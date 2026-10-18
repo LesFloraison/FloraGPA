@@ -68,6 +68,127 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void hellbladePrefixDependencies() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_DX12_CAPTURE_DIR for Hellblade2 prefix dependency inspection");
+        dx12::StreamDirectory directory(std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex index(directory);
+        const auto draw = index.execution(9731);
+        QCOMPARE(draw.record, 577579ULL);
+        QCOMPARE(draw.submission, 578777ULL);
+        QCOMPARE(draw.generation, 2ULL);
+        QCOMPARE(draw.ordinal, 1ULL);
+        const auto waits = dx12::inspectObservationWaits(directory, draw.submission);
+        QCOMPARE(waits.size(), size_t(2));
+        QCOMPARE(waits[0].record, 577992ULL);
+        QCOMPARE(waits[1].record, 578048ULL);
+        QCOMPARE(waits[0].handle, 3964ULL);
+        try {
+            (void)dx12::inspectObservationWaits(directory, 579109);
+            QFAIL("Later CPU event registration must require synchronization reconstruction");
+        } catch (const std::runtime_error &e) {
+            QVERIFY(QString::fromUtf8(e.what()).contains("578875"));
+        }
+    }
+    void observationWaitBoundaries() {
+        QTemporaryDir temp;
+        const auto path = fixture(temp);
+        QByteArray thread;
+        auto packet = [&](uint64_t type, uint64_t timestamp, const QByteArray &payload) {
+            qword(thread, type);
+            qword(thread, timestamp);
+            qword(thread, 0);
+            qword(thread, uint64_t(payload.size()));
+            thread += payload;
+        };
+        QByteArray wait;
+        qword(wait, UINT64_MAX);
+        packet(0x27000000000000ULL, 5, wait);
+        QByteArray poll;
+        qword(poll, 42);
+        qword(poll, 99);
+        packet(0x11469e993999dULL, 30, poll);
+        write(path + "/thread-8-1", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            const auto waits = dx12::inspectObservationWaits(directory, 4);
+            QCOMPARE(waits.size(), size_t(1));
+            QCOMPARE(waits.front().record, 1ULL);
+            QCOMPARE(waits.front().handle, UINT64_MAX);
+            // The two Draws belong to the other thread, so their GPU prefix
+            // has no dependency on this polling thread's unknown CPU event.
+            QCOMPARE(directory.files().at(waits.front().file).thread, 8ULL);
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     dx12::inspectObservationWaits(directory, 4, [] { return true; }));
+        }
+        QByteArray draw;
+        qword(draw, 7);
+        for (int i = 0; i < 4; ++i)
+            dword(draw, 1);
+        packet(0x1ae3c190d8b1eULL, 40, draw);
+        write(path + "/thread-8-1", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            QCOMPARE(dx12::inspectObservationWaits(directory, 4).size(), size_t(1));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(directory, 5));
+        }
+        // A second stream file for the same captured thread must not bypass
+        // its wait when the directory merges records by CPU timestamp.
+        thread.clear();
+        packet(0x27000000000000ULL, 5, wait);
+        write(path + "/thread-8-1", thread);
+        thread.clear();
+        packet(0x1ae3c190d8b1eULL, 40, draw);
+        write(path + "/thread-8-2", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(directory, 4));
+        }
+        thread.clear();
+        packet(0x27000000000000ULL, 5, wait.chopped(1));
+        write(path + "/thread-8-1", thread);
+        dx12::StreamDirectory truncated(std::filesystem::path(path.toStdWString()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(truncated, 4));
+    }
+    void hellbladeRasterStateDecoding() {
+        // Hellblade2 records 577565-577567. Keep nullable combiner arrays and
+        // 64-bit resource identity intact, and reject damaged wire lengths.
+        const std::array<std::pair<uint64_t, QByteArray>, 3> samples{
+            {{0x10144f9457a81ULL, QByteArray::fromHex("30f3e028f5010000000000000000803f")},
+             {0x10140788f8c34ULL,
+              QByteArray::fromHex("30f3e028f5010000000000000102000000000000000000000003000000")},
+             {0x101407e5f6cc3ULL, QByteArray::fromHex("30f3e028f50100000000000000000000")}}};
+        const auto decode = [](uint64_t type, const QByteArray &bytes) {
+            return dx12::decodeArguments(
+                type, {reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())});
+        };
+        for (const auto &[type, bytes] : samples) {
+            const auto decoded = decode(type, bytes);
+            QVERIFY(decoded.supported);
+            QCOMPARE(decoded.consumed, size_t(bytes.size()));
+            QCOMPARE(decoded.values.at("CommandList"), nlohmann::json("2152464446256"));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(type, bytes.chopped(1)));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(type, bytes + char(0)));
+        }
+        const auto bounds = decode(samples[0].first, samples[0].second).values;
+        QCOMPARE(bounds.at("MinDepthBounds"), nlohmann::json(0.0));
+        QCOMPARE(bounds.at("MaxDepthBounds"), nlohmann::json(1.0));
+        const auto rate = decode(samples[1].first, samples[1].second).values;
+        QCOMPARE(rate.at("BaseShadingRate"), nlohmann::json(0));
+        QCOMPARE(rate.at("Combiners"), nlohmann::json::array({0, 3}));
+        auto invalid = samples[1].second;
+        invalid[13] = char(1);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(samples[1].first, invalid));
+        auto nullable = samples[1].second.left(12) + char(0);
+        QVERIFY(decode(samples[1].first, nullable).values.at("Combiners").is_null());
+        auto image = samples[2].second.left(8);
+        qword(image, UINT64_MAX);
+        const auto decoded = decode(samples[2].first, image);
+        QCOMPARE(decoded.resources, std::vector<uint64_t>{UINT64_MAX});
+        QCOMPARE(decoded.values.at("ShadingRateImage"), nlohmann::json("18446744073709551615"));
+    }
     void workerIdentityEnvelope() {
         QTemporaryDir temp; const auto path=fixture(temp);
         const ReplayRequestIdentity expected{"test-session",ReplayBackend::Dx12,UINT64_MAX,UINT64_MAX-1};
@@ -1114,6 +1235,41 @@ class Dx12SessionTests : public QObject {
             std::runtime_error,
             wide.finish(wide.requestId(),
                         {{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740992"}}));
+    }
+    void dxilPixelInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_DXIL_PS_TRACE");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_DXIL_PS_TRACE to the Hellblade2 first Draw trace");
+        QFile input(path);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(input.readAll().toStdString());
+        QCOMPARE(result.at("execution"), nlohmann::json("9731"));
+        QCOMPARE(result.at("eid"), nlohmann::json(418));
+        QVERIFY(result.at("disassembly").get<std::string>().find("compiled under SM6.6") !=
+                std::string::npos);
+        ReplayDebugView view("ps");
+        view.setContext("hellblade-dxil", 9731, true);
+        view.selectPixel(169, 269, 0);
+        QVERIFY(view.finish(view.requestId(), result));
+        QCOMPARE(view.model()->size(), size_t(276));
+        // DXIL retains an entry-point name and variable mappings, but its PDB
+        // is absent. The source editor must not invent source files.
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QLineEdit *>("debugInstruction")->setText("273");
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        view.findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(273));
+        view.findChild<QAction *>("debugStep")->trigger();
+        view.model()->addWatch("SV_Target");
+        const auto watch = view.model()->watchResults().at(0);
+        QCOMPARE(watch.at("status"), nlohmann::json("available"));
+        QCOMPARE(watch.at("values"),
+                 nlohmann::json::array({0.51123046875, -0.82080078125, 428.224609375, 0.41978317499160767}));
+        const auto serial = view.requestId();
+        view.selectPixel(170, 269, 0);
+        QVERIFY(!view.model());
+        QVERIFY(!view.finish(serial, result));
     }
     void pixelInstructionDebug() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PS_REPORT");

@@ -1,9 +1,40 @@
 #include "SubmissionIndex.h"
 #include "StreamArguments.h"
 #include <algorithm>
+#include <set>
 #include <unordered_map>
 
 namespace flora::dx12 {
+std::vector<ObservationWait> inspectObservationWaits(const StreamDirectory &directory, uint64_t lastRecord,
+                                                     const CancelCheck &cancelled) {
+    if (lastRecord > directory.packets().size())
+        throw std::runtime_error("Unknown CPU wait inspection boundary");
+    std::set<uint64_t> waiting;
+    std::vector<ObservationWait> result;
+    for (uint64_t i = directory.initializationCount(); i < lastRecord; ++i) {
+        if (i % 1024 == 0)
+            checkCancellation(cancelled);
+        const auto &packet = directory.packets()[size_t(i)];
+        const auto thread = directory.files().at(packet.file).thread;
+        if (packet.type == 0x27000000000000ULL) {
+            format::Reader r(directory.payload(packet));
+            const auto handle = r.read<uint64_t>();
+            r.end();
+            if (!handle)
+                throw std::runtime_error("Null captured CPU wait handle");
+            waiting.insert(thread);
+            result.push_back({i + 1, handle, packet.file});
+        } else if (waiting.contains(thread) &&
+                   packet.type != 0x11469e993999dULL && // GetCompletedValue: recorded CPU observation.
+                   packet.type != 0x114696360f841ULL && // Native fences retain their own references.
+                   packet.type != 0x11469e8691d1cULL) {
+            throw std::runtime_error("Unresolved captured CPU wait precedes state-changing record " +
+                                     std::to_string(i + 1) + " (" + streamPacketName(packet.type) + ")");
+        }
+    }
+    checkCancellation(cancelled);
+    return result;
+}
 SubmissionIndex::SubmissionIndex(const StreamDirectory &directory, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
     std::unordered_map<uint64_t,size_t> current;

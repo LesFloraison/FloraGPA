@@ -365,8 +365,8 @@ CPU decoding covered all three samples' descriptor records:
 Native initialization with descriptor restoration succeeded for Talos (9 heaps,
 24,974 write calls, 23,150 known slots) and BF1 (19 heaps, 171,892 write calls,
 171,098 known slots). The initialization portions contain no descriptor-copy
-calls; native frame copy execution remains to be verified. Hellblade2's new
-descriptor path has CPU decoding evidence only. Targeted checks also verified
+calls; native frame copy execution remains to be verified. Hellblade2's descriptor
+restoration and frame descriptor copies now have first-Draw evidence below. Targeted checks also verified
 native GPU descriptor increment translation, invalid alignment rejection,
 GPU address offsets/access bounds, cancellation and truncated descriptor input.
 
@@ -1061,6 +1061,95 @@ and selection-invalidation checks pass (`dx11-counters-compat1.txt`). Release GU
 CLI, Worker, isolated analysis and focused tests build successfully (`build100.log`,
 `build101.log`). These checks did not repeat the GPU measurement.
 
+### Hellblade2 first submitted Draw and DXIL pixel debugging
+
+The first frame submission is record 578777 on queue 2131165365824. Its first
+list contains timestamp/barrier/timestamp commands (executions 9701-9703).
+The next list, 2152464446256, generation 2, ordinal 1, contains the first Draw:
+execution **9731**, source record **577579**, six indices and one instance.
+This is a selected submitted prefix, not a complete Hellblade2 frame.
+
+The native recorder now restores `OMSetDepthBounds`, `RSSetShadingRate` and
+`RSSetShadingRateImage`, queries their device capabilities and rejects unavailable
+features. The sample uses depth bounds [0,1], rate 1x1, combiners [PASSTHROUGH,MAX]
+and a null shading-rate image. Nondefault rates and nonnull images do not yet have
+GPU evidence. Queue/device `QueryInterface` observations accept only an unchanged
+identity or `E_NOINTERFACE` with no returned object; aliases still fail. Captured
+queue/descriptor-heap references retain replay-owned native objects. Reserved
+resources no longer call `GetHeapProperties` during state decay: that query is
+invalid for them and previously produced three validation errors.
+
+GPA 2025 R1 `StreamPlayback.dll` (same version/hash recorded above) reader RVAs:
+`0x53ba30` depth bounds, `0x67bb40` shading rate plus optional two-entry combiner
+array, `0x53bda0` shading-rate image, and `0x53a130` queue interface query.
+Playback RVAs `0x62d550`, `0x62efe0`, `0x62f0d0` forward the three restored states.
+Evidence: `hellblade-draw-state-readers1.txt` and real records 577565-577567.
+
+CPU `WaitOperation` stores a captured event handle (writer RVA `0x4f61d0`);
+Hellblade2 handle 3964 also appears in `FenceSetEventOnCompletion` record 578875.
+The first prefix includes waits 577992 and 578048 on thread 29988. After these
+waits, through submission 578777, that thread only observes Fence completion.
+`inspectObservationWaits` proves this bounded property before initialization and
+reports the two waits explicitly. It does not synthesize an event signal or
+weaken GPU queue/Fence checks. Any later state-changing operation on the same
+thread, including in another stream file, fails preflight. Extending the prefix
+to submission 579109 currently fails at event registration 578875; CPU event
+signalling/scheduling remains unfinished. This is verified by CPU inspection,
+without another heavy GPU run.
+
+The native before/after requests used SDK 616, the NVIDIA RTX 5090 Laptop GPU,
+a 12 GiB allocation budget and the debug layer. Both reached execution 9731 with
+**zero validation errors**. Initialization still executes 26 captured submissions,
+8,192 tile mappings and restores resources by bounded mapped reads. Peak accounted
+native allocation is 5,238,685,696 bytes; this is not a process-memory measurement.
+The existing workspace budget control must be raised from 4096 MiB for this sample.
+No complete-frame residency or cancellation acceptance is claimed.
+
+Target object 2152470267632, creation 503905, subresource 0 is a 512x512
+`R16G16B16A16_FLOAT` texture. Each raw readback contains 2,097,152 unpadded bytes:
+
+| Boundary | SHA-256 |
+| --- | --- |
+| Before 9731 | `1dae70fd20aa8420722ee30f924d254f06a0e1efb300328b6898096d67e6fee2` |
+| After 9731 | `97a0605a8e4f0a3cdfbe99e5001ec193c0bfa47ab31d76510000d04ef99e9e7d` |
+
+123,029 pixels change. This texture contains negative and HDR values; it is
+exported as raw float storage, with `display_interpretation=unavailable`. No
+preview PNG is used as replay evidence. The native RenderDoc-captured run produces
+the exact same after hash. Evidence: `hellblade-first-draw3`,
+`hellblade-first-draw-before1`, `hellblade-first-draw-rdc1` (742,457,018-byte RDC),
+and `hellblade-first-draw-difference1.json`.
+
+RenderDoc 1.45 maps all 31 marked executions in this prefix uniquely; 9731 maps
+to RDC event **418**. At pixel (169,269), sample 0, Pixel History reports primitive
+1 with one mapped modification. Before/after RGBA values exactly match the
+independent native readbacks:
+
+- Before: `(0.5224609375, -0.81787109375, 427.75, 0.4306640625)`.
+- After: `(0.51123046875, -0.82080078125, 428, 0.419677734375)`.
+- Shader output: `(0.51123046875, -0.82080078125, 428.224609375, 0.41978317499160767)`.
+
+The DXIL SM6.6 PS, hash `9b9ce25ad2594828fe1a0767a1cb6b62`, returns **276 debug
+states**. Its final `SV_Target` equals all four GPU history `shaderOut` values
+exactly. The difference between shader output and stored target is present in the
+GPU history itself; the raw native target agrees with `postMod`. No shader PDB or
+source files are available. The backend retains `MainPS` and variable mappings;
+the UI correctly offers instruction debugging without fabricated source files.
+No GPA modules are loaded in these isolated analysis jobs. Evidence:
+`hellblade-dxil-ps1`, `hellblade-first-pixel-history1`, and the compact comparison
+`hellblade-first-draw-validation1.json`.
+
+CPU-only panel verification reuses the saved trace: instruction breakpoint 273,
+step to 274, `SV_Target` Watch, and stale-result rejection after changing pixel
+all pass. Wire truncation/array-length checks, cross-file wait guarding, and the
+real next-submission dependency failure are covered by focused tests. This does
+not yet verify Hellblade2's complete workspace request flow, VS/CS/MS debugging,
+geometry, full histories, performance or modification experiments.
+Release GUI, CLI, Worker and the focused test target build successfully
+(`build106.log`). All four focused cases pass (`hellblade-final-checks1.txt`);
+these final checks reuse the trace and inspect CPU records without another GPU
+replay. No unrelated DX11/Talos/BF1 GPU regression run was added for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1069,9 +1158,9 @@ CLI, Worker, isolated analysis and focused tests build successfully (`build100.l
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First submitted Draw before/after raw float readback verified; full frame and CPU event synchronization unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS trace, instruction breakpoint and Watch verified against GPU shader output; other stages and geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

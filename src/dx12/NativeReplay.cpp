@@ -106,6 +106,7 @@ struct NativeReplay::Impl {
         bool after{}, markers{};
         bool measure{};
         std::unique_ptr<NativePerformance> performance;
+        std::vector<ObservationWait> observationWaits;
     };
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
@@ -371,6 +372,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
     auto frame = std::make_unique<Impl::FramePlan>();
+    frame->observationWaits = inspectObservationWaits(s.directory, target.submission, s.cancelled);
     frame->execution = execution;
     frame->after = after;
     frame->markers = analysisMarkers;
@@ -533,20 +535,37 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
+                case 0x27000000000000ULL:
+                    // prepareExecution proved that this thread only polls or
+                    // adjusts fence references through the selected submission.
+                    // No GPU state or producer dependency is skipped here.
+                    break;
+                case 0x11469e993999dULL: {
+                    Reader r(s.directory.payload(p));
+                    require(s.fenceRecipes.contains(r.read<uint64_t>()),
+                            "Completion observation references an unknown fence");
+                    (void)r.read<uint64_t>();
+                    r.end();
+                    break;
+                }
+                case 0x1254809e0c150ULL:
+                case 0x1279309e0c150ULL:
                 case 0x1ae3c09e0c150ULL: {
                     Reader r(s.directory.payload(p));
                     const auto object = r.read<uint64_t>();
-                    require(object != 0, "Null command-list interface query");
+                    require(object != 0, "Null captured interface query");
+                    if (p.type == 0x1254809e0c150ULL)
+                        require(s.queueRecipes.contains(object), "Interface query references an unknown queue");
                     (void)r.read<GUID>();
                     uint64_t returned{};
                     if (r.flag()) {
-                        require(r.read<uint64_t>() == 1, "Invalid command-list interface output");
+                        require(r.read<uint64_t>() == 1, "Invalid captured interface output");
                         returned = r.read<uint64_t>();
                     }
                     const auto hr = r.read<HRESULT>();
                     r.end();
                     require((hr == E_NOINTERFACE && !returned) || (SUCCEEDED(hr) && returned == object),
-                            "Command-list interface query introduces an unresolved alias or failure");
+                            "Captured interface query introduces an unresolved alias or failure");
                     break;
                 }
                 case 0x1e65015a11fecULL: {
@@ -597,6 +616,9 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 case 0x129496360f841ULL:
                 case 0x12949e8691d1cULL:
                 case 0x12793e8691d1cULL:
+                case 0x12548e8691d1cULL:
+                case 0x15a3e6360f841ULL:
+                case 0x15a3ee8691d1cULL:
                 case 0x1d532e8691d1cULL: {
                     Reader r(s.directory.payload(p));
                     require(r.read<uint64_t>() != 0, "Null captured COM reference");
@@ -655,7 +677,6 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 case 0x1e650cfcd4902ULL:
                 case 0x1e650e8691d1cULL:
                 case 0x14538e8691d1cULL:
-                case 0x11469e993999dULL:
                 case 0x1279331d76605ULL:
                 case 0x1e6508ef58ff0ULL:
                 case 0x15a3eb3b8e877ULL:
@@ -877,10 +898,21 @@ json NativeReplay::performanceResult() const {
     return result;
 }
 json NativeReplay::information() const {
-    const auto &s = *impl_; return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
+    const auto &s = *impl_;
+    auto waits = json::array();
+    if (s.frame) for (const auto &entry : s.frame->observationWaits) {
+        if (waits.size() == 32) break;
+        waits.push_back({{"record", std::to_string(entry.record)}, {"handle", std::to_string(entry.handle)},
+                         {"file", s.directory.files().at(entry.file).storage->path().filename().string()}});
+    }
+    return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},
+        {"cpu_waits", {{"scope", "observation_only_through_selected_submission"},
+                       {"event_signalling_reconstructed", false},
+                       {"count", std::to_string(s.frame ? s.frame->observationWaits.size() : 0)},
+                       {"first_records", std::move(waits)}}},
         {"selected_execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"}, {"execution_boundary_reached", s.boundaryReached},
         {"frame_replayed", false}, {"note", "Native initialization and selected frame execution; full-frame correctness and analysis require separate validation"}};
 }

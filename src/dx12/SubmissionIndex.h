@@ -20,6 +20,15 @@ struct ExecutionInstance {
     uint64_t id{}, record{}, submission{}, queue{}, list{}, ordinal{}, generation{};
     bool recordingComplete = false;
 };
+struct ObservationWait {
+    uint64_t record{}, handle{};
+    uint32_t file{};
+};
+// A captured CPU wait can be irrelevant to a selected GPU prefix only when
+// that thread performs no state-changing calls after it within the prefix.
+// This does not reconstruct event signalling or authorize future submissions.
+std::vector<ObservationWait> inspectObservationWaits(const StreamDirectory &, uint64_t lastRecord,
+                                                     const CancelCheck &cancelled = {});
 // Indexes recorded command-list invocations. It does not certify replayability,
 // resolve object aliases, or invent a global GPU order from CPU timestamps.
 class SubmissionIndex {

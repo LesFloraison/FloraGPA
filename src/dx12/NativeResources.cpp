@@ -311,7 +311,10 @@ void NativeResources::completeSubmission(D3D12_COMMAND_LIST_TYPE queueType) {
     for (auto &[id, r] : impl_->resources) {
         if (!r.touched) continue; r.touched = false;
         D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
-        if (SUCCEEDED(r.native->GetHeapProperties(&heap, &flags)) &&
+        // Reserved resources have tile mappings, not a parent heap. Querying
+        // GetHeapProperties on them is itself a D3D12 validation error.
+        if (impl_->recipe(id).kind != ResourceRecipe::Kind::Reserved &&
+            SUCCEEDED(r.native->GetHeapProperties(&heap, &flags)) &&
             (heap.Type == D3D12_HEAP_TYPE_UPLOAD || heap.Type == D3D12_HEAP_TYPE_READBACK || heap.Type == D3D12_HEAP_TYPE_GPU_UPLOAD)) continue;
         const auto desc = r.native->GetDesc();
         if (queueType == D3D12_COMMAND_LIST_TYPE_COPY || desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER ||

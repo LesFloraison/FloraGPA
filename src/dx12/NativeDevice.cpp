@@ -137,6 +137,15 @@ NativeDevice::NativeDevice(const StreamDirectory &directory, bool debug) : impl_
     if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
         state.report["features"] = {{"resource_binding_tier", uint32_t(options.ResourceBindingTier)},
             {"resource_heap_tier", uint32_t(options.ResourceHeapTier)}, {"tiled_resources_tier", uint32_t(options.TiledResourcesTier)}};
+    D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2{};
+    if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2))))
+        state.report["features"]["depth_bounds_test"] = bool(options2.DepthBoundsTestSupported);
+    D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6{};
+    if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6)))) {
+        state.report["features"]["variable_shading_rate_tier"] = uint32_t(options6.VariableShadingRateTier);
+        state.report["features"]["additional_shading_rates"] = bool(options6.AdditionalShadingRatesSupported);
+        state.report["features"]["shading_rate_image_tile_size"] = options6.ShadingRateImageTileSize;
+    }
     state.report["note"] = "Device initialization only; resource restoration, GPU replay and analysis are not validated";
 }
 NativeDevice::~NativeDevice() = default;

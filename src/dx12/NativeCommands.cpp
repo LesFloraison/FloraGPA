@@ -300,6 +300,61 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
     case 0x1ae3c48bf1cd1ULL: {
         const auto factor = array<float>(r, 4); r.end(); list->OMSetBlendFactor(factor.data()); break;
     }
+    case 0x10144f9457a81ULL: {
+        const auto minimum = r.read<float>(), maximum = r.read<float>();
+        r.end();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS2 options{};
+        check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options, sizeof(options)),
+              "Query depth bounds support");
+        require(options.DepthBoundsTestSupported, "Replay device does not support depth bounds");
+        ComPtr<ID3D12GraphicsCommandList1> extended;
+        check(list->QueryInterface(IID_PPV_ARGS(&extended)), "Query depth bounds command list");
+        extended->OMSetDepthBounds(minimum, maximum);
+        break;
+    }
+    case 0x10140788f8c34ULL: {
+        const auto rate = r.read<D3D12_SHADING_RATE>();
+        std::optional<std::array<D3D12_SHADING_RATE_COMBINER, 2>> combiners;
+        if (r.flag()) {
+            require(r.read<uint64_t>() == 2, "Shading rate requires two combiners");
+            combiners = r.read<std::array<D3D12_SHADING_RATE_COMBINER, 2>>();
+            for (auto combiner : *combiners)
+                require(combiner >= D3D12_SHADING_RATE_COMBINER_PASSTHROUGH &&
+                            combiner <= D3D12_SHADING_RATE_COMBINER_SUM,
+                        "Invalid shading rate combiner");
+        }
+        r.end();
+        require(rate == D3D12_SHADING_RATE_1X1 || rate == D3D12_SHADING_RATE_1X2 ||
+                    rate == D3D12_SHADING_RATE_2X1 || rate == D3D12_SHADING_RATE_2X2 ||
+                    rate == D3D12_SHADING_RATE_2X4 || rate == D3D12_SHADING_RATE_4X2 ||
+                    rate == D3D12_SHADING_RATE_4X4,
+                "Invalid shading rate");
+        D3D12_FEATURE_DATA_D3D12_OPTIONS6 options{};
+        check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options, sizeof(options)),
+              "Query variable shading rate support");
+        require(options.VariableShadingRateTier != D3D12_VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED,
+                "Replay device does not support variable shading rates");
+        require(rate <= D3D12_SHADING_RATE_2X2 || options.AdditionalShadingRatesSupported,
+                "Replay device does not support the captured additional shading rate");
+        ComPtr<ID3D12GraphicsCommandList5> extended;
+        check(list->QueryInterface(IID_PPV_ARGS(&extended)), "Query shading rate command list");
+        extended->RSSetShadingRate(rate, combiners ? combiners->data() : nullptr);
+        break;
+    }
+    case 0x101407e5f6cc3ULL: {
+        const auto object = r.read<uint64_t>();
+        r.end();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS6 options{};
+        check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options, sizeof(options)),
+              "Query shading rate image support");
+        require(options.VariableShadingRateTier >= D3D12_VARIABLE_SHADING_RATE_TIER_2,
+                "Replay device does not support shading rate images");
+        auto image = object ? s.resources.resource(object, id) : nullptr;
+        ComPtr<ID3D12GraphicsCommandList5> extended;
+        check(list->QueryInterface(IID_PPV_ARGS(&extended)), "Query shading rate image command list");
+        extended->RSSetShadingRateImage(image);
+        break;
+    }
     case 0x1ae3cd41bfa9cULL: { const auto stencil = r.read<UINT>(); r.end(); list->OMSetStencilRef(stencil); break; }
     case 0x1ae3c6601dd2cULL: case 0x1ae3c64a8e138ULL: {
         const auto object = r.read<uint64_t>(); const auto type = r.read<D3D12_QUERY_TYPE>(); const auto index = r.read<UINT>(); r.end(); auto &heap = s.query(object, id, index, 1);

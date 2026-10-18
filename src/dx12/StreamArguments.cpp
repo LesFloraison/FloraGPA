@@ -48,6 +48,8 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
         u64("CapturedMemory"); u64("ResourceDataDescriptorOffset"); r.end(); break;
     case 0x26000000000000ULL:
         u64("CapturedObject"); u32("ReferenceCount"); r.end(); break;
+    case 0x27000000000000ULL:
+        u64("EventHandle"); r.end(); break;
     case 0x1ae3c190d8b1eULL:
         u64("CommandList"); u32("VertexCountPerInstance"); u32("InstanceCount");
         u32("StartVertexLocation"); u32("StartInstanceLocation"); break;
@@ -56,6 +58,19 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
         u32("StartIndexLocation"); v["BaseVertexLocation"] = r.read<int32_t>(); u32("StartInstanceLocation"); break;
     case 0x1ae3cef0e6c17ULL:
         u64("CommandList"); u32("ThreadGroupCountX"); u32("ThreadGroupCountY"); u32("ThreadGroupCountZ"); break;
+    case 0x10144f9457a81ULL:
+        u64("CommandList"); v["MinDepthBounds"] = r.read<float>(); v["MaxDepthBounds"] = r.read<float>();
+        r.end(); break;
+    case 0x101407e5f6cc3ULL:
+        u64("CommandList"); resource("ShadingRateImage"); r.end(); break;
+    case 0x10140788f8c34ULL:
+        u64("CommandList"); u32("BaseShadingRate"); v["Combiners"] = nullptr;
+        if (r.flag()) {
+            if (r.read<uint64_t>() != 2) throw std::runtime_error("Shading rate requires two combiners");
+            v["Combiners"] = json::array();
+            for (int i = 0; i < 2; ++i) v["Combiners"].push_back(r.read<uint32_t>());
+        }
+        r.end(); break;
     case 0x1ae3c721c351aULL:
         u64("CommandList"); u64("CommandAllocator"); u64("InitialPipelineState"); u32("HRESULT"); break;
     case 0x1ae3cd6acf667ULL:
