@@ -232,6 +232,93 @@ hash above: RVAs `0x679f00`, `0x679cf0`, `0x67a250`, `0x67cba0`, `0x677ee0`;
 descriptor readers `0x60dce0`, `0x60e800`, `0x8e1f50`; stream traversal `0x783d30`
 and pointer fixups `0x8e1720`, `0x8e16a0`, `0x8e28a0`, `0x8e2a60`.
 
+### Captured initialization submissions (2026-10-18)
+
+`NativeReplay::initializeTransfers` now executes the actual submitted keyframe
+command-list recordings, with their original queue/list/submission identities.
+Unsubmitted graphics recordings in metadata are not executed. The implementation
+restores mapped buffer snapshots, shared heaps, committed/placed/reserved resources,
+legacy barriers, buffer/texture/resource copies and tiled-resource transfers.
+It serializes the captured single initialization queue with completion fences;
+it does not establish frame or cross-queue execution support.
+
+`NativeResources` keeps native allocations by creation record. Repeated addresses
+within initialization select the latest preceding creation; forward references
+are accepted only when unambiguous. This was required by Hellblade2's upload
+resource declarations at records 1324 and 1563. Explicit helper `IUnknownRelease`
+records retire completed upload allocations. Other COM lifetime/refcount and
+residency operations still need the full frame object-state implementation.
+Castable formats are preserved for `CreateCommittedResource3` and passed to
+`GetResourceAllocationInfo3`: the older allocation query incorrectly rejects
+Hellblade2's BC1 UAV resource at creation record 531786. Invalid allocation
+descriptions and actual budget exhaustion now have separate diagnostics.
+
+The resource budget includes native committed allocations and complete backing
+heaps, using device allocation requirements. Reserved virtual address ranges are
+not counted as physical allocations; their tile heaps are. Readback allocations
+must fit the remaining budget. This is resource allocation accounting, not a
+measurement of total driver/physical VRAM usage. Resource data remains mapped
+read-only, and CPU restoration copies at most 8 MiB per cancellable iteration.
+
+Use a fresh CLI/Worker process and a new output directory, for example:
+
+```text
+FloraGPA.Worker validate-frame <Talos-directory> --check-initialization --max-bytes 3221225472 --id 13 --length 2130 --verify-texture-copy 8525 --out <new-directory>
+```
+
+`--id/--offset/--length` optionally read back one initialized buffer;
+`--verify-texture-copy` compares a complete initialized texture subresource with
+its captured upload, excluding row padding. Both identify the boundary as
+`after_initialization_submissions`. The top-level result remains `blocked`, with
+exit code 2 and `frame_replayed: false`. A failed attempt cannot be reused.
+The report distinguishes commands recorded from commands whose submission
+completed, and retains failure record, partial progress and allocation counts.
+
+Targeted native execution on the NVIDIA adapter produced:
+
+| Sample | Completed submissions | Buffer / texture copies | Barrier calls | Peak resource allocation bytes | Selected readback |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Talos | 25 | 2,299 / 10,300 | 50 | 2,295,332,864 | Buffer creation 13: same exact 2,130-byte hash as above; texture copy 8525 matched |
+| BF1 | 52 | 5,785 / 15,722 | 101 | 3,339,649,024 | Buffer creation 25: same exact 10,752-byte hash as above |
+| Hellblade2 | 26 | 761 / 8,885 | 52 | 4,841,340,928 | Buffer creation 99: same exact 8,192-byte hash as above; texture copy 507333 matched |
+
+Talos texture copy 8525 targets creation 1, subresource 0 (16×16 BC1 typeless).
+All 128 effective bytes matched SHA-256
+`800c034632490c5b5cf5e41adc9ea0c6ceb57c55873861c06f7701f357c31b01`.
+Hellblade2 copy 507333 targets creation 57, subresource 0 (480×456 R8 UNORM).
+All 218,880 bytes matched SHA-256
+`d63358ddc37ec6bf67f2c66451f2b44ddbc19ca6bd5c70bc6d2bd0c96e72643f`.
+These comparisons use GPU readback, not directory preview images. They verify
+selected initialization contents, not every resource or original GPA frame parity.
+
+Hellblade2 additionally executed 8,192 `UpdateTileMappings` calls and two
+4,096-tile `CopyTiles` calls. Native subresource tiling, heap ranges, array lengths,
+copy direction, states and linear buffer bounds are checked. Implicit mapping
+arrays, packed-mip tile coordinates and regions crossing subresource boundaries
+remain explicit unsupported cases; they were not required by these initialization
+records. Tile-copy bytes have not yet received their own readback comparison.
+Semantics follow Microsoft's [UpdateTileMappings documentation](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12commandqueue-updatetilemappings)
+and [CopyTiles documentation](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copytiles).
+
+Focused CPU checks decoded BF1 17,132 resources, Talos 7,352 resources / 6 heaps,
+and Hellblade2 4,883 resources / 61 heaps (7 modern descriptions), plus all
+Hellblade2 tile records. Truncated resource/heap/tile records and oversized tile
+arrays were rejected. Native guard checks verified budget rejection before
+allocation/submission, pre-execution cancellation and rejection of context reuse.
+Cancellation while GPU work is pending, device-loss recovery, and overall
+Hellblade2 frame memory/residency behavior remain unverified.
+
+Ghidra evidence uses the reference DLL hash above. Relevant reader RVAs:
+`0x6774d0` / `0x60ebc0` (modern resource / DESC1), `0x679300` / `0x5b61d0`
+(heap), `0x6799a0` (queue), `0x5e48a0` (allocator), `0x5c9c90` (fence),
+`0x67c060` / `0x60edc0` (texture copy / location), `0x67c6e0` (barriers),
+`0x50cd50` (Release), `0x677210` (tile mappings), `0x5b5c70` (tile copies).
+`ID3D12ExecuteCommandListsUserDataReader` at `0x50baf0` reads the `0xfede0000`
+header and a count of three-qword remapping entries. Initialization submissions
+here have zero entries; nonempty remapping data is explicitly rejected pending
+indirect-argument reconstruction. Runtime code loads no GPA/Python component;
+portable-package replay/analysis acceptance is still outstanding.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -239,6 +326,7 @@ and pointer fixups `0x8e1720`, `0x8e16a0`, `0x8e28a0`, `0x8e2a60`.
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
+| Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Unfinished | Unfinished | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | Unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | Unfinished | Unfinished | Unfinished |

@@ -5,6 +5,9 @@
 #include "dx12/SubmissionIndex.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
+#include "dx12/NativeResources.h"
+#include "dx12/TileRecipes.h"
+#include "dx12/NativeReplay.h"
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
@@ -265,6 +268,74 @@ class Dx12SessionTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,8530,1024));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,13,256ULL*1024*1024));
         QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::prepareInitializationCopy(directory,8530,256ULL*1024*1024,[]{return true;}));
+    }
+    void nativeInitializationGuards() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for native initialization guards");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(directory);
+        dx12::NativeReplay limited(device,directory,1024);
+        try { limited.initializeTransfers(); QFAIL("Insufficient resource budget was accepted"); }
+        catch(const std::runtime_error &e) { QVERIFY(QString::fromUtf8(e.what()).contains("allocation budget exceeded")); }
+        QCOMPARE(limited.information().at("resources").at("allocation_bytes").get<std::string>(),std::string("0"));
+        QVERIFY(limited.information().at("submissions").empty());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,limited.initializeTransfers());
+        bool cancel=false;
+        dx12::NativeReplay cancelled(device,directory,256ULL*1024*1024,[&]{return cancel;}); cancel=true;
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled,cancelled.initializeTransfers());
+        QVERIFY(cancelled.information().at("submissions").empty());
+        QCOMPARE(cancelled.information().at("resources").at("allocation_bytes").get<std::string>(),std::string("0"));
+    }
+    void tileRecipeDecoding() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for tiled resource decoding");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        size_t mappings{},copies{};
+        for(size_t i=0;i<directory.initializationCount();++i) {
+            const auto &p=directory.packets()[i]; const auto bytes=directory.payload(p);
+            if(p.type==0x125482264c67fULL) {
+                const auto recipe=dx12::decodeTileMapping(bytes); ++mappings;
+                QCOMPARE(recipe.regionCount,1U); QCOMPARE(recipe.rangeCount,1U);
+                QCOMPARE(recipe.starts.size(),size_t(1)); QCOMPARE(recipe.sizes.size(),size_t(1));
+                QCOMPARE(recipe.rangeFlags.size(),size_t(1)); QCOMPARE(recipe.heapOffsets.size(),size_t(1)); QCOMPARE(recipe.tileCounts.size(),size_t(1));
+                QCOMPARE(recipe.tileCounts[0],1U);
+                if(mappings==1) {
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeTileMapping(bytes.first(bytes.size()-1)));
+                    auto bad=std::vector<uint8_t>(bytes.begin(),bytes.end()); const uint64_t invalid=UINT64_MAX; memcpy(bad.data()+21,&invalid,8);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeTileMapping(bad));
+                }
+            } else if(p.type==0x1ae3cba2cc519ULL) {
+                const auto recipe=dx12::decodeTileCopy(bytes); ++copies;
+                QCOMPARE(recipe.size.NumTiles,4096U); QCOMPARE(recipe.flags,D3D12_TILE_COPY_FLAG_LINEAR_BUFFER_TO_SWIZZLED_TILED_RESOURCE);
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeTileCopy(bytes.first(bytes.size()-1)));
+            }
+        }
+        QCOMPARE(mappings,size_t(8192)); QCOMPARE(copies,size_t(2));
+    }
+    void resourceRecipeDecoding() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for captured resource decoding");
+        for(const auto name : {"bf1_2025_12_10__14_29_55.gpa_frame", "Talos_2026_10_18__00_55_08.gpa_frame",
+                              "Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame"}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root+'/'+name).toStdWString()));
+            size_t resources{},heaps{},modern{};
+            for(size_t i=0;i<directory.packets().size();++i) {
+                const auto &p=directory.packets()[i]; const auto bytes=directory.payload(p);
+                try {
+                    if(dx12::isResourceRecipe(p.type)) {
+                        const auto recipe=dx12::decodeResourceRecipe(p.type,bytes); ++resources;
+                        if(SUCCEEDED(recipe.result)) { QVERIFY(recipe.object); QVERIFY(recipe.description.Width); }
+                        if(recipe.kind==dx12::ResourceRecipe::Kind::Committed3) ++modern;
+                        if(resources==1) QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeResourceRecipe(p.type,bytes.first(bytes.size()-1)));
+                    } else if(p.type==0x1279335a5747bULL) {
+                        const auto recipe=dx12::decodeHeapRecipe(bytes); ++heaps;
+                        if(SUCCEEDED(recipe.result)) { QVERIFY(recipe.object); QVERIFY(recipe.description.SizeInBytes); }
+                        if(heaps==1) QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeHeapRecipe(bytes.first(bytes.size()-1)));
+                    }
+                } catch(const std::exception &e) { QFAIL(qPrintable(QString("%1 record %2: %3").arg(name).arg(i+1).arg(e.what()))); }
+            }
+            QVERIFY(resources>0); qInfo()<<name<<"resources"<<resources<<"heaps"<<heaps<<"modern"<<modern;
+        }
     }
     void pipelineRecipeDecoding() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

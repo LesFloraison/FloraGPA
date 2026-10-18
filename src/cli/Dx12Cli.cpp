@@ -3,6 +3,7 @@
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
+#include "dx12/NativeReplay.h"
 #include <QDir>
 #include <QSaveFile>
 #include <QTextStream>
@@ -13,11 +14,13 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
     for (const auto &option : options.optionNames())
         if (option != "out" && option != "replay-identity" && !(command == "commands" && option == "filter") &&
-            !(command == "validate-frame" && (option == "check-device" || option == "check-copy" || option == "check-pipeline" ||
-                (option == "max-bytes" && options.isSet("check-copy")))))
+            !(command == "validate-frame" && (option == "check-device" || option == "check-copy" || option == "check-pipeline" || option == "check-initialization" ||
+                (option == "max-bytes" && (options.isSet("check-copy") || options.isSet("check-initialization"))) ||
+                (options.isSet("check-initialization") && (option == "id" || option == "offset" || option == "length" || option == "verify-texture-copy")))))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
-    if (options.isSet("check-copy") && options.isSet("check-pipeline")) throw std::runtime_error("Choose one targeted initialization check per invocation");
+    if (int(options.isSet("check-copy")) + int(options.isSet("check-pipeline")) + int(options.isSet("check-initialization")) > 1)
+        throw std::runtime_error("Choose one targeted initialization check per invocation");
     const QDir output(options.value("out"));
     if (output.exists() && !output.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System).empty())
         throw std::runtime_error("Output directory must be new or empty");
@@ -33,7 +36,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     auto report = session->information();
     report["status"] = command == "validate-frame" ? "blocked" : "indexed";
     report["note"] = "Stream indexing does not establish native replay support";
-    if (options.isSet("check-device") || options.isSet("check-copy") || options.isSet("check-pipeline")) {
+    if (options.isSet("check-device") || options.isSet("check-copy") || options.isSet("check-pipeline") || options.isSet("check-initialization")) {
         try {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             std::optional<dx12::InitializationCopy> copy;
@@ -59,8 +62,46 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 dx12::NativePipelines pipelines(device, directory); pipelines.create(*pipelineRecord);
                 report["pipeline"] = pipelines.information(*pipelineRecord);
             }
+            if (options.isSet("check-initialization")) {
+                const auto number = [&](const char *name) {
+                    bool valid = false; const auto value = options.value(name).toULongLong(&valid);
+                    if (!valid) throw std::runtime_error(std::string("Invalid unsigned integer: --") + name);
+                    return uint64_t(value);
+                };
+                const auto limit = number("max-bytes");
+                const auto id = options.isSet("id") ? number("id") : 0;
+                const auto offset = number("offset");
+                const auto length = options.isSet("length") ? number("length") : 0;
+                const auto textureCopy = options.isSet("verify-texture-copy") ? number("verify-texture-copy") : 0;
+                if (!limit || (options.isSet("id") && (!id || !length)) || (!id && (options.isSet("offset") || options.isSet("length"))))
+                    throw std::runtime_error("Initialization requires a nonzero memory budget; buffer inspection requires --id and --length");
+                if (id) {
+                    if (id > directory.initializationCount()) throw std::runtime_error("Buffer creation is outside initialization");
+                    const auto &packet = directory.packets()[size_t(id - 1)]; const auto recipe = dx12::decodeResourceRecipe(packet.type, directory.payload(packet));
+                    const auto &desc = recipe.description;
+                    if (desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER || offset > desc.Width || length > desc.Width - offset)
+                        throw std::runtime_error("Invalid initialized buffer inspection range");
+                }
+                if (options.isSet("verify-texture-copy") && (!textureCopy || textureCopy > directory.initializationCount() ||
+                    directory.packets()[size_t(textureCopy - 1)].type != 0x1ae3c53697cd3ULL))
+                    throw std::runtime_error("Invalid initialization texture copy record");
+                dx12::NativeReplay replay(device, directory, limit);
+                std::string stage = "initialization";
+                try {
+                    replay.initializeTransfers();
+                    stage = "buffer_readback";
+                    if (id) report["initialized_buffer"] = replay.inspectBuffer(id, offset, length);
+                    stage = "texture_readback";
+                    if (textureCopy) report["initialized_texture"] = replay.verifyInitializedTexture(textureCopy);
+                    report["initialization"] = replay.information();
+                } catch (const std::exception &e) {
+                    report["initialization"] = replay.information();
+                    report["initialization"]["failure"] = e.what();
+                    report["initialization"]["failure_stage"] = stage;
+                }
+            }
         } catch (const std::exception &e) {
-            report[options.isSet("check-copy") ? "initialization_copy" : options.isSet("check-pipeline") ? "pipeline" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
+            report[options.isSet("check-initialization") ? "initialization" : options.isSet("check-copy") ? "initialization_copy" : options.isSet("check-pipeline") ? "pipeline" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
         }
     }
     if (command == "commands") {

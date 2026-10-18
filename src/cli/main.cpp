@@ -113,6 +113,8 @@ int main(int argc, char **argv) {
     p.addOption({"check-device", "Check DX12 device/SDK initialization during validate-frame (does not validate replay)"});
     p.addOption({"check-copy", "Check one DX12 initialization CopyBufferRegion and compare GPU readback (validate-frame only)", "record"});
     p.addOption({"check-pipeline", "Recreate a captured DX12 pipeline and its root signature (validate-frame only)", "record"});
+    p.addOption({"check-initialization", "Execute captured DX12 initialization transfers (validate-frame only); optional --id/--length inspect a buffer"});
+    p.addOption({"verify-texture-copy", "Compare an initialized DX12 texture subresource against its captured full-subresource upload", "record"});
     p.addOption({"gpu-vendor", "Use the first adapter with this PCI vendor ID (decimal or 0x hex)", "id"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
@@ -211,6 +213,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--check-copy requires DX12 validate-frame");
         if (p.isSet("check-pipeline") && command != "validate-frame")
             throw std::runtime_error("--check-pipeline requires DX12 validate-frame");
+        if (p.isSet("check-initialization") && command != "validate-frame")
+            throw std::runtime_error("--check-initialization requires DX12 validate-frame");
         std::optional<uint32_t> gpuVendor;
         if (p.isSet("gpu-vendor")) {
             if (!usesNativeReplayDevice(command.toStdString()))
