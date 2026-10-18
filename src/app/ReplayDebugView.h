@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <functional>
 class QAction;
+class QCheckBox;
 class QComboBox;
 class QLabel;
 class QLineEdit;
@@ -52,6 +53,9 @@ class ReplayDebugView final : public QWidget {
     QComboBox *navigation_, *interpretation_, *files_, *hitMode_;
     QLabel *summary_, *gpuReference_, *backendNotice_;
     QLabel *referenceSelection_{};
+    QCheckBox *pixelHistoryReference_{};
+    QCheckBox *readOnlyDepthSnapshot_{};
+    QLabel *invocationReference_;
     QPlainTextEdit *assembly_, *source_, *details_;
     QTabWidget *code_, *values_;
     QTreeWidget *registers_, *locals_, *stack_, *rules_, *watches_;

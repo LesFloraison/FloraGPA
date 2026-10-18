@@ -82,6 +82,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"stage", "VSOut"},
              {"api_validation", false},
              {"readonly_depth_snapshot", false},
+             {"pixel_history_reference", false},
              {"group", Json::array({0, 0, 0})},
              {"thread", Json::array({0, 0, 0})}};
     if (!options.is_object())
@@ -99,6 +100,11 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Read-only depth snapshot must be a boolean");
     if (job["readonly_depth_snapshot"].get<bool>() && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
+    if (!job["pixel_history_reference"].is_boolean())
+        throw std::runtime_error("Pixel history reference must be a boolean");
+    if (job["pixel_history_reference"].get<bool>() &&
+        (action != "debug-pixel" || !job.contains("primitive") || job["primitive"] == UINT32_MAX))
+        throw std::runtime_error("Pixel history reference requires debug-pixel and an explicit primitive");
     for (const auto key : {"x", "y", "mip", "layer", "sample", "instance", "vertex"})
         unsignedNumber(job[key], UINT32_MAX, key);
     if (job.contains("primitive"))

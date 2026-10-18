@@ -9,6 +9,7 @@
 #include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QCryptographicHash>
 #include <QDir>
@@ -51,6 +52,63 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dx12PixelInvocationReference() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PS_FRAGMENT_REPORT");
+        if (path.isEmpty()) QSKIP("Set the BF1 particle fragment reference report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("36560"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        const auto &reference = report.at("gpu_invocation_reference");
+        QCOMPARE(reference.at("status"), Json("read"));
+        QCOMPARE(reference.at("matching_fragments"), Json(1));
+        QCOMPARE(reference.at("primitive"), Json(1322));
+        QCOMPARE(reference.at("target_consistency"), Json("selected_texel_unchanged"));
+        QCOMPARE(reference.at("history_boundary_consistency"), Json("exact_match"));
+        Json output;
+        for (const auto &step : report.at("steps"))
+            for (const auto &change : step.at("changes"))
+                if (change.at("after").at("name") == "o0") output = change.at("after").at("value").at("u32v");
+        QVERIFY(output.is_array());
+        for (size_t i = 0; i < 4; ++i)
+            QCOMPARE(output.at(i), reference.at("value").at("uintValue").at(i));
+        QVERIFY(reference.at("value").at("uintValue") != report.at("gpu_reference").at("value").at("uintValue"));
+        ReplayDebugView view("ps");
+        view.resize(1500, 950); view.show();
+        view.setContext("particle:barriers", 36560, true);
+        view.selectPixel(836, 241, 0);
+        auto checkbox = view.findChild<QCheckBox *>("debugPixelHistoryReference");
+        QVERIFY(checkbox); QVERIFY(!checkbox->isChecked());
+        checkbox->setChecked(true);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
+        view.selectPrimitive(1322);
+        QCOMPARE(view.request().at("pixel_history_reference"), Json(true));
+        auto snapshot = view.findChild<QCheckBox *>("debugReadOnlyDepthSnapshot");
+        QVERIFY(snapshot); QVERIFY(!snapshot->isChecked());
+        snapshot->setChecked(true);
+        QCOMPARE(view.request().at("readonly_depth_snapshot"), Json(true));
+        QVERIFY(view.finish(view.requestId(), report));
+        auto label = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(label); QVERIFY(!label->isHidden());
+        QVERIFY(label->text().contains("before blending"));
+        QCOMPARE(view.exportReport().at("gpu_invocation_reference"), reference);
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(int(view.model()->size() - 1));
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/pixel-fragment-reference.png"));
+        const auto unavailable = read(qEnvironmentVariable("FLORA_DX12_PS_REJECTED_REPORT"));
+        const auto &rejected = unavailable.at("gpu_invocation_reference");
+        QCOMPARE(rejected.at("status"), Json("unavailable"));
+        QCOMPARE(rejected.at("primitive"), Json(265));
+        QVERIFY(rejected.at("fragment").at("depthTestFailed").get<bool>());
+        QVERIFY(!rejected.contains("value"));
+        view.selectPrimitive(265);
+        QVERIFY(view.finish(view.requestId(), unavailable));
+        QVERIFY(label->text().contains("unavailable: The matching fragment did not pass"));
+        const auto request = view.requestId();
+        view.setContext("other-session", 36560, true);
+        QVERIFY(label->isHidden()); QVERIFY(!checkbox->isChecked());
+        QVERIFY(!snapshot->isChecked());
+        QVERIFY(!view.finish(request, report));
+    }
     void dx12TemporalStoreReference() {
         const auto root = qEnvironmentVariable("FLORA_DX12_TEMPORAL_EVIDENCE_DIR");
         if (root.isEmpty())

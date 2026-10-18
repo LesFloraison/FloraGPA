@@ -2,6 +2,7 @@
 #include "application/NativeDebugConfig.h"
 #include "application/RenderDocLibrary.h"
 #include <QAction>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDir>
 #include <QFileDialog>
@@ -141,6 +142,18 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
                                "this does not select an instance or a fragment index.");
         inputs_->addWidget(primitive_);
         connect(primitive_, &QLineEdit::textChanged, this, &ReplayDebugView::invalidate);
+        pixelHistoryReference_ = new QCheckBox("GPU fragment reference");
+        pixelHistoryReference_->setObjectName("debugPixelHistoryReference");
+        pixelHistoryReference_->setToolTip("Requires an explicit primitive and a single draw instance. "
+                                           "Runs additional Pixel History replays to read shader output before blending.");
+        inputs_->addWidget(pixelHistoryReference_);
+        connect(pixelHistoryReference_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
+        readOnlyDepthSnapshot_ = new QCheckBox("D32 depth snapshot (experimental)");
+        readOnlyDepthSnapshot_->setObjectName("debugReadOnlyDepthSnapshot");
+        readOnlyDepthSnapshot_->setToolTip("Requires the patched RenderDoc library. Copies read-only, single-sample "
+                                            "D32 depth for isolated draws; preserves depth comparison and adds GPU work.");
+        inputs_->addWidget(readOnlyDepthSnapshot_);
+        connect(readOnlyDepthSnapshot_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
     } else if (stage_ == "vs") {
         auto index = [&](const char *name, const QString &label) {
             inputs_->addWidget(new QLabel(label));
@@ -265,6 +278,12 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     gpuReference_->setMargin(4);
     gpuReference_->hide();
     layout->addWidget(gpuReference_);
+    invocationReference_ = new QLabel;
+    invocationReference_->setObjectName("debugGpuInvocationReference");
+    invocationReference_->setWordWrap(true);
+    invocationReference_->setMargin(4);
+    invocationReference_->hide();
+    layout->addWidget(invocationReference_);
     auto vertical = new QSplitter(Qt::Vertical);
     vertical->setChildrenCollapsible(false);
     layout->addWidget(vertical, 1);
@@ -506,6 +525,10 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
             referenceSelection_->clear();
         if (primitive_)
             primitive_->clear();
+        if (pixelHistoryReference_)
+            pixelHistoryReference_->setChecked(false);
+        if (readOnlyDepthSnapshot_)
+            readOnlyDepthSnapshot_->setChecked(false);
         invalidate();
     }
     updateActions();
@@ -574,6 +597,13 @@ Json ReplayDebugView::request() const {
         job.update({{"x", x_->value()}, {"y", y_->value()}, {"sample", sample_->value()}});
         if (!primitive_->text().trimmed().isEmpty())
             job["primitive"] = invocationIndex(primitive_);
+        if (dx12_ && pixelHistoryReference_->isChecked()) {
+            if (!job.contains("primitive") || job.at("primitive") == UINT32_MAX)
+                throw std::runtime_error("GPU fragment reference requires an explicit primitive ID");
+            job["pixel_history_reference"] = true;
+        }
+        if (dx12_ && readOnlyDepthSnapshot_->isChecked())
+            job["readonly_depth_snapshot"] = true;
     } else if (stage_ == "vs")
         job.update({{"vertex", invocationIndex(vertex_)}, {"instance", invocationIndex(instance_)}});
     else {
@@ -588,6 +618,8 @@ void ReplayDebugView::invalidate() {
     model_.reset();
     gpuReference_->clear();
     gpuReference_->hide();
+    invocationReference_->clear();
+    invocationReference_->hide();
     rendering_ = true;
     backendNotice_->clear();
     backendNotice_->hide();
@@ -613,6 +645,10 @@ void ReplayDebugView::updateActions() {
     cancel_->setEnabled(busy_);
     backend_->setEnabled(!busy_);
     inputs_->setEnabled(!busy_);
+    if (pixelHistoryReference_)
+        pixelHistoryReference_->setVisible(dx12_);
+    if (readOnlyDepthSnapshot_)
+        readOnlyDepthSnapshot_->setVisible(dx12_);
     if (clearReference_) {
         clearReference_->setVisible(dx12_);
         clearReference_->setEnabled(!busy_ && textureReference_.is_object());
@@ -689,6 +725,23 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         } else {
             gpuReference_->setText("GPU target reference unavailable: " +
                                    text(reference.value("reason", Json("Unknown"))));
+        }
+    }
+    const auto invocationReference = result.value("gpu_invocation_reference", Json());
+    invocationReference_->setVisible(dx12_ && stage_ == "ps" && invocationReference.is_object());
+    if (invocationReference.is_object()) {
+        invocationReference_->setToolTip(QString::fromStdString(invocationReference.dump(2)));
+        if (invocationReference.value("status", "") == "read") {
+            const auto kind = invocationReference.value("interpretation", "float");
+            const auto field = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
+            invocationReference_->setText(
+                QString("GPU fragment output before blending · primitive %1 · target 0 · %2 %3\n"
+                        "Separate Pixel History replay; compare with the selected shader output, not the final texture.")
+                    .arg(text(invocationReference.at("primitive")), QString::fromStdString(kind),
+                         text(invocationReference.at("value").at(field))));
+        } else {
+            invocationReference_->setText("GPU fragment reference unavailable: " +
+                text(invocationReference.value("reason", Json("Unknown"))));
         }
     }
     rendering_ = true;

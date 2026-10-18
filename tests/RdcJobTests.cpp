@@ -91,6 +91,7 @@ class RdcJobTests : public QObject {
         QCOMPARE(job.at("stage"), Json("VSOut"));
         QCOMPARE(job.at("api_validation"), Json(false));
         QCOMPARE(job.at("readonly_depth_snapshot"), Json(false));
+        QCOMPARE(job.at("pixel_history_reference"), Json(false));
         QCOMPARE(job.at("group"), Json::array({1, 2, 3}));
         QCOMPARE(job.at("thread"), Json::array({0, 0, 0}));
         QVERIFY(QFileInfo(QString::fromStdString(job.at("capture").get<std::string>())).isAbsolute());
@@ -99,6 +100,18 @@ class RdcJobTests : public QObject {
         write(out + "/.keep", "preserve");
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success"));
         QCOMPARE(read(out + "/.keep"), QByteArray("preserve"));
+    }
+    void pixelHistoryReference() {
+        QTemporaryDir dir;
+        for (const auto &invalid : {Json{{"pixel_history_reference", "true"}},
+                                    Json{{"pixel_history_reference", true}},
+                                    Json{{"pixel_history_reference", true}, {"primitive", UINT32_MAX}}})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "debug-pixel"));
+        const Json options{{"pixel_history_reference", true}, {"primitive", 1322}, {"execution", "36560"}};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "texture"));
+        const auto job = prepare(dir.path(), "success", options, "debug-pixel");
+        QCOMPARE(job.at("pixel_history_reference"), Json(true));
+        QCOMPARE(job.at("primitive"), Json(1322));
     }
     void invalidOptions_data() {
         QTest::addColumn<Json>("options");

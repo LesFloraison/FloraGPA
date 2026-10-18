@@ -3023,6 +3023,65 @@ submission/project/undo validation: **3 passed**, **215 ms**; auxiliary event
 mapping: **3 passed**, **2 ms**, including setup/cleanup. GPU checks were serial
 and confined to the failing particle boundary; no broad regression was run.
 
+### GPU fragment reference in pixel debugging
+
+The PS workspace now offers **GPU fragment reference**, also available as
+`rdc-analyze ... debug-pixel --primitive <id> --pixel-history-reference`.
+It requests additional Pixel History replays after instruction stepping and
+reports the selected fragment's `shaderOut` separately from the blended target.
+The option is off by default, requires an explicit primitive, and currently
+supports DX12 color target 0 with a single draw instance and an unambiguous
+target subresource. Missing/duplicate matches and rejected fragments retain
+explicit reasons instead of supplying a successful zero output reference.
+The debugger trace is released before the extra history query.
+
+`gpu_invocation_reference` preserves the native event ID, primitive, fragment
+index, target/subresource, original backend failure flags, pre/post values and
+GPU shader output. An output reference is unverified if the selected target
+changes during debugging/history or if the history's final event value does not
+exactly match direct post-event readback. These checks do not prove that all
+inputs are stable. The original `gpu_reference` still means the complete
+post-event texel, including other fragments, blending and storage conversion.
+
+The PS panel also exposes the existing **D32 depth snapshot (experimental)**
+option. Both options reset when the event/session/experiment context changes;
+they do not enable the depth workaround globally. The depth option still requires
+the pinned patched library and its existing restricted D32 path.
+
+On the four-barrier BF1 experiment, execution **36560**, pixel **(836,241)**,
+primitive **1322**, the original shader's **33-step** trace ends with `o0` equal
+bit-for-bit to GPU Pixel History fragment **20**:
+`(0.019068362191319466,0.01583746448159218,0.012434612028300762,0.427259236574173)`.
+Its float32 bits are **1016870209,1015135634,1011595915,1054523833**. This is not
+the final target value: later primitive **1334** and target storage yield
+`(0.035003662109375,0.031463623046875,0.02667236328125,0.65478515625)`, which agrees
+with native readback. Primitive **265** at the same pixel is a negative control:
+the backend returns a trace but Pixel History reports `depthTestFailed`; its
+invocation reference is unavailable and has no successful `value` field.
+
+A second negative control disables only the D32 snapshot: the selected texel
+remains zero during debugging, while Pixel History reconstructs the nonzero
+final value above. The new boundary check reports
+`unverified_history_boundary` and `partial: true`, rather than treating the
+unchanged zero target as sufficient validation. With the snapshot enabled, the
+history boundary and direct target match exactly and the reference is `read`.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-shadow-barrier-history1`, `bf1-particle-fragment-reference{1,2}`,
+`bf1-particle-fragment-rejected1`, `bf1-particle-fragment-boundary1`,
+and `pixel-fragment-ui3` (rendered panel).
+The UI check compares all four GPU/trace output bit patterns, verifies separate
+fragment/target display and export, checks the rejected-fragment explanation,
+and rejects a stale result after a context change. This validates the selected
+particle invocation under the explicit synchronization/depth experiments; it
+does not complete original BF1 frame fidelity or general shader-debug acceptance.
+Builds **229–233** cover the workspace, CLI, analysis worker and focused tests.
+Option/default validation: **4 passed**, **9 ms** (`pixel-reference-options1.txt`).
+Saved GPU evidence and panel integration: **3 passed**, **228 ms**
+(`pixel-fragment-ui3.txt`), including setup/cleanup. Offscreen Qt emitted only its
+expected `propagateSizeHints` warnings; the rendered panel was inspected.
+GPU queries were serial and limited to this particle failure and its controls.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

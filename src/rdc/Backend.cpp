@@ -678,6 +678,78 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                                "GPU reference cannot validate this trace; inspect replay/input stability.");
         }
     }
+    if (job.value("pixel_history_reference", false)) {
+        // This query has its own replay phase. Never present its shader output
+        // as the blended target or silently select among duplicate primitives.
+        Json reference{{"status", "unavailable"}, {"event_id", eid},
+                       {"primitive", index(job, "primitive")}, {"output_index", 0},
+                       {"method", "RenderDoc PixelHistory shaderOut after debugger stepping"},
+                       {"scope", "GPU fragment output before blending/storage conversion. Separate instrumented "
+                                 "replays; matching output alone does not validate every instruction or input."}};
+        if (!referenceSelection) {
+            reference["reason"] = "No unambiguous color target 0 reference is available";
+        } else if (selected->numInstances != 1) {
+            reference["reason"] = "Pixel history primitive selection does not identify a draw instance";
+        } else {
+            const auto &selection = *referenceSelection;
+            reference.update({{"resource", resourceName(selection.resource)}, {"x", selection.x}, {"y", selection.y},
+                              {"mip", selection.sub.mip}, {"layer", selection.sub.slice}, {"sample", selection.sub.sample},
+                              {"interpretation", result.at("gpu_reference").at("interpretation")}});
+            trace.reset();
+            const auto modifications = controller.PixelHistory(selection.resource, selection.x, selection.y,
+                                                                 selection.sub, selection.cast);
+            Json matches = Json::array();
+            Json historyBoundary;
+            for (const auto &entry : modifications) {
+                if (entry.eventId != eid) continue;
+                historyBoundary = pixel(entry.postMod.col);
+                if (entry.primitiveID == index(job, "primitive")) matches.push_back(record(entry));
+            }
+            reference["matching_fragments"] = matches.size();
+            if (matches.size() != 1) {
+                reference["reason"] = matches.empty() ? "No matching GPU fragment was returned"
+                                                      : "Multiple GPU fragments share this primitive; selection is ambiguous";
+            } else {
+                const auto &entry = matches.front();
+                reference["fragment"] = entry;
+                bool rejected = false;
+                for (const auto key : {"directShaderWrite", "unboundPS", "sampleMasked", "backfaceCulled",
+                                        "depthClipped", "depthBoundsFailed", "viewClipped", "scissorClipped",
+                                        "shaderDiscarded", "depthTestFailed", "stencilTestFailed", "predicationSkipped"})
+                    rejected |= entry.at(key).get<bool>();
+                if (rejected)
+                    reference["reason"] = "The matching fragment did not pass all tests; shader output is not validated";
+                else {
+                    reference["status"] = "read";
+                    reference["value"] = entry.at("shaderOut").at("col");
+                }
+            }
+            controller.SetFrameEvent(eid, true);
+            reference["post_history_target"] = pixel(controller.PickPixel(selection.resource, selection.x,
+                                                                           selection.y, selection.sub, selection.cast));
+            const bool same = reference.at("post_history_target").at("uintValue") ==
+                              result.at("gpu_reference").at("after_debug_value").at("uintValue");
+            reference["target_consistency"] = same ? "selected_texel_unchanged" : "selected_texel_changed";
+            reference["history_post_event_value"] = historyBoundary;
+            const bool boundaryMatches = !historyBoundary.is_null() && historyBoundary.at("uintValue") ==
+                                         reference.at("post_history_target").at("uintValue");
+            reference["history_boundary_consistency"] = boundaryMatches ? "exact_match" : "not_exactly_matched";
+            if (!boundaryMatches && reference.at("status") == "read") {
+                reference["status"] = "unverified_history_boundary";
+                reference["reason"] = "Pixel History's final event value does not exactly match the post-event target";
+                result["partial"] = true;
+            }
+            if (!same || result.at("gpu_reference").value("consistency", "") != "selected_texel_unchanged") {
+                reference["status"] = "unverified_replay_changed";
+                reference["reason"] = "The selected target changed during debugger or pixel-history replays";
+                result["partial"] = true;
+                auto &warnings = result["debug_scope"]["warnings"];
+                if (warnings.is_null()) warnings = Json::array();
+                warnings.push_back("The GPU fragment reference comes from a changing replay and cannot validate this trace.");
+            }
+        }
+        result["gpu_invocation_reference"] = std::move(reference);
+    }
     return result;
 }
 } // namespace
@@ -710,6 +782,9 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     if (job.value("readonly_depth_snapshot", false) && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
+    if (job.value("pixel_history_reference", false) &&
+        (action != "debug-pixel" || index(job, "primitive", UINT32_MAX) == UINT32_MAX))
+        throw std::runtime_error("Pixel history reference requires debug-pixel and an explicit primitive");
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
         action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
@@ -732,6 +807,8 @@ Json runRdcJob(const Json &job) {
     auto &controller = *session.controller;
     const auto properties = controller.GetAPIProperties();
     const bool dx12 = properties.pipelineType == GraphicsAPI::D3D12;
+    if (job.value("pixel_history_reference", false) && !dx12)
+        throw std::runtime_error("Pixel history invocation reference currently requires DX12");
     if (dx12)
         for (const auto key : {"execution", "resource", "resource_creation"})
             if (job.contains(key) && !job[key].is_null() && !job[key].is_string())
