@@ -76,14 +76,18 @@ class RdcTests : public QObject {
             {node(1, marker(35808), 0x40, {wrapper(2, 0x40, {node(3, "Dispatch", 4)}), wrapper(4, 0x80)}),
              node(5, marker(35814), 0x40, {wrapper(6, 0x40), wrapper(7, 0x80)}),
              node(8, marker(35834), 0x40,
-                  {wrapper(9, 0x40, {node(10, "Draw", 2), node(11, "Draw", 2)}), wrapper(12, 0x80)})});
+                  {wrapper(9, 0x40, {node(10, "Draw", 2), node(11, "Draw", 2)}), wrapper(12, 0x80)}),
+             node(13, marker(10267), 0x40,
+                  {wrapper(14, 0x40, {node(15, "DispatchMesh", 8)}), wrapper(16, 0x80)})});
         const auto result = indexDx12RdcEvents(roots, native);
-        QCOMPARE(result["execution_map"], Json({{"35808", 3}}));
+        QCOMPARE(result["execution_map"], Json({{"35808", 3}, {"10267", 15}}));
+        QCOMPARE(rdcProvenance(15, result["reverse"])["execution"], Json("10267"));
+        QCOMPARE(result["actions"].back()["eid"], Json(15));
         QCOMPARE(result["execution_commands"]["35808"]["api_event_ids"], Json::array({2, 4}));
         QCOMPARE(result["execution_commands"]["35814"]["status"], Json("unrepresented"));
         QVERIFY(!result["execution_commands"]["35834"]["selectable"].get<bool>());
         QCOMPARE(rdcProvenance(11, result["reverse"])["execution"], Json("35834"));
-        for (const auto id : {2u, 4u, 6u, 7u, 9u, 12u})
+        for (const auto id : {2u, 4u, 6u, 7u, 9u, 12u, 14u, 16u})
             QVERIFY(!result["reverse"].contains(std::to_string(id)));
     }
     void commandProvenance() {

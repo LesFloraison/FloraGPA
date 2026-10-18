@@ -141,6 +141,9 @@ NativeDevice::NativeDevice(const StreamDirectory &directory, bool debug) : impl_
     if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2))))
         state.report["features"]["depth_bounds_test"] = bool(options2.DepthBoundsTestSupported);
     D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6{};
+    D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7{};
+    if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7))))
+        state.report["features"]["mesh_shader_tier"] = uint32_t(options7.MeshShaderTier);
     if (SUCCEEDED(state.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6)))) {
         state.report["features"]["variable_shading_rate_tier"] = uint32_t(options6.VariableShadingRateTier);
         state.report["features"]["additional_shading_rates"] = bool(options6.AdditionalShadingRatesSupported);

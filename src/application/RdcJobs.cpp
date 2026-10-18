@@ -121,8 +121,8 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         for (const auto &v : coords)
             unsignedNumber(v, UINT32_MAX, key);
     }
-    if (job["stage"] != "VSOut" && job["stage"] != "GSOut")
-        throw std::runtime_error("Stage must be VSOut or GSOut");
+    if (job["stage"] != "VSOut" && job["stage"] != "GSOut" && job["stage"] != "MeshOut")
+        throw std::runtime_error("Stage must be VSOut, GSOut or MeshOut");
     job["capture"] = existingFile(capture, "RDC capture").toStdString();
     job["renderdoc"] = existingFile(library, "RenderDoc library").toStdString();
     emptyOutput(output);

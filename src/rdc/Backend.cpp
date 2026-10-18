@@ -233,14 +233,20 @@ struct Events {
                 native[std::to_string(event.eventId)] = {{"name", text(chunk->name)}};
                 chunks[event.eventId] = chunk;
             }
-            roots.push_back({{"eventId", node.eventId},
-                             {"customName", text(node.customName)},
-                             {"flags", uint32_t(node.flags)},
-                             {"flags_text", flagsText(node.flags)},
-                             {"numIndices", node.numIndices},
-                             {"numInstances", node.numInstances},
-                             {"events", events},
-                             {"children", walk(node.children, file, depth + 1)}});
+            roots.push_back(
+                {{"eventId", node.eventId},
+                 {"customName", text(node.customName)},
+                 {"flags", uint32_t(node.flags)},
+                 {"flags_text", flagsText(node.flags)},
+                 {"numIndices", node.numIndices},
+                 {"numInstances", node.numInstances},
+                 {"dispatchDimension",
+                  {node.dispatchDimension[0], node.dispatchDimension[1], node.dispatchDimension[2]}},
+                 {"dispatchThreadsDimension",
+                  {node.dispatchThreadsDimension[0], node.dispatchThreadsDimension[1],
+                   node.dispatchThreadsDimension[2]}},
+                 {"events", events},
+                 {"children", walk(node.children, file, depth + 1)}});
         }
         return roots;
     }
@@ -611,13 +617,19 @@ Json runRdcJob(const Json &job) {
     controller.SetFrameEvent(eid, true);
     if (action == "postmesh") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
-        if (!selected || !(selected->flags & ActionFlags::Drawcall))
-            throw std::runtime_error("Selected analysis requires an executed draw action");
         const auto stage = job.value("stage", std::string("VSOut"));
+        const bool meshOutput = stage == "MeshOut";
+        if (!selected ||
+            !(selected->flags & (meshOutput ? ActionFlags::MeshDispatch : ActionFlags::Drawcall)))
+            throw std::runtime_error(meshOutput ? "Mesh output requires an executed mesh dispatch"
+                                                : "Selected analysis requires an executed draw action");
+        if (meshOutput && index(job, "instance") != 0)
+            throw std::runtime_error("Mesh output returns all meshlets; draw instances do not apply");
         const auto nativeStage = stage == "VSOut"   ? MeshDataStage::VSOut
                                  : stage == "GSOut" ? MeshDataStage::GSOut
+                                 : meshOutput       ? MeshDataStage::MeshOut
                                                     : MeshDataStage::VSIn;
-        if (stage != "VSOut" && stage != "GSOut" && stage != "VSIn")
+        if (stage != "VSOut" && stage != "GSOut" && stage != "VSIn" && !meshOutput)
             throw std::runtime_error("Unsupported post-shader stage");
         const auto mesh = controller.GetPostVSData(index(job, "instance"), 0, nativeStage);
         if (mesh.vertexResourceId == ResourceId::Null())
@@ -628,8 +640,36 @@ Json runRdcJob(const Json &job) {
                 file.write(static_cast<const char *>(bytes), qint64(size)) != qint64(size) || !file.commit())
                 throw std::runtime_error("Cannot save post-shader mesh artifact");
         };
-        const auto raw =
-            controller.GetBufferData(mesh.vertexResourceId, mesh.vertexByteOffset, mesh.vertexByteSize);
+        uint64_t vertexBytes = mesh.vertexByteSize;
+        Json meshlets = Json::array();
+        if (meshOutput) {
+            uint64_t vertices{}, indices{};
+            for (const auto &size : mesh.meshletSizes) {
+                vertices += size.numVertices;
+                indices += size.numIndices;
+                if (vertices > UINT32_MAX || indices > UINT32_MAX)
+                    throw std::runtime_error("Mesh output count exceeds supported bounds");
+                meshlets.push_back({{"vertices", size.numVertices}, {"indices", size.numIndices}});
+            }
+            vertexBytes = vertices * mesh.vertexByteStride;
+            if (indices != mesh.numIndices || !vertices || !mesh.vertexByteStride ||
+                vertexBytes > mesh.vertexByteSize || vertexBytes > (1ULL << 30))
+                throw std::runtime_error("Empty, inconsistent or oversized mesh output");
+            // The D3D12 backend compacts vertices first, then per-primitive
+            // attributes, then rebased indices. Its reported primitive offset
+            // can disagree with the vertex count/stride; do not use it to size
+            // the position table or interpret primitive attributes.
+            if (mesh.topology != Topology::TriangleList || indices % 3)
+                throw std::runtime_error("Mesh output currently requires triangle-list topology");
+            if (mesh.indexResourceId == mesh.vertexResourceId &&
+                (mesh.indexByteOffset < mesh.vertexByteOffset ||
+                 vertexBytes + (indices / 3) * mesh.perPrimitiveStride >
+                     mesh.indexByteOffset - mesh.vertexByteOffset))
+                throw std::runtime_error("Mesh vertex/primitive data overlaps index storage");
+        }
+        const auto raw = controller.GetBufferData(mesh.vertexResourceId, mesh.vertexByteOffset, vertexBytes);
+        if (meshOutput && raw.size() != vertexBytes)
+            throw std::runtime_error("Truncated mesh vertex readback");
         save(L"post_vertices.bin", raw.data(), raw.size());
         bytebuf ib;
         if (mesh.indexResourceId != ResourceId::Null()) {
@@ -651,7 +691,16 @@ Json runRdcJob(const Json &job) {
                       {"nearPlane", real(mesh.nearPlane)},
                       {"farPlane", real(mesh.farPlane)},
                       {"status", text(mesh.status)}};
+        if (meshOutput)
+            metadata.update({{"meshlets", meshlets},
+                             {"position_bytes", std::to_string(vertexBytes)},
+                             {"per_primitive_offset", std::to_string(mesh.perPrimitiveOffset)},
+                             {"per_primitive_stride", mesh.perPrimitiveStride},
+                             {"per_primitive_attributes_exported", false},
+                             {"scope", "all_meshlets_positions_and_triangle_indices"}});
         const auto decoded = ReplayMesh::decode(metadata, {raw.data(), raw.size()}, {ib.data(), ib.size()});
+        if (meshOutput && decoded.faces.size() != decoded.candidateFaceCount)
+            throw std::runtime_error("Mesh output contains out-of-range triangle indices");
         const auto csv = decoded.csv(), obj = decoded.obj();
         save(L"post_vertices.csv", csv.data(), csv.size());
         save(L"post_geometry.obj", obj.data(), obj.size());

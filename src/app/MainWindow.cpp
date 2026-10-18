@@ -1605,13 +1605,14 @@ void MainWindow::updateCheckpointContext() {
             view->setContext(key, available);
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
     const auto analysisKey = historyContextKey();
-    bool draw = true, dispatch = true;
+    bool draw = true, dispatch = true, meshDispatch = false;
     if (dx12) {
         draw = dispatch = false;
         if (selection_.execution) {
             const auto kind = session_->executionEvent(*selection_.execution).workKind;
             draw = kind == ReplayWorkKind::Draw;
             dispatch = kind == ReplayWorkKind::Dispatch;
+            meshDispatch = kind == ReplayWorkKind::MeshDispatch;
         }
     }
     if (history_) {
@@ -1630,7 +1631,7 @@ void MainWindow::updateCheckpointContext() {
                                     dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
     }
     if (replayMesh_)
-        replayMesh_->setContext(draw ? analysisKey : QString{}, selectedEvent_, dx12);
+        replayMesh_->setContext((draw || meshDispatch) ? analysisKey : QString{}, selectedEvent_, dx12, meshDispatch);
     for (size_t i = 0; i < replayDebug_.size(); ++i)
         if (auto view = replayDebug_[i])
             view->setContext((i == 2 ? dispatch : draw) ? analysisKey : QString{}, selectedEvent_, dx12);

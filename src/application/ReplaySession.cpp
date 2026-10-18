@@ -130,6 +130,10 @@ class Dx12Session final : public IReplaySession {
                 if (recipe.byteStride >= sizeof(D3D12_DISPATCH_ARGUMENTS))
                     return ReplayWorkKind::Dispatch;
                 break;
+            case D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH:
+                if (recipe.byteStride >= sizeof(D3D12_DISPATCH_MESH_ARGUMENTS))
+                    return ReplayWorkKind::MeshDispatch;
+                break;
             default:
                 break;
             }
@@ -386,6 +390,14 @@ class Dx12Session final : public IReplaySession {
             if (!replay.supported())
                 return replay;
             const auto event = executionEvent(*selection.execution);
+            if (event.workKind == ReplayWorkKind::MeshDispatch)
+                return feature == ReplayFeature::Geometry
+                           ? SessionCapability{CapabilityStatus::Supported,
+                                               "Mesh output positions and triangle indices through RenderDoc "
+                                               "1.45; all meshlets"}
+                           : SessionCapability{CapabilityStatus::NotImplemented,
+                                               "AS/MS invocation debugging is not implemented by the current "
+                                               "analysis backend"};
             if (event.workKind == ReplayWorkKind::MissingIndirect)
                 return {CapabilityStatus::MissingData,
                         "The indirect call has no valid command signature at its recording boundary"};

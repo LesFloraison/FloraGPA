@@ -107,14 +107,23 @@ struct NativeCommands::Impl {
                 "Indirect root arguments and GPU address patching are not implemented");
         const auto type = recipe.arguments.front().Type;
         const UINT minimum =
-            type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW           ? sizeof(D3D12_DRAW_ARGUMENTS)
-            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED ? sizeof(D3D12_DRAW_INDEXED_ARGUMENTS)
-            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH     ? sizeof(D3D12_DISPATCH_ARGUMENTS)
-                                                                : 0;
+            type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW            ? sizeof(D3D12_DRAW_ARGUMENTS)
+            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED  ? sizeof(D3D12_DRAW_INDEXED_ARGUMENTS)
+            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH      ? sizeof(D3D12_DISPATCH_ARGUMENTS)
+            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH ? sizeof(D3D12_DISPATCH_MESH_ARGUMENTS)
+                                                                 : 0;
         require(minimum, "Unsupported indirect argument type; address-bearing arguments require patching");
         require(recipe.byteStride >= minimum && recipe.byteStride % 4 == 0,
                 "Invalid indirect argument stride");
         if (!selected->native) {
+            if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH) {
+                D3D12_FEATURE_DATA_D3D12_OPTIONS7 options{};
+                check(device.device()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options,
+                                                           sizeof(options)),
+                      "Query mesh shader support");
+                require(options.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED,
+                        "Device does not support captured mesh shader dispatches");
+            }
             const D3D12_COMMAND_SIGNATURE_DESC desc{recipe.byteStride, UINT(recipe.arguments.size()),
                                                     recipe.arguments.data(), recipe.nodeMask};
             check(device.device()->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&selected->native)),

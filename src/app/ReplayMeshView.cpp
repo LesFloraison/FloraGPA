@@ -14,6 +14,7 @@
 #include <QPlainTextEdit>
 #include <QSaveFile>
 #include <QSettings>
+#include <QSignalBlocker>
 #include <QSplitter>
 #include <QTableView>
 #include <QToolBar>
@@ -153,9 +154,21 @@ void ReplayMeshView::invalidate() {
     summary_->setToolTip({});
     updateActions();
 }
-void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12) {
-    if (key == key_ && event == event_ && dx12_ == dx12)
+void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12, bool meshDispatch) {
+    if (key == key_ && event == event_ && dx12_ == dx12 && meshDispatch_ == meshDispatch)
         return;
+    if (meshDispatch_ != meshDispatch) {
+        const QSignalBlocker blocker(stage_);
+        stage_->clear();
+        if (meshDispatch)
+            stage_->addItem("Mesh output (all meshlets)", "MeshOut");
+        else {
+            stage_->addItem("VS output", "VSOut");
+            stage_->addItem("GS / DS output", "GSOut");
+        }
+        instance_->setText("0");
+    }
+    meshDispatch_ = meshDispatch;
     dx12_ = dx12;
     key_ = key;
     event_ = event;
@@ -180,7 +193,7 @@ void ReplayMeshView::updateActions() {
     export_->setEnabled(!busy_ && !result_.is_null());
     backend_->setEnabled(!busy_);
     stage_->setEnabled(!busy_);
-    instance_->setEnabled(!busy_);
+    instance_->setEnabled(!busy_ && !meshDispatch_);
 }
 ReplayMeshView::Json ReplayMeshView::request() const {
     bool ok = false;
@@ -212,6 +225,8 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         throw std::runtime_error("Mesh result does not match the DX12 execution selection");
     if (result.value("action", "") != "postmesh" || !result.at("stage").is_string())
         throw std::runtime_error("Invalid mesh result");
+    if (result.at("stage") != stage_->currentData().toString().toStdString())
+        throw std::runtime_error("Mesh result does not match the selected output stage");
     QMap<QString, QByteArray> files;
     QStringList names{"post_vertices.bin", "post_vertices.csv", "post_geometry.obj"};
     if (result.at("mesh").at("indexResourceId") != "ResourceId::0")

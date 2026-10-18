@@ -20,7 +20,7 @@ struct ReplaySelection {
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
 };
-enum class ReplayWorkKind { None, Draw, Dispatch, MissingIndirect, UnsupportedIndirect };
+enum class ReplayWorkKind { None, Draw, Dispatch, MissingIndirect, UnsupportedIndirect, MeshDispatch };
 struct SessionEvent {
     Id id{};
     std::string name, summary;

@@ -68,6 +68,72 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void hellbladeMeshSignature() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for the Hellblade2 mesh signature");
+        const auto path = std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString());
+        dx12::StreamDirectory directory(path);
+        const auto recipe = dx12::decodeCommandSignature(directory.payload(directory.packets().at(1295)));
+        QCOMPARE(recipe.object, 0x1f0337daf80ULL);
+        QCOMPARE(recipe.rootSignature, 0ULL);
+        QCOMPARE(recipe.byteStride, UINT(sizeof(D3D12_DISPATCH_MESH_ARGUMENTS)));
+        QCOMPARE(recipe.arguments.size(), size_t(1));
+        QCOMPARE(recipe.arguments.front().Type, D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH);
+        const auto session = openReplaySession(path);
+        QCOMPARE(session->executionEvent(10233).workKind, ReplayWorkKind::Dispatch);
+        QCOMPARE(session->executionEvent(10267).workKind, ReplayWorkKind::MeshDispatch);
+        ReplaySelection selection;
+        selection.execution = 10267;
+        QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
+        QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
+                 CapabilityStatus::NotImplemented);
+        QVERIFY(session->capability(ReplayFeature::Geometry, selection).supported());
+    }
+    void hellbladeMeshOutputWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_MESH_OUTPUT");
+        if (root.isEmpty() || output.isEmpty())
+            QSKIP("Set Hellblade2 capture and saved MeshOut result directory");
+        QFile file(output + "/result.json");
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(file.readAll().toStdString());
+        QCOMPARE(result.at("execution"), nlohmann::json("10267"));
+        QCOMPARE(result.at("vertex_count"), nlohmann::json(97608));
+        QCOMPARE(result.at("face_count"), nlohmann::json(96731));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("10267");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        QVERIFY(mesh->findChild<QAction *>("replayMeshRead")->isEnabled());
+        QCOMPARE(mesh->request().at("stage"), nlohmann::json("MeshOut"));
+        QCOMPARE(mesh->request().at("execution"), nlohmann::json("10267"));
+        QVERIFY(!mesh->findChild<QLineEdit *>("replayMeshInstance")->isEnabled());
+        QVERIFY(mesh->finish(mesh->requestId(), result, output));
+        QCOMPARE(mesh->findChild<QTableView *>("replayMeshPositions")->model()->rowCount(), 97608);
+        QTemporaryDir exported;
+        mesh->exportResult(exported.filePath("mesh.obj"));
+        QFile actual(exported.filePath("mesh.obj")), expected(output + "/post_geometry.obj");
+        QVERIFY(actual.open(QIODevice::ReadOnly) && expected.open(QIODevice::ReadOnly));
+        QCOMPARE(QCryptographicHash::hash(actual.readAll(), QCryptographicHash::Sha256),
+                 QCryptographicHash::hash(expected.readAll(), QCryptographicHash::Sha256));
+        const auto serial = mesh->requestId();
+        locate->setText("10135");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(mesh->result().is_null());
+        QVERIFY(!mesh->finish(serial, result, output));
+        QVERIFY(!mesh->findChild<QAction *>("replayMeshRead")->isEnabled());
+        locate->setText("9731");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QCOMPARE(mesh->request().at("stage"), nlohmann::json("VSOut"));
+        QVERIFY(mesh->findChild<QLineEdit *>("replayMeshInstance")->isEnabled());
+    }
     void cpuFenceEventPlanning() {
         QTemporaryDir temp;
         const auto path = fixture(temp);

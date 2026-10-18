@@ -1208,6 +1208,76 @@ additional DX11/Talos/BF1 GPU replay was run. Subsequent indirect calls, complet
 Hellblade2 execution, geometry, performance, experiments and portable acceptance
 remain unfinished.
 
+### Hellblade2 indirect mesh dispatch and MeshOut geometry
+
+The second submission contains 42 indirect calls: 22 compute dispatches and 20
+mesh dispatches. Signature creation 1296, object `0x1f0337daf80`, has one
+`DISPATCH_MESH` argument, 12-byte stride, node mask 1 and no root signature.
+The first mesh call is execution **10267**, source **578355**, submission 579109,
+using argument buffer 2144426640464 at byte offset 16, maximum count 1, without a
+count buffer. Native command signatures now support this address-free layout and
+check device MeshShaderTier. Root-argument/address patching remains unsupported.
+The layout and API path follow the [Microsoft mesh shader specification](https://microsoft.github.io/DirectX-Specs/d3d/MeshShader.html).
+
+One native prefix run (`hellblade-first-mesh1`) reaches that event with SDK 616,
+MeshShaderTier 10 (tier 1), and **zero debug-layer messages/errors**. The prefix
+contains 65 direct Dispatch calls, 11 direct Draw calls and three indirect calls.
+This is not all of submission 579109 or the complete frame. Its RenderDoc capture
+is 931,226,507 bytes. All **567** marked executions map uniquely. The first two
+indirect calls generate `Dispatch(145,1,1)` at RDC events 2109 and 2153; execution
+10267 generates **`DispatchMesh(795,1,1)`**, RDC event **2215**
+(`hellblade-first-mesh-inventory1`). MeshDispatch is classified separately from
+compute Dispatch, and its generated action is selected instead of either API
+wrapper. Group dimensions are retained in the analysis action inventory; the
+backend reports unknown thread dimensions as zeros, not as inferred thread counts.
+
+Geometry > Replay Mesh now selects **Mesh output (all meshlets)** for a mesh
+execution. Draw-instance selection is disabled for this path; ordinary Draws keep
+their VS/GS output choices. The isolated analysis service requests `MeshOut` and
+exports positions, rebased triangle indices, CSV and OBJ. Meshlet counts bound the
+position readback and exclude adjacent primitive attributes and indices from the
+vertex table. Empty output, inconsistent counts, unsupported topology, oversized
+storage and out-of-range triangle indices fail explicitly.
+
+The first extraction exposed a backend metadata inconsistency: the reported
+per-primitive offset is 1,561,728 (`97608 * 16`), whereas the compacted vertex
+region occupies 5,856,480 bytes (`97608 * 60`). Local RenderDoc D3D12 post-VS code
+confirms that primitive data follows compacted vertices, while its reported offset
+uses primitive stride times vertex count. The implementation uses meshlet vertex
+counts and vertex stride, checks the combined regions against index offset
+7,404,176, retains the reported offset for diagnosis, and **does not export or
+interpret per-primitive attributes**. The same saved capture was reused for the
+corrected extraction; no second native prefix replay was needed.
+
+`hellblade-mesh-output2` and `hellblade-mesh-validation1.json` provide:
+
+| Observation | Value |
+| --- | --- |
+| Meshlets | 795 |
+| Vertices / stride | 97,608 / 60 bytes |
+| Indices / triangles | 290,193 / 96,731 |
+| Position components | float32 x/y/z/w; all finite, all w = 1 |
+| Indices outside their own meshlet vertex range | 0 |
+| Vertex storage SHA-256 | `d252e09b196bef61a6920990dec2e8f88bc496995a8dc6135cc411ffa17b6b9b` |
+| Index storage SHA-256 | `c6e4f38810301e0d330f9040b03a7c18a6761cb4b9b670561006061ad0172caf` |
+| OBJ SHA-256 | `4057bf6d5ef6389bd42abadb42c08b6fbd83daa505c5ea02644052b3588a7d06` |
+
+No GPA modules load in the analysis processes. CPU-only workspace checks load the
+real saved output, verify all 97,608 table rows and byte-identical OBJ export,
+reject the stale result after selecting CS 10135, and restore VSOut/instance
+controls when selecting Draw 9731. Signature classification, unsupported indirect
+layouts and exact action mapping also pass (`hellblade-mesh-final1.txt`,
+`hellblade-mesh-mapping2.txt`; six focused cases total). GUI, Worker, CLI, isolated
+analysis and focused test targets build (`build112.log` through `build116.log`).
+The new extraction required one native capture, one inventory query, and two
+geometry queries, with the second query fixing the concrete layout failure.
+
+This verifies one MeshOut position/index path and its workspace display/export,
+not full original-GPA geometry equivalence, every output attribute, meshlet
+filtering, AS/MS shader debugging, the complete workspace worker request cycle or
+the remaining indirect calls. Those remain unfinished. Existing VS/PS/CS debugging
+is not advertised for mesh shader invocations.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1216,9 +1286,9 @@ remain unfinished.
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First Draw raw float before/after verified; entire first submit and second-submit prefix through CS 10135 executed with one verified CPU Fence dependency; full frame and general synchronization unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First Draw raw float before/after verified; entire first submit and second-submit prefix through indirect MeshDispatch 10267 executed with one verified CPU Fence dependency; full frame and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace, instruction breakpoint and SSA Watch verified; UAV write validation, other stages and geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

@@ -11,7 +11,7 @@ namespace flora {
 using Json = nlohmann::json;
 namespace {
 // Public ActionFlags values from RenderDoc 1.45 replay_enums.h.
-constexpr uint32_t clear = 1, draw = 2, dispatch = 4, push = 0x40, copy = 0x400, resolve = 0x800,
+constexpr uint32_t clear = 1, draw = 2, dispatch = 4, meshDispatch = 8, push = 0x40, copy = 0x400, resolve = 0x800,
                    mips = 0x1000;
 const std::map<std::string, uint32_t> apiFlags{{"ClearDepthStencilView", clear},
                                                {"ClearRenderTargetView", clear},
@@ -217,14 +217,16 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
                             current->events.insert(id);
                     }
                 }
-                if (flags & (draw | dispatch | clear | copy | resolve))
+                if (flags & (draw | dispatch | meshDispatch | clear | copy | resolve))
                     current->events.insert(eid);
             }
-            if (flags & (draw | dispatch))
+            if (flags & (draw | dispatch | meshDispatch))
                 actions.push_back({{"eid", eid},
                                    {"name", name},
                                    {"indices", action.at("numIndices")},
                                    {"instances", action.at("numInstances")},
+                                   {"dispatch_groups", action.value("dispatchDimension", Json(nullptr))},
+                                   {"dispatch_threads", action.value("dispatchThreadsDimension", Json(nullptr))},
                                    {"flags", action.at("flags_text")}});
             walk(action.at("children"), current, depth + 1);
         }
