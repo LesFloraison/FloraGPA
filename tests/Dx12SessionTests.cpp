@@ -74,6 +74,77 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void resourceHistoryShaderVisibility() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_USAGE_VISIBILITY_EVIDENCE");
+        if (root.isEmpty())
+            QSKIP("Set the BF1 shader-visibility resource history evidence directory");
+        const auto read = [&](const char *name) {
+            QFile file(root + '/' + name + "/result.json");
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Missing resource history evidence");
+            return Json::parse(file.readAll().toStdString());
+        };
+        const auto oldInput = read("bf1-color-input-history-stock1");
+        const auto input = read("bf1-color-input-history-fixed1");
+        const auto oldOutput = read("bf1-premotion-history1");
+        const auto output = read("bf1-premotion-history-fixed1");
+        const auto count = [](const Json &report, const char *execution, const char *usage) {
+            size_t found = 0;
+            for (const auto &row : report.at("resource_history"))
+                if (row.at("execution") == execution && row.at("usage_name") == usage)
+                    ++found;
+            return found;
+        };
+        QCOMPARE(count(oldInput, "36659", "PS_Resource"), size_t(0));
+        QCOMPARE(oldInput.at("backend_dx12_usage_visibility_patch"), Json(0));
+        QCOMPARE(oldInput.at("history_scope").at("shader_stage_binding_status"),
+                 Json("known_stage_visibility_gap"));
+        QCOMPARE(count(input, "36659", "PS_Resource"), size_t(1));
+        QCOMPARE(count(oldOutput, "36758", "VS_Resource"), size_t(1));
+        QCOMPARE(count(output, "36758", "VS_Resource"), size_t(0));
+        QCOMPARE(count(output, "36758", "PS_Resource"), size_t(1));
+        QCOMPARE(count(output, "36666", "CS_RWResource"), size_t(1));
+        for (const auto *report : {&input, &output}) {
+            QVERIFY(report->at("ok").get<bool>());
+            QVERIFY(report->at("gpa_modules_loaded").empty());
+            QCOMPARE(report->at("backend_dx12_usage_visibility_patch"), Json(1));
+            QCOMPARE(report->at("history_scope").at("shader_stage_binding_status"),
+                     Json("stage_visibility_matched"));
+            QVERIFY(report->at("partial").get<bool>());
+        }
+        ResourceHistoryView view;
+        view.setContext("bf1-stage-usage", 36659, 324843, 10432919056ULL);
+        QVERIFY(view.finish(view.requestId(), input));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        QTreeWidgetItem *selected = nullptr;
+        for (int i = 0; i < rows->topLevelItemCount(); ++i)
+            if (rows->topLevelItem(i)->text(0) == "36659" &&
+                rows->topLevelItem(i)->text(1) == "PS_Resource")
+                selected = rows->topLevelItem(i);
+        QVERIFY(selected);
+        QCOMPARE(selected->text(2), QString("bound_use"));
+        rows->setCurrentItem(selected);
+        QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
+        view.findChild<QAction *>("locateResourceHistoryEvent")->trigger();
+        QCOMPARE(jump.count(), 1);
+        QCOMPARE(jump[0][0].toULongLong(), 36659ULL);
+        QTemporaryDir temp;
+        QVERIFY(temp.isValid());
+        view.exportResult(temp.path() + "/history.json");
+        QFile exported(temp.path() + "/history.json");
+        QVERIFY(exported.open(QIODevice::ReadOnly));
+        QCOMPARE(Json::parse(exported.readAll().toStdString()), input);
+        QVERIFY(view.finish(view.requestId(), oldInput));
+        auto summary = view.findChild<QLabel *>("resourceHistorySummary");
+        QVERIFY(summary->text().contains("Overlapping stage registers"));
+        QVERIFY(view.finish(view.requestId(), input));
+        QVERIFY(!summary->text().contains("Overlapping stage registers"));
+        const auto serial = view.requestId();
+        view.setContext("other-frame", 36659, 324843, 10432919056ULL);
+        QVERIFY(!view.finish(serial, input));
+        QCOMPARE(rows->topLevelItemCount(), 0);
+    }
     void packedFloatWorkspaceReference() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto project = qEnvironmentVariable("FLORA_DX12_PACKED_FLOAT_PROJECT");

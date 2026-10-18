@@ -195,6 +195,8 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                               "creation and replay initialization.")
                           .arg(uses.size())
                           .arg(execution_));
+    for (const auto &warning : result.value("history_scope", Json::object()).value("warnings", Json::array()))
+        summary_->setText(summary_->text() + '\n' + QString::fromStdString(warning.get<std::string>()));
     updateActions();
     return true;
 }

@@ -151,6 +151,7 @@ class Session {
     std::string version, commit;
     uint32_t d16HistoryPatch{};
     uint32_t dxbcWorkgroupPatch{};
+    uint32_t dx12UsageVisibilityPatch{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -173,6 +174,8 @@ class Session {
             d16HistoryPatch = patch();
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxbcWorkgroupPatchVersion")))
             dxbcWorkgroupPatch = patch();
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12UsageVisibilityPatchVersion")))
+            dx12UsageVisibilityPatch = patch();
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
         const auto open = symbol<decltype(&RENDERDOC_OpenCaptureFile)>("RENDERDOC_OpenCaptureFile");
@@ -740,6 +743,7 @@ Json runRdcJob(const Json &job) {
         {"backend_commit", session.commit},
         {"backend_d16_history_patch", session.d16HistoryPatch},
         {"backend_dxbc_workgroup_patch", session.dxbcWorkgroupPatch},
+        {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
         {"replay_environment",
          {{"gpu_vendor_enum", vendor},
           {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
@@ -1077,6 +1081,16 @@ Json runRdcJob(const Json &job) {
                  "Usage records do not supply subresource ranges or fence dependencies.",
                  "Replay initialization is separate from original execution markers.",
                  "Only the captured replay prefix is covered; empty usage is not proof of no access."}}}}});
+        if (dx12) {
+            result["history_scope"]["shader_stage_binding_status"] =
+                session.dx12UsageVisibilityPatch == 1 ? "stage_visibility_matched"
+                                                       : "known_stage_visibility_gap";
+            if (session.dx12UsageVisibilityPatch != 1)
+                result["history_scope"]["warnings"] = {
+                    "This RenderDoc 1.45 usage index does not match root-parameter visibility to the "
+                    "shader stage. Overlapping stage registers can omit resources or misattribute uses. "
+                    "Select the patched analysis library."};
+        }
         return complete();
     }
     const auto textures = controller.GetTextures();

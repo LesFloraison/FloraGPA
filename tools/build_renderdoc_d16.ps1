@@ -8,7 +8,8 @@ $source = (Resolve-Path -LiteralPath $SourceDirectory).Path
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $patch = Join-Path $repo 'third_party/renderdoc/patches/dx12-d16-history.patch'
 $workgroupPatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-workgroup.patch'
-$patches = @($patch, $workgroupPatch)
+$usagePatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-usage-visibility.patch'
+$patches = @($patch, $workgroupPatch, $usagePatch)
 $upstream = '2fc0bc04cb95499635f63986a55bc6f67849dd9f'
 $head = & git -C $source rev-parse HEAD
 if ($LASTEXITCODE -ne 0 -or $head -ne $upstream) { throw 'Use a dedicated RenderDoc v1.45 checkout at the pinned upstream commit.' }
@@ -39,7 +40,7 @@ if ($actual.TrimEnd() -eq '') {
     }
 }
 & git -C $source diff --quiet $expectedTree --
-if ($LASTEXITCODE -ne 0) { throw 'RenderDoc source differs from the pinned D16 and DXBC workgroup fixes; use a dedicated checkout.' }
+if ($LASTEXITCODE -ne 0) { throw 'RenderDoc source differs from the pinned D16, DXBC workgroup and usage-visibility fixes; use a dedicated checkout.' }
 if (-not $MSBuild) {
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
     $MSBuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild/**/Bin/MSBuild.exe' | Select-Object -First 1
@@ -72,6 +73,8 @@ $manifest = [ordered]@{
     patch_sha256 = (Get-FileHash -LiteralPath $patch -Algorithm SHA256).Hash.ToLowerInvariant()
     dxbc_workgroup_patch_version = 1
     dxbc_workgroup_patch_sha256 = (Get-FileHash -LiteralPath $workgroupPatch -Algorithm SHA256).Hash.ToLowerInvariant()
+    dx12_usage_visibility_patch_version = 1
+    dx12_usage_visibility_patch_sha256 = (Get-FileHash -LiteralPath $usagePatch -Algorithm SHA256).Hash.ToLowerInvariant()
     renderdoc_sha256 = (Get-FileHash -LiteralPath $library -Algorithm SHA256).Hash.ToLowerInvariant()
     toolset = 'v143'
     configuration = 'Release|x64'

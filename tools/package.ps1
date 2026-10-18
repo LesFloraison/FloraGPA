@@ -43,6 +43,7 @@ foreach ($file in $rdcManifest.files.PSObject.Properties) {
 $patchedLibrary = $null
 $patchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-d16-history.patch'
 $workgroupPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-workgroup.patch'
+$usagePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-usage-visibility.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -55,6 +56,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.patch_sha256 -ne (Get-PackageSha256 $patchPath) -or
         $patchManifest.dxbc_workgroup_patch_version -ne 1 -or
         $patchManifest.dxbc_workgroup_patch_sha256 -ne (Get-PackageSha256 $workgroupPatchPath) -or
+        $patchManifest.dx12_usage_visibility_patch_version -ne 1 -or
+        $patchManifest.dx12_usage_visibility_patch_sha256 -ne (Get-PackageSha256 $usagePatchPath) -or
         $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
         throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
     }
@@ -147,6 +150,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $patchManifestPath -Destination $rdcDestination
     Copy-Item -LiteralPath $patchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $workgroupPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $usagePatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

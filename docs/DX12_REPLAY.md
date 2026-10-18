@@ -2585,6 +2585,66 @@ mantissas against the correct GPU reference phase, ignoring the unstored alpha.
 Both focused checks passed (`temporal-storage-stability1.txt`: **4 passed**,
 including setup/cleanup, **982 ms**). No full-sample or DX11 regression run was added.
 
+### Stage-correct DX12 Resource History bindings
+
+Following the unstable temporal input upstream identified execution **36659**,
+source record **213094**, RDC event **45527**. Its PS
+`d083aa7d-5718f32b-9adda33d-f550cc62` samples `mainTexture` at **t1** and clamps
+the color. Pipeline inspection maps this SRV to object **10432919056**, creation
+**324843**, and RTV0 to creation **324851**. At **(1673,483)**, the six-state PS
+trace returns **(0.056640625,0.05078125,0.044921875,1)**, matching the GPU value
+after trace creation and stepping. The pre-debug target differs. This moves the
+variation upstream of the temporal compute shader; it does not resolve its cause.
+
+The old Resource History omitted this known PS input. In pinned RenderDoc 1.45,
+`D3D12CommandData::AddUsageForBindInRootSig` searched root parameters without
+knowing the reflected shader stage. A matching VS-only table could consume the
+PS register lookup and return before visiting the PS-only table. It also derived
+the reported stage from root visibility, instead of the actual shader. This is
+independent of the execution-marker mapping.
+
+`third_party/renderdoc/patches/dx12-usage-visibility.patch` passes each reflection's
+stage into that lookup, rejects incompatible root visibility, and labels CBV,
+SRV and UAV usage with the actual shader stage. `ALL` visibility remains eligible
+for each relevant stage. It exports
+`RENDERDOC_GetFloraDx12UsageVisibilityPatchVersion() == 1`; reports record
+`backend_dx12_usage_visibility_patch`. Resource History from an unpatched library
+now displays the concrete visibility limitation, rather than silently implying
+that its shader-binding index is complete. All usage rows remain **bound uses**,
+not proof of a shader read or an observed content modification.
+
+Targeted results from the same existing BF1 RDC:
+
+| Resource / execution | Prior backend | Patched backend |
+| --- | --- | --- |
+| Creation 324843 / 36659 | PS input missing | One `PS_Resource`, mapped to source 213094 |
+| Creation 299115 / 36758 | Misattributed `VS_Resource` | One `PS_Resource`, no spurious VS use |
+| Creation 299115 / 36666 | `CS_RWResource` | Same compute write binding retained |
+
+Evidence is under ignored `bf1-color-input-history{1,-stock1,-fixed1}`,
+`bf1-premotion-history{1,-fixed1}`, `bf1-temporal-input-history1` and
+`bf1-temporal-producer-{pipeline1,ps1}`. The stock-library query confirms marker
+**0** and `known_stage_visibility_gap`; the rebuilt library confirms marker
+**1** and `stage_visibility_matched`. Both retain `partial: true` for the other
+history limitations. No GPA modules were loaded in these queries.
+
+The focused `resourceHistoryShaderVisibility` check verifies the missing and
+misattributed real rows, retained CS usage, exact event navigation, JSON export,
+the actual stock warning, warning removal and rejection after a context change.
+It passed (**3 passed** including setup/cleanup, **179 ms**,
+`usage-visibility-ui1.txt`). Seven GPU queries served the producer investigation
+and old/new history checks; there was no new native recapture or broad regression.
+
+The build and optional patched-runtime packaging scripts now require all three
+patches. The usage patch SHA-256 is
+`d4ab0794dd4333cd8e09b0c7fbe0c9ad0c16732684903dd88e4aaeaa98c1b134`;
+the combined Release DLL SHA-256 is
+`02c8df93c5a5fb964648e1307db903bf60092a0afd8dcec08ecf80cab7493b4e`.
+`rdc-usage-visibility-build1.log` records the successful pinned build. The package
+script passed syntax inspection; a full portable package was not rebuilt or
+accepted here. Full resource histories and the underlying replay variation
+remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

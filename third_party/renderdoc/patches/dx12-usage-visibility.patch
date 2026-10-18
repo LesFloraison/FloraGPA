@@ -1,0 +1,103 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_commands.cpp b/renderdoc/driver/d3d12/d3d12_commands.cpp
+index ca40841a5..2b78da38e 100644
+--- a/renderdoc/driver/d3d12/d3d12_commands.cpp
++++ b/renderdoc/driver/d3d12/d3d12_commands.cpp
+@@ -2072,7 +2072,7 @@ void D3D12CommandData::AddUsageForBindInRootSig(const D3D12RenderState &state,
+                                                 D3D12ActionTreeNode &actionNode,
+                                                 const D3D12RenderState::RootSignature *rootsig,
+                                                 D3D12_DESCRIPTOR_RANGE_TYPE type, uint32_t space,
+-                                                uint32_t bind, uint32_t rangeSize)
++                                                uint32_t bind, uint32_t rangeSize, ShaderStage stage)
+ {
+   static bool hugeRangeWarned = false;
+ 
+@@ -2097,25 +2097,26 @@ void D3D12CommandData::AddUsageForBindInRootSig(const D3D12RenderState &state,
+     if(p.ParameterType == D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS)
+       continue;
+ 
+-    ResourceUsage cb = ResourceUsage::CS_Constants;
+-    ResourceUsage ro = ResourceUsage::CS_Resource;
+-    ResourceUsage rw = ResourceUsage::CS_RWResource;
++    // Register spaces can overlap between stage-specific root parameters.
++    // Match the shader's visibility before accepting a binding or returning.
++    D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL;
++    switch(stage)
++    {
++      case ShaderStage::Vertex: visibility = D3D12_SHADER_VISIBILITY_VERTEX; break;
++      case ShaderStage::Hull: visibility = D3D12_SHADER_VISIBILITY_HULL; break;
++      case ShaderStage::Domain: visibility = D3D12_SHADER_VISIBILITY_DOMAIN; break;
++      case ShaderStage::Geometry: visibility = D3D12_SHADER_VISIBILITY_GEOMETRY; break;
++      case ShaderStage::Pixel: visibility = D3D12_SHADER_VISIBILITY_PIXEL; break;
++      case ShaderStage::Amplification: visibility = D3D12_SHADER_VISIBILITY_AMPLIFICATION; break;
++      case ShaderStage::Mesh: visibility = D3D12_SHADER_VISIBILITY_MESH; break;
++      default: break;
++    }
++    if(p.ShaderVisibility != D3D12_SHADER_VISIBILITY_ALL && p.ShaderVisibility != visibility)
++      continue;
+ 
+-    if(rootsig == &state.graphics)
+-    {
+-      if(p.ShaderVisibility == D3D12_SHADER_VISIBILITY_ALL)
+-      {
+-        cb = ResourceUsage::All_Constants;
+-        ro = ResourceUsage::All_Resource;
+-        rw = ResourceUsage::All_RWResource;
+-      }
+-      else
+-      {
+-        cb = CBUsage(p.ShaderVisibility - D3D12_SHADER_VISIBILITY_VERTEX);
+-        ro = ResUsage(p.ShaderVisibility - D3D12_SHADER_VISIBILITY_VERTEX);
+-        rw = RWResUsage(p.ShaderVisibility - D3D12_SHADER_VISIBILITY_VERTEX);
+-      }
+-    }
++    const ResourceUsage cb = CBUsage(stage);
++    const ResourceUsage ro = ResUsage(stage);
++    const ResourceUsage rw = RWResUsage(stage);
+ 
+     if(p.ParameterType == D3D12_ROOT_PARAMETER_TYPE_CBV && el.type == eRootCBV &&
+        type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV && p.Descriptor.RegisterSpace == space &&
+@@ -2365,19 +2366,19 @@ void D3D12CommandData::AddUsage(const D3D12RenderState &state, D3D12ActionTreeNo
+       for(const ConstantBlock &b : refls[sh]->constantBlocks)
+       {
+         AddUsageForBindInRootSig(state, actionNode, rootsig, D3D12_DESCRIPTOR_RANGE_TYPE_CBV,
+-                                 b.fixedBindSetOrSpace, b.fixedBindNumber, b.bindArraySize);
++                                 b.fixedBindSetOrSpace, b.fixedBindNumber, b.bindArraySize, refls[sh]->stage);
+       }
+ 
+       for(const ShaderResource &r : refls[sh]->readOnlyResources)
+       {
+         AddUsageForBindInRootSig(state, actionNode, rootsig, D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+-                                 r.fixedBindSetOrSpace, r.fixedBindNumber, r.bindArraySize);
++                                 r.fixedBindSetOrSpace, r.fixedBindNumber, r.bindArraySize, refls[sh]->stage);
+       }
+ 
+       for(const ShaderResource &r : refls[sh]->readWriteResources)
+       {
+         AddUsageForBindInRootSig(state, actionNode, rootsig, D3D12_DESCRIPTOR_RANGE_TYPE_UAV,
+-                                 r.fixedBindSetOrSpace, r.fixedBindNumber, r.bindArraySize);
++                                 r.fixedBindSetOrSpace, r.fixedBindNumber, r.bindArraySize, refls[sh]->stage);
+       }
+     }
+   }
+@@ -2519,3 +2520,8 @@ void D3D12CommandData::InsertActionsAndRefreshIDs(ResourceId cmd, const BakedCmd
+       GetActionStack().pop_back();
+   }
+ }
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12UsageVisibilityPatchVersion()
++{
++  return 1;
++}
+diff --git a/renderdoc/driver/d3d12/d3d12_commands.h b/renderdoc/driver/d3d12/d3d12_commands.h
+index 2c4762dee..cce7d2dec 100644
+--- a/renderdoc/driver/d3d12/d3d12_commands.h
++++ b/renderdoc/driver/d3d12/d3d12_commands.h
+@@ -427,7 +427,7 @@ struct D3D12CommandData
+   void AddUsageForBindInRootSig(const D3D12RenderState &state, D3D12ActionTreeNode &actionNode,
+                                 const D3D12RenderState::RootSignature *rootsig,
+                                 D3D12_DESCRIPTOR_RANGE_TYPE type, uint32_t space, uint32_t bind,
+-                                uint32_t rangeSize);
++                                uint32_t rangeSize, ShaderStage stage);
+ 
+   void AddResourceUsage(D3D12ActionTreeNode &actionNode, ResourceId id, uint32_t EID,
+                         ResourceUsage usage);
