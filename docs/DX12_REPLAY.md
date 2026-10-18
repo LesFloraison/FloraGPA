@@ -2900,8 +2900,9 @@ This difference between rasterized and PS-written depth narrows the reproduction
 it does not identify a particular driver/compression defect.
 
 On the original unmodified particle shader the option restores a nonzero selected
-pixel, but its color remains different from the earlier native run. The prior
-cross-replay color variation is unresolved; this patch is not enabled in the
+pixel, but its color remains different from the earlier native run. At this stage
+the variation remained unresolved; the subsequent UAV-ordering experiment below
+narrows the selected particle case. This patch is not enabled in the
 workspace by default and does not complete BF1 fidelity or shader-debug acceptance.
 The targeted original PS debug query at **(836,241), primitive 1322** executes
 three snapshots. Its reference changes from
@@ -2930,6 +2931,97 @@ generator/loading/undo check: **3 passed**, **18,714 ms** (`depth-snapshot-proje
 Counts include setup/cleanup. The stock-library request failed before opening a
 capture with the explicit missing-patch-version error. No broad sample regression
 or portable-package acceptance run was performed for this change.
+
+### Particle color variation and explicit UAV-ordering experiments
+
+Comparison of the original and depth-snapshot PS traces at execution **36560**,
+pixel **(836,241)**, primitive **1322** narrowed the changed shader input to
+**v3.xyz**: `(751.333862,603.336853,457.764252)` versus
+`(864.018738,685.226074,511.111755)`. All other PS input components and constant
+blocks match. The VS (hash **1d014928-d79835e6-0add66ba-34d44e5c**) computes this
+color from vertex lighting and the per-vertex shadow factor in VB1, creation
+**163437**. The primitive references vertices **1428,1431,1430**. One VS trace and
+an independent calculation from saved buffers account for the higher interpolated
+color; the discrepancy is already present in GPU-generated PS inputs, not only
+in PS instruction evaluation.
+
+A temporary input probe compared both vertex buffers, the index buffer and
+VS/PS constant ranges before trace creation, afterwards and after stepping.
+Only VB1 changed in that run (four floats, indices **72–75**); the selected
+primitive's three shadow factors remained **0.45074862241744995**. Its selected
+target texel was unchanged, so this particular probe does not attribute the
+selected color change to those four elements. The probe was removed.
+
+Resource history shows VB1 is copied at **35772**, source **265612**, from
+shadow UAV creation **300425**, object **8697204528**. That UAV is cleared at
+**35703** and read/modified by four fullscreen particle-shadow draws:
+**35713,35732,35751,35770**, source records
+**265553,265572,265591,265610**. The last draw's PS reads `u0[4*x]`, combines a
+shadow-map comparison and previous-frame shadow, then stores four entries starting
+at `4*x`. Its previous-frame input is separate creation **300500**. The recorded
+list contains no `ResourceBarrier` between the clear and these draws; source
+**265611**, after the last draw, transitions the UAV for the following copy.
+All four PS bytecodes (pipeline creations **293249,301176,301178,301188**) contain
+typed UAV loads followed by four stores; this finding is based on their decoded
+instructions as well as the binding history.
+
+The intervening single-vertex draws are **not** a recovered synchronization API.
+Their PSO creation **59082** has the captured name
+`GPUBreadcrumbManager::m_pipelineStateVs` (source **59083**). Its VS has no output
+and only stores integer `1` into a separate structured UAV. No matching shader
+hash was found in the installed GPA binaries. These observations do not establish
+its original author, but they do not supply a UAV-ordering guarantee. Microsoft
+requires ordering barriers when UAV read/write dependencies cannot safely execute
+in arbitrary order; see the [UAV barrier definition](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_uav_barrier).
+
+The original captured calls remain the default. A new **explicit experiment**
+inserts a global UAV barrier immediately before selected direct Draw/Dispatch
+execution instances:
+
+```powershell
+FloraGPA.Cli.exe replay <capture-directory> --event 36560 --id 325012 `
+  --max-bytes 8589934592 --uav-barrier-before 35713,35732,35751,35770 --out <new-directory>
+```
+
+The generated `experiment.json` uses the existing capture-bound DX12 project
+format. Each operation has `kind: uav_barrier`, `scope: before_execution`, a
+decimal-string `event`, and boolean `value`. Existing project loading, undo/redo
+and operation hashing apply; a false value removes the inserted barrier. The
+target is an execution instance, so a repeated submission of the same recorded
+draw is not implicitly edited. Unsupported target kinds, incomplete recordings,
+wrong capture identities and malformed redo entries are rejected. CLI insertion
+is supported by DX12 `replay` and `buffer`; there is no new workspace insertion
+button in this change.
+
+The barrier is executed even if its selected draw is separately disabled. It is
+outside that draw's performance interval and inside its command-list timeline.
+Reports list requested, recorded and GPU-completed insertions separately under
+`native_replay.uav_barrier_experiment`, with an explicit synchronization/performance
+warning. In independent captures each added barrier has its own auxiliary marker,
+outside the original execution's API range. Original sources and event identities
+are unchanged. This is a synchronization modification, not proof that the captured
+application used this ordering or that the original full frame is correct.
+
+With the four explicit barriers, the **original particle shader** produces the
+same **3,870,720 bytes** in native readback and independent single-draw analysis
+with the opt-in depth snapshot. SHA-256:
+**a1cec82b979735c74db4dd23e7b41bcd189128ae376bbcd6fae0abfc029b7138**.
+Selected PS debug references before debugging, after trace creation and after
+stepping all equal
+**(0.035003662109375,0.031463623046875,0.02667236328125,0.65478515625)**.
+The original unmodified capture still has the earlier variation; these results
+support a UAV-ordering dependency at this boundary, not full-frame/debug acceptance.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-particle-{vs1322-1,input-probe1,shadow-history1,shadow-source-history1,shadow-pipeline1}`,
+`bf1-shadow-producer-shaders1`, `bf1-shadow-uav-barriers-{native1,texture1,debug1}`
+(temporary research insertion), and
+`bf1-shadow-barrier-experiment{1,-texture1,-debug1}` (the generic saved experiment).
+All temporary input-readback and hardcoded insertion code was removed. Builds
+**227/228** cover CLI, analysis worker, workspace and focused tests. Repeated
+submission/project/undo validation: **3 passed**, **215 ms**; auxiliary event
+mapping: **3 passed**, **2 ms**, including setup/cleanup. GPU checks were serial
+and confined to the failing particle boundary; no broad regression was run.
 
 ### Full feature acceptance
 

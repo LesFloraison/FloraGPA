@@ -192,6 +192,7 @@ int main(int argc, char **argv) {
     p.addOption({"no-buffer-csv", "Omit words.csv from buffer output"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
     p.addOption({"disable", "Comma-separated disabled event IDs", "ids"});
+    p.addOption({"uav-barrier-before", "DX12 experiment: insert global UAV barriers before these execution IDs", "ids"});
     p.process(app);
     try {
         std::optional<ReplayRequestIdentity> identity;
@@ -264,6 +265,7 @@ int main(int argc, char **argv) {
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
         if (QFileInfo(args[1]).isDir()) return runDx12Cli(command, args[1], p);
+        if (p.isSet("uav-barrier-before")) throw std::runtime_error("--uav-barrier-before requires DX12 replay");
         if (p.isSet("measure-event")) throw std::runtime_error("--measure-event requires native DX12 replay");
         if (command == "validate-frame") {
             for (const auto &option : optionNames)

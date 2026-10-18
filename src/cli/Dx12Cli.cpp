@@ -75,7 +75,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         return 2;
     }
     std::optional<Experiment> experiment;
-    if (options.isSet("experiment") || options.isSet("disable")) {
+    if (options.isSet("experiment") || options.isSet("disable") || options.isSet("uav-barrier-before")) {
         experiment.emplace(session);
         if (options.isSet("experiment")) experiment->load(options.value("experiment"), session);
         if (options.isSet("disable")) for (const auto &id : options.value("disable").split(',')) {
@@ -84,6 +84,13 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             if (!valid || !editedExecution || id != QString::number(editedExecution))
                 throw std::runtime_error("DX12 --disable requires comma-separated decimal execution IDs");
             experiment->setEnabled(session, editedExecution, false);
+        }
+        if (options.isSet("uav-barrier-before")) for (const auto &id : options.value("uav-barrier-before").split(',')) {
+            bool valid{};
+            const auto editedExecution = id.toULongLong(&valid);
+            if (!valid || !editedExecution || id != QString::number(editedExecution))
+                throw std::runtime_error("DX12 --uav-barrier-before requires comma-separated decimal execution IDs");
+            experiment->setUavBarrierBefore(session, editedExecution, true);
         }
         experiment->save(output.filePath("experiment.json"));
     }
@@ -97,6 +104,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     if (experiment) {
         auto edits = experiment->dx12Edits(session);
         replay.setDisabledExecutions(std::move(edits.disabled));
+        replay.setUavBarriersBefore(std::move(edits.uavBarriersBefore));
         replay.setShaderReplacements(std::move(edits.shaders));
         replay.setResourcePatches(std::move(edits.resources));
     }
@@ -208,6 +216,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
     if (command == "buffer")
         allowed.insert({"event", "before", "id", "offset", "length", "max-bytes", "debug-device", "experiment", "disable", "no-buffer-csv"});
+    if (command == "replay" || command == "buffer") allowed.insert("uav-barrier-before");
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");

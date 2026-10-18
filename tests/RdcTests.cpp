@@ -40,9 +40,12 @@ class RdcTests : public QObject {
              node(8, "Flora DX12 helper", 0x40, {node(9, "", 0x400)}),
              node(10, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(11, "", 2)}),
              node(12, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(13, "", 2)}),
-             node(14, "Flora DX12 disabled execution 9007199254740997 record 22 submission 33 queue 1 list 2 generation 1 ordinal 0: ID3D12GraphicsCommandListDrawInstanced", 0x40)});
+             node(14, "Flora DX12 disabled execution 9007199254740997 record 22 submission 33 queue 1 list 2 generation 1 ordinal 0: ID3D12GraphicsCommandListDrawInstanced", 0x40),
+             node(15, "Flora DX12 experiment UAV barrier before execution 9007199254740993", 0x40,
+                  {node(17, "", 0x80, Json::array(), {{{"eventId", 16}}})})});
         const auto result = indexDx12RdcEvents(
-            roots, {{"6", {{"name", "ID3D12GraphicsCommandList::IASetPrimitiveTopology"}}}});
+            roots, {{"6", {{"name", "ID3D12GraphicsCommandList::IASetPrimitiveTopology"}}},
+                    {"16", {{"name", "ID3D12GraphicsCommandList::ResourceBarrier"}}}});
         QCOMPARE(result["execution_map"].size(), size_t(3));
         QVERIFY(result["execution_map"]["9007199254740993"] == 2);
         QVERIFY(result["execution_map"]["9007199254740994"] == 4);
@@ -57,6 +60,7 @@ class RdcTests : public QObject {
         QVERIFY(!result["reverse"].contains("11"));
         QVERIFY(!result["execution_map"].contains("9007199254740997"));
         QVERIFY(!result["reverse"].contains("14"));
+        QVERIFY(!result["reverse"].contains("16"));
         QVERIFY_THROWS_EXCEPTION(
             std::runtime_error,
             indexDx12RdcEvents({node(1, marker("18446744073709551616", "19", "30", "DrawInstanced"), 0x40)},

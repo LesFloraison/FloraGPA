@@ -3291,6 +3291,26 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(first.at("recording_complete").get<bool>());
         QCOMPARE(session->submissionDetails().at("lists").at(2).at("status").get<std::string>(),std::string("unresolved_recording"));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,session->executionDetails(4));
+        // Two submissions of the same recorded draw must not share edits.
+        Experiment barriers(*session);
+        barriers.setUavBarrierBefore(*session, 2, true);
+        QCOMPARE(barriers.dx12Edits(*session).uavBarriersBefore, (std::set<Id>{2}));
+        const auto barrierProject = temp.filePath("barriers.json");
+        barriers.save(barrierProject);
+        Experiment barrierReload(*session); barrierReload.load(barrierProject, *session);
+        QVERIFY(barrierReload.undo()); QVERIFY(barrierReload.dx12Edits(*session).uavBarriersBefore.empty());
+        QVERIFY(barrierReload.redo());
+        QCOMPARE(barrierReload.dx12Edits(*session).uavBarriersBefore, (std::set<Id>{2}));
+        barrierReload.setUavBarrierBefore(*session, 2, false);
+        QVERIFY(barrierReload.dx12Edits(*session).uavBarriersBefore.empty());
+        QVERIFY(barrierReload.undo());
+        auto invalidBarrier = barriers.document();
+        invalidBarrier["cursor"] = 0; // Validate inactive redo operations too.
+        invalidBarrier["history"][0]["operations"][0]["event"] = 2.0;
+        write(barrierProject, QByteArray::fromStdString(invalidBarrier.dump()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, barrierReload.load(barrierProject, *session));
+        QCOMPARE(barrierReload.dx12Edits(*session).uavBarriersBefore, (std::set<Id>{2}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, barriers.setUavBarrierBefore(*session, 4, true));
         Experiment experiment(*session);
         experiment.setEnabled(*session, 2, false);
         QCOMPARE(experiment.disabledExecutions(*session), (std::set<Id>{2}));

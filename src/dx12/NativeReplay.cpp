@@ -92,6 +92,7 @@ struct NativeReplay::Impl {
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
     std::set<uint64_t> disabledExecutions, suppressedExecutions;
+    std::set<uint64_t> uavBarriersBefore, recordedUavBarriers, executedUavBarriers;
     std::vector<ShaderReplacement> shaderReplacements;
     std::vector<ResourcePatch> resourcePatches;
     json appliedResourcePatches = json::array();
@@ -376,6 +377,20 @@ void NativeReplay::setDisabledExecutions(std::set<uint64_t> executions) {
     }
     s.disabledExecutions = std::move(executions);
 }
+void NativeReplay::setUavBarriersBefore(std::set<uint64_t> executions) {
+    auto &s = *impl_;
+    require(!s.attempted && !s.frame, "Configure UAV barrier experiments before preparing initialization");
+    for (const auto id : executions) {
+        const auto execution = s.index.execution(id);
+        require(execution.submission > s.directory.initializationCount() && execution.recordingComplete,
+                "UAV barrier experiment requires a complete frame execution instance");
+        const auto &packet = s.directory.packets().at(size_t(execution.record - 1));
+        require(streamPacketCanDisable(packet.type), "UAV barrier experiments currently require direct Draw/Dispatch");
+        const auto decoded = decodeArguments(packet.type, s.directory.payload(packet));
+        require(decoded.supported && decoded.consumed == packet.size, "Invalid UAV barrier target arguments");
+    }
+    s.uavBarriersBefore = std::move(executions);
+}
 void NativeReplay::initializeTransfers() {
     auto &s = *impl_; require(!s.attempted, "Use a fresh replay context for initialization"); s.attempted = true;
     std::set<uint64_t> queues;
@@ -526,6 +541,19 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             require(original.records[native.recorded] == id, "Native recording order mismatch");
             const auto executionId = native.instance.firstExecution + native.recorded;
             const bool disabled = s.disabledExecutions.contains(executionId);
+            if (s.uavBarriersBefore.contains(executionId)) {
+                // A sibling marker keeps synthetic synchronization outside the
+                // captured event's API range and original execution identity.
+                if (analysisMarkers) {
+                    const auto marker = "Flora DX12 experiment UAV barrier before execution " + std::to_string(executionId);
+                    native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+                }
+                D3D12_RESOURCE_BARRIER barrier{};
+                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+                native.list->ResourceBarrier(1, &barrier);
+                if (analysisMarkers) native.list->EndEvent();
+                s.recordedUavBarriers.insert(executionId);
+            }
             if (analysisMarkers) {
                 const auto &instance = native.instance;
                 const auto marker =
@@ -711,6 +739,9 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                     const auto selected = instances.find({id, instance.ordinal});
                     if (instance.submission != id || selected == instances.end()) continue;
                     const auto count = recordings.at(selected->second).count;
+                    for (auto barrier = s.uavBarriersBefore.lower_bound(instance.firstExecution);
+                         barrier != s.uavBarriersBefore.end() && *barrier - instance.firstExecution < count; ++barrier)
+                        s.executedUavBarriers.insert(*barrier);
                     for (auto disabled = s.disabledExecutions.lower_bound(instance.firstExecution);
                          disabled != s.disabledExecutions.end() && *disabled - instance.firstExecution < count; ++disabled)
                         s.suppressedExecutions.insert(*disabled);
@@ -1198,6 +1229,10 @@ json NativeReplay::information() const {
     auto disabled = json::array(), suppressed = json::array();
     for (const auto id : s.disabledExecutions) disabled.push_back(std::to_string(id));
     for (const auto id : s.suppressedExecutions) suppressed.push_back(std::to_string(id));
+    auto barrierRequests = json::array(), barrierRecords = json::array(), barrierExecutions = json::array();
+    for (const auto id : s.uavBarriersBefore) barrierRequests.push_back(std::to_string(id));
+    for (const auto id : s.recordedUavBarriers) barrierRecords.push_back(std::to_string(id));
+    for (const auto id : s.executedUavBarriers) barrierExecutions.push_back(std::to_string(id));
     auto patches = json::array();
     for (size_t i = 0; i < s.resourcePatches.size(); ++i) {
         const auto &patch = s.resourcePatches[i];
@@ -1234,6 +1269,10 @@ json NativeReplay::information() const {
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"query_replay_coverage", s.queries.information()},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
+        {"uav_barrier_experiment", {{"before_executions", std::move(barrierRequests)},
+            {"recorded_before_executions", std::move(barrierRecords)}, {"executed_before_executions", std::move(barrierExecutions)},
+            {"scope", "Additional global UAV barriers before selected execution instances, including disabled ones. "
+                      "This changes synchronization and performance; it does not establish original-capture fidelity."}}},
         {"shader_replacements", s.frame ? s.frame->commands->pipelines().shaderReplacementInformation() : json::array()},
         {"resource_patches", std::move(patches)}, {"applied_resource_patches", s.appliedResourcePatches},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},

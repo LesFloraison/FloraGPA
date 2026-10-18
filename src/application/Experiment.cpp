@@ -83,6 +83,19 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
         const auto &operations = history.at(i).at("operations");
         if (!operations.is_array()) throw std::runtime_error("Invalid experiment operation list");
         for (const auto &op : operations) {
+            if (op.at("kind") == "uav_barrier") {
+                if (op.at("scope") != "before_execution" || !op.at("event").is_string() || !op.at("value").is_boolean())
+                    throw std::runtime_error("Invalid DX12 UAV barrier scope or execution identity");
+                const auto execution = identifier(op.at("event"));
+                ReplaySelection selection; selection.execution = execution;
+                const auto capability = session.capability(ReplayFeature::Experiments, selection);
+                if (!capability.supported()) throw std::runtime_error(capability.reason);
+                if (i < revision()) {
+                    if (op.at("value").get<bool>()) edits.uavBarriersBefore.insert(execution);
+                    else edits.uavBarriersBefore.erase(execution);
+                }
+                continue;
+            }
             if (op.at("kind") == "resource_patch") {
                 if (op.at("scope") != "before_submission" || !op.at("submission").is_string() ||
                     !op.at("resource_creation").is_string() || !op.at("offset").is_string() || !op.at("subresource").is_string())
@@ -190,6 +203,19 @@ void Experiment::load(const QString &path, const IReplaySession &session) {
     project_ = std::move(candidate);
     try { (void)disabledExecutions(session); }
     catch (...) { project_ = std::move(old); throw; }
+}
+void Experiment::setUavBarrierBefore(const IReplaySession &session, Id execution, bool enabled) {
+    (void)dx12Edits(session);
+    ReplaySelection selection; selection.execution = execution;
+    const auto capability = session.capability(ReplayFeature::Experiments, selection);
+    if (!capability.supported()) throw std::runtime_error(capability.reason);
+    auto history = project_.at("history");
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back({{"label", std::string(enabled ? "Insert UAV barrier before execution " : "Remove UAV barrier before execution ") + std::to_string(execution)},
+        {"operations", Json::array({{{"kind", "uav_barrier"}, {"scope", "before_execution"},
+                                    {"event", std::to_string(execution)}, {"value", enabled}}})}});
+    project_["history"] = std::move(history);
+    project_["cursor"] = project_["history"].size();
 }
 void Experiment::setEnabled(const IReplaySession &session, Id execution, bool enabled) {
     if (const auto frame = session.dx11Frame()) { setEnabled(*frame, execution, enabled); return; }

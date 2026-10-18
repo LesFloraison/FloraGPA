@@ -17,9 +17,11 @@ class Experiment {
     explicit Experiment(const IReplaySession &session, const CancelCheck &cancelled = {});
     void load(const QString &path, const IReplaySession &session);
     void setEnabled(const IReplaySession &session, Id execution, bool enabled);
+    void setUavBarrierBefore(const IReplaySession &session, Id execution, bool enabled);
     std::set<Id> disabledExecutions(const IReplaySession &session) const;
     struct Dx12Edits {
         std::set<Id> disabled;
+        std::set<Id> uavBarriersBefore;
         std::vector<dx12::ShaderReplacement> shaders;
         std::vector<dx12::ResourcePatch> resources;
     };
