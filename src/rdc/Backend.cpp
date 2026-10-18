@@ -12,6 +12,7 @@
 
 #include <Psapi.h>
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <filesystem>
 #include <map>
@@ -45,6 +46,14 @@ uint64_t id(ResourceId value) {
 }
 std::string resourceName(ResourceId value) { return "ResourceId::" + std::to_string(id(value)); }
 uint64_t number(const Json &v) {
+    if (v.is_string()) {
+        const auto &text = v.get_ref<const std::string &>();
+        uint64_t result{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+        if (text.empty() || parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size())
+            throw std::runtime_error("Invalid decimal uint64 identity");
+        return result;
+    }
     if (!v.is_number_integer() || (!v.is_number_unsigned() && v.get<int64_t>() < 0))
         throw std::runtime_error("Expected an unsigned integer");
     return v.get<uint64_t>();
@@ -166,16 +175,27 @@ class Session {
                 throw std::runtime_error("RenderDoc did not create a capture handle");
             const auto filename = std::filesystem::canonical(path(job.at("capture"))).u8string();
             checked(file->OpenFile(reinterpret_cast<const char *>(filename.c_str()), "", {}));
-            auto opened = file->OpenCapture(ReplayOptions{}, {});
+            ReplayOptions options;
+            options.apiValidation = job.value("api_validation", false);
+            auto opened = file->OpenCapture(options, {});
             controller.reset(opened.second);
             checked(opened.first);
             if (!controller)
                 throw std::runtime_error("RenderDoc did not create a replay controller");
-            if (controller->GetAPIProperties().pipelineType != GraphicsAPI::D3D11)
-                throw std::runtime_error("Native analysis requires a DX11 independent replay capture");
-            if (job.contains("request_identity") && flora::parseReplayIdentity(job.at("request_identity")).backend != flora::ReplayBackend::Dx11)
+            const auto api = controller->GetAPIProperties().pipelineType;
+            if (api != GraphicsAPI::D3D11 && api != GraphicsAPI::D3D12)
+                throw std::runtime_error(
+                    "Native analysis requires a DX11 or DX12 independent replay capture");
+            const auto backend =
+                api == GraphicsAPI::D3D12 ? flora::ReplayBackend::Dx12 : flora::ReplayBackend::Dx11;
+            if (job.contains("request_identity") &&
+                flora::parseReplayIdentity(job.at("request_identity")).backend != backend)
                 throw std::runtime_error("Analysis request backend does not match the independent capture");
         } catch (...) {
+            const auto log = reinterpret_cast<decltype(&RENDERDOC_GetLogFile)>(
+                GetProcAddress(library, "RENDERDOC_GetLogFile"));
+            if (log)
+                fprintf(stderr, "RenderDoc diagnostic log: %s\n", log());
             close();
             throw;
         }
@@ -350,12 +370,17 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
     if (!selected || !(selected->flags & (compute ? ActionFlags::Dispatch : ActionFlags::Drawcall)))
         throw std::runtime_error(compute ? "Compute debugging requires an executed dispatch action"
                                          : "Selected analysis requires an executed draw action");
-    const auto *pipe = controller.GetD3D11PipelineState();
-    if (!pipe)
-        throw std::runtime_error("No D3D11 pipeline at the selected event");
-    const auto *reflection = compute  ? pipe->computeShader.reflection
-                             : vertex ? pipe->vertexShader.reflection
-                                      : pipe->pixelShader.reflection;
+    const bool dx12 = controller.GetAPIProperties().pipelineType == GraphicsAPI::D3D12;
+    const auto *pipe = dx12 ? nullptr : controller.GetD3D11PipelineState();
+    const auto *pipe12 = dx12 ? controller.GetD3D12PipelineState() : nullptr;
+    if (!pipe && !pipe12)
+        throw std::runtime_error("No Direct3D pipeline at the selected event");
+    const auto *reflection = pipe12 ? (compute  ? pipe12->computeShader.reflection
+                                       : vertex ? pipe12->vertexShader.reflection
+                                                : pipe12->pixelShader.reflection)
+                                    : (compute  ? pipe->computeShader.reflection
+                                       : vertex ? pipe->vertexShader.reflection
+                                                : pipe->pixelShader.reflection);
     if (!reflection)
         throw std::runtime_error("No shader bound at the selected stage");
     if (!reflection->debugInfo.debuggable)
@@ -373,16 +398,21 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
         if (job.contains("index") && !job.at("index").is_null()) {
             actual = index(job, "index");
         } else if (selected->flags & ActionFlags::Indexed) {
-            const auto &ib = pipe->inputAssembly.indexBuffer;
-            if (ib.byteStride != 1 && ib.byteStride != 2 && ib.byteStride != 4)
+            const auto stride = pipe12 ? pipe12->inputAssembly.indexBuffer.byteStride
+                                       : pipe->inputAssembly.indexBuffer.byteStride;
+            const auto offset = pipe12 ? pipe12->inputAssembly.indexBuffer.byteOffset
+                                       : pipe->inputAssembly.indexBuffer.byteOffset;
+            const auto resource = pipe12 ? pipe12->inputAssembly.indexBuffer.resourceId
+                                         : pipe->inputAssembly.indexBuffer.resourceId;
+            if (stride != 1 && stride != 2 && stride != 4)
                 throw std::runtime_error("Invalid index buffer stride");
-            const auto address = uint64_t(ib.byteOffset) +
-                                 (uint64_t(selected->indexOffset) + index(job, "vertex")) * ib.byteStride;
-            const auto bytes = controller.GetBufferData(ib.resourceId, address, ib.byteStride);
-            if (bytes.size() != ib.byteStride)
+            const auto address =
+                uint64_t(offset) + (uint64_t(selected->indexOffset) + index(job, "vertex")) * stride;
+            const auto bytes = controller.GetBufferData(resource, address, stride);
+            if (bytes.size() != stride)
                 throw std::runtime_error("Selected vertex index is outside the index buffer");
             uint32_t raw = 0;
-            memcpy(&raw, bytes.data(), ib.byteStride);
+            memcpy(&raw, bytes.data(), stride);
             actual = int64_t(raw) + selected->baseVertex;
         } else {
             actual = int64_t(selected->vertexOffset) + index(job, "vertex");
@@ -410,8 +440,8 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
         {"offset_policy", "RenderDoc 1.45 DXBC signature/whole-block mappings have uninitialized offsets; "
                           "these are null, while defined member/instruction offsets are preserved."}};
     result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
-    // D3D11 has no monolithic pipeline object, matching PipeState's null ID.
-    const auto assembly = controller.DisassembleShader(ResourceId::Null(), reflection, "");
+    const auto assembly = controller.DisassembleShader(
+        pipe12 ? pipe12->pipelineResourceId : ResourceId::Null(), reflection, "");
     auto exportedAssembly = QByteArray(assembly.c_str(), qsizetype(assembly.size()));
     exportedAssembly.replace("\n", "\r\n");
     QSaveFile file(QString::fromStdString(job.at("out").get<std::string>()) + "/debug_shader.asm");
@@ -472,7 +502,7 @@ Json runRdcJob(const Json &job) {
             throw std::runtime_error("Choose GPA or RDC event, not both");
         for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index"})
             index(job, key);
-        for (const auto *key : {"gpa_event", "resource"})
+        for (const auto *key : {"gpa_event", "execution", "resource", "resource_creation"})
             if (job.contains(key) && !job.at(key).is_null())
                 number(job.at(key));
         if (debugging) {
@@ -483,6 +513,17 @@ Json runRdcJob(const Json &job) {
     Session session(job);
     auto &controller = *session.controller;
     const auto properties = controller.GetAPIProperties();
+    const bool dx12 = properties.pipelineType == GraphicsAPI::D3D12;
+    if (dx12)
+        for (const auto key : {"execution", "resource", "resource_creation"})
+            if (job.contains(key) && !job[key].is_null() && !job[key].is_string())
+                throw std::runtime_error("DX12 64-bit identities must be decimal strings");
+    if ((dx12 && job.contains("gpa_event") && !job["gpa_event"].is_null()) ||
+        (!dx12 && job.contains("execution")))
+        throw std::runtime_error("Select an execution instance for DX12 or a GPA event for DX11");
+    if (dx12 && !job.value("execution", Json(nullptr)).is_null() &&
+        !job.value("eid", Json(nullptr)).is_null())
+        throw std::runtime_error("Choose DX12 execution or RDC event, not both");
     const auto vendor = uint32_t(properties.vendor);
     // These are RenderDoc 1.45 enum values, not PCI vendor IDs. Report the active
     // replay controller rather than inferring its adapter from the capture host.
@@ -491,10 +532,11 @@ Json runRdcJob(const Json &job) {
                                         "Verisilicon", "Software", "Samsung"};
     Events events;
     const auto roots = events.walk(controller.GetRootActions(), controller.GetStructuredFile());
-    auto mapping = indexRdcEvents(roots, events.native);
+    auto mapping = dx12 ? indexDx12RdcEvents(roots, events.native) : indexRdcEvents(roots, events.native);
     Json result{
         {"ok", true},
         {"action", action},
+        {"backend", dx12 ? "dx12" : "dx11"},
         {"backend_version", session.version},
         {"backend_commit", session.commit},
         {"replay_environment",
@@ -508,6 +550,12 @@ Json runRdcJob(const Json &job) {
         {"gpa_command_map", mapping["gpa_command_map"]}};
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        if (dx12) {
+            result["execution_map"] = mapping["execution_map"];
+            result["record_executions"] = mapping["record_executions"];
+            result["execution"] = job.value("execution", Json(nullptr));
+            result.erase("gpa_event");
+        }
         result["loaded_modules"] = rdcLoadedModules();
         return std::move(result);
     };
@@ -517,17 +565,18 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     const auto resources = controller.GetResources();
-    const auto gpa = job.value("gpa_event", Json(nullptr));
-    if (!gpa.is_null() && !mapping["gpa_event_map"].contains(std::to_string(number(gpa))))
-        throw std::runtime_error("Selected GPA event has no uniquely mapped executed action");
+    const auto gpa = job.value(dx12 ? "execution" : "gpa_event", Json(nullptr));
+    const auto selectionMap = dx12 ? "execution_map" : "gpa_event_map";
+    if (!gpa.is_null() && !mapping[selectionMap].contains(std::to_string(number(gpa))))
+        throw std::runtime_error("Selected capture event has no uniquely mapped executed action");
     uint32_t eid = index(job, "eid");
     if (!eid) {
         if (!gpa.is_null())
-            eid = mapping["gpa_event_map"].at(std::to_string(number(gpa))).get<uint32_t>();
+            eid = mapping[selectionMap].at(std::to_string(number(gpa))).get<uint32_t>();
         else if (!mapping["actions"].empty())
             eid = mapping["actions"].back().at("eid").get<uint32_t>();
         else
-            for (const auto &v : mapping["gpa_event_map"].items())
+            for (const auto &v : mapping[selectionMap].items())
                 eid = (std::max)(eid, v.value().get<uint32_t>());
     }
     if (!eid && action == "inventory" && !events.chunks.empty())
@@ -545,7 +594,7 @@ Json runRdcJob(const Json &job) {
                                  : stage == "GSOut" ? MeshDataStage::GSOut
                                                     : MeshDataStage::VSIn;
         if (stage != "VSOut" && stage != "GSOut" && stage != "VSIn")
-            throw std::runtime_error("Unsupported DX11 post-shader stage");
+            throw std::runtime_error("Unsupported post-shader stage");
         const auto mesh = controller.GetPostVSData(index(job, "instance"), 0, nativeStage);
         if (mesh.vertexResourceId == ResourceId::Null())
             throw std::runtime_error("Selected event/stage has no post-shader mesh data");
@@ -650,14 +699,23 @@ Json runRdcJob(const Json &job) {
     const auto gpaResource = job.value("resource", Json(nullptr));
     if (gpaResource.is_null()) {
         const auto *pipe = controller.GetD3D11PipelineState();
-        if (pipe && !pipe->outputMerger.renderTargets.empty())
+        const auto *pipe12 = controller.GetD3D12PipelineState();
+        if (dx12 && pipe12 && !pipe12->outputMerger.renderTargets.empty())
+            resource = pipe12->outputMerger.renderTargets[0].resource;
+        else if (pipe && !pipe->outputMerger.renderTargets.empty())
             resource = pipe->outputMerger.renderTargets[0].resource;
     } else {
-        const auto prefix = "GPA resource " + std::to_string(number(gpaResource)) + " (";
+        auto prefix = dx12 ? "Flora DX12 resource " + std::to_string(number(gpaResource)) + " creation "
+                           : "GPA resource " + std::to_string(number(gpaResource)) + " (";
+        if (dx12 && job.contains("resource_creation"))
+            prefix += std::to_string(number(job["resource_creation"]));
         for (const auto &r : resources)
-            if (text(r.name).starts_with(prefix)) {
+            if (dx12 && job.contains("resource_creation") ? text(r.name) == prefix
+                                                          : text(r.name).starts_with(prefix)) {
+                if (resource != ResourceId::Null())
+                    throw std::runtime_error(
+                        "Resource object has multiple captured lifetimes; select resource_creation");
                 resource = r.resourceId;
-                break;
             }
     }
     if (resource == ResourceId::Null())
@@ -696,18 +754,73 @@ Json runRdcJob(const Json &job) {
                              : tex.format.compType == CompType::SInt ? "sint"
                                                                      : "float";
     Json records = Json::array(), gaps = Json::array();
+    // RenderDoc 1.45's D3D12 GetDepthFormat returns the resource's R16_TYPELESS
+    // format for a depth target. GetDepthValue then decodes UNORM bits as half
+    // floats. Fragment values cannot be recovered reliably (NaNs lose bits,
+    // and intermediate fragments take a different conversion path).
+    const bool unreliableD16 = dx12 && session.version == "1.45" &&
+                               bool(tex.creationFlags & TextureCategory::DepthTarget) &&
+                               tex.format.type == ResourceFormatType::Regular && tex.format.compCount == 1 &&
+                               tex.format.compByteWidth == 2;
+    Json depthBoundaries = Json::array(), depthGaps = Json::array();
     std::set<uint32_t> existing;
     for (const auto &v : controller.PixelHistory(resource, x, y, sub, CompType::Typeless)) {
         auto r = record(v);
         r.update(rdcProvenance(v.eventId, mapping["reverse"]));
         r["record_kind"] = "backend_modification";
         r["color_interpretation"] = kind;
+        if (unreliableD16) {
+            r["backend_depth_diagnostic"] = {{"pre", r["preMod"]["depth"]}, {"post", r["postMod"]["depth"]}};
+            r["preMod"]["depth"] = nullptr;
+            r["postMod"]["depth"] = nullptr;
+            r["depth_value_status"] = "unavailable_backend_d16_format";
+            r["depth_test_reason_status"] = "unverified_backend_d16_format";
+        }
         records.push_back(std::move(r));
         existing.insert(v.eventId);
     }
     const auto parsed = writes(events);
     size_t added = 0;
     try {
+        if (unreliableD16) {
+            // Read actual R16 bytes at each action boundary. These observations
+            // are separate from PixelHistory fragments and shader outputs.
+            const uint64_t width = extent(tex.width, sub.mip), height = extent(tex.height, sub.mip);
+            const bool bounded = tex.dimension == 2 && tex.msSamp <= 1 &&
+                                 width * height <= 128ULL * 1024 * 1024 && existing.size() <= 256;
+            uint64_t remainingReadback = 256ULL * 1024 * 1024;
+            auto depthAt = [&](uint32_t event) -> Json {
+                remainingReadback -= width * height * 2;
+                controller.SetFrameEvent(event, true);
+                const auto bytes = controller.GetTextureData(resource, sub);
+                const uint64_t offset = (uint64_t(y) * width + x) * 2;
+                if (bytes.size() != width * height * 2 || offset + 2 > bytes.size())
+                    throw std::runtime_error("Unexpected D16 readback layout");
+                const auto raw = uint16_t(bytes[size_t(offset)]) | uint16_t(bytes[size_t(offset + 1)]) << 8;
+                return {{"raw_unorm16", raw}, {"depth", double(raw) / 65535.0}};
+            };
+            for (const auto event : existing) {
+                if (!bounded || event == 0 || width * height * 4 > remainingReadback) {
+                    depthGaps.push_back(
+                        {{"eventId", event},
+                         {"reason", "D16 boundary readback requires single-sample 2D data, at most 256 "
+                                    "events and a 256 MiB total readback budget"}});
+                    continue;
+                }
+                try {
+                    auto before = depthAt(event - 1), after = depthAt(event);
+                    Json observation{
+                        {"eventId", event},        {"record_kind", "observed_event_depth_boundary"},
+                        {"before_eid", event - 1}, {"pre", before},
+                        {"post", after},           {"mip", sub.mip},
+                        {"layer", sub.slice},      {"sample", sub.sample}};
+                    observation.update(rdcProvenance(event, mapping["reverse"]));
+                    depthBoundaries.push_back(std::move(observation));
+                } catch (const std::exception &e) {
+                    depthGaps.push_back({{"eventId", event}, {"reason", e.what()}});
+                }
+            }
+        }
         for (const auto &usage : controller.GetUsage(resource)) {
             if (usage.usage != ResourceUsage::CPUWrite || existing.contains(usage.eventId))
                 continue;
@@ -765,7 +878,7 @@ Json runRdcJob(const Json &job) {
             unrepresented.push_back(number(c.value()["gpa_event"]));
     size_t unmapped = 0;
     for (const auto &r : records)
-        if (r["gpa_event"].is_null())
+        if (r.value("mapping_status", std::string()) != "mapped")
             ++unmapped;
     result.update(
         {{"eid", eid},
@@ -774,20 +887,28 @@ Json runRdcJob(const Json &job) {
          {"x", x},
          {"y", y},
          {"history", records},
+         {"depth_event_boundaries", depthBoundaries},
          {"history_events", records.size()},
          {"history_scope",
           {{"backend", "RenderDoc PixelHistory of independent replay"},
            {"unmapped_records", unmapped},
            {"cpu_write_snapshots", added},
            {"cpu_write_gaps", gaps},
+           {"depth_value_status", unreliableD16 ? "event_boundaries_only" : "backend_values"},
+           {"depth_boundary_gaps", depthGaps},
            {"unrepresented_api_commands", unrepresented},
            {"limitations",
             {"CPU writes use API-boundary pixel snapshots, not shader fragments; Map coverage is a "
              "subresource candidate.",
              "Old captures may lack GPA CPU-write markers; unknown structured layouts remain explicit gaps.",
              "Resource operations can appear with unchanged selected-subresource values; no shader fragment "
-             "or test pass is implied."}}}}});
+             "or test pass is implied.",
+             "RenderDoc 1.45 DX12 D16 fragment depths are withheld because of typeless decoding; separate "
+             "raw UNORM event boundaries do not recover fragment depths or validate depth-test "
+             "reasons."}}}}});
     result["resource_name"] = nullptr;
+    if (unreliableD16)
+        result["partial"] = true;
     for (const auto &r : resources)
         if (r.resourceId == resource)
             result["resource_name"] = text(r.name);

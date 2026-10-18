@@ -372,6 +372,9 @@ class Dx12SessionTests : public QObject {
             resources.restoreMappedData(id);
         }
         auto native=resources.resource(object,185508); void *mapped{}; D3D12_RANGE read{0,expected.size()};
+        D3D12_HEAP_PROPERTIES properties{}; D3D12_HEAP_FLAGS heapFlags{};
+        QVERIFY(SUCCEEDED(native->GetHeapProperties(&properties,&heapFlags)));
+        QVERIFY(!(heapFlags & D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH));
         QVERIFY(SUCCEEDED(native->Map(0,&read,&mapped))); const bool matches=memcmp(mapped,expected.data(),expected.size())==0;
         D3D12_RANGE none{0,0}; native->Unmap(0,&none); QVERIFY(matches);
         QCOMPARE(resources.information().at("uploaded_bytes").get<std::string>(),std::string("10812"));
@@ -389,6 +392,33 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(resources.state(depth,185550),D3D12_RESOURCE_STATE_COPY_SOURCE); // All individually transitioned subresources converge.
         resources.transition(depth,185550,D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_COMMON);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,resources.requireState(depth,185550,0,D3D12_RESOURCE_STATE_COPY_SOURCE));
+        // The partial-patch buffer above is not write-watched. Exercise a real
+        // captured write-watch allocation separately, without replaying a frame.
+        dx12::NativeResources watched(device,directory,64ULL*1024*1024);
+        bool foundWatch = false;
+        for (size_t i=0;i<directory.initializationCount();++i) {
+            const auto &packet=directory.packets()[i];
+            if (packet.type==0x1279335a5747bULL) {
+                const auto recipe=dx12::decodeHeapRecipe(directory.payload(packet));
+                if (!(recipe.description.Flags & D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH) || recipe.description.SizeInBytes>64ULL*1024*1024) continue;
+                const auto actual=watched.tileHeap(recipe.object,i+1)->GetDesc();
+                QCOMPARE(UINT(actual.Flags),UINT(recipe.description.Flags)&~UINT(D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH));
+                QCOMPARE(actual.Properties.Type,recipe.description.Properties.Type);
+                foundWatch=true; break;
+            } else if (dx12::isResourceRecipe(packet.type)) {
+                const auto recipe=dx12::decodeResourceRecipe(packet.type,directory.payload(packet));
+                if (!(recipe.heapFlags & D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH) || recipe.description.Dimension!=D3D12_RESOURCE_DIMENSION_BUFFER || recipe.description.Width>64ULL*1024*1024) continue;
+                auto resource=watched.resource(recipe.object,i+1);
+                QVERIFY(SUCCEEDED(resource->GetHeapProperties(&properties,&heapFlags)));
+                // The runtime adds DENY_* flags for a committed buffer heap.
+                QVERIFY(!(heapFlags & D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH));
+                QCOMPARE(properties.Type,recipe.properties.Type);
+                QCOMPARE(watched.recipe(recipe.object,i+1).heapFlags,recipe.heapFlags);
+                foundWatch=true; break;
+            }
+        }
+        QVERIFY(foundWatch);
+        QCOMPARE(watched.information().at("write_watch_flags_removed").get<std::string>(),std::string("1"));
     }
     void nativeInitializationGuards() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

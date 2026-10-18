@@ -14,7 +14,8 @@ distinguished from frame-thread records. CPU timestamp order is not GPU executio
 order, and an indexed record is not yet a command-list execution instance.
 
 `inventory`, `commands`, `command-lists` and `validate-frame` accept DX12 directories. Validation
-reports `blocked` until native resource restoration and execution are implemented.
+reports `blocked` while complete frame replay and feature acceptance remain unfinished;
+the selected native execution and isolated analysis paths below are available for investigation.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
 arguments are decoded on demand. Committed, placed and reserved resource
 creation descriptors appear in the resource table with their originating record
@@ -442,6 +443,104 @@ above: `0x67c420` (render targets), `0x67c110` (discard), `0x67bcf0` (depth clea
 `0x6094c0` (root constants), `0x67c2d0` (vertex views), `0x67bdb0` (color clear),
 `0x67c8c0` (descriptor heaps), `0x67a0c0` (query heap creation).
 
+### Original-player comparison and isolated DX12 analysis
+
+GPA 2025 R1's actual Talos playback, using `gpa-player --offscreen
+--exit-after-frame 1` with the `api-debug-layer:flushafterexecute=true` and
+`screenshot:frames=1,path=<output>,async=false` post-layers, also reports the same
+140 unresolved occlusion queries. StreamPlayback RVAs `0x632220`
+(`ResolveQueryData` execution) and `0x628860` (`CreateQueryHeap` execution)
+forward the native calls; these routines do not supply historical results.
+This is an observed original-player limitation on this capture, not proof that
+the missing values can be reconstructed. Flora's pre-submit guard remains.
+
+The original player's `screen-1.png` and Flora's accepted execution-16000 color
+readback have **identical RGB values at all 2,073,600 pixels**. Alpha differs at
+957,622 pixels: the original screenshot is entirely opaque, whereas the native
+resource retains varying alpha. The source of that difference is not established,
+so RGBA equality and complete-frame correctness are not claimed. The screenshot
+layer additionally reports a PRESENT/COPY_SOURCE state error; it is separate
+from the 140 undefined-query errors. Local evidence:
+`gpa-talos-debug-reference.log`, `gpa-talos-reference1/screen-1.png`, and
+`talos-original-color-comparison.json` under the ignored research directory.
+
+`validate-frame --check-initialization --check-execution <execution> --renderdoc
+<renderdoc.dll>` now captures the selected native DX12 replay prefix for the
+existing isolated `FloraGPA.Rdc.exe` analysis process. Initialization precedes
+capture, and diagnostic texture readback follows it. The capture retains needed
+resources and gives each submitted list instance its own execution markers;
+repeated submissions are not collapsed. Each marker preserves source record,
+submission, queue, list generation and ordinal. Unknown helpers stay unmapped.
+DX12 execution/object/creation identities in analysis jobs and results are
+decimal strings, including values above JavaScript's exact integer range.
+
+Native allocations omit captured `ALLOW_WRITE_WATCH`, a CPU dirty-tracking flag
+unused by the read-only replay implementation. Captured resource recipes remain
+unchanged and explicit captured patches still restore contents. This avoids a
+RenderDoc 1.45 replay failure: its large-upload-buffer conversion to DEFAULT
+otherwise retains WRITE_WATCH on CPU-inaccessible memory (`E_INVALIDARG`).
+The targeted allocation check verifies flag removal and recipe preservation;
+the existing partial-upload check verifies restored bytes and resource states.
+
+Verified with the installed **RenderDoc 1.45 release**, commit
+`2fc0bc04cb95499635f63986a55bc6f67849dd9f`, DLL SHA256
+`313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3`:
+
+- Talos prefix through execution `12675`: all 26 marked command executions
+  have unique RenderDoc mappings, including Clear `12667` -> EID 127 and Draw
+  `12675` -> EID 151. Synthetic mapping checks cover repeated source records,
+  duplicate markers, helper exclusion, uint64 overflow and identities above 2^53;
+  existing DX11 command mapping checks also pass.
+- VS invocation vertex 0 / instance 0: 20 DXBC instruction-debug states.
+  No source debug information is present; no source or call stack is invented.
+  Post-VS output contains 8,053 vertices and 42,006 indices, exported as binary,
+  CSV and OBJ. The debugger's position register and the first GPU post-VS
+  position differ only in Y by `5.960464477539063e-08` (two float32 ULPs);
+  other components match. Y is produced by instruction 8's `dp4` and copied
+  to the position by instruction 11. Re-evaluating that dot product with
+  per-step fused multiply-add rounding reproduces the GPU value; the shader
+  permits refactoring. This supports an arithmetic-rounding explanation, but
+  the driver's actual instruction lowering has not been inspected. It is not
+  a bit-exact pass.
+- Depth pixel `(1527,1240)`, mip 0 / layer 1 / sample 0: history identifies the
+  exact Clear and Draw executions. RenderDoc's D16 typeless history decoder
+  incorrectly returns half-float `6.234375` for raw UNORM bits `17980`.
+  Affected fragment pre/post depths are therefore **withheld**, with a partial
+  result and explicit depth-test-reason limitation. Separate event-boundary
+  GPU readbacks return 0 before the Draw and `17980/65535 = 0.2743572137026017`
+  afterward, exactly matching native replay. They do not replace fragment
+  history. Boundary reads are limited to single-sample 2D data, 256 events and
+  256 MiB total per request; omitted observations have explicit reasons.
+
+Example analysis job for the captured prefix (new output directory required):
+
+```json
+{
+  "action": "history",
+  "renderdoc": "C:/Program Files/RenderDoc/renderdoc.dll",
+  "capture": "<validation-output>/native-dx12_capture.rdc",
+  "execution": "12675",
+  "resource": "4980699392",
+  "resource_creation": "167081",
+  "x": 1527, "y": 1240, "mip": 0, "layer": 1, "sample": 0,
+  "out": "<new-analysis-output>"
+}
+```
+
+Run with `FloraGPA.Rdc.exe --job <job.json>`. `debug-vertex` uses the same capture
+and execution with `vertex` / `instance`; `postmesh` uses `stage: "VSOut"` and
+`instance`. Local evidence: `talos-native-rdc2`, `talos-rdc-events3`,
+`talos-dx12-history4`, `talos-dx12-vsdebug1`, `talos-dx12-mesh1`, and
+`talos-dx12-vs-mesh-comparison.json`. The analysis processes report no loaded GPA
+modules and run without Python. This does not yet verify a portable bundle.
+`talos-rdc-query-guard1` verifies capture-failure cleanup: the missing historical
+query stops frame execution, the active capture is discarded while its device
+is alive, and no RDC file or executed Draw is reported. Release CLI, Worker,
+GUI and analysis executables build successfully. Only checks directly related
+to the mapping, resource-flag failure and selected analysis paths were run.
+Workspace analysis controls, PS/CS/DXIL validation, complete Resource History,
+fragment-depth repair, counters and modification experiments remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -451,15 +550,15 @@ above: `0x67c420` (render targets), `0x67c110` (discard), `0x67bcf0` (depth clea
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Unfinished | First Draw before/after and first color boundary verified; full frame blocked by historical query state | Unfinished |
-| Resource/Pixel History with execution mapping | Unfinished | Unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | Unfinished | Unfinished | Unfinished |
+| Resource/Pixel History with execution mapping | Unfinished | First Clear/Draw mapped; D16 event-boundary values verified, fragment depths unavailable; full history unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | Unfinished | One DXBC VS trace and post-VS mesh verified; remaining stages/UI unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
-| Comparison with original GPA frame/intermediate resources | Not performed | Not performed | Not performed |
+| Comparison with original GPA frame/intermediate resources | Not performed | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
 implementation gaps include historical query state, frame execution coverage
 beyond the verified Talos prefix, full resource lifetime and address-alias handling,
-complete command arguments, dependency scheduling and cross-queue synchronization. The existing analysis
-backend still requires DX11 captures; its request envelope is shared, but its
-pipeline and execution mapping have not yet been ported to DX12.
+complete command arguments, dependency scheduling and cross-queue synchronization.
+The isolated analysis backend now accepts native DX12 captures and execution
+identities; the main workspace's analysis workflow still requires integration.

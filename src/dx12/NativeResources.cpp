@@ -22,6 +22,12 @@ uint64_t output(Reader &r, REFIID expected, HRESULT &hr) {
     hr = r.read<HRESULT>(); r.end(); return object;
 }
 template<class T> T required(Reader &r, const char *message) { require(r.flag(), message); return r.read<T>(); }
+D3D12_HEAP_FLAGS replayHeapFlags(D3D12_HEAP_FLAGS flags) {
+    // Write-watch tracks CPU dirty pages during capture. Replay applies recorded
+    // patches explicitly and never calls GetWriteWatch. Keeping this capture
+    // flag also breaks RenderDoc 1.45's upload-to-default replay remapping.
+    return D3D12_HEAP_FLAGS(UINT(flags) & ~UINT(D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH));
+}
 uint64_t resolve(const std::map<uint64_t, std::vector<uint64_t>> &objects, uint64_t object, uint64_t at, size_t initialization) {
     const auto it = objects.find(object);
     if (it == objects.end()) throw std::runtime_error("Missing DX12 allocation recipe for object " + std::to_string(object));
@@ -98,7 +104,7 @@ struct NativeResources::Impl {
     NativeDevice &device; const StreamDirectory &directory; CancelCheck cancelled;
     AddressIndex addresses;
     BackBufferIndex backbuffers;
-    uint64_t limit{}, allocated{}, peakAllocated{}, created{}, uploaded{}, uploadRecords{};
+    uint64_t limit{}, allocated{}, peakAllocated{}, created{}, uploaded{}, uploadRecords{}, writeWatchRemoved{};
     std::set<uint64_t> retired;
     std::map<uint64_t, std::vector<uint64_t>> resourceRecords, heapRecords;
     std::map<uint64_t, ComPtr<ID3D12Heap>> heaps;
@@ -134,7 +140,9 @@ struct NativeResources::Impl {
             offset <= recipe.description.SizeInBytes && placement.SizeInBytes <= recipe.description.SizeInBytes - offset, "Captured resource placement is incompatible with this device");
         if (auto it = heaps.find(record); it != heaps.end()) return it->second.Get();
         budget(recipe.description.SizeInBytes, record); ComPtr<ID3D12Heap> native;
-        check(device.device()->CreateHeap(&recipe.description, IID_PPV_ARGS(&native)), "Create captured heap");
+        auto desc = recipe.description; desc.Flags = replayHeapFlags(desc.Flags);
+        check(device.device()->CreateHeap(&desc, IID_PPV_ARGS(&native)), "Create captured heap");
+        writeWatchRemoved += desc.Flags != recipe.description.Flags;
         allocated += recipe.description.SizeInBytes; peakAllocated = (std::max)(peakAllocated, allocated);
         auto result = native.Get(); heaps.emplace(record, std::move(native)); return result;
     }
@@ -186,11 +194,13 @@ ID3D12Resource *NativeResources::resource(uint64_t object, uint64_t atRecord) {
             allocation = device8->GetResourceAllocationInfo2(0, 1, &r.description1, nullptr).SizeInBytes;
         }
         s.budget(allocation, record);
-        check(device10->CreateCommittedResource3(&r.properties, r.heapFlags, &r.description1, r.initialLayout, clear, nullptr,
+        check(device10->CreateCommittedResource3(&r.properties, replayHeapFlags(r.heapFlags), &r.description1, r.initialLayout, clear, nullptr,
             UINT(r.castableFormats.size()), r.castableFormats.data(), IID_PPV_ARGS(&native)), "Create captured resource with barrier layout");
+        s.writeWatchRemoved += replayHeapFlags(r.heapFlags) != r.heapFlags;
     } else {
         allocation = s.device.device()->GetResourceAllocationInfo(0, 1, &r.description).SizeInBytes; s.budget(allocation, record);
-        check(s.device.device()->CreateCommittedResource(&r.properties, r.heapFlags, &r.description, r.initialState, clear, IID_PPV_ARGS(&native)), "Create captured committed resource");
+        check(s.device.device()->CreateCommittedResource(&r.properties, replayHeapFlags(r.heapFlags), &r.description, r.initialState, clear, IID_PPV_ARGS(&native)), "Create captured committed resource");
+        s.writeWatchRemoved += replayHeapFlags(r.heapFlags) != r.heapFlags;
     }
     s.allocated += allocation; s.peakAllocated = (std::max)(s.peakAllocated, s.allocated); ++s.created; auto result = native.Get();
     const auto name = L"Flora DX12 resource " + std::to_wstring(object) + L" creation " + std::to_wstring(record); native->SetName(name.c_str());
@@ -316,6 +326,7 @@ nlohmann::json NativeResources::information() const {
     return {{"created_resources", impl_->created}, {"resident_resources", impl_->resources.size()}, {"retired_resources", impl_->retired.size()}, {"created_heaps", impl_->heaps.size()},
         {"allocation_bytes", std::to_string(impl_->allocated)}, {"allocation_limit", std::to_string(impl_->limit)},
         {"peak_allocation_bytes", std::to_string(impl_->peakAllocated)},
-        {"restored_memory_records", std::to_string(impl_->uploadRecords)}, {"uploaded_bytes", std::to_string(impl_->uploaded)}};
+        {"restored_memory_records", std::to_string(impl_->uploadRecords)}, {"uploaded_bytes", std::to_string(impl_->uploaded)},
+        {"write_watch_flags_removed", std::to_string(impl_->writeWatchRemoved)}};
 }
 }

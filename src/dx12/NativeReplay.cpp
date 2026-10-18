@@ -328,7 +328,7 @@ void NativeReplay::initializeTransfers() {
     }
     for (const auto &[id, queue] : s.queues) s.wait(queue.Get()); s.initialized = true;
 }
-void NativeReplay::replayTo(uint64_t execution, bool after) {
+void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
     auto &s = *impl_; require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
     s.frameAttempted = true; s.selectedExecution = execution; s.boundaryAfter = after;
     const auto target = s.index.execution(execution);
@@ -337,10 +337,12 @@ void NativeReplay::replayTo(uint64_t execution, bool after) {
     struct Recording {
         ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
         Impl::StateActions states; size_t count{}, recorded{}; bool closed = false;
+        SubmittedList instance;
     };
     using Key = std::pair<size_t, size_t>;
     std::map<Key, Recording> recordings;
     std::map<std::pair<uint64_t, uint64_t>, Key> instances;
+    uint64_t nativeCommandCount{};
     for (const auto &instance : s.index.lists()) {
         if (instance.submission <= s.directory.initializationCount() || instance.submission > target.submission ||
             (instance.submission == target.submission && instance.ordinal > target.ordinal)) continue;
@@ -348,7 +350,12 @@ void NativeReplay::replayTo(uint64_t execution, bool after) {
         require(original.hasBeginning && original.closed && original.begin > s.directory.initializationCount(), "Frame list needs keyframe recording-state restoration");
         const auto count = instance.submission == target.submission && instance.ordinal == target.ordinal ?
             size_t(execution - instance.firstExecution + (after ? 1 : 0)) : original.records.size();
-        const Key key{*instance.recording, count}; recordings.try_emplace(key).first->second.count = count;
+        require(count <= 4000000 - nativeCommandCount, "Native frame recording exceeds the four-million command limit"); nativeCommandCount += count;
+        // Each submission instance gets its own native recording, including
+        // repeated submissions of one generation. This makes execution markers
+        // unambiguous without splitting a native ExecuteCommandLists batch.
+        const Key key{*instance.recording, instances.size()}; auto &native = recordings.try_emplace(key).first->second;
+        native.count = count; native.instance = instance;
         instances.emplace(std::pair{instance.submission, instance.ordinal}, key);
     }
     std::map<uint64_t, std::vector<Key>> starts;
@@ -372,8 +379,16 @@ void NativeReplay::replayTo(uint64_t execution, bool after) {
                     if (key.first != *recording || native.closed) continue;
                     require(native.list && native.recorded < native.count, "Invalid native recording boundary");
                     const auto &original = s.index.recordings()[key.first]; require(original.records[native.recorded] == id, "Native recording order mismatch");
+                    if (analysisMarkers) {
+                        const auto &instance = native.instance;
+                        const auto marker = "Flora DX12 execution " + std::to_string(instance.firstExecution + native.recorded) + " record " + std::to_string(id) +
+                            " submission " + std::to_string(instance.submission) + " queue " + std::to_string(instance.queue) + " list " + std::to_string(instance.list) +
+                            " generation " + std::to_string(original.generation) + " ordinal " + std::to_string(instance.ordinal) + ": " + streamPacketName(p.type);
+                        native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+                    }
                     if (transfer(p.type)) s.record(native.list.Get(), id, original.list, &native.states);
                     else { commands.record(native.list.Get(), id, original.list, native.states); ++s.recordedCommands[streamPacketName(p.type)]; }
+                    if (analysisMarkers) native.list->EndEvent();
                     if (++native.recorded == native.count) { check(native.list->Close(), "Close frame execution prefix"); native.closed = true; }
                 }
                 continue;

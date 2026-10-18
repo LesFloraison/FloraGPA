@@ -11,7 +11,8 @@ struct RenderDocCapture::Impl {
     void *device{};
     uint32_t firstCapture{};
 };
-RenderDocCapture::RenderDocCapture(const std::filesystem::path &library, const std::filesystem::path &output)
+RenderDocCapture::RenderDocCapture(const std::filesystem::path &library, const std::filesystem::path &output,
+                                   bool referenceAllResources)
     : impl_(std::make_unique<Impl>()) {
     const auto path = std::filesystem::canonical(library);
     if (!std::filesystem::is_regular_file(path) || output.empty())
@@ -36,21 +37,21 @@ RenderDocCapture::RenderDocCapture(const std::filesystem::path &library, const s
     api.SetCaptureFilePathTemplate(reinterpret_cast<const char *>(prefix.c_str()));
     api.MaskOverlayBits(0, 0);
     api.SetCaptureKeys(nullptr, 0);
-    if (!api.SetCaptureOptionU32(eRENDERDOC_Option_RefAllResources, 1))
+    if (!api.SetCaptureOptionU32(eRENDERDOC_Option_RefAllResources, referenceAllResources ? 1 : 0))
         throw std::runtime_error("RenderDoc cannot retain referenced resources");
     impl_->firstCapture = api.GetNumCaptures();
 }
 RenderDocCapture::~RenderDocCapture() { discard(); }
-void RenderDocCapture::start(void *device) {
+void RenderDocCapture::start(void *device, const char *title) {
     if (!device || impl_->device || impl_->api->IsFrameCapturing())
         throw std::runtime_error("RenderDoc capture is already active or the D3D device is missing");
     impl_->device = device;
     impl_->api->StartFrameCapture(device, nullptr);
     if (!impl_->api->IsFrameCapturing()) {
         impl_->device = nullptr;
-        throw std::runtime_error("RenderDoc did not start capturing the DX11 device");
+        throw std::runtime_error("RenderDoc did not start capturing the replay device");
     }
-    impl_->api->SetCaptureTitle("FloraGPA independent DX11 replay");
+    impl_->api->SetCaptureTitle(title);
 }
 std::filesystem::path RenderDocCapture::finish() {
     if (!impl_->device)

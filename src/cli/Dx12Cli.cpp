@@ -4,20 +4,28 @@
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
 #include "dx12/NativeReplay.h"
+#include "replay/RenderDocCapture.h"
 #include <QDir>
 #include <QSaveFile>
 #include <QTextStream>
+#include <set>
 
 namespace flora {
 int runDx12Cli(const QString &command, const QString &path, const QCommandLineParser &options) {
     if (command != "inventory" && command != "commands" && command != "validate-frame" && command != "command-lists")
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
+    std::set<QString> allowed{"out", "replay-identity"};
+    if (command == "commands") allowed.insert("filter");
+    if (command == "validate-frame") {
+        allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
+        if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");
+        if (options.isSet("check-initialization")) {
+            allowed.insert({"id", "offset", "length", "verify-texture-copy", "check-execution", "texture-object", "subresource", "before", "debug-device"});
+            if (options.isSet("check-execution")) allowed.insert("renderdoc");
+        }
+    }
     for (const auto &option : options.optionNames())
-        if (option != "out" && option != "replay-identity" && !(command == "commands" && option == "filter") &&
-            !(command == "validate-frame" && (option == "check-device" || option == "check-copy" || option == "check-pipeline" || option == "check-initialization" ||
-                (option == "max-bytes" && (options.isSet("check-copy") || options.isSet("check-initialization"))) ||
-                (options.isSet("check-initialization") && (option == "id" || option == "offset" || option == "length" || option == "verify-texture-copy" ||
-                    option == "check-execution" || option == "texture-object" || option == "subresource" || option == "before" || option == "debug-device")))))
+        if (!allowed.contains(option))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
     if (int(options.isSet("check-copy")) + int(options.isSet("check-pipeline")) + int(options.isSet("check-initialization")) > 1)
@@ -56,6 +64,9 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 if (!validRecord || !record || !validLimit || !limit) throw std::runtime_error("Invalid copy record or memory budget");
                 copy = dx12::prepareInitializationCopy(directory, record, limit);
             }
+            std::optional<RenderDocCapture> analysisCapture;
+            if (options.isSet("renderdoc")) analysisCapture.emplace(std::filesystem::path(options.value("renderdoc").toStdWString()),
+                std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
             dx12::NativeDevice device(directory, options.isSet("debug-device"));
             report["device"] = device.information();
             if (copy) report["initialization_copy"] = dx12::executeInitializationCopy(device, *copy);
@@ -101,11 +112,21 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                     stage = "texture_readback";
                     if (textureCopy) report["initialized_texture"] = replay.verifyInitializedTexture(textureCopy);
                     stage = "frame_execution";
-                    if (execution) replay.replayTo(execution, !options.isSet("before"));
+                    if (analysisCapture) analysisCapture->start(device.device(), "FloraGPA independent DX12 replay");
+                    if (execution) replay.replayTo(execution, !options.isSet("before"), bool(analysisCapture));
+                    if (analysisCapture) {
+                        stage = "analysis_capture";
+                        const auto captured = analysisCapture->finish();
+                        report["analysis_capture"] = {{"backend", "dx12"}, {"path", QString::fromStdWString(captured.wstring()).toStdString()},
+                            {"execution", std::to_string(execution)}, {"boundary", options.isSet("before") ? "before" : "after"}};
+                    }
                     stage = "frame_texture_readback";
                     if (texture) report["frame_texture"] = replay.readTexture(texture, UINT(subresource), std::filesystem::path(output.filePath("texture.bin").toStdWString()));
                     report["initialization"] = replay.information();
                 } catch (const std::exception &e) {
+                    // Discard while the native device is alive. The capture hook
+                    // was loaded before device creation and is destroyed later.
+                    if (analysisCapture) analysisCapture->discard();
                     report["initialization"] = replay.information();
                     report["initialization"]["failure"] = e.what();
                     report["initialization"]["failure_stage"] = stage;

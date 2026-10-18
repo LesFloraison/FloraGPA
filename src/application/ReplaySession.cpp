@@ -247,7 +247,7 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
-        return {CapabilityStatus::NotImplemented, "DX12 execution and resource restoration are not implemented"};
+        return {CapabilityStatus::NotImplemented, "DX12 workspace replay/analysis integration is unfinished; selected native execution is available through CLI validation"};
     }
 };
 }

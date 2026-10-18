@@ -23,6 +23,42 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12ExecutionProvenance() {
+        const auto marker = [](const char *execution, const char *record, const char *submission,
+                               const char *method) {
+            return std::string("Flora DX12 execution ") + execution + " record " + record + " submission " +
+                   submission +
+                   " queue 18446744073709551615 list 9007199254740993 generation 2 ordinal 0: "
+                   "ID3D12GraphicsCommandList" +
+                   method;
+        };
+        const auto roots = Json::array(
+            {node(1, marker("9007199254740993", "19", "30", "DrawIndexedInstanced"), 0x40, {node(2, "", 2)}),
+             node(3, marker("9007199254740994", "19", "31", "DrawIndexedInstanced"), 0x40, {node(4, "", 2)}),
+             node(5, marker("9007199254740995", "20", "31", "IASetPrimitiveTopology"), 0x40,
+                  {node(7, "", 0x80, Json::array(), {{{"eventId", 6}}})}),
+             node(8, "Flora DX12 helper", 0x40, {node(9, "", 0x400)}),
+             node(10, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(11, "", 2)}),
+             node(12, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(13, "", 2)})});
+        const auto result = indexDx12RdcEvents(
+            roots, {{"6", {{"name", "ID3D12GraphicsCommandList::IASetPrimitiveTopology"}}}});
+        QCOMPARE(result["execution_map"].size(), size_t(3));
+        QVERIFY(result["execution_map"]["9007199254740993"] == 2);
+        QVERIFY(result["execution_map"]["9007199254740994"] == 4);
+        QVERIFY(result["execution_map"]["9007199254740995"] == 6);
+        QVERIFY(result["record_executions"]["19"] == Json::array({"9007199254740993", "9007199254740994"}));
+        const auto provenance = rdcProvenance(4, result["reverse"]);
+        QCOMPARE(provenance["execution"].get<std::string>(), std::string("9007199254740994"));
+        QCOMPARE(provenance["submission"].get<std::string>(), std::string("31"));
+        QCOMPARE(provenance["queue"].get<std::string>(), std::string("18446744073709551615"));
+        QVERIFY(!result["execution_map"].contains("9007199254740996"));
+        QVERIFY(!result["reverse"].contains("9"));
+        QVERIFY(!result["reverse"].contains("11"));
+        QVERIFY_THROWS_EXCEPTION(
+            std::runtime_error,
+            indexDx12RdcEvents({node(1, marker("18446744073709551616", "19", "30", "DrawInstanced"), 0x40)},
+                               Json::object()));
+    }
     void commandProvenance() {
         auto roots = Json::array(
             {node(1, "GPA 20: Draw", 0x40, {node(2, "", 2)}), node(3, "helper", 0x400),

@@ -149,8 +149,129 @@ Json indexRdcEvents(const Json &roots, const Json &nativeEvents) {
             {"gpa_command_map", commands},
             {"reverse", reverse}};
 }
+Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
+    static const std::regex marker(
+        "^Flora DX12 execution ([0-9]+) record ([0-9]+) submission ([0-9]+) queue ([0-9]+) list ([0-9]+) "
+        "generation ([0-9]+) ordinal ([0-9]+): (ID3D12GraphicsCommandList[0-9]*[A-Za-z][A-Za-z0-9]*)$");
+    static const std::regex method("^ID3D12GraphicsCommandList[0-9]*([A-Za-z][A-Za-z0-9]*)$");
+    if (!roots.is_array() || !nativeEvents.is_object())
+        throw std::runtime_error("Invalid DX12 action/event collection");
+    struct Execution {
+        Json identity;
+        std::string method;
+        uint32_t marker{};
+        std::set<uint32_t> events, api;
+    };
+    std::map<std::string, std::vector<std::unique_ptr<Execution>>> groups;
+    Json actions = Json::array(), selected = Json::object(), commands = Json::object(),
+         reverse = Json::object(), records = Json::object();
+    size_t visited{};
+    std::function<void(const Json &, Execution *, unsigned)> walk;
+    walk = [&](const Json &nodes, Execution *scope, unsigned depth) {
+        if (!nodes.is_array() || depth > 128)
+            throw std::runtime_error("DX12 action tree exceeds traversal bounds");
+        for (const auto &action : nodes) {
+            if (++visited > 1000000)
+                throw std::runtime_error("Too many DX12 analysis actions");
+            const auto eid = number(action.at("eventId")), flags = number(action.at("flags"));
+            const auto name = action.at("customName").get<std::string>();
+            if (name.size() > 1048576)
+                throw std::runtime_error("DX12 action name exceeds traversal bounds");
+            auto current = scope;
+            std::smatch match;
+            if ((flags & push) && std::regex_match(name, match, marker)) {
+                auto entry = std::make_unique<Execution>();
+                entry->marker = eid;
+                constexpr const char *keys[]{"execution", "source_record", "submission",  "queue",
+                                             "list",      "generation",    "list_ordinal"};
+                for (size_t i = 0; i < std::size(keys); ++i) {
+                    const auto text = match[i + 1].str();
+                    uint64_t value{};
+                    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), value);
+                    if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
+                        (!value && i != 6))
+                        throw std::runtime_error("Invalid uint64 DX12 execution identity");
+                    entry->identity[keys[i]] = std::to_string(value);
+                }
+                entry->identity["backend"] = "dx12";
+                entry->identity["name"] = match[8].str();
+                const auto command = match[8].str();
+                std::smatch methodMatch;
+                std::regex_match(command, methodMatch, method);
+                entry->method = methodMatch[1].str();
+                current = entry.get();
+                groups[entry->identity["execution"].get<std::string>()].push_back(std::move(entry));
+            } else if (name.starts_with("Flora DX12 "))
+                current = nullptr;
+            if (current) {
+                for (const auto &event : action.value("events", Json::array())) {
+                    const auto id = number(event.at("eventId"));
+                    const auto native = nativeEvents.find(std::to_string(id));
+                    if (id > current->marker && native != nativeEvents.end() &&
+                        native->at("name").get<std::string>().ends_with("::" + current->method)) {
+                        current->api.insert(id);
+                        current->events.insert(id);
+                    }
+                }
+                if (flags & (draw | dispatch | clear | copy | resolve))
+                    current->events.insert(eid);
+            }
+            if (flags & (draw | dispatch))
+                actions.push_back({{"eid", eid},
+                                   {"name", name},
+                                   {"indices", action.at("numIndices")},
+                                   {"instances", action.at("numInstances")},
+                                   {"flags", action.at("flags_text")}});
+            walk(action.at("children"), current, depth + 1);
+        }
+    };
+    walk(roots, nullptr, 0);
+    for (const auto &[execution, entries] : groups) {
+        std::set<uint32_t> eids, api;
+        Json markers = Json::array();
+        for (const auto &entry : entries) {
+            eids.insert(entry->events.begin(), entry->events.end());
+            api.insert(entry->api.begin(), entry->api.end());
+            markers.push_back(entry->marker);
+        }
+        const auto status = entries.size() != 1 ? "duplicate_markers"
+                            : eids.empty()      ? "unrepresented"
+                                                : "mapped";
+        auto command = entries.front()->identity;
+        command.update({{"status", status},
+                        {"event_ids", eids},
+                        {"api_event_ids", api},
+                        {"marker_eids", markers},
+                        {"selectable", entries.size() == 1 && eids.size() == 1}});
+        commands[execution] = command;
+        const auto record = command["source_record"].get<std::string>();
+        if (!records.contains(record))
+            records[record] = Json::array();
+        records[record].push_back(execution);
+        if (entries.size() == 1) {
+            for (const auto eid : eids)
+                reverse[std::to_string(eid)] = command;
+            if (eids.size() == 1)
+                selected[execution] = *eids.begin();
+        }
+    }
+    return {{"backend", "dx12"},
+            {"actions", actions},
+            {"execution_map", selected},
+            {"execution_commands", commands},
+            {"record_executions", records},
+            {"reverse", reverse},
+            {"gpa_event_map", Json::object()},
+            {"gpa_command_map", Json::object()}};
+}
 Json rdcProvenance(uint32_t event, const Json &reverse) {
     const auto found = reverse.find(std::to_string(event));
+    if (found != reverse.end() && found->contains("execution")) {
+        auto result = *found;
+        result["mapping_status"] = "mapped";
+        result["gpa_event"] = nullptr;
+        return result;
+    }
     if (found != reverse.end())
         return {{"gpa_event", found->at("gpa_event")},
                 {"gpa_command", found->at("name")},
