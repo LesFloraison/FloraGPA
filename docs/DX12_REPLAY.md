@@ -1759,6 +1759,69 @@ before-execution injection, reserved/MSAA resources, modified-resource Pixel
 History and other shader stages, BF1/Hellblade2 resource experiments and full
 experiment acceptance remain unfinished.
 
+### Selected-execution buffer readback
+
+Selecting a DX12 buffer creation now opens the existing **Buffer** tab. Choose
+**Before event** or **After event**, enter a byte offset and length, then **Read**.
+Hex/ASCII and 32-bit word interpretations use the actual GPU readback bytes;
+**Export** writes exactly the displayed range. The default range is the first
+256 bytes (or the entire buffer if smaller). Initial-state viewing, reflected
+constant fields and DX12 UAV-counter interpretation are not connected here.
+The existing texture-output Replay action directs buffer users to this tab.
+
+The existing CLI `buffer` command detects DX12 directories and requires a
+submitted execution identity:
+
+```powershell
+FloraGPA.Cli.exe buffer "D:\CDXrepo\captures\Talos_2026_10_18__00_55_08.gpa_frame" --event 12675 --before --id 150566 --offset 32058656 --length 16 --max-bytes 4294967296 --out talos-buffer
+```
+
+It writes `buffer.bin` and `report.json`, including resource creation/object,
+execution, boundary, offset, length, SHA-256 and native replay/experiment evidence.
+DX12 offsets and lengths are decimal strings throughout the report; DX11 keeps
+its existing numeric range format. Omitting length means the remaining bytes,
+and ranges larger than 256 MiB are rejected rather than silently truncated.
+Use multiple explicit ranges for a larger buffer. DX12 CSV and initial-state
+inspection remain unimplemented; `--no-buffer-csv` is accepted for callers
+sharing the existing buffer interface.
+
+The native implementation copies the requested range into a budget-checked
+readback allocation, restores state, waits for completion and hashes/publishes
+bounded chunks. Readback-heap sources have a direct mapped path. Mapping is
+released on failure or cancellation, and a debug-layer readback error prevents
+publishing success. The Worker verifies backend, execution, resource, boundary,
+range, file length and hash. The existing session/request/experiment guards
+remain active. Event, resource, boundary and experiment changes clear displayed
+DX12 bytes and reject obsolete results; changing a buffer boundary does not
+automatically launch another expensive replay.
+
+Focused evidence:
+
+- `talos-buffer-native1`: debug-layer CLI read before execution **12675**, buffer
+  creation **150566**, offset **32058656**, length **16**, with the existing
+  constant-buffer experiment. Exact bytes `0000000000000000000000000000803e`,
+  SHA-256 `1498d267dc099c4ea99c89d5f647dfdc6063c6ed2403e92011f4145702614427`,
+  **zero D3D12 validation errors**.
+- `dx12-buffer-workspace1.txt`: two Worker replays in 38.601 seconds. Modified
+  before-event bytes display/export exactly; undo followed by after-event
+  readback returns `c7e4fc3a8f44d43a7af659baa9b25e3e`. The restored bytes equal
+  an independent reconstruction from captured CPU uploads to source buffer
+  **109473824** before the captured Copy at record **188930** / submission
+  **188936**. Restored SHA-256:
+  `af5ca3c3b4f8a2fc5b4db1c24be9c2739574885c15394d9ef6e8fe825c48af80`.
+  Exported bytes and comparison are under `talos-buffer-workspace1`.
+- `worker-buffer-dx12-1.txt`: 30 checks pass, retaining DX11 buffer artifact
+  checks and adding decimal offset **9007199254740993**, overflow, size limit,
+  backend/execution mismatch, hash rejection and cancellation. This is CPU
+  evidence for wide identity/range transport, not a >4 GB native GPU allocation.
+- Build159 builds GUI, CLI, Worker and both focused test targets; Build160 adds
+  the final default-range clamp for buffers smaller than 256 bytes.
+
+Actual GPU readback is verified for the selected Talos default-heap range.
+Readback-heap sources, large native offsets, other formats/usages and the other
+two samples have not received additional buffer-readback acceptance here. This
+work does not resolve the remaining full-frame or analysis gaps below.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

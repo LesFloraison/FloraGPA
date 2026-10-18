@@ -16,7 +16,7 @@
 namespace flora {
 namespace {
 int replayDx12(const IReplaySession &session, const QString &path, const QCommandLineParser &options,
-               const QDir &output) {
+               const QDir &output, bool buffer = false) {
     const auto number = [&](const char *key) {
         bool valid{};
         const auto value = options.value(key).toULongLong(&valid);
@@ -39,11 +39,23 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         object = session.resource(creation).capturedObject;
     } else if (options.isSet("subresource"))
         throw std::runtime_error("DX12 subresource requires --id <resource creation record>");
+    uint64_t offset{}, length{};
+    if (buffer) {
+        if (!creation) throw std::runtime_error("DX12 buffer requires --id <resource creation record>");
+        const auto desc = nlohmann::json::parse(session.resource(creation).summary);
+        if (desc.at("Dimension") != 1) throw std::runtime_error("Selected DX12 resource is not a buffer");
+        const auto width = std::stoull(desc.at("Width").get<std::string>());
+        offset = number("offset");
+        if (offset > width) throw std::runtime_error("Buffer offset exceeds resource size");
+        length = options.isSet("length") ? number("length") : width - offset;
+        if (!length || length > width - offset || length > 256ULL * 1024 * 1024)
+            throw std::runtime_error("DX12 buffer range must fit the resource and be 1 byte to 256 MiB");
+    }
     ReplaySelection selection;
     selection.session = session.identity();
     selection.execution = execution;
     selection.before = options.isSet("before");
-    selection.resource = creation;
+    selection.resource = buffer ? 0 : creation;
     const auto capability = session.capability(ReplayFeature::Replay, selection);
     if (!capability.supported()) {
         const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
@@ -116,7 +128,12 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             report["performance"] = replay.performanceResult();
         if (capture)
             report["rdc_capture"] = QString::fromStdWString(capture->finish().wstring()).toStdString();
-        if (object) {
+        if (buffer) {
+            const auto bytes = replay.inspectBuffer(creation, offset, length,
+                std::filesystem::path(output.filePath("buffer.bin").toStdWString()));
+            report.update({{"resource", std::to_string(creation)}, {"offset", std::to_string(offset)},
+                {"length", std::to_string(length)}, {"sha256", bytes.at("sha256")}, {"native_buffer", bytes}});
+        } else if (object) {
             const auto texture = replay.readTexture(
                 object, UINT(sub),
                 std::filesystem::path(output.filePath("output_storage.bin").toStdWString()), creation);
@@ -158,7 +175,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             }
         }
         report["completed"] = true;
-        report["image_status"] = object ? (report["image_available"] == true
+        report["image_status"] = buffer ? "Native GPU buffer range readback" : object ? (report["image_available"] == true
                                                ? "Native GPU readback; selected execution only"
                                                : "Raw GPU texture saved; this display format is unsupported")
                                         : "Execution replayed; select a texture creation record for readback";
@@ -179,7 +196,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
 } // namespace
 int runDx12Cli(const QString &command, const QString &path, const QCommandLineParser &options) {
     if (command != "inventory" && command != "commands" && command != "validate-frame" &&
-        command != "command-lists" && command != "replay")
+        command != "command-lists" && command != "replay" && command != "buffer")
         throw std::runtime_error("DX12 " + command.toStdString() +
                                  " is not implemented; use inventory or commands for stream inspection");
     std::set<QString> allowed{"out", "replay-identity"};
@@ -187,6 +204,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         allowed.insert("filter");
     if (command == "replay")
         allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
+    if (command == "buffer")
+        allowed.insert({"event", "before", "id", "offset", "length", "max-bytes", "debug-device", "experiment", "disable", "no-buffer-csv"});
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");
@@ -206,7 +225,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("Output directory must be new or empty");
     auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
     if (!QDir().mkpath(output.path())) throw std::runtime_error("Cannot create DX12 inspection output directory");
-    if (command == "replay") return replayDx12(*session,path,options,output);
+    if (command == "replay" || command == "buffer") return replayDx12(*session,path,options,output,command == "buffer");
     const auto filename = command == "commands" ? "commands.json" : command == "validate-frame" ? "validation.json" :
                           command == "command-lists" ? "command-lists.json" : "inventory.json";
     QSaveFile file(output.filePath(filename));

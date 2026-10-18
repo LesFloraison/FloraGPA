@@ -21,6 +21,29 @@ void save(const QString &directory, const QByteArray &bytes) {
 class WorkerBufferTests final : public QObject {
     Q_OBJECT
   private slots:
+    void dx12WideOffsets() {
+        QTemporaryDir dir; const QByteArray bytes("native buffer bytes"); save(dir.path(), bytes);
+        BufferRequest request{UINT64_MAX - 1, 9007199254740993ULL, uint64_t(bytes.size()), UINT64_MAX - 2, true, true};
+        auto report = reportFor(request, bytes);
+        report["backend"] = "dx12"; report["execution"] = QString::number(request.event);
+        report["offset"] = QString::number(request.offset); report["length"] = QString::number(request.length);
+        QCOMPARE(readWorkerBuffer(dir.path(), report, request), bytes);
+        auto bad = report; bad["offset"] = double(request.offset);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), bad, request));
+        bad = report; bad["offset"] = "18446744073709551616";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), bad, request));
+        bad = report; bad["backend"] = "dx11";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), bad, request));
+        bad = report; bad["execution"] = "3";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), bad, request));
+        auto invalid = request; invalid.length = 256ULL * 1024 * 1024 + 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), report, invalid));
+        invalid = request; invalid.offset = UINT64_MAX;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), report, invalid));
+        bad = report; bad["sha256"] = QString(64, '0');
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readWorkerBuffer(dir.path(), bad, request));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, readWorkerBuffer(dir.path(), report, request, [] { return true; }));
+    }
     void valid_data() {
         QTest::addColumn<int>("mode");
         QTest::newRow("initial-unaligned") << 0;

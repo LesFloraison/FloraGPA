@@ -24,7 +24,8 @@ class NativeReplay final {
     void initializeTransfers();
     void replayTo(uint64_t execution, bool after, bool analysisMarkers = false);
     nlohmann::json readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output, uint64_t expectedCreation = 0);
-    nlohmann::json inspectBuffer(uint64_t creationRecord, uint64_t offset, uint64_t length);
+    nlohmann::json inspectBuffer(uint64_t creationRecord, uint64_t offset, uint64_t length,
+                                const std::filesystem::path &output = {});
     nlohmann::json verifyInitializedTexture(uint64_t copyRecord);
     nlohmann::json information() const;
 };

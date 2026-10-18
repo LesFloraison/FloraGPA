@@ -72,6 +72,77 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12BufferWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto project = qEnvironmentVariable("FLORA_DX12_BUFFER_PROJECT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_BUFFER_OUTPUT");
+        if (root.isEmpty() || project.isEmpty() || output.isEmpty()) QSKIP("Set Talos captures, prepared buffer project and new output");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto capture = root + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        dx12::StreamDirectory directory(std::filesystem::path(capture.toStdWString()));
+        QByteArray original(16, 0); std::array<bool, 16> covered{};
+        // Source buffer of captured CopyBufferRegion record 188930. Restore
+        // this exact byte range from recorded CPU patches before its submission.
+        for (size_t i = 0; i < 188936; ++i) {
+            const auto &p = directory.packets().at(i); if (p.type != 0x20000000000000ULL) continue;
+            format::Reader r(directory.payload(p)); if (r.read<uint64_t>() != 109473824) continue;
+            const auto data = directory.resourceData(r.read<uint64_t>());
+            format::Reader descriptor(directory.resources().bytes(data.descriptorOffset, 64)); descriptor.skip(32);
+            const auto offset = descriptor.read<uint64_t>();
+            for (size_t n = 0; n < covered.size(); ++n) {
+                const auto byte = 32058656ULL + n;
+                if (byte >= offset && byte - offset < data.bytes.size()) { original[qsizetype(n)] = char(data.bytes[size_t(byte - offset)]); covered[n] = true; }
+            }
+        }
+        QVERIFY(std::all_of(covered.begin(), covered.end(), [](bool value) { return value; }));
+        write(output + "/captured-original.bin", original);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished), exported(&window, &MainWindow::exportFinished);
+        window.openCapture(capture); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 150566) { resources->setCurrentIndex(index); break; }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 150566ULL);
+        window.openDx12Experiment(project); QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        window.findChild<QLineEdit *>("bufferOffset")->setText("32058656");
+        window.findChild<QLineEdit *>("bufferLength")->setText("16");
+        auto boundary = window.findChild<QComboBox *>("bufferBoundary"); boundary->setCurrentIndex(1);
+        auto table = window.findChild<QTableView *>("bufferTable");
+        const auto model = static_cast<BufferModel *>(table->model());
+        auto read = window.findChild<QAction *>("readBuffer");
+        for (const auto modified : {true, false}) {
+            if (!modified) {
+                window.findChild<QAction *>("undoExperiment")->trigger();
+                QVERIFY(model->bytes().isEmpty());
+                boundary->setCurrentIndex(2);
+            }
+            done.clear(); read->trigger(); QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QCOMPARE(model->offset(), 32058656ULL);
+            const float row[4]{0, 0, 0, 0.25f}; const QByteArray changed(reinterpret_cast<const char *>(row), sizeof(row));
+            QCOMPARE(model->bytes(), modified ? changed : original);
+            const auto name = modified ? QString("modified") : QString("restored");
+            QTimer chooser, watchdog; watchdog.setSingleShot(true); bool chosen{};
+            connect(&chooser, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) {
+                    chosen = true; chooser.stop();
+                    dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                    QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                }
+            });
+            connect(&watchdog, &QTimer::timeout, &window, [&] { if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject(); });
+            chooser.start(10); watchdog.start(5000); window.findChild<QAction *>("exportBuffer")->trigger(); QVERIFY(chosen);
+            QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+            QFile file(output + '/' + name + ".bin"); QVERIFY(file.open(QIODevice::ReadOnly)); QCOMPARE(file.readAll(), model->bytes());
+            qInfo() << name << model->bytes().toHex();
+        }
+        locate->setText("12667"); QTest::keyClick(locate, Qt::Key_Return); QVERIFY(model->bytes().isEmpty());
+    }
     void querySubmissionIdentityAndBounds() {
         QTemporaryDir temp; const auto path = fixture(temp);
         QByteArray packets; uint64_t timestamp{};

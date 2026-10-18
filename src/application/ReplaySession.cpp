@@ -464,7 +464,7 @@ class Dx12Session final : public IReplaySession {
                     (void)resource(selection.resource);
                     const auto descriptor=resourceDescription(selection.resource);
                     if (descriptor.is_null()) return {CapabilityStatus::MissingData,"Selected texture creation has no captured descriptor"};
-                    if (descriptor.at("Dimension")==1) return {CapabilityStatus::NotImplemented,"Selected buffer readback is not yet connected to workspace replay; select a texture"};
+                    if (descriptor.at("Dimension")==1) return {CapabilityStatus::NotImplemented,"Use Buffer > Read for a selected-event byte range; output Replay displays textures"};
                     if (descriptor.at("SampleCount")!=1) return {CapabilityStatus::NotImplemented,"DX12 multisample texture readback is not implemented"};
                 }
                 return {CapabilityStatus::Supported,"Selected execution replay; unsupported commands and missing captured state fail explicitly"};

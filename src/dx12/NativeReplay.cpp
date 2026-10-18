@@ -925,7 +925,7 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
     require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
     s.boundaryReached = true;
 }
-json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t length) {
+json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t length, const std::filesystem::path &output) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");
     require(!s.frameAttempted || s.boundaryReached, "Selected execution failed before buffer inspection");
     const auto at = s.boundaryReached ? s.currentRecord : uint64_t(s.directory.initializationCount());
@@ -934,6 +934,35 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
     require(creation == s.resources.creationRecord(recipe.object, at), "Selected buffer lifetime is no longer active at the inspection boundary");
     auto source = s.resources.resource(recipe.object, at); const auto desc = source->GetDesc();
     require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && length && offset <= desc.Width && length <= desc.Width - offset, "Invalid buffer inspection range");
+    require(length <= 256ULL * 1024 * 1024, "Buffer inspection is limited to 256 MiB per request");
+    const auto publish = [&](ID3D12Resource *resource, uint64_t mappedOffset) {
+        void *mapped{}; D3D12_RANGE read{SIZE_T(mappedOffset), SIZE_T(mappedOffset + length)};
+        check(resource->Map(0, &read, &mapped), "Map buffer inspection");
+        struct Unmap { ID3D12Resource *resource; ~Unmap() { D3D12_RANGE none{0, 0}; resource->Unmap(0, &none); } } unmap{resource};
+        const auto data = static_cast<const uint8_t *>(mapped) + mappedOffset;
+        const auto preview = QByteArray(reinterpret_cast<const char *>(data), int(std::min<uint64_t>(length, 256))).toHex().toStdString();
+        QCryptographicHash digest(QCryptographicHash::Sha256);
+        QSaveFile file(QString::fromStdWString(output.wstring()));
+        if (!output.empty()) require(file.open(QIODevice::WriteOnly), "Cannot open buffer output");
+        for (uint64_t at = 0; at < length;) {
+            checkCancellation(s.cancelled);
+            const auto count = qint64(std::min<uint64_t>(1024 * 1024, length - at));
+            const auto chunk = reinterpret_cast<const char *>(data + at);
+            digest.addData(QByteArrayView(chunk, count));
+            if (!output.empty()) require(file.write(chunk, count) == count, "Cannot write buffer output");
+            at += uint64_t(count);
+        }
+        checkCancellation(s.cancelled);
+        require(s.device.information().value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported buffer readback errors");
+        if (!output.empty()) require(file.commit(), "Cannot publish buffer output");
+        return json{{"creation_record", std::to_string(creation)}, {"object", std::to_string(recipe.object)}, {"offset", std::to_string(offset)},
+            {"length", std::to_string(length)}, {"sha256", digest.result().toHex().toStdString()}, {"preview_hex", preview},
+            {"source", "native_gpu_readback"}, {"boundary", s.boundaryReached ? (s.boundaryAfter ? "after_event" : "before_event") : "after_initialization_submissions"},
+            {"execution", s.boundaryReached ? json(std::to_string(s.selectedExecution)) : json(nullptr)}, {"frame_replayed", false}};
+    };
+    D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
+    check(source->GetHeapProperties(&heap, &flags), "Read buffer heap properties");
+    if (heap.Type == D3D12_HEAP_TYPE_READBACK) return publish(source, offset);
     auto readDesc = desc; readDesc.Width = length; readDesc.Alignment = 0; readDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
     const auto allocation = s.device.device()->GetResourceAllocationInfo(0, 1, &readDesc).SizeInBytes;
     require(allocation <= s.resources.remainingAllocationBudget(), "Readback exceeds the resource allocation budget");
@@ -950,11 +979,9 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
     check(list->Close(), "Close buffer inspection");
     ID3D12CommandQueue *queue{}; for (const auto &[id, native] : s.queues) if (s.queueRecipes.at(id).desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) { queue = native.Get(); break; }
     require(queue, "Buffer inspection needs a direct replay queue"); ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists); s.wait(queue);
-    void *mapped{}; D3D12_RANGE read{0, SIZE_T(length)}; check(readback->Map(0, &read, &mapped), "Map initialized buffer readback");
-    const auto preview = QByteArray(static_cast<const char *>(mapped), int(std::min<uint64_t>(length,256))).toHex().toStdString();
-    const auto sha = hash({static_cast<const uint8_t *>(mapped), size_t(length)}); D3D12_RANGE none{0, 0}; readback->Unmap(0, &none);
-    return {{"creation_record", std::to_string(creation)}, {"object", std::to_string(recipe.object)}, {"offset", std::to_string(offset)},
-        {"length", std::to_string(length)}, {"sha256", sha}, {"preview_hex", preview}, {"boundary", s.boundaryReached ? (s.boundaryAfter ? "after_event" : "before_event") : "after_initialization_submissions"}, {"execution", s.boundaryReached ? json(std::to_string(s.selectedExecution)) : json(nullptr)}, {"frame_replayed", false}};
+    if (transition) s.resources.transition(recipe.object, at, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, before, before);
+    s.resources.completeSubmission(D3D12_COMMAND_LIST_TYPE_DIRECT);
+    return publish(readback.Get(), 0);
 }
 json NativeReplay::verifyInitializedTexture(uint64_t copyRecord) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");

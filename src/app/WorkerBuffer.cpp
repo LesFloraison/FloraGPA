@@ -5,10 +5,19 @@
 #include <QRegularExpression>
 #include <cmath>
 #include <limits>
+#include <charconv>
 
 namespace flora {
 namespace {
-uint64_t byteCount(const QJsonValue &value) {
+uint64_t byteCount(const QJsonValue &value, bool dx12) {
+    if (dx12) {
+        if (!value.isString()) throw std::runtime_error("DX12 buffer range must be a decimal string");
+        const auto text = value.toString().toStdString(); uint64_t result{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+        if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || text != std::to_string(result))
+            throw std::runtime_error("DX12 buffer range is invalid");
+        return result;
+    }
     const auto n = value.toDouble(-1);
     // A DX11 buffer has a UINT ByteWidth. Keeping this bound also prevents
     // floating-point rounding and narrowing into model row counts.
@@ -21,13 +30,18 @@ uint64_t byteCount(const QJsonValue &value) {
 QByteArray readWorkerBuffer(const QString &directory, const QJsonObject &report,
                           const BufferRequest &request, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    const auto max = std::numeric_limits<uint32_t>::max();
+    const auto max = request.dx12 ? UINT64_MAX : uint64_t(std::numeric_limits<uint32_t>::max());
     if (!request.resource || request.offset > max || request.length > max - request.offset)
         throw std::runtime_error("Worker buffer request range is invalid");
+    if (request.dx12 && (!request.event || !request.length || request.length > 256ULL * 1024 * 1024 || report["backend"] != "dx12"))
+        throw std::runtime_error("Invalid DX12 buffer request/backend");
+    if (!request.dx12 && report["backend"] == "dx12") throw std::runtime_error("Unexpected DX12 buffer result");
+    if (request.dx12 && report["execution"] != QJsonValue(QString::number(request.event)))
+        throw std::runtime_error("DX12 buffer execution does not match request");
     const auto when = request.event ? (request.before ? "before_event" : "after_event") : "capture_initial";
     if (!report["completed"].isBool() || !report["completed"].toBool() ||
         report["resource"] != QJsonValue(QString::number(request.resource)) ||
-        byteCount(report["offset"]) != request.offset || byteCount(report["length"]) != request.length ||
+        byteCount(report["offset"], request.dx12) != request.offset || byteCount(report["length"], request.dx12) != request.length ||
         report["value_time"] != QJsonValue(when) ||
         (request.event ? report["event"] != QJsonValue(QString::number(request.event))
                        : !report["event"].isNull()))

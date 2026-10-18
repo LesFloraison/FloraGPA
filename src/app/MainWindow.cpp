@@ -1029,7 +1029,7 @@ void MainWindow::buildUi() {
     bufferLength_->setToolTip("Byte length (empty reads to the end)");
     bufferBar->addWidget(bufferLength_);
     bufferBar->addAction("Read", this, &MainWindow::previewBuffer)->setObjectName("readBuffer");
-    bufferBar->addAction("Export", this, &MainWindow::exportBuffer);
+    bufferBar->addAction("Export", this, &MainWindow::exportBuffer)->setObjectName("exportBuffer");
     bufferEditAction_ = bufferBar->addAction("Edit Bytes…", this, [this] { editBuffer(); });
     bufferEditAction_->setObjectName("editBuffer");
     bufferImportAction_ = bufferBar->addAction("Import Patch…", this, [this] { editBuffer(true); });
@@ -1084,6 +1084,7 @@ void MainWindow::buildUi() {
     connect(constants_, &QTreeWidget::itemDoubleClicked, this, [this] { editConstant(); });
     centerTabs_->addTab(bufferPane_, "Buffer");
     connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) { invalidateDx12Output(); return; }
         clearBufferDetails();
         bufferTimer_.start();
     });
@@ -2776,6 +2777,15 @@ void MainWindow::inspectResource(Id id) {
         selection_.resource = id;
         selectedResource_ = id;
         invalidateDx12Output();
+        const auto descriptor = nlohmann::json::parse(session_->resource(id).summary);
+        if (descriptor.at("Dimension") == 1) {
+            const QSignalBlocker blocker(bufferBoundary_);
+            if (!bufferBoundary_->currentIndex()) bufferBoundary_->setCurrentIndex(2);
+            bufferLength_->setText(QString::number(std::min<uint64_t>(256, std::stoull(descriptor.at("Width").get<std::string>()))));
+            bufferOffset_->setText("0");
+            bufferLabel_->setText("DX12 buffer · Select an execution and byte range, then Read (up to 256 MiB)");
+            centerTabs_->setCurrentWidget(bufferPane_);
+        }
         resourceStatus_->setText(QString("DX12 resource creation %1 · %2").arg(id).arg(QString::fromStdString(session_->capability(ReplayFeature::Replay,selection_).reason)));
         properties("DX12 resource creation", values);
         return;
@@ -3225,6 +3235,30 @@ void MainWindow::previewTexture() {
     startWorker(args, false);
 }
 void MainWindow::previewBuffer() {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        if (busy() || !selection_.resource || !selection_.execution) return;
+        try {
+            if (!bufferBoundary_->currentIndex()) throw std::runtime_error("DX12 buffer readback requires Before event or After event");
+            const auto desc = nlohmann::json::parse(session_->resource(selection_.resource).summary);
+            if (desc.at("Dimension") != 1) throw std::runtime_error("Select a DX12 buffer resource");
+            const auto width = std::stoull(desc.at("Width").get<std::string>());
+            bool valid{}; const auto offset = bufferOffset_->text().toULongLong(&valid, 0);
+            if (!valid || offset > width) throw std::runtime_error("Invalid buffer offset");
+            const auto length = bufferLength_->text().trimmed().isEmpty() ? width - offset : bufferLength_->text().toULongLong(&valid, 0);
+            if (!valid || !length || length > width - offset || length > 256ULL * 1024 * 1024)
+                throw std::runtime_error("Buffer range must fit the resource and be 1 byte to 256 MiB");
+            auto selected = selection_; selected.resource = 0; selected.before = bufferBoundary_->currentIndex() == 1;
+            const auto capability = session_->capability(ReplayFeature::Replay, selected);
+            if (!capability.supported()) throw std::runtime_error(capability.reason);
+            invalidateDx12Output();
+            runningBuffer_ = {selection_.resource, offset, length, *selection_.execution, selected.before, true};
+            QStringList args{"buffer", capturePath_, "--id", QString::number(selection_.resource), "--event", QString::number(*selection_.execution),
+                "--offset", QString::number(offset), "--length", QString::number(length), "--max-bytes", QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)};
+            if (selected.before) args << "--before";
+            startWorker(args, false);
+        } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
+        return;
+    }
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
         return;
     if (process_.state() != QProcess::NotRunning || artifactJob_) {
