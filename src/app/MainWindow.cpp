@@ -4558,6 +4558,7 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
             const auto mip = display.at("mip").get<int>(), layer = display.at("layer").get<int>();
             history_->selectPixel(object, x, y, mip, layer, 0);
             replayDebug_[1]->selectPixel(x, y, 0);
+            replayDebug_[2]->selectTextureReference(object, selection_.resource, x, y, mip, layer, 0);
             image_->setSelectedPixel(QPoint(x, y));
             if (historyPick_->isChecked()) {
                 leftTabs_->setCurrentWidget(history_);

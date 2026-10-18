@@ -149,6 +149,7 @@ class Session {
     std::unique_ptr<IReplayController, Shutdown> controller;
     std::string version, commit;
     uint32_t d16HistoryPatch{};
+    uint32_t dxbcWorkgroupPatch{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -169,6 +170,8 @@ class Session {
         using PatchVersion = uint32_t (RENDERDOC_CC *)();
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraD16HistoryPatchVersion")))
             d16HistoryPatch = patch();
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxbcWorkgroupPatchVersion")))
+            dxbcWorkgroupPatch = patch();
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
         const auto open = symbol<decltype(&RENDERDOC_OpenCaptureFile)>("RENDERDOC_OpenCaptureFile");
@@ -352,6 +355,25 @@ bool selected(const Json &write, const TextureDescription &tex, const Subresourc
     return box.is_null() ||
            (box[0] <= x && x < box[3] && box[1] <= y && y < box[4] && box[2] <= z && z < box[5]);
 }
+ResourceId capturedResource(const rdcarray<ResourceDescription> &resources, const Json &job, bool dx12) {
+    const auto &object = job.at("resource");
+    auto prefix = dx12 ? "Flora DX12 resource " + std::to_string(number(object)) + " creation "
+                       : "GPA resource " + std::to_string(number(object)) + " (";
+    const bool exact = dx12 && job.contains("resource_creation");
+    if (exact)
+        prefix += std::to_string(number(job.at("resource_creation")));
+    ResourceId result;
+    for (const auto &resource : resources)
+        if (exact ? text(resource.name) == prefix : text(resource.name).starts_with(prefix)) {
+            if (result != ResourceId::Null())
+                throw std::runtime_error(
+                    "Resource object has multiple captured lifetimes; select resource_creation");
+            result = resource.resourceId;
+        }
+    if (result == ResourceId::Null())
+        throw std::runtime_error("No matching captured resource for the selected object/creation");
+    return result;
+}
 const ActionDescription *findAction(const rdcarray<ActionDescription> &nodes, uint32_t eid) {
     for (const auto &node : nodes) {
         if (node.eventId == eid)
@@ -376,7 +398,7 @@ rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     }
     return result;
 }
-Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
+Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_t dxbcWorkgroupPatch) {
     const auto kind = job.at("action").get<std::string>();
     const auto *selected = findAction(controller.GetRootActions(), eid);
     const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
@@ -399,6 +421,43 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
     Json result = Json::object();
+    if (dx12 && compute && !job.value("resource", Json()).is_null()) {
+        const auto resource = capturedResource(controller.GetResources(), job, true);
+        const auto textures = controller.GetTextures();
+        const auto found = std::find_if(textures.begin(), textures.end(),
+                                        [&](const auto &t) { return t.resourceId == resource; });
+        if (found == textures.end())
+            throw std::runtime_error("Compute GPU reference requires a texture resource");
+        const Subresource sub(index(job, "mip"), index(job, "layer"), index(job, "sample"));
+        const auto x = index(job, "x"), y = index(job, "y");
+        validate(*found, sub, x, y);
+        Json reference{{"status", "unavailable"},
+                       {"scope", "post_event_selected_texel_before_debug_replays"},
+                       {"resource", resourceName(resource)},
+                       {"resource_object", job.at("resource")},
+                       {"resource_creation", job.value("resource_creation", Json())},
+                       {"x", x},
+                       {"y", y},
+                       {"mip", sub.mip},
+                       {"layer", sub.slice},
+                       {"sample", sub.sample},
+                       {"reason", "Typeless texture interpretation is unavailable"}};
+        const auto cast = found->format.compType;
+        if (cast != CompType::Typeless) {
+            reference.erase("reason");
+            reference.update(
+                {{"status", "read"},
+                 {"format", flora::rdcResourceFormat(found->format)},
+                 {"interpretation", cast == CompType::UInt   ? "uint"
+                                    : cast == CompType::SInt ? "sint"
+                                                             : "float"},
+                 {"value", pixel(controller.PickPixel(resource, x, y, sub, cast))},
+                 {"method", "RenderDoc PickPixel with texture component interpretation"},
+                 {"note", "Explicit selected texel after the dispatch, before DebugThread replays. This is "
+                          "not proof that the selected invocation wrote this location."}});
+        }
+        result["gpu_reference"] = std::move(reference);
+    }
     if (dx12 && !compute && !vertex) {
         // Capture the selected event's target before DebugPixel performs any
         // diagnostic replays. This is post-event GPU output, not the selected
@@ -531,6 +590,21 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
         !file.commit())
         throw std::runtime_error("Cannot export shader disassembly");
     result["disassembly"] = text(assembly);
+    if (dx12 && compute && text(assembly).find("dcl_tgsm_") != std::string::npos) {
+        const auto group = coordinates(job, "group");
+        const bool affected = dxbcWorkgroupPatch != 1 && (group[0] || group[1] || group[2]);
+        result["debug_scope"]["dxbc_workgroup"] = {
+            {"patch_version", dxbcWorkgroupPatch},
+            {"group", {group[0], group[1], group[2]}},
+            {"status", affected ? "known_incorrect_helper_group_ids" : "group_ids_initialized"}};
+        if (affected) {
+            result["partial"] = true;
+            result["debug_scope"]["warnings"] = {
+                "This RenderDoc 1.45 DX12 DXBC debugger assigns the selected "
+                "Group ID only to the active lane. Other groupshared lanes use group zero, so this trace "
+                "is not a reliable computation of the selected group. Select the patched analysis library."};
+        }
+    }
     Json steps = Json::array();
     for (;;) {
         const auto batch = controller.ContinueDebug(trace->debugger);
@@ -623,6 +697,7 @@ Json runRdcJob(const Json &job) {
         {"backend_version", session.version},
         {"backend_commit", session.commit},
         {"backend_d16_history_patch", session.d16HistoryPatch},
+        {"backend_dxbc_workgroup_patch", session.dxbcWorkgroupPatch},
         {"replay_environment",
          {{"gpu_vendor_enum", vendor},
           {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
@@ -859,7 +934,7 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (debugging) {
-        result.update(debug(controller, eid, job));
+        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch));
         result["eid"] = eid;
         result["gpa_event"] = gpa;
         return complete();
@@ -874,18 +949,7 @@ Json runRdcJob(const Json &job) {
         else if (pipe && !pipe->outputMerger.renderTargets.empty())
             resource = pipe->outputMerger.renderTargets[0].resource;
     } else {
-        auto prefix = dx12 ? "Flora DX12 resource " + std::to_string(number(gpaResource)) + " creation "
-                           : "GPA resource " + std::to_string(number(gpaResource)) + " (";
-        if (dx12 && job.contains("resource_creation"))
-            prefix += std::to_string(number(job["resource_creation"]));
-        for (const auto &r : resources)
-            if (dx12 && job.contains("resource_creation") ? text(r.name) == prefix
-                                                          : text(r.name).starts_with(prefix)) {
-                if (resource != ResourceId::Null())
-                    throw std::runtime_error(
-                        "Resource object has multiple captured lifetimes; select resource_creation");
-                resource = r.resourceId;
-            }
+        resource = capturedResource(resources, job, dx12);
     }
     if (resource == ResourceId::Null())
         throw std::runtime_error("Select an explicit texture resource; no matching target");

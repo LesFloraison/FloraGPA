@@ -10,6 +10,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
@@ -49,6 +50,146 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dx12WorkgroupRegression() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_WORKGROUP_EVIDENCE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set the workgroup reproduction evidence directory");
+        const auto stock = read(root + "/bf1-workgroup-stock1/result.json");
+        const auto fixed = read(root + "/bf1-workgroup-fixed1/result.json");
+        const auto native = read(root + "/bf1-workgroup-native2/output_storage.json");
+        QVERIFY(stock.at("ok").get<bool>());
+        QVERIFY(fixed.at("ok").get<bool>());
+        QVERIFY(stock.at("gpa_modules_loaded").empty());
+        QVERIFY(fixed.at("gpa_modules_loaded").empty());
+        QCOMPARE(stock.at("backend_dxbc_workgroup_patch"), Json(0));
+        QCOMPARE(fixed.at("backend_dxbc_workgroup_patch"), Json(1));
+        QVERIFY(stock.at("partial").get<bool>());
+        QCOMPARE(stock.at("debug_scope").at("dxbc_workgroup").at("status"),
+                 Json("known_incorrect_helper_group_ids"));
+        QCOMPARE(fixed.at("debug_scope").at("dxbc_workgroup").at("status"), Json("group_ids_initialized"));
+        const auto store = [](const Json &report) {
+            Json values;
+            for (const auto &step : report.at("steps"))
+                if (step.at("nextInstruction") == 12)
+                    for (const auto &change : step.at("changes"))
+                        if (change.at("after").at("name") == "r0") {
+                            const auto &all = change.at("after").at("value").at("f32v");
+                            values = Json::array({all[0], all[1], all[2], all[3]});
+                        }
+            return values;
+        };
+        const auto expected = Json::array({1.0, 0.5, 0.25, 1.0});
+        QCOMPARE(stock.at("gpu_reference").at("value").at("floatValue"), expected);
+        QCOMPARE(fixed.at("gpu_reference").at("value").at("floatValue"), expected);
+        QCOMPARE(store(stock), Json::array({0.0, 0.5, 0.25, 1.0}));
+        QCOMPARE(store(fixed), expected);
+        QFile storage(root + "/bf1-workgroup-native2/output_storage.bin");
+        QVERIFY(storage.open(QIODevice::ReadOnly));
+        const auto bytes = storage.readAll();
+        QCOMPARE(bytes.size(), qsizetype(1920 * 1009 * 4));
+        QCOMPARE(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toStdString(),
+                 native.at("sha256").get<std::string>());
+        const uint32_t packed = (15U << 6) | ((14U << 6) << 11) | ((13U << 5) << 22);
+        size_t wrong = 0;
+        for (qsizetype i = 0; i < bytes.size(); i += 4) {
+            uint32_t value{};
+            memcpy(&value, bytes.constData() + i, 4);
+            wrong += value != packed;
+        }
+        QCOMPARE(wrong, size_t(0));
+        ReplayDebugView view("cs");
+        view.setContext("workgroup", 36666, true);
+        QVERIFY(view.finish(view.requestId(), stock));
+        auto notice = view.findChild<QLabel *>("debugBackendNotice");
+        QVERIFY(!notice->isHidden());
+        QVERIFY(notice->text().contains("group zero"));
+        QVERIFY(view.finish(view.requestId(), fixed));
+        QVERIFY(notice->isHidden());
+    }
+    void dx12ComputeGpuReference() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_CS_REFERENCE_REPORT");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_CS_REFERENCE_REPORT to the BF1 temporal CS trace");
+        const auto report = read(path);
+        QVERIFY(report.at("ok").get<bool>());
+        QCOMPARE(report.at("execution"), Json("36666"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        const auto &reference = report.at("gpu_reference");
+        QCOMPARE(reference.at("status"), Json("read"));
+        QCOMPARE(reference.at("resource_creation"), Json("299115"));
+        QCOMPARE(reference.at("resource_object"), Json("10432933744"));
+        QCOMPARE(reference.at("scope"), Json("post_event_selected_texel_before_debug_replays"));
+        ReplayDebugView view("cs");
+        view.resize(1500, 950);
+        view.show();
+        view.setContext("temporal:original", 36666, true);
+        view.findChild<QLineEdit *>("debugGroup")->setText("209 60 0");
+        view.findChild<QLineEdit *>("debugThread")->setText("2 5 0");
+        QVERIFY(!view.request().contains("resource"));
+        view.selectTextureReference(10432933744ULL, 299115, 1674, 485, 0, 0, 0);
+        const auto request = view.request();
+        QCOMPARE(request.at("resource"), reference.at("resource_object"));
+        QCOMPARE(request.at("resource_creation"), reference.at("resource_creation"));
+        QCOMPARE(request.at("group"), Json::array({209, 60, 0}));
+        QCOMPARE(request.at("thread"), Json::array({2, 5, 0}));
+        QCOMPARE(request.at("x"), Json(1674));
+        QCOMPARE(request.at("y"), Json(485));
+        QVERIFY(view.finish(view.requestId(), report));
+        auto label = view.findChild<QLabel *>("debugGpuReference");
+        QVERIFY(label);
+        QVERIFY(!label->isHidden());
+        QVERIFY(label->text().contains("GPU selected texel after dispatch"));
+        QVERIFY(label->text().contains("does not prove"));
+        const auto model = view.model();
+        QVERIFY(model);
+        size_t storeStep = 0;
+        for (size_t i = 0; i < model->size(); ++i)
+            if (report.at("steps")[i].at("nextInstruction") == 373) {
+                storeStep = i;
+                break;
+            }
+        QVERIFY(storeStep > 0);
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(int(storeStep));
+        model->addWatch("r1.x");
+        // DXBC temporary registers are typeless; the float register view is
+        // explicit, while a source Watch must not invent their type.
+        QCOMPARE(model->watchResults().at(0).at("status"), Json("unavailable"));
+        bool storeValueVisible = false;
+        for (const auto &row : model->registerRows("float"))
+            if (row[0] == "r1")
+                storeValueVisible = !row[1].get<std::string>().empty();
+        QVERIFY(storeValueVisible);
+        QCOMPARE(view.exportReport().at("gpu_reference"), reference);
+        auto registers = view.findChild<QTreeWidget *>("debugRegisters");
+        for (int i = 0; i < registers->topLevelItemCount(); ++i)
+            if (registers->topLevelItem(i)->text(0) == "r1") {
+                registers->setCurrentItem(registers->topLevelItem(i));
+                registers->scrollToItem(registers->topLevelItem(i), QAbstractItemView::PositionAtTop);
+            }
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty())
+            QVERIFY(view.grab().save(output_ + "/compute-gpu-reference.png"));
+        auto warned = report;
+        warned["debug_scope"]["warnings"] = {"Known incorrect helper group IDs in stock backend"};
+        QVERIFY(view.finish(view.requestId(), warned));
+        auto notice = view.findChild<QLabel *>("debugBackendNotice");
+        QVERIFY(!notice->isHidden());
+        QVERIFY(notice->text().contains("incorrect helper group"));
+        QVERIFY(view.finish(view.requestId(), report));
+        QVERIFY(notice->isHidden());
+        const auto old = view.requestId();
+        action(view, "clearComputeReference")->trigger();
+        QVERIFY(!view.request().contains("resource"));
+        QVERIFY(label->isHidden());
+        QVERIFY(!view.finish(old, report));
+        view.selectTextureReference(9007199254740993ULL, 9007199254740995ULL, 1, 2, 3, 4, 0);
+        QCOMPARE(view.request().at("resource"), Json("9007199254740993"));
+        QCOMPARE(view.request().at("resource_creation"), Json("9007199254740995"));
+        view.setContext("temporal:modified", 36666, true);
+        QVERIFY(!view.request().contains("resource"));
+        view.setContext("dx11", 1, false);
+        QVERIFY(!action(view, "clearComputeReference")->isVisible());
+    }
     void dx12DebugGpuReference() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PS_REFERENCE_REPORT");
         if (path.isEmpty())

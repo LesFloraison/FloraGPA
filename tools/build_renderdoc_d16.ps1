@@ -7,20 +7,39 @@ $ErrorActionPreference = 'Stop'
 $source = (Resolve-Path -LiteralPath $SourceDirectory).Path
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $patch = Join-Path $repo 'third_party/renderdoc/patches/dx12-d16-history.patch'
+$workgroupPatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-workgroup.patch'
+$patches = @($patch, $workgroupPatch)
 $upstream = '2fc0bc04cb95499635f63986a55bc6f67849dd9f'
 $head = & git -C $source rev-parse HEAD
 if ($LASTEXITCODE -ne 0 -or $head -ne $upstream) { throw 'Use a dedicated RenderDoc v1.45 checkout at the pinned upstream commit.' }
 $actual = (& git -C $source diff --binary --no-ext-diff --no-color HEAD) -join "`n"
 if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect RenderDoc source changes.' }
-$expected = (Get-Content -LiteralPath $patch -Raw).Replace("`r`n", "`n").TrimEnd()
-if ($actual.TrimEnd() -eq '') {
-    & git -C $source apply --check $patch
-    if ($LASTEXITCODE -ne 0) { throw 'RenderDoc patch does not apply to this checkout.' }
-    & git -C $source apply $patch
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot apply RenderDoc patch.' }
-} elseif ($actual.Replace("`r`n", "`n").TrimEnd() -ne $expected) {
-    throw 'RenderDoc source has changes beyond the pinned Flora D16 patch; use a dedicated checkout.'
+# Build the exact expected tree without touching the checkout's real index.
+# Separate patches can modify files whose combined diff has a different order.
+$temporaryIndex = Join-Path ([IO.Path]::GetTempPath()) ('flora-rdc-index-' + [Guid]::NewGuid().ToString('N'))
+$previousIndex = $env:GIT_INDEX_FILE
+try {
+    $env:GIT_INDEX_FILE = $temporaryIndex
+    & git -C $source read-tree $upstream
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot initialize expected RenderDoc source tree.' }
+    foreach ($fix in $patches) {
+        & git -C $source apply --cached $fix
+        if ($LASTEXITCODE -ne 0) { throw "RenderDoc patch does not apply to the pinned source: $fix" }
+    }
+    $expectedTree = & git -C $source write-tree
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot record expected RenderDoc source tree.' }
+} finally {
+    $env:GIT_INDEX_FILE = $previousIndex
+    if (Test-Path -LiteralPath $temporaryIndex) { Remove-Item -LiteralPath $temporaryIndex }
 }
+if ($actual.TrimEnd() -eq '') {
+    foreach ($fix in $patches) {
+        & git -C $source apply $fix
+        if ($LASTEXITCODE -ne 0) { throw "Cannot apply RenderDoc patch: $fix" }
+    }
+}
+& git -C $source diff --quiet $expectedTree --
+if ($LASTEXITCODE -ne 0) { throw 'RenderDoc source differs from the pinned D16 and DXBC workgroup fixes; use a dedicated checkout.' }
 if (-not $MSBuild) {
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
     $MSBuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild/**/Bin/MSBuild.exe' | Select-Object -First 1
@@ -51,6 +70,8 @@ $manifest = [ordered]@{
     version = '1.45'
     patch_version = 1
     patch_sha256 = (Get-FileHash -LiteralPath $patch -Algorithm SHA256).Hash.ToLowerInvariant()
+    dxbc_workgroup_patch_version = 1
+    dxbc_workgroup_patch_sha256 = (Get-FileHash -LiteralPath $workgroupPatch -Algorithm SHA256).Hash.ToLowerInvariant()
     renderdoc_sha256 = (Get-FileHash -LiteralPath $library -Algorithm SHA256).Hash.ToLowerInvariant()
     toolset = 'v143'
     configuration = 'Release|x64'

@@ -165,6 +165,14 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         };
         group_ = field("debugGroup", " Group ");
         thread_ = field("debugThread", " Thread ");
+        referenceSelection_ = new QLabel;
+        referenceSelection_->setObjectName("computeReferenceSelection");
+        inputs_->addWidget(referenceSelection_);
+        clearReference_ = action(inputs_, "clearComputeReference", "Clear reference", [this] {
+            textureReference_ = Json();
+            referenceSelection_->clear();
+            invalidate();
+        });
     }
     steps_ = new QToolBar;
     layout->addWidget(steps_);
@@ -245,6 +253,12 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     summary_->setMargin(4);
     summary_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     layout->addWidget(summary_);
+    backendNotice_ = new QLabel;
+    backendNotice_->setObjectName("debugBackendNotice");
+    backendNotice_->setWordWrap(true);
+    backendNotice_->setMargin(4);
+    backendNotice_->hide();
+    layout->addWidget(backendNotice_);
     gpuReference_ = new QLabel;
     gpuReference_->setObjectName("debugGpuReference");
     gpuReference_->setWordWrap(true);
@@ -320,7 +334,10 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     interpretation_->addItems({"float", "int", "uint", "hex"});
     registerLayout->addWidget(interpretation_);
     registers_ = table("debugRegisters", {"Register", "Value", "Type"});
-    registers_->setColumnWidth(0, 100);
+    registers_->header()->setStretchLastSection(false);
+    registers_->setColumnWidth(0, 150);
+    registers_->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    registers_->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     registerLayout->addWidget(registers_, 1);
     values_->addTab(registerPage, "Registers");
     connect(interpretation_, &QComboBox::currentIndexChanged, this, [this] {
@@ -484,6 +501,9 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
         dx12_ = dx12;
         key_ = key;
         event_ = event;
+        textureReference_ = Json();
+        if (referenceSelection_)
+            referenceSelection_->clear();
         if (primitive_)
             primitive_->clear();
         invalidate();
@@ -515,6 +535,30 @@ void ReplayDebugView::selectPrimitive(uint32_t primitive) {
     if (!busy_ && primitive_)
         primitive_->setText(QString::number(primitive));
 }
+void ReplayDebugView::selectTextureReference(qulonglong object, qulonglong creation, int x, int y, int mip,
+                                             int layer, int sample) {
+    if (busy_ || !dx12_ || stage_ != "cs" || !object || !creation || x < 0 || y < 0 || mip < 0 || layer < 0 ||
+        sample < 0)
+        return;
+    textureReference_ = {{"resource", std::to_string(object)},
+                         {"resource_creation", std::to_string(creation)},
+                         {"x", x},
+                         {"y", y},
+                         {"mip", mip},
+                         {"layer", layer},
+                         {"sample", sample}};
+    referenceSelection_->setText(QString(" Reference: creation %1 · (%2, %3) · mip %4 layer %5 sample %6 ")
+                                     .arg(creation)
+                                     .arg(x)
+                                     .arg(y)
+                                     .arg(mip)
+                                     .arg(layer)
+                                     .arg(sample));
+    referenceSelection_->setToolTip("Reads this selected texel after the dispatch and before debugging. "
+                                    "Thread coordinates are independent; a matching value does not prove "
+                                    "this invocation wrote the texel.");
+    invalidate();
+}
 Json ReplayDebugView::request() const {
     if (key_.isEmpty() || !event_)
         throw std::runtime_error("Select an executed event first");
@@ -532,8 +576,11 @@ Json ReplayDebugView::request() const {
             job["primitive"] = invocationIndex(primitive_);
     } else if (stage_ == "vs")
         job.update({{"vertex", invocationIndex(vertex_)}, {"instance", invocationIndex(instance_)}});
-    else
+    else {
         job.update({{"group", triple(group_)}, {"thread", triple(thread_)}});
+        if (dx12_ && textureReference_.is_object())
+            job.update(textureReference_);
+    }
     return job;
 }
 void ReplayDebugView::invalidate() {
@@ -542,6 +589,8 @@ void ReplayDebugView::invalidate() {
     gpuReference_->clear();
     gpuReference_->hide();
     rendering_ = true;
+    backendNotice_->clear();
+    backendNotice_->hide();
     for (auto tree : {registers_, locals_, stack_, rules_, watches_})
         tree->clear();
     assembly_->clear();
@@ -564,6 +613,11 @@ void ReplayDebugView::updateActions() {
     cancel_->setEnabled(busy_);
     backend_->setEnabled(!busy_);
     inputs_->setEnabled(!busy_);
+    if (clearReference_) {
+        clearReference_->setVisible(dx12_);
+        clearReference_->setEnabled(!busy_ && textureReference_.is_object());
+        referenceSelection_->setVisible(dx12_);
+    }
     export_->setEnabled(!busy_ && bool(model_));
     steps_->setEnabled(!busy_ && bool(model_));
     values_->setEnabled(!busy_ && bool(model_));
@@ -588,20 +642,35 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("Shader debugger returned no steps");
     replacement->move(0);
     model_ = std::move(replacement);
+    QStringList warnings;
+    for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
+        warnings.append(text(warning));
+    backendNotice_->setText(warnings.join('\n'));
+    backendNotice_->setVisible(!warnings.isEmpty());
     const auto reference = result.value("gpu_reference", Json());
     gpuReference_->clear();
-    gpuReference_->setVisible(dx12_ && stage_ == "ps" && !reference.is_null());
-    if (dx12_ && stage_ == "ps" && !reference.is_null()) {
+    gpuReference_->setVisible(dx12_ && (stage_ == "ps" || stage_ == "cs") && !reference.is_null());
+    if (dx12_ && (stage_ == "ps" || stage_ == "cs") && !reference.is_null()) {
         gpuReference_->setToolTip(QString::fromStdString(reference.dump(2)));
         if (reference.value("status", "") == "read") {
             const auto kind = reference.value("interpretation", "float");
             const auto key = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
-            gpuReference_->setText(QString("GPU target after event · RT0 mip %1 layer %2 sample %3 · %4 %5\n"
-                                           "Read before debugger replay; target conversion, blending and "
-                                           "other fragments may differ from shader output.")
-                                       .arg(text(reference.at("mip")), text(reference.at("layer")),
-                                            text(reference.at("sample")), QString::fromStdString(kind),
-                                            text(reference.at("value").at(key))));
+            if (stage_ == "cs")
+                gpuReference_->setText(
+                    QString("GPU selected texel after dispatch · (%1, %2) mip %3 layer %4 sample %5 · %6 %7\n"
+                            "Read before debugger replay; this does not prove the selected invocation wrote "
+                            "this location.")
+                        .arg(text(reference.at("x")), text(reference.at("y")), text(reference.at("mip")),
+                             text(reference.at("layer")), text(reference.at("sample")),
+                             QString::fromStdString(kind), text(reference.at("value").at(key))));
+            else
+                gpuReference_->setText(
+                    QString("GPU target after event · RT0 mip %1 layer %2 sample %3 · %4 %5\n"
+                            "Read before debugger replay; target conversion, blending and "
+                            "other fragments may differ from shader output.")
+                        .arg(text(reference.at("mip")), text(reference.at("layer")),
+                             text(reference.at("sample")), QString::fromStdString(kind),
+                             text(reference.at("value").at(key))));
         } else {
             gpuReference_->setText("GPU target reference unavailable: " +
                                    text(reference.value("reason", Json("Unknown"))));

@@ -1,0 +1,30 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+index 992912692..94f5369d3 100644
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -3506,11 +3506,13 @@ ShaderDebugTrace *D3D12Replay::DebugThread(uint32_t eventId,
+     GatherConstantBuffers(m_pDevice, *dxbc->GetDXBCByteCode(), rs.compute, refl, global,
+                           ret->sourceVars);
+ 
++    // Every lane contributing to groupshared memory belongs to the selected
++    // workgroup. BeginDebug already assigns each lane's local ThreadID.
++    for(DXBCDebug::ThreadState &lane : interpreter->workgroup)
++      for(int i = 0; i < 3; i++)
++        lane.semantics.GroupID[i] = groupid[i];
+     for(int i = 0; i < 3; i++)
+-    {
+-      state.semantics.GroupID[i] = groupid[i];
+       state.semantics.ThreadID[i] = threadid[i];
+-    }
+ 
+     ret->constantBlocks = global.constantBlocks;
+ 
+@@ -4131,3 +4133,8 @@ void D3D12Replay::FreeDebugger(ShaderDebugger *debugger)
+ {
+   delete debugger;
+ }
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxbcWorkgroupPatchVersion()
++{
++  return 1;
++}

@@ -41,7 +41,7 @@ int rdcAnalyzeCli(QStringList args) {
         for (const auto &[key, description] :
              {std::pair{"gpa-event", "Original GPA draw, dispatch or resource-write command ID"},
               std::pair{"eid", "Native RenderDoc event ID (alternative to --gpa-event)"},
-              std::pair{"resource", "Original GPA texture resource ID (default: color target 0)"},
+              std::pair{"resource", "Original resource ID (default: color target 0); optional DX12 CS debug texel reference"},
               std::pair{"x", "Pixel X coordinate"}, std::pair{"y", "Pixel Y coordinate"},
               std::pair{"mip", "Texture mip level"}, std::pair{"layer", "Texture array layer"},
               std::pair{"sample", "MSAA sample index"}, std::pair{"instance", "Zero-based draw instance"},

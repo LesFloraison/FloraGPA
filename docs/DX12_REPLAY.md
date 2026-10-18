@@ -2396,6 +2396,82 @@ reference passed in **164 ms** (`ps-gpu-reference-ui2.txt`).
 Only these three targeted GPU analysis queries ran for this increment; no
 Hellblade2 replay or full regression suite was needed.
 
+### Nonzero compute workgroups and explicit GPU texel references
+
+The BF1 upstream investigation reaches Dispatch execution **36666**, source record
+**213101**, RenderDoc event **45548**, command list **0x2f8005630**, Draw/Dispatch
+ordinal **4**. Its temporal CS `a6745e61-c0a63ae2-5e15ec9e-f4b15799` reads current
+color creation **324851**, history color **16551**, depth **16021**, velocity
+**325064** and history velocity magnitude **325479**. It writes the motion-blur
+input **299115**, history color **286299**, and velocity magnitude **298958**.
+These are distinct committed resource creations. The selected group **(209,60,0)**,
+local thread **(2,5,0)**, is global pixel **(1674,485,0)** in an **8×8×1** group.
+The original CS trace has **432** states and uses shared memory and history sampling.
+
+DX12 CS debug now optionally accepts an explicit original resource object/creation
+and texel selector, reading it after the dispatch **before** DebugThread. It
+reuses strict resource lifetime matching and texture subresource validation.
+CLI selectors are `--resource`, `--resource-creation`, `--x`, `--y`, `--mip`,
+`--layer`, and `--sample`. In the workspace, picking a supported output preview
+sets this independent reference in the CS panel; **Clear reference** removes it.
+Invocation coordinates are unchanged. Context/experiment changes clear it and
+reject old results, including exact identities above 2^53. A selected texel is
+not proof of a write by the selected invocation. R11G11B10 native preview is
+still unavailable, so this BF1 resource was selected explicitly through the CLI;
+no workspace pixel-picking pass is claimed for that format.
+
+The reference exposed an actual RenderDoc 1.45 defect. In the pinned upstream
+`renderdoc/driver/d3d12/d3d12_shaderdebug.cpp`, DebugThread initializes GroupID only
+on `activeLane()`. `DXBCDebug::InterpretDebugger::BeginDebug` creates the other
+workgroup lanes with their correct local ThreadIDs but zero GroupIDs. Those lanes
+therefore load incorrect coordinates when contributing shared memory in a nonzero
+group. `dx12-dxbc-workgroup.patch` initializes the selected GroupID on every lane
+and exports `RENDERDOC_GetFloraDxbcWorkgroupPatchVersion() == 1`. The adapter records
+this version and displays a concrete warning for affected stock DXBC shared-memory
+traces; a nonempty trace alone is not accepted as reliable debugging evidence.
+
+A minimal reproduction uses the existing CS experiment mechanism to replace BF1
+PSO creation **179440**, preserving its `u3` output binding and **8×8×1** group.
+Each lane writes `group.x + 256*group.y + lane` to shared memory, synchronizes,
+and checks the next lane's value. All **1,937,280** valid GPU output pixels are
+exactly **(1,0.5,0.25)** in R11G11B10 storage. Raw SHA-256:
+`97bc49991a49c2a76383d607da01363aeb595af412fc3fa8b6f9e6466de42b1f`.
+At the selected invocation, stock simulation returns **(0,0.5,0.25,1)** while
+the patched simulation and both pre-debug GPU references return
+**(1,0.5,0.25,1)**. The original capture is unchanged; project save/reload and
+undo remove the replacement. This verifies an actual changed-CS execution,
+not merely PSO creation. GPU undo restoration was not repeated here.
+
+The original BF1 CS is **not yet validated**: the stock simulated store was
+approximately **(0.155922,0.169648,0.175920)**; after fixing group IDs it is
+**(0.101484,0.088130,0.075260)**, while that request's pre-debug GPU texel is
+**(0.1044921875,0.0908203125,0.07421875)**. Further debugger/replay differences
+remain. This defect and its minimal reproduction do not explain the earlier
+original-GPA/native frame variation.
+
+Evidence under ignored `artifacts/dx12-research`: `bf1-premotion-{history1,pipeline1}`,
+`bf1-temporal-{resources1.json,cs1,cs-reference1,cs-fixed1}`, `bf1-workgroup-project1`,
+`bf1-workgroup-native2`, `bf1-workgroup-{stock1,fixed1}` and
+`workgroup-regression1.txt`. The focused CPU checks verify all raw pixels, stored
+shader values, backend warnings, reference exports, request invalidation and
+legacy PS traces (**5 passed**, including setup/cleanup, **941 ms**). The rendered
+CS view was inspected. One earlier native attempt stopped at the default 256 MiB
+budget; the successful retry used an 8 GiB limit, peaked at **3,370,385,408** bytes,
+and used SDK **616**. Seven targeted analysis queries and one successful modified
+native replay ran; no whole-sample regression suite or GPA playback was required.
+After widening the register value column, the same CPU checks passed in **917 ms**
+(`workgroup-regression2.txt`); `cs-gpu-reference-ui4/compute-gpu-reference.png`
+shows the full store vector alongside the GPU reference and was inspected.
+
+The existing `tools/build_renderdoc_d16.ps1` now builds both fixes, verifies the
+exact combined source tree via a temporary Git index, and records both patch
+hashes. Optional patched packaging verifies/copies both. New workgroup patch SHA:
+`00e9e95c158df11c6f806a37587705ec6a92e713b269dabee3c546bd29e45672`;
+local combined DLL SHA:
+`1dee5c374c07cc6046eb8c61558251a4b0a0231e4c9c225dc433ab484af33540`.
+The analyzer loaded no GPA modules in the compared traces. Full portable package
+acceptance remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2407,8 +2483,8 @@ Hellblade2 replay or full regression suite was needed.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; original temporal CS/GPU mismatch, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

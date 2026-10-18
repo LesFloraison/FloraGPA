@@ -74,6 +74,65 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12ComputeWorkgroupProject() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_WORKGROUP_PROJECT");
+        if (root.isEmpty() || output.isEmpty())
+            QSKIP("Set BF1 capture directory and workgroup reproduction project output");
+        QVERIFY(QDir().mkpath(output));
+        const auto session = openReplaySession(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        dx12::StreamDirectory directory(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        const auto &setter = directory.packets().at(213096 - 1);
+        QCOMPARE(setter.type, uint64_t(0x1ae3c82b462fcULL));
+        format::Reader reader(directory.payload(setter));
+        reader.skip(8);
+        const auto object = reader.read<uint64_t>();
+        reader.end();
+        uint64_t creation{};
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &packet = directory.packets()[i];
+            if (dx12::isPipelineRecipe(packet.type) &&
+                dx12::decodePipelineRecipe(packet.type, directory.payload(packet)).object == object)
+                creation = i + 1;
+        }
+        QVERIFY(creation);
+        // Use BF1's actual temporal CS output binding and group dimensions. The
+        // neighbouring lane must carry this group's ID, not the default zero.
+        const QByteArray source = R"(
+RWTexture2D<float4> result : register(u3);
+groupshared uint values[64];
+[numthreads(8,8,1)]
+void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_DispatchThreadID) {
+    values[lane] = group.x + 256 * group.y + lane;
+    GroupMemoryBarrierWithGroupSync();
+    uint neighbour = (lane + 1) % 64;
+    float correct = values[neighbour] == group.x + 256 * group.y + neighbour ? 1.0 : 0.0;
+    result[pixel.xy] = float4(correct, 0.5, 0.25, 1.0);
+})";
+        Microsoft::WRL::ComPtr<ID3DBlob> code, errors;
+        const auto hr =
+            D3DCompile(source.data(), size_t(source.size()), "workgroup-reference.hlsl", nullptr, nullptr,
+                       "main", "cs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &code, &errors);
+        QVERIFY2(SUCCEEDED(hr),
+                 errors ? static_cast<const char *>(errors->GetBufferPointer()) : "Compile failed");
+        write(output + "/workgroup-reference.hlsl", source);
+        const format::Bytes bytes(static_cast<const uint8_t *>(code->GetBufferPointer()),
+                                  code->GetBufferSize());
+        Experiment experiment(*session);
+        experiment.save(output + "/original.json");
+        experiment.setShader(*session, creation, "CS", bytes);
+        experiment.save(output + "/workgroup.json");
+        Experiment loaded(*session);
+        loaded.load(output + "/workgroup.json", *session);
+        QCOMPARE(loaded.dx12Edits(*session).shaders.size(), size_t(1));
+        QCOMPARE(loaded.dx12Edits(*session).shaders.front().bytecode.size(), bytes.size());
+        QVERIFY(experiment.undo());
+        QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+        experiment.save(output + "/restored.json");
+        qInfo() << "Workgroup reproduction CS pipeline creation" << creation;
+    }
     void dx12PipelineWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
