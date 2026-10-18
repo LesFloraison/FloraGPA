@@ -1,5 +1,6 @@
 #include "RdcAnalyzeCli.h"
 #include "Dx12Cli.h"
+#include "application/ReplayRequest.h"
 #include "BufferCsv.h"
 #include "application/Annotations.h"
 #include "application/DrawResources.h"
@@ -136,6 +137,9 @@ int main(int argc, char **argv) {
     QCommandLineOption readyFile("ready-file", "Desktop process job handshake", "path");
     readyFile.setFlags(QCommandLineOption::HiddenFromHelp);
     p.addOption(readyFile);
+    QCommandLineOption replayIdentity("replay-identity", "Desktop replay request envelope", "path");
+    replayIdentity.setFlags(QCommandLineOption::HiddenFromHelp);
+    p.addOption(replayIdentity);
     p.addOption({"coverage-mode", "Coverage mode: fragment or geometry", "mode", "fragment"});
     p.addOption({"coverage-target", "Coverage target: auto, depth or rt0..rt7", "target", "auto"});
     p.addOption({"coverage-layer", "Coverage array layer, volume slice or viewport array index", "index"});
@@ -184,6 +188,18 @@ int main(int argc, char **argv) {
     p.addOption({"disable", "Comma-separated disabled event IDs", "ids"});
     p.process(app);
     try {
+        std::optional<ReplayRequestIdentity> identity;
+        if (p.isSet(replayIdentity)) {
+            identity = readReplayIdentity(p.value(replayIdentity));
+            if (p.value("out").isEmpty()) throw std::runtime_error("Replay identity requires an output directory");
+            const auto positional = p.positionalArguments();
+            if (positional.size() > 1) {
+                const auto backend = QFileInfo(positional[1]).isDir() ? ReplayBackend::Dx12 : ReplayBackend::Dx11;
+                if (identity->backend != backend) throw std::runtime_error("Replay request backend does not match the capture");
+            }
+        }
+        auto optionNames = p.optionNames(); optionNames.removeAll("replay-identity");
+        const auto execute = [&]() -> int {
         const auto args = p.positionalArguments();
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
@@ -226,7 +242,7 @@ int main(int argc, char **argv) {
         if (command == "metric-catalog") {
             if (args.size() != 1 || p.value("out").isEmpty())
                 throw std::runtime_error("metric-catalog requires --out and no capture argument");
-            for (const auto &option : p.optionNames())
+            for (const auto &option : optionNames)
                 if (option != "out" && option != "metrics-bridge" && option != "ready-file")
                     throw std::runtime_error("Unsupported catalog option: --" + option.toStdString());
             const auto result = collectMetricCatalog(p.value("out"), p.value("metrics-bridge"));
@@ -237,7 +253,7 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Expected command and capture path");
         if (QFileInfo(args[1]).isDir()) return runDx12Cli(command, args[1], p);
         if (command == "validate-frame") {
-            for (const auto &option : p.optionNames())
+            for (const auto &option : optionNames)
                 if (option != "out") throw std::runtime_error("validate-frame accepts only --out");
             const auto output = p.value("out");
             if (output.isEmpty()) throw std::runtime_error("validate-frame requires --out");
@@ -252,7 +268,7 @@ int main(int argc, char **argv) {
             return validation["status"] == "blocked" ? 2 : 0;
         }
         if (command == "initialization-graph")
-            for (const auto &option : p.optionNames())
+            for (const auto &option : optionNames)
                 if (option != "out")
                     throw std::runtime_error("initialization-graph accepts only --out");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
@@ -323,7 +339,7 @@ int main(int argc, char **argv) {
         if (command == "metric-groups") {
             if (out.isEmpty())
                 throw std::invalid_argument("metric-groups requires --out");
-            for (const auto &option : p.optionNames())
+            for (const auto &option : optionNames)
                 if (!QStringList{"out", "set", "event", "samples", "warmup", "experiment", "metrics-bridge",
                                  "groups", "publisher-values", "ready-file"}
                          .contains(option))
@@ -1212,6 +1228,10 @@ int main(int argc, char **argv) {
             save(out + "/report.json", json);
         QTextStream(stdout) << json;
         return 0;
+        };
+        const auto result = execute();
+        if (identity) writeReplayIdentity(QDir(p.value("out")).filePath("response-identity.json"), *identity);
+        return result;
     } catch (const std::exception &e) {
         QJsonObject error{{"error", QString::fromUtf8(e.what())}, {"completed", false}};
         QTextStream(stderr) << QJsonDocument(error).toJson(QJsonDocument::Compact) << Qt::endl;

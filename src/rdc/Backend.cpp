@@ -5,6 +5,7 @@
 #include "DebugTrace.h"
 #include "application/RdcEvents.h"
 #include "application/ReplayMesh.h"
+#include "application/ReplayRequest.h"
 #include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
@@ -172,6 +173,8 @@ class Session {
                 throw std::runtime_error("RenderDoc did not create a replay controller");
             if (controller->GetAPIProperties().pipelineType != GraphicsAPI::D3D11)
                 throw std::runtime_error("Native analysis requires a DX11 independent replay capture");
+            if (job.contains("request_identity") && flora::parseReplayIdentity(job.at("request_identity")).backend != flora::ReplayBackend::Dx11)
+                throw std::runtime_error("Analysis request backend does not match the independent capture");
         } catch (...) {
             close();
             throw;

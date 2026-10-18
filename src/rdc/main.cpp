@@ -1,5 +1,7 @@
 #include "Assets.h"
 #include "Backend.h"
+#include "application/ReplayRequest.h"
+#include <optional>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -17,6 +19,7 @@ int main(int argc, char **argv) {
     using Json = nlohmann::json;
     Json result{{"ok", false}};
     QString output;
+    std::optional<flora::ReplayRequestIdentity> identity;
     try {
         const auto args = app.arguments();
         if (args.size() != 3 || args[1] != "--job")
@@ -26,6 +29,7 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Cannot read bounded RenderDoc job");
         const auto bytes = file.readAll();
         const auto job = Json::parse(bytes.begin(), bytes.end());
+        if (job.contains("request_identity")) identity = flora::parseReplayIdentity(job.at("request_identity"));
         const auto destination = QString::fromStdString(job.at("out").get<std::string>());
         if (destination.isEmpty())
             throw std::runtime_error("Missing output directory");
@@ -52,6 +56,7 @@ int main(int argc, char **argv) {
             result["error"] = e.what();
     }
     result["loaded_modules"] = modules;
+    if (identity) result["request_identity"] = flora::replayIdentityJson(*identity);
     const bool evaluated = result.value("ok", false);
     if (evaluated) {
         Json forbidden = Json::array();
@@ -70,6 +75,10 @@ int main(int argc, char **argv) {
         }
     }
     if (!output.isEmpty()) {
+        if (identity) {
+            try { flora::writeReplayIdentity(QDir(output).filePath("response-identity.json"), *identity); }
+            catch (const std::exception &e) { fprintf(stderr, "%s\n", e.what()); return 2; }
+        }
         if (evaluated) {
             QSaveFile modulesFile(QDir(output).filePath("loaded_modules.json"));
             const auto bytes = QByteArray::fromStdString(modules.dump(2));

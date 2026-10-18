@@ -16,6 +16,7 @@ void MainWindow::loadWorkerReport() {
     job->directory = std::move(jobDir_);
     job->kind = runningKind_;
     job->revision = runningRevision_;
+    job->identity = runningIdentity_;
     job->readingReport = true;
     artifactJob_ = job;
     setBusy(true);
@@ -28,7 +29,7 @@ void MainWindow::loadWorkerReport() {
         if (artifactJob_ != job) return;
         artifactJob_.reset();
         setBusy(false);
-        if (job->cancelled.load() || result->cancelled || job->revision != revision_) {
+        if (job->cancelled.load() || result->cancelled || job->revision != revision_ || job->identity != currentWorkerIdentity()) {
             failWorkerResult("Cancelled", true);
             return;
         }

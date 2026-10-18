@@ -49,6 +49,42 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void workerIdentityEnvelope() {
+        QTemporaryDir temp; const auto path=fixture(temp);
+        const ReplayRequestIdentity expected{"test-session",ReplayBackend::Dx12,UINT64_MAX,UINT64_MAX-1};
+        const auto identityPath=temp.filePath("request.json");writeReplayIdentity(identityPath,expected);
+        QVERIFY(readReplayIdentity(identityPath)==expected);
+        auto malformed=replayIdentityJson(expected);malformed["request"]=UINT64_MAX;
+        QVERIFY_THROWS_EXCEPTION(std::exception,parseReplayIdentity(malformed));
+        malformed=replayIdentityJson(expected);malformed["experiment_revision"]="18446744073709551616";
+        QVERIFY_THROWS_EXCEPTION(std::exception,parseReplayIdentity(malformed));
+        QProcess worker;worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Worker.exe",
+            {"inventory",path,"--out",temp.filePath("output"),"--replay-identity",identityPath});
+        QVERIFY(worker.waitForFinished(15000));QCOMPARE(worker.exitStatus(),QProcess::NormalExit);
+        QVERIFY2(worker.exitCode()==0,worker.readAllStandardError().constData());
+        const auto response=temp.filePath("output/response-identity.json");requireReplayIdentity(response,expected);
+        auto stale=expected;stale.session="new-session";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireReplayIdentity(response,stale));
+        stale=expected;stale.backend=ReplayBackend::Dx11;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireReplayIdentity(response,stale));
+        stale=expected;--stale.request;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireReplayIdentity(response,stale));
+        stale=expected;--stale.experimentRevision;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireReplayIdentity(response,stale));
+        stale=expected;stale.backend=ReplayBackend::Dx11;writeReplayIdentity(identityPath,stale);
+        worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Worker.exe",
+            {"inventory",path,"--out",temp.filePath("wrong-backend"),"--replay-identity",identityPath});
+        QVERIFY(worker.waitForFinished(15000));QCOMPARE(worker.exitCode(),1);
+        QVERIFY(worker.readAllStandardError().contains("backend does not match"));
+        QVERIFY(!QFile::exists(temp.filePath("wrong-backend/response-identity.json")));
+        // Exercise analysis-envelope publication without loading a GPU backend.
+        const nlohmann::json analysis{{"action","identity-test-invalid-action"},
+            {"out",temp.filePath("analysis").toStdString()}, {"request_identity",replayIdentityJson(stale)}};
+        write(temp.filePath("analysis-job.json"),QByteArray::fromStdString(analysis.dump()));
+        worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Rdc.exe",{"--job",temp.filePath("analysis-job.json")});
+        QVERIFY(worker.waitForFinished(15000));QCOMPARE(worker.exitCode(),1);
+        requireReplayIdentity(temp.filePath("analysis/response-identity.json"),stale);
+    }
     void packetIdentityAndCapabilities() {
         QTemporaryDir temp; const auto path=fixture(temp);
         auto session=openReplaySession(std::filesystem::path(path.toStdWString()));

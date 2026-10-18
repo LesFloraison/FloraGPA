@@ -142,6 +142,18 @@ and [independent-device specification](https://microsoft.github.io/DirectX-Specs
 
 ### Outstanding implementation
 
+Worker requests now carry a shared backend/session/request/revision envelope.
+The native Worker publishes an atomic `response-identity.json`; the analysis
+Worker echoes the same identity in its result and envelope. The window checks
+the returned identity before reading artifacts and again against the active
+context after asynchronous decoding. Request/revision integers are decimal
+strings, and numeric JSON identities are rejected. The monotonic revision also
+changes on selection and cancellation, providing stricter invalidation than an
+undo cursor alone. Legacy direct CLI use without an envelope remains supported.
+Focused checks covered UINT64_MAX round trips, changed backend/session/request/
+revision rejection, analysis failure envelopes and the DX11 replay/session-switch
+path. The DX11 image hash and geometry result remained unchanged.
+
 An additional targeted prerequisite is available as
 `validate-frame <directory> --check-copy <initialization-record> --out <new-directory>`.
 It resolves the selected buffer copy's creation recipes (including forward heap

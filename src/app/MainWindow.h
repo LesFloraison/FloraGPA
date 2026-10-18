@@ -134,6 +134,8 @@ class MainWindow final : public QMainWindow {
     void inspectCaptureStructure();
     void showPipeline(const State &state);
     void startWorker(QStringList args, bool timings);
+    ReplayRequestIdentity currentWorkerIdentity() const;
+    void beginWorkerIdentity();
     void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
     void loadWorkerReport();
@@ -309,6 +311,7 @@ class MainWindow final : public QMainWindow {
         bool readingReport = false;
         QString kind;
         uint64_t revision{};
+        ReplayRequestIdentity identity;
         bool timings{};
         BufferRequest buffer;
         std::atomic_bool cancelled{false};
@@ -323,6 +326,8 @@ class MainWindow final : public QMainWindow {
     bool workerTimedOut_ = false;
     void *job_ = nullptr;
     uint64_t revision_ = 0, runningRevision_ = 0;
+    uint64_t workerRequestSerial_ = 0;
+    ReplayRequestIdentity runningIdentity_;
     Id selectedEvent_ = 0, selectedResource_ = 0;
     std::optional<unsigned> selectedShaderStage_;
     bool runningTimings_ = false;

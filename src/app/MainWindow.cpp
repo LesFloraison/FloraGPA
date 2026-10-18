@@ -1622,13 +1622,15 @@ void MainWindow::startHistoryWorker() {
     if (!jobDir_->isValid())
         throw std::runtime_error("Cannot create history worker directory");
     auto options = historyRequest_;
-    for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key"})
+    for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key", "request_identity"})
         options.erase(key);
     auto prepared = prepareRdcJob(
         historyRdc_, historyRequest_.at("action").get<std::string>(), jobDir_->path() + "/result",
         QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
     prepared["frame_sha256"] = historyRequest_.at("frame_sha256");
     prepared["experiment_key"] = historyRequest_.at("experiment_key");
+    beginWorkerIdentity();
+    prepared["request_identity"] = replayIdentityJson(runningIdentity_);
     historyRequest_ = std::move(prepared);
     const auto path = jobDir_->path() + "/job.json";
     writeFile(path, QByteArray::fromStdString(historyRequest_.dump(2)));
@@ -1743,6 +1745,17 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
         showError(e.what());
     }
 }
+ReplayRequestIdentity MainWindow::currentWorkerIdentity() const {
+    // revision_ also changes for selection/cancellation, so it is deliberately
+    // stricter than the experiment cursor (undo may revisit an old cursor).
+    return {session_ ? session_->identity() : "no-capture",
+        session_ ? session_->backend() : ReplayBackend::Dx11, workerRequestSerial_, revision_};
+}
+void MainWindow::beginWorkerIdentity() {
+    if (workerRequestSerial_ == UINT64_MAX) throw std::runtime_error("Replay request identity exhausted");
+    ++workerRequestSerial_;
+    runningIdentity_ = currentWorkerIdentity();
+}
 void MainWindow::startWorker(QStringList args, bool timings) {
     if (process_.state() != QProcess::NotRunning || artifactJob_)
         return;
@@ -1807,6 +1820,12 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     }
     if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
     args << replayAdapterArguments(*adapter_, args.first());
+    try {
+        beginWorkerIdentity();
+        const auto identityPath = jobDir_->filePath("request-identity.json");
+        writeReplayIdentity(identityPath, runningIdentity_);
+        args << "--replay-identity" << identityPath;
+    } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); return; }
     runningRevision_ = revision_;
     runningTimings_ = timings;
     runningKind_ = args.first();
@@ -1885,7 +1904,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         job_ = nullptr;
     }
     setBusy(false);
-    if (runningRevision_ != revision_) {
+    if (runningRevision_ != revision_ || runningIdentity_ != currentWorkerIdentity()) {
         const char *reason = workerTimedOut_ ? "Worker timed out." : "Cancelled";
         if (runningKind_ == "draw-resources") {
             resourceBrowser_->failPreviews(runningResourceKey_, workerTimedOut_ ? reason : "Selection changed");
@@ -1920,6 +1939,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             auto error = QJsonDocument::fromJson(errorText_.toUtf8()).object()["error"].toString(errorText_);
             throw std::runtime_error((error.isEmpty() ? "Replay worker failed" : error).toStdString());
         }
+        requireReplayIdentity(jobDir_->filePath("result/response-identity.json"), runningIdentity_);
         if (runningKind_ == "metric-catalog") {
             loadWorkerReport();
             return;

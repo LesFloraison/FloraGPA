@@ -33,6 +33,7 @@ void MainWindow::validateWorkerArtifact(nlohmann::json replayReport) {
     job->replayReport = std::move(replayReport);
     job->kind = runningKind_;
     job->revision = runningRevision_;
+    job->identity = runningIdentity_;
     job->timings = runningTimings_;
     job->buffer = runningBuffer_;
     artifactJob_ = job;
@@ -46,7 +47,7 @@ void MainWindow::validateWorkerArtifact(nlohmann::json replayReport) {
             return;
         artifactJob_.reset();
         setBusy(false);
-        if (job->cancelled.load() || result.cancelled || job->revision != revision_) {
+        if (job->cancelled.load() || result.cancelled || job->revision != revision_ || job->identity != currentWorkerIdentity()) {
             if (!loadCancel_)
                 statusBar()->showMessage("Cancelled", 2000);
             emit taskFinished(false);

@@ -1,10 +1,10 @@
 #pragma once
 #include "core/Frame.h"
+#include "ReplayRequest.h"
 #include <nlohmann/json.hpp>
 #include <optional>
 
 namespace flora {
-enum class ReplayBackend { Dx11, Dx12 };
 enum class CapabilityStatus { Supported, NotImplemented, MissingData, UnsupportedDevice, Failed };
 enum class ReplayFeature { ApiInspection, ResourceInspection, Replay, PixelHistory, ResourceHistory,
                            ShaderDebug, Geometry, Performance, Experiments };
@@ -19,12 +19,6 @@ struct ReplaySelection {
     std::optional<Id> execution;
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
-};
-struct ReplayRequestIdentity {
-    std::string session;
-    ReplayBackend backend = ReplayBackend::Dx11;
-    uint64_t request{}, experimentRevision{};
-    bool operator==(const ReplayRequestIdentity &) const = default;
 };
 struct SessionEvent {
     Id id{};

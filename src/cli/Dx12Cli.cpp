@@ -11,7 +11,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     if (command != "inventory" && command != "commands" && command != "validate-frame" && command != "command-lists")
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
     for (const auto &option : options.optionNames())
-        if (option != "out" && !(command == "commands" && option == "filter") &&
+        if (option != "out" && option != "replay-identity" && !(command == "commands" && option == "filter") &&
             !(command == "validate-frame" && (option == "check-device" || option == "check-copy" ||
                 (option == "max-bytes" && options.isSet("check-copy")))))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
