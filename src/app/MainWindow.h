@@ -58,6 +58,8 @@ class MainWindow final : public QMainWindow {
 
   protected:
     void closeEvent(QCloseEvent *) override;
+    void dragEnterEvent(QDragEnterEvent *) override;
+    void dropEvent(QDropEvent *) override;
 
   private:
     void buildUi();
@@ -177,6 +179,8 @@ class MainWindow final : public QMainWindow {
     CheckpointView *runningCheckpoint_ = nullptr;
     bool runningCheckpointCatalog_ = true;
     std::shared_ptr<const Frame> frame_;
+    std::shared_ptr<const IReplaySession> session_;
+    ReplaySelection selection_;
     std::unique_ptr<Experiment> experiment_;
     QString projectPath_;
     bool projectDirty_ = false;
@@ -289,6 +293,7 @@ class MainWindow final : public QMainWindow {
     QDockWidget *logDock_;
     QProcess process_;
     struct CaptureLoadResult {
+        std::shared_ptr<const IReplaySession> session;
         std::shared_ptr<const Frame> frame;
         std::shared_ptr<const QueryInspection> queries;
         std::shared_ptr<const CommandSearchIndex> search;

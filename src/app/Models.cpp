@@ -32,6 +32,7 @@ void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<
     if (frame && kind_ == Kind::Commands && !search)
         throw std::invalid_argument("Command model requires prepared API search");
     beginResetModel();
+    session_.reset();
     frame_ = std::move(frame);
     queries_ = std::move(queries);
     search_ = std::move(search);
@@ -54,11 +55,24 @@ void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<
     }
     endResetModel();
 }
+void CaptureModel::setSession(std::shared_ptr<const IReplaySession> session) {
+    if (session && session->backend() == ReplayBackend::Dx11)
+        throw std::invalid_argument("DX11 command model requires prepared Query/search data");
+    setFrame({});
+    beginResetModel();
+    session_ = std::move(session);
+    if (session_ && kind_ == Kind::Commands)
+        ids_.assign(session_->events().begin(), session_->events().end());
+    if (session_ && kind_ == Kind::Resources)
+        ids_.assign(session_->resources().begin(), session_->resources().end());
+    endResetModel();
+}
 int CaptureModel::rowOf(Id id) const {
     auto it = std::lower_bound(ids_.begin(), ids_.end(), id);
     return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
 }
 nlohmann::json CaptureModel::command(Id id) const {
+    if (session_) return session_->eventDetails(id);
     if (!frame_) throw std::runtime_error("Command capture is unavailable");
     if (queries_)
         if (const auto row = queries_->find(id)) return *row;
@@ -77,9 +91,37 @@ nlohmann::json CaptureModel::command(Id id) const {
     return found->second;
 }
 bool CaptureModel::matchesCommand(Id id, const QStringList &words, std::optional<Id> resource) const {
+    if (session_) {
+        if (resource) return false; // Do not infer resource references from arbitrary payload bytes.
+        auto e = session_->event(id);
+        auto text = QString::fromStdString(std::to_string(id) + " " + e.name + " " + e.summary).toCaseFolded();
+        const bool needsArguments = std::any_of(words.begin(), words.end(), [&](const auto &word) { return !text.contains(word); });
+        if (needsArguments) text += QString::fromStdString(session_->argumentText(id)).toCaseFolded();
+        for (const auto &word : words) if (!text.contains(word)) return false;
+        return true;
+    }
     return search_ && search_->matches(id, words, resource);
 }
 QVariant CaptureModel::data(const QModelIndex &index, int role) const {
+    if (session_) {
+        if (!index.isValid() || index.row() < 0 || index.row() >= int(ids_.size())) return {};
+        if (kind_ == Kind::Resources) {
+            const auto r = session_->resource(ids_[index.row()]);
+            if (role == Qt::UserRole) return QVariant::fromValue<qulonglong>(r.id);
+            if (role == Qt::ToolTipRole) return QString::fromStdString("Captured object " + std::to_string(r.capturedObject) + " | " + r.summary);
+            if (role != Qt::DisplayRole) return {};
+            return index.column() == 0 ? QString::number(r.id) : QString::fromStdString(index.column() == 1 ? r.name : r.summary);
+        }
+        const auto e = session_->event(ids_[index.row()]);
+        if (role == Qt::UserRole) return QVariant::fromValue<qulonglong>(e.id);
+        if (role == Qt::UserRole + 2) return e.work;
+        if (role == Qt::UserRole + 3 && e.thread) return QVariant::fromValue<qulonglong>(*e.thread);
+        if (role == Qt::ToolTipRole) return QString::fromStdString(e.summary);
+        if (role == Qt::ForegroundRole && e.work) return QColor("#a6dffa");
+        if (role != Qt::DisplayRole) return {};
+        return index.column() == 0 ? QString::number(e.id) :
+               QString::fromStdString(index.column() == 1 ? e.name : e.summary);
+    }
     if (!index.isValid() || index.row() >= int(ids_.size()) || !frame_)
         return {};
     auto id = ids_[index.row()];
@@ -88,6 +130,7 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
         return QVariant::fromValue<qulonglong>(id);
     if (role == Qt::UserRole + 1)
         return e.type;
+    if (role == Qt::UserRole + 2) return isDraw(e.type);
     if (role == Qt::ForegroundRole && kind_ == Kind::Commands && isDraw(e.type))
         return QColor("#a6dffa");
     if (role == Qt::ToolTipRole)
@@ -145,8 +188,10 @@ QVariant CaptureModel::headerData(int n, Qt::Orientation orientation, int role) 
 bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
     auto index = sourceModel()->index(row, 0, parent);
     auto type = index.data(Qt::UserRole + 1).toUInt();
-    if (workOnly && !(type >= 0x31 && type <= 0x42))
+    if (workOnly && !index.data(Qt::UserRole + 2).toBool())
         return false;
+    if (thread && (!index.data(Qt::UserRole + 3).isValid() ||
+                   index.data(Qt::UserRole + 3).toULongLong() != *thread)) return false;
     if (resourceType == 1 && !(type >= 0x84 && type <= 0x86))
         return false;
     if (resourceType == 2 && type != 0x83)

@@ -3,6 +3,7 @@
 #include "core/Frame.h"
 #include "QueryInspection.h"
 #include "CommandSearchIndex.h"
+#include "application/ReplaySession.h"
 #include <QAbstractTableModel>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -18,6 +19,7 @@ class CaptureModel final : public QAbstractTableModel {
     explicit CaptureModel(Kind kind, QObject *parent = nullptr) : QAbstractTableModel(parent), kind_(kind) {}
     void setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries = {},
                   std::shared_ptr<const CommandSearchIndex> search = {});
+    void setSession(std::shared_ptr<const IReplaySession> session);
     int rowCount(const QModelIndex &parent = {}) const override {
         return parent.isValid() ? 0 : int(ids_.size());
     }
@@ -41,6 +43,7 @@ class CaptureModel final : public QAbstractTableModel {
   private:
     Kind kind_;
     std::shared_ptr<const Frame> frame_;
+    std::shared_ptr<const IReplaySession> session_;
     std::shared_ptr<const QueryInspection> queries_;
     std::shared_ptr<const CommandSearchIndex> search_;
     std::vector<Id> ids_;
@@ -53,6 +56,7 @@ class CaptureFilter final : public QSortFilterProxyModel {
     bool workOnly = false;
     int resourceType = 0;
     std::optional<Id> referencedResource;
+    std::optional<uint64_t> thread;
     QString searchText;
     void setFilterFixedString(const QString &text) {
         searchText = text;

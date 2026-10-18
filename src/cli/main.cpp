@@ -1,4 +1,5 @@
 #include "RdcAnalyzeCli.h"
+#include "Dx12Cli.h"
 #include "BufferCsv.h"
 #include "application/Annotations.h"
 #include "application/DrawResources.h"
@@ -98,7 +99,7 @@ int main(int argc, char **argv) {
                    "| metric-iterations | metric-groups | "
                    "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
                    "rdc-analyze");
-    p.addPositionalArgument("capture", "DX11 .gpa_frame file");
+    p.addPositionalArgument("capture", "DX11 .gpa_frame file or DX12 single-frame directory");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
     p.addOption({"source", "HLSL translation unit or shader project JSON", "path"});
@@ -228,6 +229,7 @@ int main(int argc, char **argv) {
         }
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
+        if (QFileInfo(args[1]).isDir()) return runDx12Cli(command, args[1], p);
         if (command == "validate-frame") {
             for (const auto &option : p.optionNames())
                 if (option != "out") throw std::runtime_error("validate-frame accepts only --out");

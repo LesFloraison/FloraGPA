@@ -47,6 +47,9 @@
 #include "replay/Replay.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
 #include <QCryptographicHash>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -172,6 +175,9 @@ MainWindow::MainWindow() : loader_(this) {
             }
             if (!loaded.error.isEmpty())
                 throw std::runtime_error(loaded.error.toStdString());
+            session_ = std::move(loaded.session);
+            selection_ = {};
+            selection_.session = session_->identity();
             frame_ = std::move(loaded.frame);
             capturePath_ = pendingPath_;
             compatibility_->setCapture(capturePath_);
@@ -187,15 +193,22 @@ MainWindow::MainWindow() : loader_(this) {
             shaderDocuments_ = nlohmann::json::object();
             shaderEntries_ = nlohmann::json::object();
             selectedShaderStage_.reset();
-            experiment_ = std::make_unique<Experiment>(*frame_);
+            experiment_ = frame_ ? std::make_unique<Experiment>(*frame_) : nullptr;
             projectPath_.clear();
             projectDirty_ = false;
             updateExperimentActions();
-            commands_->setFrame(frame_, std::move(loaded.queries), std::move(loaded.search));
+            if (frame_) commands_->setFrame(frame_, std::move(loaded.queries), std::move(loaded.search));
+            else commands_->setSession(session_);
+            findChild<QLineEdit *>("apiThreadFilter")->clear();
+            findChild<QLineEdit *>("apiThreadFilter")->setEnabled(!frame_);
+            findChild<QLineEdit *>("apiResourceFilter")->clear();
+            findChild<QLineEdit *>("apiResourceFilter")->setEnabled(bool(frame_));
+            apiView_->setColumnHidden(2, bool(frame_));
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
             updateProfileContext();
-            resources_->setFrame(frame_);
+            if (frame_) resources_->setFrame(frame_);
+            else resources_->setSession(session_);
             chart_->clear();
             pipeline_->clear();
             capturedState_->setSelection(frame_, 0);
@@ -230,7 +243,8 @@ MainWindow::MainWindow() : loader_(this) {
                     sampleBlock(outputSample_), channelBlock(channels_);
                 while (outputTarget_->count() > 12)
                     outputTarget_->removeItem(12);
-                const auto inventory = presentationInventory(*frame_);
+                const auto inventory = frame_ ? presentationInventory(*frame_) :
+                    nlohmann::json{{"swap_chains", nlohmann::json::array()}};
                 for (const auto &chain : inventory["swap_chains"])
                     if (!chain["target"].is_null()) {
                         auto selector = QString::fromStdString(chain["selector"].get<std::string>());
@@ -244,6 +258,7 @@ MainWindow::MainWindow() : loader_(this) {
                 outputHigh_->setText("1");
             }
             image_->setImage({});
+            imageLabel_->setText(frame_ ? "" : "DX12 stream indexed — native replay is not implemented");
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
             selectionLabel_->setText(QString("%1 API calls").arg(commands_->rowCount()));
@@ -251,7 +266,8 @@ MainWindow::MainWindow() : loader_(this) {
             updateStatistics();
             setBusy(false);
             emit captureLoaded();
-            replay();
+            if (frame_) replay();
+            else statusBar()->showMessage("DX12 API inspection ready; resource restoration and replay are incomplete.");
         } catch (const std::exception &e) {
             setBusy(false);
             showError(QString::fromUtf8(e.what()));
@@ -369,6 +385,7 @@ MainWindow::~MainWindow() {
     if (loader_.future().isValid()) loader_.waitForFinished();
 }
 void MainWindow::buildUi() {
+    setAcceptDrops(true);
     resize(1680, 1000);
     setMinimumSize(1000, 640);
     setWindowTitle("FloraGPA");
@@ -380,6 +397,12 @@ void MainWindow::buildUi() {
             openCapture(path);
     });
     openAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    auto openDirectory = file->addAction("Open DX12 Frame Directory…", this, [this] {
+        if (busy()) return;
+        const auto path = QFileDialog::getExistingDirectory(this, "Open DX12 single-frame directory");
+        if (!path.isEmpty()) openCapture(path);
+    });
+    openDirectory->setObjectName("openDx12Directory");
 #ifdef FLORA_CAPTURE_UI
     auto captureDialog = new capture_ui::CaptureDialog(
         QCoreApplication::applicationDirPath() + "/FloraCapture.exe", this);
@@ -585,6 +608,29 @@ void MainWindow::buildUi() {
         commandFilter_->refresh();
     });
     static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(2, referenceFilter);
+    auto threadFilter = new QLineEdit;
+    threadFilter->setObjectName("apiThreadFilter");
+    threadFilter->setPlaceholderText("Thread ID…");
+    threadFilter->setClearButtonEnabled(true);
+    connect(threadFilter, &QLineEdit::textChanged, this, [this, threadFilter](const QString &value) {
+        bool valid = false;
+        const auto id = value.toULongLong(&valid);
+        threadFilter->setToolTip(value.isEmpty() || valid ? "" : "Enter an unsigned thread ID");
+        if (!value.isEmpty() && (!valid || value.startsWith('-'))) return;
+        commandFilter_->thread = value.isEmpty() ? std::nullopt : std::optional<uint64_t>(id);
+        commandFilter_->refresh();
+    });
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(3, threadFilter);
+    auto locate = new QLineEdit;
+    locate->setObjectName("apiLocate");
+    locate->setPlaceholderText("Locate event ID (Enter)…");
+    connect(locate, &QLineEdit::returnPressed, this, [this, locate] {
+        bool valid = false;
+        const auto id = locate->text().toULongLong(&valid);
+        if (valid && !locate->text().startsWith('-') && commands_->rowOf(id) >= 0) locateEvent(id);
+        else statusBar()->showMessage("Event ID was not found in this capture.");
+    });
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(4, locate);
     leftTabs_->addTab(apiPane, "API Log");
     leftTabs_->addTab(filtered(resourceView_, resourceFilter_, resourceKinds), "Resources");
     statistics_ = tree({"Statistic", "Value"});
@@ -1405,7 +1451,13 @@ void MainWindow::setBusy(bool busy) {
     scheduledMetrics_->setWorkerBusy(busy);
     coverage_->setWorkerBusy(busy);
     quad_->setWorkerBusy(busy);
-    geometryStage_->setEnabled(!busy);
+    const bool geometryAvailable = !busy && bool(frame_);
+    if (auto action = findChild<QAction *>("inspectGeometry")) {
+        action->setEnabled(geometryAvailable);
+        action->setToolTip(session_ && session_->backend() == ReplayBackend::Dx12 ?
+            QString::fromStdString(session_->capability(ReplayFeature::Geometry, selection_).reason) : QString{});
+    }
+    geometryStage_->setEnabled(geometryAvailable);
     geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
                                          geometryStage_->currentData() == "vs-index" ||
                                          geometryStage_->currentData() == "hs"));
@@ -1414,8 +1466,11 @@ void MainWindow::setBusy(bool busy) {
         geometryStage_->currentData() != "ds-writes" && geometryStage_->currentData() != "hs");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
+    findChild<QAction *>("openDx12Directory")->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
+    replayAction_->setToolTip(session_ && session_->backend() == ReplayBackend::Dx12 ?
+        QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason) : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
@@ -1579,7 +1634,12 @@ void MainWindow::openCapture(const QString &path) {
         try {
             promise.setProgressRange(0, 3);
             const CancelCheck cancelled = [token] { return token->load(); };
-            auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()), cancelled);
+            result.session = openReplaySession(std::filesystem::path(path.toStdWString()), cancelled);
+            auto frame = result.session->dx11Frame();
+            if (!frame) {
+                promise.addResult(std::move(result));
+                return;
+            }
             frame->sha256(cancelled);
             promise.setProgressValueAndText(1, "Reading Query history…");
             result.queries = QueryInspection::prepare(frame, cancelled);
@@ -1594,6 +1654,17 @@ void MainWindow::openCapture(const QString &path) {
         }
         promise.addResult(std::move(result));
     }));
+}
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+    const auto urls = event->mimeData()->urls();
+    if (!busy() && urls.size() == 1 && urls.front().isLocalFile()) event->acceptProposedAction();
+}
+void MainWindow::dropEvent(QDropEvent *event) {
+    const auto urls = event->mimeData()->urls();
+    if (!busy() && urls.size() == 1 && urls.front().isLocalFile()) {
+        openCapture(urls.front().toLocalFile());
+        event->acceptProposedAction();
+    }
 }
 void MainWindow::replay(bool timings) {
     if (!frame_ || loadCancel_)
@@ -2134,7 +2205,7 @@ void MainWindow::properties(const QString &title, const QList<QPair<QString, QSt
     properties_->resizeColumnToContents(0);
 }
 void MainWindow::locateEvent(Id id) {
-    if (!frame_)
+    if (!session_)
         return;
     auto source = commands_->index(commands_->rowOf(id), 0);
     if (!source.isValid())
@@ -2143,6 +2214,7 @@ void MainWindow::locateEvent(Id id) {
         findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
         findChild<QLineEdit *>("apiSearch")->clear();
         findChild<QLineEdit *>("apiResourceFilter")->clear();
+        findChild<QLineEdit *>("apiThreadFilter")->clear();
     }
     leftTabs_->setCurrentIndex(0);
     selectEvent(id);
@@ -2151,9 +2223,21 @@ void MainWindow::locateEvent(Id id) {
     apiView_->scrollTo(index);
 }
 void MainWindow::selectEvent(Id id) {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        if (commands_->rowOf(id) < 0) return;
+        selectedEvent_ = id;
+        selectedResource_ = 0;
+        selection_.event = id;
+        selection_.resource = 0;
+        ++revision_;
+        selectionLabel_->setText(QString("Stream record %1").arg(id));
+        inspectEvent(id);
+        return;
+    }
     if (!frame_ || selectedEvent_ == id)
         return;
     selectedEvent_ = id;
+    selection_.event = id;
     updateCheckpointContext();
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
@@ -2196,6 +2280,14 @@ void MainWindow::selectEvent(Id id) {
 }
 void MainWindow::inspectEvent(Id id) {
     const auto &details = commands_->command(id);
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        QList<QPair<QString, QString>> values;
+        for (auto it = details.begin(); it != details.end(); ++it)
+            if (it.key() != "name") values.push_back({QString::fromStdString(it.key()),
+                QString::fromStdString(it.value().is_string() ? it.value().get<std::string>() : it.value().dump())});
+        properties(QString::fromStdString(details.at("name").get<std::string>()), values);
+        return;
+    }
     auto display = [](const nlohmann::json &v) {
         return QString::fromStdString(v.is_string() ? v.get<std::string>() : v.dump());
     };
@@ -2370,6 +2462,16 @@ void MainWindow::inspectResource(Id id) {
     stashShaderDrafts();
     shaderDocument_ = 0;
     selectedShaderStage_.reset();
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        const auto details = session_->resourceDetails(id);
+        QList<QPair<QString, QString>> values;
+        for (auto it = details.begin(); it != details.end(); ++it)
+            values.push_back({QString::fromStdString(it.key()), QString::fromStdString(
+                it.value().is_string() ? it.value().get<std::string>() : it.value().dump())});
+        selection_.resource = id;
+        properties("DX12 resource creation", values);
+        return;
+    }
     if (!frame_)
         return;
     try {
@@ -2602,6 +2704,14 @@ void MainWindow::inspectResource(Id id) {
 }
 void MainWindow::updateStatistics() {
     statistics_->clear();
+    if (!frame_) {
+        if (session_) {
+            row(statistics_, "Backend", "DX12");
+            row(statistics_, "Stream records (including initialization)", QString::number(session_->events().size()));
+            row(statistics_, "Replay", "Not implemented");
+        }
+        return;
+    }
     uint64_t draws = 0, dispatches = 0, resources = 0, bytes = 0;
     std::map<std::string, uint64_t> kinds;
     for (auto &[id, e] : frame_->entries()) {

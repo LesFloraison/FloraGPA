@@ -1,0 +1,59 @@
+#pragma once
+#include "core/Frame.h"
+#include <nlohmann/json.hpp>
+#include <optional>
+
+namespace flora {
+enum class ReplayBackend { Dx11, Dx12 };
+enum class CapabilityStatus { Supported, NotImplemented, MissingData, UnsupportedDevice, Failed };
+enum class ReplayFeature { ApiInspection, ResourceInspection, Replay, PixelHistory, ResourceHistory,
+                           ShaderDebug, Geometry, Performance, Experiments };
+struct SessionCapability {
+    CapabilityStatus status = CapabilityStatus::NotImplemented;
+    std::string reason;
+    bool supported() const { return status == CapabilityStatus::Supported; }
+};
+struct ReplaySelection {
+    std::string session;
+    Id event{}, resource{};
+    uint32_t mip{}, layer{}, sample{};
+    bool before = false;
+};
+struct ReplayRequestIdentity {
+    std::string session;
+    ReplayBackend backend = ReplayBackend::Dx11;
+    uint64_t request{}, experimentRevision{};
+    bool operator==(const ReplayRequestIdentity &) const = default;
+};
+struct SessionEvent {
+    Id id{};
+    std::string name, summary;
+    bool work = false;
+    // Raw CPU records are distinct from command-list execution instances.
+    std::optional<uint64_t> thread, fileOffset, queue, recording, submission;
+};
+struct SessionResource {
+    Id id{}, capturedObject{};
+    std::string name, summary;
+};
+class IReplaySession {
+  public:
+    virtual ~IReplaySession() = default;
+    virtual ReplayBackend backend() const = 0;
+    virtual const std::string &identity() const = 0;
+    virtual const std::filesystem::path &path() const = 0;
+    virtual nlohmann::json information() const = 0;
+    virtual std::span<const Id> events() const = 0;
+    virtual SessionEvent event(Id id) const = 0;
+    virtual nlohmann::json eventDetails(Id id) const = 0;
+    virtual std::string argumentText(Id id) const = 0;
+    virtual std::span<const Id> resources() const = 0;
+    virtual SessionResource resource(Id id) const = 0;
+    virtual nlohmann::json resourceDetails(Id id) const = 0;
+    virtual SessionCapability capability(ReplayFeature feature, const ReplaySelection &selection = {}) const = 0;
+    // Transitional adapter for existing DX11 specialists; never synthesize a DX11 Frame for DX12.
+    virtual std::shared_ptr<const Frame> dx11Frame() const { return {}; }
+};
+std::shared_ptr<const IReplaySession> openReplaySession(const std::filesystem::path &path,
+                                                       const CancelCheck &cancelled = {});
+}
