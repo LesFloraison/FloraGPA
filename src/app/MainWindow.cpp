@@ -265,7 +265,7 @@ MainWindow::MainWindow() : loader_(this) {
                 outputHigh_->setText("1");
             }
             image_->setImage({});
-            imageLabel_->setText(frame_ ? "" : "DX12 stream indexed — native replay is not implemented");
+            imageLabel_->setText(frame_ ? "" : "Select a submitted execution instance and optional texture creation, then press Replay");
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
             selectionLabel_->setText(QString("%1 API calls").arg(commands_->rowCount()));
@@ -480,6 +480,7 @@ void MainWindow::buildUi() {
     file->addAction("Exit", QKeySequence::Quit, this, &QWidget::close);
     auto analyze = menuBar()->addMenu("&Analysis");
     replayAction_ = analyze->addAction("Replay", QKeySequence("F5"), this, [this] { replay(); });
+    replayAction_->setObjectName("replayFrame");
     replayAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     collectAction_ =
         analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
@@ -609,6 +610,7 @@ void MainWindow::buildUi() {
     connect(eventDomain, &QComboBox::currentIndexChanged, this, [this](int value) {
         commands_->setExecutionView(value == 1);
         selectedEvent_ = 0; selection_.event = 0; selection_.execution.reset();
+        invalidateDx12Output();
         properties_->clear();
         selectionLabel_->setText(value ? "Submitted instances — not replayed" : "Recorded API calls");
     });
@@ -694,7 +696,7 @@ void MainWindow::buildUi() {
          {"auto", "present", "rt0", "rt1", "rt2", "rt3", "rt4", "rt5", "rt6", "rt7", "depth", "stencil"})
         outputTarget_->addItem(QString(target).toUpper(), target);
     outputTarget_->setToolTip("Output target");
-    imageBar->addWidget(outputTarget_);
+    imageBar->addWidget(outputTarget_)->setObjectName("dx11OutputTarget");
     outputLayer_ = new QSpinBox;
     outputLayer_->setObjectName("outputLayer");
     outputLayer_->setRange(-1, 65535);
@@ -702,7 +704,7 @@ void MainWindow::buildUi() {
     outputLayer_->setPrefix("Layer ");
     outputLayer_->setValue(-1);
     outputLayer_->setToolTip("Absolute array layer or volume slice");
-    imageBar->addWidget(outputLayer_);
+    imageBar->addWidget(outputLayer_)->setObjectName("dx11OutputLayer");
     outputSample_ = new QSpinBox;
     outputSample_->setObjectName("outputSample");
     outputSample_->setRange(-1, 31);
@@ -710,7 +712,23 @@ void MainWindow::buildUi() {
     outputSample_->setPrefix("Sample ");
     outputSample_->setValue(-1);
     outputSample_->setToolTip("MSAA sample index; Resolve averages samples");
-    imageBar->addWidget(outputSample_);
+    imageBar->addWidget(outputSample_)->setObjectName("dx11OutputSample");
+    auto dx12Controls = new QWidget;
+    auto dx12Layout = new QHBoxLayout(dx12Controls);
+    dx12Layout->setContentsMargins(0,0,0,0);
+    auto dx12Label=new QLabel("DX12"); dx12Label->setToolTip("Automatic hardware adapter; the output tooltip reports the actual device and SDK");
+    dx12Layout->addWidget(dx12Label);
+    dx12Subresource_ = new QSpinBox;
+    dx12Subresource_->setObjectName("dx12Subresource");
+    dx12Subresource_->setRange(0,INT_MAX); dx12Subresource_->setPrefix("Subresource ");
+    dx12Subresource_->setToolTip("D3D12 subresource index of the selected resource creation; depth is displayed as normalized grayscale");
+    dx12Layout->addWidget(dx12Subresource_);
+    dx12Budget_ = new QSpinBox;
+    dx12Budget_->setObjectName("dx12AllocationMiB"); dx12Budget_->setRange(64,131072);
+    dx12Budget_->setValue(4096); dx12Budget_->setPrefix("Budget "); dx12Budget_->setSuffix(" MiB");
+    dx12Budget_->setToolTip("Maximum native resource and readback allocation; requests exceeding this budget fail explicitly");
+    dx12Layout->addWidget(dx12Budget_);
+    dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
     imageBar->addSeparator();
     channels_ = new QComboBox;
     channels_->addItems({"RGB", "RGBA", "R", "G", "B", "A"});
@@ -1381,6 +1399,7 @@ void MainWindow::buildUi() {
     connect(outputLow_, &QLineEdit::editingFinished, this, outputChanged);
     connect(outputHigh_, &QLineEdit::editingFinished, this, outputChanged);
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
+        if (session_ && session_->backend()==ReplayBackend::Dx12) { invalidateDx12Output(); return; }
         if (frame_) {
             ++revision_;
             if (process_.state() != QProcess::NotRunning || artifactJob_)
@@ -1388,6 +1407,8 @@ void MainWindow::buildUi() {
             replayTimer_.start();
         }
     });
+    connect(dx12Subresource_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
+    connect(dx12Budget_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
         updateCheckpointContext();
         updateProfileContext();
@@ -1501,9 +1522,18 @@ void MainWindow::setBusy(bool busy) {
     openAction_->setEnabled(!busy);
     findChild<QAction *>("openDx12Directory")->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
-    replayAction_->setEnabled(!busy && bool(frame_));
+    const bool dx12 = session_ && session_->backend()==ReplayBackend::Dx12;
+    replayAction_->setEnabled(!busy && (bool(frame_) || (dx12 && boundary_->currentIndex()!=0 && session_->capability(ReplayFeature::Replay,selection_).supported())));
+    dx12Controls_->setVisible(dx12);
+    resourceBrowser_->setVisible(!dx12);
+    for(const auto name : {"dx11OutputTarget","dx11OutputLayer","dx11OutputSample"}) findChild<QAction *>(name)->setVisible(!dx12);
+    for(const auto name : {"finalFrame","toggleResourceCoverage","resourceCoverageSettings","pickPixelHistory"}) findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
+    dx12Subresource_->setEnabled(dx12 && !busy); dx12Budget_->setEnabled(dx12 && !busy);
+    for (QWidget *control : std::initializer_list<QWidget *>{adapter_,outputTarget_,outputLayer_,outputSample_,channels_,outputLow_,outputHigh_})
+        control->setEnabled(!busy && !dx12);
     replayAction_->setToolTip(session_ && session_->backend() == ReplayBackend::Dx12 ?
-        QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason) : QString{});
+        (boundary_->currentIndex()==0 ? QString("Full-frame DX12 replay is unfinished; choose Before event or After event") :
+         QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason)) : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
@@ -1702,12 +1732,24 @@ void MainWindow::dropEvent(QDropEvent *event) {
     }
 }
 void MainWindow::replay(bool timings) {
-    if (!frame_ || loadCancel_)
+    if (!session_ || loadCancel_)
         return;
     if (process_.state() != QProcess::NotRunning || artifactJob_) {
         cancel();
         replayTimer_.start();
         return;
+    }
+    if (session_->backend()==ReplayBackend::Dx12) {
+        if(timings) { showError("DX12 workspace performance analysis is not yet available"); return; }
+        const auto capability=session_->capability(ReplayFeature::Replay,selection_);
+        if(!capability.supported() || boundary_->currentIndex()==0) {
+            showError(boundary_->currentIndex()==0 ? "Select Before event or After event for a DX12 execution instance" : QString::fromStdString(capability.reason)); return;
+        }
+        QStringList args{"replay",capturePath_,"--event",QString::number(*selection_.execution),
+            "--max-bytes",QString::number(uint64_t(dx12Budget_->value())*1024*1024)};
+        if(selection_.resource) args << "--id" << QString::number(selection_.resource) << "--subresource" << QString::number(dx12Subresource_->value());
+        if(boundary_->currentIndex()==1) args << "--before";
+        startWorker(args,false); return;
     }
     QStringList args{"replay",           capturePath_,
                      "--output-target",  outputTarget_->currentData().toString(),
@@ -1819,7 +1861,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         args << "--preview-request" << path;
     }
     if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
-    args << replayAdapterArguments(*adapter_, args.first());
+    if (!session_ || session_->backend()!=ReplayBackend::Dx12) args << replayAdapterArguments(*adapter_, args.first());
     try {
         beginWorkerIdentity();
         const auto identityPath = jobDir_->filePath("request-identity.json");
@@ -2280,11 +2322,10 @@ void MainWindow::selectEvent(Id id) {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
         if (commands_->rowOf(id) < 0) return;
         selectedEvent_ = id;
-        selectedResource_ = 0;
         selection_.event = commands_->executionView() ? session_->executionEvent(id).sourceRecord.value() : id;
         selection_.execution = commands_->executionView() ? std::optional<Id>(id) : std::nullopt;
-        selection_.resource = 0;
-        ++revision_;
+        if (boundary_->currentIndex()==0) { QSignalBlocker blocker(boundary_); boundary_->setCurrentIndex(2); }
+        invalidateDx12Output();
         selectionLabel_->setText(QString(commands_->executionView() ? "Execution instance %1 — not replayed" : "Stream record %1").arg(id));
         inspectEvent(id);
         return;
@@ -2524,6 +2565,9 @@ void MainWindow::inspectResource(Id id) {
             values.push_back({QString::fromStdString(it.key()), QString::fromStdString(
                 it.value().is_string() ? it.value().get<std::string>() : it.value().dump())});
         selection_.resource = id;
+        selectedResource_ = id;
+        invalidateDx12Output();
+        resourceStatus_->setText(QString("DX12 resource creation %1 · %2").arg(id).arg(QString::fromStdString(session_->capability(ReplayFeature::Replay,selection_).reason)));
         properties("DX12 resource creation", values);
         return;
     }

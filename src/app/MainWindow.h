@@ -63,6 +63,9 @@ class MainWindow final : public QMainWindow {
 
   private:
     void buildUi();
+    void invalidateDx12Output();
+    QSpinBox *dx12Subresource_ = nullptr, *dx12Budget_ = nullptr;
+    QAction *dx12Controls_ = nullptr;
     CompatibilityButton *compatibility_ = nullptr;
     void buildResourceWorkspace(QWidget *output);
     void updateResourceContext(bool chooseDefault = false);

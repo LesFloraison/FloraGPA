@@ -8,14 +8,140 @@
 #include <QDir>
 #include <QSaveFile>
 #include <QTextStream>
+#include <QImage>
+#include <QCryptographicHash>
 #include <set>
 
 namespace flora {
+namespace {
+int replayDx12(const IReplaySession &session, const QString &path, const QCommandLineParser &options,
+               const QDir &output) {
+    const auto number = [&](const char *key) {
+        bool valid{};
+        const auto value = options.value(key).toULongLong(&valid);
+        if (!valid || options.value(key).startsWith('-'))
+            throw std::runtime_error(std::string("Invalid DX12 unsigned argument: --") + key);
+        return uint64_t(value);
+    };
+    if (!options.isSet("event"))
+        throw std::runtime_error(
+            "DX12 replay requires --event <execution instance>; full-frame replay is unfinished");
+    const auto execution = number("event"), budget = number("max-bytes");
+    if (!execution || !budget)
+        throw std::runtime_error("DX12 execution and allocation budget must be nonzero");
+    const auto sub = number("subresource");
+    if (sub > UINT_MAX)
+        throw std::runtime_error("DX12 subresource exceeds uint32");
+    uint64_t object{}, creation{};
+    if (options.isSet("id")) {
+        creation = number("id");
+        object = session.resource(creation).capturedObject;
+    } else if (options.isSet("subresource"))
+        throw std::runtime_error("DX12 subresource requires --id <resource creation record>");
+    ReplaySelection selection;
+    selection.session = session.identity();
+    selection.execution = execution;
+    selection.resource = creation;
+    const auto capability = session.capability(ReplayFeature::Replay, selection);
+    if (!capability.supported())
+        throw std::runtime_error(capability.reason);
+    dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+    std::optional<RenderDocCapture> capture;
+    if (options.isSet("renderdoc"))
+        capture.emplace(std::filesystem::path(options.value("renderdoc").toStdWString()),
+                        std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
+    dx12::NativeDevice device(directory, options.isSet("debug-device"));
+    dx12::NativeReplay replay(device, directory, budget);
+    nlohmann::json report{{"backend", "dx12"},
+                          {"completed", false},
+                          {"frame_complete", false},
+                          {"replay_scope", "selected_execution"},
+                          {"execution", std::to_string(execution)},
+                          {"event", std::to_string(execution)},
+                          {"value_time", options.isSet("before") ? "before_event" : "after_event"},
+                          {"image_available", false},
+                          {"width", nullptr},
+                          {"height", nullptr},
+                          {"resource", nullptr},
+                          {"rgba_sha256", nullptr}};
+    try {
+        replay.initializeTransfers();
+        if (capture)
+            capture->start(device.device(), "FloraGPA independent DX12 replay");
+        replay.replayTo(execution, !options.isSet("before"), bool(capture));
+        if (capture)
+            report["rdc_capture"] = QString::fromStdWString(capture->finish().wstring()).toStdString();
+        if (object) {
+            const auto texture = replay.readTexture(
+                object, UINT(sub),
+                std::filesystem::path(output.filePath("output_storage.bin").toStdWString()), creation);
+            report["native_texture"] = texture;
+            auto storage = texture;
+            storage["backend"] = "dx12";
+            storage["storage_bytes"] = std::stoull(texture.at("bytes").get<std::string>());
+            storage["storage_sha256"] = texture.at("sha256");
+            report["output_display"] = storage;
+            QSaveFile metadata(output.filePath("output_storage.json"));
+            const auto serialized = QByteArray::fromStdString(storage.dump(2) + "\n");
+            if (!metadata.open(QIODevice::WriteOnly) || metadata.write(serialized) != serialized.size() ||
+                !metadata.commit())
+                throw std::runtime_error("Cannot save DX12 raw storage metadata");
+            if (!texture.at("image").get<std::string>().empty()) {
+                auto image =
+                    QImage(output.filePath(QString::fromStdString(texture.at("image").get<std::string>())))
+                        .convertToFormat(QImage::Format_RGBA8888);
+                if (image.isNull())
+                    throw std::runtime_error("Cannot decode native DX12 display image");
+                QSaveFile raw(output.filePath("frame.rgba")), png(output.filePath("frame.png"));
+                if (!raw.open(QIODevice::WriteOnly) || !png.open(QIODevice::WriteOnly))
+                    throw std::runtime_error("Cannot open DX12 display output");
+                QCryptographicHash hash(QCryptographicHash::Sha256);
+                for (int y = 0; y < image.height(); ++y) {
+                    const auto data = reinterpret_cast<const char *>(image.constScanLine(y));
+                    const auto size = qint64(image.width()) * 4;
+                    hash.addData(QByteArrayView(data, size));
+                    if (raw.write(data, size) != size)
+                        throw std::runtime_error("Cannot write DX12 display pixels");
+                }
+                if (!raw.commit() || !image.save(&png, "PNG") || !png.commit())
+                    throw std::runtime_error("Cannot publish DX12 display output");
+                report.update({{"image_available", true},
+                               {"width", image.width()},
+                               {"height", image.height()},
+                               {"resource", std::to_string(creation)},
+                               {"rgba_sha256", hash.result().toHex().toStdString()}});
+            }
+        }
+        report["completed"] = true;
+        report["image_status"] = object ? (report["image_available"] == true
+                                               ? "Native GPU readback; selected execution only"
+                                               : "Raw GPU texture saved; this display format is unsupported")
+                                        : "Execution replayed; select a texture creation record for readback";
+    } catch (...) {
+        if (capture)
+            capture->discard();
+        throw;
+    }
+    report["device"] = device.information();
+    report["native_replay"] = replay.information();
+    QSaveFile file(output.filePath("report.json"));
+    const auto bytes = QByteArray::fromStdString(report.dump(2));
+    if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
+        throw std::runtime_error("Cannot save DX12 replay report");
+    QTextStream(stdout) << QString::fromUtf8(bytes) << Qt::endl;
+    return 0;
+}
+} // namespace
 int runDx12Cli(const QString &command, const QString &path, const QCommandLineParser &options) {
-    if (command != "inventory" && command != "commands" && command != "validate-frame" && command != "command-lists")
-        throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
+    if (command != "inventory" && command != "commands" && command != "validate-frame" &&
+        command != "command-lists" && command != "replay")
+        throw std::runtime_error("DX12 " + command.toStdString() +
+                                 " is not implemented; use inventory or commands for stream inspection");
     std::set<QString> allowed{"out", "replay-identity"};
-    if (command == "commands") allowed.insert("filter");
+    if (command == "commands")
+        allowed.insert("filter");
+    if (command == "replay")
+        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device"});
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");
@@ -35,6 +161,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("Output directory must be new or empty");
     auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
     if (!QDir().mkpath(output.path())) throw std::runtime_error("Cannot create DX12 inspection output directory");
+    if (command == "replay") return replayDx12(*session,path,options,output);
     const auto filename = command == "commands" ? "commands.json" : command == "validate-frame" ? "validation.json" :
                           command == "command-lists" ? "command-lists.json" : "inventory.json";
     QSaveFile file(output.filePath(filename));

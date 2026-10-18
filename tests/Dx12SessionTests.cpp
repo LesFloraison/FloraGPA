@@ -15,6 +15,8 @@
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
+#include "app/OutputStorageExport.h"
+#include "app/WorkerImage.h"
 #include <QAction>
 #include <QCryptographicHash>
 #include <QDir>
@@ -180,6 +182,70 @@ class Dx12SessionTests : public QObject {
         thread->setText("7");QCOMPARE(view->model()->rowCount(),2);
         window.openCapture(path);QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),2,10000);
         QVERIFY(!window.busy());
+    }
+    void selectedReplayWorkspace() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for selected native replay workspace checks");
+        MainWindow window; window.resize(1500,900); window.show();
+        QSignalSpy loaded(&window,&MainWindow::captureLoaded), done(&window,&MainWindow::taskFinished);
+        window.openCapture(root+"/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,30000);
+        auto replay=window.findChild<QAction *>("replayFrame"); QVERIFY(replay); QVERIFY(!replay->isEnabled());
+        auto domain=window.findChild<QComboBox *>("apiEventDomain"); QVERIFY(domain); domain->setCurrentIndex(1);
+        auto locate=window.findChild<QLineEdit *>("apiLocate"); QVERIFY(locate);
+        locate->setText("12675"); QTest::keyClick(locate,Qt::Key_Return);
+        auto resources=window.findChild<QTableView *>("resources"); QVERIFY(resources);
+        QModelIndex depth;
+        for(int row=0;row<resources->model()->rowCount();++row) {
+            auto index=resources->model()->index(row,0);
+            if(index.data(Qt::UserRole).toULongLong()==167081) { depth=index; break; }
+        }
+        QVERIFY(depth.isValid()); resources->setCurrentIndex(depth);
+        auto sub=window.findChild<QSpinBox *>("dx12Subresource"); QVERIFY(sub); sub->setValue(1);
+        auto boundary=window.findChild<QComboBox *>("outputBoundary"); QVERIFY(boundary); boundary->setCurrentIndex(1);
+        auto image=window.findChild<ImageView *>("frameOutput"); QVERIFY(image);
+        QVERIFY(replay->isEnabled()); replay->trigger(); QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),60000); QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image().size(),QSize(2048,2048)); QCOMPARE(image->image().pixelColor(1527,1240),QColor(0,0,0,255));
+        boundary->setCurrentIndex(2); QVERIFY(image->image().isNull());
+        done.clear(); window.replay(); QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),60000); QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image().size(),QSize(2048,2048)); QCOMPARE(image->image().pixelColor(1527,1240),QColor(70,70,70,255));
+        QVERIFY(window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+        const auto screenshot=qEnvironmentVariable("FLORA_DX12_UI_SCREENSHOT");
+        if(!screenshot.isEmpty()) QVERIFY(window.grab().save(screenshot));
+        // Replacing a running DX12 job must not publish into the next session.
+        done.clear(); window.replay(); QTemporaryDir temp; const auto replacement=fixture(temp);
+        loaded.clear(); window.openCapture(replacement); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,30000);
+        QVERIFY(!window.busy()); QVERIFY(image->image().isNull());
+        // The common report/image route must still accept the existing DX11 baseline.
+        done.clear(); window.openCapture(root+"/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),60000); QVERIFY(done.takeLast()[0].toBool());
+        const auto pixels=image->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(pixels.size(),QSize(2560,1440));
+        QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()),pixels.sizeInBytes()),QCryptographicHash::Sha256).toHex(),
+            QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
+        QVERIFY(window.findChild<QComboBox *>("outputTarget")->isEnabled()); QVERIFY(!sub->isVisible());
+    }
+    void selectedReplayStorageExport() {
+        const auto directory=qEnvironmentVariable("FLORA_DX12_REPLAY_OUTPUT");
+        if(directory.isEmpty()) QSKIP("Set FLORA_DX12_REPLAY_OUTPUT to a Talos first-draw CLI replay output");
+        const auto result=readWorkerReport(directory,true);
+        QCOMPARE(result.replayReport.at("backend").get<std::string>(),std::string("dx12"));
+        QCOMPARE(result.replayReport.at("execution").get<std::string>(),std::string("12675"));
+        QVERIFY(!result.replayReport.at("frame_complete").get<bool>());
+        QCOMPARE(result.replayReport.at("native_texture").at("display_interpretation").get<std::string>(),std::string("unorm16_grayscale_0_to_1"));
+        QCOMPARE(result.replayReport.at("device").at("validation_error_count").get<std::string>(),std::string("0"));
+        const auto image=readWorkerImage(directory,result.report,true);
+        QCOMPARE(image.pixelColor(1527,1240),QColor(70,70,70,255));
+        QTemporaryDir temp;
+        exportOutputStorageFiles(directory,temp.filePath("depth.bin"),result.replayReport.at("output_display"));
+        QFile raw(temp.filePath("depth.bin")); QVERIFY(raw.open(QIODevice::ReadOnly));
+        const auto bytes=raw.readAll(); QCOMPARE(bytes.size(),qsizetype(8388608));
+        QCOMPARE(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex(),QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+        uint16_t value{}; memcpy(&value,bytes.constData()+(1240*2048+1527)*2,2); QCOMPARE(value,uint16_t(17980));
+        QFile sidecar(temp.filePath("depth.bin.json")); QVERIFY(sidecar.open(QIODevice::ReadOnly));
+        const auto metadata=nlohmann::json::parse(sidecar.readAll().toStdString());
+        QCOMPARE(metadata.at("creation_record").get<std::string>(),std::string("167081"));
+        QCOMPARE(metadata.at("subresource").get<unsigned>(),1U);
     }
     void resourceDataBounds() {
         QTemporaryDir temp;const auto path=fixture(temp);

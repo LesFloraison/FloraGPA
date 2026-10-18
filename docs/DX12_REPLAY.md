@@ -13,7 +13,7 @@ drag-and-drop use the existing API log. Initialization records are explicitly
 distinguished from frame-thread records. CPU timestamp order is not GPU execution
 order, and an indexed record is not yet a command-list execution instance.
 
-`inventory`, `commands`, `command-lists` and `validate-frame` accept DX12 directories. Validation
+`inventory`, `commands`, `command-lists`, `replay` and `validate-frame` accept DX12 directories. Validation
 reports `blocked` while complete frame replay and feature acceptance remain unfinished;
 the selected native execution and isolated analysis paths below are available for investigation.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
@@ -541,6 +541,69 @@ to the mapping, resource-flag failure and selected analysis paths were run.
 Workspace analysis controls, PS/CS/DXIL validation, complete Resource History,
 fragment-depth repair, counters and modification experiments remain unfinished.
 
+### Selected execution in the shared workspace
+
+The existing Replay action now dispatches DX12 selected execution requests to
+the isolated native Worker. Switch the API Log to **Submitted command instances**,
+locate an execution ID, then choose **Before event** or **After event**. Optionally
+select a resource creation in Resources and set its D3D12 subresource index.
+Press Replay explicitly; changing DX12 selection does not automatically repeat
+GPU work. The allocation budget defaults to 4096 MiB and is editable. The selected
+resource creation must match the object's lifetime at the execution boundary.
+Missing/partial recordings, buffer or multisample readback, unsupported commands
+and missing captured state remain explicit failures or unavailable capabilities.
+
+For Talos's first Draw, use execution `12675`, resource creation `167081` and
+subresource `1`. The workspace displays the actual 2048x2048 depth readback before
+and after that execution. R16 UNORM and D16/R16 typeless depth textures use a
+grayscale display of [0,1]; the unmodified 16-bit values remain in the storage
+artifact. BGRA8/RGBA8 display retains stored components. Other texture formats
+can produce raw readback without a display image; the report states that limit.
+Export Image saves the display PNG. Export Output Storage saves checked native
+bytes and a JSON sidecar containing object/creation/execution identities, format,
+subresource, row layout and hash. Export uses bounded copying and cancellation.
+
+Equivalent CLI request:
+
+```powershell
+FloraGPA.Cli.exe replay "D:\CDXrepo\captures\Talos_2026_10_18__00_55_08.gpa_frame" --event 12675 --id 167081 --subresource 1 --max-bytes 4294967296 --out talos-selected
+```
+
+Here `--event` is an **execution instance** and `--id` is a **resource creation
+record**. Omit `--id` for execution without texture readback; add `--before` for
+the preceding boundary. `--renderdoc <dll>` also captures that native prefix for
+isolated analysis. DX11 CLI meanings and behavior remain unchanged. Successful
+requests return zero with `completed: true`, `replay_scope: "selected_execution"`
+and `frame_complete: false`; this completes the request, not full feature
+acceptance. `validate-frame` still reports overall acceptance as blocked.
+
+The UI uses the existing request/session/backend/revision envelope, asynchronous
+report/image validation, cancellation and isolated Worker. Resource, subresource,
+execution-domain and boundary changes invalidate the displayed result and reject
+late output. DX12 controls do not silently pass ignored DX11 adapter/channel/MSAA
+options. The actual hardware adapter and Agility SDK appear in the output tooltip.
+
+Targeted evidence: `selectedReplayWorkspace` executed Talos before/after through
+the real UI/Worker path, checked the known pixel's displayed values 0 and 70,
+replaced an active DX12 session without accepting its result, then verified the
+existing GF2 DX11 image hash
+`2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`.
+The native D16 value is still `17980`, not the 8-bit displayed value 70. Logs and
+the offscreen workspace image are in `artifacts/dx12-research/dx12-workspace-replay2.txt`
+and `talos-dx12-workspace2.png`. No BF1/Hellblade2 GPU rerun was required for this
+UI integration. Shader/debug/history/geometry controls in the workspace still
+need the isolated DX12 analysis connection; successful selected replay is not
+acceptance of those features.
+
+The equivalent CLI run in `talos-workspace-cli1` completed with zero D3D12 debug
+errors. `selectedReplayStorageExport` read that actual Worker-compatible report,
+validated its display PNG/RGBA pair, exported native storage through the existing
+bounded exporter, and verified all 8,388,608 bytes against SHA256
+`c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`.
+The exported pixel remains exactly `17980`; its sidecar retains creation
+`167081` and subresource `1`. See `dx12-storage-export1.txt`. Release CLI, Worker,
+GUI and targeted test executables build successfully.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -549,7 +612,7 @@ fragment-depth repair, counters and modification experiments remain unfinished.
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Unfinished | First Draw before/after and first color boundary verified; full frame blocked by historical query state | Unfinished |
+| Complete native frame and selected-event replay | Unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | First Clear/Draw mapped; D16 event-boundary values verified, fragment depths unavailable; full history unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | Unfinished | One DXBC VS trace and post-VS mesh verified; remaining stages/UI unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
@@ -561,4 +624,5 @@ implementation gaps include historical query state, frame execution coverage
 beyond the verified Talos prefix, full resource lifetime and address-alias handling,
 complete command arguments, dependency scheduling and cross-queue synchronization.
 The isolated analysis backend now accepts native DX12 captures and execution
-identities; the main workspace's analysis workflow still requires integration.
+identities. Selected replay/readback is connected to the workspace; its analysis
+workflow still requires integration.

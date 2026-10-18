@@ -220,7 +220,7 @@ WorkerReport readWorkerReport(const QString &directory, bool replay, const Cance
     result.report = qtObject(bytes, cancelled);
     if (!result.report["completed"].isBool() || !result.report["completed"].toBool())
         throw std::runtime_error("Worker did not complete");
-    if (replay && result.report["image_available"].toBool(true)) {
+    if (replay && (result.report["image_available"].toBool(true) || result.report["backend"]=="dx12")) {
         result.replayReport = nativeObject(bytes, cancelled);
     }
     checkCancellation(cancelled);

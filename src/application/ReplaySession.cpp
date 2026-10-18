@@ -247,7 +247,24 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
-        return {CapabilityStatus::NotImplemented, "DX12 workspace replay/analysis integration is unfinished; selected native execution is available through CLI validation"};
+        if (feature == ReplayFeature::Replay) {
+            if (!selection.execution) return {CapabilityStatus::MissingData,"Select a submitted execution instance; full-frame replay is unfinished"};
+            try {
+                const auto execution=submissions_.execution(*selection.execution);
+                if (!execution.recordingComplete || execution.submission<=directory_.initializationCount())
+                    return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
+                if (selection.resource) {
+                    (void)resource(selection.resource);
+                    const auto &record=packet(selection.resource);
+                    const auto descriptor=dx12::decodeArguments(record.type,directory_.payload(record)).values.at("Description");
+                    if (descriptor.is_null()) return {CapabilityStatus::MissingData,"Selected texture creation has no captured descriptor"};
+                    if (descriptor.at("Dimension")==1) return {CapabilityStatus::NotImplemented,"Selected buffer readback is not yet connected to workspace replay; select a texture"};
+                    if (descriptor.at("SampleCount")!=1) return {CapabilityStatus::NotImplemented,"DX12 multisample texture readback is not implemented"};
+                }
+                return {CapabilityStatus::Supported,"Selected execution replay; unsupported commands and missing captured state fail explicitly"};
+            } catch(const std::exception &error) { return {CapabilityStatus::MissingData,error.what()}; }
+        }
+        return {CapabilityStatus::NotImplemented, "DX12 workspace analysis and experiments are not yet connected; isolated analysis is available through the CLI"};
     }
 };
 }

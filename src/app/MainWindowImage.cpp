@@ -17,6 +17,20 @@ struct ArtifactResult {
     bool cancelled = false;
 };
 } // namespace
+void MainWindow::invalidateDx12Output() {
+    if (!session_ || session_->backend() != ReplayBackend::Dx12)
+        return;
+    ++revision_;
+    if (process_.state() != QProcess::NotRunning || artifactJob_)
+        cancel();
+    image_->setImage({});
+    outputReport_ = nullptr;
+    outputDir_.reset();
+    exportAction_->setEnabled(false);
+    outputStorageAction_->setEnabled(false);
+    imageLabel_->setText("Select an execution instance and optional texture creation, then press Replay");
+    setBusy(busy());
+}
 QString MainWindow::boundaryLabel(const QJsonObject &report) {
     auto when = report["value_time"].toString();
     if (when == "capture_initial")
@@ -108,6 +122,56 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
     const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
     if (result.original.isNull() && outputAvailable)
         throw std::runtime_error("Worker output image is missing");
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        if (runningKind_ != "replay" || report_["backend"] != "dx12" ||
+            report_["replay_scope"] != "selected_execution" || report_["frame_complete"] != false ||
+            !selection_.execution ||
+            report_["execution"].toString() != QString::number(*selection_.execution) ||
+            report_["value_time"].toString() !=
+                (boundary_->currentIndex() == 1 ? "before_event" : "after_event"))
+            throw std::runtime_error("DX12 replay result does not match the selected execution boundary");
+        const auto texture = report_["native_texture"].toObject();
+        if (selection_.resource &&
+            (texture["creation_record"].toString() != QString::number(selection_.resource) ||
+             texture["object"].toString() !=
+                 QString::number(session_->resource(selection_.resource).capturedObject) ||
+             texture["subresource"].toInteger(-1) != dx12Subresource_->value()))
+            throw std::runtime_error(
+                "DX12 readback does not match the selected resource lifetime/subresource");
+        image_->setPreparedImage(std::move(result));
+        imageLabel_->setText(outputAvailable
+                                 ? QString("DX12 creation %1 · Subresource %2 · %3 × %4 · %5 (execution)")
+                                       .arg(QString::number(selection_.resource))
+                                       .arg(dx12Subresource_->value())
+                                       .arg(report_["width"].toInt())
+                                       .arg(report_["height"].toInt())
+                                       .arg(boundaryLabel(report_))
+                                 : report_["image_status"].toString());
+        const auto device = report_["device"].toObject();
+        imageLabel_->setToolTip(report_["image_status"].toString() +
+                                QString("\n%1 · Agility SDK %2")
+                                    .arg(device["adapter"].toObject()["description"].toString())
+                                    .arg(device["actual_sdk_version"].toInt()));
+        selectionLabel_->setText(QString("Execution %1 · %2 replayed; full frame unfinished")
+                                     .arg(*selection_.execution)
+                                     .arg(boundary_->currentIndex() == 1 ? "before" : "after"));
+        outputReport_ = std::move(replayReport);
+        outputDir_ = std::move(jobDir_);
+        exportAction_->setEnabled(outputAvailable);
+        outputStorageAction_->setEnabled(report_["output_display"].isObject());
+        resourceImages_->setCurrentIndex(0);
+        resourceImagePending_ = false;
+        displayedOutputGeneration_ = outputGeneration_;
+        resourceStatus_->setText(QString("DX12 execution %1 · %2")
+                                    .arg(*selection_.execution)
+                                    .arg(report_["image_status"].toString()));
+        statusBar()->showMessage("Selected DX12 execution replay complete", 7000);
+        log_->appendPlainText(QString("DX12 execution %1 · %2")
+                                  .arg(*selection_.execution)
+                                  .arg(report_["image_status"].toString()));
+        emit taskFinished(true);
+        return;
+    }
     Id resource = 0;
     if (outputAvailable) {
         bool valid = false;

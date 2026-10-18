@@ -32,7 +32,7 @@ void MainWindow::startExport(const QString &progress, const QString &complete,
         exportCancel_.reset();
         setBusy(process_.state() != QProcess::NotRunning);
         outputStorageAction_->setEnabled(outputDir_ && outputReport_.is_object() &&
-                                        outputReport_.value("image_available", false));
+            (outputReport_.value("backend",std::string())=="dx12" ? outputReport_.contains("output_display") : outputReport_.value("image_available", false)));
         if (!result.error.isEmpty()) showError(result.error);
         else if (!busy()) statusBar()->showMessage(result.cancelled ? "Export cancelled" : complete, 3000);
         emit exportFinished(result.error.isEmpty() && !result.cancelled);

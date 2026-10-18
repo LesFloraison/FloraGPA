@@ -544,8 +544,10 @@ json NativeReplay::verifyInitializedTexture(uint64_t copyRecord) {
         {"expected_sha256", expected.result().toHex().toStdString()}, {"actual_sha256", actual.result().toHex().toStdString()},
         {"boundary", "after_initialization_submissions"}, {"row_padding_compared", false}, {"frame_replayed", false}};
 }
-json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output) {
+json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output, uint64_t expectedCreation) {
     auto &s = *impl_; require(s.boundaryReached, "Frame execution boundary has not completed");
+    require(!expectedCreation || s.resources.creationRecord(object,s.currentRecord)==expectedCreation,
+        "Selected resource creation does not match the lifetime at this execution boundary");
     auto texture = s.resources.resource(object, s.currentRecord); const auto desc = texture->GetDesc();
     require(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.SampleDesc.Count == 1, "Texture readback requires a single-sample texture");
     D3D12_FEATURE_DATA_FORMAT_INFO format{desc.Format}; check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &format, sizeof(format)), "Query readback planes");
@@ -575,7 +577,7 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
     require(queue, "Frame texture readback requires a direct queue"); ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists); s.wait(queue);
     QSaveFile file(QString::fromStdWString(output.wstring())); require(file.open(QIODevice::WriteOnly), "Cannot open frame texture output");
     void *mapped{}; D3D12_RANGE read{0, SIZE_T(total)}; check(readback->Map(0, &read, &mapped), "Map frame texture readback");
-    QCryptographicHash digest(QCryptographicHash::Sha256); uint64_t nonzero{}; std::string imageFile;
+    QCryptographicHash digest(QCryptographicHash::Sha256); uint64_t nonzero{}; std::string imageFile, displayInterpretation="unavailable";
     const uint64_t rowCount = uint64_t(rows) * footprint.Footprint.Depth;
     try {
         for (uint64_t row = 0; row < rowCount; ++row) {
@@ -588,10 +590,28 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         const bool bgra = pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM || pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
         const bool rgba = pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM || pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         if ((bgra || rgba) && footprint.Footprint.Depth == 1) {
+            displayInterpretation="stored_rgba8_components";
             const QImage image(static_cast<const uchar *>(mapped) + footprint.Offset, int(footprint.Footprint.Width), int(footprint.Footprint.Height),
                 qsizetype(footprint.Footprint.RowPitch), bgra ? QImage::Format_ARGB32 : QImage::Format_RGBA8888);
             auto imagePath = output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
             require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish GPU texture PNG"); imageFile = imagePath.filename().string();
+        } else if (footprint.Footprint.Depth == 1 && (pixelFormat == DXGI_FORMAT_R16_UNORM || pixelFormat == DXGI_FORMAT_D16_UNORM ||
+            (pixelFormat == DXGI_FORMAT_R16_TYPELESS && (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)))) {
+            displayInterpretation="unorm16_grayscale_0_to_1";
+            QImage image(int(footprint.Footprint.Width),int(footprint.Footprint.Height),QImage::Format_RGBA8888);
+            require(!image.isNull(),"Cannot allocate D16 display image");
+            for(int y=0;y<image.height();++y) {
+                checkCancellation(s.cancelled);
+                const auto row=static_cast<const uint8_t *>(mapped)+footprint.Offset+uint64_t(y)*footprint.Footprint.RowPitch;
+                auto pixels=image.scanLine(y);
+                for(int x=0;x<image.width();++x) {
+                    uint16_t value{}; memcpy(&value,row+size_t(x)*2,2);
+                    const auto gray=uint8_t((uint32_t(value)*255+32767)/65535);
+                    pixels[x*4]=pixels[x*4+1]=pixels[x*4+2]=gray; pixels[x*4+3]=255;
+                }
+            }
+            auto imagePath=output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
+            require(png.open(QIODevice::WriteOnly)&&image.save(&png,"PNG")&&png.commit(),"Cannot publish D16 display PNG"); imageFile=imagePath.filename().string();
         }
     } catch (...) { D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); throw; }
     D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); require(file.commit(), "Cannot publish frame texture output");
@@ -599,7 +619,7 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         {"width", footprint.Footprint.Width}, {"height", footprint.Footprint.Height}, {"depth", footprint.Footprint.Depth}, {"format", UINT(footprint.Footprint.Format)},
         {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
         {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"},
-        {"file", output.filename().string()}, {"image", imageFile}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
+        {"file", output.filename().string()}, {"image", imageFile}, {"display_interpretation",displayInterpretation}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
 }
 json NativeReplay::information() const {
     const auto &s = *impl_; return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
