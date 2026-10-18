@@ -143,6 +143,88 @@ class Dx12SessionTests : public QObject {
         const auto saved = reopened.document();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, reopened.load(bad.fileName(), *session)); QCOMPARE(reopened.document(), saved);
     }
+    void dx12ModifiedResourceAnalysis() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        const auto project = qEnvironmentVariable("FLORA_DX12_MODIFIED_RESOURCE_PROJECT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_RESOURCE_ANALYSIS_OUTPUT");
+        if (root.isEmpty() || library.isEmpty() || project.isEmpty() || output.isEmpty())
+            QSKIP("Set Talos captures, RenderDoc, the constant-buffer project and a new output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 150566) { resources->setCurrentIndex(index); break; }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 150566ULL);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+        window.openDx12Experiment(project);
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        debug->setBackendPath(library, false);
+        debug->findChild<QAction *>("replayDebugRead")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 90000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QVERIFY(debug->model()); const auto model = debug->model();
+        const auto trace = model->result();
+        debug->exportResult(output + "/debug.json");
+        QVERIFY(QFile::copy(QString::fromStdString(trace.at("capture").get<std::string>()), output + "/modified.rdc"));
+        QCOMPARE(trace.at("backend"), nlohmann::json("dx12"));
+        QCOMPARE(trace.at("execution"), nlohmann::json("12675"));
+        QVERIFY(trace.at("gpa_modules_loaded").empty());
+        QCOMPARE(model->size(), size_t(20)); // Original VS instructions, modified constant data.
+        debug->findChild<QAction *>("debugStep")->trigger(); QCOMPARE(model->position(), int64_t(1));
+        debug->findChild<QSpinBox *>("debugStepIndex")->setValue(int(model->size() - 1));
+        model->addWatch("SV_Position.z / SV_Position.w");
+        QCOMPARE(model->watchResults()[0].at("status"), nlohmann::json("available"));
+        QCOMPARE(model->watchResults()[0].at("values")[0].get<double>(), 0.25);
+        debug->exportResult(output + "/debug.json");
+        auto history = window.findChild<ResourceHistoryView *>("resourceHistoryView");
+        history->setBackendPath(library, false);
+        auto read = history->findChild<QAction *>("readResourceHistory"); QVERIFY(read->isEnabled());
+        done.clear(); read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        history->exportResult(output + "/history.json");
+        const auto &result = history->result();
+        QCOMPARE(result.at("capture"), trace.at("capture"));
+        QCOMPARE(result.at("experiment_key"), trace.at("experiment_key"));
+        QCOMPARE(result.at("captured_creation").at("id"), nlohmann::json("150566"));
+        QVERIFY(result.at("gpa_modules_loaded").empty());
+        size_t auxiliaryCopies{}, drawUses{};
+        for (const auto &row : result.at("resource_history")) {
+            if (row.at("usage_name") == "CopyDst" && row.at("mapping_status") == "unmapped_replay_action") {
+                ++auxiliaryCopies;
+                QVERIFY(!row.value("selectable", false));
+                QVERIFY(!row.contains("execution") || row.at("execution").is_null());
+                QCOMPARE(row.at("evidence"), nlohmann::json("recorded_operation"));
+            }
+            if (row.value("execution", "") == "12675") {
+                ++drawUses;
+                QVERIFY(row.at("usage_name").get<std::string>().ends_with("_Constants"));
+                QCOMPARE(row.at("evidence"), nlohmann::json("bound_use"));
+                QCOMPARE(row.at("captured_call").at("source_record"), nlohmann::json("185550"));
+                QVERIFY(row.at("selectable").get<bool>());
+            }
+        }
+        QCOMPARE(auxiliaryCopies, size_t(1)); QVERIFY(drawUses > 0);
+        qInfo() << "Resource-modified VS depth 0.25; auxiliary copies" << auxiliaryCopies
+                << "mapped constant uses" << drawUses << "RDC event" << trace.at("eid").get<unsigned>();
+        // Undo must also invalidate analysis of resource data without a new
+        // recapture merely to re-prove the already verified original output.
+        const auto debugRequest = debug->requestId(), historyRequest = history->requestId();
+        const auto oldHistory = result;
+        window.findChild<QAction *>("undoExperiment")->trigger();
+        QVERIFY(!debug->model()); QVERIFY(history->result().is_null());
+        QVERIFY(!debug->finish(debugRequest, trace)); QVERIFY(!history->finish(historyRequest, oldHistory));
+    }
     void dx12AnalysisCaptureReportIdentity() {
         QTemporaryDir directory;
         const nlohmann::json report{{"backend", "dx12"}, {"completed", true}, {"image_available", false},

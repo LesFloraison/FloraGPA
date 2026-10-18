@@ -1680,10 +1680,28 @@ comparison evidence is `talos-resource-workspace2/comparison.json`; no extra GPU
 replay is used for these comparisons. Build152 builds GUI, CLI, Worker and the
 focused test target with final report fields.
 
+`dx12-resource-analysis1.txt` subsequently validates the modified buffer in the
+workspace's VS debugger and Resource History using **one** native recapture and
+two serial RenderDoc queries (28.947 seconds). The original VS still executes
+20 instruction steps, and the final Watch `SV_Position.z / SV_Position.w` is
+**0.25**. Its Draw maps to RenderDoc event **164**, not the unmodified capture's
+event 151: auxiliary replay commands are allowed to shift native event numbers.
+Both analyses share the same capture and experiment identity and report no GPA
+modules loaded. The resource history contains one auxiliary CopyDst with
+`unmapped_replay_action` and no selectable original execution, while the Draw's
+constant binding maps to execution **12675**, source record **185550**. The
+captured preceding Copy and barriers retain their own execution identities.
+Undo clears both views and rejects their old request IDs. Saved evidence is
+`talos-resource-analysis1` (`modified.rdc`, `debug.json`, `history.json` and
+`comparison.json`); Build153 adds this focused integration check.
+
 These checks establish default-heap buffer and D16 texture overrides at one
-Talos submission. General before-execution injection, reserved/MSAA resources,
-resource-modified debug/history validation, BF1/Hellblade2 resource experiments
-and full experiment acceptance remain unfinished.
+Talos submission and modified-buffer VS debugging. Resource History remains a
+partial operation/binding index, with auxiliary copies explicitly excluded from
+original execution mapping; it does not measure every content change. General
+before-execution injection, reserved/MSAA resources, modified-resource Pixel
+History and other shader stages, BF1/Hellblade2 resource experiments and full
+experiment acceptance remain unfinished.
 
 ### Full feature acceptance
 
