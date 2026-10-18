@@ -41,6 +41,14 @@ std::string replayMeshFloat(double value) {
 ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> raw,
                               std::span<const uint8_t> ib) {
     ReplayMesh result;
+    result.perspectiveDivide = m.value("perspective_divide", true);
+    if (m.contains("input")) {
+        const auto text = m.at("input").at("first_vertex").get<std::string>();
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result.firstVertex);
+        if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
+            text != std::to_string(result.firstVertex))
+            throw std::runtime_error("Invalid input mesh first vertex identity");
+    }
     const auto &format = m.at("format");
     if (format.at("compType") != 1 || format.at("compByteWidth") != 4)
         throw std::runtime_error("Post-shader position is not float32; binary export is available");
@@ -49,6 +57,8 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
     if (!stride)
         throw std::runtime_error("Post-shader vertex stride is zero");
     const auto count = raw.size() / stride;
+    if (count && result.firstVertex > UINT64_MAX - (count - 1))
+        throw std::runtime_error("Input mesh vertex identity range overflows");
     result.positions.reserve(size_t(count));
     for (uint64_t i = 0; i < count; ++i) {
         const auto offset = i * stride;
@@ -108,7 +118,7 @@ std::string ReplayMesh::csv() const {
     }
     out += "\r\n";
     for (size_t i = 0; i < positions.size(); ++i) {
-        out += std::to_string(i);
+        out += std::to_string(firstVertex + i);
         for (uint32_t c = 0; c < components; ++c)
             out += ',' + replayMeshFloat(positions[i][c]);
         out += "\r\n";
@@ -116,9 +126,10 @@ std::string ReplayMesh::csv() const {
     return out;
 }
 std::string ReplayMesh::obj() const {
-    std::string out = "# Post-shader positions. Perspective divide applied when w is available.\r\n";
+    std::string out = perspectiveDivide ? "# Post-shader positions. Perspective divide applied when w is available.\r\n"
+        : "# Selected input attribute, converted to float32. No perspective divide.\r\n";
     for (const auto &p : positions) {
-        const auto w = components > 3 && p[3] != 0 ? p[3] : 1;
+        const auto w = perspectiveDivide && components > 3 && p[3] != 0 ? p[3] : 1;
         out += "v ";
         for (uint32_t c = 0; c < (std::min)(components, 3U); ++c) {
             if (c)

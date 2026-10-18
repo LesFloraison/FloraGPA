@@ -1822,6 +1822,60 @@ Readback-heap sources, large native offsets, other formats/usages and the other
 two samples have not received additional buffer-readback acceptance here. This
 work does not resolve the remaining full-frame or analysis gaps below.
 
+### Input assembler geometry
+
+For a DX12 Draw, **Replay Mesh → Input attribute** now reads the selected input
+layout attribute and draw instance from the isolated RenderDoc replay. The
+attribute field is a zero-based layout index; **Details** records every semantic,
+format, slot, binding, stride, instance step rate and the draw's index/base-vertex
+parameters. The selected semantic is not assumed to be position. The table,
+preview, CSV and OBJ use converted float32 components without perspective divide;
+32-bit integer conversion can lose precision. Original bytes remain available
+through **Raw input vertices (.vbin)** and **Raw input indices (.ibin)** export.
+
+Vertex export contains the selected attribute's referenced byte span, including
+stride gaps, starting at `raw_vertex_offset`; it is not necessarily the complete
+bound vertex buffer. Index export preserves the original draw range and index
+width. Preview indices are separately rebased to the minimum referenced vertex.
+Source vertex numbers, byte offsets and sizes use decimal strings in metadata.
+Artifact lengths/hashes, selected attribute/instance and existing execution,
+session, request and experiment guards are checked before displaying results.
+
+The adapter handles regular 8/16/32-bit scalar components, Float16/Float32,
+integer and normalized formats, indexed/nonindexed draws, base vertices and
+per-instance attributes. Packed formats, primitive restart and out-of-binding
+reads explicitly fail. Input reads are bounded to 256 MiB and four million
+references/vertices. Only the selected Talos layout below has actual GPU evidence;
+other format and instancing paths are not claimed as sample acceptance.
+
+Focused evidence reuses the existing native Talos RDC (no new frame replay):
+
+- `talos-input-mesh2`: execution **12675**, source record **185550**, instance 0,
+  attribute 0 (**TEXCOORD0**, slot 0, float3, stride 12). RenderDoc returns
+  **8,053 vertices**, **42,006 uint16 indices** and **14,002 triangle faces**,
+  with no loaded GPA modules. All converted float3 values and rebased indices
+  match the retained raw bytes. The first vertex
+  `(-10.244478225708008, 19.756996154785156, 61.500404357910156, 1)`
+  also matches the earlier independent VS Debug input.
+- `dx12-input-mesh-artifacts1.txt`: CPU comparison against the original capture
+  confirms all **96,636 vertex bytes** equal initialization Copy record **8821**
+  for resource creation **4595**, and all **84,012 index bytes** equal Copy record
+  **113545** for creation **70438**. The same check loads the workspace table,
+  exports original bytes and rejects results after the attribute changes.
+- Vertex SHA-256:
+  `5c75467d94575dabe780ba1ff12ecd6a194276809312c790c09f52355564bb24`.
+  Index SHA-256:
+  `268814027b2032c640a2b53679e9e5ee663b649a5043f9e6a81f7c5a86a14c22`.
+  Full comparison is in `talos-input-mesh2/comparison.json`.
+- Build164 builds GUI, CLI, Worker, RenderDoc service and both focused test
+  targets. `dx12-input-mesh-artifacts2.txt` passes all three Qt checks in 147 ms,
+  including exact vertex/index export. `FloraReplayMeshTests` also passes,
+  covering invalid/overflowing decimal vertex identities and a valid identity
+  above 2^53. These final checks are CPU-only.
+
+This adds verified input geometry alongside the existing post-VS and MeshOut
+paths. It does not complete all geometry stages, formats or samples.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1832,7 +1886,7 @@ work does not resolve the remaining full-frame or analysis gaps below.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; modified VS and undo match native depth readbacks; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

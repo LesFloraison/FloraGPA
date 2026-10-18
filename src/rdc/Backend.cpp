@@ -3,6 +3,7 @@
 #include "Assets.h"
 #include "Counters.h"
 #include "DebugTrace.h"
+#include "InputMesh.h"
 #include "application/RdcEvents.h"
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
@@ -625,6 +626,22 @@ Json runRdcJob(const Json &job) {
                                                 : "Selected analysis requires an executed draw action");
         if (meshOutput && index(job, "instance") != 0)
             throw std::runtime_error("Mesh output returns all meshlets; draw instances do not apply");
+        if (stage == "VSIn") {
+            if (!dx12) throw std::runtime_error("Raw input mesh adapter currently requires DX12");
+            const auto data = readDx12InputMesh(controller, *selected, index(job, "instance"), index(job, "attribute"));
+            const auto decoded = ReplayMesh::decode(data.metadata, data.vertices, data.indices);
+            auto save = [&](const char *name, const auto &bytes) {
+                QSaveFile file(QString::fromStdWString((path(job.at("out")) / name).wstring()));
+                if (!file.open(QIODevice::WriteOnly) || file.write(reinterpret_cast<const char *>(bytes.data()), qint64(bytes.size())) != qint64(bytes.size()) || !file.commit())
+                    throw std::runtime_error("Cannot save input mesh artifact");
+            };
+            save("post_vertices.bin", data.vertices); save("post_indices.bin", data.indices);
+            save("input_vertices.bin", data.rawVertices); save("input_indices.bin", data.rawIndices);
+            save("post_vertices.csv", decoded.csv()); save("post_geometry.obj", decoded.obj());
+            result.update({{"eid", eid}, {"gpa_event", gpa}, {"stage", stage}, {"mesh", data.metadata},
+                {"vertex_count", decoded.positions.size()}, {"index_count", decoded.indexCount}, {"face_count", decoded.candidateFaceCount}});
+            return complete();
+        }
         const auto nativeStage = stage == "VSOut"   ? MeshDataStage::VSOut
                                  : stage == "GSOut" ? MeshDataStage::GSOut
                                  : meshOutput       ? MeshDataStage::MeshOut

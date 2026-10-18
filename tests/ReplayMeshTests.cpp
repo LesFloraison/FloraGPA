@@ -65,7 +65,17 @@ int main(int argc, char **argv) {
         m["numIndices"] = 3;
         mesh = ReplayMesh::decode(m, vertices, {});
         require(mesh.faces.size() == 1, "Nonindexed draw must ignore base vertex");
+        auto input = m; input["perspective_divide"] = false; input["input"] = {{"first_vertex", "9007199254740993"}};
+        auto inputMesh = ReplayMesh::decode(input, vertices, {});
+        require(inputMesh.obj().find("v 2.0 4.0 6.0\r\n") != std::string::npos, "Input attribute must not be perspective divided");
+        require(inputMesh.csv().find("9007199254740993,2.0,4.0,6.0,2.0") != std::string::npos, "Input source vertex identity lost");
         Json job = {{"mesh", m}, {"vertices", vertices}, {"indices", Json::array()}};
+        job["mesh"] = input;
+        for (const auto invalid : {"-1", "1x", "01", "18446744073709551616", "18446744073709551615"}) {
+            job["mesh"]["input"]["first_vertex"] = invalid;
+            require(!evaluate(job)["ok"].get<bool>(), "Invalid or overflowing input vertex identity accepted");
+        }
+        job["mesh"] = m;
         job["mesh"]["vertexByteStride"] = 0;
         require(!evaluate(job)["ok"].get<bool>(), "Zero stride accepted");
         job["mesh"] = m;

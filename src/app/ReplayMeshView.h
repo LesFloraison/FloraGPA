@@ -45,6 +45,7 @@ class ReplayMeshView final : public QWidget {
     QAction *read_, *cancel_, *export_, *backend_;
     QComboBox *stage_;
     QLineEdit *instance_;
+    QLineEdit *attribute_;
     QLabel *summary_;
     QPlainTextEdit *details_;
     MeshView *preview_;

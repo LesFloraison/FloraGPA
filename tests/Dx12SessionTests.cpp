@@ -72,6 +72,65 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12InputMeshArtifacts() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto artifact = qEnvironmentVariable("FLORA_DX12_INPUT_MESH");
+        if (root.isEmpty() || artifact.isEmpty()) QSKIP("Set Talos capture and input mesh artifact");
+        const auto read = [&](const QString &file) { QFile f(artifact + '/' + file); if (!f.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing input mesh test artifact"); return f.readAll(); };
+        const auto result = nlohmann::json::parse(read("result.json").toStdString());
+        QCOMPARE(result.at("stage"), nlohmann::json("VSIn")); QCOMPARE(result.at("execution"), nlohmann::json("12675"));
+        QCOMPARE(result.at("vertex_count"), nlohmann::json(8053)); QCOMPARE(result.at("index_count"), nlohmann::json(42006));
+        QVERIFY(result.at("gpa_modules_loaded").empty());
+        dx12::StreamDirectory directory(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex submissions(directory); dx12::AddressIndex addresses(directory);
+        const auto draw = submissions.execution(12675);
+        const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(draw.record));
+        D3D12_VERTEX_BUFFER_VIEW vb{}; D3D12_INDEX_BUFFER_VIEW ib{};
+        for (const auto id : recording.records) {
+            if (id > draw.record) break; const auto &p = directory.packets()[size_t(id - 1)];
+            format::Reader r(directory.payload(p));
+            if (p.type == 0x1ae3cc2293674ULL) {
+                r.skip(8); const auto start = r.read<UINT>(), count = r.read<UINT>();
+                QVERIFY(r.flag()); QCOMPARE(r.read<uint64_t>(), uint64_t(count));
+                for (UINT i = 0; i < count; ++i) { const auto view = r.read<D3D12_VERTEX_BUFFER_VIEW>(); if (start + i == 0) vb = view; }
+            } else if (p.type == 0x1ae3ccbc6c8c9ULL) { r.skip(8); QVERIFY(r.flag()); ib = r.read<D3D12_INDEX_BUFFER_VIEW>(); }
+        }
+        QCOMPARE(vb.StrideInBytes, 12U); QCOMPARE(vb.SizeInBytes, 96636U); QCOMPARE(ib.Format, DXGI_FORMAT_R16_UINT);
+        const auto compareCaptured = [&](uint64_t address, uint64_t length, const QByteArray &actual) {
+            const auto binding = addresses.resolve(address, draw.record, length); bool found{};
+            for (size_t i = 0; i < directory.initializationCount(); ++i) {
+                const auto &p = directory.packets()[i]; if (p.type != 0x1ae3cd301bf84ULL) continue;
+                format::Reader r(directory.payload(p)); r.skip(8); const auto destination = r.read<uint64_t>(), offset = r.read<uint64_t>();
+                r.skip(16); const auto count = r.read<uint64_t>();
+                if (destination != binding.object || offset > binding.offset || binding.offset - offset > count || length > count - (binding.offset - offset)) continue;
+                const auto plan = dx12::prepareInitializationCopy(directory, i + 1, 4294967296ULL);
+                const auto source = plan.sourceOffset + binding.offset - offset;
+                QVERIFY(source <= plan.sourceData.bytes.size() && length <= plan.sourceData.bytes.size() - source);
+                QCOMPARE(actual, QByteArray(reinterpret_cast<const char *>(plan.sourceData.bytes.data() + source), qsizetype(length)));
+                qInfo() << "Exact input bytes" << binding.creation << binding.object << "copy record" << i + 1 << "length" << length;
+                found = true;
+            }
+            QVERIFY(found);
+        };
+        compareCaptured(vb.BufferLocation, vb.SizeInBytes, read("input_vertices.bin"));
+        compareCaptured(ib.BufferLocation, 42006 * 2, read("input_indices.bin"));
+        ReplayMeshView view; view.setContext("talos-input", 12675, true);
+        auto stage = view.findChild<QComboBox *>("replayMeshStage"); stage->setCurrentIndex(stage->findData("VSIn"));
+        QCOMPARE(view.request().at("attribute"), nlohmann::json(0));
+        QVERIFY(view.finish(view.requestId(), result, artifact));
+        const auto table = view.findChild<QTableView *>("replayMeshPositions"); QCOMPARE(table->model()->rowCount(), 8053);
+        QCOMPARE(table->model()->index(0, 1).data().toDouble(), -10.244478225708008);
+        QCOMPARE(table->model()->index(0, 2).data().toDouble(), 19.756996154785156);
+        QCOMPARE(table->model()->index(0, 3).data().toDouble(), 61.500404357910156);
+        QCOMPARE(table->model()->index(0, 4).data().toDouble(), 1.0);
+        QTemporaryDir exports;
+        view.exportResult(exports.filePath("input.vbin")); view.exportResult(exports.filePath("input.ibin"));
+        QFile exported(exports.filePath("input.vbin")); QVERIFY(exported.open(QIODevice::ReadOnly)); QCOMPARE(exported.readAll(), read("input_vertices.bin"));
+        QFile exportedIndices(exports.filePath("input.ibin")); QVERIFY(exportedIndices.open(QIODevice::ReadOnly)); QCOMPARE(exportedIndices.readAll(), read("input_indices.bin"));
+        const auto old = view.requestId(); view.findChild<QLineEdit *>("replayMeshAttribute")->setText("1");
+        QVERIFY(view.result().is_null()); QVERIFY(!view.finish(old, result, artifact));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), result, artifact));
+    }
     void dx12BufferWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto project = qEnvironmentVariable("FLORA_DX12_BUFFER_PROJECT");
