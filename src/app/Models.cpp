@@ -2,6 +2,8 @@
 #include "application/CaptureNames.h"
 #include <QColor>
 #include <QFont>
+#include <algorithm>
+#include <climits>
 
 namespace flora {
 QVariant GeometryModel::data(const QModelIndex &index, int role) const {
@@ -33,6 +35,7 @@ void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<
         throw std::invalid_argument("Command model requires prepared API search");
     beginResetModel();
     session_.reset();
+    executions_ = false;
     frame_ = std::move(frame);
     queries_ = std::move(queries);
     search_ = std::move(search);
@@ -67,12 +70,24 @@ void CaptureModel::setSession(std::shared_ptr<const IReplaySession> session) {
         ids_.assign(session_->resources().begin(), session_->resources().end());
     endResetModel();
 }
+void CaptureModel::setExecutionView(bool value) {
+    if (!session_ || kind_ != Kind::Commands || executions_ == value) return;
+    if (value && session_->executionCount() > uint64_t(INT_MAX)) throw std::runtime_error("DX12 execution table exceeds Qt row capacity");
+    beginResetModel();
+    executions_ = value;
+    ids_.clear();
+    if (value) {
+        ids_.reserve(size_t(session_->executionCount()));
+        for (Id id = 1; id <= session_->executionCount(); ++id) ids_.push_back(id);
+    } else ids_.assign(session_->events().begin(), session_->events().end());
+    endResetModel();
+}
 int CaptureModel::rowOf(Id id) const {
     auto it = std::lower_bound(ids_.begin(), ids_.end(), id);
     return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
 }
 nlohmann::json CaptureModel::command(Id id) const {
-    if (session_) return session_->eventDetails(id);
+    if (session_) return executions_ ? session_->executionDetails(id) : session_->eventDetails(id);
     if (!frame_) throw std::runtime_error("Command capture is unavailable");
     if (queries_)
         if (const auto row = queries_->find(id)) return *row;
@@ -92,11 +107,15 @@ nlohmann::json CaptureModel::command(Id id) const {
 }
 bool CaptureModel::matchesCommand(Id id, const QStringList &words, std::optional<Id> resource) const {
     if (session_) {
-        if (resource) return false; // Do not infer resource references from arbitrary payload bytes.
-        auto e = session_->event(id);
+        auto e = sessionEvent(id);
+        const auto record = e.sourceRecord.value_or(id);
+        if (resource) {
+            const auto references = session_->referencedObjects(record);
+            if (std::find(references.begin(), references.end(), *resource) == references.end()) return false;
+        }
         auto text = QString::fromStdString(std::to_string(id) + " " + e.name + " " + e.summary).toCaseFolded();
         const bool needsArguments = std::any_of(words.begin(), words.end(), [&](const auto &word) { return !text.contains(word); });
-        if (needsArguments) text += QString::fromStdString(session_->argumentText(id)).toCaseFolded();
+        if (needsArguments) text += QString::fromStdString(session_->argumentText(record)).toCaseFolded();
         for (const auto &word : words) if (!text.contains(word)) return false;
         return true;
     }
@@ -112,10 +131,11 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
             if (role != Qt::DisplayRole) return {};
             return index.column() == 0 ? QString::number(r.id) : QString::fromStdString(index.column() == 1 ? r.name : r.summary);
         }
-        const auto e = session_->event(ids_[index.row()]);
+        const auto e = sessionEvent(ids_[index.row()]);
         if (role == Qt::UserRole) return QVariant::fromValue<qulonglong>(e.id);
         if (role == Qt::UserRole + 2) return e.work;
         if (role == Qt::UserRole + 3 && e.thread) return QVariant::fromValue<qulonglong>(*e.thread);
+        if (role == Qt::UserRole + 4 && e.queue) return QVariant::fromValue<qulonglong>(*e.queue);
         if (role == Qt::ToolTipRole) return QString::fromStdString(e.summary);
         if (role == Qt::ForegroundRole && e.work) return QColor("#a6dffa");
         if (role != Qt::DisplayRole) return {};
@@ -181,7 +201,7 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
 QVariant CaptureModel::headerData(int n, Qt::Orientation orientation, int role) const {
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
         return {};
-    return QStringList{"ID", kind_ == Kind::Commands ? "API call" : "Resource",
+    return QStringList{executions_ ? "Execution ID" : "ID", kind_ == Kind::Commands ? "API call" : "Resource",
                        kind_ == Kind::Commands ? "Arguments" : "Size"}
         .value(n);
 }
@@ -192,6 +212,8 @@ bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
         return false;
     if (thread && (!index.data(Qt::UserRole + 3).isValid() ||
                    index.data(Qt::UserRole + 3).toULongLong() != *thread)) return false;
+    if (queue && (!index.data(Qt::UserRole + 4).isValid() ||
+                  index.data(Qt::UserRole + 4).toULongLong() != *queue)) return false;
     if (resourceType == 1 && !(type >= 0x84 && type <= 0x86))
         return false;
     if (resourceType == 2 && type != 0x83)

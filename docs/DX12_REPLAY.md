@@ -13,7 +13,7 @@ drag-and-drop use the existing API log. Initialization records are explicitly
 distinguished from frame-thread records. CPU timestamp order is not GPU execution
 order, and an indexed record is not yet a command-list execution instance.
 
-`inventory`, `commands` and `validate-frame` accept DX12 directories. Validation
+`inventory`, `commands`, `command-lists` and `validate-frame` accept DX12 directories. Validation
 reports `blocked` until native resource restoration and execution are implemented.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
 arguments are decoded on demand. Committed, placed and reserved resource
@@ -21,8 +21,22 @@ creation descriptors appear in the resource table with their originating record
 and captured object pointer. These rows identify creation records, not resolved
 object lifetimes or restored GPU resources. Newer creation APIs remain gaps.
 Unknown packet types retain their numeric identity and bytes; they are not
-silently treated as supported calls. Resource-reference filtering and analysis
-are not enabled for DX12 until their semantics have been decoded.
+silently treated as supported calls. Captured-object filtering currently covers
+decoded resource creation and copy arguments only; the UI labels that limitation.
+It does not resolve object lifetime aliases or infer shader binding use.
+
+The API log can switch from recorded calls to submitted command instances, with
+queue filtering and location within either domain. Each submitted list ordinal
+gets a distinct execution range, including repeated submissions of the same
+recording. Reset starts a new generation; incomplete recordings remain explicit.
+Queue signal/wait records preserve 64-bit fence values. This index does not yet
+resolve cross-queue dependencies or certify a global GPU execution order.
+
+CopyOperation resource data uses a checked 64-byte descriptor and a signed
+offset relative to its end. Data remains a mapped span; the inspector reads at
+most 64 preview bytes. Unsupported data kinds and missing/invalid ranges fail
+explicitly. The initializer contains ExecuteCallOperation references to other
+records, so physical initialization record order is not an execution schedule.
 
 Native DX12 replay, resource inspection/history, Pixel History, shader debugging,
 geometry, metrics and experiments remain **unfinished**. Ordinary execution does
@@ -47,6 +61,13 @@ Addresses below are RVAs relative to image base `0x180000000`.
 - `0x679c10`, `0x679fd0`, `0x67a1a0`: committed/placed/reserved creation readers;
   `0x60ec40` reads the optional 56-byte resource descriptor.
 - `0x67bfa0`, `0x53ac50`: buffer/resource copy readers.
+- `0x6798b0`: command-list creation reader. `0x0affc0` establishes global API
+  identities, including D3D12CreateDevice and CreateDXGIFactory variants.
+- `0x0a2ea0` dispatches internal operations; `0x4f4ad0`, `0x4f5090`,
+  `0x4f56f0`, `0x4f4a20`, `0x4f60c0` establish Copy, ExecuteCall, ThreadRestart,
+  AdjustRefCount and Wait kinds. `0x4f4c50` writes the CopyOperation fields;
+  `0x4f05c0` resolves its resource descriptor. `0x5438d0` independently shows
+  descriptor length at `+0x28` and data at `descriptor + 0x40 + relative(+0x30)`.
 
 Ghidra 12.1.4 imported the reference into the local `FloraDX12` project with a
 180-second initial analysis budget. Initial analysis timed out; targeted
@@ -87,6 +108,15 @@ with resource-creation rows. Replacing an active DX11 worker session with DX12
 clears the old image. A stale enabled geometry action found by this check was
 fixed. Other documented DX11 baseline failures were not rerun.
 No DX12 GPU replay or advanced-analysis acceptance has passed yet.
+
+Subsequent focused checks passed for signed resource-data offsets, overflowing
+lengths, repeated list submissions, generation changes, queue-filter location
+and decoded object references. All real CopyOperation data ranges were in bounds:
+BF1 9,571; Talos 3,679; Hellblade2 2,781 (1,473 above 4 GiB). The largest observed
+Hellblade2 block is 603,979,776 bytes and is not copied by the inspector.
+Submitted-list/command-instance counts are BF1 226/54,186, Talos 41/19,410,
+Hellblade2 349/37,104, with no missing list-recording associations in these samples.
+These are structural checks, not proof that recorded GPU commands have executed.
 
 ## Remaining milestones
 

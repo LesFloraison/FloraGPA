@@ -14,6 +14,11 @@ struct StreamFile {
     std::shared_ptr<const MappedFile> storage;
     uint64_t thread{};
 };
+struct ResourceDataView {
+    uint64_t capturedObject{}, descriptorOffset{}, dataOffset{}, size{};
+    uint32_t kind{}, pitch0{}, pitch1{};
+    format::Bytes bytes;
+};
 class StreamDirectory final {
     std::filesystem::path path_;
     std::vector<StreamFile> files_;
@@ -34,6 +39,7 @@ class StreamDirectory final {
     uint32_t width() const { return width_; }
     uint32_t height() const { return height_; }
     format::Bytes payload(const StreamPacket &packet) const;
+    ResourceDataView resourceData(uint64_t descriptorOffset) const;
 };
 std::string streamPacketName(uint64_t type);
 bool streamPacketWork(uint64_t type);

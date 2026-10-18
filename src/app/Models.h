@@ -20,6 +20,9 @@ class CaptureModel final : public QAbstractTableModel {
     void setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries = {},
                   std::shared_ptr<const CommandSearchIndex> search = {});
     void setSession(std::shared_ptr<const IReplaySession> session);
+    void setExecutionView(bool value);
+    bool executionView() const { return executions_; }
+    SessionEvent sessionEvent(Id id) const { return executions_ ? session_->executionEvent(id) : session_->event(id); }
     int rowCount(const QModelIndex &parent = {}) const override {
         return parent.isValid() ? 0 : int(ids_.size());
     }
@@ -44,6 +47,7 @@ class CaptureModel final : public QAbstractTableModel {
     Kind kind_;
     std::shared_ptr<const Frame> frame_;
     std::shared_ptr<const IReplaySession> session_;
+    bool executions_ = false;
     std::shared_ptr<const QueryInspection> queries_;
     std::shared_ptr<const CommandSearchIndex> search_;
     std::vector<Id> ids_;
@@ -57,6 +61,7 @@ class CaptureFilter final : public QSortFilterProxyModel {
     int resourceType = 0;
     std::optional<Id> referencedResource;
     std::optional<uint64_t> thread;
+    std::optional<uint64_t> queue;
     QString searchText;
     void setFilterFixedString(const QString &text) {
         searchText = text;

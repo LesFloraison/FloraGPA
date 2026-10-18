@@ -141,4 +141,30 @@ void StreamDirectory::metadata(const CancelCheck &cancelled) {
 format::Bytes StreamDirectory::payload(const StreamPacket &packet) const {
     return files_.at(packet.file).storage->bytes(packet.offset + 32, packet.size);
 }
+ResourceDataView StreamDirectory::resourceData(uint64_t offset) const {
+    Reader reader(resources_->bytes(offset, 64));
+    ResourceDataView out;
+    out.descriptorOffset = offset;
+    out.capturedObject = reader.read<uint64_t>();
+    reader.skip(8);
+    out.kind = reader.read<uint32_t>(); reader.skip(4);
+    out.pitch0 = reader.read<uint32_t>(); out.pitch1 = reader.read<uint32_t>();
+    reader.skip(8); out.size = reader.read<uint64_t>();
+    const auto relative = reader.read<int64_t>(); reader.skip(8);
+    if (out.kind != 0) throw std::runtime_error("DX12 resource data kind is not implemented");
+    if (relative == INT64_MAX) throw std::runtime_error("DX12 resource data was not captured");
+    // resource bounds already establish offset+64 <= size, without overflow.
+    const auto base = offset + 64;
+    if (relative < 0) {
+        const auto distance = uint64_t(-(relative + 1)) + 1;
+        if (distance > base) throw std::runtime_error("Invalid DX12 relative resource data offset");
+        out.dataOffset = base - distance;
+    } else {
+        if (uint64_t(relative) > resources_->size() - base)
+            throw std::runtime_error("Truncated DX12 resource data offset");
+        out.dataOffset = base + uint64_t(relative);
+    }
+    out.bytes = resources_->bytes(out.dataOffset, out.size);
+    return out;
+}
 }

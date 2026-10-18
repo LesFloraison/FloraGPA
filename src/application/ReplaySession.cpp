@@ -2,6 +2,7 @@
 #include "ApiCommands.h"
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
+#include "dx12/SubmissionIndex.h"
 #include <QUuid>
 #include <sstream>
 #include <iomanip>
@@ -39,6 +40,10 @@ class Dx11Session final : public IReplaySession {
     }
     nlohmann::json eventDetails(Id id) const override { return inspectCommand(*frame_, id); }
     std::string argumentText(Id id) const override { return eventDetails(id).dump(); }
+    nlohmann::json executionDetails(Id id) const override { return eventDetails(id); }
+    nlohmann::json submissionDetails() const override {
+        return {{"backend", "dx11"}, {"status", "Use the existing DX11 command-list inspection adapter"}};
+    }
     std::span<const Id> resources() const override { return resources_; }
     SessionResource resource(Id id) const override {
         const auto &e = frame_->entry(id);
@@ -60,6 +65,7 @@ class Dx11Session final : public IReplaySession {
 };
 class Dx12Session final : public IReplaySession {
     dx12::StreamDirectory directory_;
+    dx12::SubmissionIndex submissions_;
     std::vector<Id> ids_;
     std::vector<Id> resources_;
     std::string identity_ = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
@@ -68,7 +74,8 @@ class Dx12Session final : public IReplaySession {
         return directory_.packets()[size_t(id - 1)];
     }
   public:
-    Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled) : directory_(path, cancelled) {
+    Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled)
+        : directory_(path, cancelled), submissions_(directory_, cancelled) {
         ids_.reserve(directory_.packets().size());
         for (Id i = 1; i <= directory_.packets().size(); ++i) {
             if (i % 1024 == 0) checkCancellation(cancelled);
@@ -86,6 +93,8 @@ class Dx12Session final : public IReplaySession {
     nlohmann::json information() const override {
         return {{"backend", "dx12"}, {"events", ids_.size()},
                 {"decoded_resource_creations", resources_.size()}, {"resource_catalog_complete", false},
+                {"indexed_execution_instances", std::to_string(submissions_.executionCount())},
+                {"submitted_lists", submissions_.lists().size()}, {"gpu_order_resolved", false},
                 {"initialization_records", directory_.initializationCount()},
                 {"frame_records", ids_.size() - directory_.initializationCount()},
                 {"resource_storage_bytes", directory_.resources().size()},
@@ -99,7 +108,7 @@ class Dx12Session final : public IReplaySession {
         const auto &p = packet(id);
         const auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
         const auto &desc = decoded.values.at("Description");
-        return {id, *decoded.createdResource, "DX12 resource creation", desc.is_null() ? "No descriptor captured" : desc.dump()};
+        return {id, *decoded.createdResource, "DX12 object " + std::to_string(*decoded.createdResource), desc.is_null() ? "No descriptor captured" : desc.dump()};
     }
     nlohmann::json resourceDetails(Id id) const override {
         const auto info = resource(id);
@@ -114,8 +123,70 @@ class Dx12Session final : public IReplaySession {
         out.id = id; out.name = dx12::streamPacketName(p.type); out.work = dx12::streamPacketWork(p.type);
         out.fileOffset = p.offset;
         if (!p.initialization) out.thread = directory_.files()[p.file].thread;
+        if (const auto index = submissions_.recordingForRecord(id)) {
+            out.recording = *index + 1; out.commandList = submissions_.recordings()[*index].list;
+        }
+        if (p.type == 0x125482975df48ULL || p.type == 0x12548dab1bf2dULL || p.type == 0x12548db3bfde2ULL) {
+            format::Reader r(directory_.payload(p)); out.queue = r.read<uint64_t>();
+            if (p.type == 0x125482975df48ULL) out.submission = id;
+        }
         out.summary = (p.initialization ? "Initialization" : "Thread " + std::to_string(*out.thread)) +
                       " | " + std::to_string(p.size) + " bytes | offset " + std::to_string(p.offset);
+        return out;
+    }
+    uint64_t executionCount() const override { return submissions_.executionCount(); }
+    SessionEvent executionEvent(Id id) const override {
+        const auto execution = submissions_.execution(id);
+        auto out = event(execution.record);
+        out.id = id; out.sourceRecord = execution.record;
+        out.queue = execution.queue; out.submission = execution.submission; out.commandList = execution.list;
+        out.summary = "Record " + std::to_string(execution.record) + " | submit " + std::to_string(execution.submission) +
+            " | queue " + std::to_string(execution.queue) + " | list ordinal " + std::to_string(execution.ordinal) +
+            " | generation " + std::to_string(execution.generation) + " | not replayed";
+        return out;
+    }
+    std::vector<Id> referencedObjects(Id id) const override {
+        const auto &p = packet(id);
+        try {
+            auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
+            if (decoded.createdResource) decoded.resources.push_back(*decoded.createdResource);
+            return decoded.resources;
+        } catch (const std::exception &) { return {}; }
+    }
+    nlohmann::json executionDetails(Id id) const override {
+        const auto e = submissions_.execution(id);
+        auto out = eventDetails(e.record);
+        out["execution_id"] = std::to_string(e.id);
+        out["source_record"] = std::to_string(e.record);
+        out["submission_record"] = std::to_string(e.submission);
+        out["queue"] = std::to_string(e.queue);
+        out["command_list"] = std::to_string(e.list);
+        out["list_ordinal"] = std::to_string(e.ordinal);
+        out["recording_generation"] = std::to_string(e.generation);
+        out["recording_complete"] = e.recordingComplete;
+        out["note"] = "Indexed command-list invocation; GPU synchronization and initialization dependencies are unresolved";
+        return out;
+    }
+    nlohmann::json submissionDetails() const override {
+        nlohmann::json out{{"backend", "dx12"}, {"gpu_order_resolved", false},
+            {"lists", nlohmann::json::array()}, {"synchronization", nlohmann::json::array()}};
+        for (const auto &list : submissions_.lists()) {
+            nlohmann::json row{{"submission_record", std::to_string(list.submission)}, {"queue", std::to_string(list.queue)},
+                {"list_ordinal", std::to_string(list.ordinal)}, {"command_list", std::to_string(list.list)},
+                {"first_execution", std::to_string(list.firstExecution)}, {"execution_count", std::to_string(list.count)},
+                {"status", "unresolved_recording"}};
+            if (list.recording) {
+                const auto &recording = submissions_.recordings()[*list.recording];
+                row["recording_generation"] = std::to_string(recording.generation);
+                row["begin_record"] = std::to_string(recording.begin); row["close_record"] = std::to_string(recording.close);
+                row["status"] = recording.hasBeginning ? "recording_indexed" : "partial_recording";
+            }
+            out["lists"].push_back(std::move(row));
+        }
+        for (const auto &sync : submissions_.synchronization())
+            out["synchronization"].push_back({{"record", std::to_string(sync.record)}, {"queue", std::to_string(sync.queue)},
+                {"fence", std::to_string(sync.fence)}, {"value", std::to_string(sync.value)}, {"wait", sync.wait}});
+        out["note"] = "CPU submission records and distinct list invocations; fence dependencies and object aliases are not resolved";
         return out;
     }
     std::string argumentText(Id id) const override {
@@ -141,6 +212,12 @@ class Dx12Session final : public IReplaySession {
                 {"status", "packet_indexed"}, {"payload_preview", preview.str()},
                 {"preview_truncated", bytes.size() > 256},
                 {"note", "CPU stream record; not a GPU execution instance"}};
+        if (const auto index = submissions_.recordingForRecord(id)) {
+            const auto &recording = submissions_.recordings()[*index];
+            result["recording_id"] = std::to_string(*index + 1);
+            result["recording_generation"] = std::to_string(recording.generation);
+            result["command_list"] = std::to_string(recording.list);
+        }
         try {
             auto decoded = dx12::decodeArguments(p.type, bytes);
             result["arguments_decoded"] = decoded.supported;
@@ -148,6 +225,19 @@ class Dx12Session final : public IReplaySession {
                 result["arguments"] = std::move(decoded.values);
                 result["resource_references"] = nlohmann::json::array();
                 for (auto ref : decoded.resources) result["resource_references"].push_back(std::to_string(ref));
+                if (p.type == 0x20000000000000ULL) {
+                    format::Reader reader(bytes); reader.skip(8);
+                    const auto data = directory_.resourceData(reader.read<uint64_t>());
+                    std::ostringstream preview;
+                    preview << std::hex << std::setfill('0');
+                    for (size_t i = 0; i < std::min<size_t>(data.bytes.size(), 64); ++i)
+                        preview << (i ? " " : "") << std::setw(2) << unsigned(data.bytes[i]);
+                    result["stored_data"] = {{"captured_object", std::to_string(data.capturedObject)},
+                        {"descriptor_offset", std::to_string(data.descriptorOffset)},
+                        {"data_offset", std::to_string(data.dataOffset)}, {"size", std::to_string(data.size)},
+                        {"kind", data.kind}, {"preview", preview.str()}, {"preview_truncated", data.size > 64},
+                        {"status", "mapped_read_only; not uploaded to GPU"}};
+                }
             }
         } catch (const std::exception &e) { result["status"] = "invalid_arguments"; result["error"] = e.what(); }
         return result;

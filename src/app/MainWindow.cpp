@@ -199,10 +199,17 @@ MainWindow::MainWindow() : loader_(this) {
             updateExperimentActions();
             if (frame_) commands_->setFrame(frame_, std::move(loaded.queries), std::move(loaded.search));
             else commands_->setSession(session_);
+            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+            findChild<QComboBox *>("apiEventDomain")->setEnabled(!frame_);
             findChild<QLineEdit *>("apiThreadFilter")->clear();
             findChild<QLineEdit *>("apiThreadFilter")->setEnabled(!frame_);
+            findChild<QLineEdit *>("apiQueueFilter")->clear();
+            findChild<QLineEdit *>("apiQueueFilter")->setEnabled(!frame_);
             findChild<QLineEdit *>("apiResourceFilter")->clear();
-            findChild<QLineEdit *>("apiResourceFilter")->setEnabled(bool(frame_));
+            findChild<QLineEdit *>("apiResourceFilter")->setEnabled(true);
+            findChild<QLineEdit *>("apiResourceFilter")->setPlaceholderText(frame_ ? "Referenced resource ID…" : "Captured resource object (partial decoding)…");
+            findChild<QComboBox *>("resourceKinds")->setCurrentIndex(0);
+            findChild<QComboBox *>("resourceKinds")->setEnabled(bool(frame_));
             apiView_->setColumnHidden(2, bool(frame_));
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
@@ -585,6 +592,7 @@ void MainWindow::buildUi() {
         commandFilter_->refresh();
     });
     auto resourceKinds = new QComboBox;
+    resourceKinds->setObjectName("resourceKinds");
     resourceKinds->addItems({"All resources", "Textures", "Buffers", "Shaders"});
     connect(resourceKinds, &QComboBox::currentIndexChanged, this, [this](int i) {
         resourceFilter_->resourceType = i;
@@ -594,6 +602,17 @@ void MainWindow::buildUi() {
     leftTabs_->setDocumentMode(true);
     auto apiPane = filtered(apiView_, commandFilter_, apiKinds);
     apiPane->findChild<QLineEdit *>()->setObjectName("apiSearch");
+    auto eventDomain = new QComboBox;
+    eventDomain->setObjectName("apiEventDomain");
+    eventDomain->addItems({"Recorded API calls", "Submitted command instances"});
+    eventDomain->setToolTip("Submission instances have distinct identities. Indexing does not establish GPU replay or global GPU order.");
+    connect(eventDomain, &QComboBox::currentIndexChanged, this, [this](int value) {
+        commands_->setExecutionView(value == 1);
+        selectedEvent_ = 0; selection_.event = 0; selection_.execution.reset();
+        properties_->clear();
+        selectionLabel_->setText(value ? "Submitted instances — not replayed" : "Recorded API calls");
+    });
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(2, eventDomain);
     auto referenceFilter = new QLineEdit;
     referenceFilter->setObjectName("apiResourceFilter");
     referenceFilter->setPlaceholderText("Referenced resource ID…");
@@ -601,13 +620,15 @@ void MainWindow::buildUi() {
     connect(referenceFilter, &QLineEdit::textChanged, this, [this, referenceFilter](const QString &value) {
         bool valid = false;
         auto id = value.toULongLong(&valid);
-        referenceFilter->setToolTip(value.isEmpty() || valid ? "" : "Enter an unsigned resource ID");
+        referenceFilter->setToolTip(!value.isEmpty() && !valid ? "Enter an unsigned resource ID" :
+            session_ && session_->backend() == ReplayBackend::Dx12 ?
+                "Captured object references from decoded resource creation and copy arguments only. Other APIs and pointer lifetimes remain incomplete." : "");
         if (!value.isEmpty() && (!valid || value.startsWith('-')))
             return;
         commandFilter_->referencedResource = value.isEmpty() ? std::nullopt : std::optional<Id>(id);
         commandFilter_->refresh();
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(2, referenceFilter);
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(3, referenceFilter);
     auto threadFilter = new QLineEdit;
     threadFilter->setObjectName("apiThreadFilter");
     threadFilter->setPlaceholderText("Thread ID…");
@@ -620,7 +641,19 @@ void MainWindow::buildUi() {
         commandFilter_->thread = value.isEmpty() ? std::nullopt : std::optional<uint64_t>(id);
         commandFilter_->refresh();
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(3, threadFilter);
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(4, threadFilter);
+    auto queueFilter = new QLineEdit;
+    queueFilter->setObjectName("apiQueueFilter");
+    queueFilter->setPlaceholderText("Queue object…");
+    queueFilter->setClearButtonEnabled(true);
+    connect(queueFilter, &QLineEdit::textChanged, this, [this, queueFilter](const QString &value) {
+        bool valid = false; const auto id = value.toULongLong(&valid);
+        queueFilter->setToolTip(value.isEmpty() || valid ? "" : "Enter an unsigned queue object");
+        if (!value.isEmpty() && (!valid || value.startsWith('-'))) return;
+        commandFilter_->queue = value.isEmpty() ? std::nullopt : std::optional<uint64_t>(id);
+        commandFilter_->refresh();
+    });
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(5, queueFilter);
     auto locate = new QLineEdit;
     locate->setObjectName("apiLocate");
     locate->setPlaceholderText("Locate event ID (Enter)…");
@@ -630,7 +663,7 @@ void MainWindow::buildUi() {
         if (valid && !locate->text().startsWith('-') && commands_->rowOf(id) >= 0) locateEvent(id);
         else statusBar()->showMessage("Event ID was not found in this capture.");
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(4, locate);
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(6, locate);
     leftTabs_->addTab(apiPane, "API Log");
     leftTabs_->addTab(filtered(resourceView_, resourceFilter_, resourceKinds), "Resources");
     statistics_ = tree({"Statistic", "Value"});
@@ -2215,6 +2248,7 @@ void MainWindow::locateEvent(Id id) {
         findChild<QLineEdit *>("apiSearch")->clear();
         findChild<QLineEdit *>("apiResourceFilter")->clear();
         findChild<QLineEdit *>("apiThreadFilter")->clear();
+        findChild<QLineEdit *>("apiQueueFilter")->clear();
     }
     leftTabs_->setCurrentIndex(0);
     selectEvent(id);
@@ -2227,10 +2261,11 @@ void MainWindow::selectEvent(Id id) {
         if (commands_->rowOf(id) < 0) return;
         selectedEvent_ = id;
         selectedResource_ = 0;
-        selection_.event = id;
+        selection_.event = commands_->executionView() ? session_->executionEvent(id).sourceRecord.value() : id;
+        selection_.execution = commands_->executionView() ? std::optional<Id>(id) : std::nullopt;
         selection_.resource = 0;
         ++revision_;
-        selectionLabel_->setText(QString("Stream record %1").arg(id));
+        selectionLabel_->setText(QString(commands_->executionView() ? "Execution instance %1 — not replayed" : "Stream record %1").arg(id));
         inspectEvent(id);
         return;
     }

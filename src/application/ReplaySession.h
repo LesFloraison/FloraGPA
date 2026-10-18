@@ -16,6 +16,7 @@ struct SessionCapability {
 struct ReplaySelection {
     std::string session;
     Id event{}, resource{};
+    std::optional<Id> execution;
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
 };
@@ -30,7 +31,7 @@ struct SessionEvent {
     std::string name, summary;
     bool work = false;
     // Raw CPU records are distinct from command-list execution instances.
-    std::optional<uint64_t> thread, fileOffset, queue, recording, submission;
+    std::optional<uint64_t> thread, fileOffset, queue, recording, submission, commandList, sourceRecord;
 };
 struct SessionResource {
     Id id{}, capturedObject{};
@@ -47,6 +48,11 @@ class IReplaySession {
     virtual SessionEvent event(Id id) const = 0;
     virtual nlohmann::json eventDetails(Id id) const = 0;
     virtual std::string argumentText(Id id) const = 0;
+    virtual nlohmann::json executionDetails(Id id) const = 0;
+    virtual nlohmann::json submissionDetails() const = 0;
+    virtual uint64_t executionCount() const { return 0; }
+    virtual SessionEvent executionEvent(Id id) const { return event(id); }
+    virtual std::vector<Id> referencedObjects(Id) const { return {}; }
     virtual std::span<const Id> resources() const = 0;
     virtual SessionResource resource(Id id) const = 0;
     virtual nlohmann::json resourceDetails(Id id) const = 0;

@@ -36,6 +36,10 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     const auto u64 = [&](const char *name) { auto n = r.read<uint64_t>(); v[name] = std::to_string(n); return n; };
     const auto resource = [&](const char *name) { auto n = u64(name); if(n) out.resources.push_back(n); };
     switch (type) {
+    case 0x20000000000000ULL:
+        u64("CapturedMemory"); u64("ResourceDataDescriptorOffset"); r.end(); break;
+    case 0x26000000000000ULL:
+        u64("CapturedObject"); u32("ReferenceCount"); r.end(); break;
     case 0x1ae3c190d8b1eULL:
         u64("CommandList"); u32("VertexCountPerInstance"); u32("InstanceCount");
         u32("StartVertexLocation"); u32("StartInstanceLocation"); break;
@@ -48,6 +52,13 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
         u64("CommandList"); u64("CommandAllocator"); u64("InitialPipelineState"); u32("HRESULT"); break;
     case 0x1ae3cd6acf667ULL:
         u64("CommandList"); u32("HRESULT"); break;
+    case 0x127938b682074ULL: {
+        u64("Device"); u32("NodeMask"); u32("Type"); u64("CommandAllocator"); u64("InitialPipelineState");
+        r.skip(16); const auto outputs = pointers(r); u32("HRESULT");
+        if (outputs.size() > 1) throw std::runtime_error("Invalid DX12 command-list output count");
+        if (!outputs.empty()) v["CommandList"] = std::to_string(outputs[0]);
+        break;
+    }
     case 0x12548dab1bf2dULL: case 0x12548db3bfde2ULL:
         u64("Queue"); u64("Fence"); u64("Value"); u32("HRESULT"); break;
     case 0x125482975df48ULL: {

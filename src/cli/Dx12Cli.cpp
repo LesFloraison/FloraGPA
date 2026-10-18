@@ -6,7 +6,7 @@
 
 namespace flora {
 int runDx12Cli(const QString &command, const QString &path, const QCommandLineParser &options) {
-    if (command != "inventory" && command != "commands" && command != "validate-frame")
+    if (command != "inventory" && command != "commands" && command != "validate-frame" && command != "command-lists")
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
     for (const auto &option : options.optionNames())
         if (option != "out" && !(command == "commands" && option == "filter"))
@@ -17,7 +17,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("Output directory must be new or empty");
     auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
     if (!QDir().mkpath(output.path())) throw std::runtime_error("Cannot create DX12 inspection output directory");
-    const auto filename = command == "commands" ? "commands.json" : command == "validate-frame" ? "validation.json" : "inventory.json";
+    const auto filename = command == "commands" ? "commands.json" : command == "validate-frame" ? "validation.json" :
+                          command == "command-lists" ? "command-lists.json" : "inventory.json";
     QSaveFile file(output.filePath(filename));
     if (!file.open(QIODevice::WriteOnly)) throw std::runtime_error("Cannot open DX12 inspection output");
     const auto write = [&](const std::string &s) {
@@ -36,7 +37,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
             write(nlohmann::json{{"id", std::to_string(id)}, {"name", event.name}, {"summary", event.summary}}.dump());
         }
         write("\n]\n");
-    } else write(report.dump(2) + "\n");
+    } else if (command == "command-lists") write(session->submissionDetails().dump(2) + "\n");
+    else write(report.dump(2) + "\n");
     if (!file.commit()) throw std::runtime_error("Cannot publish DX12 inspection output");
     QTextStream(stdout) << QString::fromStdString(report.dump(2)) << Qt::endl;
     return command == "validate-frame" ? 2 : 0;

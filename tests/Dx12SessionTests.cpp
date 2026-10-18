@@ -1,6 +1,7 @@
 #include "application/ReplaySession.h"
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
+#include "dx12/SubmissionIndex.h"
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
@@ -24,6 +25,7 @@ void write(const QString &path, const QByteArray &bytes) {
         throw std::runtime_error("Cannot create test input");
 }
 void qword(QByteArray &bytes, uint64_t value) { bytes.append(reinterpret_cast<const char *>(&value), 8); }
+void dword(QByteArray &bytes, uint32_t value) { bytes.append(reinterpret_cast<const char *>(&value), 4); }
 QString fixture(QTemporaryDir &directory) {
     const auto path = directory.path() + "/frame.gpa_frame";
     QDir().mkpath(path + "/D3D12");
@@ -117,6 +119,86 @@ class Dx12SessionTests : public QObject {
         window.openCapture(path);QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),2,10000);
         QVERIFY(!window.busy());
     }
+    void resourceDataBounds() {
+        QTemporaryDir temp;const auto path=fixture(temp);
+        QByteArray storage(192,0);
+        const uint64_t object=UINT64_MAX-7,size=8;
+        memcpy(storage.data(),&object,8);memcpy(storage.data()+40,&size,8);
+        memcpy(storage.data()+64,"contents",8);
+        const int64_t relative=-128;
+        memcpy(storage.data()+128,&object,8);memcpy(storage.data()+168,&size,8);
+        memcpy(storage.data()+176,&relative,8);
+        write(path+"/resources",storage);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            const auto first=directory.resourceData(0),second=directory.resourceData(128);
+            QCOMPARE(first.capturedObject,object);QCOMPARE(first.dataOffset,uint64_t(64));
+            QCOMPARE(first.bytes.data(),second.bytes.data());
+            QCOMPARE(std::string(reinterpret_cast<const char *>(first.bytes.data()),first.bytes.size()),std::string("contents"));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,directory.resourceData(160));
+        }
+        const uint64_t oversized=UINT64_MAX;
+        memcpy(storage.data()+40,&oversized,8);write(path+"/resources",storage);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,directory.resourceData(0));
+        }
+        const int64_t invalid=INT64_MIN;
+        memcpy(storage.data()+176,&invalid,8);write(path+"/resources",storage);
+        dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,directory.resourceData(128));
+    }
+    void repeatedSubmissions() {
+        QTemporaryDir temp;const auto path=fixture(temp);
+        QByteArray packets;uint64_t timestamp=0;
+        const auto packet=[&](uint64_t type,const QByteArray &payload) {
+            qword(packets,type);qword(packets,++timestamp);qword(packets,0);qword(packets,payload.size());packets+=payload;
+        };
+        const uint64_t list=UINT64_MAX-2,queue=UINT64_MAX-3;
+        const auto record=[&](uint32_t vertices) {
+            QByteArray reset;qword(reset,list);qword(reset,17);qword(reset,0);dword(reset,0);packet(0x1ae3c721c351aULL,reset);
+            QByteArray draw;qword(draw,list);dword(draw,vertices);dword(draw,1);dword(draw,0);dword(draw,0);packet(0x1ae3c190d8b1eULL,draw);
+            QByteArray close;qword(close,list);dword(close,0);packet(0x1ae3cd6acf667ULL,close);
+        };
+        const auto submit=[&](std::initializer_list<uint64_t> lists) {
+            QByteArray payload;qword(payload,queue);dword(payload,uint32_t(lists.size()));payload.append(char(1));qword(payload,lists.size());
+            for(auto object:lists) qword(payload,object);packet(0x125482975df48ULL,payload);
+        };
+        record(3);submit({list,list});submit({19});record(6);submit({list});
+        write(path+"/thread-7-0",packets);
+        auto session=openReplaySession(std::filesystem::path(path.toStdWString()));
+        const auto first=session->executionDetails(1),second=session->executionDetails(2),third=session->executionDetails(3);
+        QCOMPARE(first.at("source_record"),second.at("source_record"));
+        QVERIFY(first.at("execution_id")!=second.at("execution_id"));
+        QVERIFY(first.at("list_ordinal")!=second.at("list_ordinal"));
+        QCOMPARE(first.at("recording_generation").get<std::string>(),std::string("1"));
+        QCOMPARE(third.at("recording_generation").get<std::string>(),std::string("2"));
+        QVERIFY(first.at("source_record")!=third.at("source_record"));
+        QCOMPARE(first.at("queue").get<std::string>(),std::to_string(queue));
+        QVERIFY(first.at("recording_complete").get<bool>());
+        QCOMPARE(session->submissionDetails().at("lists").at(2).at("status").get<std::string>(),std::string("unresolved_recording"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,session->executionDetails(4));
+        MainWindow window;QSignalSpy loaded(&window,&MainWindow::captureLoaded);
+        window.openCapture(path);QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,10000);
+        auto domain=window.findChild<QComboBox *>("apiEventDomain");QVERIFY(domain);domain->setCurrentIndex(1);
+        auto api=window.findChild<QTableView *>("apiLog");QVERIFY(api);QCOMPARE(api->model()->rowCount(),3);
+        auto filter=window.findChild<QLineEdit *>("apiQueueFilter");QVERIFY(filter);
+        filter->setText(QString::number(queue));QCOMPARE(api->model()->rowCount(),3);
+        filter->setText("1");QCOMPARE(api->model()->rowCount(),0);
+        auto locate=window.findChild<QLineEdit *>("apiLocate");locate->setText("2");QTest::keyClick(locate,Qt::Key_Return);
+        QCOMPARE(api->currentIndex().data(Qt::UserRole).toULongLong(),2ULL);QVERIFY(filter->text().isEmpty());
+    }
+    void decodedResourceReferences() {
+        QTemporaryDir temp;const auto path=fixture(temp);
+        QByteArray packets,payload;
+        qword(payload,17);qword(payload,UINT64_MAX-1);qword(payload,UINT64_MAX-2);
+        qword(packets,0x1ae3c1d190092ULL);qword(packets,1);qword(packets,0);qword(packets,payload.size());packets+=payload;
+        write(path+"/thread-7-0",packets);
+        CaptureModel model(CaptureModel::Kind::Commands);
+        model.setSession(openReplaySession(std::filesystem::path(path.toStdWString())));
+        QVERIFY(model.matchesCommand(1,{},UINT64_MAX-1));QVERIFY(model.matchesCommand(1,{},UINT64_MAX-2));
+        QVERIFY(!model.matchesCommand(1,{},17));
+    }
     void originalDirectories() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for real-directory indexing");
@@ -129,14 +211,29 @@ class Dx12SessionTests : public QObject {
             QCOMPARE(directory.initializationCount(),count);
             QVERIFY(directory.packets().size()>count);
             qInfo()<<name<<"initialization"<<count<<"frame"<<directory.packets().size()-count;
-            size_t decoded{}, creations{}, extensions{};
+            size_t decoded{}, creations{}, extensions{},copies{},above4G{};
             for(const auto &p: directory.packets()) {
                 const auto args=dx12::decodeArguments(p.type,directory.payload(p));
                 if(args.supported) { ++decoded; if(args.consumed!=p.size) ++extensions; }
                 if(args.createdResource) ++creations;
+                if(p.type==0x20000000000000ULL) {
+                    format::Reader reader(directory.payload(p));reader.skip(8);
+                    const auto data=directory.resourceData(reader.read<uint64_t>());
+                    QCOMPARE(data.kind,0U);QCOMPARE(data.bytes.size(),size_t(data.size));
+                    ++copies;if(data.dataOffset>UINT32_MAX) ++above4G;
+                }
             }
             QVERIFY(creations>0);
             qInfo()<<"decoded arguments"<<decoded<<"resource creations"<<creations<<"extensions"<<extensions;
+            qInfo()<<"resource copy ranges"<<copies<<"above 4 GiB"<<above4G;
+            if(QString(name).startsWith("Hellblade2")) QCOMPARE(above4G,size_t(1473));
+            dx12::SubmissionIndex submissions(directory);
+            size_t unresolved{};for(const auto &list:submissions.lists()) if(!list.recording) ++unresolved;
+            qInfo()<<"submitted lists"<<submissions.lists().size()<<"unresolved"<<unresolved<<"execution instances"<<submissions.executionCount();
+            if(submissions.executionCount()) {
+                const auto first=submissions.execution(1),last=submissions.execution(submissions.executionCount());
+                QVERIFY(first.record>0);QVERIFY(last.record<=directory.packets().size());
+            }
         }
     }
     void dx11ReplayAndSessionSwitch() {
