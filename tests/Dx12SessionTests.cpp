@@ -42,6 +42,7 @@
 #include <winioctl.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
+#include <bit>
 
 using namespace flora;
 namespace {
@@ -74,6 +75,112 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void fixedPipelineComposite() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto evidence = qEnvironmentVariable("FLORA_DX12_FIXED_PIPELINE_EVIDENCE");
+        if (root.isEmpty() || evidence.isEmpty())
+            QSKIP("Set BF1 capture and fixed-pipeline evidence directories");
+        const auto read = [&](const char *name) {
+            QFile file(evidence + '/' + name + "/result.json");
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing fixed-pipeline evidence");
+            return Json::parse(file.readAll().toStdString());
+        };
+        const auto report = read("bf1-color-final-pipeline3");
+        const auto compute = read("bf1-compute-fixed-state1");
+        const auto history = read("bf1-color-input-pixel-history1");
+        for (const auto *r : {&report, &compute, &history}) {
+            QVERIFY(r->at("ok").get<bool>());
+            QVERIFY(r->at("gpa_modules_loaded").empty());
+        }
+        const auto detail = [&](const char *binding) -> const Json & {
+            for (const auto &row : report.at("pipeline_rows"))
+                if (row.at("binding") == binding) return row.at("details");
+            throw std::runtime_error("Missing fixed-function pipeline row");
+        };
+        dx12::StreamDirectory directory(std::filesystem::path(
+            (root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        const auto &packet = directory.packets().at(179424 - 1);
+        const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+        QCOMPARE(recipe.object, 0x7eb2e6c0ULL);
+        const auto &bind = directory.packets().at(213069 - 1);
+        format::Reader reader(directory.payload(bind));
+        reader.skip(8);
+        QCOMPARE(reader.read<uint64_t>(), recipe.object);
+        const auto &native = recipe.graphics;
+        const auto &b = native.BlendState.RenderTarget[0];
+        const auto &blend = detail("Blend target 0");
+        QCOMPARE(bool(b.BlendEnable), true);
+        QCOMPARE(b.SrcBlend, D3D12_BLEND_ONE);
+        QCOMPARE(b.DestBlend, D3D12_BLEND_INV_SRC_ALPHA);
+        QCOMPARE(b.BlendOp, D3D12_BLEND_OP_ADD);
+        QCOMPARE(blend.at("enabled"), Json(bool(b.BlendEnable)));
+        QCOMPARE(blend.at("color").at("source").at("name"), Json("One"));
+        QCOMPARE(blend.at("color").at("destination").at("name"), Json("InverseSourceAlpha"));
+        QCOMPARE(blend.at("color").at("operation").at("name"), Json("Add"));
+        QCOMPARE(blend.at("write_mask"), Json(b.RenderTargetWriteMask));
+        QCOMPARE(detail("Blend state").at("independent_blend"), Json(bool(native.BlendState.IndependentBlendEnable)));
+        QCOMPARE(detail("Depth / stencil").at("depth_enabled"), Json(bool(native.DepthStencilState.DepthEnable)));
+        QCOMPARE(detail("Depth / stencil").at("stencil_enabled"), Json(bool(native.DepthStencilState.StencilEnable)));
+        QCOMPARE(detail("State").at("front_counter_clockwise"), Json(bool(native.RasterizerState.FrontCounterClockwise)));
+        QCOMPARE(detail("State").at("depth_clip"), Json(bool(native.RasterizerState.DepthClipEnable)));
+        QCOMPARE(detail("State").at("sample_mask"), Json(native.SampleMask));
+        QCOMPARE(native.InputLayout.NumElements, 2U);
+        for (size_t i = 0; i < recipe.inputs.size(); ++i) {
+            const auto &l = recipe.inputs[i];
+            const auto &row = detail(i == 0 ? "Input 0 TEXCOORD0" : "Input 1 TEXCOORD1");
+            QCOMPARE(row.at("semantic"), Json(l.SemanticName));
+            QCOMPARE(row.at("semantic_index"), Json(l.SemanticIndex));
+            QCOMPARE(row.at("byte_offset"), Json(l.AlignedByteOffset));
+            QCOMPARE(row.at("input_slot"), Json(l.InputSlot));
+            QCOMPARE(row.at("per_instance"), Json(l.InputSlotClass == D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA));
+        }
+        QCOMPARE(detail("Viewport 0").at("width"), Json(1920.0));
+        QCOMPARE(detail("Viewport 0").at("height"), Json(1009.0));
+        QCOMPARE(detail("Scissor 0").at("width"), Json(1920));
+        QCOMPARE(detail("Scissor 0").at("height"), Json(1009));
+        // Use pre/shader/post values from the same Pixel History record;
+        // separately replayed shader traces have different input colors.
+        bool verifiedBlend = false;
+        for (const auto &row : history.at("history")) {
+            if (row.at("execution") != "36640") continue;
+            const auto &src = row.at("shaderOut").at("col").at("floatValue");
+            const auto &dst = row.at("preMod").at("col").at("floatValue");
+            const auto &post = row.at("postMod").at("col").at("floatValue");
+            for (size_t c = 0; c < 3; ++c) {
+                const float blended = src[c].get<float>() + (1.0f - src[3].get<float>()) * dst[c].get<float>();
+                QVERIFY(blended >= 0.03125f && blended < 0.125f);
+                const uint32_t mask = UINT32_MAX << (23U - (c == 2 ? 5U : 6U));
+                QCOMPARE(Json(std::bit_cast<float>(std::bit_cast<uint32_t>(blended) & mask)), post[c]);
+            }
+            verifiedBlend = true;
+        }
+        QVERIFY(verifiedBlend);
+        QVERIFY(!compute.at("pipeline_scope").at("graphics_state_applicable").get<bool>());
+        for (const auto &row : compute.at("pipeline_rows")) {
+            QVERIFY(row.at("binding") != "Blend state");
+            QVERIFY(row.at("section") != "Rasterizer");
+            QVERIFY(row.at("section") != "Stream output");
+        }
+        Dx12PipelineView view;
+        view.setContext("composite", 36640);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows");
+        for (int i = 0; i < rows->topLevelItemCount(); ++i)
+            if (rows->topLevelItem(i)->text(1) == "Blend target 0") rows->setCurrentItem(rows->topLevelItem(i));
+        QVERIFY(view.findChild<QPlainTextEdit *>()->toPlainText().contains("InverseSourceAlpha"));
+        QVERIFY(!view.findChild<QAction *>("inspectPipelineResource")->isEnabled());
+        QTemporaryDir temp;
+        view.exportResult(temp.path() + "/pipeline.json");
+        QFile exported(temp.path() + "/pipeline.json");
+        QVERIFY(exported.open(QIODevice::ReadOnly));
+        QCOMPARE(Json::parse(exported.readAll().toStdString()), report);
+        const auto serial = view.requestId();
+        view.setContext("compute", 36666);
+        QVERIFY(!view.finish(serial, report));
+        QVERIFY(view.finish(view.requestId(), compute));
+        QVERIFY(!view.findChild<QPlainTextEdit *>()->toPlainText().contains("InverseSourceAlpha"));
+    }
     void resourceHistoryShaderVisibility() {
         using Json = nlohmann::json;
         const auto root = qEnvironmentVariable("FLORA_DX12_USAGE_VISIBILITY_EVIDENCE");

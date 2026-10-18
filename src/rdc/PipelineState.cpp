@@ -1,5 +1,6 @@
 #include "PipelineState.h"
 #include <charconv>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 #include <string_view>
@@ -7,6 +8,42 @@
 namespace flora {
 namespace {
 using Json = nlohmann::json;
+Json real(float value) {
+    if (std::isfinite(value))
+        return double(value);
+    return std::isnan(value) ? "nan" : value < 0 ? "-inf" : "inf";
+}
+template <typename E, size_t N> Json named(E value, const char *const (&names)[N]) {
+    const auto index = uint32_t(value);
+    return {{"enum", index}, {"name", index < N ? names[index] : "Unknown"}};
+}
+Json comparison(CompareFunction value) {
+    return named(value,
+                 {"Never", "Always", "Less", "LessEqual", "Greater", "GreaterEqual", "Equal", "NotEqual"});
+}
+Json stencil(const StencilFace &s) {
+    const auto op = [](StencilOperation value) {
+        return named(value, {"Keep", "Zero", "Replace", "IncrementSaturate", "DecrementSaturate",
+                             "IncrementWrap", "DecrementWrap", "Invert"});
+    };
+    return {{"fail", op(s.failOperation)}, {"depth_fail", op(s.depthFailOperation)},
+            {"pass", op(s.passOperation)}, {"function", comparison(s.function)},
+            {"reference", s.reference},    {"compare_mask", s.compareMask},
+            {"write_mask", s.writeMask}};
+}
+Json blendEquation(const BlendEquation &b) {
+    const auto factor = [](BlendMultiplier value) {
+        return named(value,
+                     {"Zero", "One", "SourceColor", "InverseSourceColor", "DestinationColor",
+                      "InverseDestinationColor", "SourceAlpha", "InverseSourceAlpha", "DestinationAlpha",
+                      "InverseDestinationAlpha", "SourceAlphaSaturate", "BlendFactorRGB",
+                      "InverseBlendFactorRGB", "BlendFactorAlpha", "InverseBlendFactorAlpha", "Source1Color",
+                      "InverseSource1Color", "Source1Alpha", "InverseSource1Alpha"});
+    };
+    return {{"source", factor(b.source)},
+            {"destination", factor(b.destination)},
+            {"operation", named(b.operation, {"Add", "Subtract", "ReverseSubtract", "Minimum", "Maximum"})}};
+}
 std::string idText(ResourceId id) {
     uint64_t value{};
     static_assert(sizeof(id) == sizeof(value));
@@ -265,6 +302,106 @@ Json readDx12Pipeline(IReplayController &controller) {
         {{"descriptor", descriptor(state->outputMerger.depthTarget)},
          {"depth_read_only", state->outputMerger.depthReadOnly},
          {"stencil_read_only", state->outputMerger.stencilReadOnly}});
+    const bool graphics = state->computeShader.resourceId == ResourceId();
+    if (graphics) {
+        for (size_t i = 0; i < state->inputAssembly.layouts.size(); ++i) {
+            const auto &l = state->inputAssembly.layouts[i];
+            const auto resource = l.inputSlot < state->inputAssembly.vertexBuffers.size()
+                                      ? state->inputAssembly.vertexBuffers[l.inputSlot].resourceId
+                                      : ResourceId();
+            add("IA",
+                "Input " + std::to_string(i) + " " + l.semanticName.c_str() + std::to_string(l.semanticIndex),
+                reference(resource),
+                {{"semantic", l.semanticName.c_str()},
+                 {"semantic_index", l.semanticIndex},
+                 {"input_slot", l.inputSlot},
+                 {"byte_offset", l.byteOffset},
+                 {"append_aligned", l.byteOffset == D3D12Pipe::Layout::TightlyPacked},
+                 {"per_instance", l.perInstance},
+                 {"instance_step_rate", l.instanceDataStepRate},
+                 {"format",
+                  {{"type_enum", uint32_t(l.format.type)},
+                   {"component_type_enum", uint32_t(l.format.compType)},
+                   {"component_count", l.format.compCount},
+                   {"component_byte_width", l.format.compByteWidth},
+                   {"srgb", l.format.SRGBCorrected()}}}});
+        }
+        const auto &blend = state->outputMerger.blendState;
+        add("OM", "Blend state", reference(ResourceId()),
+            {{"alpha_to_coverage", blend.alphaToCoverage},
+             {"independent_blend", blend.independentBlend},
+             {"blend_factor",
+              {real(blend.blendFactor[0]), real(blend.blendFactor[1]), real(blend.blendFactor[2]),
+               real(blend.blendFactor[3])}}});
+        for (size_t i = 0; i < blend.blends.size(); ++i) {
+            const auto &b = blend.blends[i];
+            add("OM", "Blend target " + std::to_string(i), reference(ResourceId()),
+                {{"enabled", b.enabled},
+                 {"color", blendEquation(b.colorBlend)},
+                 {"alpha", blendEquation(b.alphaBlend)},
+                 {"logic_enabled", b.logicOperationEnabled},
+                 {"logic_operation_enum", uint32_t(b.logicOperation)},
+                 {"write_mask", uint32_t(b.writeMask)},
+                 {"applies_to", blend.independentBlend ? "same_index_target"
+                                : i == 0               ? "all_targets"
+                                                       : "ignored_independent_blend_disabled"}});
+        }
+        const auto &depth = state->outputMerger.depthStencilState;
+        add("OM", "Depth / stencil", reference(ResourceId()),
+            {{"depth_enabled", depth.depthEnable},
+             {"depth_writes", depth.depthWrites},
+             {"depth_function", comparison(depth.depthFunction)},
+             {"bounds_enabled", depth.depthBoundsEnable},
+             {"min_depth_bounds", real(depth.minDepthBounds)},
+             {"max_depth_bounds", real(depth.maxDepthBounds)},
+             {"stencil_enabled", depth.stencilEnable},
+             {"front", stencil(depth.frontFace)},
+             {"back", stencil(depth.backFace)}});
+        const auto &raster = state->rasterizer.state;
+        add("Rasterizer", "State", reference(ResourceId()),
+            {{"fill_mode_enum", uint32_t(raster.fillMode)},
+             {"cull_mode_enum", uint32_t(raster.cullMode)},
+             {"front_counter_clockwise", raster.frontCCW},
+             {"depth_bias", real(raster.depthBias)},
+             {"depth_bias_clamp", real(raster.depthBiasClamp)},
+             {"slope_scaled_depth_bias", real(raster.slopeScaledDepthBias)},
+             {"depth_clip", raster.depthClip},
+             {"line_raster_mode_enum", uint32_t(raster.lineRasterMode)},
+             {"forced_sample_count", raster.forcedSampleCount},
+             {"conservative_rasterization_enum", uint32_t(raster.conservativeRasterization)},
+             {"sample_mask", state->rasterizer.sampleMask}});
+        add("Rasterizer", "Shading rate", reference(raster.shadingRateImage),
+            {{"base_rate", {raster.baseShadingRate.first, raster.baseShadingRate.second}},
+             {"combiner_enums",
+              {uint32_t(raster.shadingRateCombiners.first), uint32_t(raster.shadingRateCombiners.second)}}});
+        for (size_t i = 0; i < state->rasterizer.viewports.size(); ++i) {
+            const auto &v = state->rasterizer.viewports[i];
+            add("Rasterizer", "Viewport " + std::to_string(i), reference(ResourceId()),
+                {{"enabled", v.enabled},
+                 {"x", real(v.x)},
+                 {"y", real(v.y)},
+                 {"width", real(v.width)},
+                 {"height", real(v.height)},
+                 {"min_depth", real(v.minDepth)},
+                 {"max_depth", real(v.maxDepth)}});
+        }
+        for (size_t i = 0; i < state->rasterizer.scissors.size(); ++i) {
+            const auto &s = state->rasterizer.scissors[i];
+            add("Rasterizer", "Scissor " + std::to_string(i), reference(ResourceId()),
+                {{"enabled", s.enabled}, {"x", s.x}, {"y", s.y}, {"width", s.width}, {"height", s.height}});
+        }
+        add("Stream output", "Rasterized stream", reference(ResourceId()),
+            {{"enabled", state->streamOut.rasterizedStream != D3D12Pipe::StreamOut::NoRasterization},
+             {"stream", state->streamOut.rasterizedStream}});
+        for (size_t i = 0; i < state->streamOut.outputs.size(); ++i) {
+            const auto &b = state->streamOut.outputs[i];
+            add("Stream output", "Buffer " + std::to_string(i), reference(b.resourceId),
+                {{"byte_offset", std::to_string(b.byteOffset)},
+                 {"byte_size", std::to_string(b.byteSize)},
+                 {"written_count_resource", reference(b.writtenCountResourceId)},
+                 {"written_count_byte_offset", std::to_string(b.writtenCountByteOffset)}});
+        }
+    }
     add("Predication", "Predicate", reference(state->predication.resourceId),
         {{"byte_offset", std::to_string(state->predication.offset)},
          {"skip_if_zero", state->predication.skipIfZero}});
@@ -275,8 +412,9 @@ Json readDx12Pipeline(IReplayController &controller) {
               {"descriptor_evidence", "potential shader bindings; not measured GPU accesses"},
               {"descriptor_access_limit", maxAccesses},
               {"descriptor_access_count", accesses.size()},
+              {"graphics_state_applicable", graphics},
               {"gaps",
-               {"Full rasterizer/blend/depth-stencil and stream-output state",
+               {"Stream-output declarations and PSO sample description not exposed by this adapter",
                 "Unaccessed descriptor table entries",
                 "Original PSO/root-signature/shader creation identity mapping"}}}}};
 }

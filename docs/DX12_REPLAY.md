@@ -2645,6 +2645,69 @@ script passed syntax inspection; a full portable package was not rebuilt or
 accepted here. Full resource histories and the underlying replay variation
 remain unfinished.
 
+### Fixed-function pipeline inspection and BF1 composition
+
+The existing DX12 pipeline panel now includes input-layout elements, color/alpha
+blend equations and factors, write masks, logic-op settings, depth/stencil tests
+and front/back operations, rasterizer state, sample mask, viewports/scissors,
+shading-rate settings/image, and stream-output bindings/count-buffer references.
+Blend factors, operations, comparisons and stencil operations retain both readable
+names and backend enum values. Nonfinite float values are explicit strings rather
+than silently becoming null. Buffer offsets/sizes and resource identities retain
+their lossless representation. Graphics-only rows are omitted for a compute PSO;
+the scope reports `graphics_state_applicable`.
+
+Input layout and shading-rate image rows use the same captured-resource mapping
+as existing bindings. Fixed-function rows without a resource cannot trigger a
+resource jump. JSON export includes the new state. Remaining gaps still include
+stream-output declarations, the PSO sample description, unaccessed descriptor
+entries and original PSO/root-signature/shader creation provenance. Exposed
+stream-output state does not constitute a verified stream-output replay.
+
+The BF1 input pixel investigation now reaches execution **36640**, source record
+**213075**, which writes creation **324843** before the simple copy at **36659**.
+Its PS `7d991753-540003a6-9bd94a68-8b7fea61` reads color creation **325012** and
+depth creations **325004 / 325048**. It computes a depth-aware color contribution
+with alpha, so comparing its RGB directly with the target would omit blending.
+At this draw the observed equation is:
+
+`target.rgb = source.rgb + oldTarget.rgb * (1 - source.a)`
+
+Depth testing and writes are disabled, independent blending is enabled, the
+RT0 write mask is **15**, and viewport/scissor cover **1920x1009**. Input slot 0
+has `TEXCOORD0` float2 at byte **0** and `TEXCOORD1` float4 at byte **8**. The
+focused test independently decodes original PSO creation **179424**, object
+**0x7eb2e6c0**, and verifies its use by `SetPipelineState` record **213069**.
+The checked blend equation/write mask, depth/stencil enables, rasterizer
+orientation/depth-clip flag, sample mask and layout semantic/slot/offset fields
+match those captured settings.
+
+For pixel **(1673,483)**, one Pixel History record for execution **36640** contains:
+
+| Value | RGB / alpha |
+| --- | --- |
+| Pre-modification | (0.05712890625, 0.05224609375, 0.052734375) |
+| Reconstructed shader output | (0.03888561949, 0.03455479816, 0.02888564393), alpha 0.6815996170 |
+| Post-modification | (0.056640625, 0.05078125, 0.044921875) |
+
+Applying the captured blend and R11G11B10 truncation exactly reproduces the
+post-modification RGB. This verifies interpretation of this recorded composition;
+Pixel History's own reconstruction limitations remain. A separately replayed PS
+debug trace yields different source colors and is not substituted into this
+record. The history also contains four indirect dispatch boundaries with unchanged
+selected-pixel values; this does not imply those dispatches performed no work.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-color-input-pixel-history1`, `bf1-color-final-ps1`,
+`bf1-color-final-pipeline{1,2,3}` and `bf1-compute-fixed-state1`.
+Six targeted GPU queries served the investigation and adapter checks, without
+another native recapture. `fixedPipelineComposite` reads the original directory
+and these reports without GPU work, validates the captured PSO, composition,
+compute-state exclusion, panel details, export and stale-result rejection.
+It passed (**3 passed** including setup/cleanup, **162 ms**,
+`fixed-pipeline-composite1.txt`). Full frame consistency and the upstream source
+of the varying color contribution remain unresolved.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
