@@ -21,46 +21,29 @@ std::vector<CpuWait> planCpuWaits(const StreamDirectory &directory, uint64_t las
                                 const CancelCheck &cancelled) {
     if (lastRecord > directory.packets().size())
         throw std::runtime_error("Unknown CPU wait inspection boundary");
-    std::set<uint64_t> waiting;
-    std::map<uint64_t, CpuFenceEvent> events;
+    std::map<uint64_t, std::vector<CpuFenceEvent>> events;
     std::vector<CpuWait> result;
     for (uint64_t i = directory.initializationCount(); i < lastRecord; ++i) {
         if (i % 1024 == 0)
             checkCancellation(cancelled);
         const auto &packet = directory.packets()[size_t(i)];
-        const auto thread = directory.files().at(packet.file).thread;
         if (packet.type == 0x114699e3dba70ULL) {
             auto event = decodeFenceEvent(directory.payload(packet));
             event.registration = i + 1;
             if (!event.handle) {
                 // A null event handle makes SetEventOnCompletion synchronous.
-                result.push_back({i + 1, 0, packet.file, event});
-                waiting.erase(thread);
-            } else if (!events.emplace(event.handle, event).second) {
-                throw std::runtime_error("Overlapping captured Fence event registrations at record " +
-                                         std::to_string(i + 1));
-            }
+                result.push_back({i + 1, 0, packet.file, {event}});
+            } else
+                events[event.handle].push_back(event);
         } else if (packet.type == 0x27000000000000ULL) {
             format::Reader r(directory.payload(packet));
             const auto handle = r.read<uint64_t>();
             r.end();
             if (!handle)
                 throw std::runtime_error("Null captured CPU wait handle");
-            const auto registered = events.find(handle);
-            if (registered != events.end()) {
-                result.push_back({i + 1, handle, packet.file, registered->second});
-                events.erase(registered);
-                waiting.erase(thread);
-            } else {
-                waiting.insert(thread);
-                result.push_back({i + 1, handle, packet.file, {}});
-            }
-        } else if (waiting.contains(thread) &&
-                   packet.type != 0x11469e993999dULL && // GetCompletedValue: recorded CPU observation.
-                   packet.type != 0x114696360f841ULL && // Native fences retain their own references.
-                   packet.type != 0x11469e8691d1cULL) {
-            throw std::runtime_error("Unresolved captured CPU wait precedes state-changing record " +
-                                     std::to_string(i + 1) + " (" + streamPacketName(packet.type) + ")");
+            auto registered = events.extract(handle);
+            result.push_back({i + 1, handle, packet.file,
+                              registered.empty() ? std::vector<CpuFenceEvent>{} : std::move(registered.mapped())});
         }
     }
     checkCancellation(cancelled);

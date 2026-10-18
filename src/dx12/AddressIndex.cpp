@@ -33,19 +33,27 @@ AddressIndex::AddressIndex(const StreamDirectory &directory, const CancelCheck &
     uint64_t end{}; for (auto &range : ranges_) { end = (std::max)(end, range.end); range.prefixEnd = end; }
 }
 AddressReference AddressIndex::resolve(uint64_t address, uint64_t at, uint64_t bytes) const {
+    const auto references = candidates(address, at, bytes);
+    if (references.size() != 1)
+        throw std::runtime_error("Captured GPU address overlaps multiple resource lifetimes; alias selection is required");
+    return references.front();
+}
+std::vector<AddressReference> AddressIndex::candidates(uint64_t address, uint64_t at, uint64_t bytes) const {
     if (!address || !bytes || !at || at > directory_.packets().size()) throw std::runtime_error("Invalid GPU address resolution request");
     auto it = std::upper_bound(ranges_.begin(), ranges_.end(), address, [](uint64_t value, const Range &r) { return value < r.base; });
-    std::optional<AddressReference> selected;
+    std::vector<AddressReference> result;
     while (it != ranges_.begin()) {
         --it; if (it->prefixEnd <= address) break;
         if (address < it->base || address >= it->end || bytes > it->end - address) continue;
         if (it->query > at && !(at <= directory_.initializationCount() && it->query <= directory_.initializationCount())) continue;
         if (creation(it->object, at) != it->creation) continue;
-        if (selected && (selected->creation != it->creation || selected->offset != address - it->base))
-            throw std::runtime_error("Captured GPU address overlaps multiple resource lifetimes; alias selection is required");
-        selected = AddressReference{it->object, it->creation, address - it->base, it->end - address};
+        const AddressReference reference{it->object, it->creation, address - it->base, it->end - address};
+        if (std::none_of(result.begin(), result.end(), [&](const auto &existing) {
+                return existing.creation == reference.creation && existing.offset == reference.offset;
+            }))
+            result.push_back(reference);
     }
-    if (!selected) throw std::runtime_error("Captured GPU address is not mapped at record " + std::to_string(at) + ": " + std::to_string(address));
-    return *selected;
+    if (result.empty()) throw std::runtime_error("Captured GPU address is not mapped at record " + std::to_string(at) + ": " + std::to_string(address));
+    return result;
 }
 }

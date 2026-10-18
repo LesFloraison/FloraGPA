@@ -27,11 +27,13 @@ CpuFenceEvent decodeFenceEvent(format::Bytes bytes);
 struct CpuWait {
     uint64_t record{}, handle{};
     uint32_t file{};
-    std::optional<CpuFenceEvent> completion;
+    // Registrations recorded since the preceding wait on this handle. These
+    // are observations, not a reconstruction of Win32 reset/timeout semantics.
+    std::vector<CpuFenceEvent> registrations;
 };
-// Match single-registration event waits to Fence values. Unknown waits permit
-// only observations until a known completion wait supersedes them on that
-// thread. The native executor must verify every planned completion dependency.
+// Plan explicit submitted-queue drains at captured CPU waits. The stream does
+// not carry Win32 event creation/reset/timeout state. Null-handle registrations
+// are synchronous D3D12 waits and still require their exact Fence condition.
 std::vector<CpuWait> planCpuWaits(const StreamDirectory &, uint64_t lastRecord,
                                 const CancelCheck &cancelled = {});
 // Indexes recorded command-list invocations. It does not certify replayability,

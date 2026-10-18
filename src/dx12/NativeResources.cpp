@@ -105,6 +105,7 @@ struct NativeResources::Impl {
     AddressIndex addresses;
     BackBufferIndex backbuffers;
     uint64_t limit{}, allocated{}, peakAllocated{}, created{}, uploaded{}, uploadRecords{}, writeWatchRemoved{};
+    uint64_t equivalentAddressBindings{};
     std::set<uint64_t> retired;
     std::map<uint64_t, std::vector<uint64_t>> resourceRecords, heapRecords;
     std::map<uint64_t, ComPtr<ID3D12Heap>> heaps;
@@ -239,9 +240,37 @@ ID3D12Heap *NativeResources::tileHeap(uint64_t object, uint64_t atRecord) {
 }
 D3D12_GPU_VIRTUAL_ADDRESS NativeResources::gpuAddress(uint64_t captured, uint64_t atRecord, uint64_t bytes) {
     if (!captured) return 0;
-    const auto reference = impl_->addresses.resolve(captured, atRecord, bytes);
-    const auto base = resource(reference.object, atRecord)->GetGPUVirtualAddress();
-    require(base && reference.offset <= UINT64_MAX - base, "Native resource has no usable GPU virtual address"); return base + reference.offset;
+    auto &s = *impl_;
+    auto references = s.addresses.candidates(captured, atRecord, bytes);
+    std::erase_if(references, [&](const auto &reference) { return s.retired.contains(reference.creation); });
+    require(!references.empty(), "Captured GPU address has no live resource at this boundary");
+    uint64_t heapCreation{}, heapByte{};
+    if (references.size() > 1) {
+        for (const auto &reference : references) {
+            const auto recipe = s.recipe(reference.creation);
+            require(recipe.kind == ResourceRecipe::Kind::Placed &&
+                        recipe.heapOffset <= UINT64_MAX - reference.offset,
+                    "Overlapping GPU addresses require equivalent placed-buffer storage");
+            const auto heap = resolve(s.heapRecords, recipe.heap, reference.creation, s.directory.initializationCount());
+            require(heap == resolve(s.heapRecords, recipe.heap, atRecord, s.directory.initializationCount()),
+                    "GPU address alias references an expired heap lifetime");
+            const auto byte = recipe.heapOffset + reference.offset;
+            require(!heapCreation || (heapCreation == heap && heapByte == byte),
+                    "Overlapping GPU addresses refer to different heap bytes");
+            heapCreation = heap;
+            heapByte = byte;
+        }
+    }
+    D3D12_GPU_VIRTUAL_ADDRESS address{};
+    for (const auto &reference : references) {
+        const auto base = resource(reference.object, atRecord)->GetGPUVirtualAddress();
+        require(base && reference.offset <= UINT64_MAX - base, "Native resource has no usable GPU virtual address");
+        const auto candidate = base + reference.offset;
+        require(!address || address == candidate, "Equivalent captured aliases have different native GPU addresses");
+        address = candidate;
+    }
+    if (references.size() > 1) ++s.equivalentAddressBindings;
+    return address;
 }
 void NativeResources::releaseCompleted(uint64_t releaseRecord) {
     auto &s = *impl_; const auto &p = s.directory.packets().at(size_t(releaseRecord - 1));
@@ -329,6 +358,8 @@ nlohmann::json NativeResources::information() const {
     return {{"created_resources", impl_->created}, {"resident_resources", impl_->resources.size()}, {"retired_resources", impl_->retired.size()}, {"created_heaps", impl_->heaps.size()},
         {"allocation_bytes", std::to_string(impl_->allocated)}, {"allocation_limit", std::to_string(impl_->limit)},
         {"peak_allocation_bytes", std::to_string(impl_->peakAllocated)},
+        {"equivalent_placed_address_bindings", std::to_string(impl_->equivalentAddressBindings)},
+        {"address_alias_policy", "identical_placed_heap_byte_range_and_native_gpu_address"},
         {"restored_memory_records", std::to_string(impl_->uploadRecords)}, {"uploaded_bytes", std::to_string(impl_->uploaded)},
         {"write_watch_flags_removed", std::to_string(impl_->writeWatchRemoved)}};
 }

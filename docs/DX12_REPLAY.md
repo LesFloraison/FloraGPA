@@ -1151,7 +1151,7 @@ replay. No unrelated DX11/Talos/BF1 GPU regression run was added for this change
 
 ### Hellblade2 CPU Fence completion and DXIL compute debugging
 
-`planCpuWaits` associates a single captured `SetEventOnCompletion` registration
+At this milestone, `planCpuWaits` associated a single captured `SetEventOnCompletion` registration
 with its subsequent wait. A null handle represents a synchronous completion wait.
 The native executor verifies the actual Fence value before passing that boundary;
 captured handles are never passed to Windows. Missing registrations permit only
@@ -1160,7 +1160,8 @@ same captured thread. Mutations before that boundary, overlapping registrations,
 failed/truncated registrations and unscheduled producers fail explicitly. This
 does not restore arbitrary event reset/lifetime behavior or a complete CPU scheduler.
 Captured allocator resets validate object identity and HRESULT; each submitted
-recording still owns a fresh native allocator.
+recording still owns a fresh native allocator. The later submitted-queue drain
+policy below supersedes this single-registration/observation-only restriction.
 
 GPA 2025 R1 `StreamPlayback.dll`, version/hash recorded above: reader RVA
 `0x67b010` reads Fence, value, event handle and HRESULT; execution RVA `0x62cb70`
@@ -1278,6 +1279,98 @@ filtering, AS/MS shader debugging, the complete workspace worker request cycle o
 the remaining indirect calls. Those remain unfinished. Existing VS/PS/CS debugging
 is not advertised for mesh shader invocations.
 
+### Hellblade2 last indexed submission and RGB10 output
+
+The full directory contains 46 CPU waits, including repeated waits without a new
+registration and multiple Fence registrations on handle 3964. Creation/reset and
+timeout results for that Win32 event are not recorded. Replay now explicitly
+serializes all previously submitted native queues at each captured CPU wait,
+using replay-owned completion fences and cancellation-aware polling. Captured API
+arguments and mapped writes are replayed; the original CPU application is not
+re-executed. This is a conservative GPU serialization policy, not reconstructed
+Win32 event semantics or a faithful concurrency/performance timeline.
+
+Registrations since the preceding wait remain diagnostic annotations, including
+all overlapping registrations. Reports retain actual native completion values and
+whether each condition was reached; an unregistered wait never invents a Fence
+dependency. Null-handle `SetEventOnCompletion` remains a synchronous wait and
+requires its exact Fence condition. GPU queue Wait packets retain their separate
+producer checks: unscheduled producers still fail. The report declares
+`scope: serialized_submitted_queue_barriers` and `full_event_semantics: false`.
+
+This exposed a real placed-buffer alias at record **587987**. Creations 571474,
+571692 and 572348 have widths 49,920, 276 and 32,772 bytes, respectively, but share
+heap `0x1f34678c0b0`, heap offset `0x7540000`, and captured GPU base
+`0x135d940000`. Native address binding now accepts multiple candidates only after
+checking the same heap lifetime, same heap byte, sufficient ranges, and identical
+actual native GPU addresses. Other overlaps still fail. Resource-identity lookup
+remains ambiguous; histories/debugging do not arbitrarily pick an alias owner.
+
+Frame command-allocator creation is published at its original CPU boundary
+(first encountered at 594770), retaining a fresh native allocator per submitted
+recording and rejecting duplicate captured allocator lifetimes. Resource AddRef,
+fullscreen-state and heap-description observations are decoded and checked.
+They do not create a display window or alter replay ownership. GPA 2025 R1
+`StreamPlayback.dll`, version/hash recorded above, provides fullscreen reader
+RVA **0x5e3e80**, heap-description reader **0x5c2960** and its optional 48-byte
+description helper **0x5b61d0**. Local evidence is in
+`hellblade-fullscreen-decoder2.txt` and `hellblade-heap-description-helper1.txt`.
+
+`hellblade-remaining-prefix6` reaches execution **37104**, submission **613374**:
+all **125 frame submissions**, following 26 initialization submissions. Executed
+commands include 1,122 direct Draws, 882 direct Dispatches and 1,270 indirect API
+calls (not a count of the GPU-generated indirect actions). All **32 CPU waits**
+through this boundary drain; all **20 annotated Fence conditions** are reached.
+The entire directory has later CPU records, including Present, beyond this
+selected boundary. This does not certify complete frame semantics.
+
+SDK 616 on the RTX 5090 Laptop reports **zero D3D12 errors and 560 warnings**:
+341 overlapping GPU-address bindings, 123 waits for Fence value zero, 68 buffer
+initial-state notices, 21 missing RTV notices, four unbound vertex-buffer notices,
+two missing clear-value notices and one missing DSV notice. These warnings remain
+visible. Peak resource allocation is **5,238,685,696 bytes** under a 12 GiB budget;
+61 heaps and 4,879 resources were created, with 2,489 resources resident at the
+boundary. The alias checks succeeded for 341 bindings. None of these observations
+alone establishes output fidelity or alias-state correctness.
+
+The last recorded `GetCurrentBackBufferIndex` returns 3, but that captured buffer
+has no frame-thread writes and its native readback is zero (`hellblade-last-color1`).
+Following actual GPU commands instead identifies CopyResource **613353**, copying
+to object **2149283441408**, creation **506294**, swapchain buffer index 1. Readback
+after execution 37104 produces the visible scene, with the character, rocks and
+letterbox bars, from that resource. The relation between the observed swapchain
+index and copied buffer remains to be reconciled with original GPA behavior.
+
+`hellblade-last-color3` reads **1920 x 1200 R10G10B10A2_UNORM**, subresource 0,
+9,216,000 unpadded bytes. Native display now reuses the existing integer UNORM
+conversion for RGB10/alpha2 to RGBA8; it applies no color-space transform or HDR
+tone mapping. Raw storage remains unchanged. A CPU comparison against the saved
+raw bytes verifies every displayed pixel exactly; 1,541,760 pixels have nonzero
+RGB and every alpha component is 3. Evidence hashes:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Raw GPU readback | `08e46411da923de9f08a5db1f240be69684ff2804f61b8d1190c88ae4c6ec1f0` |
+| Native display PNG | `8484d044b185c291e950f36d445c414ba044908ff4e0cf14a26a96dcb24c4384` |
+
+The preceding raw readback (`hellblade-last-color2`, before adding display) has
+hash `17cb0fd4a855eba921464c46046a0e4f1039ad7e8d00f13138ce4fd447cc782b`.
+Comparing these already available outputs finds **10,593 changed pixels** out of
+2,304,000; maximum absolute RGB differences are **3, 3, 4** in 10-bit units,
+with no alpha changes. The difference is **unexplained**, not accepted as a
+tolerance or attributed to a particular GPU operation. No repeatability sweep
+was run (`hellblade-last-color-inspection1.json`). Original GPA comparison,
+intermediate-resource fidelity and the source of this variation remain unfinished.
+
+Four targeted CPU cases pass: real alias candidates/range/identity ambiguity,
+single/overlapping/repeated/null-handle wait plans and malformed input, the real
+46-wait capture plan, and cross-thread/file boundaries with cancellation
+(`hellblade-sync-alias-cpu2.txt`). GUI, CLI, Worker and focused tests build through
+`build122.log`. Each GPU rerun addressed a concrete decoder/address/allocator
+failure, selected the actually written output, or verified the new RGB10 display.
+No DX11, BF1 or Talos GPU rerun was added. No new full-frame RenderDoc capture,
+original-player comparison, experiment or portable acceptance is claimed.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1286,7 +1379,7 @@ is not advertised for mesh shader invocations.
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First Draw raw float before/after verified; entire first submit and second-submit prefix through indirect MeshDispatch 10267 executed with one verified CPU Fence dependency; full frame and general synchronization unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |

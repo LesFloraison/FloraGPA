@@ -68,6 +68,29 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void hellbladePlacedAddressAliases() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set capture directory for Hellblade2 placed aliases");
+        dx12::StreamDirectory directory(std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        dx12::AddressIndex addresses(directory);
+        const auto references = addresses.candidates(0x135d940000ULL, 587987, 276);
+        QCOMPARE(references.size(), size_t(3));
+        std::set<uint64_t> creations;
+        for (const auto &reference : references) {
+            creations.insert(reference.creation);
+            const auto &packet = directory.packets().at(size_t(reference.creation - 1));
+            const auto recipe = dx12::decodeResourceRecipe(packet.type, directory.payload(packet));
+            QCOMPARE(recipe.kind, dx12::ResourceRecipe::Kind::Placed);
+            QCOMPARE(recipe.heap, 0x1f34678c0b0ULL);
+            QCOMPARE(recipe.heapOffset + reference.offset, 0x7540000ULL);
+        }
+        QCOMPARE(creations, (std::set<uint64_t>{571474, 571692, 572348}));
+        // Resource identity remains ambiguous even though a native address may
+        // be proven equivalent. History/debugging must not invent one owner.
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, addresses.resolve(0x135d940000ULL, 587987, 276));
+        QCOMPARE(addresses.candidates(0x135d940000ULL, 587987, 40000).size(), size_t(1));
+    }
     void hellbladeMeshSignature() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty())
@@ -159,30 +182,37 @@ class Dx12SessionTests : public QObject {
             dword(draw, 1);
         packet(0x27000000000000ULL, handle); // Missing keyframe CPU event state.
         packet(0x114699e3dba70ULL, registration);
-        packet(0x27000000000000ULL, handle); // Known completion supersedes observation-only waits.
+        packet(0x27000000000000ULL, handle); // Registration is available for native completion diagnostics.
         packet(0x1ae3c190d8b1eULL, draw);
-        packet(0x27000000000000ULL, handle); // Cannot reuse an already-consumed registration.
+        packet(0x27000000000000ULL, handle); // Repeated wait still requires a native submitted-queue drain.
         packet(0x1ae3c190d8b1eULL, draw);
         write(path + "/thread-7-0", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             const auto plan = dx12::planCpuWaits(directory, 4);
             QCOMPARE(plan.size(), size_t(2));
-            QVERIFY(!plan[0].completion);
-            QVERIFY(plan[1].completion);
-            QCOMPARE(plan[1].completion->fence, UINT64_MAX - 2);
-            QCOMPARE(plan[1].completion->value, UINT64_MAX - 1);
-            QCOMPARE(plan[1].completion->registration, 2ULL);
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 6));
+            QVERIFY(plan[0].registrations.empty());
+            QCOMPARE(plan[1].registrations.size(), size_t(1));
+            QCOMPARE(plan[1].registrations[0].fence, UINT64_MAX - 2);
+            QCOMPARE(plan[1].registrations[0].value, UINT64_MAX - 1);
+            QCOMPARE(plan[1].registrations[0].registration, 2ULL);
+            const auto repeated = dx12::planCpuWaits(directory, 6);
+            QCOMPARE(repeated.size(), size_t(3));
+            QVERIFY(repeated.back().registrations.empty()); // No invented new registration.
         }
         thread.clear();
         timestamp = 0;
         packet(0x114699e3dba70ULL, registration);
         packet(0x114699e3dba70ULL, registration);
+        packet(0x27000000000000ULL, handle);
         write(path + "/thread-7-0", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 2));
+            const auto overlap = dx12::planCpuWaits(directory, 3);
+            QCOMPARE(overlap.size(), size_t(1));
+            QCOMPARE(overlap[0].registrations.size(), size_t(2));
+            QCOMPARE(overlap[0].registrations[0].registration, 1ULL);
+            QCOMPARE(overlap[0].registrations[1].registration, 2ULL);
         }
         registration.replace(16, 8, QByteArray(8, 0)); // Null handle is a synchronous completion wait.
         thread.clear();
@@ -196,7 +226,7 @@ class Dx12SessionTests : public QObject {
             const auto plan = dx12::planCpuWaits(directory, 3);
             QCOMPARE(plan.back().record, 2ULL);
             QCOMPARE(plan.back().handle, 0ULL);
-            QVERIFY(plan.back().completion);
+            QCOMPARE(plan.back().registrations.size(), size_t(1));
         }
         const auto bytes = [](const QByteArray &data) {
             return format::Bytes(reinterpret_cast<const uint8_t *>(data.data()), size_t(data.size()));
@@ -225,12 +255,20 @@ class Dx12SessionTests : public QObject {
         const auto next = dx12::planCpuWaits(directory, 579109);
         QCOMPARE(next.size(), size_t(4));
         QCOMPARE(next.back().record, 579052ULL);
-        QVERIFY(next.back().completion.has_value());
-        QCOMPARE(next.back().completion->registration, 578875ULL);
-        QCOMPARE(next.back().completion->fence, 0x1f033697240ULL);
-        QCOMPARE(next.back().completion->value, 449714ULL);
+        QCOMPARE(next.back().registrations.size(), size_t(1));
+        QCOMPARE(next.back().registrations[0].registration, 578875ULL);
+        QCOMPARE(next.back().registrations[0].fence, 0x1f033697240ULL);
+        QCOMPARE(next.back().registrations[0].value, 449714ULL);
+        const auto complete = dx12::planCpuWaits(directory, directory.packets().size());
+        QCOMPARE(complete.size(), size_t(46));
+        const auto overlap = std::find_if(complete.begin(), complete.end(),
+                                         [](const auto &wait) { return wait.record == 595143; });
+        QVERIFY(overlap != complete.end());
+        QCOMPARE(overlap->registrations.size(), size_t(2));
+        QCOMPARE(overlap->registrations[0].fence, 0x1f033697240ULL);
+        QCOMPARE(overlap->registrations[1].fence, 0x1f033697d30ULL);
     }
-    void observationWaitBoundaries() {
+    void cpuWaitPlanningAcrossThreads() {
         QTemporaryDir temp;
         const auto path = fixture(temp);
         QByteArray thread;
@@ -256,7 +294,7 @@ class Dx12SessionTests : public QObject {
             QCOMPARE(waits.front().record, 1ULL);
             QCOMPARE(waits.front().handle, UINT64_MAX);
             // The two Draws belong to the other thread, so their GPU prefix
-            // has no dependency on this polling thread's unknown CPU event.
+            // is retained independently from the thread's captured CPU event.
             QCOMPARE(directory.files().at(waits.front().file).thread, 8ULL);
             QVERIFY_THROWS_EXCEPTION(OperationCancelled,
                                      dx12::planCpuWaits(directory, 4, [] { return true; }));
@@ -270,10 +308,10 @@ class Dx12SessionTests : public QObject {
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             QCOMPARE(dx12::planCpuWaits(directory, 4).size(), size_t(1));
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 5));
+            QCOMPARE(dx12::planCpuWaits(directory, 5).size(), size_t(1));
         }
-        // A second stream file for the same captured thread must not bypass
-        // its wait when the directory merges records by CPU timestamp.
+        // A second stream file does not drop the earlier wait: the executor
+        // must drain all submitted queues at the original wait record.
         thread.clear();
         packet(0x27000000000000ULL, 5, wait);
         write(path + "/thread-8-1", thread);
@@ -282,7 +320,9 @@ class Dx12SessionTests : public QObject {
         write(path + "/thread-8-2", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 4));
+            const auto waits = dx12::planCpuWaits(directory, 4);
+            QCOMPARE(waits.size(), size_t(1));
+            QCOMPARE(waits[0].record, 1ULL);
         }
         thread.clear();
         packet(0x27000000000000ULL, 5, wait.chopped(1));

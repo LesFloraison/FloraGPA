@@ -16,6 +16,7 @@ class AddressIndex final {
   public:
     explicit AddressIndex(const StreamDirectory &, const CancelCheck &cancelled = {});
     AddressReference resolve(uint64_t address, uint64_t atRecord, uint64_t bytes = 1) const;
+    std::vector<AddressReference> candidates(uint64_t address, uint64_t atRecord, uint64_t bytes = 1) const;
     size_t rangeCount() const { return ranges_.size(); }
 };
 }

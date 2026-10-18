@@ -4,6 +4,7 @@
 #include "NativeDescriptors.h"
 #include "NativeCommands.h"
 #include "NativePerformance.h"
+#include "../common/PackedColor.hpp"
 #include <wrl/client.h>
 #include <dxgi1_4.h>
 #include <QCryptographicHash>
@@ -88,7 +89,7 @@ struct NativeReplay::Impl {
     uint64_t currentRecord{}; bool initialized = false, attempted = false;
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
-    std::map<uint64_t, uint64_t> completedCpuWaits;
+    std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
         std::unique_ptr<NativeCommands> commands;
@@ -150,6 +151,7 @@ struct NativeReplay::Impl {
         check(queue->Signal(completion.Get(), ++completionValue), "Signal replay completion");
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
         while (completion->GetCompletedValue() < completionValue) {
+            checkCancellation(cancelled);
             check(device.device()->GetDeviceRemovedReason(), "Native initialization execution");
             require(std::chrono::steady_clock::now() < deadline, "Native initialization timed out; retry in a fresh Worker");
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -511,13 +513,24 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             const auto &waits = s.frame->cpuWaits;
             const auto wait = std::lower_bound(waits.begin(), waits.end(), id,
                                               [](const CpuWait &entry, uint64_t record) { return entry.record < record; });
-            if (wait != waits.end() && wait->record == id && wait->completion) {
-                const auto &dependency = *wait->completion;
-                const auto completed = s.fence(dependency.fence)->GetCompletedValue();
-                check(s.device.device()->GetDeviceRemovedReason(), "Replay CPU Fence wait");
-                require(completed != UINT64_MAX && completed >= dependency.value,
-                        "CPU Fence wait requires an unscheduled producer");
-                s.completedCpuWaits.emplace(id, completed);
+            if (wait != waits.end() && wait->record == id) {
+                // CPU application code is not re-executed: its API arguments and
+                // mapped writes are captured. Serialize outstanding GPU work at
+                // this boundary; do not invent absent Win32 event/reset state.
+                // GPU queue Wait packets retain their separate producer checks.
+                for (const auto &[object, queue] : s.queues)
+                    s.wait(queue.Get());
+                std::vector<uint64_t> values;
+                for (const auto &dependency : wait->registrations) {
+                    const auto completed = s.fence(dependency.fence)->GetCompletedValue();
+                    check(s.device.device()->GetDeviceRemovedReason(), "Replay CPU Fence observation");
+                    require(completed != UINT64_MAX, "Device removed while draining CPU wait queues");
+                    if (!wait->handle)
+                        require(completed >= dependency.value,
+                                "Synchronous CPU Fence wait requires an unscheduled producer");
+                    values.push_back(completed);
+                }
+                s.completedCpuWaits.emplace(id, std::move(values));
             }
             s.recordFrame(id);
             if (s.index.recordingForRecord(id)) continue;
@@ -548,15 +561,23 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
+                case 0x12793beef5413ULL: {
+                    const auto recipe = allocatorRecipe(s.directory.payload(p), id);
+                    require(recipe.object != 0, "Null frame command allocator");
+                    require(s.allocatorRecipes.emplace(recipe.object, recipe).second,
+                            "Ambiguous frame allocator lifetime");
+                    // Native allocators belong to individual submitted recordings;
+                    // publish the captured recipe only at its CPU creation boundary.
+                    break;
+                }
                 case 0x27000000000000ULL:
-                    // Known registrations were checked against the native Fence
-                    // above. Missing registrations remain observation-only until
-                    // a known wait on this thread provides a completion boundary.
+                    // All previously submitted queues were drained above. This
+                    // is explicit serialized replay, not Win32 event emulation.
                     break;
                 case 0x114699e3dba70ULL: {
                     const auto event = decodeFenceEvent(s.directory.payload(p));
                     (void)s.fence(event.fence);
-                    // The plan binds this registration to its subsequent wait;
+                    // Retain registrations for diagnostics at the next wait;
                     // replay never uses a captured HANDLE as an OS handle.
                     break;
                 }
@@ -602,6 +623,23 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                     (void)s.resources.creationRecord(r.read<uint64_t>(), id);
                     if (r.flag())
                         (void)r.read<D3D12_RESOURCE_DESC>();
+                    r.end();
+                    break;
+                }
+                case 0x1e6506360f841ULL: {
+                    Reader r(s.directory.payload(p));
+                    (void)s.resources.creationRecord(r.read<uint64_t>(), id);
+                    require(r.read<ULONG>() != 0, "Invalid captured resource AddRef result");
+                    r.end();
+                    // Captured reference counts do not own replay COM references.
+                    break;
+                }
+                case 0x1991015a11fecULL: {
+                    // StreamPlayback reader RVA 0x5c2960: object and optional
+                    // 48-byte heap description, without an HRESULT.
+                    Reader r(s.directory.payload(p));
+                    require(r.read<uint64_t>() != 0, "Null captured heap description query");
+                    if (r.flag()) (void)r.read<D3D12_HEAP_DESC>();
                     r.end();
                     break;
                 }
@@ -684,6 +722,21 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                         r.skip(64); // Captured 64-byte body in BF1 record 364425; not used for replay state.
                     check(r.read<HRESULT>(), "Captured swapchain description query");
                     r.end();
+                    break;
+                }
+                case 0x1d5320e2ce403ULL: {
+                    // StreamPlayback reader RVA 0x5e3e80: object, optional BOOL,
+                    // optional counted output interface, then HRESULT.
+                    Reader r(s.directory.payload(p));
+                    require(r.read<uint64_t>() != 0, "Null swapchain fullscreen query");
+                    if (r.flag()) (void)r.read<BOOL>();
+                    if (r.flag()) {
+                        require(r.read<uint64_t>() == 1, "Invalid fullscreen output count");
+                        require(r.read<uint64_t>() == 0, "Fullscreen query introduces an unresolved output interface");
+                    }
+                    check(r.read<HRESULT>(), "Captured fullscreen state query");
+                    r.end();
+                    // A CPU observation does not change our offscreen backbuffers.
                     break;
                 }
                 case 0x1279364bf60fbULL: {
@@ -882,6 +935,25 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
                 qsizetype(footprint.Footprint.RowPitch), bgra ? QImage::Format_ARGB32 : QImage::Format_RGBA8888);
             auto imagePath = output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
             require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish GPU texture PNG"); imageFile = imagePath.filename().string();
+        } else if (pixelFormat == DXGI_FORMAT_R10G10B10A2_UNORM && footprint.Footprint.Depth == 1) {
+            displayInterpretation = "unorm10_rgb_unorm2_alpha_to_rgba8_no_color_space_transform";
+            QImage image(int(footprint.Footprint.Width), int(footprint.Footprint.Height), QImage::Format_RGBA8888);
+            require(!image.isNull(), "Cannot allocate RGB10 display image");
+            for (int y = 0; y < image.height(); ++y) {
+                checkCancellation(s.cancelled);
+                const auto row = static_cast<const uint8_t *>(mapped) + footprint.Offset + uint64_t(y) * footprint.Footprint.RowPitch;
+                auto pixels = image.scanLine(y);
+                for (int x = 0; x < image.width(); ++x) {
+                    uint32_t packed{};
+                    memcpy(&packed, row + size_t(x) * 4, 4);
+                    const auto rgba = unpack_rgb10a2(packed);
+                    std::copy(rgba.begin(), rgba.end(), pixels + size_t(x) * 4);
+                }
+            }
+            auto imagePath = output; imagePath.replace_extension(L".png");
+            QSaveFile png(QString::fromStdWString(imagePath.wstring()));
+            require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish RGB10 display PNG");
+            imageFile = imagePath.filename().string();
         } else if (footprint.Footprint.Depth == 1 && (pixelFormat == DXGI_FORMAT_R16_UNORM || pixelFormat == DXGI_FORMAT_D16_UNORM ||
             (pixelFormat == DXGI_FORMAT_R16_TYPELESS && (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)))) {
             displayInterpretation="unorm16_grayscale_0_to_1";
@@ -932,23 +1004,31 @@ json NativeReplay::information() const {
         if (waits.size() == 32) break;
         json wait{{"record", std::to_string(entry.record)}, {"handle", std::to_string(entry.handle)},
                   {"file", s.directory.files().at(entry.file).storage->path().filename().string()},
-                  {"kind", entry.completion ? "fence_completion" : "observation_only"}};
-        if (entry.completion) {
-            const auto &event = *entry.completion;
-            wait.update({{"registration", std::to_string(event.registration)}, {"fence", std::to_string(event.fence)},
-                         {"value", std::to_string(event.value)}, {"native_completed_value", nullptr}});
-            if (const auto completed = s.completedCpuWaits.find(entry.record); completed != s.completedCpuWaits.end())
-                wait["native_completed_value"] = std::to_string(completed->second);
+                  {"kind", entry.handle ? "submitted_queue_drain" : "synchronous_fence_completion"},
+                  {"drained", s.completedCpuWaits.contains(entry.record)}};
+        auto conditions = json::array();
+        for (size_t i = 0; i < entry.registrations.size(); ++i) {
+            const auto &event = entry.registrations[i];
+            json condition{{"registration", std::to_string(event.registration)}, {"fence", std::to_string(event.fence)},
+                           {"value", std::to_string(event.value)}, {"native_completed_value", nullptr},
+                           {"condition_reached", nullptr}};
+            if (const auto completed = s.completedCpuWaits.find(entry.record); completed != s.completedCpuWaits.end()) {
+                condition["native_completed_value"] = std::to_string(completed->second.at(i));
+                condition["condition_reached"] = completed->second.at(i) >= event.value;
+            }
+            conditions.push_back(std::move(condition));
         }
+        wait["registrations_since_previous_wait"] = std::move(conditions);
         waits.push_back(std::move(wait));
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},
-        {"cpu_waits", {{"scope", "single_registration_fence_dependencies_and_scoped_observations"},
+        {"cpu_waits", {{"scope", "serialized_submitted_queue_barriers"},
                        {"full_event_semantics", false},
-                       {"verified_fence_waits", std::to_string(s.completedCpuWaits.size())},
+                       {"win32_event_state", "creation_reset_and_timeout_results_not_recorded"},
+                       {"drained_waits", std::to_string(s.completedCpuWaits.size())},
                        {"count", std::to_string(s.frame ? s.frame->cpuWaits.size() : 0)},
                        {"first_records", std::move(waits)}}},
         {"selected_execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"}, {"execution_boundary_reached", s.boundaryReached},
