@@ -1,5 +1,6 @@
 #include "Dx12Cli.h"
 #include "application/ReplaySession.h"
+#include "application/Experiment.h"
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
@@ -45,6 +46,19 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     const auto capability = session.capability(ReplayFeature::Replay, selection);
     if (!capability.supported())
         throw std::runtime_error(capability.reason);
+    std::optional<Experiment> experiment;
+    if (options.isSet("experiment") || options.isSet("disable")) {
+        experiment.emplace(session);
+        if (options.isSet("experiment")) experiment->load(options.value("experiment"), session);
+        if (options.isSet("disable")) for (const auto &id : options.value("disable").split(',')) {
+            bool valid{};
+            const auto editedExecution = id.toULongLong(&valid);
+            if (!valid || !editedExecution || id != QString::number(editedExecution))
+                throw std::runtime_error("DX12 --disable requires comma-separated decimal execution IDs");
+            experiment->setEnabled(session, editedExecution, false);
+        }
+        experiment->save(output.filePath("experiment.json"));
+    }
     dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
     std::optional<RenderDocCapture> capture;
     if (options.isSet("renderdoc"))
@@ -52,6 +66,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                         std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
     dx12::NativeDevice device(directory, options.isSet("debug-device"));
     dx12::NativeReplay replay(device, directory, budget);
+    if (experiment) replay.setDisabledExecutions(experiment->disabledExecutions(session));
     nlohmann::json report{{"backend", "dx12"},
                           {"completed", false},
                           {"frame_complete", false},
@@ -64,6 +79,12 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"height", nullptr},
                           {"resource", nullptr},
                           {"rgba_sha256", nullptr}};
+    if (experiment) {
+        const auto document = QByteArray::fromStdString(experiment->document().dump());
+        report["experiment"] = {{"backend", "dx12"}, {"capture_identity", experiment->document().at("capture_identity")},
+            {"cursor", std::to_string(experiment->revision())},
+            {"document_sha256", QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex().toStdString()}};
+    }
     try {
         replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
         replay.initializeTransfers();
@@ -144,7 +165,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     if (command == "commands")
         allowed.insert("filter");
     if (command == "replay")
-        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event"});
+        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");

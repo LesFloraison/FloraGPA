@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <mutex>
 
 namespace flora {
 namespace {
@@ -69,6 +70,8 @@ class Dx12Session final : public IReplaySession {
     dx12::StreamDirectory directory_;
     dx12::SubmissionIndex submissions_;
     dx12::BackBufferIndex backBuffers_;
+    mutable std::mutex contentMutex_;
+    mutable std::string contentHash_;
     std::map<uint64_t, std::vector<Id>> signatures_;
     std::vector<Id> ids_;
     std::vector<Id> resources_;
@@ -174,6 +177,12 @@ class Dx12Session final : public IReplaySession {
         }
     }
     ReplayBackend backend() const override { return ReplayBackend::Dx12; }
+    nlohmann::json captureIdentity(const CancelCheck &cancelled = {}) const override {
+        std::lock_guard lock(contentMutex_);
+        checkCancellation(cancelled);
+        if (contentHash_.empty()) contentHash_ = directory_.contentHash(cancelled);
+        return {{"kind", "dx12_stream_sha256_v1"}, {"value", contentHash_}};
+    }
     const std::string &identity() const override { return identity_; }
     const std::filesystem::path &path() const override { return directory_.path(); }
     nlohmann::json information() const override {
@@ -352,6 +361,17 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
+        if (feature == ReplayFeature::Experiments) {
+            if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};
+            try {
+                const auto execution = submissions_.execution(*selection.execution);
+                if (execution.submission <= directory_.initializationCount() || !execution.recordingComplete)
+                    return {CapabilityStatus::MissingData, "Select a complete frame execution instance"};
+                if (dx12::streamPacketCanDisable(packet(execution.record).type))
+                    return {CapabilityStatus::Supported, "Direct Draw/Dispatch enable overrides; shader/resource edits are unfinished"};
+            } catch (const std::exception &e) { return {CapabilityStatus::MissingData, e.what()}; }
+            return {CapabilityStatus::NotImplemented, "Only direct Draw/Dispatch enable overrides are implemented"};
+        }
         if (feature == ReplayFeature::PixelHistory) {
             if (!selection.resource)
                 return {CapabilityStatus::MissingData, "Select a texture resource creation"};

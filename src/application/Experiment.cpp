@@ -1,4 +1,6 @@
 #include "Experiment.h"
+#include "ReplaySession.h"
+#include <charconv>
 #include "BlendEdits.h"
 #include "CommandEdits.h"
 #include "DepthStencilEdits.h"
@@ -19,6 +21,13 @@ namespace flora {
 using Json = nlohmann::json;
 namespace {
 Id identifier(const Json &value) {
+    if (value.is_string()) {
+        const auto &text = value.get_ref<const std::string &>();
+        Id result{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+        if (parsed.ec == std::errc{} && parsed.ptr == text.data() + text.size()) return result;
+        throw std::runtime_error("Invalid decimal experiment identifier");
+    }
     if (value.is_number_unsigned())
         return value.get<Id>();
     if (value.is_number_integer() && value.get<int64_t>() >= 0)
@@ -45,6 +54,68 @@ Experiment::Experiment(const Frame &frame) {
                 {"frame_name", QString::fromStdWString(frame.path().filename().wstring()).toStdString()},
                 {"cursor", 0},
                 {"history", Json::array()}};
+}
+Experiment::Experiment(const IReplaySession &session, const CancelCheck &cancelled) {
+    if (const auto frame = session.dx11Frame()) {
+        project_ = Experiment(*frame).document();
+        return;
+    }
+    if (session.backend() != ReplayBackend::Dx12) throw std::runtime_error("Unknown experiment backend");
+    project_ = {{"format", "FloraGPA experiment 2"}, {"backend", "dx12"},
+                {"capture_identity", session.captureIdentity(cancelled)}, {"event_domain", "execution_instance"},
+                {"frame_name", QString::fromStdWString(session.path().filename().wstring()).toStdString()},
+                {"cursor", 0}, {"history", Json::array()}};
+}
+std::set<Id> Experiment::disabledExecutions(const IReplaySession &session) const {
+    if (session.backend() != ReplayBackend::Dx12 || project_.at("format") != "FloraGPA experiment 2" ||
+        project_.at("backend") != "dx12" || project_.at("event_domain") != "execution_instance" ||
+        project_.at("capture_identity") != session.captureIdentity())
+        throw std::runtime_error("DX12 experiment capture identity or domain mismatch");
+    const auto &history = project_.at("history");
+    if (!history.is_array() || revision() > history.size()) throw std::runtime_error("Invalid experiment cursor");
+    std::set<Id> disabled;
+    // Validate redo entries as well: invalid operations must not hide behind undo.
+    for (size_t i = 0; i < history.size(); ++i) {
+        const auto &operations = history.at(i).at("operations");
+        if (!operations.is_array()) throw std::runtime_error("Invalid experiment operation list");
+        for (const auto &op : operations) {
+            if (op.at("kind") != "enabled" || !op.at("event").is_string() || !op.at("value").is_boolean())
+                throw std::runtime_error("Unsupported DX12 experiment operation");
+            const auto execution = identifier(op.at("event"));
+            ReplaySelection selection; selection.execution = execution;
+            const auto capability = session.capability(ReplayFeature::Experiments, selection);
+            if (!capability.supported()) throw std::runtime_error(capability.reason);
+            if (i < revision()) {
+                if (op.at("value").get<bool>()) disabled.erase(execution);
+                else disabled.insert(execution);
+            }
+        }
+    }
+    return disabled;
+}
+void Experiment::load(const QString &path, const IReplaySession &session) {
+    if (const auto frame = session.dx11Frame()) { load(path, *frame); return; }
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot open experiment");
+    const auto bytes = file.readAll();
+    auto candidate = Json::parse(bytes.begin(), bytes.end());
+    auto old = project_;
+    project_ = std::move(candidate);
+    try { (void)disabledExecutions(session); }
+    catch (...) { project_ = std::move(old); throw; }
+}
+void Experiment::setEnabled(const IReplaySession &session, Id execution, bool enabled) {
+    if (const auto frame = session.dx11Frame()) { setEnabled(*frame, execution, enabled); return; }
+    (void)disabledExecutions(session);
+    ReplaySelection selection; selection.execution = execution;
+    const auto capability = session.capability(ReplayFeature::Experiments, selection);
+    if (!capability.supported()) throw std::runtime_error(capability.reason);
+    auto history = project_.at("history");
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back({{"label", std::string(enabled ? "Enable execution " : "Disable execution ") + std::to_string(execution)},
+                       {"operations", Json::array({{{"kind", "enabled"}, {"event", std::to_string(execution)}, {"value", enabled}}})}});
+    project_["history"] = std::move(history);
+    project_["cursor"] = project_["history"].size();
 }
 size_t Experiment::revision() const { return size_t(identifier(project_.at("cursor"))); }
 void Experiment::load(const QString &path, const Frame &frame) {

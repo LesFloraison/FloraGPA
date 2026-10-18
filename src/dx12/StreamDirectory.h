@@ -40,7 +40,11 @@ class StreamDirectory final {
     uint32_t height() const { return height_; }
     format::Bytes payload(const StreamPacket &packet) const;
     ResourceDataView resourceData(uint64_t descriptorOffset) const;
+    // Requested only for persistent experiments; reads bounded chunks without
+    // copying the resource file. SDK binaries and preview images are excluded.
+    std::string contentHash(const CancelCheck &cancelled = {}) const;
 };
 std::string streamPacketName(uint64_t type);
 bool streamPacketWork(uint64_t type);
+bool streamPacketCanDisable(uint64_t type);
 }

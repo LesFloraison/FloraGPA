@@ -1,6 +1,7 @@
 #pragma once
 #include "NativeResources.h"
 #include "SubmissionIndex.h"
+#include <set>
 
 namespace flora::dx12 {
 // Native execution context. Initialization submissions are executed from their
@@ -11,6 +12,7 @@ class NativeReplay final {
   public:
     NativeReplay(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeReplay();
+    void setDisabledExecutions(std::set<uint64_t> executions);
     // Plan before initialization to restore lists recorded in the keyframe at
     // their original CPU boundaries, without executing their frame work early.
     void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false, bool performance = false);

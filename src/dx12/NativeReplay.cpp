@@ -89,6 +89,7 @@ struct NativeReplay::Impl {
     uint64_t currentRecord{}; bool initialized = false, attempted = false;
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
+    std::set<uint64_t> disabledExecutions, suppressedExecutions;
     std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
@@ -328,6 +329,20 @@ struct NativeReplay::Impl {
 NativeReplay::NativeReplay(NativeDevice &d, const StreamDirectory &s, uint64_t limit, const CancelCheck &cancelled)
     : impl_(std::make_unique<Impl>(d, s, limit, cancelled)) {}
 NativeReplay::~NativeReplay() = default;
+void NativeReplay::setDisabledExecutions(std::set<uint64_t> executions) {
+    auto &s = *impl_;
+    require(!s.attempted && !s.frame, "Configure experiment edits before preparing initialization");
+    for (const auto id : executions) {
+        const auto execution = s.index.execution(id);
+        require(execution.submission > s.directory.initializationCount() && execution.recordingComplete,
+                "Disable requires a complete frame execution instance");
+        const auto &packet = s.directory.packets().at(size_t(execution.record - 1));
+        require(streamPacketCanDisable(packet.type), "Only direct Draw/Dispatch suppression is implemented");
+        const auto decoded = decodeArguments(packet.type, s.directory.payload(packet));
+        require(decoded.supported && decoded.consumed == packet.size, "Invalid disabled command arguments");
+    }
+    s.disabledExecutions = std::move(executions);
+}
 void NativeReplay::initializeTransfers() {
     auto &s = *impl_; require(!s.attempted, "Use a fresh replay context for initialization"); s.attempted = true;
     std::set<uint64_t> queues;
@@ -381,6 +396,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     frame->after = after;
     frame->markers = analysisMarkers;
     require(!performance || after, "Performance queries require an after-event replay boundary");
+    require(!performance || !s.disabledExecutions.contains(execution), "Selected execution is disabled by the experiment");
     require(!performance || !analysisMarkers, "Native performance queries cannot be combined with RenderDoc capture");
     frame->measure = performance;
     frame->commands =
@@ -462,10 +478,12 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             require(native.list && native.recorded < native.count, "Invalid native recording boundary");
             const auto &original = s.index.recordings()[key.first];
             require(original.records[native.recorded] == id, "Native recording order mismatch");
+            const auto executionId = native.instance.firstExecution + native.recorded;
+            const bool disabled = s.disabledExecutions.contains(executionId);
             if (analysisMarkers) {
                 const auto &instance = native.instance;
                 const auto marker =
-                    "Flora DX12 execution " + std::to_string(instance.firstExecution + native.recorded) +
+                    std::string(disabled ? "Flora DX12 disabled execution " : "Flora DX12 execution ") + std::to_string(executionId) +
                     " record " + std::to_string(id) + " submission " + std::to_string(instance.submission) +
                     " queue " + std::to_string(instance.queue) + " list " + std::to_string(instance.list) +
                     " generation " + std::to_string(original.generation) + " ordinal " +
@@ -474,7 +492,8 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             }
             const bool measured = frame->measure && native.instance.firstExecution + native.recorded == frame->execution;
             if (measured) frame->performance->begin(native.list.Get());
-            if (transfer(p.type))
+            if (disabled) {} // Suppress only this submitted instance, retaining all surrounding state commands.
+            else if (transfer(p.type))
                 s.record(native.list.Get(), id, original.list, &native.states);
             else {
                 commands->record(native.list.Get(), id, original.list, native.states);
@@ -545,11 +564,22 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                     require(native.list->GetType() == s.queueRecipes.at(queueId).desc.Type, "Frame queue/list types disagree");
                     for (auto &action : native.states) action(); lists.push_back(native.list.Get());
                     const auto &original = s.index.recordings()[selected->second.first];
-                    for (size_t i = 0; i < native.count; ++i) ++pendingCounts[streamPacketName(s.directory.packets()[size_t(original.records[i] - 1)].type)];
+                    for (size_t i = 0; i < native.count; ++i) {
+                        if (s.disabledExecutions.contains(instance.firstExecution + i)) continue;
+                        ++pendingCounts[streamPacketName(s.directory.packets()[size_t(original.records[i] - 1)].type)];
+                    }
                     executed.push_back({{"list", std::to_string(instance.list)}, {"ordinal", std::to_string(instance.ordinal)},
                         {"generation", std::to_string(original.generation)}, {"first_execution", std::to_string(instance.firstExecution)}, {"execution_count", std::to_string(native.count)}});
                 }
                 if (!lists.empty()) queue->ExecuteCommandLists(UINT(lists.size()), lists.data()); s.wait(queue);
+                for (const auto &instance : s.index.lists()) {
+                    const auto selected = instances.find({id, instance.ordinal});
+                    if (instance.submission != id || selected == instances.end()) continue;
+                    const auto count = recordings.at(selected->second).count;
+                    for (auto disabled = s.disabledExecutions.lower_bound(instance.firstExecution);
+                         disabled != s.disabledExecutions.end() && *disabled - instance.firstExecution < count; ++disabled)
+                        s.suppressedExecutions.insert(*disabled);
+                }
                 s.resources.completeSubmission(s.queueRecipes.at(queueId).desc.Type);
                 for (const auto &[name, count] : pendingCounts) s.executedCommands[name] += count;
                 s.submissions.push_back({{"record", std::to_string(id)}, {"queue", std::to_string(queueId)}, {"lists", std::move(executed)}});
@@ -946,8 +976,8 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
                 for (int x = 0; x < image.width(); ++x) {
                     uint32_t packed{};
                     memcpy(&packed, row + size_t(x) * 4, 4);
-                    const auto rgba = unpack_rgb10a2(packed);
-                    std::copy(rgba.begin(), rgba.end(), pixels + size_t(x) * 4);
+                    const auto components = unpack_rgb10a2(packed);
+                    std::copy(components.begin(), components.end(), pixels + size_t(x) * 4);
                 }
             }
             auto imagePath = output; imagePath.replace_extension(L".png");
@@ -999,6 +1029,9 @@ json NativeReplay::performanceResult() const {
 }
 json NativeReplay::information() const {
     const auto &s = *impl_;
+    auto disabled = json::array(), suppressed = json::array();
+    for (const auto id : s.disabledExecutions) disabled.push_back(std::to_string(id));
+    for (const auto id : s.suppressedExecutions) suppressed.push_back(std::to_string(id));
     auto waits = json::array();
     if (s.frame) for (const auto &entry : s.frame->cpuWaits) {
         if (waits.size() == 32) break;
@@ -1022,6 +1055,7 @@ json NativeReplay::information() const {
         waits.push_back(std::move(wait));
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
+        {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},

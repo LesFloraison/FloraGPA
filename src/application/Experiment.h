@@ -5,12 +5,17 @@
 #include <nlohmann/json.hpp>
 
 namespace flora {
+class IReplaySession;
 class Experiment {
     nlohmann::json project_;
     void setPipeline(const Frame &frame, Id event, const nlohmann::json &values, const std::string &label);
 
   public:
     explicit Experiment(const Frame &frame);
+    explicit Experiment(const IReplaySession &session, const CancelCheck &cancelled = {});
+    void load(const QString &path, const IReplaySession &session);
+    void setEnabled(const IReplaySession &session, Id execution, bool enabled);
+    std::set<Id> disabledExecutions(const IReplaySession &session) const;
     void load(const QString &path, const Frame &frame);
     void save(const QString &path, const nlohmann::json &ui = nullptr) const;
     void apply(const Frame &frame, ReplayOptions &options) const;

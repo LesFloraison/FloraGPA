@@ -3,8 +3,37 @@
 #include <charconv>
 #include <limits>
 #include <unordered_map>
+#include <QCryptographicHash>
+#include <QByteArrayView>
 
 namespace flora::dx12 {
+bool streamPacketCanDisable(uint64_t type) {
+    return type == 0x1ae3c190d8b1eULL || type == 0x1ae3c86b1c3b9ULL || type == 0x1ae3cef0e6c17ULL;
+}
+std::string StreamDirectory::contentHash(const CancelCheck &cancelled) const {
+    std::map<std::string, const MappedFile *> storage;
+    for (const auto &file : files_) storage.emplace(file.storage->path().filename().string(), file.storage.get());
+    storage.emplace("resources", resources_.get());
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(QByteArrayView("FloraGPA DX12 content identity 1\n"));
+    const auto integer = [&](uint64_t value) {
+        char encoded[8];
+        for (unsigned i = 0; i < 8; ++i) encoded[i] = char(value >> (i * 8));
+        hash.addData(QByteArrayView(encoded, 8));
+    };
+    for (const auto &[name, file] : storage) {
+        integer(name.size()); hash.addData(QByteArrayView(name.data(), qsizetype(name.size())));
+        integer(file->size());
+        for (uint64_t offset = 0; offset < file->size();) {
+            checkCancellation(cancelled);
+            const auto bytes = file->bytes(offset, std::min<uint64_t>(16 * 1024 * 1024, file->size() - offset));
+            hash.addData(QByteArrayView(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
+            offset += bytes.size();
+        }
+    }
+    checkCancellation(cancelled);
+    return hash.result().toHex().toStdString();
+}
 using format::Reader;
 namespace {
 uint64_t number(std::string_view value) {

@@ -39,7 +39,8 @@ class RdcTests : public QObject {
                   {node(7, "", 0x80, Json::array(), {{{"eventId", 6}}})}),
              node(8, "Flora DX12 helper", 0x40, {node(9, "", 0x400)}),
              node(10, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(11, "", 2)}),
-             node(12, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(13, "", 2)})});
+             node(12, marker("9007199254740996", "21", "32", "DrawInstanced"), 0x40, {node(13, "", 2)}),
+             node(14, "Flora DX12 disabled execution 9007199254740997 record 22 submission 33 queue 1 list 2 generation 1 ordinal 0: ID3D12GraphicsCommandListDrawInstanced", 0x40)});
         const auto result = indexDx12RdcEvents(
             roots, {{"6", {{"name", "ID3D12GraphicsCommandList::IASetPrimitiveTopology"}}}});
         QCOMPARE(result["execution_map"].size(), size_t(3));
@@ -54,6 +55,8 @@ class RdcTests : public QObject {
         QVERIFY(!result["execution_map"].contains("9007199254740996"));
         QVERIFY(!result["reverse"].contains("9"));
         QVERIFY(!result["reverse"].contains("11"));
+        QVERIFY(!result["execution_map"].contains("9007199254740997"));
+        QVERIFY(!result["reverse"].contains("14"));
         QVERIFY_THROWS_EXCEPTION(
             std::runtime_error,
             indexDx12RdcEvents({node(1, marker("18446744073709551616", "19", "30", "DrawInstanced"), 0x40)},

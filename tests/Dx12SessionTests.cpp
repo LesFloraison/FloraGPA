@@ -68,6 +68,50 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void talosDisableExperiment() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_EXPERIMENT_OUTPUT");
+        if (captures.isEmpty() || output.isEmpty()) QSKIP("Set capture and new experiment output directories for this targeted GPU check");
+        QVERIFY(!QFileInfo::exists(output));
+        QVERIFY(QDir().mkpath(output));
+        const auto capture = captures + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        const auto session = openReplaySession(std::filesystem::path(capture.toStdWString()));
+        Experiment experiment(*session);
+        experiment.save(output + "/baseline.json");
+        experiment.setEnabled(*session, 12675, false);
+        experiment.save(output + "/disabled.json");
+        QVERIFY(experiment.undo());
+        experiment.save(output + "/restored.json");
+        const auto run = [&](const QString &name, nlohmann::json &report) {
+            QProcess process;
+            process.setProcessChannelMode(QProcess::MergedChannels);
+            process.setStandardOutputFile(output + '/' + name + ".log");
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe",
+                {"replay", capture, "--event", "12675", "--id", "167081", "--subresource", "1",
+                 "--max-bytes", "4294967296", "--debug-device", "--experiment", output + '/' + name + ".json",
+                 "--out", output + '/' + name});
+            if (!process.waitForStarted(5000) || !process.waitForFinished(60000)) {
+                process.kill(); process.waitForFinished(5000); return false;
+            }
+            if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) return false;
+            QFile file(output + '/' + name + "/report.json");
+            if (!file.open(QIODevice::ReadOnly)) return false;
+            report = nlohmann::json::parse(file.readAll().toStdString());
+            return report.at("completed").get<bool>() && report.at("device").at("validation_error_count") == "0";
+        };
+        nlohmann::json baseline, disabled, restored;
+        QVERIFY2(run("baseline", baseline), "Baseline replay failed; inspect baseline.log");
+        QVERIFY2(run("disabled", disabled), "Disabled replay failed; inspect disabled.log");
+        QVERIFY2(run("restored", restored), "Undo replay failed; inspect restored.log");
+        QCOMPARE(baseline.at("native_texture").at("sha256"),
+                 nlohmann::json("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+        QCOMPARE(disabled.at("native_texture").at("nonzero_bytes"), nlohmann::json("0"));
+        QCOMPARE(disabled.at("native_replay").at("suppressed_executions"), nlohmann::json::array({"12675"}));
+        QCOMPARE(restored.at("native_replay").at("suppressed_executions"), nlohmann::json::array());
+        QCOMPARE(restored.at("native_texture").at("sha256"), baseline.at("native_texture").at("sha256"));
+        QVERIFY(restored.at("experiment").at("document_sha256") != disabled.at("experiment").at("document_sha256"));
+        QCOMPARE(restored.at("experiment").at("capture_identity"), baseline.at("experiment").at("capture_identity"));
+    }
     void hellbladePlacedAddressAliases() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty()) QSKIP("Set capture directory for Hellblade2 placed aliases");
@@ -1721,6 +1765,38 @@ class Dx12SessionTests : public QObject {
         QVERIFY(first.at("recording_complete").get<bool>());
         QCOMPARE(session->submissionDetails().at("lists").at(2).at("status").get<std::string>(),std::string("unresolved_recording"));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,session->executionDetails(4));
+        Experiment experiment(*session);
+        experiment.setEnabled(*session, 2, false);
+        QCOMPARE(experiment.disabledExecutions(*session), (std::set<Id>{2}));
+        QVERIFY(experiment.enabled(1)); QVERIFY(!experiment.enabled(2));
+        QCOMPARE(experiment.document().at("history").at(0).at("operations").at(0).at("event"), nlohmann::json("2"));
+        const auto project = temp.filePath("experiment.json");
+        experiment.save(project);
+        Experiment restored(*session); restored.load(project, *session);
+        QCOMPARE(restored.disabledExecutions(*session), (std::set<Id>{2}));
+        QVERIFY(restored.undo()); QVERIFY(restored.disabledExecutions(*session).empty());
+        QVERIFY(restored.redo()); QCOMPARE(restored.disabledExecutions(*session), (std::set<Id>{2}));
+        QVERIFY(restored.undo()); restored.setEnabled(*session, 3, false);
+        QVERIFY(!restored.canRedo()); QCOMPARE(restored.disabledExecutions(*session), (std::set<Id>{3}));
+        auto invalid = experiment.document();
+        invalid["history"][0]["operations"][0]["event"] = 2.0;
+        write(project, QByteArray::fromStdString(invalid.dump()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, restored.load(project, *session));
+        QCOMPARE(restored.disabledExecutions(*session), (std::set<Id>{3}));
+        invalid = experiment.document(); invalid["cursor"] = 0;
+        invalid["history"][0]["operations"][0]["kind"] = "shader";
+        write(project, QByteArray::fromStdString(invalid.dump()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, restored.load(project, *session));
+        QTemporaryDir otherTemp;
+        const auto otherPath = fixture(otherTemp);
+        write(otherPath + "/thread-7-0", packets);
+        write(otherPath + "/resources", "changed!");
+        const auto other = openReplaySession(std::filesystem::path(otherPath.toStdWString()));
+        QVERIFY(session->captureIdentity() != other->captureIdentity());
+        experiment.save(project);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, restored.load(project, *other));
+        dx12::StreamDirectory hashDirectory(std::filesystem::path(otherPath.toStdWString()));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, hashDirectory.contentHash([] { return true; }));
         MainWindow window;QSignalSpy loaded(&window,&MainWindow::captureLoaded);
         window.openCapture(path);QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,10000);
         auto domain=window.findChild<QComboBox *>("apiEventDomain");QVERIFY(domain);domain->setCurrentIndex(1);

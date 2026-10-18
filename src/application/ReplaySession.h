@@ -38,6 +38,11 @@ class IReplaySession {
     virtual ~IReplaySession() = default;
     virtual ReplayBackend backend() const = 0;
     virtual const std::string &identity() const = 0;
+    virtual nlohmann::json captureIdentity(const CancelCheck &cancelled = {}) const {
+        checkCancellation(cancelled);
+        if (const auto frame = dx11Frame()) return {{"kind", "sha256"}, {"value", frame->sha256()}};
+        throw std::runtime_error("Persistent capture identity is unavailable");
+    }
     virtual const std::filesystem::path &path() const = 0;
     virtual nlohmann::json information() const = 0;
     virtual std::span<const Id> events() const = 0;

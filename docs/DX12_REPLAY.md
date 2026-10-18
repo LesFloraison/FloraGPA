@@ -1371,6 +1371,73 @@ failure, selected the actually written output, or verified the new RGB10 display
 No DX11, BF1 or Talos GPU rerun was added. No new full-frame RenderDoc capture,
 original-player comparison, experiment or portable acceptance is claimed.
 
+### DX12 execution-enable experiments and verified Draw undo
+
+The experiment model now has a DX12 session overload with format
+`FloraGPA experiment 2`, backend `dx12`, and event domain `execution_instance`.
+Operations store execution IDs as decimal strings. Disabled IDs address a single
+submission instance, including when a command-list generation is submitted more
+than once. Native recording omits only the selected direct Draw/Dispatch call;
+state commands, list boundaries, queue dependencies and execution numbering stay
+intact. Planned disabled executions and actually suppressed submitted executions
+are reported separately. A disabled execution cannot be measured as an ordinary
+performance event. Its analysis marker has a separate disabled prefix, which
+cannot map an adjacent action to the omitted execution.
+
+Persistence binds the project to `dx12_stream_sha256_v1`: SHA-256 over the named,
+length-prefixed metadata, thread and resources files in filename order, including
+all resource contents. Paths, preview images and SDK binaries are excluded. Hashing
+is requested only for experiment creation/load, reads mapped data in cancellable
+16 MiB chunks, and is cached by the read-only session. Ordinary directory opening
+does not hash the large resources file. Projects from another capture, floating
+point event IDs, unsupported operation kinds and invalid redo entries are rejected
+without replacing the active project. Version-1 DX11 project loading is preserved.
+
+The native CLI accepts `replay --experiment <project.json>` and
+`--disable <comma-separated execution IDs>`; the latter adds enable-history edits
+to a new or loaded project. The resolved project is saved as `experiment.json` in
+the output directory. Reports include capture identity, cursor and a SHA-256 of
+the complete project document, distinguishing different edits at the same cursor.
+For example:
+
+```powershell
+FloraGPA.Cli.exe replay "D:\CDXrepo\captures\Talos_2026_10_18__00_55_08.gpa_frame" --event 12675 --id 167081 --subresource 1 --disable 12675 --max-bytes 4294967296 --out talos-disabled
+```
+
+`talos-disable-experiment1` validates three serial CLI replays using projects
+created, saved and undone by the actual C++ experiment model. The selected Draw
+is execution **12675**; texture creation **167081**, object **4980699392**,
+subresource **1**, is 2048 x 2048 R16 with 8,388,608 raw bytes.
+
+| Project state | Executed direct Draws | Nonzero raw bytes | Raw SHA-256 |
+| --- | --- | --- | --- |
+| Baseline | 1 | 792,141 | `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217` |
+| Execution 12675 disabled | 0 | 0 | `2daeb1f36095b44b318410b3f4e8b5d989dcc7bb023d1426c492dab0a3053e74` |
+| Undo, saved and reloaded | 1 | 792,141 | `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217` |
+
+All three run with zero D3D12 validation errors. Undo restores the exact raw bytes,
+not merely a matching preview. The capture identity is
+`328a72597054f17f08b9026ff3f0fe0409984514c81137640fbf0640aa0a6c72`.
+The disabled report contains only `"12675"` in `suppressed_executions`; baseline
+and undone reports contain none. Captures remain mapped read-only; edited bytes
+and projects are written only to the chosen output directory.
+
+The focused repeated-submission fixture verifies that disabling execution 2 does
+not disable execution 1 from the same recording, project round-trip, undo/redo,
+redo truncation, rejection of floating IDs/invalid undone operations, content
+identity differences when only resource bytes change, and hash cancellation.
+The real GPU experiment and this fixture pass (`dx12-experiment1.txt`); legacy
+GF2 DX11 project identity checks pass without GPU replay
+(`dx12-experiment-legacy2.txt`). Disabled-marker mapping is checked separately.
+GUI/CLI/Worker and the focused tests build through `build126.log`.
+
+This is a verified native/model Draw experiment. Main-window edit actions,
+project UI restoration and experiment cache invalidation are **not yet connected
+for DX12**. Direct Dispatch suppression is implemented but lacks an independent
+GPU-write experiment. Indirect/mesh suppression, shader replacement, resource
+patches, and modified history/debug/geometry validation remain unfinished. No BF1
+or Hellblade2 GPU rerun was added for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1382,7 +1449,7 @@ original-player comparison, experiment or portable acceptance is claimed.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Native/model Draw disable changes depth output; persisted undo restores exact bytes; workspace experiments and performance unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
