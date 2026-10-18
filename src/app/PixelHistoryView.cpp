@@ -16,6 +16,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 #include <Windows.h>
+#include <charconv>
 
 namespace flora {
 using Json = nlohmann::json;
@@ -23,11 +24,16 @@ bool historyBackendCompatible(const QString &path) {
     const auto name = path.toStdWString();
     DWORD ignored = 0;
     const auto size = GetFileVersionInfoSizeW(name.c_str(), &ignored);
-    if (!size) return false;
+    if (!size)
+        return false;
     std::vector<uint8_t> bytes(size);
-    if (!GetFileVersionInfoW(name.c_str(), 0, size, bytes.data())) return false;
-    VS_FIXEDFILEINFO *info = nullptr; UINT length = 0;
-    if (!VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void **>(&info), &length) || length < sizeof(*info)) return false;
+    if (!GetFileVersionInfoW(name.c_str(), 0, size, bytes.data()))
+        return false;
+    VS_FIXEDFILEINFO *info = nullptr;
+    UINT length = 0;
+    if (!VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void **>(&info), &length) ||
+        length < sizeof(*info))
+        return false;
     return HIWORD(info->dwFileVersionMS) == 1 && LOWORD(info->dwFileVersionMS) == 45;
 }
 
@@ -40,6 +46,12 @@ QString scalar(const Json &v) {
     return QString::fromStdString(v.is_string() ? v.get<std::string>() : v.dump());
 }
 QString color(const Json &row, const char *key) {
+    if (row.value("record_kind", "") == "observed_event_depth_boundary") {
+        const auto &value = row.at(std::string(key) == "preMod" ? "pre" : "post");
+        return scalar(value.at("depth")) + " (raw " + scalar(value.at("raw_unorm16")) + ')';
+    }
+    if (row.value("depth_value_status", "") == "unavailable_backend_d16_format")
+        return "Fragment depth unavailable";
     const auto kind = row.value("color_interpretation", std::string("float"));
     const auto field = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
     QStringList parts;
@@ -48,6 +60,10 @@ QString color(const Json &row, const char *key) {
     return parts.join(", ");
 }
 QString outcome(const Json &r) {
+    if (r.value("record_kind", "") == "observed_event_depth_boundary")
+        return "Observed event boundary (not a fragment)";
+    if (r.value("depth_test_reason_status", "") == "unverified_backend_d16_format")
+        return "Depth-test result unverified";
     if (r.value("record_kind", "") == "cpu_write_snapshot")
         return "CPU snapshot";
     if (r.value("gpa_command_kind", Json(nullptr)) == "api")
@@ -77,6 +93,16 @@ Json optionalId(const QLineEdit *input) {
     if (!ok || text.startsWith('-') || text.startsWith('+'))
         throw std::runtime_error("Invalid unsigned identifier");
     return uint64_t(value);
+}
+uint64_t executionId(const Json &value) {
+    if (!value.is_string())
+        throw std::runtime_error("DX12 execution identity must be a decimal string");
+    const auto &text = value.get_ref<const std::string &>();
+    uint64_t id{};
+    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), id);
+    if (!id || parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size())
+        throw std::runtime_error("Invalid DX12 execution identity");
+    return id;
 }
 } // namespace
 PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
@@ -117,7 +143,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
         connect(value, &QLineEdit::textChanged, this, &PixelHistoryView::invalidate);
         return value;
     };
-    eventInput_ = idInput(" API ", "historyEvent", "Last draw");
+    eventInput_ = idInput(" Event ", "historyEvent", "Last draw");
     resource_ = idInput(" Resource ", "historyResource", "Target 0");
     auto spin = [&](const QString &label, const char *name, int limit) {
         inputs->addWidget(new QLabel(label));
@@ -155,7 +181,8 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     const int widths[] = {65, 65, 65, 185, 150, 150};
     for (int i = 0; i < 6; ++i)
         records_->setColumnWidth(i, widths[i]);
-    for (int column : {1, 2, 4, 5}) records_->setColumnHidden(column, true);
+    for (int column : {1, 2, 4, 5})
+        records_->setColumnHidden(column, true);
     records_->header()->setStretchLastSection(false);
     records_->header()->setSectionResizeMode(3, QHeaderView::Stretch);
     details_ = new QPlainTextEdit;
@@ -215,7 +242,17 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
-void PixelHistoryView::setContext(const QString &key, qulonglong event) {
+void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12) {
+    if (dx12_ != dx12) {
+        dx12_ = dx12;
+        creation_ = object_ = 0;
+        resource_->clear();
+        invalidate();
+    }
+    records_->headerItem()->setText(0, dx12 ? "Execution" : "GPA");
+    locate_->setText(dx12 ? "Locate execution" : "Locate API");
+    for (int column : {4, 5})
+        records_->setColumnHidden(column, !dx12);
     if (key_ != key) {
         key_ = key;
         invalidate();
@@ -230,11 +267,20 @@ void PixelHistoryView::setContext(const QString &key, qulonglong event) {
     }
     updateActions();
 }
+void PixelHistoryView::setDx12Resource(qulonglong creation, qulonglong object) {
+    if (!dx12_ || (creation_ == creation && object_ == object))
+        return;
+    creation_ = creation;
+    object_ = object;
+    resource_->setText(object ? QString::number(object) : QString());
+    invalidate();
+}
 void PixelHistoryView::setBackendPath(const QString &path, bool persist) {
     if (backendPath_ == path)
         return;
     backendPath_ = path;
-    if (persist) QSettings().setValue("analysis/renderdoc", path);
+    if (persist)
+        QSettings().setValue("analysis/renderdoc", path);
     backend_->setToolTip(path);
     invalidate();
 }
@@ -249,21 +295,32 @@ void PixelHistoryView::selectPixel(qulonglong resource, int x, int y, int mip, i
     sample_->setValue(sample);
 }
 Json PixelHistoryView::request() const {
-    return {{"action", "history"},
-            {"gpa_event", optionalId(eventInput_)},
-            {"resource", optionalId(resource_)},
-            {"x", x_->value()},
-            {"y", y_->value()},
-            {"mip", mip_->value()},
-            {"layer", layer_->value()},
-            {"sample", sample_->value()}};
+    Json job{{"action", "history"},
+             {"gpa_event", optionalId(eventInput_)},
+             {"resource", optionalId(resource_)},
+             {"x", x_->value()},
+             {"y", y_->value()},
+             {"mip", mip_->value()},
+             {"layer", layer_->value()},
+             {"sample", sample_->value()}};
+    if (dx12_) {
+        if (key_.isEmpty() || !event_ || !object_ || !creation_)
+            throw std::runtime_error("Select a submitted execution and a resource creation");
+        job.erase("gpa_event");
+        job["execution"] = std::to_string(event_);
+        job["resource"] = std::to_string(object_);
+        job["resource_creation"] = std::to_string(creation_);
+    }
+    return job;
 }
 void PixelHistoryView::setNotice(const QString &notice) {
     summary_->setText(notice);
     summary_->setToolTip(notice);
 }
-void PixelHistoryView::queryPixel(qulonglong event, qulonglong resource, int x, int y, int mip, int layer, int sample) {
-    if (busy_) return;
+void PixelHistoryView::queryPixel(qulonglong event, qulonglong resource, int x, int y, int mip, int layer,
+                                  int sample) {
+    if (busy_)
+        return;
     eventInput_->setText(event ? QString::number(event) : QString());
     selectPixel(resource, x, y, mip, layer, sample);
     read_->trigger();
@@ -271,6 +328,7 @@ void PixelHistoryView::queryPixel(qulonglong event, qulonglong resource, int x, 
 void PixelHistoryView::invalidate() {
     ++requestId_;
     result_ = nullptr;
+    rows_ = nullptr;
     records_->clear();
     details_->clear();
     summary_->setText("No history");
@@ -289,6 +347,10 @@ void PixelHistoryView::updateActions() {
     for (auto widget :
          std::initializer_list<QWidget *>{eventInput_, resource_, x_, y_, mip_, layer_, sample_})
         widget->setEnabled(!busy_);
+    if (dx12_) {
+        eventInput_->setEnabled(false);
+        resource_->setEnabled(false);
+    }
     const auto item = records_->currentItem();
     locate_->setEnabled(!busy_ && item && item->data(0, Qt::UserRole).isValid());
 }
@@ -300,7 +362,7 @@ void PixelHistoryView::selected() {
         return;
     }
     const auto index = item->data(0, Qt::UserRole + 1).toULongLong();
-    details_->setPlainText(QString::fromStdString(result_.at("history").at(size_t(index)).dump(2)));
+    details_->setPlainText(QString::fromStdString(rows_.at(size_t(index)).dump(2)));
     updateActions();
 }
 bool PixelHistoryView::finish(uint64_t request, const Json &result) {
@@ -311,22 +373,36 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
         emit inspectionFinished(false);
         return false;
     }
+    if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
+                  result.value("execution", Json()) != Json(std::to_string(event_))))
+        throw std::runtime_error("History result does not match the DX12 execution selection");
+    auto rows = result.at("history");
+    if (dx12_)
+        for (const auto &boundary : result.value("depth_event_boundaries", Json::array()))
+            rows.push_back(boundary);
     // Validate every displayed field before mutating the current table.
-    for (const auto &r : result.at("history")) {
+    for (const auto &r : rows) {
         color(r, "preMod");
         color(r, "postMod");
         outcome(r);
+        if (dx12_ && r.value("selectable", false))
+            (void)executionId(r.at("execution"));
     }
     result_ = result;
+    rows_ = std::move(rows);
     records_->clear();
     size_t index = 0;
-    for (const auto &r : result.at("history")) {
+    for (const auto &r : rows_) {
         const auto command =
-            r.at("gpa_command").is_null() ? QString("Unmapped") : scalar(r.at("gpa_command"));
-        auto item = new QTreeWidgetItem(records_, {scalar(r.at("gpa_event")), scalar(r.at("eventId")),
-                                                   scalar(r.at("fragIndex")), command + " · " + outcome(r),
-                                                   color(r, "preMod"), color(r, "postMod")});
-        if (!r.at("gpa_event").is_null())
+            dx12_ ? scalar(r.value("name", Json("Unmapped")))
+                  : (r.at("gpa_command").is_null() ? QString("Unmapped") : scalar(r.at("gpa_command")));
+        auto item = new QTreeWidgetItem(
+            records_, {scalar(r.value(dx12_ ? "execution" : "gpa_event", Json())), scalar(r.at("eventId")),
+                       scalar(r.value("fragIndex", Json())), command + " · " + outcome(r), color(r, "preMod"),
+                       color(r, "postMod")});
+        if (dx12_ && r.value("selectable", false))
+            item->setData(0, Qt::UserRole, qulonglong(executionId(r.at("execution"))));
+        else if (!dx12_ && !r.at("gpa_event").is_null())
             item->setData(0, Qt::UserRole, qulonglong(r.at("gpa_event").get<uint64_t>()));
         item->setData(0, Qt::UserRole + 1, qulonglong(index++));
         for (int c = 0; c < 6; ++c)
@@ -339,8 +415,27 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(scope.at("cpu_write_gaps").size())
                           .arg(result.at("x").get<uint32_t>())
                           .arg(result.at("y").get<uint32_t>()));
-    summary_->setText(summary_->text() + QString("\nT:%1 · through API %2 · mip %3 / layer %4 / sample %5")
-        .arg(resource_->text(), eventInput_->text()).arg(mip_->value()).arg(layer_->value()).arg(sample_->value()));
+    if (dx12_)
+        summary_->setText(
+            QString("%1 fragment/operation records · %2 observed depth boundaries · %3 unmapped · (%4, %5)")
+                .arg(result.at("history").size())
+                .arg(rows_.size() - result.at("history").size())
+                .arg(scope.at("unmapped_records").get<size_t>())
+                .arg(result.at("x").get<uint32_t>())
+                .arg(result.at("y").get<uint32_t>()));
+    summary_->setText(summary_->text() +
+                      QString(dx12_ ? "\nObject %1 · through execution %2 · mip %3 / layer %4 / sample %5"
+                                    : "\nT:%1 · through API %2 · mip %3 / layer %4 / sample %5")
+                          .arg(resource_->text(), eventInput_->text())
+                          .arg(mip_->value())
+                          .arg(layer_->value())
+                          .arg(sample_->value()));
+    if (result.value("partial", false))
+        summary_->setText("Partial history · " + summary_->text());
+    if (scope.value("depth_value_status", "") == "event_boundaries_only")
+        summary_->setText(
+            summary_->text() +
+            "\nD16: event-boundary depths only; fragment depths and depth-test reasons unavailable.");
     summary_->setToolTip(QString::fromStdString(scope.dump(2)));
     details_->setPlainText(QString::fromStdString(scope.dump(2)));
     updateActions();

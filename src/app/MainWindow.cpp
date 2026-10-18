@@ -1228,8 +1228,11 @@ void MainWindow::buildUi() {
     connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
-        if (!busy())
+        if (!busy()) {
+            if (session_ && session_->backend() == ReplayBackend::Dx12)
+                findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
             locateEvent(id);
+        }
     });
     auto debugTabs = new QTabWidget;
     debugTabs->setObjectName("checkpointStageTabs");
@@ -1526,14 +1529,23 @@ void MainWindow::setBusy(bool busy) {
     replayAction_->setEnabled(!busy && (bool(frame_) || (dx12 && boundary_->currentIndex()!=0 && session_->capability(ReplayFeature::Replay,selection_).supported())));
     dx12Controls_->setVisible(dx12);
     resourceBrowser_->setVisible(!dx12);
-    for(const auto name : {"dx11OutputTarget","dx11OutputLayer","dx11OutputSample"}) findChild<QAction *>(name)->setVisible(!dx12);
-    for(const auto name : {"finalFrame","toggleResourceCoverage","resourceCoverageSettings","pickPixelHistory"}) findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
-    dx12Subresource_->setEnabled(dx12 && !busy); dx12Budget_->setEnabled(dx12 && !busy);
-    for (QWidget *control : std::initializer_list<QWidget *>{adapter_,outputTarget_,outputLayer_,outputSample_,channels_,outputLow_,outputHigh_})
+    for (const auto name : {"dx11OutputTarget", "dx11OutputLayer", "dx11OutputSample"})
+        findChild<QAction *>(name)->setVisible(!dx12);
+    for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
+        findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
+    historyPick_->setEnabled(
+        !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull())));
+    dx12Subresource_->setEnabled(dx12 && !busy);
+    dx12Budget_->setEnabled(dx12 && !busy);
+    for (QWidget *control : std::initializer_list<QWidget *>{
+             adapter_, outputTarget_, outputLayer_, outputSample_, channels_, outputLow_, outputHigh_})
         control->setEnabled(!busy && !dx12);
-    replayAction_->setToolTip(session_ && session_->backend() == ReplayBackend::Dx12 ?
-        (boundary_->currentIndex()==0 ? QString("Full-frame DX12 replay is unfinished; choose Before event or After event") :
-         QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason)) : QString{});
+    replayAction_->setToolTip(
+        session_ && session_->backend() == ReplayBackend::Dx12
+            ? (boundary_->currentIndex() == 0
+                   ? QString("Full-frame DX12 replay is unfinished; choose Before event or After event")
+                   : QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason))
+            : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
@@ -1571,8 +1583,13 @@ void MainWindow::updateCheckpointContext() {
             dispatch = name == "ID3D12GraphicsCommandListDispatch";
         }
     }
-    if (history_)
-        history_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
+    if (history_) {
+        history_->setContext(dx12 ? (selection_.resource && !analysisKey.isEmpty() ? analysisKey+':'+QString::number(selection_.resource) : QString{}) : analysisKey,selectedEvent_,dx12);
+        if (dx12)
+            history_->setDx12Resource(
+                selection_.resource,
+                selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
+    }
     if (rdcCounters_)
         rdcCounters_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
     if (replayMesh_)
@@ -1615,7 +1632,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
-    if (dx12 && !view && kind != RdcAnalysis::Mesh)
+    if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
@@ -4259,17 +4276,64 @@ bool MainWindow::saveExperiment() {
     }
 }
 void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
-    if (!frame_ || outputReport_.is_null()) return;
+    if(session_ && session_->backend()==ReplayBackend::Dx12) {
+        if(busy() || outputReport_.is_null() || outputGeneration_!=displayedOutputGeneration_) return;
+        try {
+            const auto &display = outputReport_.at("output_display");
+            if (!selection_.execution || display.at("execution") != std::to_string(*selection_.execution) ||
+                display.at("creation_record") != std::to_string(selection_.resource))
+                throw std::runtime_error("Replay the selected execution/resource before picking a pixel");
+            if (display.value("dimension", 0) != 3 || display.value("plane", -1) != 0 ||
+                display.value("samples", 0) != 1)
+                throw std::runtime_error("Pixel picking currently requires a single-sample 2D texture, plane "
+                                         "0; replay to refresh metadata");
+            if (x < 0 || y < 0 || uint32_t(x) >= display.at("width").get<uint32_t>() ||
+                uint32_t(y) >= display.at("height").get<uint32_t>())
+                return;
+            if (historyPick_->isChecked() && display.at("boundary") != "after")
+                throw std::runtime_error("DX12 Pixel History currently queries through the selected "
+                                         "execution; replay After event before picking");
+            const auto object = session_->resource(selection_.resource).capturedObject;
+            const auto mip = display.at("mip").get<int>(), layer = display.at("layer").get<int>();
+            history_->selectPixel(object, x, y, mip, layer, 0);
+            replayDebug_[1]->selectPixel(x, y, 0);
+            image_->setSelectedPixel(QPoint(x, y));
+            if (historyPick_->isChecked()) {
+                leftTabs_->setCurrentWidget(history_);
+                history_->queryPixel(*selection_.execution, object, x, y, mip, layer, 0);
+            } else
+                properties("DX12 Output Pixel", {{"Execution", QString::number(*selection_.execution)},
+                                                 {"Resource creation", QString::number(selection_.resource)},
+                                                 {"Pixel", QString("%1, %2").arg(x).arg(y)},
+                                                 {"Mip / layer", QString("%1 / %2").arg(mip).arg(layer)},
+                                                 {"Display RGBA", QString("%1, %2, %3, %4")
+                                                                      .arg(color.red())
+                                                                      .arg(color.green())
+                                                                      .arg(color.blue())
+                                                                      .arg(color.alpha())}});
+        } catch (const std::exception &e) {
+            history_->setNotice(QString::fromUtf8(e.what()));
+        }
+        return;
+    }
+    if (!frame_ || outputReport_.is_null())
+        return;
     if (busy() && runningKind_ != "draw-resources" && runningKind_ != "coverage" &&
-        runningKind_ != "history" && runningKind_ != "history-capture") return;
+        runningKind_ != "history" && runningKind_ != "history-capture")
+        return;
     if (historyPick_->isChecked()) {
-        if (resourceImagePending_ || outputGeneration_ != displayedOutputGeneration_ || replayTimer_.isActive()) return;
+        if (resourceImagePending_ || outputGeneration_ != displayedOutputGeneration_ ||
+            replayTimer_.isActive())
+            return;
         const auto &d = outputReport_.at("output_display");
-        if (d.value("view_kind", nlohmann::json()) != "rtv" && d.value("view_kind", nlohmann::json()) != "dsv") {
-            history_->setNotice("Select a bound RT or depth view to query history."); return;
+        if (d.value("view_kind", nlohmann::json()) != "rtv" &&
+            d.value("view_kind", nlohmann::json()) != "dsv") {
+            history_->setNotice("Select a bound RT or depth view to query history.");
+            return;
         }
         const auto resource = d.at("resource").get<Id>();
-        if (frame_->entry(resource).type == 0x83) return;
+        if (frame_->entry(resource).type == 0x83)
+            return;
         const auto layer = frame_->entry(resource).type == 0x86 ? d.at("slice") : d.at("layer");
         // The displayed report owns provenance, including a Before boundary.
         const auto time = outputReport_.value("value_time", std::string());
@@ -4279,10 +4343,15 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
             const auto before = event;
             event = 0;
             for (auto id : frame_->entryOrder()) {
-                if (id == before) break;
-                if (frame_->entry(id).category == 7) event = id;
+                if (id == before)
+                    break;
+                if (frame_->entry(id).category == 7)
+                    event = id;
             }
-            if (!event) { history_->setNotice("No preceding API boundary for this image."); return; }
+            if (!event) {
+                history_->setNotice("No preceding API boundary for this image.");
+                return;
+            }
         } else if (time == "frame_end") {
             const auto last = outputReport_.at("output_selection").at("event");
             event = last.is_number_unsigned() ? last.get<Id>() : 0;

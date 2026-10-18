@@ -247,6 +247,16 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
+        if (feature == ReplayFeature::PixelHistory) {
+            if (!selection.resource)
+                return {CapabilityStatus::MissingData, "Select a texture resource creation"};
+            const auto replay = capability(ReplayFeature::Replay, selection);
+            if (!replay.supported())
+                return replay;
+            return {CapabilityStatus::Supported,
+                    "Query through the selected execution using RenderDoc 1.45; D16 fragment depths and "
+                    "depth-test reasons remain unavailable"};
+        }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;
             executionOnly.resource = 0;

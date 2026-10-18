@@ -157,6 +157,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
                                      .arg(boundary_->currentIndex() == 1 ? "before" : "after"));
         outputReport_ = std::move(replayReport);
         outputDir_ = std::move(jobDir_);
+        historyPick_->setEnabled(outputAvailable);
         exportAction_->setEnabled(outputAvailable);
         outputStorageAction_->setEnabled(report_["output_display"].isObject());
         resourceImages_->setCurrentIndex(0);

@@ -615,7 +615,10 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         }
     } catch (...) { D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); throw; }
     D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); require(file.commit(), "Cannot publish frame texture output");
+    const UINT arrays=desc.Dimension==D3D12_RESOURCE_DIMENSION_TEXTURE3D ? 1 : desc.DepthOrArraySize;
     return {{"object", std::to_string(object)}, {"creation_record", std::to_string(s.resources.creationRecord(object, s.currentRecord))}, {"subresource", subresource},
+        {"mip",subresource%desc.MipLevels},{"layer",(subresource/desc.MipLevels)%arrays},
+        {"plane",subresource/(UINT(desc.MipLevels)*arrays)},{"samples",desc.SampleDesc.Count},{"dimension",int(desc.Dimension)},
         {"width", footprint.Footprint.Width}, {"height", footprint.Footprint.Height}, {"depth", footprint.Footprint.Depth}, {"format", UINT(footprint.Footprint.Format)},
         {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
         {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"},

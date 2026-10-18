@@ -619,7 +619,7 @@ The bounded prefix cache includes the session, execution, budget, canonical DLL
 path and DLL SHA256, so VS debugging and mesh analysis can reuse exactly the same
 capture. DX12 results carry an explicit runtime-session capture identity rather
 than inventing a capture content hash. Persistent content identity is unfinished.
-History and counters are not enabled by this connection.
+Pixel History is connected separately below; counters remain unavailable.
 
 `selectedAnalysisWorkspace` exercised Talos execution `12675` through the actual
 UI/Worker/RenderDoc path: 20 VS instruction states, no source files, working Step
@@ -650,6 +650,43 @@ Relevant legacy configuration/selection and RDC job validation checks passed;
 Release GUI, Worker and targeted tests built successfully (`build60.log`,
 `build61.log`). These checks did not replay another GPU frame.
 
+### Pixel History from a native DX12 readback
+
+After selected execution replay with a texture resource, enable **Pixel History**
+and click the output image. Native readback now carries its actual mip, layer,
+plane, sample count and texture dimension. Picking validates that metadata against
+the selected execution/resource lifetime, then queries the same independent
+RenderDoc prefix through that execution. The current pick path accepts only
+single-sample 2D plane-0 images at **After event**; Before-event picking is rejected
+explicitly until a matching preceding analysis boundary is implemented. Coordinates
+can also be edited in Pixel History; DX12 event and object fields follow the API
+and resource selections, with creation identity supplied separately to the Worker.
+
+The table uses **execution instances**, retains fragment/operation records and
+separately labelled observed event-depth boundaries, and displays partial-result
+limitations. For D16 it shows “Fragment depth unavailable” and “Depth-test result
+unverified”; the separate raw UNORM readbacks are never substituted into fragment
+records. Only mapped/selectable rows can navigate, using the submitted-instance
+domain and restoring filtered events. Export preserves the full original evidence
+and limitation fields. Resource and execution changes invalidate old requests.
+
+`selectedPixelHistoryWorkspace` replayed Talos `12675` / creation `167081` /
+subresource `1`, clicked `(1527,1240)`, and obtained two backend records plus two
+observed Clear/Draw boundaries. It checked layer 1/mip 0, partial status, unavailable
+fragment depths and the separate Draw result `raw_unorm16: 17980`, exported the
+report, then located Clear execution `12667` through an active API filter. The first
+run exposed a disabled pick action after image validation; the fixed path passed
+(`dx12-pixel-history-ui2.txt`). Existing DX11 pixel-selection/stale-result behavior
+passed (`dx11-history-selection1.txt`). This is a working partial D16 history path,
+not completion of Pixel History or full-frame acceptance.
+
+`pixelHistoryIdentityAndMapping` reused the saved real history report without GPU
+work to verify decimal identities above 2^53 through UINT64_MAX, reject numeric or
+mismatched execution IDs, keep ambiguous rows non-navigable, invalidate resource
+changes, and restore DX11 request fields after switching backend. It passed in
+`dx12-history-identity1.txt`. Release GUI/Worker and targeted test builds passed
+(`build63.log`, `build64.log`); no BF1/Hellblade2 replay was added for this UI work.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -659,7 +696,7 @@ Release GUI, Worker and targeted tests built successfully (`build60.log`,
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
-| Resource/Pixel History with execution mapping | Unfinished | First Clear/Draw mapped; D16 event-boundary values verified, fragment depths unavailable; full history unfinished | Unfinished |
+| Resource/Pixel History with execution mapping | Unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | Unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Not performed | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
@@ -671,4 +708,5 @@ beyond the verified Talos prefix, full resource lifetime and address-alias handl
 complete command arguments, dependency scheduling and cross-queue synchronization.
 The isolated analysis backend now accepts native DX12 captures and execution
 identities. Selected replay/readback, VS debugging and Replay Mesh are connected
-to the workspace. History, performance and experiment integration remain unfinished.
+to the workspace. Pixel History has a verified partial D16 path; full history,
+performance and experiment integration remain unfinished.

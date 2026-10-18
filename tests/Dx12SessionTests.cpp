@@ -19,6 +19,7 @@
 #include "app/WorkerImage.h"
 #include "app/ReplayDebugView.h"
 #include "app/ReplayMeshView.h"
+#include "app/PixelHistoryView.h"
 #include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QCryptographicHash>
@@ -227,6 +228,114 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()),pixels.sizeInBytes()),QCryptographicHash::Sha256).toHex(),
             QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
         QVERIFY(window.findChild<QComboBox *>("outputTarget")->isEnabled()); QVERIFY(!sub->isVisible());
+    }
+    void pixelHistoryIdentityAndMapping() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_HISTORY");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_HISTORY to the Talos D16 history result");
+        QFile input(path);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        auto report = nlohmann::json::parse(input.readAll().toStdString());
+        PixelHistoryView history;
+        history.setContext("wide-history", 9007199254740993ULL, true);
+        history.setDx12Resource(UINT64_MAX - 1, UINT64_MAX);
+        QCOMPARE(history.request().at("execution"), nlohmann::json("9007199254740993"));
+        QCOMPARE(history.request().at("resource"), nlohmann::json("18446744073709551615"));
+        QCOMPARE(history.request().at("resource_creation"), nlohmann::json("18446744073709551614"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, history.finish(history.requestId(), report));
+        report["execution"] = "9007199254740993";
+        report["history"][0]["execution"] = "18446744073709551615";
+        report["history"][1]["selectable"] = false;
+        report["history"][1]["mapping_status"] = "ambiguous";
+        QVERIFY(history.finish(history.requestId(), report));
+        auto rows = history.findChild<QTreeWidget *>("historyRecords");
+        QSignalSpy jump(&history, &PixelHistoryView::eventRequested);
+        rows->setCurrentItem(rows->topLevelItem(0));
+        history.findChild<QAction *>("locateHistoryEvent")->trigger();
+        QCOMPARE(jump.count(), 1);
+        QCOMPARE(jump[0][0].toULongLong(), UINT64_MAX);
+        rows->setCurrentItem(rows->topLevelItem(1));
+        QVERIFY(!history.findChild<QAction *>("locateHistoryEvent")->isEnabled());
+        report["history"][0]["execution"] = UINT64_MAX;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, history.finish(history.requestId(), report));
+        QCOMPARE(rows->topLevelItem(0)->data(0, Qt::UserRole).toULongLong(), UINT64_MAX);
+        const auto serial = history.requestId();
+        history.setDx12Resource(12, 34);
+        QVERIFY(!history.finish(serial, report));
+        QCOMPARE(rows->topLevelItemCount(), 0);
+        history.setContext("dx11", 1);
+        history.selectPixel(84, 0, 0, 0, 0, 0);
+        QVERIFY(!history.request().contains("execution"));
+        QCOMPARE(history.request().at("resource"), nlohmann::json(84));
+    }
+    void selectedPixelHistoryWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (root.isEmpty() || library.isEmpty())
+            QSKIP("Set capture directory and RenderDoc library for DX12 pixel history UI");
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("12675");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        QModelIndex depth;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 167081) {
+                depth = index;
+                break;
+            }
+        }
+        QVERIFY(depth.isValid());
+        resources->setCurrentIndex(depth);
+        window.findChild<QSpinBox *>("dx12Subresource")->setValue(1);
+        window.replay();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto image = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(image->image().pixelColor(1527, 1240), QColor(70, 70, 70, 255));
+        auto history = window.findChild<PixelHistoryView *>("pixelHistoryView");
+        history->setBackendPath(library, false);
+        auto pick = window.findChild<QAction *>("pickPixelHistory");
+        QVERIFY(pick->isEnabled());
+        pick->setChecked(true);
+        done.clear();
+        image->pixelSelected(1527, 1240, QColor(70, 70, 70, 255));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto records = history->findChild<QTreeWidget *>("historyRecords");
+        QCOMPARE(records->topLevelItemCount(), 4);
+        QCOMPARE(history->request().at("execution"), nlohmann::json("12675"));
+        QCOMPARE(history->request().at("resource_creation"), nlohmann::json("167081"));
+        QCOMPARE(history->request().at("resource"), nlohmann::json("4980699392"));
+        QCOMPARE(history->request().at("layer"), nlohmann::json(1));
+        QCOMPARE(history->request().at("mip"), nlohmann::json(0));
+        QVERIFY(history->findChild<QLabel *>("historySummary")->text().contains("Partial history"));
+        auto draw = records->topLevelItem(3);
+        QCOMPARE(draw->data(0, Qt::UserRole).toULongLong(), 12675ULL);
+        QVERIFY(draw->text(5).contains("17980"));
+        QVERIFY(draw->text(3).contains("not a fragment"));
+        QVERIFY(records->topLevelItem(1)->text(4).contains("unavailable"));
+        QVERIFY(records->topLevelItem(1)->text(3).contains("unverified"));
+        QTemporaryDir temp;
+        history->exportResult(temp.filePath("history.json"));
+        QFile exported(temp.filePath("history.json"));
+        QVERIFY(exported.open(QIODevice::ReadOnly));
+        const auto report = nlohmann::json::parse(exported.readAll().toStdString());
+        QCOMPARE(report.at("depth_event_boundaries")[1].at("post").at("raw_unorm16"), nlohmann::json(17980));
+        QVERIFY(report.at("partial").get<bool>());
+        const auto oldRequest = history->requestId();
+        records->setCurrentItem(records->topLevelItem(2));
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        history->findChild<QAction *>("locateHistoryEvent")->trigger();
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 12667ULL);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(!history->finish(oldRequest, report));
     }
     void selectedAnalysisCapabilities() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
