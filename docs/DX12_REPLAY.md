@@ -424,6 +424,62 @@ zero native validation errors and no falsely reported executed Draws. Historical
 command recordings exist in metadata, but the necessary query-state restoration
 has not yet been established. This remains a full-frame blocker.
 
+The later **CPU query coverage index** now detects these gaps before device
+creation in the replay CLI, and before native initialization in direct backend
+requests. It follows submitted recording generations and repeated submission
+instances, retaining query state across submissions. It uses the same unique
+keyframe forward-reference rule as native query heap reconstruction. The
+execution details and `command-lists` report include query heap creation,
+destination/offset, completed counts, missing ranges, and bounded examples of
+recorded EndQuery calls that did not supply a completed replay result.
+
+| Talos resolve execution / source | Submission | Heap creation / object | Requested / completed / missing | Missing slots with / without a recorded EndQuery |
+| --- | --- | --- | --- | --- |
+| 16001 / 188923 | 188940 | 78117 / 180523136 | 236 / 96 / 140 | 16 / 124 |
+| 19409 / 192515 | 192532 | 69442 / 180521984 | 236 / 90 / 146 | 21 / 125 |
+
+The recorded-End distinction is deliberately weaker than a restored value:
+historical, unsubmitted recordings cannot seed a native query heap merely by
+being present in metadata. For example, the first missing range starts at slot
+0 with eight slots, and missing slot 37 has historical EndQuery records 10150,
+26647, 48381, 71580, 86422, 110894, 129601 and 147603. No usable result restoration
+has been established for these entries. This evidence does **not** establish
+that every possible source of saved query values has been exhausted.
+
+The workspace reports the first blocking resolve as `MissingData`, including
+its execution/source and exact missing count. Before execution 16001 remains
+selectable; after 16001 and later prefixes report the gap. Execution 16000 is
+still available. Analysis captures and performance require the selected event
+to be included even when the output view selects a before-event boundary.
+Malformed query records report a separate failure. Existing native deferred
+query checks remain as an execution-time guard.
+
+Targeted CPU evidence, without GPU replay:
+
+- `query-coverage3`: all submitted query ranges in the three supplied captures.
+  BF1's **5** resolves and Hellblade2's **240** resolves have completed query
+  coverage in the backend's serialized submission order. This says nothing
+  about cross-queue dependency correctness or full-frame image fidelity.
+- `dx12-query-coverage3.txt`: the real capture audit, workspace boundary checks
+  and a fixture covering repeated submissions, unsubmitted query recordings,
+  64-bit heap identities, bounds, truncation and cancellation pass in 0.499 s.
+  Earlier retained reports `coverage1/2` exposed the keyframe forward-reference
+  omission and the resulting one-slot correction in the first Talos breakdown;
+  the accepted figures above use that rule consistently.
+- `talos-query-preflight1/report.json`: selected after-execution 16001 returns
+  `completed: false`, `device_created: false`, `capability_status: missing_data`
+  and the query coverage evidence. The diagnostic run requested the debug layer
+  but did not create a device or submit GPU work.
+- Build157 includes the final GUI/CLI/Worker integration. The focused fixture
+  additionally checks that before-event display selection does not incorrectly
+  permit an after-event performance capture.
+
+The index is cancellable and bounded to four million submitted commands and
+one million slots per query resolve. It neither synthesizes missing results nor
+changes the native query calls. Talos full-frame replay remains unverified and
+blocked on result restoration; disabling an unavailable action is not feature
+completion.
+
 Reproduce the accepted color boundary (new/empty output directory required):
 
 ```powershell

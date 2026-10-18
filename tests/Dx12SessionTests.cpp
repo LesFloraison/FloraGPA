@@ -3,6 +3,7 @@
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
+#include "dx12/QueryReplayIndex.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
 #include "dx12/NativeResources.h"
@@ -71,6 +72,108 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void querySubmissionIdentityAndBounds() {
+        QTemporaryDir temp; const auto path = fixture(temp);
+        QByteArray packets; uint64_t timestamp{};
+        const auto packet = [&](uint64_t type, const QByteArray &bytes) {
+            qword(packets, type); qword(packets, ++timestamp); qword(packets, 0); qword(packets, bytes.size()); packets += bytes;
+        };
+        const uint64_t heap = UINT64_MAX - 4, queue = UINT64_MAX - 3, list = UINT64_MAX - 2;
+        QByteArray creation; qword(creation, 1); creation.append(char(1));
+        dword(creation, 0); dword(creation, 3); dword(creation, 0);
+        const auto iid = __uuidof(ID3D12QueryHeap); creation.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+        creation.append(char(1)); qword(creation, 1); qword(creation, heap); dword(creation, 0);
+        packet(0x127937e9603edULL, creation);
+        const auto reset = [&](uint64_t object) {
+            QByteArray p; qword(p, object); qword(p, 17); qword(p, 0); dword(p, 0); packet(0x1ae3c721c351aULL, p);
+        };
+        const auto close = [&](uint64_t object) { QByteArray p; qword(p, object); dword(p, 0); packet(0x1ae3cd6acf667ULL, p); };
+        const auto query = [&](uint64_t object, uint64_t type, uint32_t slot) {
+            QByteArray p; qword(p, object); qword(p, heap); dword(p, 0); dword(p, slot); packet(type, p);
+        };
+        const auto resolve = [&](uint32_t count, bool truncate = false) {
+            QByteArray p; qword(p, list); qword(p, heap); dword(p, 0); dword(p, 0); dword(p, count); qword(p, 42); qword(p, 0);
+            if (truncate) p.chop(3); packet(0x1ae3cdc411c2dULL, p);
+        };
+        const auto submit = [&] {
+            QByteArray p; qword(p, queue); dword(p, 1); p.append(char(1)); qword(p, 1); qword(p, list); packet(0x125482975df48ULL, p);
+        };
+        // Slot 2 exists in a recording that is never submitted.
+        reset(9); query(9, 0x1ae3c6601dd2cULL, 2); query(9, 0x1ae3c64a8e138ULL, 2); close(9);
+        reset(list); query(list, 0x1ae3c6601dd2cULL, 0); query(list, 0x1ae3c64a8e138ULL, 0); resolve(2); close(list);
+        submit(); submit();
+        reset(list); query(list, 0x1ae3c6601dd2cULL, 1); query(list, 0x1ae3c64a8e138ULL, 1); resolve(2); resolve(3); resolve(4); resolve(1, true); close(list); submit();
+        write(path + "/thread-7-0", packets);
+        dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString())); dx12::SubmissionIndex submissions(directory);
+        dx12::QueryReplayIndex queries(directory, submissions);
+        QVERIFY(queries.firstIssue(3, true).is_null());
+        QCOMPARE(queries.details(3).at("missing_count"), nlohmann::json(1));
+        QCOMPARE(queries.details(3).at("source_record"), queries.details(6).at("source_record"));
+        QVERIFY(queries.details(3).at("submission") != queries.details(6).at("submission"));
+        QCOMPARE(queries.details(6).at("query_heap"), nlohmann::json(std::to_string(heap)));
+        QCOMPARE(queries.details(9).at("status"), nlohmann::json("covered"));
+        QCOMPARE(queries.details(10).at("missing_slots_with_recorded_end"), nlohmann::json(1));
+        QCOMPARE(queries.details(10).at("missing_slots_without_recorded_end"), nlohmann::json(0));
+        QCOMPARE(queries.details(11).at("status"), nlohmann::json("invalid_query_data"));
+        QCOMPARE(queries.details(12).at("status"), nlohmann::json("invalid_query_data"));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, dx12::QueryReplayIndex(directory, submissions, [] { return true; }));
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        ReplaySelection selection; selection.execution = 3; selection.before = true;
+        QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
+        QCOMPARE(session->capability(ReplayFeature::Performance, selection).status, CapabilityStatus::MissingData);
+        selection.before = false;
+        QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::MissingData);
+        QCOMPARE(session->executionDetails(3).at("query_replay_coverage"), queries.details(3));
+    }
+    void queryWorkspaceBoundary() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set captures for Talos query boundary navigation");
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("16001"); QTest::keyClick(locate, Qt::Key_Return);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary");
+        auto replay = window.findChild<QAction *>("replayFrame");
+        boundary->setCurrentIndex(2); QVERIFY(!replay->isEnabled());
+        QVERIFY(replay->toolTip().contains("140 of 236"));
+        boundary->setCurrentIndex(1); QVERIFY(replay->isEnabled());
+        boundary->setCurrentIndex(2); QVERIFY(!replay->isEnabled());
+        locate->setText("16000"); QTest::keyClick(locate, Qt::Key_Return); QVERIFY(replay->isEnabled());
+        QVERIFY(done.empty()); QVERIFY(!window.busy()); // Navigation does not launch GPU work.
+    }
+    void dx12CapturedQueryCoverage() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_QUERY_COVERAGE_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set captures and a new CPU query coverage output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        for (const auto &name : {QString("Talos_2026_10_18__00_55_08.gpa_frame"),
+                                QString("bf1_2025_12_10__14_29_55.gpa_frame"),
+                                QString("Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame")}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root + '/' + name).toStdWString()));
+            dx12::SubmissionIndex submissions(directory); dx12::QueryReplayIndex queries(directory, submissions);
+            const auto report = queries.information();
+            QFile file(output + '/' + name + ".json"); QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write(QByteArray::fromStdString(report.dump(2))); file.close();
+            const auto issue = queries.firstIssue(submissions.executionCount(), false);
+            qInfo() << name << "query resolves/issues" << report.at("resolves_and_issues").size()
+                    << "first issue" << (issue.is_null() ? QString("none") : QString::fromStdString(issue.at("reason").get<std::string>()));
+            if (name.startsWith("Talos")) {
+                QVERIFY(queries.firstIssue(16000, false).is_null());
+                QVERIFY(queries.firstIssue(16001, true).is_null());
+                const auto missing = queries.firstIssue(16001, false);
+                QCOMPARE(missing.at("source_record"), nlohmann::json("188923"));
+                QCOMPARE(missing.at("status"), nlohmann::json("missing_query_results"));
+                QCOMPARE(missing.at("count"), nlohmann::json(236));
+                QCOMPARE(missing.at("completed_count"), nlohmann::json(96));
+                QCOMPARE(missing.at("missing_count"), nlohmann::json(140));
+                QCOMPARE(missing.at("missing_slots_without_recorded_end"), nlohmann::json(124));
+                const auto second = queries.details(19409);
+                QCOMPARE(second.at("missing_count"), nlohmann::json(146));
+                QCOMPARE(second.at("missing_slots_without_recorded_end"), nlohmann::json(125));
+            } else QVERIFY(issue.is_null());
+        }
+    }
     void dx12ResourceExperimentProjects() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_RESOURCE_EXPERIMENT_OUTPUT");

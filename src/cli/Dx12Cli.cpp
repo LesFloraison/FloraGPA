@@ -42,10 +42,26 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     ReplaySelection selection;
     selection.session = session.identity();
     selection.execution = execution;
+    selection.before = options.isSet("before");
     selection.resource = creation;
     const auto capability = session.capability(ReplayFeature::Replay, selection);
-    if (!capability.supported())
-        throw std::runtime_error(capability.reason);
+    if (!capability.supported()) {
+        const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
+                            capability.status == CapabilityStatus::NotImplemented ? "not_implemented" :
+                            capability.status == CapabilityStatus::UnsupportedDevice ? "unsupported_device" : "failed";
+        const nlohmann::json report{{"backend", "dx12"}, {"completed", false}, {"frame_complete", false},
+            {"image_available", false}, {"device_created", false}, {"replay_scope", "selected_execution"},
+            {"execution", std::to_string(execution)}, {"event", std::to_string(execution)},
+            {"value_time", selection.before ? "before_event" : "after_event"},
+            {"capability_status", status}, {"error", capability.reason},
+            {"query_replay_coverage", session.submissionDetails().at("query_replay_coverage")}};
+        QSaveFile file(output.filePath("report.json"));
+        const auto bytes = QByteArray::fromStdString(report.dump(2));
+        if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
+            throw std::runtime_error("Cannot save DX12 replay capability report");
+        QTextStream(stderr) << QString::fromStdString(capability.reason) << '\n';
+        return 2;
+    }
     std::optional<Experiment> experiment;
     if (options.isSet("experiment") || options.isSet("disable")) {
         experiment.emplace(session);

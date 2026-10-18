@@ -1455,7 +1455,10 @@ void MainWindow::buildUi() {
     connect(outputLow_, &QLineEdit::editingFinished, this, outputChanged);
     connect(outputHigh_, &QLineEdit::editingFinished, this, outputChanged);
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
-        if (session_ && session_->backend()==ReplayBackend::Dx12) { invalidateDx12Output(); return; }
+        if (session_ && session_->backend()==ReplayBackend::Dx12) {
+            selection_.before = boundary_->currentIndex() == 1;
+            invalidateDx12Output(); return;
+        }
         if (frame_) {
             ++revision_;
             if (process_.state() != QProcess::NotRunning || artifactJob_)
@@ -1673,6 +1676,7 @@ QString MainWindow::historyContextKey() const {
             return {};
         auto selection = selection_;
         selection.resource = 0;
+        selection.before = false; // Analysis captures include the selected execution.
         if (!session_->capability(ReplayFeature::Replay, selection).supported())
             return {};
         if (experiment_ && !experiment_->enabled(*selection_.execution)) return {};

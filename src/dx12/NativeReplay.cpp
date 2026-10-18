@@ -4,6 +4,7 @@
 #include "NativeDescriptors.h"
 #include "NativeCommands.h"
 #include "NativePerformance.h"
+#include "QueryReplayIndex.h"
 #include "../common/PackedColor.hpp"
 #include <wrl/client.h>
 #include <dxgi1_4.h>
@@ -78,7 +79,7 @@ std::string hash(format::Bytes bytes) {
 }
 struct NativeReplay::Impl {
     NativeDevice &device; const StreamDirectory &directory; CancelCheck cancelled;
-    SubmissionIndex index; NativeResources resources; NativeDescriptors descriptors;
+    SubmissionIndex index; QueryReplayIndex queries; NativeResources resources; NativeDescriptors descriptors;
     std::map<uint64_t, QueueRecipe> queueRecipes;
     std::map<uint64_t, FenceRecipe> fenceRecipes;
     std::map<uint64_t, AllocatorRecipe> allocatorRecipes;
@@ -126,7 +127,7 @@ struct NativeReplay::Impl {
     std::map<uint64_t, Tiling> tilings;
     uint64_t tileMappingCalls{};
     Impl(NativeDevice &d, const StreamDirectory &s, uint64_t limit, CancelCheck c)
-        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled),
+        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled), queries(s, index, cancelled),
           resources(d, s, limit, cancelled), descriptors(d, s, resources, cancelled) {
         for (size_t i = 0; i < s.initializationCount(); ++i) {
             if (i % 1024 == 0)
@@ -419,6 +420,8 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     const auto target = s.index.execution(execution);
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
+    if (const auto issue = s.queries.firstIssue(execution, !after); !issue.is_null())
+        throw std::runtime_error(issue.at("reason").get<std::string>());
     auto frame = std::make_unique<Impl::FramePlan>();
     frame->cpuWaits = planCpuWaits(s.directory, target.submission, s.cancelled);
     frame->execution = execution;
@@ -1182,6 +1185,7 @@ json NativeReplay::information() const {
         waits.push_back(std::move(wait));
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
+        {"query_replay_coverage", s.queries.information()},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
         {"shader_replacements", s.frame ? s.frame->commands->pipelines().shaderReplacementInformation() : json::array()},
         {"resource_patches", std::move(patches)}, {"applied_resource_patches", s.appliedResourcePatches},

@@ -20,6 +20,7 @@ struct ArtifactResult {
 void MainWindow::invalidateDx12Output() {
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
+    selection_.before = boundary_->currentIndex() == 1;
     replayTimer_.stop();
     ++revision_;
     if (process_.state() != QProcess::NotRunning || artifactJob_)

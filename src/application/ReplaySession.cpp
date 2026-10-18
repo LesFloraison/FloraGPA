@@ -3,6 +3,7 @@
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
+#include "dx12/QueryReplayIndex.h"
 #include "dx12/NativeCommands.h"
 #include "dx12/BackBufferIndex.h"
 #include <QUuid>
@@ -69,6 +70,7 @@ class Dx11Session final : public IReplaySession {
 class Dx12Session final : public IReplaySession {
     dx12::StreamDirectory directory_;
     dx12::SubmissionIndex submissions_;
+    dx12::QueryReplayIndex queries_;
     dx12::BackBufferIndex backBuffers_;
     mutable std::mutex contentMutex_;
     mutable std::string contentHash_;
@@ -150,7 +152,7 @@ class Dx12Session final : public IReplaySession {
 
   public:
     Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled)
-        : directory_(path, cancelled), submissions_(directory_, cancelled),
+        : directory_(path, cancelled), submissions_(directory_, cancelled), queries_(directory_, submissions_, cancelled),
           backBuffers_(directory_, cancelled) {
         ids_.reserve(directory_.packets().size());
         for (Id i = 1; i <= directory_.packets().size(); ++i) {
@@ -278,12 +280,14 @@ class Dx12Session final : public IReplaySession {
         out["list_ordinal"] = std::to_string(e.ordinal);
         out["recording_generation"] = std::to_string(e.generation);
         out["recording_complete"] = e.recordingComplete;
+        if (const auto query = queries_.details(id); !query.is_null()) out["query_replay_coverage"] = query;
         out["note"] = "Indexed command-list invocation; GPU synchronization and initialization dependencies are unresolved";
         return out;
     }
     nlohmann::json submissionDetails() const override {
         nlohmann::json out{{"backend", "dx12"}, {"gpu_order_resolved", false},
-            {"lists", nlohmann::json::array()}, {"synchronization", nlohmann::json::array()}};
+            {"lists", nlohmann::json::array()}, {"synchronization", nlohmann::json::array()},
+            {"query_replay_coverage", queries_.information()}};
         for (const auto &list : submissions_.lists()) {
             nlohmann::json row{{"submission_record", std::to_string(list.submission)}, {"queue", std::to_string(list.queue)},
                 {"list_ordinal", std::to_string(list.ordinal)}, {"command_list", std::to_string(list.list)},
@@ -377,7 +381,8 @@ class Dx12Session final : public IReplaySession {
         if (feature == ReplayFeature::PixelHistory) {
             if (!selection.resource)
                 return {CapabilityStatus::MissingData, "Select a texture resource creation"};
-            const auto replay = capability(ReplayFeature::Replay, selection);
+            auto throughEvent = selection; throughEvent.before = false;
+            const auto replay = capability(ReplayFeature::Replay, throughEvent);
             if (!replay.supported())
                 return replay;
             return {CapabilityStatus::Supported,
@@ -391,13 +396,14 @@ class Dx12Session final : public IReplaySession {
             catch (const std::exception &error) { return {CapabilityStatus::MissingData, error.what()}; }
             auto executionOnly = selection;
             executionOnly.resource = 0;
+            executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported()) return replay;
             return {CapabilityStatus::Supported, "Partial replay-prefix usage history; bindings are potential "
                     "accesses, content changes and complete subresource/synchronization coverage are not measured"};
         }
         if (feature == ReplayFeature::Performance) {
-            auto executionOnly = selection; executionOnly.resource = 0;
+            auto executionOnly = selection; executionOnly.resource = 0; executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported()) return replay;
             const auto kind = executionEvent(*selection.execution).workKind;
@@ -408,6 +414,7 @@ class Dx12Session final : public IReplaySession {
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;
             executionOnly.resource = 0;
+            executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported())
                 return replay;
@@ -450,6 +457,9 @@ class Dx12Session final : public IReplaySession {
                 const auto execution = submissions_.execution(*selection.execution);
                 if (!execution.recordingComplete || execution.submission<=directory_.initializationCount())
                     return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
+                if (const auto issue = queries_.firstIssue(*selection.execution, selection.before); !issue.is_null())
+                    return {issue.at("status") == "missing_query_results" ? CapabilityStatus::MissingData : CapabilityStatus::Failed,
+                            issue.at("reason").get<std::string>()};
                 if (selection.resource) {
                     (void)resource(selection.resource);
                     const auto descriptor=resourceDescription(selection.resource);
