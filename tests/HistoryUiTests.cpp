@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QLineEdit>
 #include <QLabel>
+#include <bit>
 #include <cmath>
 #include <QMessageBox>
 #include <QPlainTextEdit>
@@ -50,6 +51,128 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dx12TemporalStoreReference() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_TEMPORAL_EVIDENCE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set the BF1 temporal shader evidence directory");
+        const auto output = read(root + "/bf1-temporal-cs-stability2/result.json");
+        const auto history = read(root + "/bf1-temporal-history-store1/result.json");
+        // These stores contain positive normal values within R11G11B10's
+        // range. D3D high-to-low floating conversion truncates the mantissa,
+        // unlike the round-to-nearest RGBA8 display conversion.
+        const auto storage = [](const Json &report, uint32_t instruction) {
+            Json value;
+            for (const auto &step : report.at("steps")) {
+                for (const auto &change : step.at("changes"))
+                    if (change.at("after").at("name") == "r1")
+                        value = change.at("after").at("value").at("f32v");
+                if (step.at("nextInstruction") == instruction) {
+                    Json rgb = Json::array();
+                    for (size_t i = 0; i < 3; ++i) {
+                        const float f = value.at(i).get<float>();
+                        if (!std::isfinite(f) || f < std::ldexp(1.0f, -14) || f > 64512.0f)
+                            throw std::runtime_error("Temporal fixture needs positive normal RGB");
+                        const uint32_t mantissa = i == 2 ? 5U : 6U;
+                        const uint32_t bits = std::bit_cast<uint32_t>(f) &
+                                              (UINT32_MAX << (23U - mantissa));
+                        rgb.push_back(std::bit_cast<float>(bits));
+                    }
+                    return rgb;
+                }
+            }
+            throw std::runtime_error("Missing temporal UAV store");
+        };
+        const auto rgb = [](const Json &value) {
+            const auto &v = value.at("floatValue");
+            return Json::array({v.at(0), v.at(1), v.at(2)});
+        };
+        for (const auto *report : {&output, &history}) {
+            QVERIFY(report->at("ok").get<bool>());
+            QVERIFY(report->at("gpa_modules_loaded").empty());
+            QCOMPARE(report->at("backend_dxbc_workgroup_patch"), Json(1));
+            QCOMPARE(report->at("execution"), Json("36666"));
+        }
+        const auto &reference = output.at("gpu_reference");
+        QCOMPARE(reference.at("resource_creation"), Json("299115"));
+        QCOMPARE(reference.at("consistency"), Json("selected_texel_changed"));
+        QCOMPARE(storage(output, 373), rgb(reference.at("after_trace_creation_value")));
+        QVERIFY(storage(output, 373) != rgb(reference.at("value")));
+        QCOMPARE(reference.at("value"), reference.at("after_debug_value"));
+        QCOMPARE(history.at("gpu_reference").at("resource_creation"), Json("286299"));
+        QCOMPARE(storage(history, 295), rgb(history.at("gpu_reference").at("value")));
+    }
+    void dx12DebugReferenceStability() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_STABILITY_REPORT");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_STABILITY_REPORT to a trace with before/after GPU reference values");
+        auto report = read(path);
+        QVERIFY(report.at("ok").get<bool>());
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        const auto &reference = report.at("gpu_reference");
+        const bool same = reference.at("value").at("uintValue") ==
+                              reference.at("after_debug_value").at("uintValue") &&
+                          reference.at("value").at("uintValue") ==
+                              reference.at("after_trace_creation_value").at("uintValue");
+        QCOMPARE(reference.at("consistency"),
+                 Json(same ? "selected_texel_unchanged" : "selected_texel_changed"));
+        if (!same) {
+            QVERIFY(report.at("partial").get<bool>());
+            QVERIFY(!report.at("debug_scope").at("warnings").empty());
+        }
+        ReplayDebugView view("cs");
+        view.setContext("stability", 36666, true);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto label = view.findChild<QLabel *>("debugGpuReference");
+        QVERIFY(label->text().contains("After debug replays"));
+        QVERIFY(label->text().contains("After trace creation"));
+        QCOMPARE(view.exportReport().at("gpu_reference"), reference);
+        // A changed-reference fixture must remain distinguishable from the
+        // real observation and from older reports.
+        auto changed = report;
+        changed["gpu_reference"]["after_debug_value"]["floatValue"] = {0.25, 0.5, 0.75, 1.0};
+        changed["gpu_reference"]["after_debug_value"]["uintValue"] = {
+            1048576000U, 1056964608U, 1061158912U, 1065353216U};
+        changed["gpu_reference"]["after_debug_value"]["intValue"] = {
+            1048576000, 1056964608, 1061158912, 1065353216};
+        changed["gpu_reference"]["consistency"] = "selected_texel_changed";
+        changed["partial"] = true;
+        changed["debug_scope"]["warnings"] = {"The selected GPU texel changed during shader-debug replays."};
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("changed; reference cannot validate this trace"));
+        QVERIFY(label->text().contains("0.25"));
+        auto notice = view.findChild<QLabel *>("debugBackendNotice");
+        QVERIFY(!notice->isHidden());
+        QVERIFY(notice->text().contains("GPU texel changed"));
+        QCOMPARE(view.exportReport().at("gpu_reference"), changed.at("gpu_reference"));
+        // A transient change is still a warning even if the final texel
+        // returned to its initial value.
+        changed["gpu_reference"]["after_trace_creation_value"] =
+            changed["gpu_reference"]["after_debug_value"];
+        changed["gpu_reference"]["after_debug_value"] = reference.at("value");
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("changed; reference cannot validate this trace"));
+        QVERIFY(label->text().contains("0.25"));
+        auto unchanged = report;
+        unchanged["gpu_reference"]["after_trace_creation_value"] = reference.at("value");
+        unchanged["gpu_reference"]["after_debug_value"] = reference.at("value");
+        unchanged["gpu_reference"]["consistency"] = "selected_texel_unchanged";
+        unchanged["debug_scope"].erase("warnings");
+        unchanged["partial"] = false;
+        QVERIFY(view.finish(view.requestId(), unchanged));
+        QVERIFY(label->text().contains("input stability is not established"));
+        QVERIFY(notice->isHidden());
+        auto legacy = report;
+        legacy["gpu_reference"].erase("after_trace_creation_value");
+        legacy["gpu_reference"].erase("after_debug_value");
+        legacy["gpu_reference"].erase("consistency");
+        legacy["gpu_reference"].erase("consistency_scope");
+        legacy["debug_scope"].erase("warnings");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        QVERIFY(!label->text().contains("After debug replays"));
+        QVERIFY(notice->isHidden());
+        view.setContext("different-capture", 1, true);
+        QVERIFY(label->isHidden());
+    }
     void dx12WorkgroupRegression() {
         const auto root = qEnvironmentVariable("FLORA_DX12_WORKGROUP_EVIDENCE_DIR");
         if (root.isEmpty())

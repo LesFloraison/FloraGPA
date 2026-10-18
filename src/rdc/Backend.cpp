@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <tuple>
@@ -421,6 +422,13 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
     Json result = Json::object();
+    struct ReferenceSelection {
+        ResourceId resource;
+        uint32_t x, y;
+        Subresource sub;
+        CompType cast;
+    };
+    std::optional<ReferenceSelection> referenceSelection;
     if (dx12 && compute && !job.value("resource", Json()).is_null()) {
         const auto resource = capturedResource(controller.GetResources(), job, true);
         const auto textures = controller.GetTextures();
@@ -444,6 +452,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                        {"reason", "Typeless texture interpretation is unavailable"}};
         const auto cast = found->format.compType;
         if (cast != CompType::Typeless) {
+            referenceSelection = ReferenceSelection{resource, x, y, sub, cast};
             reference.erase("reason");
             reference.update(
                 {{"status", "read"},
@@ -489,6 +498,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                             const auto cast = target.format.compType;
                             reference["reason"] = "Typeless color target interpretation is unavailable";
                             if (cast != CompType::Typeless) {
+                                referenceSelection = ReferenceSelection{target.resource, x, y, sub, cast};
                                 const auto value = controller.PickPixel(target.resource, x, y, sub, cast);
                                 reference = {
                                     {"status", "read"},
@@ -570,6 +580,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     }
     if (!trace || !trace->debugger)
         throw std::runtime_error("No debugger trace at the selected invocation");
+    if (referenceSelection) {
+        const auto &selection = *referenceSelection;
+        result["gpu_reference"]["after_trace_creation_value"] =
+            pixel(controller.PickPixel(selection.resource, selection.x, selection.y, selection.sub,
+                                       selection.cast));
+    }
     result["trace"] = flora::rdcDebugTrace(*trace);
     Json missingOffsets = Json::array();
     const auto &globals = result["trace"]["sourceVars"];
@@ -619,6 +635,32 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         throw std::runtime_error("Shader debugger returned no steps");
     result["step_count"] = steps.size();
     result["steps"] = std::move(steps);
+    // Debugging can replay the capture again, including when a DXBC UAV is
+    // fetched lazily. Do not silently compare a trace against an earlier
+    // output when those replays have changed even the selected reference.
+    if (referenceSelection) {
+        const auto &selection = *referenceSelection;
+        const auto after = pixel(controller.PickPixel(selection.resource, selection.x, selection.y,
+                                                      selection.sub, selection.cast));
+        auto &reference = result["gpu_reference"];
+        const auto &before = reference.at("value").at("uintValue");
+        const bool same = before == after.at("uintValue") &&
+                          before == reference.at("after_trace_creation_value").at("uintValue");
+        reference["after_debug_value"] = after;
+        reference["consistency"] = same ? "selected_texel_unchanged" : "selected_texel_changed";
+        reference["consistency_scope"] =
+            "Selected post-event texel before debugging, after trace creation and after stepping, "
+            "compared as PickPixel result bits. "
+            "An unchanged texel does not establish stable inputs or validate the simulated invocation.";
+        if (!same) {
+            result["partial"] = true;
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null())
+                warnings = Json::array();
+            warnings.push_back("The selected GPU texel changed during shader-debug replays. The earlier "
+                               "GPU reference cannot validate this trace; inspect replay/input stability.");
+        }
+    }
     return result;
 }
 } // namespace

@@ -2442,12 +2442,14 @@ the patched simulation and both pre-debug GPU references return
 undo remove the replacement. This verifies an actual changed-CS execution,
 not merely PSO creation. GPU undo restoration was not repeated here.
 
-The original BF1 CS is **not yet validated**: the stock simulated store was
+At this increment the original BF1 CS was **not yet validated**: the stock simulated store was
 approximately **(0.155922,0.169648,0.175920)**; after fixing group IDs it is
 **(0.101484,0.088130,0.075260)**, while that request's pre-debug GPU texel is
 **(0.1044921875,0.0908203125,0.07421875)**. Further debugger/replay differences
 remain. This defect and its minimal reproduction do not explain the earlier
-original-GPA/native frame variation.
+original-GPA/native frame variation. The later stability investigation below
+matches the selected stores after accounting for replay phase and float-format
+truncation; it still does not establish stable full-frame replay.
 
 Evidence under ignored `artifacts/dx12-research`: `bf1-premotion-{history1,pipeline1}`,
 `bf1-temporal-{resources1.json,cs1,cs-reference1,cs-fixed1}`, `bf1-workgroup-project1`,
@@ -2507,6 +2509,82 @@ under ignored `bf1-packed-float-workspace1`. It verifies resource display and
 selection; it does not rerun Shader Debug or resolve the original BF1 temporal
 shader discrepancy. Only this one GPU replay ran for the preview change.
 
+### BF1 debug replay stability and temporal-input investigation
+
+DX12 PS/CS debug references now retain three observations of the same selected
+texel: before debugging, immediately after trace creation, and after stepping.
+The comparison uses the returned component bits, including integer values and
+nonfinite floating values. Any difference marks the report partial and adds a
+visible warning; exports preserve all three values. An unchanged selected texel
+does **not** validate shader inputs, other pixels, or the simulated invocation.
+Legacy reports still display without inventing missing observations. This adds
+two selected-texel reads, without requesting another frame replay.
+
+Pinned RenderDoc 1.45 source explains why all three observations matter:
+`ReplayController::DebugThread` (`renderdoc/replay/replay_controller.cpp:1667`)
+calls `SetFrameEvent(..., true)` after constructing the debugger. In the DX12
+DXBC wrapper, `FetchUAV` (`d3d12_shaderdebug.cpp:1257` in the patched research
+checkout) may subsequently replay without the selected action; its destructor
+reexecutes the action. Thus constant-buffer capture, texture sampling and lazy
+UAV fetching can occur across different replays. No new RenderDoc patch is
+claimed here.
+
+`bf1-temporal-cs-stability2` demonstrates a real transient change at execution
+**36666**, group **(209,60,0)**, thread **(2,5,0)**, output creation **299115**,
+pixel **(1674,485)**:
+
+| Observation | GPU RGB |
+| --- | --- |
+| Before debugging | (0.1044921875, 0.0908203125, 0.07421875) |
+| After trace creation | (0.1005859375, 0.087890625, 0.07421875) |
+| After stepping | (0.1044921875, 0.0908203125, 0.07421875) |
+
+The report correctly emits `selected_texel_changed`, `partial: true`, and a
+warning that the earlier reference cannot validate the trace. Comparing only
+the first and last values would miss this failure. In this same request, the
+simulated instruction **373** stores approximately
+**(0.1014838591,0.0881296322,0.0752600357)**. Applying R11G11B10's high-to-low
+floating conversion with **round toward zero** gives exactly the RGB observed
+after trace creation. This is a verified selected-invocation storage match,
+not a stable-frame or complete temporal-shader validation. Conversion follows
+[Microsoft's floating-point conversion rules, section 3.2.2](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm).
+It must not be confused with the preview's nearest-integer RGBA8 display conversion.
+
+Additional targeted evidence narrows, but does not resolve, the discrepancy:
+
+- `bf1-temporal-history-store1`: history-output creation **286299** stores
+  **(130,122,112)** at the selected location. The same request's simulated value
+  before instruction **295** is approximately **(130.160110,122.438538,113.803062)**,
+  which converts exactly to the GPU RGB using round toward zero. Values from
+  another request must not be substituted for this trace's registers.
+- `bf1-temporal-input-load1`: current-input creation **324851**, pixel
+  **(1673,483)**, reads **(0.056640625,0.05078125,0.044921875)**, matching the
+  active lane's instruction **66** texture load exactly.
+- A separately replayed input export (`bf1-temporal-input-tile1`) differs from
+  the debug input, so it is not accepted as a same-run shared-memory oracle.
+- One research-only instrumented query (`bf1-temporal-input-snapshot1`) saves
+  that input subresource before and after debugging. The first barrier's
+  **100** shared-memory elements agree with the same-request pre-debug input
+  and the disassembled color transform to within **1.45e-6**, using constants
+  rounded to six decimal places. The selected **10x10** input region is unchanged
+  between the snapshots, while **9,064** other pixels change (bounding box
+  **1466,458–1919,743**). This excludes neither transient input changes nor
+  other inputs. Snapshot SHA-256 values are
+  `445e02bbe99d40fc7e89db906835a6ceed97f2902c7b7d7d6cf264e623ec6ce5`
+  and `7e5c46eeebae0d97825b41525ace46dc5c3f1e5ae20c8d599758e03deafa2fbf`.
+
+The bounded snapshot instrumentation and numerical comparison scripts remain
+under ignored `artifacts/dx12-research`; the diagnostic instrumentation was
+removed and the production analysis worker rebuilt. Six serial GPU queries
+served these specific checks, with no GPA modules loaded. The focused
+`dx12DebugReferenceStability` UI check uses the real transient report and tests
+changed/unchanged references, intermediate-only changes, exports, legacy reports
+and context invalidation. `dx12TemporalStoreReference` separately reconstructs
+the registers before both real UAV stores and checks their truncated 6/6/5-bit
+mantissas against the correct GPU reference phase, ignoring the unstored alpha.
+Both focused checks passed (`temporal-storage-stability1.txt`: **4 passed**,
+including setup/cleanup, **982 ms**). No full-sample or DX11 regression run was added.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2518,7 +2596,7 @@ shader discrepancy. Only this one GPU replay ran for the preview change.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; original temporal CS/GPU mismatch, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

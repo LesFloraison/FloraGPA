@@ -671,6 +671,21 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                         .arg(text(reference.at("mip")), text(reference.at("layer")),
                              text(reference.at("sample")), QString::fromStdString(kind),
                              text(reference.at("value").at(key))));
+            if (reference.contains("after_debug_value")) {
+                const bool changed = reference.value("consistency", "") == "selected_texel_changed";
+                if (reference.contains("after_trace_creation_value"))
+                    gpuReference_->setText(
+                        gpuReference_->text() +
+                        QString("\nAfter trace creation: %1 %2")
+                            .arg(QString::fromStdString(kind),
+                                 text(reference.at("after_trace_creation_value").at(key))));
+                gpuReference_->setText(
+                    gpuReference_->text() +
+                    QString("\nAfter debug replays: %1 %2 · %3")
+                        .arg(QString::fromStdString(kind), text(reference.at("after_debug_value").at(key)),
+                             changed ? "changed; reference cannot validate this trace"
+                                     : "selected texel unchanged; input stability is not established"));
+            }
         } else {
             gpuReference_->setText("GPU target reference unavailable: " +
                                    text(reference.value("reason", Json("Unknown"))));
