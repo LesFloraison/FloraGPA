@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
     p.addOption({"decompiler", "Optional cmd_Decompiler.exe for recovery fallback or assembly", "path"});
     p.addOption({"recover", "Reconstruct supported DXBC as editable HLSL (shader only)"});
     p.addOption({"warp", "Use the WARP software adapter"});
+    p.addOption({"check-device", "Check DX12 device/SDK initialization during validate-frame (does not validate replay)"});
     p.addOption({"gpu-vendor", "Use the first adapter with this PCI vendor ID (decimal or 0x hex)", "id"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
@@ -186,6 +187,8 @@ int main(int argc, char **argv) {
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
         auto command = args[0];
+        if (p.isSet("check-device") && command != "validate-frame")
+            throw std::runtime_error("--check-device requires DX12 validate-frame");
         std::optional<uint32_t> gpuVendor;
         if (p.isSet("gpu-vendor")) {
             if (!usesNativeReplayDevice(command.toStdString()))

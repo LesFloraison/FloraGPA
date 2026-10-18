@@ -1,5 +1,6 @@
 #include "Dx12Cli.h"
 #include "application/ReplaySession.h"
+#include "dx12/NativeDevice.h"
 #include <QDir>
 #include <QSaveFile>
 #include <QTextStream>
@@ -9,7 +10,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     if (command != "inventory" && command != "commands" && command != "validate-frame" && command != "command-lists")
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
     for (const auto &option : options.optionNames())
-        if (option != "out" && !(command == "commands" && option == "filter"))
+        if (option != "out" && !(command == "commands" && option == "filter") &&
+            !(command == "validate-frame" && option == "check-device"))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
     const QDir output(options.value("out"));
@@ -27,6 +29,13 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     auto report = session->information();
     report["status"] = command == "validate-frame" ? "blocked" : "indexed";
     report["note"] = "Stream indexing does not establish native replay support";
+    if (options.isSet("check-device")) {
+        try {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            dx12::NativeDevice device(directory);
+            report["device"] = device.information();
+        } catch (const std::exception &e) { report["device"] = {{"status", "failed"}, {"reason", e.what()}}; }
+    }
     if (command == "commands") {
         write("[\n"); bool first = true;
         for (auto id : session->events()) {

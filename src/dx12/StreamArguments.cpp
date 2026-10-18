@@ -36,6 +36,14 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     const auto u64 = [&](const char *name) { auto n = r.read<uint64_t>(); v[name] = std::to_string(n); return n; };
     const auto resource = [&](const char *name) { auto n = u64(name); if(n) out.resources.push_back(n); };
     switch (type) {
+    case 0x1000016b94da9ULL: case 0x11fac3bb041bfULL: {
+        if (type == 0x11fac3bb041bfULL) u64("DeviceFactory");
+        u64("Adapter"); u32("MinimumFeatureLevel"); r.skip(16);
+        const auto outputs = pointers(r); u32("HRESULT");
+        if (outputs.size() > 1) throw std::runtime_error("Invalid DX12 device output count");
+        if (!outputs.empty()) v["Device"] = std::to_string(outputs[0]);
+        break;
+    }
     case 0x20000000000000ULL:
         u64("CapturedMemory"); u64("ResourceDataDescriptorOffset"); r.end(); break;
     case 0x26000000000000ULL:

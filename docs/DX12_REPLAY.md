@@ -120,6 +120,28 @@ These are structural checks, not proof that recorded GPU commands have executed.
 
 ## Remaining milestones
 
+### Native device prerequisite (2026-10-18)
+
+`validate-frame <directory> --check-device --out <new-directory>` creates a
+native device in the CLI/Worker and records both the capture's SDK requirement
+and the actual runtime SDK version. This command still returns exit code 2 and
+`status: blocked`: creating a device is not frame replay validation.
+The preferred path uses `ID3D12SDKConfiguration1::CreateDeviceFactory`; the
+legacy fallback calls `SetSDKVersion` before device creation and reports failures.
+No GPA library is loaded by this code. The SDK comes from the capture directory.
+
+Targeted Worker checks on NVIDIA RTX 5090 Laptop succeeded for Talos (requested
+616, actual 616) and BF1 (requested 602, actual 616). Both captured devices require
+feature level 11_0. The newer actual version is reported rather than assumed to
+equal the directory name. Device argument readers were corroborated at playback
+RVAs `0x676b80` and `0x67a6c0`. Resource restoration remains a separate requirement.
+
+SDK behavior follows Microsoft's
+[SDK configuration API](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12sdkconfiguration-setsdkversion)
+and [independent-device specification](https://microsoft.github.io/DirectX-Specs/d3d/IndependentDevices.html).
+
+### Outstanding implementation
+
 1. Complete typed arguments, resource/object catalog and submission-instance
    identity; preserve source file/offset provenance.
 2. Restore initial resources, addresses, descriptors, PSOs and queue/fence
