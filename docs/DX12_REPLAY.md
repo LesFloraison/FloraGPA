@@ -3151,9 +3151,9 @@ index propagates the latest required CPU record through producer dependencies;
 an observed value whose transitive producer is not yet submitted is rejected
 before execution. A future GPU Signal separated from its Wait by a required
 host drain is also rejected rather than allowed to deadlock. Initialization
-remains serialized. Resource-state validation still follows CPU submission
-order; the future-producer fixture below does not certify resource transitions
-that need a different cross-queue order.
+remains serialized. At this milestone resource-state validation still followed
+CPU submission order; the later dependency-ready scheduling change below
+addresses the resulting future-producer transition failure.
 
 Cancellation/failure with outstanding frame work removes this isolated replay
 device before releasing in-flight objects. It does not count pending work as
@@ -3199,6 +3199,74 @@ Builds **243–244** cover workspace, CLI, Worker and focused tests. The existin
 ReplaySession preview-variable shadow warning is unrelated. GPU checks were
 serial; Talos's known historical-query failure was not rerun by this change.
 
+### Dependency-ready resource transitions and a measured Hellblade2 prefix
+
+The two-queue fixture now uses a real 4x4 RGBA8 render-target texture initially
+in COPY_DEST. Its producer transitions it to RENDER_TARGET. The consumer
+transitions RENDER_TARGET to COPY_SOURCE and back, and its command list is
+submitted twice. CPU records submit the first consumer before the producer,
+with a GPU Fence Wait requiring the producer's later Signal.
+
+The previous implementation fails this valid dependency order before reaching
+the boundary: `native-queue-state-repro1.txt` reports source record **11**,
+submission **18**, resource **60**, captured barrier state mismatch. Queue
+submission order and resource-state checks now both follow dependency readiness.
+An operation becomes available only at its captured CPU boundary and can issue
+only after its per-queue predecessor and sufficient Fence producer have issued.
+Native GPU Wait still enforces GPU completion; readiness does not CPU-wait for
+the producer to finish. Recordings, generations and execution IDs are unchanged.
+Host mutations cannot pass deferred operations, so delayed consumers cannot
+silently acquire later descriptors or mapped contents.
+
+The graph retains at most two prerequisite record IDs per queue operation.
+The ready set selects the earliest available record and propagates satisfaction
+through successors without repeatedly scanning blocked operations. Reports
+separate issued, deferred and pending queue operations from GPU submission
+completion counts, and retain the first 128 issued-record/CPU-boundary pairs.
+Both identities remain decimal strings.
+
+`native-queue-state1.{txt,json}`: **4 passed**, **714 ms**, including setup/cleanup.
+The native issue order is **19, 20, 16, 18, 22**: producer submission, Signal,
+consumer Wait, consumer submission and its repeated instance. Two operations
+were deferred; all three submissions completed, with zero D3D12 errors. The
+cancellation pass stops after issuing the producer and retains **1** submitted
+but unconfirmed GPU batch plus **2** deferred queue operations. The isolated
+device is aborted and a fresh-device retry succeeds. CPU tests also retain
+transitive Fence-observation, cycle, missing-producer and prefix checks.
+
+One real GPU run checks the scheduler and deferred completion calibration on a
+Hellblade2 cross-queue prefix, not another complete-frame replay:
+`hellblade-queue-performance1/report.json`. Execution **16641**, source
+**585376**, is `Dispatch(17,1,1)` on compute queue **2131165364544**, list
+**2149339111872**, generation **2**, ordinal **1**, submission **594640**.
+The prefix completes **27** submissions / **112** queue operations with zero
+pending operations and zero D3D12 errors. It contains four Signal-dependent
+GPU Waits. Its producers already precede consumers in CPU order, so no source
+operation is deferred in this real sample prefix.
+
+The selected Dispatch's native timestamps are **1792366468334118240** and
+**1792366468334125760**, frequency **1,000,000,000 Hz**, duration **7.52 us**.
+The timeline has **72** measured/calibrated list intervals: **69** on the direct
+queue and **3** on the compute queue. `schedule-validation.json` checks all
+four producer-last-list / consumer-first-list brackets: positive gaps of about
+**27.0–40.5 ms**, greater than their reported calibration drift/call envelopes.
+No cross-queue timestamp interval intersection was observed. These are replay
+completion brackets from one instrumented sample; they do not establish
+original application overlap, GPU wait duration or stable performance.
+
+Compute-list pipeline statistics remain unavailable; the supported query table
+in Microsoft's [Counters and Queries specification](https://microsoft.github.io/DirectX-Specs/d3d/CountersAndQueries.html)
+restricts this query to direct lists. No invocation count or hardware counter
+was substituted. No texture was requested in this timing run, so it does not
+add image-fidelity evidence. Builds **245–247** cover the fixture reproduction,
+fix, workspace, CLI and Worker. Only the fixture and selected Hellblade2 prefix
+used the GPU; BF1/Talos were not replayed for this change.
+
+Still incomplete: general memory/alias hazards without sufficient captured
+ordering, arbitrary Win32 event semantics, serialized initialization, and
+selected consumers whose required producer lies beyond the inspected CPU
+prefix. Those cases are not certified by this transition fixture or timeline.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3211,7 +3279,7 @@ serial; Talos's known historical-query failure was not rerun by this change.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; byte-preserving MS/PS import creates a PSO; changed shader execution, full performance and experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

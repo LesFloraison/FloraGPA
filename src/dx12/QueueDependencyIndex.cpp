@@ -16,6 +16,7 @@ struct Node {
     std::vector<size_t> successors;
     size_t incoming{};
     bool externalBlock{};
+    std::array<uint64_t, 2> predecessors{};
 };
 struct Fence {
     uint64_t creation{}, initial{};
@@ -86,6 +87,7 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
             const auto n = nodes.size();
             nodes.push_back(std::move(node));
             if (const auto prior = previous.find(queue); prior != previous.end()) {
+                nodes[n].predecessors[0] = nodes[prior->second].record;
                 nodes[prior->second].successors.push_back(n);
                 ++nodes[n].incoming;
             }
@@ -174,6 +176,7 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
                     else
                         ++futureCount;
                     nodes[*producer].successors.push_back(n);
+                    node.predecessors[1] = source.record;
                     ++node.incoming;
                 }
             }
@@ -213,6 +216,9 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
         return reached;
     };
     const auto acyclic = visit(false), resolved = visit(true);
+    for (const auto &node : nodes)
+        if (node.record > initializationCount_)
+            frameOperations_.push_back({node.record, node.predecessors});
     for (const auto &[object, fence] : fences) {
         FenceSources sources{fence.creation, fence.initial, fence.ambiguous};
         for (const auto n : fence.signals)

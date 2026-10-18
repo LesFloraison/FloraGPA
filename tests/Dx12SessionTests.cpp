@@ -123,6 +123,19 @@ class Dx12SessionTests : public QObject {
         dword(bytes, 0);
         output(bytes, __uuidof(ID3D12Fence), fence);
         packet(0x127930cf4f3a0ULL, bytes);
+        const uint64_t texture = 60;
+        bytes.clear(); qword(bytes, 1); bytes.append(char(1));
+        D3D12_HEAP_PROPERTIES properties{}; properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+        properties.CreationNodeMask = properties.VisibleNodeMask = 1;
+        bytes.append(reinterpret_cast<const char *>(&properties), sizeof(properties));
+        dword(bytes, 0); bytes.append(char(1));
+        D3D12_RESOURCE_DESC description{}; description.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        description.Width = description.Height = 4; description.DepthOrArraySize = description.MipLevels = 1;
+        description.Format = DXGI_FORMAT_R8G8B8A8_UNORM; description.SampleDesc.Count = 1;
+        description.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+        bytes.append(reinterpret_cast<const char *>(&description), sizeof(description));
+        dword(bytes, D3D12_RESOURCE_STATE_COPY_DEST); bytes.append(char(0));
+        output(bytes, __uuidof(ID3D12Resource), texture); packet(0x12793f58d8f79ULL, bytes);
         const auto list = [&](uint64_t object, bool creation = false) {
             QByteArray b;
             if (creation) {
@@ -142,8 +155,20 @@ class Dx12SessionTests : public QObject {
             }
             b.clear();
             qword(b, object);
-            dword(b, 0);
-            b.append(char(0));
+            const auto barriers = object == 51 ? 2U : object == 52 ? 1U : 0U;
+            dword(b, barriers); b.append(char(barriers != 0));
+            if (barriers) {
+                qword(b, barriers);
+                const auto transition = [&](D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
+                    dword(b, D3D12_RESOURCE_BARRIER_TYPE_TRANSITION); dword(b, 0); qword(b, texture);
+                    dword(b, 0); dword(b, before); dword(b, after); dword(b, 0);
+                };
+                if (object == 52) transition(D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+                else {
+                    transition(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+                    transition(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+                }
+            }
             packet(0x1ae3c24e5dabeULL, b);
             b.clear();
             qword(b, object);
@@ -187,18 +212,23 @@ class Dx12SessionTests : public QObject {
         list(51);
         list(52);
         sync(true, consumer);
+        const auto waitRecord = record;
         bytes.clear();
         qword(bytes, fence);
         qword(bytes, 0);
         packet(0x11469e993999dULL, bytes);
         submit(consumer, 51);
+        const auto consumerRecord = record;
         submit(producer, 52);
+        const auto producerRecord = record;
         sync(false, producer);
+        const auto signalRecord = record;
         bytes.clear();
         qword(bytes, fence);
         qword(bytes, 1);
         packet(0x11469e993999dULL, bytes);
         submit(consumer, 51);
+        const auto repeatedRecord = record;
         write(path + "/thread-7-0", packets);
         dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
         QTemporaryDir conflicting;
@@ -222,8 +252,9 @@ class Dx12SessionTests : public QObject {
         write(conflictPath + "/thread-7-0", packets);
         dx12::StreamDirectory conflictDirectory(std::filesystem::path(conflictPath.toStdWString()));
         Json evidence = Json::array();
-        // The old per-submission CPU drain cannot reach the later producer.
-        // The cancellation pass stops while the consumer is waiting for it.
+        // CPU-order state validation observes COPY_DEST at the consumer's
+        // RENDER_TARGET barrier. Dependency-ready validation must run the
+        // producer first. Cancellation stops after issuing that producer.
         for (const bool interrupt : {false, true, false}) {
             try {
                 dx12::NativeDevice device(sdk, true);
@@ -254,6 +285,7 @@ class Dx12SessionTests : public QObject {
                     QCOMPARE(schedule.at("queued_submissions"), Json("1"));
                     QCOMPARE(schedule.at("completed_submissions"), Json("0"));
                     QCOMPARE(schedule.at("pending_submissions"), Json("1"));
+                    QCOMPARE(schedule.at("pending_queue_operations"), Json("2"));
                     QVERIFY(!report.at("execution_boundary_reached").get<bool>());
                     QVERIFY(FAILED(device.device()->GetDeviceRemovedReason()));
                     evidence.push_back(report);
@@ -267,6 +299,14 @@ class Dx12SessionTests : public QObject {
                     QCOMPARE(schedule.at("maximum_host_pending_submissions"), Json("3"));
                     QCOMPARE(schedule.at("host_drains"), Json("1"));
                     QCOMPARE(schedule.at("fence_observations"), Json("2"));
+                    QCOMPARE(schedule.at("deferred_queue_operations"), Json("2"));
+                    QCOMPARE(schedule.at("pending_queue_operations"), Json("0"));
+                    const auto &issued = schedule.at("first_issued_queue_operations");
+                    QCOMPARE(issued.size(), size_t(5));
+                    const std::array<uint64_t, 5> expected{producerRecord, signalRecord, waitRecord,
+                                                          consumerRecord, repeatedRecord};
+                    for (size_t i = 0; i < expected.size(); ++i)
+                        QCOMPARE(issued[i].at("record"), Json(std::to_string(expected[i])));
                     QCOMPARE(schedule.at("dependencies").at("later_signal_waits"), Json("1"));
                     QVERIFY(!schedule.at("aborted_device").get<bool>());
                     QVERIFY(report.at("execution_boundary_reached").get<bool>());
