@@ -59,6 +59,33 @@ class RdcTests : public QObject {
             indexDx12RdcEvents({node(1, marker("18446744073709551616", "19", "30", "DrawInstanced"), 0x40)},
                                Json::object()));
     }
+    void dx12IndirectActions() {
+        const auto marker = [](unsigned execution) {
+            return "Flora DX12 execution " + std::to_string(execution) +
+                   " record 265648 submission 364657 queue 861708976 list 10653671952 generation 1 ordinal "
+                   "59: ID3D12GraphicsCommandListExecuteIndirect";
+        };
+        Json native = Json::object();
+        auto wrapper = [&](unsigned id, unsigned flags, Json children = Json::array()) {
+            native[std::to_string(id)] = {{"name", "ID3D12GraphicsCommandList::ExecuteIndirect"}};
+            return node(id, "ExecuteIndirect", flags, children, {{{"eventId", id}}});
+        };
+        // The real BF1 single-Dispatch expansion and two boundary cases: no
+        // generated work, and multiple Draws that must not collapse to one EID.
+        const auto roots = Json::array(
+            {node(1, marker(35808), 0x40, {wrapper(2, 0x40, {node(3, "Dispatch", 4)}), wrapper(4, 0x80)}),
+             node(5, marker(35814), 0x40, {wrapper(6, 0x40), wrapper(7, 0x80)}),
+             node(8, marker(35834), 0x40,
+                  {wrapper(9, 0x40, {node(10, "Draw", 2), node(11, "Draw", 2)}), wrapper(12, 0x80)})});
+        const auto result = indexDx12RdcEvents(roots, native);
+        QCOMPARE(result["execution_map"], Json({{"35808", 3}}));
+        QCOMPARE(result["execution_commands"]["35808"]["api_event_ids"], Json::array({2, 4}));
+        QCOMPARE(result["execution_commands"]["35814"]["status"], Json("unrepresented"));
+        QVERIFY(!result["execution_commands"]["35834"]["selectable"].get<bool>());
+        QCOMPARE(rdcProvenance(11, result["reverse"])["execution"], Json("35834"));
+        for (const auto id : {2u, 4u, 6u, 7u, 9u, 12u})
+            QVERIFY(!result["reverse"].contains(std::to_string(id)));
+    }
     void commandProvenance() {
         auto roots = Json::array(
             {node(1, "GPA 20: Draw", 0x40, {node(2, "", 2)}), node(3, "helper", 0x400),

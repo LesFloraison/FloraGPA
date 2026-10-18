@@ -210,7 +210,11 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
                     if (id > current->marker && native != nativeEvents.end() &&
                         native->at("name").get<std::string>().ends_with("::" + current->method)) {
                         current->api.insert(id);
-                        current->events.insert(id);
+                        // ExecuteIndirect has API begin/end wrappers as well as
+                        // generated Draw/Dispatch actions. Only the latter are
+                        // executable selections; preserve the wrappers separately.
+                        if (current->method != "ExecuteIndirect")
+                            current->events.insert(id);
                     }
                 }
                 if (flags & (draw | dispatch | clear | copy | resolve))

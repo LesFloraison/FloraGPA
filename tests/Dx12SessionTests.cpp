@@ -8,6 +8,7 @@
 #include "dx12/NativeResources.h"
 #include "dx12/TileRecipes.h"
 #include "dx12/NativeReplay.h"
+#include "dx12/NativeCommands.h"
 #include "dx12/AddressIndex.h"
 #include "dx12/DescriptorRecipes.h"
 #include "dx12/NativeDescriptors.h"
@@ -229,6 +230,158 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()),pixels.sizeInBytes()),QCryptographicHash::Sha256).toHex(),
             QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
         QVERIFY(window.findChild<QComboBox *>("outputTarget")->isEnabled()); QVERIFY(!sub->isVisible());
+    }
+    void indirectSignatureRecipes() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for BF1 command signature records");
+        dx12::StreamDirectory directory(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        const std::array<std::tuple<size_t, UINT, D3D12_INDIRECT_ARGUMENT_TYPE>, 3> cases{
+            {{15483, 12, D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH},
+             {15525, 16, D3D12_INDIRECT_ARGUMENT_TYPE_DRAW},
+             {15543, 20, D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED}}};
+        for (const auto &[record, stride, type] : cases) {
+            const auto bytes = directory.payload(directory.packets()[record - 1]);
+            const auto recipe = dx12::decodeCommandSignature(bytes);
+            QCOMPARE(recipe.byteStride, stride);
+            QCOMPARE(recipe.arguments.size(), size_t(1));
+            QCOMPARE(recipe.arguments[0].Type, type);
+            QCOMPARE(recipe.rootSignature, 0ULL);
+            QCOMPARE(recipe.nodeMask, 1U);
+            QVERIFY(recipe.object);
+            QCOMPARE(recipe.result, S_OK);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     dx12::decodeCommandSignature(bytes.first(bytes.size() - 1)));
+            auto invalid = std::vector<uint8_t>(bytes.begin(), bytes.end());
+            const UINT wrong = 2;
+            memcpy(invalid.data() + 13, &wrong, 4);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeCommandSignature(invalid));
+        }
+    }
+    void forwardConsumedViews() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for the native descriptor fixture device");
+        dx12::StreamDirectory original(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(original, true);
+        for (bool ambiguous : {false, true}) {
+            QTemporaryDir temp;
+            const auto path = fixture(temp);
+            QByteArray packets;
+            auto packet = [&](uint64_t type, const QByteArray &body) {
+                qword(packets, type);
+                qword(packets, 0);
+                qword(packets, 0);
+                qword(packets, body.size());
+                packets += body;
+            };
+            QByteArray increment;
+            qword(increment, 1);
+            dword(increment, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+            dword(increment, 32);
+            packet(0x127932ffcb166ULL, increment);
+            QByteArray heap;
+            qword(heap, 1);
+            heap.append(char(1));
+            const D3D12_DESCRIPTOR_HEAP_DESC description{D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 4,
+                                                         D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0};
+            heap.append(reinterpret_cast<const char *>(&description), sizeof(description));
+            const auto iid = __uuidof(ID3D12DescriptorHeap);
+            heap.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+            heap.append(char(1));
+            qword(heap, 1);
+            qword(heap, 2);
+            dword(heap, S_OK);
+            packet(0x127932eb2eb14ULL, heap);
+            QByteArray start;
+            qword(start, 2);
+            start.append(char(1));
+            qword(start, 0x1000);
+            packet(0x15a3eb3b8e877ULL, start);
+            packet(0x1ae3c7884148bULL, {}); // Boundary only; not submitted in this descriptor fixture.
+            for (unsigned copy = 0; copy < 2; ++copy) {
+                QByteArray view;
+                qword(view, 1);
+                qword(view, 0);
+                view.append(char(1));
+                D3D12_RENDER_TARGET_VIEW_DESC desc{};
+                desc.Format = ambiguous && copy ? DXGI_FORMAT_R16_FLOAT : DXGI_FORMAT_R32_FLOAT;
+                desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+                view.append(reinterpret_cast<const char *>(&desc), sizeof(desc));
+                qword(view, 0x1000);
+                packet(0x1279306e469b5ULL, view);
+            }
+            QFile file(path + "/metadata");
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            auto metadata = file.readAll();
+            file.close();
+            qword(metadata, 3);
+            qword(metadata, 0);
+            qword(metadata, 0);
+            qword(metadata, 0x288 + 40 + packets.size());
+            dword(metadata, 0);
+            dword(metadata, 0);
+            metadata += packets;
+            write(path + "/metadata", metadata);
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            dx12::NativeResources resources(device, directory, 1024 * 1024);
+            dx12::NativeDescriptors descriptors(device, directory, resources);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     descriptors.consumedCpu(0x1020, 4, D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+            if (ambiguous) {
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         descriptors.consumedCpu(0x1000, 4, D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+                QCOMPARE(descriptors.information().at("forward_cpu_view_restores"), nlohmann::json("0"));
+            } else {
+                // A frame reference cannot trigger keyframe forward restoration.
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         descriptors.consumedCpu(0x1000, 7, D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+                QVERIFY(descriptors.consumedCpu(0x1000, 4, D3D12_DESCRIPTOR_HEAP_TYPE_RTV).ptr);
+                QCOMPARE(descriptors.information().at("forward_cpu_view_restores"), nlohmann::json("1"));
+                QVERIFY(descriptors.consumedCpu(0x1000, 4, D3D12_DESCRIPTOR_HEAP_TYPE_RTV).ptr);
+                QCOMPARE(descriptors.information().at("forward_cpu_view_restores"), nlohmann::json("1"));
+            }
+        }
+        QCOMPARE(device.information().at("validation_error_count"), nlohmann::json("0"));
+    }
+    void uavClearReplay() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for the BF1 UAV clear");
+        dx12::StreamDirectory directory(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        uint64_t creation{};
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &packet = directory.packets()[i];
+            if (!dx12::isResourceRecipe(packet.type))
+                continue;
+            const auto recipe = dx12::decodeResourceRecipe(packet.type, directory.payload(packet));
+            if (recipe.object == 0x20664cf30ULL) {
+                QVERIFY(!creation);
+                creation = i + 1;
+                QCOMPARE(recipe.description.Dimension, D3D12_RESOURCE_DIMENSION_BUFFER);
+                QVERIFY(recipe.description.Width >= 4700 * 4);
+            }
+        }
+        QVERIFY(creation);
+        dx12::NativeDevice device(directory, true);
+        dx12::NativeReplay replay(device, directory, 4ULL * 1024 * 1024 * 1024);
+        replay.prepareExecution(35703, true);
+        replay.initializeTransfers();
+        replay.replayTo(35703, true);
+        const auto result = replay.inspectBuffer(creation, 0, 4700 * 4);
+        QByteArray expected;
+        const float one = 1.0f;
+        for (unsigned i = 0; i < 4700; ++i)
+            expected.append(reinterpret_cast<const char *>(&one), 4);
+        QCOMPARE(result.at("sha256"),
+                 nlohmann::json(
+                     QCryptographicHash::hash(expected, QCryptographicHash::Sha256).toHex().toStdString()));
+        QCOMPARE(result.at("execution"), nlohmann::json("35703"));
+        qInfo() << "BF1 cleared float buffer" << QString::fromStdString(result.dump());
+        QCOMPARE(device.information().at("validation_error_count"), nlohmann::json("0"));
     }
     void keyframeRecordingReplay() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -485,6 +638,41 @@ class Dx12SessionTests : public QObject {
             std::runtime_error,
             wide.finish(wide.requestId(),
                         {{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740992"}}));
+    }
+    void computeInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_CS_TRACE");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_CS_TRACE to the BF1 first Dispatch trace");
+        QFile input(path);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(input.readAll().toStdString());
+        ReplayDebugView view("cs");
+        view.setContext("bf1-compute", 21895, true);
+        QCOMPARE(view.request().at("execution"), nlohmann::json("21895"));
+        QCOMPARE(view.request().at("group"), nlohmann::json::array({0, 0, 0}));
+        QCOMPARE(view.request().at("thread"), nlohmann::json::array({0, 0, 0}));
+        QVERIFY(view.finish(view.requestId(), result));
+        QCOMPARE(view.model()->size(), size_t(925));
+        QVERIFY(view.model()->files().empty());
+        view.model()->addWatch("g_params.g_inputBlocksX");
+        view.model()->addWatch("g_params.g_inputBlocksY");
+        for (const auto &watch : view.model()->watchResults()) {
+            QCOMPARE(watch.at("status"), nlohmann::json("available"));
+            QCOMPARE(watch.at("values"), nlohmann::json::array({64}));
+        }
+        view.findChild<QLineEdit *>("debugInstruction")->setText("155");
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        view.findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(155));
+        view.findChild<QAction *>("debugStep")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(156));
+        const auto serial = view.requestId();
+        view.findChild<QLineEdit *>("debugThread")->setText("1 2 0");
+        QVERIFY(!view.model());
+        QVERIFY(!view.finish(serial, result));
+        QCOMPARE(view.request().at("thread"), nlohmann::json::array({1, 2, 0}));
     }
     void instructionDebugWithoutSources() {
         const auto path = qEnvironmentVariable("FLORA_DX12_TRACE");

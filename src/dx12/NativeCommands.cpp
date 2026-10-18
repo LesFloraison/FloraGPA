@@ -21,34 +21,135 @@ template<class T> std::vector<T> array(Reader &r, UINT count) {
     require(result.size() == count, "Missing command array"); return result;
 }
 }
+CommandSignatureRecipe decodeCommandSignature(format::Bytes bytes) {
+    Reader r(bytes);
+    CommandSignatureRecipe recipe;
+    recipe.device = r.read<uint64_t>();
+    require(r.flag(), "Missing command signature description");
+    recipe.byteStride = r.read<UINT>();
+    const auto count = r.read<UINT>();
+    static_assert(sizeof(D3D12_INDIRECT_ARGUMENT_DESC) == 16);
+    recipe.arguments = array<D3D12_INDIRECT_ARGUMENT_DESC>(r, count);
+    recipe.nodeMask = r.read<UINT>();
+    recipe.rootSignature = r.read<uint64_t>();
+    require(r.read<GUID>() == __uuidof(ID3D12CommandSignature), "Unsupported command signature interface");
+    if (r.flag()) {
+        require(r.read<uint64_t>() == 1, "Invalid command signature output");
+        recipe.object = r.read<uint64_t>();
+    }
+    recipe.result = r.read<HRESULT>();
+    r.end();
+    return recipe;
+}
 struct NativeCommands::Impl {
-    NativeDevice &device; const StreamDirectory &directory; NativeResources &resources; NativeDescriptors &descriptors;
+    NativeDevice &device;
+    const StreamDirectory &directory;
+    NativeResources &resources;
+    NativeDescriptors &descriptors;
     NativePipelines pipelines;
     struct Query {
-        uint64_t record{}, object{}; D3D12_QUERY_HEAP_DESC desc{}; ComPtr<ID3D12QueryHeap> native;
+        uint64_t record{}, object{};
+        D3D12_QUERY_HEAP_DESC desc{};
+        ComPtr<ID3D12QueryHeap> native;
         std::map<UINT, D3D12_QUERY_TYPE> active, completed;
     };
     std::map<uint64_t, std::vector<Query>> queries;
-    Impl(NativeDevice &d, const StreamDirectory &s, NativeResources &r, NativeDescriptors &h, const CancelCheck &c)
+    struct Signature {
+        uint64_t record{};
+        CommandSignatureRecipe recipe;
+        ComPtr<ID3D12CommandSignature> native;
+    };
+    std::map<uint64_t, std::vector<Signature>> signatures;
+    Impl(NativeDevice &d, const StreamDirectory &s, NativeResources &r, NativeDescriptors &h,
+         const CancelCheck &c)
         : device(d), directory(s), resources(r), descriptors(h), pipelines(d, s, c) {
         for (size_t i = 0; i < s.packets().size(); ++i) {
-            if (i % 1024 == 0) checkCancellation(c); const auto &p = s.packets()[i]; if (p.type != 0x127937e9603edULL) continue;
-            Reader reader(s.payload(p)); reader.skip(8); require(reader.flag(), "Missing query heap description"); Query query; query.record = i + 1;
-            query.desc = reader.read<D3D12_QUERY_HEAP_DESC>(); require(reader.read<GUID>() == __uuidof(ID3D12QueryHeap), "Unsupported query heap interface");
-            if (reader.flag()) { require(reader.read<uint64_t>() == 1, "Invalid query heap output"); query.object = reader.read<uint64_t>(); }
-            const auto hr = reader.read<HRESULT>(); reader.end(); if (SUCCEEDED(hr) && query.object) queries[query.object].push_back(std::move(query));
+            if (i % 1024 == 0)
+                checkCancellation(c);
+            const auto &p = s.packets()[i];
+            if (p.type == 0x12793fa7d46faULL) {
+                auto recipe = decodeCommandSignature(s.payload(p));
+                if (SUCCEEDED(recipe.result) && recipe.object) {
+                    const auto object = recipe.object;
+                    signatures[object].push_back({i + 1, std::move(recipe), {}});
+                }
+                continue;
+            }
+            if (p.type != 0x127937e9603edULL)
+                continue;
+            Reader reader(s.payload(p));
+            reader.skip(8);
+            require(reader.flag(), "Missing query heap description");
+            Query query;
+            query.record = i + 1;
+            query.desc = reader.read<D3D12_QUERY_HEAP_DESC>();
+            require(reader.read<GUID>() == __uuidof(ID3D12QueryHeap), "Unsupported query heap interface");
+            if (reader.flag()) {
+                require(reader.read<uint64_t>() == 1, "Invalid query heap output");
+                query.object = reader.read<uint64_t>();
+            }
+            const auto hr = reader.read<HRESULT>();
+            reader.end();
+            if (SUCCEEDED(hr) && query.object)
+                queries[query.object].push_back(std::move(query));
         }
     }
+    Signature &signature(uint64_t object, uint64_t at) {
+        const auto it = signatures.find(object);
+        require(it != signatures.end(), "Missing command signature recipe");
+        Signature *selected{};
+        for (auto &entry : it->second)
+            if (entry.record <= at)
+                selected = &entry;
+        require(selected, "Command signature is not defined at this boundary");
+        const auto &recipe = selected->recipe;
+        require(recipe.arguments.size() == 1 && !recipe.rootSignature,
+                "Indirect root arguments and GPU address patching are not implemented");
+        const auto type = recipe.arguments.front().Type;
+        const UINT minimum =
+            type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW           ? sizeof(D3D12_DRAW_ARGUMENTS)
+            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED ? sizeof(D3D12_DRAW_INDEXED_ARGUMENTS)
+            : type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH     ? sizeof(D3D12_DISPATCH_ARGUMENTS)
+                                                                : 0;
+        require(minimum, "Unsupported indirect argument type; address-bearing arguments require patching");
+        require(recipe.byteStride >= minimum && recipe.byteStride % 4 == 0,
+                "Invalid indirect argument stride");
+        if (!selected->native) {
+            const D3D12_COMMAND_SIGNATURE_DESC desc{recipe.byteStride, UINT(recipe.arguments.size()),
+                                                    recipe.arguments.data(), recipe.nodeMask};
+            check(device.device()->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&selected->native)),
+                  "Create captured command signature");
+        }
+        return *selected;
+    }
     Query &query(uint64_t object, uint64_t at, UINT first, UINT count) {
-        auto it = queries.find(object); require(it != queries.end(), "Missing query heap recipe"); Query *selected{};
-        for (auto &q : it->second) if (q.record <= at) selected = &q;
+        auto it = queries.find(object);
+        require(it != queries.end(), "Missing query heap recipe");
+        Query *selected{};
+        for (auto &q : it->second)
+            if (q.record <= at)
+                selected = &q;
+        // Keyframe serialization can describe a heap after a list that already
+        // references it. Accept only a unique keyframe lifetime, as for resources;
+        // a later frame creation must never satisfy an earlier reference.
+        if (!selected && at <= directory.initializationCount()) {
+            for (auto &q : it->second)
+                if (q.record <= directory.initializationCount()) {
+                    require(!selected, "Ambiguous initialization query heap lifetime");
+                    selected = &q;
+                }
+        }
         require(selected, "Query heap is not defined at this boundary");
-        require(first <= selected->desc.Count && count <= selected->desc.Count - first, "Query range exceeds its heap");
-        if (!selected->native) check(device.device()->CreateQueryHeap(&selected->desc, IID_PPV_ARGS(&selected->native)), "Create captured query heap");
+        require(first <= selected->desc.Count && count <= selected->desc.Count - first,
+                "Query range exceeds its heap");
+        if (!selected->native)
+            check(device.device()->CreateQueryHeap(&selected->desc, IID_PPV_ARGS(&selected->native)),
+                  "Create captured query heap");
         return *selected;
     }
 };
-NativeCommands::NativeCommands(NativeDevice &d, const StreamDirectory &s, NativeResources &r, NativeDescriptors &h, const CancelCheck &c)
+NativeCommands::NativeCommands(NativeDevice &d, const StreamDirectory &s, NativeResources &r,
+                               NativeDescriptors &h, const CancelCheck &c)
     : impl_(std::make_unique<Impl>(d, s, r, h, c)) {}
 NativeCommands::~NativeCommands() = default;
 NativePipelines &NativeCommands::pipelines() { return impl_->pipelines; }
@@ -56,6 +157,58 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
     auto &s = *impl_; const auto &packet = s.directory.packets().at(size_t(id - 1)); Reader r(s.directory.payload(packet));
     require(r.read<uint64_t>() == capturedList, "Graphics command belongs to another list");
     switch (packet.type) {
+    case 0x1ae3ccddf9f8cULL: {
+        const auto object = r.read<uint64_t>();
+        const auto maximum = r.read<UINT>();
+        const auto arguments = r.read<uint64_t>(), offset = r.read<uint64_t>(), counter = r.read<uint64_t>(),
+                   counterOffset = r.read<uint64_t>();
+        r.end();
+        auto &signature = s.signature(object, id);
+        auto buffer = s.resources.resource(arguments, id);
+        const auto desc = buffer->GetDesc();
+        require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && offset % 4 == 0 &&
+                    offset <= desc.Width &&
+                    uint64_t(maximum) * signature.recipe.byteStride <= desc.Width - offset,
+                "Indirect arguments exceed the buffer or are misaligned");
+        auto countBuffer = counter ? s.resources.resource(counter, id) : nullptr;
+        if (countBuffer) {
+            const auto countDesc = countBuffer->GetDesc();
+            require(countDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && counterOffset % 4 == 0 &&
+                        counterOffset <= countDesc.Width && 4 <= countDesc.Width - counterOffset,
+                    "Indirect count exceeds the buffer or is misaligned");
+        }
+        executionChecks.push_back([arguments, counter, id, &resources = s.resources] {
+            resources.requireState(arguments, id, 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+            if (counter)
+                resources.requireState(counter, id, 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+        });
+        list->ExecuteIndirect(signature.native.Get(), maximum, buffer, offset, countBuffer, counterOffset);
+        break;
+    }
+    case 0x1ae3c56ea49c1ULL:
+    case 0x1ae3cdecc319dULL: {
+        const auto gpu = r.read<uint64_t>(), cpu = r.read<uint64_t>(), object = r.read<uint64_t>();
+        require(r.flag(), "Missing UAV clear values");
+        const auto values = r.take(16);
+        const auto count = r.read<UINT>();
+        auto rects = array<D3D12_RECT>(r, count);
+        r.end();
+        const auto gpuHandle = s.descriptors.gpu(gpu, id);
+        const auto cpuHandle = s.descriptors.consumedCpu(cpu, id, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        auto resource = s.resources.resource(object, id);
+        require((resource->GetDesc().Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) != 0,
+                "UAV clear references a resource without UAV access");
+        if (packet.type == 0x1ae3c56ea49c1ULL) {
+            float data[4];
+            memcpy(data, values.data(), 16);
+            list->ClearUnorderedAccessViewFloat(gpuHandle, cpuHandle, resource, data, count, rects.data());
+        } else {
+            UINT data[4];
+            memcpy(data, values.data(), 16);
+            list->ClearUnorderedAccessViewUint(gpuHandle, cpuHandle, resource, data, count, rects.data());
+        }
+        break;
+    }
     case 0x1ae3c190d8b1eULL: {
         const auto vertices = r.read<UINT>(), instances = r.read<UINT>(), start = r.read<UINT>(), instance = r.read<UINT>(); r.end();
         list->DrawInstanced(vertices, instances, start, instance); break;
@@ -124,20 +277,20 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
         // The wire array has its own length: a contiguous binding carries one handle.
         std::vector<uint64_t> handles; if (r.flag()) { const auto size = r.read<uint64_t>(); require(size <= 8, "Invalid render target handle array"); for (uint64_t i = 0; i < size; ++i) handles.push_back(r.read<uint64_t>()); }
         const auto contiguous = r.read<BOOL>(); std::optional<D3D12_CPU_DESCRIPTOR_HANDLE> depth;
-        if (r.flag()) depth = s.descriptors.cpu(r.read<uint64_t>(), id, D3D12_DESCRIPTOR_HEAP_TYPE_DSV); r.end();
+        if (r.flag()) depth = s.descriptors.consumedCpu(r.read<uint64_t>(), id, D3D12_DESCRIPTOR_HEAP_TYPE_DSV); r.end();
         require(handles.size() == (contiguous && count ? 1 : count), "Render target handle count mismatch");
-        std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> native; for (auto h : handles) native.push_back(s.descriptors.cpu(h, id, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, contiguous ? count : 1));
+        std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> native; for (auto h : handles) native.push_back(s.descriptors.consumedCpu(h, id, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, contiguous ? count : 1));
         list->OMSetRenderTargets(count, native.data(), contiguous, depth ? &*depth : nullptr); break;
     }
     case 0x1ae3c5e296342ULL: {
         const auto handle = r.read<uint64_t>(); const auto flags = r.read<D3D12_CLEAR_FLAGS>(); const auto depth = r.read<float>(); const auto stencil = r.read<UINT8>();
         const auto count = r.read<UINT>(); auto rects = array<D3D12_RECT>(r, count); r.end();
-        list->ClearDepthStencilView(s.descriptors.cpu(handle, id, D3D12_DESCRIPTOR_HEAP_TYPE_DSV), flags, depth, stencil, count, rects.data()); break;
+        list->ClearDepthStencilView(s.descriptors.consumedCpu(handle, id, D3D12_DESCRIPTOR_HEAP_TYPE_DSV), flags, depth, stencil, count, rects.data()); break;
     }
     case 0x1ae3cdc0903fcULL: {
         const auto handle = r.read<uint64_t>(); require(r.flag(), "Missing clear color"); float color[4]; const auto data = r.take(sizeof(color)); memcpy(color, data.data(), sizeof(color));
         const auto count = r.read<UINT>(); auto rects = array<D3D12_RECT>(r, count); r.end();
-        list->ClearRenderTargetView(s.descriptors.cpu(handle, id, D3D12_DESCRIPTOR_HEAP_TYPE_RTV), color, count, rects.data()); break;
+        list->ClearRenderTargetView(s.descriptors.consumedCpu(handle, id, D3D12_DESCRIPTOR_HEAP_TYPE_RTV), color, count, rects.data()); break;
     }
     case 0x1ae3ce6df7dc5ULL: {
         const auto object = r.read<uint64_t>(); std::optional<D3D12_DISCARD_REGION> region; std::vector<D3D12_RECT> rects;
@@ -145,7 +298,7 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
         r.end(); list->DiscardResource(s.resources.resource(object, id), region ? &*region : nullptr); break;
     }
     case 0x1ae3c48bf1cd1ULL: {
-        require(r.flag(), "Missing blend factor"); float factor[4]; const auto data = r.take(sizeof(factor)); memcpy(factor, data.data(), sizeof(factor)); r.end(); list->OMSetBlendFactor(factor); break;
+        const auto factor = array<float>(r, 4); r.end(); list->OMSetBlendFactor(factor.data()); break;
     }
     case 0x1ae3cd41bfa9cULL: { const auto stencil = r.read<UINT>(); r.end(); list->OMSetStencilRef(stencil); break; }
     case 0x1ae3c6601dd2cULL: case 0x1ae3c64a8e138ULL: {

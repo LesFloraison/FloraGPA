@@ -517,14 +517,72 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 if (p.type == 0x12548dab1bf2dULL) { check(nativeQueue->Signal(nativeFence, value), "Replay frame signal"); s.wait(nativeQueue); }
                 else { require(nativeFence->GetCompletedValue() >= value, "Frame wait requires an unscheduled producer"); check(nativeQueue->Wait(nativeFence, value), "Replay frame wait"); }
             } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
-            else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type)) {} // Validated indexed recipes, materialized on use.
+            else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
+                case 0x1ae3c09e0c150ULL: {
+                    Reader r(s.directory.payload(p));
+                    const auto object = r.read<uint64_t>();
+                    require(object != 0, "Null command-list interface query");
+                    (void)r.read<GUID>();
+                    uint64_t returned{};
+                    if (r.flag()) {
+                        require(r.read<uint64_t>() == 1, "Invalid command-list interface output");
+                        returned = r.read<uint64_t>();
+                    }
+                    const auto hr = r.read<HRESULT>();
+                    r.end();
+                    require((hr == E_NOINTERFACE && !returned) || (SUCCEEDED(hr) && returned == object),
+                            "Command-list interface query introduces an unresolved alias or failure");
+                    break;
+                }
+                case 0x1e65015a11fecULL: {
+                    Reader r(s.directory.payload(p));
+                    (void)s.resources.creationRecord(r.read<uint64_t>(), id);
+                    if (r.flag())
+                        (void)r.read<D3D12_RESOURCE_DESC>();
+                    r.end();
+                    break;
+                }
+                case 0x152c75a22c40dULL: {
+                    Reader r(s.directory.payload(p));
+                    require(r.read<uint64_t>() != 0, "Null device-child query");
+                    const auto device = output(r, __uuidof(ID3D12Device));
+                    bool known = false;
+                    for (const auto &[object, recipe] : s.queueRecipes) {
+                        Reader creator(
+                            s.directory.payload(s.directory.packets().at(size_t(recipe.record - 1))));
+                        known |= creator.read<uint64_t>() == device;
+                    }
+                    require(known, "Device-child query introduces an unresolved device alias");
+                    break;
+                }
+                case 0x1ea7e4eeffcebULL: {
+                    Reader r(s.directory.payload(p));
+                    require(r.read<uint64_t>() != 0, "Null command-list type query");
+                    require(r.read<UINT>() <= D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
+                            "Unknown captured command-list type");
+                    r.end();
+                    break;
+                }
+                case 0x1254841e17bd5ULL: {
+                    Reader r(s.directory.payload(p));
+                    require(s.queueRecipes.contains(r.read<uint64_t>()),
+                            "Timestamp query references an unknown queue");
+                    if (r.flag())
+                        (void)r.read<uint64_t>();
+                    check(r.read<HRESULT>(), "Captured queue timestamp frequency query");
+                    r.end();
+                    // This is a recorded CPU observation. Native measurements
+                    // must query the replay device's frequency independently.
+                    break;
+                }
                 case 0x114696360f841ULL:
                 case 0x11469e8691d1cULL:
                 case 0x18f056360f841ULL:
                 case 0x18f05e8691d1cULL:
                 case 0x129496360f841ULL:
                 case 0x12949e8691d1cULL:
+                case 0x12793e8691d1cULL:
                 case 0x1d532e8691d1cULL: {
                     Reader r(s.directory.payload(p));
                     require(r.read<uint64_t>() != 0, "Null captured COM reference");

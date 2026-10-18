@@ -1,5 +1,6 @@
 #include "NativeDescriptors.h"
 #include <wrl/client.h>
+#include <algorithm>
 #include <map>
 #include <unordered_map>
 #include <sstream>
@@ -26,11 +27,14 @@ struct NativeDescriptors::Impl {
         DescriptorHeapRecipe recipe; uint64_t cpu{}, gpu{}; UINT capturedIncrement{}, nativeIncrement{};
         ComPtr<ID3D12DescriptorHeap> native;
         std::unordered_map<UINT, Slot> slots;
+        std::unordered_map<UINT, std::vector<uint64_t>> keyframeViews;
     };
     std::map<uint64_t, Heap> heaps;
     std::map<uint64_t, std::vector<uint64_t>> objects;
     std::map<std::pair<uint64_t, UINT>, UINT> increments;
     uint64_t writes{}, copies{}, copiedSlots{};
+    uint64_t forwardViews{};
+    nlohmann::json forwardViewEvidence = nlohmann::json::array();
     Impl(NativeDevice &d, const StreamDirectory &s, NativeResources &r, CancelCheck c) : device(d), directory(s), resources(r), cancelled(std::move(c)) {}
     uint64_t creation(uint64_t object, uint64_t at) const {
         const auto it = objects.find(object); require(it != objects.end(), "Captured descriptor heap is missing");
@@ -80,6 +84,39 @@ NativeDescriptors::NativeDescriptors(NativeDevice &device, const StreamDirectory
         const uint64_t size = uint64_t(heap.capturedIncrement) * heap.recipe.description.NumDescriptors;
         require(size <= UINT64_MAX - heap.cpu && size <= UINT64_MAX - heap.gpu, "Captured descriptor heap address overflow");
     }
+    // Keyframe object traversal is not CPU chronology. A recorded list can
+    // consume an RTV/DSV/UAV whose unique snapshot is serialized later.
+    uint64_t indexedViews{};
+    for (size_t i = 0; i < directory.initializationCount(); ++i) {
+        if (i % 1024 == 0)
+            checkCancellation(cancelled);
+        const auto &p = directory.packets()[i];
+        const auto remember = [&](uint64_t handle, UINT count) {
+            const auto ref = resolve(handle, i + 1, false);
+            auto &heap = s.heaps.at(ref.creation);
+            if (heap.recipe.description.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE ||
+                ref.type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
+                return;
+            require(count <= heap.recipe.description.NumDescriptors - ref.index,
+                    "Keyframe view range exceeds its heap");
+            require(count <= 4ULL * 1024 * 1024 - indexedViews,
+                    "Keyframe CPU view provenance exceeds its entry limit");
+            indexedViews += count;
+            for (UINT n = 0; n < count; ++n) {
+                if (n % 1024 == 0)
+                    checkCancellation(cancelled);
+                heap.keyframeViews[ref.index + n].push_back(i + 1);
+            }
+        };
+        if (isDescriptorWrite(p.type)) {
+            const auto write = decodeDescriptorWrite(p.type, directory.payload(p));
+            remember(write.destination, 1);
+        } else if (p.type == 0x12793300ba04eULL || p.type == 0x1279345e6c880ULL) {
+            const auto copy = decodeDescriptorCopy(p.type, directory.payload(p));
+            for (size_t n = 0; n < copy.destinations.size(); ++n)
+                remember(copy.destinations[n], copy.destinationSizes[n]);
+        }
+    }
 }
 NativeDescriptors::~NativeDescriptors() = default;
 DescriptorReference NativeDescriptors::resolve(uint64_t handle, uint64_t at, bool gpu) const {
@@ -106,6 +143,61 @@ D3D12_GPU_DESCRIPTOR_HANDLE NativeDescriptors::gpu(uint64_t handle, uint64_t at)
     const auto ref = resolve(handle, at, true); auto &h = impl_->heaps.at(ref.creation);
     require((h.recipe.description.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE) != 0, "GPU descriptor reference needs a shader-visible heap");
     const auto native = impl_->native(ref.creation); return {native->GetGPUDescriptorHandleForHeapStart().ptr + uint64_t(ref.index) * h.nativeIncrement};
+}
+D3D12_CPU_DESCRIPTOR_HANDLE NativeDescriptors::consumedCpu(uint64_t handle, uint64_t at,
+                                                           D3D12_DESCRIPTOR_HEAP_TYPE type, UINT count) {
+    const auto native = cpu(handle, at, type, count);
+    const auto ref = resolve(handle, at, false);
+    auto &heap = impl_->heaps.at(ref.creation);
+    require(!(heap.recipe.description.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE),
+            "Consumed CPU view requires a non-shader-visible heap");
+    for (UINT i = 0; i < count; ++i) {
+        auto found = heap.slots.find(ref.index + i);
+        if (found == heap.slots.end() && at <= impl_->directory.initializationCount()) {
+            const auto writes = heap.keyframeViews.find(ref.index + i);
+            if (writes != heap.keyframeViews.end() && writes->second[0] > at) {
+                const auto record = writes->second[0];
+                const auto &packet = impl_->directory.packets().at(size_t(record - 1));
+                require(isDescriptorWrite(packet.type),
+                        "Forward CPU descriptor copy requires unresolved provenance");
+                const auto bytes = impl_->directory.payload(packet);
+                const auto view = decodeDescriptorWrite(packet.type, bytes);
+                const auto resource =
+                    view.resource ? impl_->resources.creationRecord(view.resource, record) : 0;
+                const auto counter = view.counter ? impl_->resources.creationRecord(view.counter, record) : 0;
+                // BF1 repeats identical descriptor snapshots in the keyframe.
+                // Equal bytes alone are insufficient when an object address is reused.
+                for (const auto other : writes->second) {
+                    const auto &candidate = impl_->directory.packets().at(size_t(other - 1));
+                    const auto data = impl_->directory.payload(candidate);
+                    require(packet.type == candidate.type && bytes.size() == data.size() &&
+                                std::equal(bytes.begin(), bytes.end(), data.begin()),
+                            "Ambiguous forward CPU descriptor contents");
+                    require((!view.resource ||
+                             impl_->resources.creationRecord(view.resource, other) == resource) &&
+                                (!view.counter ||
+                                 impl_->resources.creationRecord(view.counter, other) == counter),
+                            "Ambiguous forward CPU descriptor resource lifetime");
+                }
+                apply(record);
+                ++impl_->forwardViews;
+                if (impl_->forwardViewEvidence.size() < 32)
+                    impl_->forwardViewEvidence.push_back({{"use_record", std::to_string(at)},
+                                                          {"write_record", std::to_string(record)},
+                                                          {"heap_creation", std::to_string(ref.creation)},
+                                                          {"slot", ref.index + i}});
+                found = heap.slots.find(ref.index + i);
+            }
+        }
+        if (found == heap.slots.end() || !found->second.write)
+            throw std::runtime_error("CPU descriptor consumed at source record " + std::to_string(at) +
+                                     " has no recorded contents: heap creation " +
+                                     std::to_string(ref.creation) + " slot " + std::to_string(ref.index + i));
+        if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+            require(impl_->directory.packets().at(size_t(found->second.write - 1)).type == 0x12793e4a19efeULL,
+                    "UAV clear consumes a CPU descriptor of another type");
+    }
+    return native;
 }
 bool NativeDescriptors::apply(uint64_t record) {
     auto &s = *impl_; checkCancellation(s.cancelled); require(record && record <= s.directory.packets().size(), "Invalid descriptor record");
@@ -161,6 +253,7 @@ nlohmann::json NativeDescriptors::information() const {
     for (const auto &[id, h] : impl_->heaps) { native += bool(h.native); slots += h.slots.size(); if (h.native) descriptors += h.recipe.description.NumDescriptors; }
     return {{"native_heaps", native}, {"descriptor_capacity", std::to_string(descriptors)}, {"known_slots", std::to_string(slots)},
         {"write_calls", std::to_string(impl_->writes)}, {"copy_calls", std::to_string(impl_->copies)}, {"copied_slots", std::to_string(impl_->copiedSlots)},
+        {"forward_cpu_view_restores", std::to_string(impl_->forwardViews)}, {"forward_cpu_view_evidence", impl_->forwardViewEvidence},
         {"shader_access_verified", false}};
 }
 }

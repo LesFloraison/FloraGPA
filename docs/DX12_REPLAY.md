@@ -732,11 +732,89 @@ Targeted evidence on the real BF1 capture:
 
 The BF1 shader intentionally writes a buffer without producing a render target;
 this evidence is not a final-frame image or a comparison against original GPA.
-Complete BF1 replay and RenderDoc mapping of keyframe-recorded lists remain
-unverified. No Hellblade2 GPU replay was added for this change. Release CLI,
+At this checkpoint, complete BF1 replay and RenderDoc mapping of keyframe-recorded
+lists were still unverified; the next section records further progress.
+No Hellblade2 GPU replay was added for this change. Release CLI,
 Worker, GUI and the targeted test executable built successfully (`build69.log`,
 `build70.log`). Research inventories are in `bf1-frame-lists1`,
 `bf1-first-work.json` and `bf1-first-prefix-cpu.json`; they stay outside Git.
+
+### BF1 submitted work, indirect Dispatch and compute debugging
+
+The native backend now decodes command signatures and replays single-argument
+Draw, DrawIndexed and Dispatch signatures, including GPU-generated arguments and
+optional count buffers. Buffer ranges, alignment and indirect-argument state are
+checked. Root-argument and GPU-address-bearing signatures still fail explicitly;
+their address patching is unfinished. BF1's three signatures at records `15483`,
+`15525`, `15543` have strides 12/16/20 and null root signatures. This matches the
+[D3D12 indirect drawing contract](https://learn.microsoft.com/en-us/windows/win32/direct3d12/indirect-drawing).
+Float/uint UAV clears preserve captured handles, values and rectangles. Float
+clear has actual BF1 evidence below; uint clear and indirect Draw variants have
+not received separate GPU correctness checks.
+
+Two keyframe dependency problems were exposed by extending the submitted prefix:
+
+- Query heap `0x26ceed280` is used by BeginQuery at `265729`, before its unique
+  creation at `346334`. Only a unique keyframe lifetime may satisfy this forward
+  reference. Missing historical query values still fail before GPU execution.
+- RTV binding `16047` consumes heap creation `166996`, slot `2659`, before its
+  descriptor write `16069`. The keyframe repeats that exact snapshot 13 times.
+  CPU-consumed views now require recorded contents. Forward restoration requires
+  identical descriptor bytes **and** the same resource/counter creation across
+  every candidate; divergent writes, unresolved copies and missing slots fail.
+  Frame references cannot request a forward snapshot. The index is cancellable
+  and bounded to 4,194,304 provenance entries, with at most 32 evidence rows in
+  the report. The old undefined RTV caused RenderDoc 1.45 to crash while opening
+  `bf1-first-submission3`; the repaired `bf1-consumed-descriptors3` capture opens
+  successfully (`bf1-first-submission-events2`). Zero native validation errors
+  alone had not detected that missing descriptor content.
+
+OMSetBlendFactor now reads the serialized array length as well as its four floats
+(`265884`). Frame CPU queries for timestamp frequency, resource description,
+device ownership and list type are decoded separately from GPU work. Interface
+queries accept a recorded E_NOINTERFACE/null result or the same object identity;
+unresolved aliases fail. Captured timestamp frequency is not used as a native
+performance measurement.
+
+Targeted evidence, all using the original read-only BF1 directory:
+
+| Boundary/check | Observed result |
+| --- | --- |
+| First submitted Draw `21622` | All 14 prefix execution identities mapped; VS trace has 3 states, no invented source (`bf1-keyframe-vs1`). Native UAV write was verified in the preceding section. |
+| First direct Dispatch `21895` | RenderDoc event `1075`, DXBC CS hash `e8a1fa7c-e1447c80-05b26856-2c8d5806`, 925 states for group/thread `(0,0,0)` (`bf1-cs-debug1`). |
+| CS workspace trace | Breakpoint at instruction 155, step to 156, Watch of both input-block dimensions gives 64; changing the thread invalidates the old request/result (`bf1-cs-ui1.txt`). No additional GPU replay for this UI check. |
+| UAV clear `35703` | Resource creation `300425`, object `8697204528`: all 18,800 bytes covering 4,700 floats read back as `1.0`. SHA256 `f9ef289a12f1f8e88c143059b09b92b7c2be1ef4026b0b7420bdf5146675ed07`; zero debug-layer errors (`bf1-views-clear1.txt`). |
+| First submission through `37815` | 86 lists, 333 DrawInstanced, 1,208 DrawIndexedInstanced, 123 Dispatch, 11 ExecuteIndirect, 6 BeginQuery/8 EndQuery and one ResolveQueryData; zero debug-layer errors. |
+| Indirect Dispatch `35808` | Actual generated Dispatch is RenderDoc event `42909`, with groups `(1226,1,1)`. The isolated CS debugger returns 256 states for group/thread `(0,0,0)`, shader hash `5297230d-b11ed8d4-8c1b1ca9-2d9bfa5f` (`bf1-indirect-cs1`). |
+| Last indexed execution `54186` | Submission `392108` reached, cumulatively 691 DrawInstanced, 2,415 DrawIndexedInstanced, 246 Dispatch, 22 ExecuteIndirect and 5 ResolveQueryData; zero debug-layer errors (`bf1-last-execution4`). |
+| Last submission color | Native GPU readback of swapchain buffer creation `11395`, object `2119326144`, subresource 0: 1920×1009 RGBA8, 7,749,120 bytes; SHA256 `73450f309a632a1b102c92eefb173412eca7e9bfd015dab4691ce1503171ecaf`. Scene, weapon and HUD visible (`bf1-last-color1/texture.png`); zero debug-layer errors. |
+
+Indirect mapping now keeps the ExecuteIndirect wrapper events in `api_event_ids`
+and selects only generated work. All 16,207 first-submission execution identities
+are uniquely selectable in this capture after that fix (`bf1-indirect-cs1`). Zero
+generated actions remain unrepresented; multiple generated actions retain their
+reverse provenance without silently selecting one. CPU fixtures cover those
+cases, duplicate submitted-list markers and the existing DX11 provenance path
+(`bf1-indirect-mapping1.txt`). The isolated BF1 VS/CS reports list no loaded GPA
+modules. Native descriptor fixtures check repeated identical snapshots, divergent
+snapshots, missing slots and rejection of forward restoration from a frame call.
+
+This is not full feature acceptance. The stream has Present records `390416` and
+`418061`; the last indexed submission precedes the latter and replay currently
+stops at the requested execution boundary. Present/frame selection and original
+GPA image/intermediate-resource comparison remain to be established. The color
+image above is an actual GPU result, not the directory preview. PS debugging,
+BF1 history/geometry, performance, experiments and portable-package acceptance
+are unfinished. Indirect CS was exercised through the isolated job interface;
+the workspace's analysis capability gating still needs indirect-action support.
+
+Release CLI, Worker, GUI, isolated RenderDoc service and the focused test targets
+built successfully (`build80.log`). Final signature-decoding/CS-control checks
+pass (`bf1-final-cpu1.txt`). The related Talos first-Draw replay still produces
+exact SHA256 `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`
+with zero debug-layer errors (`talos-consumed-descriptors1`). No Hellblade2 replay
+or broad regression run was added. Captures, images, traces and crash-reproduction
+artifacts remain outside Git.
 
 ### Full feature acceptance
 
@@ -746,9 +824,9 @@ Worker, GUI and the targeted test executable built successfully (`build69.log`,
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | First keyframe-recorded Draw before/after and UAV write verified; full frame unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
+| Complete native frame and selected-event replay | Last indexed submission and actual color readback reached; first Draw/UAV clear verified; full frame semantics and original comparison unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | Unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, direct/indirect CS traces verified; direct CS workspace controls checked; PS/geometry and indirect UI gating unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Not performed | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
