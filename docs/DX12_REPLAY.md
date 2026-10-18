@@ -1431,12 +1431,59 @@ GF2 DX11 project identity checks pass without GPU replay
 (`dx12-experiment-legacy2.txt`). Disabled-marker mapping is checked separately.
 GUI/CLI/Worker and the focused tests build through `build126.log`.
 
-This is a verified native/model Draw experiment. Main-window edit actions,
-project UI restoration and experiment cache invalidation are **not yet connected
-for DX12**. Direct Dispatch suppression is implemented but lacks an independent
-GPU-write experiment. Indirect/mesh suppression, shader replacement, resource
-patches, and modified history/debug/geometry validation remain unfinished. No BF1
-or Hellblade2 GPU rerun was added for this change.
+This established the native/model Draw experiment; the following milestone connects
+it to the workspace. Direct Dispatch suppression is implemented but lacks an
+independent GPU-write experiment. Indirect/mesh suppression, shader replacement,
+resource patches, and modified history/debug/geometry validation remain unfinished.
+No BF1 or Hellblade2 GPU rerun was added for this change.
+
+### DX12 workspace experiments, persistence and result invalidation
+
+The existing Disable/Enable Event, Undo/Redo and Open/Save Experiment actions now
+use the DX12 execution-instance model. First edit and project loading prepare the
+capture content identity asynchronously, with cancellation and session/revision
+checks before installing a candidate. Ordinary capture opening still avoids the
+full content hash. Invalid projects leave the current experiment intact.
+
+Saved `ui.dx12` state records the event domain, event, resource creation,
+subresource, boundary and allocation budget. Identities use decimal strings;
+loading validates the schema, numeric ranges and referenced objects before
+restoring the workspace. Navigation restores filtered selections to visibility.
+Experiment changes invalidate native output, analysis captures and view request
+identities. Analysis at a disabled selected execution is unavailable. Worker
+reports must match both the capture identity and complete experiment-document
+digest, including changes that retain the same history cursor.
+
+`dx12-workspace-experiment1.txt` records the real main-window test, with two serial
+Talos Worker GPU replays at execution **12675**, resource creation **167081**,
+subresource **1**, after-event boundary:
+
+- Disable Event changes the exported 8,388,608-byte depth resource to all zeroes,
+  SHA-256 `2daeb1f36095b44b318410b3f4e8b5d989dcc7bb023d1426c492dab0a3053e74`.
+- Undo restores SHA-256
+  `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`,
+  exactly matching the prior native baseline. Display pixel (1527, 1240) changes
+  from (0, 0, 0, 255) to (70, 70, 70, 255).
+- Save, redo and reopening in another window restore the execution, resource,
+  subresource, boundary and disabled state. This portion uses boundary None and
+  performs no additional GPU replay.
+- Cancelling preparation preserves the current project. Switching captures
+  rejects an outstanding project load. Old debug, mesh, pixel-history and metrics
+  request IDs are rejected after the edit. This verifies invalidation, not the
+  correctness of analysis results for a modified later execution.
+
+The test passed in 50.763 seconds. Its temporary-capture lifetime initially
+caused a cleanup warning; the fixture now outlives the window holding its mapped
+files. No GPU rerun was added solely for that cleanup change.
+
+`dx12-workspace-experiment-compat1.txt` passes the report-identity checks against
+saved real native reports (including same-cursor changed contents, wrong capture,
+missing and unexpected experiments), plus one GF2 DX11 workspace replay. The
+2560 x 1440 DX11 RGBA output retains SHA-256
+`2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`;
+existing project actions retain their expected initial availability. Build131
+completes GUI, Worker and the focused test target. This milestone does not resolve
+the recorded DX11 baseline faults or the remaining DX12 experiment types.
 
 ### Full feature acceptance
 
@@ -1449,7 +1496,7 @@ or Hellblade2 GPU rerun was added for this change.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Native/model Draw disable changes depth output; persisted undo restores exact bytes; workspace experiments and performance unfinished | Unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Workspace Draw disable/undo, raw output restoration, project save/reopen and stale-result rejection verified; full experiments and performance unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

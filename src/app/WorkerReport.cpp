@@ -5,10 +5,24 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QImageReader>
+#include <QCryptographicHash>
 #include <limits>
 #include <set>
 
 namespace flora {
+void requireDx12ExperimentReport(const nlohmann::json &report, const nlohmann::json &project) {
+    if (report.at("backend") != "dx12") throw std::runtime_error("Worker experiment backend mismatch");
+    if (project.is_null()) {
+        if (report.contains("experiment")) throw std::runtime_error("Worker returned an unexpected experiment");
+        return;
+    }
+    const auto document = QByteArray::fromStdString(project.dump());
+    const auto hash = QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex().toStdString();
+    const auto &actual = report.at("experiment");
+    if (actual.at("backend") != "dx12" || actual.at("capture_identity") != project.at("capture_identity") ||
+        actual.at("document_sha256") != hash)
+        throw std::runtime_error("Worker result belongs to different experiment contents");
+}
 namespace {
 QByteArray readBytes(const QString &path, const CancelCheck &cancelled,
                      std::optional<uint64_t> expected = {}) {

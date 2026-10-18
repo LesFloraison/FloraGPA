@@ -28,6 +28,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QFileDialog>
 #include <QLineEdit>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -68,6 +69,140 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12ExperimentReportIdentity() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_EXPERIMENT_REPORT_DIR");
+        if (root.isEmpty()) QSKIP("Set the saved Talos experiment evidence directory");
+        const auto read = [](const QString &path) {
+            QFile file(path);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing experiment evidence");
+            return nlohmann::json::parse(file.readAll().toStdString());
+        };
+        for (const auto &name : {QString("baseline"), QString("disabled"), QString("restored")}) {
+            const auto report = read(root + '/' + name + "/report.json");
+            const auto project = read(root + '/' + name + ".json");
+            requireDx12ExperimentReport(report, project);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ExperimentReport(report, nullptr));
+            auto wrong = report; wrong["experiment"]["capture_identity"]["value"] = "another-capture";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ExperimentReport(wrong, project));
+        }
+        const auto report = read(root + "/disabled/report.json");
+        auto changed = read(root + "/disabled.json");
+        changed["history"][0]["operations"][0]["value"] = true; // Same cursor, different edit.
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ExperimentReport(report, changed));
+        requireDx12ExperimentReport({{"backend", "dx12"}}, nullptr);
+        QVERIFY_THROWS_EXCEPTION(std::exception, requireDx12ExperimentReport({{"backend", "dx12"}}, changed));
+    }
+    void dx11ExperimentWorkspaceCompatibility() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set capture directory for the existing DX11 workspace check");
+        MainWindow window; QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        const auto pixels = window.findChild<ImageView *>("frameOutput")->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(pixels.size(), QSize(2560, 1440));
+        QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()), pixels.sizeInBytes()), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
+        QVERIFY(window.findChild<QAction *>("openExperiment")->isEnabled());
+        QVERIFY(window.findChild<QAction *>("saveExperiment")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("undoExperiment")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("redoExperiment")->isEnabled());
+    }
+    void dx12ExperimentWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_WORKSPACE_EXPERIMENT_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set capture and new output paths for the targeted experiment workspace check");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished), exported(&window, &MainWindow::exportFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto domain = window.findChild<QComboBox *>("apiEventDomain"); domain->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 167081) { resources->setCurrentIndex(index); break; }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 167081ULL);
+        window.findChild<QSpinBox *>("dx12Subresource")->setValue(1);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary"); boundary->setCurrentIndex(2);
+        auto enable = window.findChild<QAction *>("enableExperimentEvent");
+        auto undo = window.findChild<QAction *>("undoExperiment");
+        auto redo = window.findChild<QAction *>("redoExperiment");
+        auto image = window.findChild<ImageView *>("frameOutput");
+        auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        auto history = window.findChild<PixelHistoryView *>();
+        auto metrics = window.findChild<RdcCountersView *>("rdcCountersView");
+        const auto oldDebug = debug->requestId(), oldMesh = mesh->requestId(), oldHistory = history->requestId(), oldMetrics = metrics->requestId();
+        QVERIFY(enable->isEnabled()); enable->trigger(); QVERIFY(window.busy());
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        QCOMPARE(image->image().pixelColor(1527, 1240), QColor(0, 0, 0, 255));
+        QVERIFY(!debug->finish(oldDebug, {})); QVERIFY(!mesh->finish(oldMesh, {}, {}));
+        QVERIFY(!history->finish(oldHistory, {})); QVERIFY(!metrics->finish(oldMetrics, {}));
+        const auto exportRaw = [&](const QString &name) {
+            QTimer chooser, watchdog; watchdog.setSingleShot(true);
+            bool chosen = false;
+            QObject::connect(&chooser, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) {
+                    chooser.stop(); chosen = true;
+                    dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                    QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                }
+            });
+            QObject::connect(&watchdog, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject();
+            });
+            chooser.start(10); watchdog.start(5000);
+            window.findChild<QAction *>("exportOutputStorage")->trigger();
+            QVERIFY(chosen);
+        };
+        exportRaw("disabled"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QVERIFY(window.saveDx12Experiment(output + "/disabled.json"));
+        done.clear(); QVERIFY(undo->isEnabled()); undo->trigger(); QVERIFY(image->image().isNull());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image().pixelColor(1527, 1240), QColor(70, 70, 70, 255));
+        QVERIFY(!undo->isEnabled()); QVERIFY(redo->isEnabled());
+        exportRaw("restored"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        for (const auto &[name, hash] : std::map<QString, QByteArray>{{"disabled", "2daeb1f36095b44b318410b3f4e8b5d989dcc7bb023d1426c492dab0a3053e74"},
+                 {"restored", "c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"}}) {
+            QFile file(output + '/' + name + ".bin"); QVERIFY(file.open(QIODevice::ReadOnly));
+            QCOMPARE(file.size(), 8388608); QCOMPARE(QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha256).toHex(), hash);
+        }
+        QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
+        window.openDx12Experiment(output + "/disabled.json");
+        window.findChild<QAction *>("cancelReplay")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 10000); QVERIFY(!prepared.takeLast()[0].toBool());
+        QCOMPARE(enable->text(), QString("Disable Event"));
+        boundary->setCurrentIndex(0); redo->trigger(); QVERIFY(image->image().isNull());
+        QCOMPARE(enable->text(), QString("Enable Event")); QVERIFY(!redo->isEnabled());
+        QVERIFY(window.saveDx12Experiment(output + "/redo.json"));
+        QTemporaryDir replacement;
+        MainWindow reopened;
+        QSignalSpy reopenedLoad(&reopened, &MainWindow::captureLoaded), reopenedProject(&reopened, &MainWindow::experimentFinished);
+        reopened.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(reopenedLoad.count(), 1, 30000);
+        reopened.openDx12Experiment(output + "/redo.json");
+        QTRY_COMPARE_WITH_TIMEOUT(reopenedProject.count(), 1, 60000); QVERIFY(reopenedProject.takeLast()[0].toBool());
+        QCOMPARE(reopened.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 1);
+        QCOMPARE(reopened.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), 12675ULL);
+        QCOMPARE(reopened.findChild<QTableView *>("resources")->currentIndex().data(Qt::UserRole).toULongLong(), 167081ULL);
+        QCOMPARE(reopened.findChild<QSpinBox *>("dx12Subresource")->value(), 1);
+        QCOMPARE(reopened.findChild<QComboBox *>("outputBoundary")->currentIndex(), 0);
+        QCOMPARE(reopened.findChild<QAction *>("enableExperimentEvent")->text(), QString("Enable Event"));
+        QVERIFY(reopened.saveDx12Experiment(output + "/reopened.json"));
+        // A pending project must not replace the experiment belonging to another session.
+        reopened.openDx12Experiment(output + "/redo.json");
+        reopenedLoad.clear(); reopened.openCapture(fixture(replacement));
+        QTRY_COMPARE_WITH_TIMEOUT(reopenedProject.count(), 1, 10000); QVERIFY(!reopenedProject.takeLast()[0].toBool());
+        QTRY_COMPARE_WITH_TIMEOUT(reopenedLoad.count(), 1, 10000);
+        QVERIFY(!reopened.findChild<QAction *>("undoExperiment")->isEnabled());
+        QVERIFY(!reopened.findChild<QAction *>("saveExperiment")->isEnabled());
+    }
     void talosDisableExperiment() {
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_EXPERIMENT_OUTPUT");

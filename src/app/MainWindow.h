@@ -49,13 +49,16 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_); }
+    void openDx12Experiment(const QString &path);
+    bool saveDx12Experiment(const QString &path);
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
     void captureLoaded();
     void taskFinished(bool success);
     void exportFinished(bool success);
+    void experimentFinished(bool success);
 
   protected:
     void closeEvent(QCloseEvent *) override;
@@ -65,6 +68,7 @@ class MainWindow final : public QMainWindow {
   private:
     void buildUi();
     void invalidateDx12Output();
+    void prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit = {});
     QSpinBox *dx12Subresource_ = nullptr, *dx12Budget_ = nullptr;
     QAction *dx12Controls_ = nullptr;
     CompatibilityButton *compatibility_ = nullptr;
@@ -309,6 +313,7 @@ class MainWindow final : public QMainWindow {
     };
     QFutureWatcher<CaptureLoadResult> loader_;
     std::shared_ptr<std::atomic_bool> loadCancel_;
+    std::shared_ptr<std::atomic_bool> experimentCancel_;
     struct ArtifactJob {
         std::unique_ptr<QTemporaryDir> directory;
         QJsonObject report;

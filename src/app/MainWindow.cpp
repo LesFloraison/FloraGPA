@@ -375,6 +375,7 @@ MainWindow::MainWindow() : loader_(this) {
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    if (experimentCancel_) experimentCancel_->store(true);
     if (exportCancel_)
         exportCancel_->store(true);
     if (artifactJob_)
@@ -426,22 +427,38 @@ void MainWindow::buildUi() {
         ->setObjectName("saveExperiment");
     auto edit = menuBar()->addMenu("&Edit");
     undoAction_ = edit->addAction("Undo", QKeySequence::Undo, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12 && busy()) return;
         if (experiment_ && experiment_->undo())
             experimentChanged();
     });
+    undoAction_->setObjectName("undoExperiment");
     redoAction_ = edit->addAction("Redo", QKeySequence::Redo, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12 && busy()) return;
         if (!experiment_ || !experiment_->redo())
             return;
         try {
             ReplayOptions check;
-            experiment_->apply(*frame_, check);
+            if (frame_) experiment_->apply(*frame_, check);
+            else (void)experiment_->disabledExecutions(*session_);
             experimentChanged();
         } catch (const std::exception &e) {
             experiment_->undo();
             showError(QString::fromUtf8(e.what()));
         }
     });
+    redoAction_->setObjectName("redoExperiment");
     enableAction_ = edit->addAction("Disable Event", this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) {
+            if (busy() || !selection_.execution || !enableAction_->isEnabled()) return;
+            try {
+                if (!experiment_) prepareDx12Experiment({}, {{*selection_.execution, false}});
+                else {
+                    experiment_->setEnabled(*session_, *selection_.execution, !experiment_->enabled(*selection_.execution));
+                    experimentChanged();
+                }
+            } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
+            return;
+        }
         if (!experiment_ || !selectedEvent_)
             return;
         try {
@@ -451,6 +468,7 @@ void MainWindow::buildUi() {
             showError(QString::fromUtf8(e.what()));
         }
     });
+    enableAction_->setObjectName("enableExperimentEvent");
     clearAction_ = edit->addAction("Edit Clear Values…", this, &MainWindow::editClear);
     clearAction_->setObjectName("editClear");
     setterAction_ = edit->addAction("Edit Setter…", this, &MainWindow::editSetter);
@@ -486,6 +504,7 @@ void MainWindow::buildUi() {
     collectAction_ =
         analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
     cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, &MainWindow::cancel);
+    cancelAction_->setObjectName("cancelReplay");
     cancelAction_->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     cancelAction_->setEnabled(false);
     auto structureAction =
@@ -1504,7 +1523,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_) || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1580,6 +1599,7 @@ void MainWindow::setBusy(bool busy) {
             : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
+                              (!experimentCancel_ || !experimentCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
     progress_->setVisible(busy);
     if (busy) {
@@ -1589,6 +1609,12 @@ void MainWindow::setBusy(bool busy) {
     } else
         progress_->setValue(0);
     exportAction_->setEnabled(!image_->image().isNull());
+    updateExperimentActions();
+    if (dx12 && busy) {
+        for (auto action : {undoAction_, redoAction_, enableAction_,
+                            findChild<QAction *>("openExperiment"), findChild<QAction *>("saveExperiment")})
+            action->setEnabled(false);
+    }
 }
 void MainWindow::updateCheckpointContext() {
     const bool available = frame_ && selectedEvent_ && isDraw(frame_->entry(selectedEvent_).type);
@@ -1644,8 +1670,11 @@ QString MainWindow::historyContextKey() const {
         selection.resource = 0;
         if (!session_->capability(ReplayFeature::Replay, selection).supported())
             return {};
+        if (experiment_ && !experiment_->enabled(*selection_.execution)) return {};
+        const auto document = QByteArray::fromStdString(experiment_ ? experiment_->document().dump() : std::string());
         return "dx12:" + QString::fromStdString(session_->identity()) + ':' +
-               QString::number(*selection_.execution) + ':' + QString::number(dx12Budget_->value());
+               QString::number(*selection_.execution) + ':' + QString::number(dx12Budget_->value()) + ':' +
+               QString::fromLatin1(QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex());
     }
     if (!frame_)
         return {};
@@ -2024,6 +2053,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    if (experimentCancel_) {
+        experimentCancel_->store(true);
+        cancelAction_->setEnabled(false);
+        statusBar()->showMessage("Cancelling experiment preparation…");
+    }
     if (exportCancel_) {
         exportCancel_->store(true);
         cancelAction_->setEnabled(false);
@@ -2181,6 +2215,9 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             jobDir_.reset(); resourceTimer_.start(); return;
         }
         report_ = std::move(result.report);
+        if (session_ && session_->backend() == ReplayBackend::Dx12)
+            requireDx12ExperimentReport(result.replayReport,
+                experiment_ && !experiment_->document().at("history").empty() ? experiment_->document() : nlohmann::json());
         if (runningKind_ == "native-counters") {
             result.replayReport["request_identity"] = replayIdentityJson(runningIdentity_);
             result.replayReport["capture_identity"] = {{"kind", "runtime_session"}, {"value", session_->identity()}, {"backend", "dx12"}};
@@ -2189,7 +2226,11 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             emit taskFinished(accepted);
             return;
         }
-        if (report_["experiment"].isObject()) {
+        if (report_["experiment"].isObject() && report_["backend"] == "dx12") {
+            log_->appendPlainText(QString("DX12 experiment r%1 · %2 suppressed executions")
+                .arg(report_["experiment"].toObject()["cursor"].toString())
+                .arg(report_["native_replay"].toObject()["suppressed_executions"].toArray().size()));
+        } else if (report_["experiment"].isObject()) {
             const auto experiment = report_["experiment"].toObject();
             log_->appendPlainText(QString("Experiment r%1/%2 · %3 applied · %4 pending")
                                       .arg(experiment["cursor"].toInteger())
@@ -3228,11 +3269,21 @@ void MainWindow::previewBuffer() {
 void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
-    undoAction_->setEnabled(experiment_ && experiment_->canUndo());
-    redoAction_->setEnabled(experiment_ && experiment_->canRedo());
+    const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
+    undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
+    if (dx12) {
+        findChild<QAction *>("openExperiment")->setEnabled(!busy());
+        findChild<QAction *>("saveExperiment")->setEnabled(!busy() && bool(experiment_));
+    } else {
+        findChild<QAction *>("openExperiment")->setEnabled(bool(frame_));
+        findChild<QAction *>("saveExperiment")->setEnabled(bool(experiment_));
+    }
+    redoAction_->setEnabled(experiment_ && experiment_->canRedo() && (!dx12 || !busy()));
     const auto type = frame_ && selectedEvent_ ? frame_->entry(selectedEvent_).type : 0;
     bool editable = isDraw(uint16_t(type)) || isWritableCommand(uint16_t(type));
+    if (dx12) editable = !busy() && session_->capability(ReplayFeature::Experiments, selection_).supported();
     enableAction_->setEnabled(editable);
+    enableAction_->setToolTip(dx12 ? QString::fromStdString(session_->capability(ReplayFeature::Experiments, selection_).reason) : QString{});
     if (clearAction_)
         clearAction_->setEnabled(isClearCommand(uint16_t(type)));
     if (setterAction_)
@@ -3283,6 +3334,17 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        projectDirty_ = true;
+        setWindowModified(true);
+        ++outputGeneration_;
+        invalidateDx12Output();
+        historyCaptures_.clear(); historyCacheOrder_.clear(); historyKey_.clear(); historyRdc_.clear();
+        historyRequest_ = nullptr; pendingPixel_ = nullptr;
+        updateCheckpointContext(); updateExperimentActions();
+        if (selection_.execution && boundary_->currentIndex() != 0) replayTimer_.start();
+        return;
+    }
     stashShaderDrafts();
     updateProfileContext();
     updateCheckpointContext();
@@ -4246,11 +4308,11 @@ void MainWindow::openExperiment() {
         if (answer == QMessageBox::Cancel || (answer == QMessageBox::Save && !saveExperiment()))
             return;
     }
-    if (!frame_)
-        return;
+    if (!session_) return;
     auto path = QFileDialog::getOpenFileName(this, "Open experiment", {}, "FloraGPA experiments (*.json)");
     if (path.isEmpty())
         return;
+    if (session_->backend() == ReplayBackend::Dx12) { openDx12Experiment(path); return; }
     try {
         auto candidate = std::make_unique<Experiment>(*frame_);
         candidate->load(path, *frame_);
@@ -4333,6 +4395,7 @@ bool MainWindow::saveExperiment() {
                                             "FloraGPA experiments (*.json)");
     if (path.isEmpty())
         return false;
+    if (session_ && session_->backend() == ReplayBackend::Dx12) return saveDx12Experiment(path);
     try {
         ReplayUiState state;
         state.target = outputTarget_->currentData().toString().toStdString();
