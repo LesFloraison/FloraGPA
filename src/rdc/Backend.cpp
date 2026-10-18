@@ -771,8 +771,13 @@ Json runRdcJob(const Json &job) {
                 {"requested", true}, {"messages", std::move(rows)},
                 {"message_count", std::to_string(messages.size())},
                 {"truncated", messages.size() > 4096},
-                {"scope", "Backend diagnostics accumulated while opening and analyzing this capture. "
-                          "An empty list does not prove replay correctness or that the validation layer was available."}};
+                {"message_phase", dx12 ? "capture_loading" : "backend_supplied"},
+                {"scope", dx12
+                    ? "RenderDoc 1.45 D3D12 GetDebugMessages exports loading-stage messages, not the "
+                      "API queue from subsequent analysis replays. An empty list does not validate "
+                      "the selected analysis or prove that the validation layer was available."
+                    : "Diagnostics exported by the backend. An empty list does not prove replay "
+                      "correctness or that the validation layer was available."}};
         }
         if (dx12) {
             result["execution_map"] = mapping["execution_map"];

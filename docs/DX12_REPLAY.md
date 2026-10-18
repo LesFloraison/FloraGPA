@@ -2760,7 +2760,11 @@ replay failure, a hardware limitation, or a completed Shader Debug comparison.
 option and exports available backend diagnostics in `api_validation`: native
 event, category/severity/source enums, message ID, and description. The default
 remains disabled. Reports preserve a decimal total count and explicit truncation
-after 4096 messages; absence of messages is not a validation pass. The BF1
+after 4096 messages; absence of messages is not a validation pass. The D3D12
+report now explicitly identifies these as **loading-stage** messages:
+`WrappedID3D12Device::GetDebugMessages` returns the saved loading messages during
+active replay without querying the live API message queue. They do not cover
+subsequent single-event/debug replays. The BF1
 reproduction collected **726 medium-severity messages**: 723 sampler comparison
 warnings (1361), two buffer initial-state warnings (1328), and one duplicate
 resource-barrier warning (1008). These messages did not identify the cause.
@@ -2777,6 +2781,67 @@ and the prior three-patch RenderDoc DLL restored (SHA-256
 The CLI/worker build passed. Focused job preparation checks cover default-off,
 explicit-on with lossless DX12 identities, and rejection of a nonboolean option:
 **5 passed**, including setup/cleanup, **12 ms**, `rdc-api-validation-options1.txt`.
+
+### Particle depth isolation: unresolved original-attachment behavior
+
+Further targeted probes of execution **36560** confirmed that the single-event
+path invokes `DrawIndexedInstanced(4974, 1, 0, 0, 0)` on its outside command list.
+The original PSO enables depth testing with **GreaterEqual (7)**, disables depth
+writes, stencil and depth bounds. The DSV is **D32_FLOAT (40)**, Texture2D,
+Mip **0**, flags **0**, resource **3115**, creation **325024**.
+
+Temporary RenderDoc instrumentation made the following isolated changes just
+before this Draw. These are research probes, not shipped replay behavior:
+
+| Probe | Selected output at (836,241) |
+| --- | --- |
+| Clone the original PSO without changing its settings | Zero |
+| Clone the PSO and disable depth testing | Nonzero, selected RGBA matches the previously recorded native boundary |
+| Keep depth enabled and change only its comparison to Always | Same nonzero selected RGBA |
+| Copy depth into an identically described temporary resource and bind that copy; preserve original PSO | Nonzero |
+| Create a new DSV heap/view but bind the original depth resource | Zero |
+| Copy depth to a spare resource, restore the source state and bind the original depth resource | Zero |
+
+The copy probe uses tracked-state barriers, `CopyResource`, and a transition of
+the temporary depth target from COPY_DEST to DEPTH_WRITE. Its selected RGBA is
+**(0.037872314453125, 0.03363037109375, 0.0281219482421875, 0.65478515625)**.
+This differs from the earlier native sample and does not validate frame fidelity
+or all depth-test outcomes. The temporary allocation has no optimized clear
+value. The probes establish a dependency on the original depth attachment; they
+do **not** establish that resource contents, compression metadata, or a particular
+driver defect caused the discrepancy. No copy/disable-depth workaround has been
+added to production.
+
+One initial PSO probe failed creation with **E_FAIL** because copying the stored
+expanded descriptor does not restore shader bytecode pointers. It supplied no
+valid depth-disable result. The subsequent probes use `WrappedID3D12PipelineState::Fill`
+and check successful PSO creation before interpreting their output.
+
+Temporarily allowing D3D12 `GetDebugMessages` to also read its active API queue
+yielded **727** medium messages: the prior 726 loading messages and one additional
+duplicate-barrier warning (1008), with event **0**. That internal-stage warning
+is not mapped to an original execution. No additional diagnostic explains the
+depth discrepancy. This probe does not turn the unmodified API's loading-stage
+report into evidence about analysis-stage validation; the production report's
+scope text and `message_phase` now make that distinction explicit.
+
+The restored production backend's resource-history query identifies the latest
+clear of depth creation **325024** at **36140** (source **330358**) and its next
+depth-target draw at **36149** (source **330367**). Barrier **36191** changes it
+from DEPTH_WRITE to shader-resource state; it is bound for PS reads at **36209**
+and **36386**. Barrier **36387** (source **350770**) restores DEPTH_WRITE before
+the particle draws. The original creation record is `CreateCommittedResource`,
+not a placed-resource alias. This is the next producer boundary to investigate;
+bound-use entries alone do not prove a write or validate those depth contents.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-particle-{draw-arguments1,no-depth1,no-depth2,clone-pso1,depth-always1}`,
+`bf1-particle-{depth-copy1,depth-rebind1,active-validation1,copy-original1,depth-history1}`.
+The local research sources, PSO substitutions, depth-copy probes and active-message
+hook were removed. The three-patch production DLL was restored to the previously
+documented SHA-256; the worker with corrected diagnostic scope builds successfully
+(`build219.log`). The particle boundary, full-frame variation and complete debug
+acceptance remain unresolved.
 
 ### Full feature acceptance
 
