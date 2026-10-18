@@ -8,6 +8,7 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <set>
 #define NOMINMAX
@@ -15,6 +16,15 @@
 namespace flora {
 namespace {
 using Json = nlohmann::json;
+void decimalIdentity(const Json &value, const char *key) {
+    if (!value.is_string())
+        throw std::runtime_error(std::string("DX12 identity must be a decimal string: ") + key);
+    const auto &text = value.get_ref<const std::string &>();
+    uint64_t number{};
+    const auto result = std::from_chars(text.data(), text.data() + text.size(), number);
+    if (text.empty() || result.ec != std::errc{} || result.ptr != text.data() + text.size() || !number)
+        throw std::runtime_error(std::string("Invalid DX12 uint64 identity: ") + key);
+}
 void unsignedNumber(const Json &value, uint64_t maximum, const char *key, bool optional = false) {
     if (optional && value.is_null())
         return;
@@ -75,7 +85,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key))
+        if (!job.contains(key) && key != "execution" && key != "resource_creation")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
@@ -85,8 +95,23 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         unsignedNumber(job[key], UINT32_MAX, key);
     for (const auto key : {"eid", "index"})
         unsignedNumber(job[key], UINT32_MAX, key, true);
-    for (const auto key : {"gpa_event", "resource"})
-        unsignedNumber(job[key], UINT64_MAX, key, true);
+    unsignedNumber(job["gpa_event"], UINT64_MAX, "gpa_event", true);
+    if (job.contains("execution")) {
+        decimalIdentity(job["execution"], "execution");
+        if (!job["gpa_event"].is_null() || !job["eid"].is_null())
+            throw std::runtime_error("Choose DX12 execution or another event selector, not both");
+        if (!job["resource"].is_null())
+            decimalIdentity(job["resource"], "resource");
+        if (job.contains("resource_creation")) {
+            if (job["resource"].is_null())
+                throw std::runtime_error("Resource creation requires a DX12 resource object");
+            decimalIdentity(job["resource_creation"], "resource_creation");
+        }
+    } else {
+        if (job.contains("resource_creation"))
+            throw std::runtime_error("Resource creation requires a DX12 execution selection");
+        unsignedNumber(job["resource"], UINT64_MAX, "resource", true);
+    }
     for (const auto key : {"group", "thread"}) {
         const auto &coords = job[key];
         if (!coords.is_array() || coords.size() != 3)

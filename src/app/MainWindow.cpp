@@ -1559,17 +1559,39 @@ void MainWindow::updateCheckpointContext() {
     for (auto view : checkpoints_)
         if (view)
             view->setContext(key, available);
+    const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
+    const auto analysisKey = historyContextKey();
+    bool draw = true, dispatch = true;
+    if (dx12) {
+        draw = dispatch = false;
+        if (selection_.execution) {
+            const auto name = session_->executionEvent(*selection_.execution).name;
+            draw = name == "ID3D12GraphicsCommandListDrawInstanced" ||
+                   name == "ID3D12GraphicsCommandListDrawIndexedInstanced";
+            dispatch = name == "ID3D12GraphicsCommandListDispatch";
+        }
+    }
     if (history_)
-        history_->setContext(historyContextKey(), selectedEvent_);
+        history_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
     if (rdcCounters_)
-        rdcCounters_->setContext(historyContextKey(), selectedEvent_);
+        rdcCounters_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
     if (replayMesh_)
-        replayMesh_->setContext(historyContextKey(), selectedEvent_);
-    for (auto view : replayDebug_)
-        if (view)
-            view->setContext(historyContextKey(), selectedEvent_);
+        replayMesh_->setContext(draw ? analysisKey : QString{}, selectedEvent_, dx12);
+    for (size_t i = 0; i < replayDebug_.size(); ++i)
+        if (auto view = replayDebug_[i])
+            view->setContext((i == 2 ? dispatch : draw) ? analysisKey : QString{}, selectedEvent_, dx12);
 }
 QString MainWindow::historyContextKey() const {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        if (!selection_.execution)
+            return {};
+        auto selection = selection_;
+        selection.resource = 0;
+        if (!session_->capability(ReplayFeature::Replay, selection).supported())
+            return {};
+        return "dx12:" + QString::fromStdString(session_->identity()) + ':' +
+               QString::number(*selection_.execution) + ':' + QString::number(dx12Budget_->value());
+    }
     if (!frame_)
         return {};
     nlohmann::json active = nlohmann::json::array();
@@ -1590,7 +1612,10 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
                          : history_->finish(historyRequestId_, result);
 }
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
-    if (busy() || !frame_)
+    if (busy() || !session_)
+        return;
+    const bool dx12 = session_->backend() == ReplayBackend::Dx12;
+    if (dx12 && !view && kind != RdcAnalysis::Mesh)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
@@ -1624,7 +1649,10 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         historyKey_ =
             historyContextKey() + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
-        historyRequest_["frame_sha256"] = frame_->sha256();
+        historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
+        if (dx12)
+            historyRequest_["capture_identity"] = {
+                {"kind", "runtime_session"}, {"value", session_->identity()}, {"backend", "dx12"}};
         if (const auto it = historyCaptures_.find(historyKey_);
             it != historyCaptures_.end() && QFileInfo::exists(it->second.path)) {
             historyRdc_ = it->second.path;
@@ -1632,7 +1660,11 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             historyCacheOrder_.append(historyKey_);
             startHistoryWorker();
         } else {
-            startWorker({"replay", capturePath_, "--renderdoc", library}, false);
+            QStringList args{"replay", capturePath_, "--renderdoc", library};
+            if (dx12)
+                args << "--event" << QString::number(*selection_.execution) << "--max-bytes"
+                     << QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024);
+            startWorker(args, false);
             if (process_.state() == QProcess::NotRunning)
                 throw std::runtime_error("Cannot start independent recapture");
             runningKind_ = "history-capture";
@@ -1652,13 +1684,16 @@ void MainWindow::startHistoryWorker() {
     if (!jobDir_->isValid())
         throw std::runtime_error("Cannot create history worker directory");
     auto options = historyRequest_;
-    for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key", "request_identity"})
+    for (const auto key :
+         {"action", "renderdoc", "frame_sha256", "experiment_key", "request_identity", "capture_identity"})
         options.erase(key);
     auto prepared = prepareRdcJob(
         historyRdc_, historyRequest_.at("action").get<std::string>(), jobDir_->path() + "/result",
         QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
     prepared["frame_sha256"] = historyRequest_.at("frame_sha256");
     prepared["experiment_key"] = historyRequest_.at("experiment_key");
+    if (historyRequest_.contains("capture_identity"))
+        prepared["capture_identity"] = historyRequest_["capture_identity"];
     beginWorkerIdentity();
     prepared["request_identity"] = replayIdentityJson(runningIdentity_);
     historyRequest_ = std::move(prepared);
@@ -2005,6 +2040,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             auto result = nlohmann::json::parse(bytes.begin(), bytes.end());
             result["capture"] = historyRdc_.toStdString();
             result["frame_sha256"] = historyRequest_.at("frame_sha256");
+            if (historyRequest_.contains("capture_identity"))
+                result["capture_identity"] = historyRequest_["capture_identity"];
             result["experiment_key"] = historyRequest_.at("experiment_key");
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
@@ -2048,6 +2085,12 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                                       .arg(experiment["pending_events"].toArray().size()));
         }
         if (runningKind_ == "history-capture") {
+            if (session_ && session_->backend() == ReplayBackend::Dx12 &&
+                (report_["backend"] != "dx12" ||
+                 report_["execution"].toString() != QString::number(*selection_.execution) ||
+                 report_["value_time"] != "after_event" || report_["frame_complete"] != false))
+                throw std::runtime_error(
+                    "Analysis capture does not match the selected DX12 execution prefix");
             historyRdc_ = report_["rdc_capture"].toString();
             if (historyRdc_.isEmpty() || !QFileInfo::exists(historyRdc_))
                 throw std::runtime_error("Independent RenderDoc capture is missing");

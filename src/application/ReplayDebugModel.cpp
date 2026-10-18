@@ -428,6 +428,9 @@ size_t ReplayDebugModel::encounterCount(int64_t position, Point point) {
 bool ReplayDebugModel::breakpointEntry(int64_t position) {
     if (!valid(position))
         return false;
+    if (instructionPoints_.contains(
+            result_->at("steps")[size_t(position)].at("nextInstruction").get<uint64_t>()))
+        return true;
     std::vector<Point> matches;
     for (const auto &p : points_) {
         if (!lineEntry(position, p))
@@ -461,8 +464,8 @@ bool ReplayDebugModel::breakpointEntry(int64_t position) {
     return false;
 }
 size_t ReplayDebugModel::seek(int64_t position) {
-    if (points_.empty())
-        throw std::runtime_error("Set a source breakpoint first");
+    if (points_.empty() && instructionPoints_.empty())
+        throw std::runtime_error("Set a source or instruction breakpoint first");
     for (auto i = position + 1; i >= 0 && uint64_t(i) < size(); ++i)
         if (breakpointEntry(i))
             return size_t(i);
@@ -502,6 +505,16 @@ std::pair<size_t, std::string> ReplayDebugModel::functionStep(int64_t position, 
     }
     throw std::runtime_error("No later function step in this invocation");
 }
+void ReplayDebugModel::toggleInstruction(uint64_t instruction) {
+    if (!instructions_.contains(instruction))
+        throw std::runtime_error("Instruction has no recorded debug information");
+    if (instructionPoints_.erase(instruction))
+        return;
+    if (instructionPoints_.size() >= 256)
+        throw std::runtime_error("At most 256 instruction breakpoints are supported");
+    instructionPoints_.insert(instruction);
+}
+Json ReplayDebugModel::instructionBreakpoints() const { return Json(instructionPoints_); }
 Json ReplayDebugModel::breakpoints() const {
     Json result = Json::array();
     for (const auto &point : points_) {
@@ -565,13 +578,17 @@ Json ReplayDebugModel::configuration() const {
     Json watches = Json::array();
     for (const auto &e : watches_)
         watches.push_back(e.text());
-    return {{"format", "FloraGPA debug config 1"},
-            {"identity", identity(*result_)},
-            {"breakpoints", breakpoints()},
-            {"watches", watches}};
+    Json config{{"format", "FloraGPA debug config 1"},
+                {"identity", identity(*result_)},
+                {"breakpoints", breakpoints()},
+                {"watches", watches}};
+    if (!instructionPoints_.empty())
+        config["instruction_breakpoints"] = instructionBreakpoints();
+    return config;
 }
 void ReplayDebugModel::importConfiguration(const Json &config) {
-    if (!fields(config, {"format", "identity", "breakpoints", "watches"}) ||
+    if ((!fields(config, {"format", "identity", "breakpoints", "watches"}) &&
+         !fields(config, {"format", "identity", "breakpoints", "watches", "instruction_breakpoints"})) ||
         config.at("format") != "FloraGPA debug config 1")
         throw std::runtime_error("Unsupported recorded shader debug configuration");
     if (config.at("identity") != identity(*result_))
@@ -580,6 +597,20 @@ void ReplayDebugModel::importConfiguration(const Json &config) {
     if (!points.is_array() || points.size() > 256 || !texts.is_array() || texts.size() > 64)
         throw std::runtime_error("Debugger configuration exceeds rule limits");
     ReplayDebugModel replacement(*result_);
+    if (config.contains("instruction_breakpoints")) {
+        const auto &instructions = config.at("instruction_breakpoints");
+        if (!instructions.is_array() || instructions.size() > 256)
+            throw std::runtime_error("Invalid instruction breakpoint list");
+        for (const auto &value : instructions) {
+            if (!value.is_number_integer() ||
+                (value.is_number_integer() && !value.is_number_unsigned() && value.get<int64_t>() < 0))
+                throw std::runtime_error("Instruction breakpoint must be an unsigned integer");
+            const auto instruction = value.get<uint64_t>();
+            if (replacement.instructionPoints_.contains(instruction))
+                throw std::runtime_error("Duplicate instruction breakpoint");
+            replacement.toggleInstruction(instruction);
+        }
+    }
     std::set<std::string> unique;
     for (const auto &text : texts) {
         if (!text.is_string())
@@ -610,6 +641,7 @@ void ReplayDebugModel::importConfiguration(const Json &config) {
         }
     }
     points_ = std::move(replacement.points_);
+    instructionPoints_ = std::move(replacement.instructionPoints_);
     conditions_ = std::move(replacement.conditions_);
     counts_ = std::move(replacement.counts_);
     watches_ = std::move(replacement.watches_);
@@ -617,6 +649,7 @@ void ReplayDebugModel::importConfiguration(const Json &config) {
 Json ReplayDebugModel::exportReport() const {
     auto out = *result_;
     out["source_breakpoints"] = breakpoints();
+    out["instruction_breakpoints"] = instructionBreakpoints();
     out["source_variable_snapshot"] = {{"step", position()}, {"variables", sourceValues()}};
     out["callstack_snapshot"] = {{"step", position()}, {"functions", stack(position())}};
     out["watch_snapshot"] = {{"step", position()}, {"expressions", watchResults()}};

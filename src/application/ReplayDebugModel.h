@@ -27,6 +27,8 @@ class ReplayDebugModel {
     std::pair<size_t, std::string> functionStep(int64_t position, bool out);
     void validateLine(Point point) const;
     void toggle(Point point);
+    void toggleInstruction(uint64_t instruction);
+    Json instructionBreakpoints() const;
     void setCondition(Point point, const std::string &text);
     void setHitCount(Point point, const std::string &mode, int64_t count);
     bool hit(int64_t position, Point point) const;
@@ -56,6 +58,7 @@ class ReplayDebugModel {
     std::map<uint64_t, Json> instructions_, locations_;
     std::map<int, Index> static_;
     std::set<Point> points_;
+    std::set<uint64_t> instructionPoints_;
     std::map<Point, DebugExpression> conditions_;
     std::map<Point, Json> counts_;
     std::map<Point, std::vector<size_t>> entries_;

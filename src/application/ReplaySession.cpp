@@ -247,10 +247,32 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
+        if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
+            auto executionOnly = selection;
+            executionOnly.resource = 0;
+            const auto replay = capability(ReplayFeature::Replay, executionOnly);
+            if (!replay.supported())
+                return replay;
+            const auto name = executionEvent(*selection.execution).name;
+            const bool draw = name == "ID3D12GraphicsCommandListDrawInstanced" ||
+                              name == "ID3D12GraphicsCommandListDrawIndexedInstanced";
+            const bool dispatch = name == "ID3D12GraphicsCommandListDispatch";
+            if (!draw && !(feature == ReplayFeature::ShaderDebug && dispatch))
+                return {CapabilityStatus::NotImplemented,
+                        "Select a direct Draw or Dispatch execution supported by this analysis"};
+            return {CapabilityStatus::Supported,
+                    feature == ReplayFeature::Geometry
+                        ? "Use Geometry > Replay Mesh; requires RenderDoc 1.45 and successful native prefix "
+                          "replay"
+                        : "Use Shader Debug VS/PS/CS; requires RenderDoc 1.45, native prefix replay and a "
+                          "supported shader invocation"};
+        }
         if (feature == ReplayFeature::Replay) {
-            if (!selection.execution) return {CapabilityStatus::MissingData,"Select a submitted execution instance; full-frame replay is unfinished"};
+            if (!selection.execution)
+                return {CapabilityStatus::MissingData,
+                        "Select a submitted execution instance; full-frame replay is unfinished"};
             try {
-                const auto execution=submissions_.execution(*selection.execution);
+                const auto execution = submissions_.execution(*selection.execution);
                 if (!execution.recordingComplete || execution.submission<=directory_.initializationCount())
                     return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
                 if (selection.resource) {
@@ -262,9 +284,11 @@ class Dx12Session final : public IReplaySession {
                     if (descriptor.at("SampleCount")!=1) return {CapabilityStatus::NotImplemented,"DX12 multisample texture readback is not implemented"};
                 }
                 return {CapabilityStatus::Supported,"Selected execution replay; unsupported commands and missing captured state fail explicitly"};
-            } catch(const std::exception &error) { return {CapabilityStatus::MissingData,error.what()}; }
+            } catch (const std::exception &error) {
+                return {CapabilityStatus::MissingData, error.what()};
+            }
         }
-        return {CapabilityStatus::NotImplemented, "DX12 workspace analysis and experiments are not yet connected; isolated analysis is available through the CLI"};
+        return {CapabilityStatus::NotImplemented, "This DX12 workspace analysis or experiment is not yet connected"};
     }
 };
 }

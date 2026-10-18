@@ -17,6 +17,9 @@
 #include "app/Views.h"
 #include "app/OutputStorageExport.h"
 #include "app/WorkerImage.h"
+#include "app/ReplayDebugView.h"
+#include "app/ReplayMeshView.h"
+#include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QCryptographicHash>
 #include <QDir>
@@ -225,38 +228,188 @@ class Dx12SessionTests : public QObject {
             QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
         QVERIFY(window.findChild<QComboBox *>("outputTarget")->isEnabled()); QVERIFY(!sub->isVisible());
     }
-    void selectedReplayStorageExport() {
-        const auto directory=qEnvironmentVariable("FLORA_DX12_REPLAY_OUTPUT");
-        if(directory.isEmpty()) QSKIP("Set FLORA_DX12_REPLAY_OUTPUT to a Talos first-draw CLI replay output");
-        const auto result=readWorkerReport(directory,true);
-        QCOMPARE(result.replayReport.at("backend").get<std::string>(),std::string("dx12"));
-        QCOMPARE(result.replayReport.at("execution").get<std::string>(),std::string("12675"));
-        QVERIFY(!result.replayReport.at("frame_complete").get<bool>());
-        QCOMPARE(result.replayReport.at("native_texture").at("display_interpretation").get<std::string>(),std::string("unorm16_grayscale_0_to_1"));
-        QCOMPARE(result.replayReport.at("device").at("validation_error_count").get<std::string>(),std::string("0"));
-        const auto image=readWorkerImage(directory,result.report,true);
-        QCOMPARE(image.pixelColor(1527,1240),QColor(70,70,70,255));
+    void selectedAnalysisCapabilities() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for DX12 analysis capability checks");
+        const auto session = openReplaySession(
+            std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        ReplaySelection selection;
+        selection.session = session->identity();
+        QVERIFY(!session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        selection.execution = 12675;
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        QVERIFY(session->capability(ReplayFeature::Geometry, selection).supported());
+        selection.resource = UINT64_MAX; // Invocation analysis does not consume the output readback resource.
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        selection.execution = 12667; // Clear has no shader invocation or post-shader mesh.
+        QVERIFY(!session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::Geometry, selection).supported());
+        selection.execution = UINT64_MAX;
+        QCOMPARE(session->capability(ReplayFeature::Geometry, selection).status,
+                 CapabilityStatus::MissingData);
+        selection.session = "stale";
+        QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status, CapabilityStatus::Failed);
+    }
+    void selectedAnalysisWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (root.isEmpty() || library.isEmpty())
+            QSKIP("Set capture directory and RenderDoc library for native DX12 analysis UI");
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("12675");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto vs = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        QVERIFY(vs);
+        vs->setBackendPath(library, false);
+        auto read = vs->findChild<QAction *>("replayDebugRead");
+        QVERIFY(read->isEnabled());
+        QCOMPARE(vs->request().at("execution"), nlohmann::json("12675"));
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(vs->model());
+        QCOMPARE(vs->model()->size(), size_t(20));
+        const auto capture = vs->model()->result().at("capture");
+        QVERIFY(vs->model()->files().empty());
+        QVERIFY(vs->model()->result().at("frame_sha256").is_null());
+        QCOMPARE(vs->model()->result().at("execution"), nlohmann::json("12675"));
+        vs->findChild<QAction *>("debugStep")->trigger();
+        QCOMPARE(vs->model()->position(), int64_t(1));
+        vs->findChild<QSpinBox *>("debugStepIndex")->setValue(19);
+        vs->findChild<QLineEdit *>("debugWatchExpression")->setText("SV_Position.y");
+        vs->findChild<QAction *>("debugAddWatch")->trigger();
+        const auto watch = vs->model()->watchResults();
+        QCOMPARE(watch.size(), size_t(1));
+        QCOMPARE(watch[0].at("status"), nlohmann::json("available"));
+        QVERIFY(std::abs(watch[0].at("values")[0].get<double>() - (-0.3396325707435608)) < 1e-9);
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        QVERIFY(mesh);
+        mesh->setBackendPath(library, false);
+        done.clear();
+        mesh->findChild<QAction *>("replayMeshRead")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(mesh->result().at("capture"),
+                 capture); // Same exact prefix is reused, without another native replay.
+        QCOMPARE(mesh->result().at("vertex_count"), nlohmann::json(8053));
+        QCOMPARE(mesh->result().at("index_count"), nlohmann::json(42006));
+        QTemporaryDir exported;
+        mesh->exportResult(exported.filePath("mesh.obj"));
+        QVERIFY(QFileInfo(exported.filePath("mesh.obj")).size() > 1000);
+        const auto stale = vs->requestId();
+        locate->setText("12679");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(!vs->model());
+        QVERIFY(mesh->result().is_null());
+        QVERIFY(!vs->finish(stale, {{"ok", false}, {"error", "stale execution"}}));
+        ReplayDebugView wide("vs");
+        wide.setContext("wide", 9007199254740993ULL, true);
+        QCOMPARE(wide.request().at("execution"), nlohmann::json("9007199254740993"));
+        QVERIFY_THROWS_EXCEPTION(
+            std::runtime_error,
+            wide.finish(wide.requestId(),
+                        {{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740992"}}));
+    }
+    void instructionDebugWithoutSources() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_TRACE");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_TRACE to the captured Talos VS debug result");
+        QFile input(path);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(input.readAll().toStdString());
+        ReplayDebugView view("vs");
+        view.setContext("talos-instructions", 12675, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        QVERIFY(view.model());
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QLineEdit *>("debugInstruction")->setText("8");
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        QCOMPARE(view.model()->instructionBreakpoints(), nlohmann::json::array({8}));
+        view.findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(view.model()->result().at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(8));
+        QCOMPARE(view.findChild<QTabWidget *>("debugCodeTabs")->currentIndex(), 0);
+        QVERIFY(view.model()->breakpoints().empty());
+        const auto config = view.model()->configuration();
         QTemporaryDir temp;
-        exportOutputStorageFiles(directory,temp.filePath("depth.bin"),result.replayReport.at("output_display"));
-        QFile raw(temp.filePath("depth.bin")); QVERIFY(raw.open(QIODevice::ReadOnly));
-        const auto bytes=raw.readAll(); QCOMPARE(bytes.size(),qsizetype(8388608));
-        QCOMPARE(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex(),QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
-        uint16_t value{}; memcpy(&value,bytes.constData()+(1240*2048+1527)*2,2); QCOMPARE(value,uint16_t(17980));
-        QFile sidecar(temp.filePath("depth.bin.json")); QVERIFY(sidecar.open(QIODevice::ReadOnly));
-        const auto metadata=nlohmann::json::parse(sidecar.readAll().toStdString());
-        QCOMPARE(metadata.at("creation_record").get<std::string>(),std::string("167081"));
-        QCOMPARE(metadata.at("subresource").get<unsigned>(),1U);
+        const auto configPath = temp.filePath("instructions.json").toStdWString();
+        writeNativeDebugConfig(configPath, config);
+        ReplayDebugModel restored(result);
+        restored.importConfiguration(readNativeDebugConfig(configPath));
+        QCOMPARE(restored.configuration(), config);
+        QCOMPARE(restored.seek(0), size_t(view.model()->position()));
+        for (const auto badPoint :
+             {nlohmann::json(-1), nlohmann::json(8.5), nlohmann::json("8"), nlohmann::json(UINT64_MAX)}) {
+            auto bad = config;
+            bad["instruction_breakpoints"] = nlohmann::json::array({badPoint});
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, restored.importConfiguration(bad));
+            QCOMPARE(restored.configuration(), config);
+        }
+        auto duplicate = config;
+        duplicate["instruction_breakpoints"].push_back(8);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, restored.importConfiguration(duplicate));
+        QCOMPARE(restored.configuration(), config);
+        auto legacy = config;
+        legacy.erase("instruction_breakpoints");
+        restored.importConfiguration(legacy);
+        QVERIFY(restored.instructionBreakpoints().empty());
+        QCOMPARE(restored.configuration(), legacy);
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        QVERIFY(view.model()->instructionBreakpoints().empty());
+        view.setContext("next-invocation", 12679, true);
+        QVERIFY(!view.model());
+    }
+    void selectedReplayStorageExport() {
+        const auto directory = qEnvironmentVariable("FLORA_DX12_REPLAY_OUTPUT");
+        if (directory.isEmpty())
+            QSKIP("Set FLORA_DX12_REPLAY_OUTPUT to a Talos first-draw CLI replay output");
+        const auto result = readWorkerReport(directory, true);
+        QCOMPARE(result.replayReport.at("backend").get<std::string>(), std::string("dx12"));
+        QCOMPARE(result.replayReport.at("execution").get<std::string>(), std::string("12675"));
+        QVERIFY(!result.replayReport.at("frame_complete").get<bool>());
+        QCOMPARE(result.replayReport.at("native_texture").at("display_interpretation").get<std::string>(),
+                 std::string("unorm16_grayscale_0_to_1"));
+        QCOMPARE(result.replayReport.at("device").at("validation_error_count").get<std::string>(),
+                 std::string("0"));
+        const auto image = readWorkerImage(directory, result.report, true);
+        QCOMPARE(image.pixelColor(1527, 1240), QColor(70, 70, 70, 255));
+        QTemporaryDir temp;
+        exportOutputStorageFiles(directory, temp.filePath("depth.bin"),
+                                 result.replayReport.at("output_display"));
+        QFile raw(temp.filePath("depth.bin"));
+        QVERIFY(raw.open(QIODevice::ReadOnly));
+        const auto bytes = raw.readAll();
+        QCOMPARE(bytes.size(), qsizetype(8388608));
+        QCOMPARE(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex(),
+                 QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+        uint16_t value{};
+        memcpy(&value, bytes.constData() + (1240 * 2048 + 1527) * 2, 2);
+        QCOMPARE(value, uint16_t(17980));
+        QFile sidecar(temp.filePath("depth.bin.json"));
+        QVERIFY(sidecar.open(QIODevice::ReadOnly));
+        const auto metadata = nlohmann::json::parse(sidecar.readAll().toStdString());
+        QCOMPARE(metadata.at("creation_record").get<std::string>(), std::string("167081"));
+        QCOMPARE(metadata.at("subresource").get<unsigned>(), 1U);
     }
     void resourceDataBounds() {
-        QTemporaryDir temp;const auto path=fixture(temp);
-        QByteArray storage(192,0);
-        const uint64_t object=UINT64_MAX-7,size=8;
-        memcpy(storage.data(),&object,8);memcpy(storage.data()+40,&size,8);
-        memcpy(storage.data()+64,"contents",8);
-        const int64_t relative=-128;
-        memcpy(storage.data()+128,&object,8);memcpy(storage.data()+168,&size,8);
-        memcpy(storage.data()+176,&relative,8);
-        write(path+"/resources",storage);
+        QTemporaryDir temp;
+        const auto path = fixture(temp);
+        QByteArray storage(192, 0);
+        const uint64_t object = UINT64_MAX - 7, size = 8;
+        memcpy(storage.data(), &object, 8);
+        memcpy(storage.data() + 40, &size, 8);
+        memcpy(storage.data() + 64, "contents", 8);
+        const int64_t relative = -128;
+        memcpy(storage.data() + 128, &object, 8);
+        memcpy(storage.data() + 168, &size, 8);
+        memcpy(storage.data() + 176, &relative, 8);
+        write(path + "/resources", storage);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             const auto first=directory.resourceData(0),second=directory.resourceData(128);

@@ -538,7 +538,7 @@ query stops frame execution, the active capture is discarded while its device
 is alive, and no RDC file or executed Draw is reported. Release CLI, Worker,
 GUI and analysis executables build successfully. Only checks directly related
 to the mapping, resource-flag failure and selected analysis paths were run.
-Workspace analysis controls, PS/CS/DXIL validation, complete Resource History,
+PS/CS/DXIL validation, complete Resource History,
 fragment-depth repair, counters and modification experiments remain unfinished.
 
 ### Selected execution in the shared workspace
@@ -591,9 +591,8 @@ existing GF2 DX11 image hash
 The native D16 value is still `17980`, not the 8-bit displayed value 70. Logs and
 the offscreen workspace image are in `artifacts/dx12-research/dx12-workspace-replay2.txt`
 and `talos-dx12-workspace2.png`. No BF1/Hellblade2 GPU rerun was required for this
-UI integration. Shader/debug/history/geometry controls in the workspace still
-need the isolated DX12 analysis connection; successful selected replay is not
-acceptance of those features.
+UI integration. The Shader Debug and Replay Mesh connection is described below;
+successful selected replay alone is not acceptance of those features.
 
 The equivalent CLI run in `talos-workspace-cli1` completed with zero D3D12 debug
 errors. `selectedReplayStorageExport` read that actual Worker-compatible report,
@@ -603,6 +602,53 @@ bounded exporter, and verified all 8,388,608 bytes against SHA256
 The exported pixel remains exactly `17980`; its sidecar retains creation
 `167081` and subresource `1`. See `dx12-storage-export1.txt`. Release CLI, Worker,
 GUI and targeted test executables build successfully.
+
+### Selected shader debugging and replay mesh in the workspace
+
+For a submitted direct Draw, the existing Shader Debug VS/PS tabs and Geometry >
+Replay Mesh now create an isolated native DX12 prefix capture and dispatch analysis
+to RenderDoc 1.45. Direct Dispatch enables the CS tab. Analysis always captures
+through the selected invocation, independently of the output texture and its
+Before/After readback setting. The native allocation budget still applies.
+Changing the execution, session or budget invalidates the analysis context.
+The Worker envelope and returned backend/execution are checked before accepting
+results; execution and resource identities remain decimal strings, including
+values above 2^53. DX11 request fields retain their existing numeric contract.
+
+The bounded prefix cache includes the session, execution, budget, canonical DLL
+path and DLL SHA256, so VS debugging and mesh analysis can reuse exactly the same
+capture. DX12 results carry an explicit runtime-session capture identity rather
+than inventing a capture content hash. Persistent content identity is unfinished.
+History and counters are not enabled by this connection.
+
+`selectedAnalysisWorkspace` exercised Talos execution `12675` through the actual
+UI/Worker/RenderDoc path: 20 VS instruction states, no source files, working Step
+and `SV_Position.y` Watch (`-0.3396325707435608`), and 8,053 post-VS vertices with
+42,006 indices. OBJ export succeeded. The same prefix capture was reused for
+both analyses. Changing execution invalidated both results and rejected an old
+request. A separate check rejected a mismatched execution above 2^53.
+See `artifacts/dx12-research/dx12-analysis-ui1.txt`.
+
+For shaders without source mappings, enter an instruction number and use
+**Instruction breakpoint**, then **Continue**. This sets a persistent instruction
+breakpoint, separate from Run to and source-line rules. Active instruction
+breakpoints appear in the status line; invoking the same action removes one.
+They are saved in the existing debug configuration and exported reports. Old
+configurations without instruction breakpoints remain readable. Imports validate
+the shader identity, actual instruction information and duplicate/bounded rules
+before replacing existing state. Missing source and callstack information is
+never synthesized. PS/CS, DXIL, additional geometry stages, and complete analysis
+coverage still need real sample validation.
+
+The CPU-only `instructionDebugWithoutSources` check reused the actual Talos VS
+trace, stopped Continue at instruction 8 in Assembly, round-tripped its config
+through disk, rejected invalid/duplicate instructions atomically, read the old
+configuration shape, and cleared state on execution change. Capability checks
+accepted the Draw and rejected Clear, missing execution and stale session.
+Logs: `dx12-instruction-breakpoint1.txt`, `dx12-analysis-capability1.txt`.
+Relevant legacy configuration/selection and RDC job validation checks passed;
+Release GUI, Worker and targeted tests built successfully (`build60.log`,
+`build61.log`). These checks did not replay another GPU frame.
 
 ### Full feature acceptance
 
@@ -614,7 +660,7 @@ GUI and targeted test executables build successfully.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | First Clear/Draw mapped; D16 event-boundary values verified, fragment depths unavailable; full history unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | Unfinished | One DXBC VS trace and post-VS mesh verified; remaining stages/UI unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | Unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Not performed | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
@@ -624,5 +670,5 @@ implementation gaps include historical query state, frame execution coverage
 beyond the verified Talos prefix, full resource lifetime and address-alias handling,
 complete command arguments, dependency scheduling and cross-queue synchronization.
 The isolated analysis backend now accepts native DX12 captures and execution
-identities. Selected replay/readback is connected to the workspace; its analysis
-workflow still requires integration.
+identities. Selected replay/readback, VS debugging and Replay Mesh are connected
+to the workspace. History, performance and experiment integration remain unfinished.

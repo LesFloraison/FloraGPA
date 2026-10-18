@@ -1,6 +1,6 @@
 #include "ReplayDebugView.h"
-#include "application/RenderDocLibrary.h"
 #include "application/NativeDebugConfig.h"
+#include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QComboBox>
 #include <QDir>
@@ -194,7 +194,7 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     action(steps_, "debugOut", "Out", [functionStep] { functionStep(true); });
     action(steps_, "debugContinue", "Continue", [this] {
         go(model_->seek(model_->position()));
-        code_->setCurrentIndex(1);
+        code_->setCurrentIndex(model_->location(model_->position()).is_null() ? 0 : 1);
         summary_->setText(summary_->text() + " · Breakpoint");
     });
     step_ = new QSpinBox;
@@ -221,6 +221,15 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
                 return;
             }
         throw std::runtime_error("Instruction is not encountered later in this trace");
+    });
+    action(steps_, "debugToggleInstructionBreakpoint", "Instruction breakpoint", [this] {
+        const auto input = instruction_->text().trimmed();
+        bool ok = false;
+        const auto target = input.toULongLong(&ok);
+        if (!ok || input.startsWith('-') || input.startsWith('+'))
+            throw std::runtime_error("Enter an unsigned instruction index");
+        model_->toggleInstruction(target);
+        render();
     });
     summary_ = new QLabel(stage_.toUpper() + " · Select an event");
     summary_->setObjectName("replayDebugSummary");
@@ -364,6 +373,7 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
             refreshRules();
             refreshWatches();
             showSource(false);
+            render();
         }
     });
     action(configBar, "debugSave", "Save…", [this] {
@@ -454,8 +464,9 @@ void ReplayDebugView::invoke(const std::function<void()> &fn) {
         emit error(QString::fromUtf8(e.what()));
     }
 }
-void ReplayDebugView::setContext(const QString &key, qulonglong event) {
-    if (key_ != key || event_ != event) {
+void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12) {
+    if (key_ != key || event_ != event || dx12_ != dx12) {
+        dx12_ = dx12;
         key_ = key;
         event_ = event;
         invalidate();
@@ -471,7 +482,8 @@ void ReplayDebugView::setBackendPath(const QString &path, bool persist) {
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    if (persist) QSettings().setValue("analysis/renderdoc", path);
+    if (persist)
+        QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
 void ReplayDebugView::selectPixel(int x, int y, int sample) {
@@ -488,6 +500,10 @@ Json ReplayDebugView::request() const {
                         : stage_ == "vs" ? "debug-vertex"
                                          : "debug-thread"},
              {"gpa_event", event_}};
+    if (dx12_) {
+        job.erase("gpa_event");
+        job["execution"] = std::to_string(event_);
+    }
     if (stage_ == "ps")
         job.update({{"x", x_->value()}, {"y", y_->value()}, {"sample", sample_->value()}});
     else if (stage_ == "vs")
@@ -511,8 +527,9 @@ void ReplayDebugView::invalidate() {
     condition_->clear();
     count_->setText("1");
     hitMode_->setCurrentIndex(0);
-    summary_->setText(stage_.toUpper() + " · " +
-                      (event_ ? QString("API %1").arg(event_) : "Select an event"));
+    summary_->setText(
+        stage_.toUpper() + " · " +
+        (event_ ? QString(dx12_ ? "DX12 execution %1" : "API %1").arg(event_) : "Select an event"));
     rendering_ = false;
     updateActions();
 }
@@ -537,6 +554,9 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         emit inspectionFinished(false);
         return false;
     }
+    if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
+                  result.value("execution", Json()) != Json(std::to_string(event_))))
+        throw std::runtime_error("Shader trace does not match the DX12 execution selection");
     auto replacement = std::make_unique<ReplayDebugModel>(result);
     if (!replacement->size())
         throw std::runtime_error("Shader debugger returned no steps");
@@ -574,13 +594,18 @@ void ReplayDebugView::render() {
     const auto position = model_->position();
     const auto &step = model_->result().at("steps").at(size_t(position));
     step_->setValue(int(position));
-    summary_->setText(QString("%1 · API %2 · Step %3/%4 · Instruction %5 · Flags %6")
+    summary_->setText(QString(dx12_ ? "%1 · DX12 execution %2 · Step %3/%4 · Instruction %5 · Flags %6"
+                                    : "%1 · API %2 · Step %3/%4 · Instruction %5 · Flags %6")
                           .arg(stage_.toUpper())
                           .arg(event_)
                           .arg(position)
                           .arg(model_->size() - 1)
                           .arg(text(step.at("nextInstruction")))
                           .arg(text(step.value("flags", Json(0)))));
+    const auto instructionPoints = model_->instructionBreakpoints();
+    if (!instructionPoints.empty())
+        summary_->setText(summary_->text() + " · Instruction breakpoints " +
+                          QString::fromStdString(instructionPoints.dump()));
     registers_->clear();
     for (const auto &row : model_->registerRows(interpretation_->currentText().toStdString()))
         tip(new QTreeWidgetItem(registers_, {text(row[0]), text(row[1]), text(row[2])}));

@@ -1,6 +1,6 @@
 #include "ReplayMeshView.h"
-#include "application/RenderDocLibrary.h"
 #include "Views.h"
+#include "application/RenderDocLibrary.h"
 #include "application/ReplayMesh.h"
 #include <QAbstractTableModel>
 #include <QAction>
@@ -153,9 +153,10 @@ void ReplayMeshView::invalidate() {
     summary_->setToolTip({});
     updateActions();
 }
-void ReplayMeshView::setContext(const QString &key, qulonglong event) {
-    if (key == key_ && event == event_)
+void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12) {
+    if (key == key_ && event == event_ && dx12_ == dx12)
         return;
+    dx12_ = dx12;
     key_ = key;
     event_ = event;
     invalidate();
@@ -165,7 +166,8 @@ void ReplayMeshView::setBackendPath(const QString &path, bool persist) {
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    if (persist) QSettings().setValue("analysis/renderdoc", path);
+    if (persist)
+        QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
 void ReplayMeshView::setWorkerBusy(bool busy) {
@@ -187,10 +189,15 @@ ReplayMeshView::Json ReplayMeshView::request() const {
         throw std::runtime_error("Instance must be an unsigned 32-bit integer");
     if (key_.isEmpty() || !event_)
         throw std::runtime_error("Select a draw first");
-    return {{"action", "postmesh"},
-            {"gpa_event", event_},
-            {"stage", stage_->currentData().toString().toStdString()},
-            {"instance", value}};
+    Json job{{"action", "postmesh"},
+             {"gpa_event", event_},
+             {"stage", stage_->currentData().toString().toStdString()},
+             {"instance", value}};
+    if (dx12_) {
+        job.erase("gpa_event");
+        job["execution"] = std::to_string(event_);
+    }
+    return job;
 }
 bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString &directory) {
     if (request != requestId_)
@@ -200,6 +207,9 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         emit inspectionFinished(false);
         return false;
     }
+    if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
+                  result.value("execution", Json()) != Json(std::to_string(event_))))
+        throw std::runtime_error("Mesh result does not match the DX12 execution selection");
     if (result.value("action", "") != "postmesh" || !result.at("stage").is_string())
         throw std::runtime_error("Invalid mesh result");
     QMap<QString, QByteArray> files;
@@ -245,7 +255,8 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
     files_ = std::move(files);
     model_->setMesh(meshData);
     preview_->setMesh(finite ? QJsonObject{{"positions", positions}, {"faces", faces}} : QJsonObject{});
-    summary_->setText(QString("API %1 · %2 · %3 vertices · %4 faces")
+    summary_->setText(QString(dx12_ ? "DX12 execution %1 · %2 · %3 vertices · %4 faces"
+                                    : "API %1 · %2 · %3 vertices · %4 faces")
                           .arg(event_)
                           .arg(QString::fromStdString(result.at("stage").get<std::string>()))
                           .arg(meshData->positions.size())

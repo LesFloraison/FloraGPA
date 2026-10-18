@@ -68,6 +68,16 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12Preparation() {
+        QTemporaryDir dir;
+        const auto job = prepare(dir.path(), "success",
+                                 {{"execution", "9007199254740993"},
+                                  {"resource", "18446744073709551615"},
+                                  {"resource_creation", "9007199254740994"}});
+        QCOMPARE(job.at("execution"), Json("9007199254740993"));
+        QCOMPARE(job.at("resource"), Json("18446744073709551615"));
+        QVERIFY(job.at("gpa_event").is_null());
+    }
     void preparation() {
         QTemporaryDir dir;
         const auto job = prepare(dir.path(), "success", {{"resource", UINT64_MAX}, {"group", {1, 2, 3}}});
@@ -91,6 +101,12 @@ class RdcJobTests : public QObject {
         QTest::newRow("overflow") << Json{{"sample", uint64_t(UINT32_MAX) + 1}};
         QTest::newRow("fraction") << Json{{"vertex", 1.5}};
         QTest::newRow("both-events") << Json{{"gpa_event", 1}, {"eid", 2}};
+        QTest::newRow("dx12-number") << Json{{"execution", 9007199254740993ULL}};
+        QTest::newRow("dx12-overflow") << Json{{"execution", "18446744073709551616"}};
+        QTest::newRow("dx12-null") << Json{{"execution", nullptr}};
+        QTest::newRow("dx12-mixed-event") << Json{{"execution", "1"}, {"gpa_event", 1}};
+        QTest::newRow("dx12-mixed-resource") << Json{{"execution", "1"}, {"resource", 1}};
+        QTest::newRow("dx12-lifetime-without-object") << Json{{"execution", "1"}, {"resource_creation", "2"}};
         QTest::newRow("short-group") << Json{{"group", {0, 0}}};
         QTest::newRow("thread-type") << Json{{"thread", "000"}};
         QTest::newRow("negative-thread") << Json{{"thread", {0, 0, -1}}};
