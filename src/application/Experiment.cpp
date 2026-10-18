@@ -39,6 +39,8 @@ std::vector<uint8_t> asset(const Json &value) {
 } // namespace
 Experiment::Experiment(const Frame &frame) {
     project_ = {{"format", "FloraGPA experiment 1"},
+                {"backend", "dx11"},
+                {"capture_identity", {{"kind", "sha256"}, {"value", frame.sha256()}}},
                 {"frame_sha256", frame.sha256()},
                 {"frame_name", QString::fromStdWString(frame.path().filename().wstring()).toStdString()},
                 {"cursor", 0},
@@ -53,6 +55,15 @@ void Experiment::load(const QString &path, const Frame &frame) {
     auto candidate = Json::parse(bytes.begin(), bytes.end());
     if (candidate.at("format") != "FloraGPA experiment 1" || candidate.at("frame_sha256") != frame.sha256())
         throw std::runtime_error("Experiment format or capture hash mismatch");
+    if (candidate.contains("backend") && candidate.at("backend") != "dx11")
+        throw std::runtime_error("Experiment backend does not match the DX11 capture");
+    const Json identity{{"kind", "sha256"}, {"value", frame.sha256()}};
+    if (candidate.contains("capture_identity") && candidate.at("capture_identity") != identity)
+        throw std::runtime_error("Experiment capture identity mismatch");
+    // Version-1 DX11 projects predate explicit backend identities. Normalize
+    // them only after verifying their original capture hash.
+    candidate["backend"] = "dx11";
+    candidate["capture_identity"] = identity;
     if (!candidate.at("history").is_array() ||
         identifier(candidate.at("cursor")) > candidate.at("history").size())
         throw std::runtime_error("Invalid experiment cursor");

@@ -154,6 +154,12 @@ Focused checks covered UINT64_MAX round trips, changed backend/session/request/
 revision rejection, analysis failure envelopes and the DX11 replay/session-switch
 path. The DX11 image hash and geometry result remained unchanged.
 
+DX11 experiment files now carry explicit `backend` and `capture_identity` fields.
+Legacy version-1 projects are still accepted after validating their original
+frame hash, then normalized on load. A backend or capture identity mismatch is
+rejected without changing the active experiment. A focused legacy-load check
+passed; this does not implement DX12 experiment operations.
+
 An additional targeted prerequisite is available as
 `validate-frame <directory> --check-copy <initialization-record> --out <new-directory>`.
 It resolves the selected buffer copy's creation recipes (including forward heap
@@ -184,3 +190,24 @@ and `0x60eb40`. Full portable-package validation is still outstanding.
    mapping to the isolated analysis backend.
 4. Implement GPU measurements and core non-destructive modification experiments,
    then verify the portable package without GPA or Python runtime dependencies.
+
+## Acceptance ledger
+
+| Requirement | BF1 | Talos | Hellblade2 |
+| --- | --- | --- | --- |
+| Open/index in shared workspace | Passed | Passed | Passed |
+| Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
+| Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
+| Complete native frame and selected-event replay | Unfinished | Unfinished | Unfinished |
+| Resource/Pixel History with execution mapping | Unfinished | Unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | Unfinished | Unfinished | Unfinished |
+| GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
+| Comparison with original GPA frame/intermediate resources | Not performed | Not performed | Not performed |
+| Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
+
+No unfinished item above has been attributed to a hardware limitation. Known
+implementation gaps include PSO/root-signature/descriptor reconstruction,
+resource lifetime and address remapping, complete command arguments, initialization
+dependency scheduling and cross-queue synchronization. The existing analysis
+backend still requires DX11 captures; its request envelope is shared, but its
+pipeline and execution mapping have not yet been ported to DX12.

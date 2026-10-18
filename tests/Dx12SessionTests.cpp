@@ -1,4 +1,5 @@
 #include "application/ReplaySession.h"
+#include "application/Experiment.h"
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
@@ -105,6 +106,22 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(session->capability(ReplayFeature::ApiInspection,other).status,CapabilityStatus::Failed);
         auto second=openReplaySession(std::filesystem::path(path.toStdWString()));
         QVERIFY(second->identity()!=session->identity());
+    }
+    void legacyExperimentIdentity() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("External DX11 capture is not configured");
+        Frame frame(std::filesystem::path((root+"/GF2_Exilium_2026_03_03__00_19_35.gpa_frame").toStdWString()));
+        Experiment experiment(frame);QTemporaryDir temp;const auto path=temp.filePath("experiment.json");
+        auto legacy=experiment.document();legacy.erase("backend");legacy.erase("capture_identity");
+        write(path,QByteArray::fromStdString(legacy.dump()));experiment.load(path,frame);
+        QCOMPARE(experiment.document().at("backend").get<std::string>(),std::string("dx11"));
+        QCOMPARE(experiment.document().at("capture_identity").at("value").get<std::string>(),frame.sha256());
+        const auto before=experiment.document();auto invalid=before;invalid["backend"]="dx12";
+        write(path,QByteArray::fromStdString(invalid.dump()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,experiment.load(path,frame));QVERIFY(experiment.document()==before);
+        invalid=before;invalid["capture_identity"]["value"]="different-capture";
+        write(path,QByteArray::fromStdString(invalid.dump()));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,experiment.load(path,frame));QVERIFY(experiment.document()==before);
     }
     void malformedAndCancellation() {
         QTemporaryDir temp; const auto path=fixture(temp);
