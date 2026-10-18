@@ -11,6 +11,9 @@ class NativeReplay final {
   public:
     NativeReplay(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeReplay();
+    // Plan before initialization to restore lists recorded in the keyframe at
+    // their original CPU boundaries, without executing their frame work early.
+    void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false);
     void initializeTransfers();
     void replayTo(uint64_t execution, bool after, bool analysisMarkers = false);
     nlohmann::json readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output, uint64_t expectedCreation = 0);

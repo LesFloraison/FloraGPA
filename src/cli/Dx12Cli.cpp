@@ -65,6 +65,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"resource", nullptr},
                           {"rgba_sha256", nullptr}};
     try {
+        replay.prepareExecution(execution, !options.isSet("before"), bool(capture));
         replay.initializeTransfers();
         if (capture)
             capture->start(device.device(), "FloraGPA independent DX12 replay");
@@ -233,6 +234,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 dx12::NativeReplay replay(device, directory, limit);
                 std::string stage = "initialization";
                 try {
+                    if (execution) replay.prepareExecution(execution, !options.isSet("before"), bool(analysisCapture));
                     replay.initializeTransfers();
                     stage = "buffer_readback";
                     if (id) report["initialized_buffer"] = replay.inspectBuffer(id, offset, length);

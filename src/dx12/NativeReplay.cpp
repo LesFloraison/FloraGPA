@@ -4,6 +4,7 @@
 #include "NativeDescriptors.h"
 #include "NativeCommands.h"
 #include <wrl/client.h>
+#include <dxgi1_4.h>
 #include <QCryptographicHash>
 #include <QByteArrayView>
 #include <chrono>
@@ -86,13 +87,40 @@ struct NativeReplay::Impl {
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
     using StateActions = std::vector<std::function<void()>>;
-    struct Tiling { UINT total{}; D3D12_PACKED_MIP_INFO packed{}; std::vector<D3D12_SUBRESOURCE_TILING> subresources; };
+    struct FramePlan {
+        std::unique_ptr<NativeCommands> commands;
+        struct Recording {
+            ComPtr<ID3D12CommandAllocator> allocator;
+            ComPtr<ID3D12GraphicsCommandList> list;
+            Impl::StateActions states;
+            size_t count{}, recorded{};
+            bool closed = false;
+            SubmittedList instance;
+        };
+        using Key = std::pair<size_t, size_t>;
+        std::map<Key, Recording> recordings;
+        std::map<std::pair<uint64_t, uint64_t>, Key> instances;
+        std::map<uint64_t, std::vector<Key>> starts;
+        uint64_t execution{};
+        bool after{}, markers{};
+    };
+    std::unique_ptr<FramePlan> frame;
+    void recordFrame(uint64_t id);
+    struct Tiling {
+        UINT total{};
+        D3D12_PACKED_MIP_INFO packed{};
+        std::vector<D3D12_SUBRESOURCE_TILING> subresources;
+    };
     std::map<uint64_t, Tiling> tilings;
     uint64_t tileMappingCalls{};
     Impl(NativeDevice &d, const StreamDirectory &s, uint64_t limit, CancelCheck c)
-        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled), resources(d, s, limit, cancelled), descriptors(d, s, resources, cancelled) {
+        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled),
+          resources(d, s, limit, cancelled), descriptors(d, s, resources, cancelled) {
         for (size_t i = 0; i < s.initializationCount(); ++i) {
-            if (i % 1024 == 0) checkCancellation(cancelled); const auto &p = s.packets()[i]; const auto bytes = s.payload(p);
+            if (i % 1024 == 0)
+                checkCancellation(cancelled);
+            const auto &p = s.packets()[i];
+            const auto bytes = s.payload(p);
             if (p.type == 0x127932607a959ULL) { const auto r = queueRecipe(bytes, i + 1); require(queueRecipes.emplace(r.object, r).second, "Ambiguous initialization queue lifetime"); }
             if (p.type == 0x127930cf4f3a0ULL) { const auto r = fenceRecipe(bytes, i + 1); require(fenceRecipes.emplace(r.object, r).second, "Ambiguous initialization fence lifetime"); }
             if (p.type == 0x12793beef5413ULL) { const auto r = allocatorRecipe(bytes, i + 1); require(allocatorRecipes.emplace(r.object, r).second, "Ambiguous initialization allocator lifetime"); }
@@ -283,7 +311,9 @@ struct NativeReplay::Impl {
         require(pointers.size() == args.at("NumCommandLists").get<size_t>(), "Submission instance count mismatch");
         currentRecord = id; checkCancellation(cancelled); if (!pointers.empty()) nativeQueue->ExecuteCommandLists(UINT(pointers.size()), pointers.data()); wait(nativeQueue);
         resources.completeSubmission(queueRecipes.at(queueId).desc.Type);
-        executedCommands = recordedCommands;
+        for (const auto &instance : index.lists()) if (instance.submission == id)
+            for (auto command : index.recordings()[*instance.recording].records)
+                ++executedCommands[streamPacketName(directory.packets()[size_t(command - 1)].type)];
         submissions.push_back({{"record", std::to_string(id)}, {"queue", std::to_string(queueId)}, {"lists", std::move(executions)}});
     }
 };
@@ -310,6 +340,7 @@ void NativeReplay::initializeTransfers() {
     for (size_t i = 0; i < s.directory.initializationCount(); ++i) {
         s.currentRecord = i + 1; if (i % 256 == 0) checkCancellation(s.cancelled); const auto &p = s.directory.packets()[i];
         try {
+            if (s.frame) s.recordFrame(i + 1);
             if (p.type == 0x20000000000000ULL) s.resources.restoreMappedData(i + 1);
             else if (s.descriptors.apply(i + 1)) {}
             else if (p.type == 0x14538e8691d1cULL) s.resources.releaseCompleted(i + 1);
@@ -326,73 +357,141 @@ void NativeReplay::initializeTransfers() {
         } catch (const OperationCancelled &) { throw; }
         catch (const std::exception &e) { throw std::runtime_error("Initialization record " + std::to_string(s.currentRecord) + ": " + e.what()); }
     }
-    for (const auto &[id, queue] : s.queues) s.wait(queue.Get()); s.initialized = true;
+    for (const auto &[id, queue] : s.queues)
+        s.wait(queue.Get());
+    s.initialized = true;
 }
-void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
-    auto &s = *impl_; require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
-    s.frameAttempted = true; s.selectedExecution = execution; s.boundaryAfter = after;
+void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers) {
+    auto &s = *impl_;
+    require(!s.frameAttempted && !s.frame, "Execution plan is already prepared or attempted");
     const auto target = s.index.execution(execution);
-    require(target.submission > s.directory.initializationCount() && target.recordingComplete, "Select a complete frame execution instance");
-    NativeCommands commands(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
-    struct Recording {
-        ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
-        Impl::StateActions states; size_t count{}, recorded{}; bool closed = false;
-        SubmittedList instance;
-    };
-    using Key = std::pair<size_t, size_t>;
-    std::map<Key, Recording> recordings;
-    std::map<std::pair<uint64_t, uint64_t>, Key> instances;
+    require(target.submission > s.directory.initializationCount() && target.recordingComplete,
+            "Select a complete frame execution instance");
+    auto frame = std::make_unique<Impl::FramePlan>();
+    frame->execution = execution;
+    frame->after = after;
+    frame->markers = analysisMarkers;
+    frame->commands =
+        std::make_unique<NativeCommands>(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
+    auto &recordings = frame->recordings;
+    auto &instances = frame->instances;
+    auto &starts = frame->starts;
     uint64_t nativeCommandCount{};
     for (const auto &instance : s.index.lists()) {
-        if (instance.submission <= s.directory.initializationCount() || instance.submission > target.submission ||
-            (instance.submission == target.submission && instance.ordinal > target.ordinal)) continue;
-        require(instance.recording.has_value(), "Missing frame command-list recording"); const auto &original = s.index.recordings()[*instance.recording];
-        require(original.hasBeginning && original.closed && original.begin > s.directory.initializationCount(), "Frame list needs keyframe recording-state restoration");
-        const auto count = instance.submission == target.submission && instance.ordinal == target.ordinal ?
-            size_t(execution - instance.firstExecution + (after ? 1 : 0)) : original.records.size();
-        require(count <= 4000000 - nativeCommandCount, "Native frame recording exceeds the four-million command limit"); nativeCommandCount += count;
+        if (instance.submission <= s.directory.initializationCount() ||
+            instance.submission > target.submission ||
+            (instance.submission == target.submission && instance.ordinal > target.ordinal))
+            continue;
+        require(instance.recording.has_value(), "Missing frame command-list recording");
+        const auto &original = s.index.recordings()[*instance.recording];
+        require(original.hasBeginning && original.closed &&
+                    (!s.initialized || original.begin > s.directory.initializationCount()),
+                "Prepare the execution before initialization to restore keyframe recording state");
+        const auto count = instance.submission == target.submission && instance.ordinal == target.ordinal
+                               ? size_t(execution - instance.firstExecution + (after ? 1 : 0))
+                               : original.records.size();
+        require(count <= 4000000 - nativeCommandCount,
+                "Native frame recording exceeds the four-million command limit");
+        nativeCommandCount += count;
         // Each submission instance gets its own native recording, including
         // repeated submissions of one generation. This makes execution markers
         // unambiguous without splitting a native ExecuteCommandLists batch.
-        const Key key{*instance.recording, instances.size()}; auto &native = recordings.try_emplace(key).first->second;
-        native.count = count; native.instance = instance;
+        const Impl::FramePlan::Key key{*instance.recording, instances.size()};
+        auto &native = recordings.try_emplace(key).first->second;
+        native.count = count;
+        native.instance = instance;
         instances.emplace(std::pair{instance.submission, instance.ordinal}, key);
     }
-    std::map<uint64_t, std::vector<Key>> starts;
-    for (const auto &[key, native] : recordings) starts[s.index.recordings()[key.first].begin].push_back(key);
+    for (const auto &[key, native] : recordings)
+        starts[s.index.recordings()[key.first].begin].push_back(key);
+    s.frame = std::move(frame);
+}
+void NativeReplay::Impl::recordFrame(uint64_t id) {
+    auto &s = *this;
+    auto &starts = frame->starts;
+    auto &recordings = frame->recordings;
+    auto &commands = frame->commands;
+    const auto analysisMarkers = frame->markers;
+    const auto &p = directory.packets().at(size_t(id - 1));
+    if (auto it = starts.find(id); it != starts.end())
+        for (const auto &key : it->second) {
+            auto &native = recordings.at(key);
+            const auto args = decodeArguments(p.type, s.directory.payload(p)).values;
+            const auto allocatorId = value(args, "CommandAllocator");
+            require(s.allocatorRecipes.contains(allocatorId), "Missing frame allocator recipe");
+            const auto type = s.allocatorRecipes.at(allocatorId).type;
+            require(type == D3D12_COMMAND_LIST_TYPE_DIRECT || type == D3D12_COMMAND_LIST_TYPE_COPY ||
+                        type == D3D12_COMMAND_LIST_TYPE_COMPUTE,
+                    "Unsupported frame command-list type");
+            if (args.contains("Type"))
+                require(args.at("Type").get<UINT>() == UINT(type), "Frame list and allocator types disagree");
+            const auto pso = value(args, "InitialPipelineState");
+            auto initial = pso ? commands->pipelines().pipeline(pso, id) : nullptr;
+            check(s.device.device()->CreateCommandAllocator(type, IID_PPV_ARGS(&native.allocator)),
+                  "Create frame allocator");
+            check(s.device.device()->CreateCommandList(args.value("NodeMask", UINT(0)), type,
+                                                       native.allocator.Get(), initial,
+                                                       IID_PPV_ARGS(&native.list)),
+                  "Create frame command list");
+            if (!native.count) {
+                check(native.list->Close(), "Close empty frame prefix");
+                native.closed = true;
+            }
+        }
+    if (const auto recording = s.index.recordingForRecord(id)) {
+        for (auto &[key, native] : recordings) {
+            if (key.first != *recording || native.closed)
+                continue;
+            require(native.list && native.recorded < native.count, "Invalid native recording boundary");
+            const auto &original = s.index.recordings()[key.first];
+            require(original.records[native.recorded] == id, "Native recording order mismatch");
+            if (analysisMarkers) {
+                const auto &instance = native.instance;
+                const auto marker =
+                    "Flora DX12 execution " + std::to_string(instance.firstExecution + native.recorded) +
+                    " record " + std::to_string(id) + " submission " + std::to_string(instance.submission) +
+                    " queue " + std::to_string(instance.queue) + " list " + std::to_string(instance.list) +
+                    " generation " + std::to_string(original.generation) + " ordinal " +
+                    std::to_string(instance.ordinal) + ": " + streamPacketName(p.type);
+                native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+            }
+            if (transfer(p.type))
+                s.record(native.list.Get(), id, original.list, &native.states);
+            else {
+                commands->record(native.list.Get(), id, original.list, native.states);
+                ++s.recordedCommands[streamPacketName(p.type)];
+            }
+            if (analysisMarkers)
+                native.list->EndEvent();
+            if (++native.recorded == native.count) {
+                check(native.list->Close(), "Close frame execution prefix");
+                native.closed = true;
+            }
+        }
+        return;
+    }
+}
+void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
+    auto &s = *impl_;
+    require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
+    if (!s.frame)
+        prepareExecution(execution, after, analysisMarkers);
+    s.frameAttempted = true;
+    s.selectedExecution = execution;
+    s.boundaryAfter = after;
+    const auto target = s.index.execution(execution);
+    require(target.submission > s.directory.initializationCount() && target.recordingComplete,
+            "Select a complete frame execution instance");
+    require(s.frame && s.frame->execution == execution && s.frame->after == after &&
+                s.frame->markers == analysisMarkers,
+            "Prepared execution does not match replay request");
+    auto &recordings = s.frame->recordings;
+    auto &instances = s.frame->instances;
     for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
         s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
         try {
-            if (auto it = starts.find(id); it != starts.end()) for (const auto &key : it->second) {
-                auto &native = recordings.at(key); const auto args = decodeArguments(p.type, s.directory.payload(p)).values;
-                const auto allocatorId = value(args, "CommandAllocator"); require(s.allocatorRecipes.contains(allocatorId), "Missing frame allocator recipe");
-                const auto type = s.allocatorRecipes.at(allocatorId).type;
-                require(type == D3D12_COMMAND_LIST_TYPE_DIRECT || type == D3D12_COMMAND_LIST_TYPE_COPY || type == D3D12_COMMAND_LIST_TYPE_COMPUTE, "Unsupported frame command-list type");
-                if (args.contains("Type")) require(args.at("Type").get<UINT>() == UINT(type), "Frame list and allocator types disagree");
-                const auto pso = value(args, "InitialPipelineState"); auto initial = pso ? commands.pipelines().pipeline(pso, id) : nullptr;
-                check(s.device.device()->CreateCommandAllocator(type, IID_PPV_ARGS(&native.allocator)), "Create frame allocator");
-                check(s.device.device()->CreateCommandList(args.value("NodeMask", UINT(0)), type, native.allocator.Get(), initial, IID_PPV_ARGS(&native.list)), "Create frame command list");
-                if (!native.count) { check(native.list->Close(), "Close empty frame prefix"); native.closed = true; }
-            }
-            if (const auto recording = s.index.recordingForRecord(id)) {
-                for (auto &[key, native] : recordings) {
-                    if (key.first != *recording || native.closed) continue;
-                    require(native.list && native.recorded < native.count, "Invalid native recording boundary");
-                    const auto &original = s.index.recordings()[key.first]; require(original.records[native.recorded] == id, "Native recording order mismatch");
-                    if (analysisMarkers) {
-                        const auto &instance = native.instance;
-                        const auto marker = "Flora DX12 execution " + std::to_string(instance.firstExecution + native.recorded) + " record " + std::to_string(id) +
-                            " submission " + std::to_string(instance.submission) + " queue " + std::to_string(instance.queue) + " list " + std::to_string(instance.list) +
-                            " generation " + std::to_string(original.generation) + " ordinal " + std::to_string(instance.ordinal) + ": " + streamPacketName(p.type);
-                        native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
-                    }
-                    if (transfer(p.type)) s.record(native.list.Get(), id, original.list, &native.states);
-                    else { commands.record(native.list.Get(), id, original.list, native.states); ++s.recordedCommands[streamPacketName(p.type)]; }
-                    if (analysisMarkers) native.list->EndEvent();
-                    if (++native.recorded == native.count) { check(native.list->Close(), "Close frame execution prefix"); native.closed = true; }
-                }
-                continue;
-            }
+            s.recordFrame(id);
+            if (s.index.recordingForRecord(id)) continue;
             if (p.type == 0x20000000000000ULL) s.resources.restoreMappedData(id);
             else if (s.descriptors.apply(id)) {}
             else if (p.type == 0x125482975df48ULL) {
@@ -420,17 +519,81 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type)) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
-            // These APIs carry no additional GPU commands. Map/Unmap data is
-            // restored by CopyOperation, and native allocations outlive all
-            // recordings in this bounded execution context.
-            case 0x127938b682074ULL: case 0x1ae3c721c351aULL: case 0x1ae3cd6acf667ULL:
-            case 0x1ae3ce8691d1cULL: case 0x1ae3c6360f841ULL:
-            case 0x1cb0a721c351aULL: case 0x1e6503e2ff325ULL: case 0x1e650cfcd4902ULL:
-            case 0x1e650e8691d1cULL: case 0x14538e8691d1cULL: case 0x11469e993999dULL:
-            case 0x1279331d76605ULL: case 0x1e6508ef58ff0ULL: case 0x15a3eb3b8e877ULL:
-            case 0x15a3edf3ce2bbULL: case 0x1af998824f46bULL: case 0x1d53218275f72ULL:
-            case 0x28000000000000ULL: break;
-            default: throw std::runtime_error("Unsupported frame CPU operation: " + streamPacketName(p.type));
+                case 0x114696360f841ULL:
+                case 0x11469e8691d1cULL:
+                case 0x18f056360f841ULL:
+                case 0x18f05e8691d1cULL:
+                case 0x129496360f841ULL:
+                case 0x12949e8691d1cULL:
+                case 0x1d532e8691d1cULL: {
+                    Reader r(s.directory.payload(p));
+                    require(r.read<uint64_t>() != 0, "Null captured COM reference");
+                    (void)r.read<ULONG>();
+                    r.end();
+                    // Replay-owned fences, PSOs and root signatures retain their
+                    // native references through the selected execution boundary.
+                    break;
+                }
+                case 0x1d53209e0c150ULL: {
+                    Reader r(s.directory.payload(p));
+                    const auto object = r.read<uint64_t>();
+                    require(r.read<GUID>() == __uuidof(IDXGISwapChain3),
+                            "Unimplemented swapchain interface query");
+                    require(r.flag() && r.read<uint64_t>() == 1 && r.read<uint64_t>() == object,
+                            "Swapchain query introduces an unresolved object alias");
+                    check(r.read<HRESULT>(), "Captured swapchain interface query");
+                    r.end();
+                    break;
+                }
+                case 0x18972bf306bb9ULL: {
+                    Reader r(s.directory.payload(p));
+                    r.skip(8 + 4 + 4);
+                    if (r.flag())
+                        r.skip(sizeof(DXGI_QUERY_VIDEO_MEMORY_INFO));
+                    check(r.read<HRESULT>(), "Captured video memory query");
+                    r.end();
+                    break;
+                }
+                case 0x1d53215a11fecULL: {
+                    Reader r(s.directory.payload(p));
+                    r.skip(8);
+                    if (r.flag())
+                        r.skip(64); // Captured 64-byte body in BF1 record 364425; not used for replay state.
+                    check(r.read<HRESULT>(), "Captured swapchain description query");
+                    r.end();
+                    break;
+                }
+                case 0x1279364bf60fbULL: {
+                    Reader r(s.directory.payload(p));
+                    r.skip(8);
+                    check(r.read<HRESULT>(), "Captured device removal status");
+                    r.end();
+                    break;
+                }
+                // These APIs carry no additional GPU commands. Map/Unmap data is
+                // restored by CopyOperation, and native allocations outlive all
+                // recordings in this bounded execution context.
+                case 0x127938b682074ULL:
+                case 0x1ae3c721c351aULL:
+                case 0x1ae3cd6acf667ULL:
+                case 0x1ae3ce8691d1cULL:
+                case 0x1ae3c6360f841ULL:
+                case 0x1cb0a721c351aULL:
+                case 0x1e6503e2ff325ULL:
+                case 0x1e650cfcd4902ULL:
+                case 0x1e650e8691d1cULL:
+                case 0x14538e8691d1cULL:
+                case 0x11469e993999dULL:
+                case 0x1279331d76605ULL:
+                case 0x1e6508ef58ff0ULL:
+                case 0x15a3eb3b8e877ULL:
+                case 0x15a3edf3ce2bbULL:
+                case 0x1af998824f46bULL:
+                case 0x1d53218275f72ULL:
+                case 0x28000000000000ULL:
+                    break;
+                default:
+                    throw std::runtime_error("Unsupported frame CPU operation: " + streamPacketName(p.type));
             }
         } catch (const OperationCancelled &) { throw; }
         catch (const std::exception &e) { throw std::runtime_error("Frame record " + std::to_string(id) + ": " + e.what()); }
@@ -441,10 +604,12 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
 }
 json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t length) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");
-    require(creation && creation <= s.directory.initializationCount(), "Buffer creation is outside initialization");
+    require(!s.frameAttempted || s.boundaryReached, "Selected execution failed before buffer inspection");
+    const auto at = s.boundaryReached ? s.currentRecord : uint64_t(s.directory.initializationCount());
+    require(creation && creation <= at, "Buffer creation is outside the inspection boundary");
     const auto &packet = s.directory.packets()[size_t(creation - 1)]; const auto recipe = decodeResourceRecipe(packet.type, s.directory.payload(packet));
-    require(creation == s.resources.creationRecord(recipe.object, s.directory.initializationCount()), "Selected buffer lifetime is no longer active at the initialization boundary");
-    auto source = s.resources.resource(recipe.object, s.directory.initializationCount()); const auto desc = source->GetDesc();
+    require(creation == s.resources.creationRecord(recipe.object, at), "Selected buffer lifetime is no longer active at the inspection boundary");
+    auto source = s.resources.resource(recipe.object, at); const auto desc = source->GetDesc();
     require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && length && offset <= desc.Width && length <= desc.Width - offset, "Invalid buffer inspection range");
     auto readDesc = desc; readDesc.Width = length; readDesc.Alignment = 0; readDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
     const auto allocation = s.device.device()->GetResourceAllocationInfo(0, 1, &readDesc).SizeInBytes;
@@ -454,7 +619,7 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
     ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
     check(s.device.device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)), "Create inspection allocator");
     check(s.device.device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list)), "Create inspection list");
-    const auto before = s.resources.state(recipe.object, s.directory.initializationCount());
+    const auto before = s.resources.state(recipe.object, at);
     D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; barrier.Transition = {source, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, before, D3D12_RESOURCE_STATE_COPY_SOURCE};
     const bool transition = !(before & D3D12_RESOURCE_STATE_COPY_SOURCE);
     if (transition) list->ResourceBarrier(1, &barrier); list->CopyBufferRegion(readback.Get(), 0, source, offset, length);
@@ -463,9 +628,10 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
     ID3D12CommandQueue *queue{}; for (const auto &[id, native] : s.queues) if (s.queueRecipes.at(id).desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) { queue = native.Get(); break; }
     require(queue, "Buffer inspection needs a direct replay queue"); ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists); s.wait(queue);
     void *mapped{}; D3D12_RANGE read{0, SIZE_T(length)}; check(readback->Map(0, &read, &mapped), "Map initialized buffer readback");
+    const auto preview = QByteArray(static_cast<const char *>(mapped), int(std::min<uint64_t>(length,256))).toHex().toStdString();
     const auto sha = hash({static_cast<const uint8_t *>(mapped), size_t(length)}); D3D12_RANGE none{0, 0}; readback->Unmap(0, &none);
     return {{"creation_record", std::to_string(creation)}, {"object", std::to_string(recipe.object)}, {"offset", std::to_string(offset)},
-        {"length", std::to_string(length)}, {"sha256", sha}, {"boundary", "after_initialization_submissions"}, {"frame_replayed", false}};
+        {"length", std::to_string(length)}, {"sha256", sha}, {"preview_hex", preview}, {"boundary", s.boundaryReached ? (s.boundaryAfter ? "after_event" : "before_event") : "after_initialization_submissions"}, {"execution", s.boundaryReached ? json(std::to_string(s.selectedExecution)) : json(nullptr)}, {"frame_replayed", false}};
 }
 json NativeReplay::verifyInitializedTexture(uint64_t copyRecord) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");

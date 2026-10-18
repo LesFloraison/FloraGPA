@@ -32,6 +32,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include <winioctl.h>
+#include <d3dcompiler.h>
 
 using namespace flora;
 namespace {
@@ -228,6 +229,66 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()),pixels.sizeInBytes()),QCryptographicHash::Sha256).toHex(),
             QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
         QVERIFY(window.findChild<QComboBox *>("outputTarget")->isEnabled()); QVERIFY(!sub->isVisible());
+    }
+    void keyframeRecordingReplay() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for the BF1 keyframe-recorded Draw");
+        dx12::StreamDirectory directory(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex index(directory);
+        const bool afterEvent = qEnvironmentVariable("FLORA_DX12_BOUNDARY") != "before";
+        const auto draw = index.execution(21622);
+        QCOMPARE(draw.record, 328782ULL);
+        QVERIFY(draw.record < directory.initializationCount());
+        QVERIFY(draw.submission > directory.initializationCount());
+        dx12::AddressIndex addresses(directory);
+        const auto uav = addresses.resolve(0x0f81261c, 328780, 4);
+        bool shaderFound = false;
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &packet = directory.packets()[i];
+            if (!dx12::isPipelineRecipe(packet.type))
+                continue;
+            const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+            if (recipe.object != 0x34145ad0)
+                continue;
+            for (const auto &[stage, bytes] : recipe.shaders)
+                if (stage == "VS") {
+                    ID3DBlob *assembly{};
+                    QVERIFY(SUCCEEDED(D3DDisassemble(bytes.data(), bytes.size(), 0, nullptr, &assembly)));
+                    const auto text = QByteArray(static_cast<const char *>(assembly->GetBufferPointer()),
+                                                 qsizetype(assembly->GetBufferSize()));
+                    assembly->Release();
+                    qInfo() << "BF1 first Draw VS" << text;
+                    QVERIFY(text.contains("store_structured u0.x, l(0), l(0), l(1)"));
+                    shaderFound = true;
+                }
+            break;
+        }
+        QVERIFY(shaderFound);
+        dx12::NativeDevice device(directory, true);
+        dx12::NativeReplay replay(device, directory, 4ULL * 1024 * 1024 * 1024);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.prepareExecution(UINT64_MAX, true));
+        replay.prepareExecution(21622, afterEvent);
+        replay.initializeTransfers();
+        const auto initialized = replay.information();
+        QCOMPARE(initialized.at("recorded_commands").value("ID3D12GraphicsCommandListDrawInstanced", 0),
+                 afterEvent ? 1 : 0);
+        QVERIFY(!initialized.at("executed_commands").contains("ID3D12GraphicsCommandListDrawInstanced"));
+        const auto before = replay.inspectBuffer(uav.creation, uav.offset, 4);
+        replay.replayTo(21622, afterEvent);
+        const auto after = replay.inspectBuffer(uav.creation, uav.offset, 4);
+        qInfo() << "BF1 root UAV" << uav.creation << uav.object << uav.offset << "before"
+                << QString::fromStdString(before.dump()) << "after" << QString::fromStdString(after.dump());
+        QCOMPARE(
+            replay.information().at("executed_commands").value("ID3D12GraphicsCommandListDrawInstanced", 0),
+            afterEvent ? 1 : 0);
+        QVERIFY(replay.information().at("execution_boundary_reached").get<bool>());
+        QCOMPARE(after.at("boundary"), nlohmann::json(afterEvent ? "after_event" : "before_event"));
+        QCOMPARE(after.at("execution"), nlohmann::json("21622"));
+        QCOMPARE(before.at("preview_hex"), nlohmann::json("00000000"));
+        QCOMPARE(after.at("preview_hex"), nlohmann::json(afterEvent ? "01000000" : "00000000"));
+        QCOMPARE(device.information().at("validation_error_count"), nlohmann::json("0"));
     }
     void pixelHistoryIdentityAndMapping() {
         const auto path = qEnvironmentVariable("FLORA_DX12_HISTORY");

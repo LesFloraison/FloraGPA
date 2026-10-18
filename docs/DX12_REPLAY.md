@@ -687,6 +687,57 @@ changes, and restore DX11 request fields after switching backend. It passed in
 `dx12-history-identity1.txt`. Release GUI/Worker and targeted test builds passed
 (`build63.log`, `build64.log`); no BF1/Hellblade2 replay was added for this UI work.
 
+### BF1 command lists recorded in the keyframe
+
+BF1's first frame submission (`364657`) includes lists begun in metadata, including
+one begun at `187454` and closed in the frame at `364398`. Its first Draw is source
+record `328782`, execution instance `21622`, in a list begun at `328776`. These are
+frame executions even though their commands were recorded before the frame's CPU
+stream. Rejecting all such lists prevented BF1 from reaching its first Draw.
+
+The native backend now prepares the selected execution plan before initialization,
+reconstructs these command lists at their original metadata record positions, and
+continues open recordings through the frame stream. This preserves the descriptor
+and resource lookup timing instead of replaying old binding commands against the
+end-of-initialization descriptor contents. Each submission instance still owns its
+own native list and execution markers. Recording a future frame Draw during
+initialization does **not** execute it or increment executed-command counters.
+Initialization counters now accumulate only the commands actually submitted.
+CLI and Worker selected replay both prepare this plan before initialization.
+
+The BF1 prefix also needed explicit handling of Fence/PSO/RootSignature reference
+counts and read-only DXGI/device queries. A swapchain interface query must return
+the same captured object; unresolved aliases are rejected. These observations do
+not synthesize GPU commands. Native buffer inspection can now read a successfully
+reached selected boundary, checks the active resource creation, and reports that
+boundary/execution with a bounded 256-byte preview. Workspace buffer readback is
+still unconnected.
+
+Targeted evidence on the real BF1 capture:
+
+- First Draw executed with zero D3D12 debug-layer errors (`bf1-first-draw2`).
+- Its root UAV resolves to creation `11815`, object `864906160`, byte offset `75292`.
+  The captured DXBC VS has no inputs or position output and executes
+  `store_structured u0.x, l(0), l(0), l(1)`.
+- The four-byte GPU readback is `00000000` after initialization and immediately
+  before execution `21622`; after that Draw it is `01000000`. SHA256 changes from
+  `df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119` to
+  `67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450`.
+  The before boundary excludes the Draw and still observes zero after the frame's
+  CPU patches and preceding copies. Both boundaries report zero validation errors.
+  Logs: `bf1-keyframe-recording1.txt`, `bf1-keyframe-before2.txt`.
+- The related Talos first-Draw check retains its exact depth hash
+  `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`
+  and zero validation errors (`talos-planned-recording1`).
+
+The BF1 shader intentionally writes a buffer without producing a render target;
+this evidence is not a final-frame image or a comparison against original GPA.
+Complete BF1 replay and RenderDoc mapping of keyframe-recorded lists remain
+unverified. No Hellblade2 GPU replay was added for this change. Release CLI,
+Worker, GUI and the targeted test executable built successfully (`build69.log`,
+`build70.log`). Research inventories are in `bf1-frame-lists1`,
+`bf1-first-work.json` and `bf1-first-prefix-cpu.json`; they stay outside Git.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -695,7 +746,7 @@ changes, and restore DX11 request fields after switching backend. It passed in
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
+| Complete native frame and selected-event replay | First keyframe-recorded Draw before/after and UAV write verified; full frame unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | Unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
