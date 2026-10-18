@@ -399,6 +399,66 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
     Json result = Json::object();
+    if (dx12 && !compute && !vertex) {
+        // Capture the selected event's target before DebugPixel performs any
+        // diagnostic replays. This is post-event GPU output, not the selected
+        // fragment's shader return value (blending/other fragments may differ).
+        Json reference{{"status", "unavailable"},
+                       {"scope", "post_event_target_before_debug_replays"},
+                       {"output_index", 0},
+                       {"reason", "No color target 0 is bound"}};
+        if (!pipe12->outputMerger.renderTargets.empty()) {
+            const auto &target = pipe12->outputMerger.renderTargets[0];
+            if (target.resource != ResourceId()) {
+                const auto textures = controller.GetTextures();
+                const auto found = std::find_if(textures.begin(), textures.end(), [&](const auto &t) {
+                    return t.resourceId == target.resource;
+                });
+                reference["reason"] = "Color target metadata is unavailable";
+                if (found != textures.end()) {
+                    const auto &texture = *found;
+                    const auto x = index(job, "x"), y = index(job, "y"), sample = index(job, "sample");
+                    reference["reason"] =
+                        "Target view covers multiple layers or a 3D texture; output layer is ambiguous";
+                    if (texture.dimension != 3 && target.numSlices == 1) {
+                        reference["reason"] = "Pixel invocation lies outside color target 0";
+                        if (target.firstMip < texture.mips && target.firstSlice < texture.arraysize &&
+                            x < extent(texture.width, target.firstMip) &&
+                            y < extent(texture.height, target.firstMip) &&
+                            sample < (std::max)(1U, texture.msSamp)) {
+                            const Subresource sub(target.firstMip, target.firstSlice, sample);
+                            const auto cast = target.format.compType;
+                            reference["reason"] = "Typeless color target interpretation is unavailable";
+                            if (cast != CompType::Typeless) {
+                                const auto value = controller.PickPixel(target.resource, x, y, sub, cast);
+                                reference = {
+                                    {"status", "read"},
+                                    {"scope", "post_event_target_before_debug_replays"},
+                                    {"output_index", 0},
+                                    {"resource", resourceName(target.resource)},
+                                    {"x", x},
+                                    {"y", y},
+                                    {"mip", sub.mip},
+                                    {"layer", sub.slice},
+                                    {"sample", sub.sample},
+                                    {"format", flora::rdcResourceFormat(target.format)},
+                                    {"interpretation", cast == CompType::UInt   ? "uint"
+                                                       : cast == CompType::SInt ? "sint"
+                                                                                : "float"},
+                                    {"value", pixel(value)},
+                                    {"method",
+                                     "RenderDoc PickPixel with target-view component interpretation"},
+                                    {"note", "Post-event target includes storage conversion and blending/all "
+                                             "fragments; this is not the selected invocation's shader "
+                                             "return. DebugPixel may replay again."}};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        result["gpu_reference"] = std::move(reference);
+    }
     auto freeTrace = [&](ShaderDebugTrace *p) {
         if (p)
             controller.FreeTrace(p);

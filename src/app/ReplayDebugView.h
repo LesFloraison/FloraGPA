@@ -48,7 +48,7 @@ class ReplayDebugView final : public QWidget {
     QLineEdit *primitive_{}, *vertex_{}, *instance_{}, *group_{}, *thread_{}, *instruction_, *condition_,
         *count_, *watch_;
     QComboBox *navigation_, *interpretation_, *files_, *hitMode_;
-    QLabel *summary_;
+    QLabel *summary_, *gpuReference_;
     QPlainTextEdit *assembly_, *source_, *details_;
     QTabWidget *code_, *values_;
     QTreeWidget *registers_, *locals_, *stack_, *rules_, *watches_;

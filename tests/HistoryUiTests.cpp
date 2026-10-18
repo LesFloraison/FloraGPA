@@ -49,6 +49,61 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dx12DebugGpuReference() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PS_REFERENCE_REPORT");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_PS_REFERENCE_REPORT to the BF1 producer PS trace");
+        const auto report = read(path);
+        QVERIFY(report.at("ok").get<bool>());
+        QCOMPARE(report.at("execution"), Json("36758"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        const auto &reference = report.at("gpu_reference");
+        QCOMPARE(reference.at("status"), Json("read"));
+        QCOMPARE(reference.at("scope"), Json("post_event_target_before_debug_replays"));
+        QCOMPARE(reference.at("x"), Json(1674));
+        QCOMPARE(reference.at("y"), Json(485));
+        QCOMPARE(reference.at("mip"), Json(0));
+        QCOMPARE(reference.at("layer"), Json(0));
+        QCOMPARE(reference.at("format").at("type"), Json(13)); // R11G11B10
+        QCOMPARE(reference.at("interpretation"), Json("float"));
+        ReplayDebugView view("ps");
+        view.resize(1500, 950);
+        view.show();
+        view.setContext("producer:original", 36758, true);
+        view.selectPixel(1674, 485, 0);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto label = view.findChild<QLabel *>("debugGpuReference");
+        QVERIFY(label);
+        QVERIFY(!label->isHidden());
+        QVERIFY(label->text().contains("GPU target after event"));
+        QVERIFY(label->text().contains("Read before debugger replay"));
+        const auto model = view.model();
+        QVERIFY(model);
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(int(model->size() - 1));
+        model->addWatch("o0.x");
+        QCOMPARE(model->watchResults().at(0).at("status"), Json("available"));
+        QVERIFY(model->watchResults().at(0).at("values").at(0).get<double>() > 0.0);
+        // This selected copy branch has no blend/conversion difference. Other
+        // draws are not required to match their post-event target reference.
+        QCOMPARE(model->watchResults().at(0).at("values").at(0),
+                 reference.at("value").at("floatValue").at(0));
+        QCOMPARE(view.exportReport().at("gpu_reference"), reference);
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty())
+            QVERIFY(view.grab().save(output_ + "/debug-gpu-reference.png"));
+        auto unavailable = report;
+        unavailable["gpu_reference"] = {{"status", "unavailable"}, {"reason", "Ambiguous output layer"}};
+        QVERIFY(view.finish(view.requestId(), unavailable));
+        QVERIFY(label->text().contains("Ambiguous output layer"));
+        const auto old = view.requestId();
+        view.setContext("changed-experiment", 36758, true);
+        QVERIFY(label->isHidden());
+        QVERIFY(!view.finish(old, report));
+        auto legacy = report;
+        legacy.erase("gpu_reference");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        QVERIFY(label->isHidden());
+    }
     void dx12PipelineReport() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PIPELINE_REPORT");
         if (path.isEmpty()) QSKIP("Set FLORA_DX12_PIPELINE_REPORT to a real pipeline result");

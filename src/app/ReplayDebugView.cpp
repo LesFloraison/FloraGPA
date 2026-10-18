@@ -245,6 +245,12 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     summary_->setMargin(4);
     summary_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     layout->addWidget(summary_);
+    gpuReference_ = new QLabel;
+    gpuReference_->setObjectName("debugGpuReference");
+    gpuReference_->setWordWrap(true);
+    gpuReference_->setMargin(4);
+    gpuReference_->hide();
+    layout->addWidget(gpuReference_);
     auto vertical = new QSplitter(Qt::Vertical);
     vertical->setChildrenCollapsible(false);
     layout->addWidget(vertical, 1);
@@ -533,6 +539,8 @@ Json ReplayDebugView::request() const {
 void ReplayDebugView::invalidate() {
     ++requestId_;
     model_.reset();
+    gpuReference_->clear();
+    gpuReference_->hide();
     rendering_ = true;
     for (auto tree : {registers_, locals_, stack_, rules_, watches_})
         tree->clear();
@@ -580,6 +588,25 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("Shader debugger returned no steps");
     replacement->move(0);
     model_ = std::move(replacement);
+    const auto reference = result.value("gpu_reference", Json());
+    gpuReference_->clear();
+    gpuReference_->setVisible(dx12_ && stage_ == "ps" && !reference.is_null());
+    if (dx12_ && stage_ == "ps" && !reference.is_null()) {
+        gpuReference_->setToolTip(QString::fromStdString(reference.dump(2)));
+        if (reference.value("status", "") == "read") {
+            const auto kind = reference.value("interpretation", "float");
+            const auto key = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
+            gpuReference_->setText(QString("GPU target after event · RT0 mip %1 layer %2 sample %3 · %4 %5\n"
+                                           "Read before debugger replay; target conversion, blending and "
+                                           "other fragments may differ from shader output.")
+                                       .arg(text(reference.at("mip")), text(reference.at("layer")),
+                                            text(reference.at("sample")), QString::fromStdString(kind),
+                                            text(reference.at("value").at(key))));
+        } else {
+            gpuReference_->setText("GPU target reference unavailable: " +
+                                   text(reference.value("reason", Json("Unknown"))));
+        }
+    }
     rendering_ = true;
     assembly_->setPlainText(text(result.at("disassembly")));
     files_->clear();

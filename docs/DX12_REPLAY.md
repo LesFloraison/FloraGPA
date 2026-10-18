@@ -2356,6 +2356,46 @@ helpers and binaries remain outside Git. This increment used four targeted RDC
 queries, three completed original-player exports and one discovery-aborted probe;
 no full sample suite or unrelated GPU tests ran.
 
+### Pixel shader debugging with a pre-debug GPU reference
+
+DX12 PS debug reports now read color target 0 at the selected invocation's
+coordinates **before** calling RenderDoc DebugPixel. The report records the view's
+mip/layer/sample, format, integer/float interpretation and returned pixel values;
+the debugger panel displays the reference and preserves it in JSON exports.
+This is post-event target data, including storage conversion, blending and other
+fragments, not the selected invocation's shader return. DebugPixel may perform
+additional replays. Multilayer or 3D output views are explicitly ambiguous;
+missing targets/metadata, typeless interpretations and out-of-range coordinates
+are reported unavailable. Older traces without this optional field still load.
+Context changes invalidate the displayed reference with the rest of the trace.
+
+The unresolved BF1 difference was followed to execution **36758**, original record
+**213193**, RenderDoc event **45824**. Its DXBC PS hash is
+`63c05020-6653250b-702de4a0-42d351aa`. A pipeline query identifies `mainTexture`
+as creation **299115**, object **10432933744**; other bindings include depth
+**325004**, velocity **325064**, tile velocity **211104**, and velocity-magnitude/
+depth **165701**. At pixel **(1674,485)** the tile-velocity magnitude is
+**0.0003445148468017578**, so the shader takes its direct-copy branch rather than
+the motion-blur sampling loop. Instruction 40 loads `mainTexture`; instructions
+45–47 return it with alpha 1. The trace executes **36** states out of the shader's
+220 instructions. The earlier trace (`bf1-motion-ps1`) returned
+`(0.1044921875, 0.0908203125, 0.07421875, 1)`; this was a separate replay.
+
+The new single analysis request (`bf1-motion-ps-reference1`) reads GPU RT0 as
+`(0.1005859375, 0.087890625, 0.07421875, 1)` and its subsequent debug trace returns
+that exact tuple. It loaded no GPA modules. Agreement at this invocation rules
+out a debugger/output mismatch **for this request**, not replay variation or
+overall fidelity; the upstream creation **299115** remains to be investigated.
+The focused UI check used this real trace, stepped to its return, evaluated
+`o0.x`, checked export, unavailable-reference handling, legacy trace loading and
+stale experiment rejection. `ps-gpu-reference-ui1.txt` passed in **592 ms** and
+`ps-gpu-reference-ui1/debug-gpu-reference.png` was visually inspected. Evidence
+also includes `bf1-main-producer-pipeline1` and `bf1-motion-ps-summary1.json`.
+A final CPU check asserting the selected copy branch's `o0.x` equals its GPU
+reference passed in **164 ms** (`ps-gpu-reference-ui2.txt`).
+Only these three targeted GPU analysis queries ran for this increment; no
+Hellblade2 replay or full regression suite was needed.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
