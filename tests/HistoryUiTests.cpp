@@ -73,6 +73,58 @@ class HistoryUiTests : public QObject {
         QVERIFY(historyBackendCompatible(bundled));
         QVERIFY(!QSettings().contains("analysis/renderdoc"));
     }
+    void d16MultiFragmentReports() {
+        const auto root = qEnvironmentVariable("FLORA_D16_MULTI_REPORTS");
+        if (root.isEmpty()) QSKIP("Set FLORA_D16_MULTI_REPORTS to the Talos two-layer experiment evidence");
+        for (const auto &name : {QString("rejected"), QString("passing")}) {
+            const auto result = read(root + "/talos-depth-" + name + "-history2/result.json");
+            const auto native = read(root + "/talos-depth-" + name + "1/report.json");
+            QVERIFY(result.at("ok").get<bool>()); QVERIFY(result.at("partial").get<bool>());
+            QVERIFY(native.at("completed").get<bool>());
+            QCOMPARE(native.at("device").at("validation_error_count"), Json("0"));
+            QCOMPARE(result.at("history").size(), size_t(3));
+            const auto &first = result.at("history")[1], &second = result.at("history")[2];
+            QCOMPARE(first.at("primitiveID"), Json(0)); QCOMPARE(second.at("primitiveID"), Json(1));
+            QCOMPARE(first.at("execution"), Json("12675")); QCOMPARE(second.at("execution"), Json("12675"));
+            QCOMPARE(first.at("source_record"), Json("185550"));
+            QCOMPARE(second.at("source_record"), Json("185550"));
+            QVERIFY(!first.at("depthTestFailed").get<bool>());
+            QCOMPARE(second.at("depthTestFailed").get<bool>(), name == "rejected");
+            QCOMPARE(first.at("postMod").at("depth"), second.at("preMod").at("depth"));
+            QCOMPARE(first.at("shaderOut").at("depth"), Json(name == "rejected" ? 0.75 : 0.25));
+            QCOMPARE(second.at("shaderOut").at("depth"), Json(name == "rejected" ? 0.25 : 0.75));
+            QCOMPARE(result.at("history_scope").at("reconstructed_depth_values"), Json(2));
+            QFile storage(root + "/talos-depth-" + name + "1/output_storage.bin");
+            QVERIFY(storage.open(QIODevice::ReadOnly)); QVERIFY(storage.seek((1240 * 2048 + 1527) * 2));
+            const auto bytes = storage.read(2); QCOMPARE(bytes.size(), 2);
+            uint16_t raw{}; memcpy(&raw, bytes.constData(), 2);
+            QCOMPARE(raw, uint16_t(49151));
+            QCOMPARE(std::lround(second.at("postMod").at("depth").get<double>() * 65535), long(raw));
+            PixelHistoryView view; view.resize(1400, 650);
+            view.setContext("multi-d16-fixture", 12675, true);
+            view.setDx12Resource(167081, 4980699392ULL);
+            view.selectPixel(4980699392ULL, 1527, 1240, 0, 1, 0);
+            QVERIFY(view.finish(view.requestId(), result));
+            auto rows = view.findChild<QTreeWidget *>("historyRecords");
+            QCOMPARE(rows->topLevelItemCount(), 3);
+            QVERIFY(!rows->isColumnHidden(2));
+            QCOMPARE(rows->topLevelItem(1)->text(2), QString("0 / 0"));
+            QCOMPARE(rows->topLevelItem(2)->text(2), QString("1 / 1"));
+            QVERIFY(rows->topLevelItem(1)->text(5).contains("D32 intermediate"));
+            QVERIFY(rows->topLevelItem(2)->text(4).contains("D32 intermediate"));
+            QVERIFY(rows->topLevelItem(2)->text(5).startsWith("Depth 0.7499962"));
+            QVERIFY(!rows->topLevelItem(2)->text(5).contains("Stencil"));
+            QCOMPARE(rows->topLevelItem(2)->text(3).contains("Depth test"), name == "rejected");
+            rows->setCurrentItem(rows->topLevelItem(2));
+            QSignalSpy jump(&view, &PixelHistoryView::eventRequested);
+            action(view, "locateHistoryEvent")->trigger();
+            QCOMPARE(jump.size(), 1); QCOMPARE(jump.front().front().toULongLong(), 12675ULL);
+            if (!output_.isEmpty()) {
+                view.show(); QTest::qWait(30);
+                QVERIFY(view.grab().save(output_ + '/' + name + ".png"));
+            }
+        }
+    }
     void d16PatchedReports() {
         const auto root = qEnvironmentVariable("FLORA_D16_HISTORY_REPORTS");
         if (root.isEmpty()) QSKIP("Set FLORA_D16_HISTORY_REPORTS to the focused Talos D16 reports");

@@ -948,11 +948,31 @@ Json runRdcJob(const Json &job) {
     const bool unreliableD16 = d16History && session.d16HistoryPatch != 1;
     Json depthBoundaries = Json::array(), depthGaps = Json::array();
     std::set<uint32_t> existing;
-    for (const auto &v : controller.PixelHistory(resource, x, y, sub, CompType::Typeless)) {
+    const bool depthTarget = bool(tex.creationFlags & TextureCategory::DepthTarget);
+    const bool stencilPresent = tex.format.type == ResourceFormatType::D24S8 || tex.format.type == ResourceFormatType::D32S8;
+    size_t reconstructedDepthValues = 0;
+    result["pixel_value_kind"] = depthTarget ? "depth_stencil" : "color";
+    const auto modifications = controller.PixelHistory(resource, x, y, sub, CompType::Typeless);
+    for (size_t i = 0; i < modifications.size(); ++i) {
+        const auto &v = modifications[i];
         auto r = record(v);
         r.update(rdcProvenance(v.eventId, mapping["reverse"]));
         r["record_kind"] = "backend_modification";
         r["color_interpretation"] = kind;
+        r["pixel_value_kind"] = depthTarget ? "depth_stencil" : "color";
+        r["stencil_present"] = stencilPresent;
+        if (d16History && !unreliableD16) {
+            // RenderDoc reconstructs intermediate fragments in a D32 scratch DSV.
+            // Only the first pre/last post values use the captured D16 format.
+            r["depth_value_sources"] = {
+                {"preMod", i && modifications[i - 1].eventId == v.eventId
+                               ? "backend_d32_intermediate" : "captured_format_event_boundary"},
+                {"postMod", i + 1 < modifications.size() && modifications[i + 1].eventId == v.eventId
+                                ? "backend_d32_intermediate" : "captured_format_event_boundary"}};
+            r["depth_test_reason_status"] = "backend_analysis";
+            for (const auto &source : r["depth_value_sources"])
+                if (source == "backend_d32_intermediate") ++reconstructedDepthValues;
+        }
         if (unreliableD16) {
             r["backend_depth_diagnostic"] = {{"pre", r["preMod"]["depth"]}, {"post", r["postMod"]["depth"]}};
             r["preMod"]["depth"] = nullptr;
@@ -1080,6 +1100,7 @@ Json runRdcJob(const Json &job) {
            {"cpu_write_gaps", gaps},
            {"depth_value_status", unreliableD16 ? "event_boundaries_only" : d16History ? "patched_backend_values" : "backend_values"},
            {"depth_boundary_gaps", depthGaps},
+           {"reconstructed_depth_values", reconstructedDepthValues},
            {"unrepresented_api_commands", unrepresented},
            {"limitations",
             {"CPU writes use API-boundary pixel snapshots, not shader fragments; Map coverage is a "
@@ -1088,10 +1109,10 @@ Json runRdcJob(const Json &job) {
              "Resource operations can appear with unchanged selected-subresource values; no shader fragment "
              "or test pass is implied.",
              unreliableD16 ? "Stock RenderDoc 1.45 DX12 D16 fragment depths are withheld because of typeless decoding; separate raw UNORM event boundaries do not recover fragment depths or validate depth-test reasons."
-                           : d16History ? "D16 depth values use the explicitly identified Flora patch to RenderDoc 1.45. Backend test-failure reasons retain RenderDoc's per-event/per-fragment limitations."
+                           : d16History ? "D16 event boundaries use the Flora decoding patch. Intermediate fragment depths come from a D32 scratch DSV and may differ in quantization or depth bias; they are not observed D16 storage values. Depth-test reasons include backend comparisons of reconstructed depths, not independent per-fragment hardware queries."
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
-    if (unreliableD16)
+    if (unreliableD16 || reconstructedDepthValues)
         result["partial"] = true;
     for (const auto &r : resources)
         if (r.resourceId == resource)

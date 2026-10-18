@@ -52,6 +52,16 @@ QString color(const Json &row, const char *key) {
     }
     if (row.value("depth_value_status", "") == "unavailable_backend_d16_format")
         return "Fragment depth unavailable";
+    if (row.value("pixel_value_kind", "") == "depth_stencil") {
+        auto value = "Depth " + scalar(row.at(key).at("depth"));
+        if (row.contains("depth_value_sources") &&
+            row.at("depth_value_sources").value(key, "") == "backend_d32_intermediate")
+            value += " (D32 intermediate)";
+        const auto &stencil = row.at(key).at("stencil");
+        if (row.value("stencil_present", false) && stencil.is_number_integer() && stencil.get<int>() >= 0)
+            value += " / Stencil " + scalar(stencil);
+        return value;
+    }
     const auto kind = row.value("color_interpretation", std::string("float"));
     const auto field = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
     QStringList parts;
@@ -263,8 +273,11 @@ void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx1
     }
     records_->headerItem()->setText(0, dx12 ? "Execution" : "GPA");
     locate_->setText(dx12 ? "Locate execution" : "Locate API");
-    for (int column : {4, 5})
+    records_->headerItem()->setText(2, dx12 ? "Fragment / primitive" : "Fragment");
+    records_->setColumnWidth(2, dx12 ? 145 : 65);
+    for (int column : {2, 4, 5})
         records_->setColumnHidden(column, !dx12);
+    for (int column : {4, 5}) records_->setColumnWidth(column, dx12 ? 245 : 150);
     if (key_ != key) {
         key_ = key;
         invalidate();
@@ -422,7 +435,7 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                   : (r.at("gpa_command").is_null() ? QString("Unmapped") : scalar(r.at("gpa_command")));
         auto item = new QTreeWidgetItem(
             records_, {scalar(r.value(dx12_ ? "execution" : "gpa_event", Json())), scalar(r.at("eventId")),
-                       scalar(r.value("fragIndex", Json())), command + " · " + outcome(r), color(r, "preMod"),
+                       scalar(r.value("fragIndex", Json())) + (dx12_ ? " / " + scalar(r.value("primitiveID", Json())) : QString()), command + " · " + outcome(r), color(r, "preMod"),
                        color(r, "postMod")});
         if (dx12_ && r.value("selectable", false))
             item->setData(0, Qt::UserRole, qulonglong(executionId(r.at("execution"))));

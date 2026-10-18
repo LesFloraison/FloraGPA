@@ -2065,6 +2065,68 @@ mapping/navigation, exact export, and the stock fallback without GPU execution.
 `d16-history-ui1/test.txt` reports **3 passed, 0 failed, 89 ms**, including setup
 and cleanup. No all-sample replay or unrelated regression suite was run.
 
+### Two-fragment depth rejection experiment
+
+`dx12DepthHistoryProjects` verifies Talos pipeline **156847** uses D16,
+depth writes, `GREATER_EQUAL` and no culling before preparing two reversible
+projects. The projects replace the VS with two overlapping full-screen triangles
+and overwrite index-buffer creation **70438**, offset **0**, with **84012 bytes**:
+indices 0..5 followed by degenerate zero-index triangles. The original indexed
+Draw count remains 42006. Resource changes apply before submission **188940**;
+the original files remain read-only. The replacement uses `SV_VertexID` and
+preserves the captured PSO/root signature. Undoing both operations produces an
+empty edit set; the saved restored projects contain the history with cursor 0.
+
+Two serial native prefix replays and their independent Pixel History queries
+test **execution 12675**, source **185550**, pixel **(1527,1240)**, mip **0**,
+layer **1**, sample **0**:
+
+| Experiment | Primitive 0 depth / rejection | Primitive 1 depth / rejection | Final native D16 |
+| --- | --- | --- | --- |
+| `talos-depth-rejected1` | 0.75 / false | 0.25 / true | 49151 |
+| `talos-depth-passing1` | 0.25 / false | 0.75 / false | 49151 |
+
+Both native runs finish with **zero D3D12 validation errors**. Each history has
+one Clear record plus two Draw fragments, with fragment/primitive pairs **0/0**
+and **1/1** mapping to the same correct execution instance. Both final history
+values are **0.7499961853027344**, quantizing exactly to the native raw value
+**49151**. Full native subresource SHA-256 is
+`23ff8950288e504926c8de7422bb5e207017a7d6f0dec65a5743b4b1b5c281a9`
+for both orderings. The source HLSL, projects, native reports, raw output and
+`talos-depth-{rejected,passing}-history2/result.json` remain in ignored artifacts.
+The existing RenderDoc patch is unchanged.
+
+This experiment also exposes a remaining precision gap: RenderDoc's
+`D3D12PixelHistoryPerFragmentCallback` uses a **D32 scratch DSV** for intermediate
+fragment values. For the rejected case it reports intermediate depth **0.75**,
+whereas actual D16 storage after that layer is **49151/65535**. The next
+fragment's pre-value inherits that reconstructed value. No inferred rounding is
+silently substituted. Reports now identify each D16 pre/post value as
+`captured_format_event_boundary` or `backend_d32_intermediate`, count the latter,
+and mark such histories **partial**. Backend depth-test reasons include
+comparisons of reconstructed depths; the two separated-depth cases above
+verify this rejection/pass distinction, not near-equality, depth bias or every
+test-failure condition. Exact D16 intermediate storage remains unfinished.
+
+The Pixel History table now displays depth (and stencil only when present),
+visible fragment/primitive identifiers and explicit D32-intermediate labels.
+Previously the table showed color fields for a depth target and hid fragment
+identity. DX11 keeps its existing column defaults. The UI exposes the backend
+depth-test failure and jumps from either fragment to execution **12675**.
+
+Focused checks: Build175 prepares the experiments; Build177 builds GUI/RDC with
+value provenance; Build179 builds the final table and CPU report checks.
+`talos-depth-history-projects1.txt` reports **3 passed**, including setup/cleanup.
+`d16MultiFragmentReports` compares history to actual native storage, checks both
+outcomes and provenance, and checks displayed depths/identifiers and navigation.
+The existing `d16PatchedReports` also checks original/modified single-fragment
+values, exact export and stock fallback. No full-frame or all-sample regression
+was run. The original captured geometry, other depth comparisons and other
+rejection types still require separate evidence.
+`d16-multi-ui2.txt` records **4 passed, 0 failed, 200 ms**, including setup and
+cleanup. Its `rejected.png` was visually checked for visible fragment identities,
+depths, rejection label and intermediate-value provenance.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2074,7 +2136,7 @@ and cleanup. No all-sample replay or unrelated regression suite was run.
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and raw D16 boundaries verified; optional patched backend restores original/modified single-fragment depths; multi-fragment/failure reasons and full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |

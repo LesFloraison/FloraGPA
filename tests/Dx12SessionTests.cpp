@@ -797,6 +797,47 @@ class Dx12SessionTests : public QObject {
                  QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
         QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
     }
+    void dx12DepthHistoryProjects() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_DEPTH_HISTORY_PROJECTS");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set captures and a new output path for depth-history experiments");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto path = std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString());
+        dx12::StreamDirectory directory(path);
+        const auto &packet = directory.packets().at(156846);
+        const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+        QCOMPARE(recipe.kind, dx12::PipelineRecipe::Kind::Graphics);
+        QVERIFY(recipe.graphics.DepthStencilState.DepthEnable);
+        QCOMPARE(recipe.graphics.DepthStencilState.DepthFunc, D3D12_COMPARISON_FUNC_GREATER_EQUAL);
+        QCOMPARE(recipe.graphics.DepthStencilState.DepthWriteMask, D3D12_DEPTH_WRITE_MASK_ALL);
+        QCOMPARE(recipe.graphics.DSVFormat, DXGI_FORMAT_D16_UNORM);
+        QCOMPARE(recipe.graphics.RasterizerState.CullMode, D3D12_CULL_MODE_NONE);
+        const auto session = openReplaySession(path);
+        std::vector<uint8_t> indices(84012);
+        for (uint16_t i = 0; i < 6; ++i) memcpy(indices.data() + i * 2, &i, 2);
+        for (const auto &name : {QString("rejected"), QString("passing")}) {
+            const QByteArray source = QByteArray(R"(
+                float4 main(uint id : SV_VertexID) : SV_Position {
+                    uint corner = id % 3;
+                    float2 p = corner == 0 ? float2(-1,-1) : corner == 1 ? float2(-1,3) : float2(3,-1);
+                    return float4(p, id < 3 ? )") + (name == "rejected" ? "0.75 : 0.25" : "0.25 : 0.75") + R"(, 1);
+                })";
+            Microsoft::WRL::ComPtr<ID3DBlob> shader, errors;
+            const auto hr = D3DCompile(source.data(), size_t(source.size()), "depth-history.hlsl", nullptr, nullptr,
+                "main", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &shader, &errors);
+            QVERIFY2(SUCCEEDED(hr), errors ? static_cast<const char *>(errors->GetBufferPointer()) : "Cannot compile depth-history VS");
+            Experiment experiment(*session);
+            experiment.setResourcePatch(*session, 188940, 70438, 0, 0, false, indices);
+            experiment.setShader(*session, 156847, "VS", {static_cast<const uint8_t *>(shader->GetBufferPointer()), shader->GetBufferSize()});
+            experiment.save(output + '/' + name + ".json");
+            QFile sourceFile(output + '/' + name + ".hlsl"); QVERIFY(sourceFile.open(QIODevice::WriteOnly));
+            QCOMPARE(sourceFile.write(source), source.size());
+            QVERIFY(experiment.undo()); QVERIFY(experiment.undo());
+            QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+            QVERIFY(experiment.dx12Edits(*session).resources.empty());
+            experiment.save(output + '/' + name + "-restored.json");
+        }
+    }
     void dx12ShaderExperimentProjects() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_EXPERIMENT_OUTPUT");
