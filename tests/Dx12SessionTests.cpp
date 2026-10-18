@@ -31,6 +31,7 @@
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QSignalSpy>
+#include <QStatusBar>
 #include <QTemporaryDir>
 #include <QtTest>
 #define NOMINMAX
@@ -69,6 +70,127 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12AnalysisCaptureReportIdentity() {
+        QTemporaryDir directory;
+        const nlohmann::json report{{"backend", "dx12"}, {"completed", true}, {"image_available", false},
+            {"rdc_capture", "capture.rdc"}, {"execution", "9007199254740993"}, {"wide_unsigned", UINT64_MAX}};
+        QFile file(directory.filePath("report.json")); QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QByteArray::fromStdString(report.dump())); file.close();
+        const auto parsed = readWorkerOutput(directory.path(), "history-capture");
+        QCOMPARE(parsed.replayReport, report);
+        QCOMPARE(parsed.replayReport.at("wide_unsigned").get<uint64_t>(), UINT64_MAX);
+        requireDx12ExperimentReport(parsed.replayReport, nullptr);
+    }
+    void dx12ModifiedShaderAnalysis() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        const auto project = qEnvironmentVariable("FLORA_DX12_MODIFIED_SHADER_PROJECT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_MODIFIED_ANALYSIS_OUTPUT");
+        if (root.isEmpty() || library.isEmpty() || project.isEmpty() || output.isEmpty())
+            QSKIP("Set Talos captures, RenderDoc, the depth-0.25 VS project and a new output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 167081) { resources->setCurrentIndex(index); break; }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 167081ULL);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+        window.openDx12Experiment(project);
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        debug->setBackendPath(library, false); mesh->setBackendPath(library, false);
+        auto history = window.findChild<PixelHistoryView *>("pixelHistoryView");
+        history->setBackendPath(library, false);
+        nlohmann::json modifiedTrace, modifiedMesh, modifiedConfig;
+        uint64_t modifiedDebugRequest{}, modifiedMeshRequest{};
+        for (const auto name : {QString("replaced"), QString("restored")}) {
+            const bool modified = name == "replaced";
+            if (!modified) {
+                window.findChild<QAction *>("undoExperiment")->trigger();
+                QVERIFY(!debug->model()); QVERIFY(mesh->result().is_null());
+                QVERIFY(!debug->finish(modifiedDebugRequest, modifiedTrace));
+                QVERIFY(!mesh->finish(modifiedMeshRequest, modifiedMesh, output));
+            }
+            done.clear(); debug->findChild<QAction *>("replayDebugRead")->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 90000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QVERIFY(debug->model());
+            auto model = debug->model();
+            const auto &trace = model->result();
+            // Preserve the recapture/trace before assertions so a failure can
+            // be investigated without repeating the native GPU prefix.
+            debug->exportResult(output + '/' + name + "-debug.json");
+            QVERIFY(QFile::copy(QString::fromStdString(trace.at("capture").get<std::string>()), output + '/' + name + ".rdc"));
+            QCOMPARE(trace.at("backend"), nlohmann::json("dx12"));
+            QCOMPARE(trace.at("execution"), nlohmann::json("12675"));
+            QVERIFY(trace.at("gpa_modules_loaded").empty());
+            QVERIFY(model->files().empty());
+            QVERIFY(model->size() > 1);
+            debug->findChild<QAction *>("debugStep")->trigger(); QCOMPARE(model->position(), int64_t(1));
+            debug->findChild<QSpinBox *>("debugStepIndex")->setValue(int(model->size() - 1));
+            model->addWatch("SV_Position.z / SV_Position.w");
+            const auto watch = model->watchResults().at(0);
+            QCOMPARE(watch.at("status"), nlohmann::json("available"));
+            const auto depth = watch.at("values")[0].get<double>();
+            if (modified) QCOMPARE(depth, 0.25);
+            else QVERIFY(std::abs(depth - 0.25) > 0.01);
+            debug->exportResult(output + '/' + name + "-debug.json");
+            if (modified) {
+                modifiedTrace = trace; modifiedDebugRequest = debug->requestId(); modifiedConfig = model->configuration();
+            } else {
+                QCOMPARE(model->size(), size_t(20));
+                QVERIFY(trace.at("capture") != modifiedTrace.at("capture"));
+                QVERIFY(trace.at("experiment_key") != modifiedTrace.at("experiment_key"));
+                QVERIFY(ReplayDebugModel::identity(trace) != ReplayDebugModel::identity(modifiedTrace));
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, model->importConfiguration(modifiedConfig));
+            }
+            done.clear(); mesh->findChild<QAction *>("replayMeshRead")->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(mesh->result().at("capture"), trace.at("capture"));
+            QCOMPARE(mesh->result().at("experiment_key"), trace.at("experiment_key"));
+            QCOMPARE(mesh->result().at("execution"), nlohmann::json("12675"));
+            QCOMPARE(mesh->result().at("vertex_count"), nlohmann::json(8053));
+            QCOMPARE(mesh->result().at("index_count"), nlohmann::json(42006));
+            QVERIFY(mesh->result().at("gpa_modules_loaded").empty());
+            auto table = mesh->findChild<QTableView *>("replayMeshPositions");
+            QCOMPARE(table->model()->rowCount(), 8053);
+            size_t depthChanged{};
+            for (int row = 0; row < table->model()->rowCount(); ++row) {
+                const auto z = table->model()->index(row, 3).data().toFloat();
+                const auto w = table->model()->index(row, 4).data().toFloat();
+                QVERIFY(std::isfinite(z) && std::isfinite(w)); QVERIFY(w != 0);
+                if (modified) QCOMPARE(z, w * 0.25f);
+                else if (z != w * 0.25f) ++depthChanged;
+            }
+            if (!modified) QVERIFY(depthChanged > 0);
+            mesh->exportResult(output + '/' + name + "-mesh.json");
+            mesh->exportResult(output + '/' + name + "-mesh.csv");
+            mesh->exportResult(output + '/' + name + "-mesh.obj");
+            done.clear(); history->queryPixel(12675, 4980699392ULL, 1527, 1240, 0, 1, 0);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+            const auto historyPath = output + '/' + name + "-history.json";
+            history->exportResult(historyPath);
+            QFile historyFile(historyPath); QVERIFY(historyFile.open(QIODevice::ReadOnly));
+            const auto historyReport = nlohmann::json::parse(historyFile.readAll().toStdString());
+            QCOMPARE(historyReport.at("capture"), trace.at("capture"));
+            QCOMPARE(historyReport.at("experiment_key"), trace.at("experiment_key"));
+            QCOMPARE(historyReport.at("depth_event_boundaries")[1].at("post").at("raw_unorm16"),
+                     nlohmann::json(modified ? 16384 : 17980));
+            QVERIFY(historyReport.at("partial").get<bool>()); // Event boundaries are not per-fragment history.
+            QCOMPARE(history->findChild<QTreeWidget *>("historyRecords")->topLevelItem(3)->data(0, Qt::UserRole).toULongLong(), 12675ULL);
+            qInfo() << name << "steps" << model->size() << "depth" << depth << "RDC event" << trace.at("eid").get<unsigned>();
+            if (modified) { modifiedMesh = mesh->result(); modifiedMeshRequest = mesh->requestId(); }
+        }
+    }
     void dx12ShaderReplacementPipelinePaths() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty()) QSKIP("Set captures for edited pipeline reconstruction");

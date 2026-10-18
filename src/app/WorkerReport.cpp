@@ -234,7 +234,9 @@ WorkerReport readWorkerReport(const QString &directory, bool replay, const Cance
     result.report = qtObject(bytes, cancelled);
     if (!result.report["completed"].isBool() || !result.report["completed"].toBool())
         throw std::runtime_error("Worker did not complete");
-    if (replay && (result.report["image_available"].toBool(true) || result.report["backend"]=="dx12")) {
+    // DX12 analysis recaptures have no display image, but still need the exact
+    // native identity/experiment document for acceptance and stale-result checks.
+    if (result.report["backend"] == "dx12" || (replay && result.report["image_available"].toBool(true))) {
         result.replayReport = nativeObject(bytes, cancelled);
     }
     checkCancellation(cancelled);

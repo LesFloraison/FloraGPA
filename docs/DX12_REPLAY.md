@@ -1434,7 +1434,7 @@ GUI/CLI/Worker and the focused tests build through `build126.log`.
 This established the native/model Draw experiment; the following milestone connects
 it to the workspace. Direct Dispatch suppression is implemented but lacks an
 independent GPU-write experiment. Indirect/mesh suppression, resource patches,
-and modified history/debug/geometry validation remain unfinished. The shader
+and full modified history/debug/geometry coverage remain unfinished. The shader
 import milestone below provides the first verified replacement path.
 No BF1 or Hellblade2 GPU rerun was added for this change.
 
@@ -1556,8 +1556,72 @@ Additional checks serve this replacement implementation:
   reported as a shader compatibility failure.
 
 Changed DXIL shader execution, all-stage replacement coverage, source-editor
-compilation integration, embedded-only roots and analysis of modified shaders
-remain unfinished. The full portable-package acceptance is still outstanding.
+compilation integration and embedded-only roots remain unfinished. The following
+milestone validates analysis of the modified Talos VS. The full portable-package
+acceptance is still outstanding.
+
+### Modified-shader debugging, geometry and depth history
+
+The first modified-shader analysis attempt exposed a report-reader regression:
+`history-capture` reports contain no output image, so the reader did not retain
+their native JSON document. The new DX12 experiment identity check then received
+null and rejected an otherwise completed native recapture before launching the
+analysis service. This also affected unmodified DX12 recaptures after the identity
+check was introduced. It is separate from the recorded DX11 baseline faults.
+
+The reader now preserves native JSON for **every DX12 report**, including
+image-free analysis recaptures. The identity/experiment acceptance checks remain
+in place. `dx12-analysis-report1.txt` covers an image-free `history-capture` report,
+execution ID `9007199254740993` and a native unsigned value of `UINT64_MAX` without
+floating-point conversion. The DX11 reading condition is unchanged.
+
+`dx12ModifiedShaderAnalysis` opens the persisted depth-0.25 VS project in the
+main window, selects Talos execution **12675** and depth creation **167081**, and
+requests VS debugging, post-VS geometry and Pixel History. It then undoes the
+shader replacement and repeats these same queries. Each state shares **one exact
+native recapture** among all three analyses. The accepted run uses two native
+recaptures with serial RenderDoc queries; there is no extra display-output replay.
+
+| Evidence | Modified VS | After undo |
+| --- | --- | --- |
+| Execution mapping | 12675 -> RenderDoc event 151 | 12675 -> RenderDoc event 151 |
+| VS trace | 13 steps; instruction stepping works | Original 20 steps |
+| Final Watch `SV_Position.z / SV_Position.w`, vertex invocation 0 | 0.25 | 0.3870071768760681 |
+| Post-VS geometry | 8,053 vertices / 42,006 indices; every vertex satisfies `z = 0.25 * w` | CSV and OBJ exactly equal the existing original-shader baseline |
+| Pixel (1527, 1240), mip 0 / layer 1 / sample 0 | Draw post-depth 16384 (D16) | Original post-depth 17980 (D16) |
+
+Both D16 values match the independently verified native resource readbacks.
+The history row retains source record **185550**, submission **188940**, queue
+**175347920**, recording generation **2** and the exact execution identity.
+The before-Draw value is zero in both states. No source files are invented for
+either stripped shader: the test uses instruction stepping and Watch.
+
+Undo clears the displayed trace and mesh and rejects their old request IDs.
+The subsequent analyses use a different capture path and experiment key; each
+state's debug, mesh and history results agree on both identities. A debugger
+configuration from the modified shader is rejected against the restored shader.
+All six analysis results report no loaded GPA modules.
+
+Evidence is retained under `talos-modified-analysis5`, including both `.rdc`
+files, debug/history reports, mesh CSV/OBJ exports and `comparison.json`:
+
+- Modified mesh CSV SHA-256:
+  `c06660cbe5defdf4cabb1b57416f8fe4e8f475916547ebe77fe7f3170e4f723c`.
+- Restored mesh CSV SHA-256:
+  `73d2c261ec870613329701d7cf73e567ba71b43d75a606118ab58bef98074755`.
+- Restored OBJ SHA-256:
+  `5d0ccb743b0ac923827ddc080910fea174baa9583d0a52930fbb51ee8754a639`.
+
+`dx12-modified-analysis5.txt` passes in 50.535 seconds. The earlier attempts
+`analysis1/2` stopped at test setup without GPU work; `analysis3/4` reproduce the
+report-reader failure after recapture. Build146 includes the GUI fix and Build147
+builds the final focused test. Saved traces/captures are retained for diagnosis
+without repeating the native prefix.
+
+Pixel History still reports **partial**: these are observed event-boundary depth
+values, not complete per-fragment modifications or test-failure reasons. Modified
+PS/CS/DXIL debugging, full history coverage, resource modifications, other sample
+acceptance and portable-package verification remain unfinished.
 
 ### Full feature acceptance
 
@@ -1568,8 +1632,8 @@ remain unfinished. The full portable-package acceptance is still outstanding.
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; modified VS and undo match native depth readbacks; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable and VS replacement change GPU output; undo restores exact bytes; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
