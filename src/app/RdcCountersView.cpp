@@ -19,6 +19,7 @@
 #include <QToolButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include <charconv>
 #include <map>
 namespace flora {
 namespace {
@@ -31,6 +32,16 @@ QString unit(const Json &v) {
     auto s = text(v);
     s.remove("CounterUnit.");
     return s == "Seconds" ? "s" : s == "Percentage" ? "%" : s == "Absolute" ? "count" : s;
+}
+uint64_t executionId(const Json &value) {
+    if (!value.is_string())
+        throw std::runtime_error("DX12 execution identity must be a decimal string");
+    const auto &s = value.get_ref<const std::string &>();
+    uint64_t id{};
+    const auto parsed = std::from_chars(s.data(), s.data() + s.size(), id);
+    if (!id || parsed.ec != std::errc{} || parsed.ptr != s.data() + s.size())
+        throw std::runtime_error("Invalid DX12 counter execution identity");
+    return id;
 }
 QTreeWidget *table(const char *name, const QStringList &columns) {
     auto tree = new QTreeWidget;
@@ -168,11 +179,14 @@ void RdcCountersView::setBackendPath(const QString &path, bool persist) {
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    if (persist) QSettings().setValue("analysis/renderdoc", path);
+    if (persist)
+        QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
-void RdcCountersView::setContext(const QString &key, qulonglong event) {
-    const bool changed = key != key_;
+void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12) {
+    const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_);
+    dx12_ = dx12;
+    scope_->setItemText(1, dx12 ? "Measured events" : "Frame");
     const bool selectionChanged = event != event_;
     key_ = key;
     event_ = event;
@@ -201,7 +215,7 @@ void RdcCountersView::invalidate() {
 void RdcCountersView::updateActions() {
     read_->setEnabled(!busy_ && !key_.isEmpty());
     cancel_->setEnabled(busy_);
-    backend_->setEnabled(!busy_);
+    backend_->setEnabled(!busy_ && !dx12_);
     export_->setEnabled(!busy_ && !result_.is_null());
     locate_->setEnabled(!busy_ && values_->currentItem() &&
                         values_->currentItem()->data(0, Qt::UserRole).toULongLong());
@@ -209,7 +223,58 @@ void RdcCountersView::updateActions() {
 RdcCountersView::Json RdcCountersView::request() const {
     if (key_.isEmpty())
         throw std::runtime_error("Open a frame first");
+    if (dx12_)
+        return {{"action", "counters"}, {"execution", std::to_string(event_)}};
     return {{"action", "counters"}};
+}
+bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
+    if (request != requestId_)
+        return false;
+    if (!dx12_ || !report.value("completed", false) || report.value("backend", "") != "dx12" ||
+        report.at("execution") != std::to_string(event_))
+        throw std::runtime_error("Native metrics do not match the selected DX12 execution");
+    const auto &measurement = report.at("performance");
+    if (measurement.at("execution") != std::to_string(event_) ||
+        measurement.at("source") != "native_d3d12_queries")
+        throw std::runtime_error("Native performance identity mismatch");
+    Json result{{"ok", true},
+                {"action", "counters"},
+                {"backend", "dx12"},
+                {"execution", std::to_string(event_)},
+                {"native_measurement", measurement},
+                {"device", report.at("device")},
+                {"available", Json::array()},
+                {"values", Json::array()}};
+    for (const auto key : {"request_identity", "capture_identity"})
+        if (report.contains(key))
+            result[key] = report.at(key);
+    auto add = [&](unsigned counter, const std::string &name, const Json &value, bool seconds) {
+        result["available"].push_back({{"counter", counter},
+                                       {"name", name},
+                                       {"category", "Native D3D12 queries"},
+                                       {"description", "Single selected execution; clocks not stabilized"},
+                                       {"resultType", seconds ? 1 : 4},
+                                       {"resultByteWidth", 8}});
+        Json row{{"eventId", 0},
+                 {"counter", counter},
+                 {"name", name},
+                 {"value", value},
+                 {"unit", seconds ? "CounterUnit.Seconds" : "CounterUnit.Absolute"},
+                 {"execution", std::to_string(event_)},
+                 {"selectable", true},
+                 {"source", "native_d3d12_queries"}};
+        for (const auto key :
+             {"source_record", "queue", "submission", "command_list", "generation", "list_ordinal"})
+            row[key] = measurement.at(key);
+        result["values"].push_back(std::move(row));
+    };
+    add(1, "GPU Duration", measurement.at("duration_seconds"), true);
+    unsigned counter = 2;
+    if (measurement.at("pipeline_statistics_status") == "measured")
+        for (const auto &[name, value] : measurement.at("pipeline_statistics").items())
+            add(counter++, name, value, false);
+    result["result_count"] = result["values"].size();
+    return finish(request, result);
 }
 bool RdcCountersView::finish(uint64_t request, const Json &result) {
     if (request != requestId_)
@@ -222,6 +287,13 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
     if (result.value("action", "") != "counters" || !result.at("available").is_array() ||
         !result.at("values").is_array() || result.at("result_count") != result.at("values").size())
         throw std::runtime_error("Invalid counter result");
+    if (dx12_) {
+        if (result.value("backend", "") != "dx12" || result.at("execution") != std::to_string(event_))
+            throw std::runtime_error("Counter result does not match DX12 selection");
+        for (const auto &row : result.at("values"))
+            if (row.value("selectable", false))
+                (void)executionId(row.at("execution"));
+    }
     result_ = result;
     render();
     if (!details_->isHidden())
@@ -238,25 +310,30 @@ void RdcCountersView::render() {
     catalog_->clear();
     const auto filter = filter_->text();
     size_t shown = 0;
-    std::map<uint32_t, QTreeWidgetItem *> groups;
+    std::map<std::string, QTreeWidgetItem *> groups;
     for (size_t i = 0; i < result_.at("values").size(); ++i) {
         const auto &r = result_["values"][i];
-        const auto gpa = r.value("gpa_event", Json(nullptr));
-        if (!scope_->currentIndex() && (gpa.is_null() || gpa != event_))
+        const auto gpa = r.value(dx12_ ? "execution" : "gpa_event", Json(nullptr));
+        if (!scope_->currentIndex() &&
+            (gpa.is_null() || gpa != (dx12_ ? Json(std::to_string(event_)) : Json(event_))))
             continue;
         if (!filter.isEmpty() && !text(r.at("name")).contains(filter, Qt::CaseInsensitive) &&
             !text(gpa).contains(filter))
             continue;
         QTreeWidgetItem *parent = nullptr;
         const auto eid = r.at("eventId").get<uint32_t>();
-        const auto id = gpa.is_null() ? qulonglong(0) : gpa.get<qulonglong>();
+        const auto id = gpa.is_null() ? qulonglong(0)
+                        : dx12_       ? (r.value("selectable", false) ? executionId(gpa) : 0)
+                                      : gpa.get<qulonglong>();
         if (scope_->currentIndex()) {
-            auto &group = groups[eid];
+            auto &group = groups[dx12_ ? gpa.dump() : std::to_string(eid)];
             if (!group) {
-                group = new QTreeWidgetItem(values_,
-                                            {id ? QString("API %1").arg(id) : QString("RDC %1").arg(eid)});
+                group = new QTreeWidgetItem(values_, {id ? QString(dx12_ ? "Execution %1" : "API %1").arg(id)
+                                                         : QString("RDC %1").arg(eid)});
                 group->setData(0, Qt::UserRole, id);
-                group->setToolTip(0, QString("RDC event %1").arg(eid));
+                group->setToolTip(0, dx12_ ? "Native selected execution on queue " +
+                                                 text(r.value("queue", Json()))
+                                           : QString("RDC event %1").arg(eid));
             }
             parent = group;
         }
@@ -266,10 +343,12 @@ void RdcCountersView::render() {
         item->setData(0, Qt::UserRole + 1, qulonglong(i));
         for (int col = 0; col < 3; ++col)
             item->setToolTip(col, item->text(col));
-        item->setToolTip(
-            0,
-            item->text(0) +
-                QString("\nAPI %1 · RDC %2 · Counter %3").arg(text(gpa)).arg(eid).arg(text(r.at("counter"))));
+        item->setToolTip(0, item->text(0) + (dx12_ ? QString("\nExecution %1 · native D3D12 · Counter %2")
+                                                         .arg(text(gpa), text(r.at("counter")))
+                                                   : QString("\nAPI %1 · RDC %2 · Counter %3")
+                                                         .arg(text(gpa))
+                                                         .arg(eid)
+                                                         .arg(text(r.at("counter")))));
         ++shown;
     }
     for (size_t i = 0; i < result_.at("available").size(); ++i) {
@@ -290,6 +369,8 @@ void RdcCountersView::render() {
     if (groups.size() <= 16)
         values_->expandAll();
     summary_->setText(QString("%1 values · %2 available").arg(shown).arg(result_.at("available").size()));
+    if (dx12_)
+        summary_->setText(summary_->text() + " · native D3D12 · 1 sample · clocks not stabilized");
     updateActions();
 }
 void RdcCountersView::exportResult(const QString &path) const {

@@ -281,7 +281,7 @@ WorkerReport readWorkerOutput(const QString &directory, const QString &kind, con
         }
         return result;
     }
-    auto result = readWorkerReport(directory, kind == "replay", cancelled);
+    auto result = readWorkerReport(directory, kind == "replay" || kind == "native-counters", cancelled);
     QString filename;
     if (kind == "quad") filename = "quad.json";
     else if (kind == "coverage") filename = "coverage.json";

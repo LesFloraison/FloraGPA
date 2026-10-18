@@ -3,6 +3,7 @@
 #include "TileRecipes.h"
 #include "NativeDescriptors.h"
 #include "NativeCommands.h"
+#include "NativePerformance.h"
 #include <wrl/client.h>
 #include <dxgi1_4.h>
 #include <QCryptographicHash>
@@ -103,6 +104,8 @@ struct NativeReplay::Impl {
         std::map<uint64_t, std::vector<Key>> starts;
         uint64_t execution{};
         bool after{}, markers{};
+        bool measure{};
+        std::unique_ptr<NativePerformance> performance;
     };
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
@@ -361,7 +364,7 @@ void NativeReplay::initializeTransfers() {
         s.wait(queue.Get());
     s.initialized = true;
 }
-void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers) {
+void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers, bool performance) {
     auto &s = *impl_;
     require(!s.frameAttempted && !s.frame, "Execution plan is already prepared or attempted");
     const auto target = s.index.execution(execution);
@@ -371,6 +374,9 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     frame->execution = execution;
     frame->after = after;
     frame->markers = analysisMarkers;
+    require(!performance || after, "Performance queries require an after-event replay boundary");
+    require(!performance || !analysisMarkers, "Native performance queries cannot be combined with RenderDoc capture");
+    frame->measure = performance;
     frame->commands =
         std::make_unique<NativeCommands>(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
     auto &recordings = frame->recordings;
@@ -420,6 +426,11 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             const auto allocatorId = value(args, "CommandAllocator");
             require(s.allocatorRecipes.contains(allocatorId), "Missing frame allocator recipe");
             const auto type = s.allocatorRecipes.at(allocatorId).type;
+            if (frame->measure && native.instance.firstExecution <= frame->execution &&
+                frame->execution - native.instance.firstExecution < native.count) {
+                require(!frame->performance, "Ambiguous performance execution instance");
+                frame->performance = std::make_unique<NativePerformance>(s.device.device(), type);
+            }
             require(type == D3D12_COMMAND_LIST_TYPE_DIRECT || type == D3D12_COMMAND_LIST_TYPE_COPY ||
                         type == D3D12_COMMAND_LIST_TYPE_COMPUTE,
                     "Unsupported frame command-list type");
@@ -455,6 +466,8 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                     std::to_string(instance.ordinal) + ": " + streamPacketName(p.type);
                 native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
             }
+            const bool measured = frame->measure && native.instance.firstExecution + native.recorded == frame->execution;
+            if (measured) frame->performance->begin(native.list.Get());
             if (transfer(p.type))
                 s.record(native.list.Get(), id, original.list, &native.states);
             else {
@@ -463,6 +476,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             }
             if (analysisMarkers)
                 native.list->EndEvent();
+            if (measured) frame->performance->end(native.list.Get());
             if (++native.recorded == native.count) {
                 check(native.list->Close(), "Close frame execution prefix");
                 native.closed = true;
@@ -847,6 +861,20 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
         {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"},
         {"file", output.filename().string()}, {"image", imageFile}, {"display_interpretation",displayInterpretation}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
+}
+json NativeReplay::performanceResult() const {
+    auto &s = *impl_;
+    require(s.boundaryReached && s.boundaryAfter && s.frame && s.frame->performance &&
+                s.selectedExecution == s.frame->execution,
+            "Performance results require a completed measured execution");
+    const auto execution = s.index.execution(s.selectedExecution);
+    auto result = s.frame->performance->result(s.queue(execution.queue));
+    result.update({{"execution", std::to_string(execution.id)}, {"source_record", std::to_string(execution.record)},
+                   {"queue", std::to_string(execution.queue)}, {"submission", std::to_string(execution.submission)},
+                   {"command_list", std::to_string(execution.list)}, {"generation", std::to_string(execution.generation)},
+                   {"list_ordinal", std::to_string(execution.ordinal)},
+                   {"command", streamPacketName(s.directory.packets().at(size_t(execution.record - 1)).type)}});
+    return result;
 }
 json NativeReplay::information() const {
     const auto &s = *impl_; return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},

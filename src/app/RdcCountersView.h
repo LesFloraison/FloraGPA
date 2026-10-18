@@ -13,7 +13,8 @@ class RdcCountersView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit RdcCountersView(QWidget *parent = nullptr);
-    void setContext(const QString &key, qulonglong event);
+    void setContext(const QString &key, qulonglong event, bool dx12 = false);
+    bool finishNative(uint64_t request, const Json &report);
     void setWorkerBusy(bool busy);
     void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return backendPath_; }
@@ -33,7 +34,7 @@ class RdcCountersView final : public QWidget {
     QString key_, backendPath_;
     qulonglong event_{};
     uint64_t requestId_{};
-    bool busy_{};
+    bool busy_{}, dx12_{};
     Json result_;
     QAction *read_, *cancel_, *export_, *backend_, *locate_;
     QComboBox *scope_;

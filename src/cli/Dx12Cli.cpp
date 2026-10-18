@@ -65,11 +65,13 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"resource", nullptr},
                           {"rgba_sha256", nullptr}};
     try {
-        replay.prepareExecution(execution, !options.isSet("before"), bool(capture));
+        replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
         replay.initializeTransfers();
         if (capture)
             capture->start(device.device(), "FloraGPA independent DX12 replay");
         replay.replayTo(execution, !options.isSet("before"), bool(capture));
+        if (options.isSet("measure-event"))
+            report["performance"] = replay.performanceResult();
         if (capture)
             report["rdc_capture"] = QString::fromStdWString(capture->finish().wstring()).toStdString();
         if (object) {
@@ -142,7 +144,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     if (command == "commands")
         allowed.insert("filter");
     if (command == "replay")
-        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device"});
+        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event"});
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");

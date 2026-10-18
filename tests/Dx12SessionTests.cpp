@@ -22,6 +22,7 @@
 #include "app/ReplayMeshView.h"
 #include "app/PixelHistoryView.h"
 #include "app/ResourceHistoryView.h"
+#include "app/RdcCountersView.h"
 #include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QCryptographicHash>
@@ -647,6 +648,61 @@ class Dx12SessionTests : public QObject {
             QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
                      missing ? CapabilityStatus::MissingData : CapabilityStatus::NotImplemented);
         }
+    }
+    void nativePerformanceWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set BF1 capture directory for selected Dispatch performance");
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("21895");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto metrics = window.findChild<RdcCountersView *>("rdcCountersView");
+        metrics->setBackendPath("missing-renderdoc.dll", false);
+        QVERIFY(!metrics->findChild<QAction *>("rdcCountersBackend")->isEnabled());
+        auto read = metrics->findChild<QAction *>("readRdcCounters");
+        QVERIFY(read->isEnabled());
+        QCOMPARE(metrics->request().at("execution"), nlohmann::json("21895"));
+        done.clear();
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        const auto result = metrics->result();
+        const auto &measurement = result.at("native_measurement");
+        QCOMPARE(measurement.at("execution"), nlohmann::json("21895"));
+        QCOMPARE(measurement.at("source_record"), nlohmann::json("274044"));
+        QCOMPARE(measurement.at("queue_type"), nlohmann::json(0));
+        QCOMPARE(measurement.at("pipeline_statistics_status"), nlohmann::json("measured"));
+        QCOMPARE(measurement.at("pipeline_statistics").at("CSInvocations"), nlohmann::json("4096"));
+        QCOMPARE(measurement.at("pipeline_statistics").at("VSInvocations"), nlohmann::json("0"));
+        const auto begin = std::stoull(measurement.at("timestamp_begin").get<std::string>());
+        const auto end = std::stoull(measurement.at("timestamp_end").get<std::string>());
+        const auto frequency = std::stoull(measurement.at("timestamp_frequency_hz").get<std::string>());
+        QVERIFY(end > begin);
+        QVERIFY(frequency > 0);
+        QCOMPARE(measurement.at("duration_seconds").get<double>(), double(end - begin) / double(frequency));
+        auto rows = metrics->findChild<QTreeWidget *>("rdcCounterValues");
+        QCOMPARE(rows->topLevelItemCount(), 12);
+        qInfo() << "BF1 native Dispatch seconds" << measurement.at("duration_seconds").get<double>()
+                << "frequency" << frequency << "CS invocations" << 4096;
+        const auto output = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
+        if (!output.isEmpty())
+            metrics->exportResult(output);
+        rows->setCurrentItem(rows->topLevelItem(0));
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 21895ULL);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        const auto token = metrics->requestId();
+        locate->setText("21622");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(metrics->result().is_null());
+        QVERIFY(!metrics->finish(token, result));
     }
     void resourceBarrierDetails() {
         QByteArray bytes;

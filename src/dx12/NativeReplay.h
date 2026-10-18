@@ -13,7 +13,8 @@ class NativeReplay final {
     ~NativeReplay();
     // Plan before initialization to restore lists recorded in the keyframe at
     // their original CPU boundaries, without executing their frame work early.
-    void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false);
+    void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false, bool performance = false);
+    nlohmann::json performanceResult() const;
     void initializeTransfers();
     void replayTo(uint64_t execution, bool after, bool analysisMarkers = false);
     nlohmann::json readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output, uint64_t expectedCreation = 0);

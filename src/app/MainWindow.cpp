@@ -1346,8 +1346,11 @@ void MainWindow::buildUi() {
     connect(rdcCounters_, &RdcCountersView::cancelRequested, this, &MainWindow::cancel);
     connect(rdcCounters_, &RdcCountersView::error, this, &MainWindow::showError);
     connect(rdcCounters_, &RdcCountersView::eventRequested, this, [this](qulonglong event) {
-        if (!busy())
+        if (!busy()) {
+            if (session_ && session_->backend() == ReplayBackend::Dx12)
+                findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
             locateEvent(event);
+        }
     });
     auto right = new QDockWidget("Inspector", workspace_);
     right->setObjectName("inspectorDock");
@@ -1619,7 +1622,7 @@ void MainWindow::updateCheckpointContext() {
                 selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
     }
     if (rdcCounters_)
-        rdcCounters_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
+        rdcCounters_->setContext((frame_ || (dx12 && (draw || dispatch))) ? analysisKey : QString{}, selectedEvent_, dx12);
     if (resourceHistory_) {
         const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
         resourceHistory_->setContext(supported ? analysisKey : QString{}, selection_.execution.value_or(0),
@@ -1695,6 +1698,21 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
+    if (dx12 && kind == RdcAnalysis::Counters && !view) {
+        runningAnalysis_ = kind;
+        historyRequestId_ = rdcCounters_->requestId();
+        try {
+            const auto request = rdcCounters_->request();
+            startWorker({"replay", capturePath_, "--event", QString::fromStdString(request.at("execution").get<std::string>()),
+                         "--measure-event", "--max-bytes", QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)}, false);
+            if (process_.state() == QProcess::NotRunning) throw std::runtime_error("Cannot start native metrics worker");
+            runningKind_ = "native-counters";
+        } catch (const std::exception &e) {
+            rdcCounters_->finish(historyRequestId_, {{"ok", false}, {"error", e.what()}});
+            emit taskFinished(false);
+        }
+        return;
+    }
     if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History && kind != RdcAnalysis::ResourceHistory)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
@@ -2075,7 +2093,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
             runningKind_ == "metric-catalog")
             scheduledMetrics_->finish(runningScheduledRequest_, {{"error", reason}});
-        if (runningKind_ == "history" || runningKind_ == "history-capture")
+        if (runningKind_ == "history" || runningKind_ == "history-capture" || runningKind_ == "native-counters")
             finishRdcAnalysis({{"ok", false}, {"error", reason}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", reason}});
@@ -2162,6 +2180,14 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             jobDir_.reset(); resourceTimer_.start(); return;
         }
         report_ = std::move(result.report);
+        if (runningKind_ == "native-counters") {
+            result.replayReport["request_identity"] = replayIdentityJson(runningIdentity_);
+            result.replayReport["capture_identity"] = {{"kind", "runtime_session"}, {"value", session_->identity()}, {"backend", "dx12"}};
+            const bool accepted = rdcCounters_->finishNative(historyRequestId_, result.replayReport);
+            statusBar()->showMessage(accepted ? "Native GPU metrics ready" : "Native metrics discarded", 3000);
+            emit taskFinished(accepted);
+            return;
+        }
         if (report_["experiment"].isObject()) {
             const auto experiment = report_["experiment"].toObject();
             log_->appendPlainText(QString("Experiment r%1/%2 · %3 applied · %4 pending")
@@ -2397,7 +2423,7 @@ void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
     if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
         runningKind_ == "metric-catalog")
         scheduledMetrics_->finish(runningScheduledRequest_, {{"error", message}});
-    if (runningKind_ == "history" || runningKind_ == "history-capture")
+    if (runningKind_ == "history" || runningKind_ == "history-capture" || runningKind_ == "native-counters")
         finishRdcAnalysis({{"ok", false}, {"error", message}});
     if (runningKind_ == "timings")
         gpuProfile_->finish(runningProfileRequest_, {{"error",message}});

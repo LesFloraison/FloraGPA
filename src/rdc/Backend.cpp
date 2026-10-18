@@ -692,7 +692,11 @@ Json runRdcJob(const Json &job) {
             if (uint32_t(counter) < uint32_t(GPUCounter::FirstAMD))
                 selected.push_back(counter);
         }
-        for (const auto &counter : controller.FetchCounters(selected)) {
+        const auto measured = controller.FetchCounters(selected);
+        checked(controller.GetFatalErrorStatus());
+        if (!selected.empty() && measured.empty())
+            throw std::runtime_error("RenderDoc returned no measured counters; available descriptions are not measurements");
+        for (const auto &counter : measured) {
             const auto it = descriptions.find(counter.counter);
             if (it == descriptions.end())
                 throw std::runtime_error("Counter result has no description");

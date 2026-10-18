@@ -999,6 +999,68 @@ Full Resource History acceptance remains open, including capture synchronization
 subresource usage for bindings, complete initialization provenance and actual
 modification observations. No full-sample replay suite was run for this change.
 
+### Native selected-execution GPU metrics
+
+The first DX12 RenderDoc counter probe exposed an error-handling defect:
+`FetchCounters` returned no values while the controller held a fatal error. The
+adapter previously reported this as success with an empty array. It now checks
+`GetFatalErrorStatus` and rejects an empty measurement instead. A targeted retry
+confirmed RenderDoc 1.45's failure at stable-power-state setup: it reports that
+Windows developer mode is required (`bf1-dispatch-counters2/result.json`). Its
+catalog also reports the missing Nsight Perf SDK library for NVIDIA counters
+(`bf1-dispatch-counters1/result.json`). Neither condition establishes a GPU query
+hardware limitation, and no system settings were changed.
+
+An independent native D3D12 query path now measures the selected execution in its
+own submitted command-list instance. Timestamp queries bracket the command;
+pipeline-statistics queries are also collected on direct lists. Results are
+resolved to a small readback buffer and read only after the replay queue fence
+completes. The duration uses that same queue's timestamp frequency. Raw timestamp,
+frequency, statistics and execution identities remain decimal strings, preserving
+values above 2^53. Compute lists currently provide timestamps only, with pipeline
+statistics explicitly unsampled; copy-list queries are not implemented.
+
+The existing **Replay Metrics** panel uses this native Worker path for DX12,
+independently of its RenderDoc library setting. It shows the source and units,
+supports export and accurate execution navigation, and invalidates metrics when
+the selected execution changes. Worker response identity checks remain in force;
+exports carry the runtime session/request/experiment identity. The DX11 RenderDoc
+path and its selection-versus-frame behavior are retained. Native measurement is
+also available through `replay <directory> --event <execution> --measure-event`.
+Measurement requires an after-event boundary and cannot currently be combined
+with `--renderdoc`, so profiling helpers cannot contaminate original-event markers.
+
+BF1 execution `21895`, source `274044`, was measured through the actual workspace
+Worker with its RenderDoc path deliberately set to a nonexistent file:
+
+| Observation | Value |
+| --- | --- |
+| Capture queue / command-list type | `861708976` / DIRECT |
+| CS invocations | `4096` |
+| Expected invocation count from decoded dispatch and shader | `8 × 8 × 1` groups, `8 × 8 × 1` threads = `4096` |
+| VS invocations | `0` |
+| Raw timestamp begin / end | `1792340049618257664` / `1792340049618262272` |
+| Queue timestamp frequency | `1000000000` Hz |
+| Single measured interval | `4608` ticks = `4.608 µs` |
+
+Evidence: `bf1-native-metrics-workspace1.json` and
+`bf1-native-metrics-workspace1.txt`. The test also checks the displayed metric
+count, filtering/locating the original execution, and stale-result rejection on
+event change. This is one instrumented sample, without explicit warmup repetitions
+or stabilized clocks; it is not an original-application performance baseline,
+full-frame timing, or a calibrated multi-queue timeline. Draw-specific statistics,
+compute-list timing, cross-queue synchronization, repeat sampling and vendor
+hardware counters remain to be verified or implemented. No missing metric is
+replaced with an estimate.
+
+The saved measurement was reused for CPU-only display and identity checks:
+decimal execution IDs above 2^53 and UINT64_MAX count text round-trip exactly,
+native response identities survive conversion for the panel, and stale execution
+results are rejected (`native-metrics-identities1.txt`). Existing DX11 exact-value
+and selection-invalidation checks pass (`dx11-counters-compat1.txt`). Release GUI,
+CLI, Worker, isolated analysis and focused tests build successfully (`build100.log`,
+`build101.log`). These checks did not repeat the GPU measurement.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1010,7 +1072,7 @@ modification observations. No full-sample replay suite was run for this change.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
-| GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

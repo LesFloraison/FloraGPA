@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
     p.addOption({"renderdoc", "Optional RenderDoc DLL for independent replay recapture", "path"});
+    p.addOption({"measure-event", "Measure the selected native DX12 execution with GPU queries"});
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
@@ -263,6 +264,7 @@ int main(int argc, char **argv) {
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
         if (QFileInfo(args[1]).isDir()) return runDx12Cli(command, args[1], p);
+        if (p.isSet("measure-event")) throw std::runtime_error("--measure-event requires native DX12 replay");
         if (command == "validate-frame") {
             for (const auto &option : optionNames)
                 if (option != "out") throw std::runtime_error("validate-frame accepts only --out");

@@ -370,6 +370,15 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Supported, "Partial replay-prefix usage history; bindings are potential "
                     "accesses, content changes and complete subresource/synchronization coverage are not measured"};
         }
+        if (feature == ReplayFeature::Performance) {
+            auto executionOnly = selection; executionOnly.resource = 0;
+            const auto replay = capability(ReplayFeature::Replay, executionOnly);
+            if (!replay.supported()) return replay;
+            const auto kind = executionEvent(*selection.execution).workKind;
+            if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch)
+                return {CapabilityStatus::NotImplemented, "Select a supported Draw or Dispatch for native GPU queries"};
+            return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample; pipeline statistics on direct lists; no stabilized clocks, calibrated timeline or vendor counters"};
+        }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;
             executionOnly.resource = 0;

@@ -2,6 +2,7 @@
 #include "app/MainWindow.h"
 #include "app/RdcCountersView.h"
 #include "app/ReplayDebugView.h"
+#include "application/ReplayRequest.h"
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
@@ -116,6 +117,43 @@ class RdcCounterUiTests : public QObject {
         QVERIFY(view.result().is_null());
         QVERIFY(!view.finish(token, fixture()));
         QCOMPARE(rows->topLevelItemCount(), 0);
+    }
+    void nativeDx12Report() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
+        if (path.isEmpty())
+            QSKIP("Set the recorded native DX12 metrics report");
+        auto report = read(path);
+        RdcCountersView view;
+        view.setContext("bf1-native", 21895, true);
+        const auto identity = replayIdentityJson({"native-metrics", ReplayBackend::Dx12, 9007199254740993ULL, 7});
+        const Json raw{{"completed", true}, {"backend", "dx12"}, {"execution", "21895"},
+                       {"performance", report.at("native_measurement")}, {"device", report.at("device")},
+                       {"request_identity", identity}, {"capture_identity", {{"kind", "runtime_session"}, {"value", "native-metrics"}}}};
+        QVERIFY(view.finishNative(view.requestId(), raw));
+        QCOMPARE(view.result().at("request_identity"), identity);
+        QCOMPARE(view.result().at("capture_identity"), raw.at("capture_identity"));
+        auto rows = view.findChild<QTreeWidget *>("rdcCounterValues");
+        QCOMPARE(rows->topLevelItemCount(), 12);
+        QCOMPARE(view.findChild<QComboBox *>("rdcCountersScope")->itemText(1), QString("Measured events"));
+        QVERIFY(!action(view, "rdcCountersBackend")->isEnabled());
+        const auto serial = view.requestId();
+        view.setContext("bf1-native", 21622, true);
+        QVERIFY(!view.finish(serial, report));
+        QVERIFY(view.result().is_null());
+        view.setContext("wide-native", 9007199254740993ULL, true);
+        report["execution"] = "9007199254740993";
+        for (auto &row : report["values"])
+            row["execution"] = report["execution"];
+        report["values"][1]["value"] = "18446744073709551615";
+        QVERIFY(view.finish(view.requestId(), report));
+        QCOMPARE(rows->topLevelItem(1)->text(1), QString("18446744073709551615"));
+        rows->setCurrentItem(rows->topLevelItem(1));
+        QSignalSpy jump(&view, &RdcCountersView::eventRequested);
+        action(view, "locateRdcCounter")->trigger();
+        QCOMPARE(jump.count(), 1);
+        QCOMPARE(jump[0][0].toULongLong(), 9007199254740993ULL);
+        report["values"][1]["execution"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report));
     }
     void recordedReports() {
         const auto root = qEnvironmentVariable("FLORA_COUNTER_REPORTS");
