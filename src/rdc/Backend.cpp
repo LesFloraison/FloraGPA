@@ -755,6 +755,25 @@ Json runRdcJob(const Json &job) {
         {"gpa_command_map", mapping["gpa_command_map"]}};
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        if (job.value("api_validation", false)) {
+            const auto messages = controller.GetDebugMessages();
+            Json rows = Json::array();
+            for (size_t i = 0; i < messages.size() && i < 4096; ++i) {
+                const auto &message = messages[i];
+                rows.push_back({{"event_id", message.eventId},
+                                {"category_enum", uint32_t(message.category)},
+                                {"severity_enum", uint32_t(message.severity)},
+                                {"source_enum", uint32_t(message.source)},
+                                {"message_id", message.messageID},
+                                {"description", text(message.description)}});
+            }
+            result["api_validation"] = {
+                {"requested", true}, {"messages", std::move(rows)},
+                {"message_count", std::to_string(messages.size())},
+                {"truncated", messages.size() > 4096},
+                {"scope", "Backend diagnostics accumulated while opening and analyzing this capture. "
+                          "An empty list does not prove replay correctness or that the validation layer was available."}};
+        }
         if (dx12) {
             result["execution_map"] = mapping["execution_map"];
             result["record_executions"] = mapping["record_executions"];

@@ -73,11 +73,13 @@ class RdcJobTests : public QObject {
         const auto job = prepare(dir.path(), "success",
                                  {{"execution", "9007199254740993"},
                                   {"resource", "18446744073709551615"},
-                                  {"resource_creation", "9007199254740994"}, {"primitive", 17}});
+                                  {"resource_creation", "9007199254740994"}, {"primitive", 17},
+                                  {"api_validation", true}});
         QCOMPARE(job.at("execution"), Json("9007199254740993"));
         QCOMPARE(job.at("resource"), Json("18446744073709551615"));
         QVERIFY(job.at("gpa_event").is_null());
         QCOMPARE(job.at("primitive"), Json(17));
+        QCOMPARE(job.at("api_validation"), Json(true));
     }
     void preparation() {
         QTemporaryDir dir;
@@ -85,6 +87,7 @@ class RdcJobTests : public QObject {
         QCOMPARE(job.at("resource"), Json(UINT64_MAX));
         QCOMPARE(job.at("index"), Json(nullptr));
         QCOMPARE(job.at("stage"), Json("VSOut"));
+        QCOMPARE(job.at("api_validation"), Json(false));
         QCOMPARE(job.at("group"), Json::array({1, 2, 3}));
         QCOMPARE(job.at("thread"), Json::array({0, 0, 0}));
         QVERIFY(QFileInfo(QString::fromStdString(job.at("capture").get<std::string>())).isAbsolute());
@@ -97,6 +100,7 @@ class RdcJobTests : public QObject {
     void invalidOptions_data() {
         QTest::addColumn<Json>("options");
         QTest::newRow("unknown") << Json{{"invented", 1}};
+        QTest::newRow("validation-type") << Json{{"api_validation", "true"}};
         QTest::newRow("boolean") << Json{{"x", true}};
         QTest::newRow("negative") << Json{{"y", -1}};
         QTest::newRow("overflow") << Json{{"sample", uint64_t(UINT32_MAX) + 1}};

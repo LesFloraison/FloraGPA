@@ -36,6 +36,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
                      flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
+        p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
         for (const auto &[key, description] :
@@ -65,6 +66,7 @@ int rdcAnalyzeCli(QStringList args) {
             throw std::runtime_error("Expected rdc-analyze <capture.rdc> <action> --out <directory>");
         using Json = nlohmann::json;
         Json options = Json::object();
+        options["api_validation"] = p.isSet("api-validation");
         auto number = [](const QString &text) -> uint64_t {
             bool valid = false;
             const auto value = text.toULongLong(&valid);

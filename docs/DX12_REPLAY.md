@@ -2708,6 +2708,76 @@ It passed (**3 passed** including setup/cleanup, **162 ms**,
 `fixed-pipeline-composite1.txt`). Full frame consistency and the upstream source
 of the varying color contribution remain unresolved.
 
+### BF1 particle boundary discrepancy and replay API diagnostics
+
+The composition input investigation now reaches resource creation **325012**
+(object **10432990048**, 960x504 RGBA16 typeless storage). At pixel **(836,241)**,
+Pixel History reports a clear at execution **36391** and 22 candidate fragments
+at execution **36560**, source **255931**, RenderDoc event **45218**. This is a
+4974-index, one-instance particle draw. Its PS is
+`12a8314a-03003d5d-ab7f51bd-f9527a6b`; input buffers are creations **300390**,
+**163437**, and index buffer **300406**. The PS samples depth **325048** and
+particle texture **222289**. Fragment reconstruction and shader debugging remain
+subject to their documented backend limitations.
+
+A new, distinct analysis-replay discrepancy was reproduced:
+
+| Stop/readback path | Selected RGBA |
+| --- | --- |
+| Native replay after execution 36560 | (0.035003662109375, 0.031463623046875, 0.02667236328125, 0.65478515625) |
+| RenderDoc texture readback at following barrier execution 36561 | Exactly the same |
+| RenderDoc texture readback directly at draw execution 36560 | (0, 0, 0, 0) |
+| PS debug 36560, primitive 1322, all three GPU-reference phases | (0, 0, 0, 0) |
+
+The native and barrier readbacks match for **all 3,870,720 bytes**, SHA-256
+**a1cec82b979735c74db4dd23e7b41bcd189128ae376bbcd6fae0abfc029b7138**.
+They are separate executions; this equality does not establish general
+determinism. The selected PS invocation returns nonzero color and alpha
+**0.4272592366**, but that output alone is not a final-target oracle.
+
+Temporary, subsequently removed research instrumentation also compared stop
+points within a single controller. Re-selecting the Draw continues to produce
+zero at this pixel. Selecting its immediate **EndEvent, 45219**, already produces
+nonzero color, without executing the following barrier. All **64 exposed pipeline
+rows** are identical between these two selections. DSV creation **325024** reads
+**0.0011842424282804132** at the selected pixel in both cases. Other repeated
+prefixes still vary in color, so this does not resolve the earlier whole-frame
+variation. Temporarily disabling `D3D12_BindlessFeedback` does not eliminate the
+zero/nonzero discrepancy; the setting was changed only in that worker's memory.
+
+Source instrumentation of the pinned RenderDoc 1.45 build confirmed that the
+single-event replay requests and resolves event **45218**, structured chunk
+**44633**, file offset **2870016**, and dispatches
+`ID3D12GraphicsCommandList::DrawIndexedInstanced`. Thus this probe did not reveal
+an event-map or chunk-selection error. `ReplayController::SetFrameEvent` uses
+`WithoutDraw` followed by `OnlyDraw`; moving to the end marker instead places
+the Draw in the prefix. **The cause of their different outputs remains unresolved.**
+An unchanged three-phase debug reference is insufficient evidence that this
+event boundary is correct. Do not classify this case as a validated native
+replay failure, a hardware limitation, or a completed Shader Debug comparison.
+
+`rdc-analyze --api-validation` now enables the existing worker replay-validation
+option and exports available backend diagnostics in `api_validation`: native
+event, category/severity/source enums, message ID, and description. The default
+remains disabled. Reports preserve a decimal total count and explicit truncation
+after 4096 messages; absence of messages is not a validation pass. The BF1
+reproduction collected **726 medium-severity messages**: 723 sampler comparison
+warnings (1361), two buffer initial-state warnings (1328), and one duplicate
+resource-barrier warning (1008). These messages did not identify the cause.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-half-color-history1`, `bf1-half-color-pixel-history1`,
+`bf1-particle-pipeline1`, `bf1-particle-ps1322-1`,
+`bf1-particle-{native-boundary1,after-barrier1,at-draw1,validation1}`,
+`bf1-particle-{boundary-probe1,no-feedback1,boundary-depth1,event-offset1,boundary-state1}`.
+These are targeted investigations of this draw, not full-sample acceptance runs.
+The diagnostic backend/source hooks were removed, the production worker rebuilt,
+and the prior three-patch RenderDoc DLL restored (SHA-256
+**02c8df93c5a5fb964648e1307db903bf60092a0afd8dcec08ecf80cab7493b4e**).
+The CLI/worker build passed. Focused job preparation checks cover default-off,
+explicit-on with lossless DX12 identities, and rejection of a nonboolean option:
+**5 passed**, including setup/cleanup, **12 ms**, `rdc-api-validation-options1.txt`.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
