@@ -469,6 +469,8 @@ void MainWindow::buildUi() {
         }
     });
     enableAction_->setObjectName("enableExperimentEvent");
+    edit->addAction("Replace DX12 Pipeline Shader…", this, &MainWindow::importDx12Shader)
+        ->setObjectName("replaceDx12Shader");
     clearAction_ = edit->addAction("Edit Clear Values…", this, &MainWindow::editClear);
     clearAction_->setObjectName("editClear");
     setterAction_ = edit->addAction("Edit Setter…", this, &MainWindow::editSetter);
@@ -1612,7 +1614,8 @@ void MainWindow::setBusy(bool busy) {
     updateExperimentActions();
     if (dx12 && busy) {
         for (auto action : {undoAction_, redoAction_, enableAction_,
-                            findChild<QAction *>("openExperiment"), findChild<QAction *>("saveExperiment")})
+                            findChild<QAction *>("openExperiment"), findChild<QAction *>("saveExperiment"),
+                            findChild<QAction *>("replaceDx12Shader")})
             action->setEnabled(false);
     }
 }
@@ -3270,6 +3273,7 @@ void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
+    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy());
     undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
     if (dx12) {
         findChild<QAction *>("openExperiment")->setEnabled(!busy());

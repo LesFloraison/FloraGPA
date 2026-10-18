@@ -66,7 +66,11 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                         std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
     dx12::NativeDevice device(directory, options.isSet("debug-device"));
     dx12::NativeReplay replay(device, directory, budget);
-    if (experiment) replay.setDisabledExecutions(experiment->disabledExecutions(session));
+    if (experiment) {
+        auto edits = experiment->dx12Edits(session);
+        replay.setDisabledExecutions(std::move(edits.disabled));
+        replay.setShaderReplacements(std::move(edits.shaders));
+    }
     nlohmann::json report{{"backend", "dx12"},
                           {"completed", false},
                           {"frame_complete", false},

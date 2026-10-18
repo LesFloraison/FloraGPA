@@ -1433,8 +1433,9 @@ GUI/CLI/Worker and the focused tests build through `build126.log`.
 
 This established the native/model Draw experiment; the following milestone connects
 it to the workspace. Direct Dispatch suppression is implemented but lacks an
-independent GPU-write experiment. Indirect/mesh suppression, shader replacement,
-resource patches, and modified history/debug/geometry validation remain unfinished.
+independent GPU-write experiment. Indirect/mesh suppression, resource patches,
+and modified history/debug/geometry validation remain unfinished. The shader
+import milestone below provides the first verified replacement path.
 No BF1 or Hellblade2 GPU rerun was added for this change.
 
 ### DX12 workspace experiments, persistence and result invalidation
@@ -1485,6 +1486,79 @@ existing project actions retain their expected initial availability. Build131
 completes GUI, Worker and the focused test target. This milestone does not resolve
 the recorded DX11 baseline faults or the remaining DX12 experiment types.
 
+### Pipeline shader replacement with native PSO validation
+
+The workspace now provides **Edit > Replace DX12 Pipeline Shader…**. Supply the
+CPU PSO creation-record ID, choose one of its captured stages and import compiled
+DXBC/DXIL bytecode. API record details expose the pipeline stages and original
+digests. The replacement applies to every use of that exact pipeline creation,
+including repeated command-list submissions. It does not target every pipeline
+sharing the same bytecode or a later object lifetime at the same address.
+
+Experiment history persists the `pipeline_shader` operation, decimal pipeline
+ID, stage, `pipeline_lifetime` scope, original shader digest and checksummed
+bytecode asset. All history entries, including undone edits, are validated.
+Same-stage edits supersede earlier edits at the active cursor; undo/redo and
+project loading reuse the existing model. Workspace imports are cancellable and
+preserve existing experiment history. Original capture files remain read-only.
+
+Container validation checks chunk ranges, executable program length and stage
+for DXBC and DXIL. Replay patches the graphics/compute descriptor or the exact
+pipeline-stream shader subobject and creates all affected PSOs before GPU
+submission, retaining the captured root signature and remaining pipeline state.
+This uses the native runtime's
+[pipeline compatibility validation](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_graphics_pipeline_state_desc).
+An incompatible replacement fails the request; it never silently falls back to
+the original shader. Debug-layer diagnostics are included when available.
+Embedded-only root signatures currently fail explicitly because that validation
+path is not implemented. Reports distinguish PSO creation from GPU execution and
+list the original/replacement digests and scope.
+
+The focused Talos experiment targets pipeline creation **156847**, library name
+`B5355971`, VS SHA-256
+`81f4477676e4cb210da4408c77314811ab233c99192d3709a222fa8bdc3daec5`.
+Execution **12675** uses this pipeline without a PS. The test reconstructs the
+captured VS XY/W transform from its saved disassembly and changes NDC depth to
+**0.25**, preserving the captured rasterizer state, including slope-scaled depth
+bias **-2**. Resource creation **167081**, subresource **1**, supplies the actual
+2048 x 2048 D16 GPU readback after the Draw.
+
+`dx12-shader-workspace2.txt` passes in 37.554 seconds using two serial Worker
+replays through the main window:
+
+| State | Raw result | SHA-256 |
+| --- | --- | --- |
+| Imported VS | 396,850 pixels equal 16384; remaining pixels zero | `3f5d384f150e24e3b078e9c2aa316610a47595014f52dee9f77b5fbe2e738bcf` |
+| Undo | Exact original 8,388,608-byte depth resource | `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217` |
+
+The written-pixel mask is identical before and after replacement (zero mask
+differences). Both project states and raw resources are saved in
+`talos-shader-workspace2`; the comparison is `comparison.json`. The initial test
+used depth 0.5 and observed uniform D16 value 32767 rather than its assumed
+32768. That test failed and was retained as `dx12-shader-workspace1.txt`. The
+accepted experiment avoids that half-step quantization boundary; it does not
+relax the exact-value check or remove the captured depth-bias state.
+
+Additional checks serve this replacement implementation:
+
+- `dx12-shader-project4.txt`: model save/load, undo/redo, wrong-stage rejection,
+  invalid original digest hidden behind undo, actual DXBC/DXIL stage decoding,
+  and the existing repeated-submission enable-edit fixture pass.
+- `talos-shader-incompatible2.log`: a VS referencing CBV b13 fails before replay
+  with the runtime's explicit message that the range is not bound in the original
+  root signature. This is an expected rejection, not a successful replay.
+- `dx12-shader-pipeline-paths1.txt`: BF1 compute pipeline **4756** and Hellblade2
+  mesh stream pipeline **1390** accept byte-preserving CS and MS/PS imports with
+  zero validation errors. These create PSOs only; they do not prove changed CS,
+  MS or PS execution, nor perform BF1/Hellblade2 frame replay.
+- Build140 completes GUI, CLI, Worker and the focused test target. Cancellation
+  during PSO preparation retains its cancellation status instead of being
+  reported as a shader compatibility failure.
+
+Changed DXIL shader execution, all-stage replacement coverage, source-editor
+compilation integration, embedded-only roots and analysis of modified shaders
+remain unfinished. The full portable-package acceptance is still outstanding.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1496,7 +1570,7 @@ the recorded DX11 baseline faults or the remaining DX12 experiment types.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Workspace Draw disable/undo, raw output restoration, project save/reopen and stale-result rejection verified; full experiments and performance unfinished | Unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable and VS replacement change GPU output; undo restores exact bytes; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

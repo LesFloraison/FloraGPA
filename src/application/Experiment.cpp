@@ -67,18 +67,44 @@ Experiment::Experiment(const IReplaySession &session, const CancelCheck &cancell
                 {"cursor", 0}, {"history", Json::array()}};
 }
 std::set<Id> Experiment::disabledExecutions(const IReplaySession &session) const {
+    return dx12Edits(session).disabled;
+}
+Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const {
     if (session.backend() != ReplayBackend::Dx12 || project_.at("format") != "FloraGPA experiment 2" ||
         project_.at("backend") != "dx12" || project_.at("event_domain") != "execution_instance" ||
         project_.at("capture_identity") != session.captureIdentity())
         throw std::runtime_error("DX12 experiment capture identity or domain mismatch");
     const auto &history = project_.at("history");
     if (!history.is_array() || revision() > history.size()) throw std::runtime_error("Invalid experiment cursor");
-    std::set<Id> disabled;
+    Dx12Edits edits;
+    std::map<std::pair<Id, std::string>, dx12::ShaderReplacement> shaders;
     // Validate redo entries as well: invalid operations must not hide behind undo.
     for (size_t i = 0; i < history.size(); ++i) {
         const auto &operations = history.at(i).at("operations");
         if (!operations.is_array()) throw std::runtime_error("Invalid experiment operation list");
         for (const auto &op : operations) {
+            if (op.at("kind") == "pipeline_shader") {
+                if (!op.at("pipeline").is_string() || op.at("scope") != "pipeline_lifetime")
+                    throw std::runtime_error("Invalid DX12 shader replacement target/scope");
+                const auto pipeline = identifier(op.at("pipeline"));
+                const auto stage = op.at("stage").get<std::string>();
+                auto bytes = asset(op.at("asset"));
+                if (dx12::shaderBytecodeStage(bytes) != stage) throw std::runtime_error("Replacement shader stage mismatch");
+                const auto info = session.eventDetails(pipeline).at("pipeline");
+                if ((info.at("captured_hresult").get<uint32_t>() & 0x80000000U) || info.at("captured_object") == "0")
+                    throw std::runtime_error("Replacement target pipeline creation failed in capture");
+                if (info.at("root_signature") == "0")
+                    throw std::runtime_error("Shader replacement requires an explicit captured root signature; embedded-only roots are not implemented");
+                bool found = false;
+                for (const auto &shader : info.at("shaders")) if (shader.at("stage") == stage) {
+                    if (shader.at("sha256") != op.at("original_sha256"))
+                        throw std::runtime_error("Original pipeline shader digest mismatch");
+                    found = true;
+                }
+                if (!found) throw std::runtime_error("Replacement stage is absent from captured pipeline");
+                if (i < revision()) shaders[{pipeline, stage}] = {pipeline, stage, op.at("original_sha256").get<std::string>(), std::move(bytes)};
+                continue;
+            }
             if (op.at("kind") != "enabled" || !op.at("event").is_string() || !op.at("value").is_boolean())
                 throw std::runtime_error("Unsupported DX12 experiment operation");
             const auto execution = identifier(op.at("event"));
@@ -86,12 +112,32 @@ std::set<Id> Experiment::disabledExecutions(const IReplaySession &session) const
             const auto capability = session.capability(ReplayFeature::Experiments, selection);
             if (!capability.supported()) throw std::runtime_error(capability.reason);
             if (i < revision()) {
-                if (op.at("value").get<bool>()) disabled.erase(execution);
-                else disabled.insert(execution);
+                if (op.at("value").get<bool>()) edits.disabled.erase(execution);
+                else edits.disabled.insert(execution);
             }
         }
     }
-    return disabled;
+    for (auto &[key, replacement] : shaders) edits.shaders.push_back(std::move(replacement));
+    return edits;
+}
+void Experiment::setShader(const IReplaySession &session, Id pipeline, const std::string &stage, Bytes bytecode) {
+    (void)dx12Edits(session);
+    const auto info = session.eventDetails(pipeline).at("pipeline");
+    std::string original;
+    for (const auto &shader : info.at("shaders")) if (shader.at("stage") == stage) original = shader.at("sha256").get<std::string>();
+    if (original.empty()) throw std::runtime_error("Replacement stage is absent from captured pipeline");
+    auto candidate = project_;
+    auto &history = candidate["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    const auto data = QByteArray(reinterpret_cast<const char *>(bytecode.data()), qsizetype(bytecode.size())).toBase64().toStdString();
+    history.push_back({{"label", "Replace " + stage + " in pipeline " + std::to_string(pipeline)},
+        {"operations", Json::array({{{"kind", "pipeline_shader"}, {"pipeline", std::to_string(pipeline)},
+            {"stage", stage}, {"scope", "pipeline_lifetime"}, {"original_sha256", original},
+            {"asset", {{"data", data}, {"sha256", sha256(bytecode)}}}}})}});
+    candidate["cursor"] = history.size();
+    auto old = std::move(project_); project_ = std::move(candidate);
+    try { (void)dx12Edits(session); }
+    catch (...) { project_ = std::move(old); throw; }
 }
 void Experiment::load(const QString &path, const IReplaySession &session) {
     if (const auto frame = session.dx11Frame()) { load(path, *frame); return; }

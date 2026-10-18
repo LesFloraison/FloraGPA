@@ -1,7 +1,9 @@
 #pragma once
 #include "NativeDevice.h"
+#include "ShaderReplacement.h"
 #include <d3d12.h>
 #include <optional>
+#include <map>
 
 namespace flora::dx12 {
 struct RootSignatureRecipe {
@@ -22,6 +24,7 @@ struct PipelineRecipe {
     // read-only mapped spans owned by the caller's StreamDirectory.
     std::vector<uint64_t> stream;
     std::optional<size_t> rootPointerOffset;
+    std::map<std::string, size_t> shaderPointerOffsets;
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputs;
     std::vector<D3D12_SO_DECLARATION_ENTRY> declarations;
     std::vector<UINT> strides;
@@ -47,6 +50,10 @@ class NativePipelines final {
   public:
     NativePipelines(NativeDevice &, const StreamDirectory &, const CancelCheck &cancelled = {});
     ~NativePipelines();
+    // Rebuild all edited PSOs before any GPU submission. The runtime validates
+    // shader linkage and compatibility with the original root signature.
+    void setShaderReplacements(std::vector<ShaderReplacement>);
+    nlohmann::json shaderReplacementInformation() const;
     ID3D12PipelineState *create(uint64_t record);
     ID3D12PipelineState *pipeline(uint64_t object, uint64_t atRecord);
     ID3D12RootSignature *rootSignature(uint64_t object, uint64_t atRecord);

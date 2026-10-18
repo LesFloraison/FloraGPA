@@ -333,6 +333,8 @@ class Dx12Session final : public IReplaySession {
             result["command_list"] = std::to_string(recording.list);
         }
         try {
+            if (dx12::isPipelineRecipe(p.type))
+                result["pipeline"] = dx12::describePipelineRecipe(dx12::decodePipelineRecipe(p.type, bytes));
             auto decoded = dx12::decodeArguments(p.type, bytes);
             result["arguments_decoded"] = decoded.supported;
             if (decoded.supported) {
@@ -368,7 +370,7 @@ class Dx12Session final : public IReplaySession {
                 if (execution.submission <= directory_.initializationCount() || !execution.recordingComplete)
                     return {CapabilityStatus::MissingData, "Select a complete frame execution instance"};
                 if (dx12::streamPacketCanDisable(packet(execution.record).type))
-                    return {CapabilityStatus::Supported, "Direct Draw/Dispatch enable overrides; shader/resource edits are unfinished"};
+                    return {CapabilityStatus::Supported, "Disable/enable one direct Draw/Dispatch execution"};
             } catch (const std::exception &e) { return {CapabilityStatus::MissingData, e.what()}; }
             return {CapabilityStatus::NotImplemented, "Only direct Draw/Dispatch enable overrides are implemented"};
         }

@@ -69,6 +69,195 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12ShaderReplacementPipelinePaths() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set captures for edited pipeline reconstruction");
+        {
+            dx12::StreamDirectory talos(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+            const auto &packet = talos.packets().at(156846);
+            const auto recipe = dx12::decodePipelineRecipe(packet.type, talos.payload(packet));
+            qInfo() << "Talos depth bias" << recipe.graphics.RasterizerState.DepthBias
+                    << recipe.graphics.RasterizerState.DepthBiasClamp << recipe.graphics.RasterizerState.SlopeScaledDepthBias;
+            QCOMPARE(recipe.graphics.RasterizerState.SlopeScaledDepthBias, -2.0f);
+        }
+        // Verify native bytecode substitution for the separate compute and
+        // stream-descriptor paths. These create PSOs; they submit no GPU work.
+        for (const auto &[name, record] : std::vector<std::pair<QString, uint64_t>>{
+                {"bf1_2025_12_10__14_29_55.gpa_frame", 4756},
+                {"Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame", 1390}}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root + '/' + name).toStdWString()));
+            const auto &packet = directory.packets().at(size_t(record - 1));
+            const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+            std::vector<dx12::ShaderReplacement> edits;
+            for (const auto &[stage, bytes] : recipe.shaders) {
+                QCOMPARE(dx12::shaderBytecodeStage(bytes), stage);
+                const auto hash = QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())), QCryptographicHash::Sha256).toHex().toStdString();
+                edits.push_back({record, stage, hash, {bytes.begin(), bytes.end()}});
+            }
+            dx12::NativeDevice device(directory, true); dx12::NativePipelines pipelines(device, directory);
+            pipelines.setShaderReplacements(std::move(edits));
+            const auto report = pipelines.shaderReplacementInformation();
+            QCOMPARE(report.size(), recipe.shaders.size());
+            for (const auto &entry : report) {
+                QCOMPARE(entry.at("original_sha256"), entry.at("replacement_sha256"));
+                QCOMPARE(entry.at("pso_created"), nlohmann::json(true));
+            }
+            qInfo() << name << QString::fromStdString(report.dump());
+            QCOMPARE(device.information().at("validation_error_count"), nlohmann::json("0"));
+        }
+    }
+    void dx12ShaderExperimentWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto projects = qEnvironmentVariable("FLORA_DX12_SHADER_PROJECTS");
+        const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_WORKSPACE_OUTPUT");
+        if (root.isEmpty() || projects.isEmpty() || output.isEmpty()) QSKIP("Set captures, prepared shader projects and new workspace output");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile project(projects + "/replaced.json"); QVERIFY(project.open(QIODevice::ReadOnly));
+        const auto document = nlohmann::json::parse(project.readAll().toStdString());
+        const auto &op = document.at("history")[0].at("operations")[0];
+        QFile shader(output + "/replacement.dxbc"); QVERIFY(shader.open(QIODevice::WriteOnly));
+        shader.write(QByteArray::fromBase64(QByteArray::fromStdString(op.at("asset").at("data").get<std::string>()))); shader.close();
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished), exported(&window, &MainWindow::exportFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 167081) { resources->setCurrentIndex(index); break; }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 167081ULL);
+        window.findChild<QSpinBox *>("dx12Subresource")->setValue(1);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+        QVERIFY(window.findChild<QAction *>("replaceDx12Shader")->isEnabled());
+        window.replaceDx12Shader(std::stoull(op.at("pipeline").get<std::string>()), op.at("stage").get<std::string>(), shader.fileName());
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        const auto exportRaw = [&](const QString &name) {
+            QTimer chooser, watchdog; watchdog.setSingleShot(true); bool chosen = false;
+            QObject::connect(&chooser, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) {
+                    chooser.stop(); chosen = true;
+                    dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                    QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                }
+            });
+            QObject::connect(&watchdog, &QTimer::timeout, &window, [&] { if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject(); });
+            chooser.start(10); watchdog.start(5000); window.findChild<QAction *>("exportOutputStorage")->trigger(); QVERIFY(chosen);
+        };
+        exportRaw("replaced"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QFile replaced(output + "/replaced.bin"); QVERIFY(replaced.open(QIODevice::ReadOnly));
+        const auto bytes = replaced.readAll(); QCOMPARE(bytes.size(), 8388608);
+        uint64_t written{};
+        for (qsizetype i = 0; i < bytes.size(); i += 2) {
+            const auto value = uint16_t(uint8_t(bytes[i])) | (uint16_t(uint8_t(bytes[i + 1])) << 8);
+            QVERIFY(value == 0 || value == 16384); if (value) ++written;
+        }
+        QVERIFY(written > 0);
+        const auto sample = (1240 * 2048 + 1527) * 2;
+        QCOMPARE(uint8_t(bytes[sample]), uint8_t(0)); QCOMPARE(uint8_t(bytes[sample + 1]), uint8_t(64));
+        qInfo() << "Shader replacement written pixels" << written << "SHA256" << QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex();
+        QVERIFY(window.saveDx12Experiment(output + "/replaced.json"));
+        done.clear(); window.findChild<QAction *>("undoExperiment")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        exportRaw("restored"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QFile restored(output + "/restored.bin"); QVERIFY(restored.open(QIODevice::ReadOnly));
+        QCOMPARE(QCryptographicHash::hash(restored.readAll(), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+        QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
+    }
+    void dx12ShaderExperimentProjects() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_EXPERIMENT_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set capture and new output paths for shader experiment preparation");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto path = std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString());
+        dx12::StreamDirectory directory(path); dx12::SubmissionIndex submissions(directory);
+        const auto selected = submissions.execution(12675);
+        const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(selected.record));
+        uint64_t pipelineObject{}, pipelineRecord{};
+        for (auto id : recording.records) {
+            if (id > selected.record) break;
+            const auto &packet = directory.packets().at(size_t(id - 1));
+            if (packet.type == 0x1ae3c82b462fcULL) {
+                format::Reader r(directory.payload(packet)); r.skip(8); pipelineObject = r.read<uint64_t>();
+            }
+        }
+        QVERIFY(pipelineObject);
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &p = directory.packets()[i]; if (!dx12::isPipelineRecipe(p.type)) continue;
+            const auto recipe = dx12::decodePipelineRecipe(p.type, directory.payload(p));
+            if (recipe.object == pipelineObject) {
+                pipelineRecord = i + 1;
+                qInfo() << "Replacement target" << pipelineRecord << QString::fromStdString(dx12::describePipelineRecipe(recipe).dump());
+                for (const auto &[stage, bytes] : recipe.shaders) {
+                    QCOMPARE(dx12::shaderBytecodeStage(bytes), stage);
+                    ID3DBlob *assembly{};
+                    QVERIFY(SUCCEEDED(D3DDisassemble(bytes.data(), bytes.size(), 0, nullptr, &assembly)));
+                    QFile listing(output + '/' + QString::fromStdString(stage) + ".asm"); QVERIFY(listing.open(QIODevice::WriteOnly));
+                    listing.write(static_cast<const char *>(assembly->GetBufferPointer()), qint64(assembly->GetBufferSize()));
+                    assembly->Release();
+                }
+                break;
+            }
+        }
+        QVERIFY(pipelineRecord);
+        const auto compile = [](const QByteArray &source, const char *profile) {
+            ID3DBlob *shader{}, *errors{};
+            const auto hr = D3DCompile(source.data(), size_t(source.size()), "replacement.hlsl", nullptr, nullptr,
+                "main", profile, D3DCOMPILE_ENABLE_STRICTNESS, 0, &shader, &errors);
+            const auto error = errors ? QByteArray(static_cast<const char *>(errors->GetBufferPointer()), qsizetype(errors->GetBufferSize())) : QByteArray();
+            if (errors) errors->Release();
+            if (FAILED(hr)) { qWarning() << error; throw std::runtime_error(error.toStdString()); }
+            std::vector<uint8_t> bytes(static_cast<const uint8_t *>(shader->GetBufferPointer()),
+                                       static_cast<const uint8_t *>(shader->GetBufferPointer()) + shader->GetBufferSize());
+            shader->Release(); return bytes;
+        };
+        const auto ps = compile("float main() : SV_Depth { return 0.5; }", "ps_5_0");
+        // Preserve captured XY/W transforms and force NDC depth to 0.25. Avoid
+        // the D16 half-step at 0.5 with the captured -2 slope-scale depth bias.
+        // The original listing is saved as evidence for the reconstruction.
+        const auto replacement = compile(R"(
+            cbuffer Transform : register(b0) { float4 c[11]; };
+            cbuffer Stereo : register(b1) { float4 stereo; };
+            float4 main(float4 p : TEXCOORD0) : SV_Position {
+                float4 world = float4(dot(p,c[5]), dot(p,c[6]), dot(p,c[7]), p.w);
+                float4 clip = float4(dot(world,c[0]), dot(world,c[1]), dot(world,c[2]), dot(world,c[3]));
+                clip.x = mad(stereo.x, dot(world,c[4]) - clip.x, clip.x);
+                clip.z = 0.25 * clip.w;
+                return clip;
+            })", "vs_5_0");
+        const auto incompatible = compile("cbuffer Unexpected : register(b13) { float4 p; }; float4 main() : SV_Position { return p; }", "vs_5_0");
+        const auto session = openReplaySession(path); Experiment experiment(*session);
+        experiment.save(output + "/baseline.json");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, experiment.setShader(*session, pipelineRecord, "VS", ps));
+        QVERIFY(!experiment.canUndo());
+        experiment.setShader(*session, pipelineRecord, "VS", replacement);
+        QCOMPARE(experiment.dx12Edits(*session).shaders.size(), size_t(1));
+        experiment.save(output + "/replaced.json");
+        QVERIFY(experiment.undo()); experiment.save(output + "/restored.json");
+        QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+        QVERIFY(experiment.redo());
+        Experiment reloaded(*session); reloaded.load(output + "/replaced.json", *session);
+        QCOMPARE(reloaded.dx12Edits(*session).shaders.front().bytecode, replacement);
+        reloaded.setShader(*session, pipelineRecord, "VS", incompatible);
+        reloaded.save(output + "/incompatible.json");
+        auto invalid = experiment.document(); invalid["cursor"] = 0;
+        invalid["history"][0]["operations"][0]["original_sha256"] = "wrong";
+        QFile file(output + "/invalid.json"); QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QByteArray::fromStdString(invalid.dump())); file.close();
+        const auto before = reloaded.document();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, reloaded.load(file.fileName(), *session));
+        QCOMPARE(reloaded.document(), before);
+        // Exercise actual DXIL mesh and pixel program headers without a GPU replay.
+        dx12::StreamDirectory hellblade(std::filesystem::path((root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        const auto &meshPacket = hellblade.packets().at(1389);
+        const auto mesh = dx12::decodePipelineRecipe(meshPacket.type, hellblade.payload(meshPacket));
+        for (const auto &[stage, bytes] : mesh.shaders) QCOMPARE(dx12::shaderBytecodeStage(bytes), stage);
+    }
     void dx12ExperimentReportIdentity() {
         const auto root = qEnvironmentVariable("FLORA_DX12_EXPERIMENT_REPORT_DIR");
         if (root.isEmpty()) QSKIP("Set the saved Talos experiment evidence directory");

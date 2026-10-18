@@ -1,6 +1,7 @@
 #pragma once
 #include "core/Frame.h"
 #include "replay/Replay.h"
+#include "dx12/ShaderReplacement.h"
 #include <QString>
 #include <nlohmann/json.hpp>
 
@@ -16,6 +17,12 @@ class Experiment {
     void load(const QString &path, const IReplaySession &session);
     void setEnabled(const IReplaySession &session, Id execution, bool enabled);
     std::set<Id> disabledExecutions(const IReplaySession &session) const;
+    struct Dx12Edits {
+        std::set<Id> disabled;
+        std::vector<dx12::ShaderReplacement> shaders;
+    };
+    Dx12Edits dx12Edits(const IReplaySession &session) const;
+    void setShader(const IReplaySession &, Id pipeline, const std::string &stage, Bytes bytecode);
     void load(const QString &path, const Frame &frame);
     void save(const QString &path, const nlohmann::json &ui = nullptr) const;
     void apply(const Frame &frame, ReplayOptions &options) const;

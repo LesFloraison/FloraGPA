@@ -90,6 +90,7 @@ struct NativeReplay::Impl {
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
     std::set<uint64_t> disabledExecutions, suppressedExecutions;
+    std::vector<ShaderReplacement> shaderReplacements;
     std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
@@ -329,6 +330,11 @@ struct NativeReplay::Impl {
 NativeReplay::NativeReplay(NativeDevice &d, const StreamDirectory &s, uint64_t limit, const CancelCheck &cancelled)
     : impl_(std::make_unique<Impl>(d, s, limit, cancelled)) {}
 NativeReplay::~NativeReplay() = default;
+void NativeReplay::setShaderReplacements(std::vector<ShaderReplacement> replacements) {
+    auto &s = *impl_;
+    require(!s.frame && !s.attempted, "Set shader replacements before preparing or initializing replay");
+    s.shaderReplacements = std::move(replacements);
+}
 void NativeReplay::setDisabledExecutions(std::set<uint64_t> executions) {
     auto &s = *impl_;
     require(!s.attempted && !s.frame, "Configure experiment edits before preparing initialization");
@@ -401,6 +407,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     frame->measure = performance;
     frame->commands =
         std::make_unique<NativeCommands>(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
+    frame->commands->pipelines().setShaderReplacements(s.shaderReplacements);
     auto &recordings = frame->recordings;
     auto &instances = frame->instances;
     auto &starts = frame->starts;
@@ -1056,6 +1063,7 @@ json NativeReplay::information() const {
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
+        {"shader_replacements", s.frame ? s.frame->commands->pipelines().shaderReplacementInformation() : json::array()},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},

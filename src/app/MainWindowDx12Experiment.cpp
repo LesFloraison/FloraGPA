@@ -1,5 +1,8 @@
 #include "MainWindow.h"
 #include <QAction>
+#include <QFile>
+#include <QFileDialog>
+#include <QInputDialog>
 #include <QStatusBar>
 #include <QtConcurrent/QtConcurrentRun>
 #include <charconv>
@@ -42,10 +45,12 @@ struct ExperimentResult {
     bool cancelled{};
 };
 }
-void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit) {
+void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit,
+                                      std::optional<Dx12ShaderImport> shader) {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
     const auto session = session_;
     const auto revision = revision_;
+    const auto current = shader && experiment_ ? std::make_shared<Experiment>(*experiment_) : nullptr;
     const auto token = std::make_shared<std::atomic_bool>(false);
     experimentCancel_ = token;
     setBusy(true);
@@ -93,24 +98,58 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
         if (!path.isEmpty()) { projectDirty_ = false; setWindowModified(false); }
         emit experimentFinished(true);
     });
-    watcher->setFuture(QtConcurrent::run([session, token, path, edit] {
+    watcher->setFuture(QtConcurrent::run([session, token, path, edit, shader, current] {
         ExperimentResult result;
         try {
             const CancelCheck cancelled = [token] { return token->load(); };
-            result.experiment = std::make_shared<Experiment>(*session, cancelled);
+            result.experiment = current ? current : std::make_shared<Experiment>(*session, cancelled);
             if (!path.isEmpty()) result.experiment->load(path, *session);
             checkCancellation(cancelled);
             if (edit) result.experiment->setEnabled(*session, edit->first, edit->second);
+            if (shader) {
+                const auto &[pipeline, stage, source] = *shader;
+                QFile file(source);
+                if (!file.open(QIODevice::ReadOnly) || file.size() <= 0 || file.size() > 64 * 1024 * 1024)
+                    throw std::runtime_error("Cannot read shader bytecode, or file exceeds 64 MiB");
+                const auto bytes = file.readAll();
+                if (bytes.size() != file.size()) throw std::runtime_error("Incomplete shader bytecode read");
+                result.experiment->setShader(*session, pipeline, stage,
+                    {reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())});
+            }
             const auto &document = result.experiment->document();
             if (document.contains("ui") && !document.at("ui").is_object())
                 throw std::runtime_error("Invalid DX12 project UI state");
-            if (document.contains("ui") && document.at("ui").contains("dx12"))
+            if (!path.isEmpty() && document.contains("ui") && document.at("ui").contains("dx12"))
                 result.ui = readUi(document.at("ui").at("dx12"), *session);
             checkCancellation(cancelled);
         } catch (const OperationCancelled &) { result.cancelled = true; }
         catch (const std::exception &e) { result.error = QString::fromUtf8(e.what()); }
         return result;
     }));
+}
+void MainWindow::replaceDx12Shader(Id pipeline, const std::string &stage, const QString &bytecodePath) {
+    if (!bytecodePath.isEmpty()) prepareDx12Experiment({}, {}, Dx12ShaderImport{pipeline, stage, bytecodePath});
+}
+void MainWindow::importDx12Shader() {
+    if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+    bool accepted{};
+    const auto text = QInputDialog::getText(this, "Replace Pipeline Shader",
+        "PSO creation record ID (applies to every use of this pipeline):", QLineEdit::Normal,
+        commands_->executionView() ? QString{} : QString::number(selectedEvent_), &accepted);
+    if (!accepted) return;
+    try {
+        bool valid{}; const auto pipeline = text.toULongLong(&valid);
+        if (!valid || !pipeline || text != QString::number(pipeline)) throw std::runtime_error("Enter a decimal PSO creation record ID");
+        const auto info = session_->eventDetails(pipeline);
+        if (!info.contains("pipeline")) throw std::runtime_error("Selected record is not a supported pipeline creation");
+        QStringList stages;
+        for (const auto &shader : info.at("pipeline").at("shaders")) stages << QString::fromStdString(shader.at("stage").get<std::string>());
+        if (stages.empty()) throw std::runtime_error("Pipeline has no captured shader stages");
+        const auto stage = QInputDialog::getItem(this, "Replace Pipeline Shader", "Captured stage:", stages, 0, false, &accepted);
+        if (!accepted) return;
+        const auto file = QFileDialog::getOpenFileName(this, "Import compiled DXBC/DXIL shader", {}, "Shader bytecode (*.cso *.dxbc *.dxil *.bin);;All files (*)");
+        if (!file.isEmpty()) replaceDx12Shader(pipeline, stage.toStdString(), file);
+    } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
 }
 void MainWindow::openDx12Experiment(const QString &path) {
     if (!path.isEmpty()) prepareDx12Experiment(path);

@@ -137,7 +137,8 @@ void pipelineStream(Reader &r, PipelineRecipe &recipe) {
         case 1: case 2: case 3: case 4: case 5: case 6: case 24: case 25: {
             const char *stage = type == 1 ? "VS" : type == 2 ? "PS" : type == 3 ? "DS" : type == 4 ? "HS" :
                 type == 5 ? "GS" : type == 6 ? "CS" : type == 24 ? "AS" : "MS";
-            patch(recipe.stream, offset + 8, shader(r, recipe, stage)); length = 24; break;
+            patch(recipe.stream, offset + 8, shader(r, recipe, stage));
+            recipe.shaderPointerOffsets.emplace(stage, offset + 8); length = 24; break;
         }
         case 7: { D3D12_STREAM_OUTPUT_DESC d{}; streamOutput(r, recipe, d); patch(recipe.stream, offset + 8, d); length = 40; break; }
         case 8: length = 336; break;
@@ -182,6 +183,44 @@ std::string shaderFormat(Bytes bytes) {
     return dxil ? "DXIL" : "DXBC";
 }
 }
+std::string shaderBytecodeStage(Bytes bytes) {
+    require(bytes.size() >= 32 && !memcmp(bytes.data(), "DXBC", 4), "Shader replacement must be a DXBC/DXIL container");
+    Reader r(bytes); r.skip(24);
+    const auto length = r.read<UINT>(), count = r.read<UINT>();
+    require(length == bytes.size() && count <= r.remaining() / 4, "Invalid shader replacement container");
+    std::map<size_t, size_t> ranges;
+    std::optional<UINT> program;
+    bool dxil = false;
+    for (UINT i = 0; i < count; ++i) {
+        const auto offset = r.read<UINT>();
+        require(offset >= 32ULL + uint64_t(count) * 4 && offset <= bytes.size() && bytes.size() - offset >= 8,
+                "Invalid shader replacement chunk offset");
+        Reader chunk(bytes.subspan(offset)); const auto name = chunk.take(4); const auto size = chunk.read<UINT>();
+        require(size <= chunk.remaining(), "Truncated shader replacement chunk");
+        require(ranges.emplace(offset, size_t(offset) + 8 + size).second, "Duplicate shader replacement chunk");
+        const bool isDxil = !memcmp(name.data(), "DXIL", 4);
+        if (isDxil || !memcmp(name.data(), "SHEX", 4) || !memcmp(name.data(), "SHDR", 4)) {
+            require(!program && size >= 8 && size % 4 == 0, "Invalid or multiple shader programs");
+            Reader code(chunk.take(size)); program = code.read<UINT>();
+            require(uint64_t(code.read<UINT>()) * 4 == size, "Shader replacement program length mismatch");
+            if (isDxil) {
+                require(size >= 24 && code.read<UINT>() == 0x4c495844, "Invalid DXIL program header");
+                code.skip(4); const auto bitOffset = code.read<UINT>(), bitSize = code.read<UINT>();
+                require(bitOffset >= 16 && uint64_t(bitOffset) + 8 <= size && bitSize <= size - bitOffset - 8,
+                        "Invalid DXIL bitcode range");
+            }
+            dxil = isDxil;
+        }
+    }
+    size_t end{};
+    for (const auto &[begin, next] : ranges) { require(begin >= end, "Overlapping shader replacement chunks"); end = next; }
+    require(program.has_value(), "Shader replacement contains no executable program");
+    const auto type = *program >> 16, major = (*program >> 4) & 15;
+    require(dxil ? major == 6 : (major >= 4 && major <= 5), "Unsupported replacement shader model");
+    static const std::map<UINT, std::string> stages{{0,"PS"},{1,"VS"},{2,"GS"},{3,"HS"},{4,"DS"},{5,"CS"},{13,"MS"},{14,"AS"}};
+    require(stages.contains(type) && (dxil || type < 6), "Unsupported replacement shader stage");
+    return stages.at(type);
+}
 bool isPipelineRecipe(uint64_t type) {
     return type == 0x127938a579e5bULL || type == 0x12793a04eeae1ULL || type == 0x1b0ef747d2b24ULL || type == 0x121f7e63b7766ULL;
 }
@@ -225,6 +264,7 @@ struct NativePipelines::Impl {
     std::map<uint64_t, ComPtr<ID3D12RootSignature>> roots;
     std::map<uint64_t, ComPtr<ID3D12PipelineState>> pipelines;
     std::map<uint64_t, json> reports;
+    std::map<std::pair<uint64_t, std::string>, ShaderReplacement> replacements;
     Impl(NativeDevice &d, const StreamDirectory &s, CancelCheck c) : device(d), directory(s), cancelled(std::move(c)) {}
     std::pair<ID3D12RootSignature *, uint64_t> root(uint64_t object, uint64_t use) {
         if (!object) return {nullptr, 0};
@@ -261,6 +301,51 @@ NativePipelines::NativePipelines(NativeDevice &device, const StreamDirectory &di
     }
 }
 NativePipelines::~NativePipelines() = default;
+void NativePipelines::setShaderReplacements(std::vector<ShaderReplacement> replacements) {
+    auto &s = *impl_;
+    require(s.pipelines.empty() && s.replacements.empty(), "Set shader replacements before creating pipelines");
+    std::map<std::pair<uint64_t, std::string>, ShaderReplacement> validated;
+    for (auto &replacement : replacements) {
+        checkCancellation(s.cancelled);
+        require(replacement.pipeline && replacement.pipeline <= s.directory.packets().size(), "Unknown replacement pipeline record");
+        const auto &p = s.directory.packets()[size_t(replacement.pipeline - 1)];
+        const auto recipe = decodePipelineRecipe(p.type, s.directory.payload(p));
+        require(SUCCEEDED(recipe.result) && recipe.object, "Replacement pipeline was not successfully captured");
+        require(recipe.rootSignature, "Shader replacement requires an explicit captured root signature; embedded-only roots are not implemented");
+        require(shaderBytecodeStage(replacement.bytecode) == replacement.stage, "Replacement shader stage mismatch");
+        bool found = false;
+        for (const auto &[stage, bytes] : recipe.shaders) if (stage == replacement.stage) {
+            require(digest(bytes) == replacement.originalSha256, "Original pipeline shader digest mismatch"); found = true;
+        }
+        require(found, "Captured pipeline does not contain the replacement stage");
+        const auto key = std::make_pair(replacement.pipeline, replacement.stage);
+        require(validated.emplace(key, std::move(replacement)).second, "Duplicate pipeline shader replacement");
+    }
+    s.replacements = std::move(validated);
+    for (const auto &[key, replacement] : s.replacements) {
+        try { create(key.first); }
+        catch (const OperationCancelled &) { throw; }
+        catch (const std::exception &e) {
+            auto reason = "Shader replacement pipeline " + std::to_string(key.first) + ": " + e.what();
+            const auto device = s.device.information();
+            if (device.contains("validation_messages")) {
+                size_t count{};
+                for (const auto &message : device.at("validation_messages"))
+                    if (message.at("severity").get<unsigned>() <= 1 && count++ < 4)
+                        reason += "\n" + message.at("description").get<std::string>();
+            }
+            throw std::runtime_error(reason);
+        }
+    }
+}
+json NativePipelines::shaderReplacementInformation() const {
+    json result = json::array();
+    for (const auto &[key, replacement] : impl_->replacements)
+        result.push_back({{"pipeline_creation", std::to_string(key.first)}, {"stage", key.second},
+            {"original_sha256", replacement.originalSha256}, {"replacement_sha256", digest(replacement.bytecode)},
+            {"scope", "pipeline_lifetime"}, {"pso_created", impl_->pipelines.contains(key.first)}});
+    return result;
+}
 ID3D12RootSignature *NativePipelines::rootSignature(uint64_t object, uint64_t atRecord) { return impl_->root(object, atRecord).first; }
 ID3D12PipelineState *NativePipelines::pipeline(uint64_t object, uint64_t atRecord) {
     if (!object) return nullptr;
@@ -277,6 +362,20 @@ ID3D12PipelineState *NativePipelines::create(uint64_t record) {
     require(record && record <= s.directory.packets().size(), "Unknown pipeline creation record");
     const auto &packet = s.directory.packets()[size_t(record - 1)]; auto recipe = decodePipelineRecipe(packet.type, s.directory.payload(packet));
     check(recipe.result, "Captured pipeline creation"); require(recipe.object, "Captured pipeline creation has no output object");
+    for (auto &[stage, bytes] : recipe.shaders) {
+        const auto it = s.replacements.find({record, stage});
+        if (it == s.replacements.end()) continue;
+        bytes = it->second.bytecode;
+        D3D12_SHADER_BYTECODE shader{bytes.data(), bytes.size()};
+        if (recipe.kind == PipelineRecipe::Kind::Stream) patch(recipe.stream, recipe.shaderPointerOffsets.at(stage), shader);
+        else if (stage == "CS") recipe.compute.CS = shader;
+        else if (stage == "VS") recipe.graphics.VS = shader;
+        else if (stage == "PS") recipe.graphics.PS = shader;
+        else if (stage == "GS") recipe.graphics.GS = shader;
+        else if (stage == "HS") recipe.graphics.HS = shader;
+        else if (stage == "DS") recipe.graphics.DS = shader;
+        else throw std::runtime_error("Shader replacement stage is absent from the native descriptor");
+    }
     auto [root, rootRecord] = s.root(recipe.rootSignature, record); ComPtr<ID3D12PipelineState> native;
     if (recipe.kind == PipelineRecipe::Kind::Graphics) {
         recipe.graphics.pRootSignature = root;
