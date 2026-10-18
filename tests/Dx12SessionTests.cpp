@@ -38,6 +38,7 @@
 #include <Windows.h>
 #include <winioctl.h>
 #include <d3dcompiler.h>
+#include <wrl/client.h>
 
 using namespace flora;
 namespace {
@@ -70,6 +71,78 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12ResourceExperimentProjects() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_RESOURCE_EXPERIMENT_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set captures and a new resource experiment directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto path = std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString());
+        dx12::StreamDirectory directory(path); dx12::SubmissionIndex submissions(directory); dx12::AddressIndex addresses(directory);
+        const auto draw = submissions.execution(12675);
+        const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(draw.record));
+        uint64_t rootObject{}; std::map<UINT, uint64_t> cbvs;
+        for (const auto id : recording.records) {
+            if (id > draw.record) break;
+            const auto &p = directory.packets().at(size_t(id - 1));
+            format::Reader reader(directory.payload(p));
+            if (p.type == 0x1ae3c6959946eULL) { reader.skip(8); rootObject = reader.read<uint64_t>(); cbvs.clear(); }
+            if (p.type == 0x1ae3cac95ac55ULL) { reader.skip(8); const auto slot = reader.read<UINT>(); cbvs[slot] = reader.read<uint64_t>(); }
+        }
+        QVERIFY(rootObject); uint64_t constantAddress{};
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &p = directory.packets()[i]; if (p.type != 0x127938051b445ULL) continue;
+            const auto recipe = dx12::decodeRootSignature(directory.payload(p)); if (recipe.object != rootObject) continue;
+            Microsoft::WRL::ComPtr<ID3D12VersionedRootSignatureDeserializer> reader;
+            QVERIFY(SUCCEEDED(D3D12CreateVersionedRootSignatureDeserializer(recipe.bytecode.data(), recipe.bytecode.size(), IID_PPV_ARGS(&reader))));
+            const D3D12_VERSIONED_ROOT_SIGNATURE_DESC *desc{};
+            QVERIFY(SUCCEEDED(reader->GetRootSignatureDescAtVersion(D3D_ROOT_SIGNATURE_VERSION_1_0, &desc)));
+            for (UINT slot = 0; slot < desc->Desc_1_0.NumParameters; ++slot) {
+                const auto &parameter = desc->Desc_1_0.pParameters[slot];
+                if (parameter.ParameterType == D3D12_ROOT_PARAMETER_TYPE_CBV && !parameter.Descriptor.ShaderRegister &&
+                    !parameter.Descriptor.RegisterSpace && (parameter.ShaderVisibility == D3D12_SHADER_VISIBILITY_ALL ||
+                    parameter.ShaderVisibility == D3D12_SHADER_VISIBILITY_VERTEX)) constantAddress = cbvs.at(slot);
+            }
+            break;
+        }
+        QVERIFY(constantAddress);
+        const auto binding = addresses.resolve(constantAddress + 32, draw.record, 16);
+        const auto &packet = directory.packets().at(size_t(binding.creation - 1));
+        const auto recipe = dx12::decodeResourceRecipe(packet.type, directory.payload(packet));
+        qInfo() << "Talos VS b0 row 2" << binding.creation << binding.object << binding.offset
+                << "heap type" << int(recipe.properties.Type) << "submission" << draw.submission;
+        const float row[4]{0, 0, 0, 0.25f};
+        const Bytes buffer(reinterpret_cast<const uint8_t *>(row), sizeof(row));
+        QFile patch(output + "/buffer.bin"); QVERIFY(patch.open(QIODevice::WriteOnly));
+        patch.write(reinterpret_cast<const char *>(row), sizeof(row)); patch.close();
+        const auto session = openReplaySession(path); Experiment experiment(*session);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, experiment.setResourcePatch(*session, draw.record, binding.creation, binding.offset, 0, false, buffer));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, experiment.setResourcePatch(*session, draw.submission, binding.creation, UINT64_MAX, 0, false, buffer));
+        QVERIFY(!experiment.canUndo());
+        experiment.setResourcePatch(*session, draw.submission, binding.creation, binding.offset, 0, false, buffer);
+        experiment.save(output + "/buffer.json");
+        QCOMPARE(experiment.dx12Edits(*session).resources.size(), size_t(1));
+        QVERIFY(experiment.undo()); QVERIFY(experiment.dx12Edits(*session).resources.empty());
+        experiment.save(output + "/restored.json"); QVERIFY(experiment.redo());
+        Experiment reopened(*session); reopened.load(output + "/buffer.json", *session);
+        const auto edited = reopened.dx12Edits(*session).resources.front();
+        QCOMPARE(edited.offset, binding.offset); QCOMPARE(edited.submission, draw.submission);
+        QCOMPARE(edited.bytes, (std::vector<uint8_t>(buffer.begin(), buffer.end())));
+        // Complete layer-1 D16 data. The selected Clear will subsequently
+        // overwrite it; a before-Clear boundary exposes the imported bytes.
+        std::vector<uint16_t> depth(2048 * 2048, 16384);
+        const Bytes texture(reinterpret_cast<const uint8_t *>(depth.data()), depth.size() * sizeof(uint16_t));
+        QFile tex(output + "/texture.bin"); QVERIFY(tex.open(QIODevice::WriteOnly));
+        tex.write(reinterpret_cast<const char *>(texture.data()), qint64(texture.size())); tex.close();
+        Experiment textureProject(*session);
+        textureProject.setResourcePatch(*session, draw.submission, 167081, 0, 1, true, texture);
+        textureProject.save(output + "/texture.json");
+        auto invalid = textureProject.document(); invalid["cursor"] = 0;
+        invalid["history"][0]["operations"][0]["scope"] = "before_execution";
+        QFile bad(output + "/invalid.json"); QVERIFY(bad.open(QIODevice::WriteOnly));
+        bad.write(QByteArray::fromStdString(invalid.dump())); bad.close();
+        const auto saved = reopened.document();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, reopened.load(bad.fileName(), *session)); QCOMPARE(reopened.document(), saved);
+    }
     void dx12AnalysisCaptureReportIdentity() {
         QTemporaryDir directory;
         const nlohmann::json report{{"backend", "dx12"}, {"completed", true}, {"image_available", false},
@@ -227,6 +300,79 @@ class Dx12SessionTests : public QObject {
             qInfo() << name << QString::fromStdString(report.dump());
             QCOMPARE(device.information().at("validation_error_count"), nlohmann::json("0"));
         }
+    }
+    void dx12ResourceExperimentWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto projects = qEnvironmentVariable("FLORA_DX12_RESOURCE_PROJECTS");
+        const auto output = qEnvironmentVariable("FLORA_DX12_RESOURCE_WORKSPACE_OUTPUT");
+        if (root.isEmpty() || projects.isEmpty() || output.isEmpty()) QSKIP("Set captures, prepared resource projects and new workspace output");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile project(projects + "/buffer.json"); QVERIFY(project.open(QIODevice::ReadOnly));
+        const auto document = nlohmann::json::parse(project.readAll().toStdString());
+        const auto &op = document.at("history")[0].at("operations")[0];
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished), exported(&window, &MainWindow::exportFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        const auto selectResource = [&](uint64_t id) {
+            for (int row = 0; row < resources->model()->rowCount(); ++row) {
+                const auto index = resources->model()->index(row, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) { resources->setCurrentIndex(index); break; }
+            }
+            QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), id);
+        };
+        const auto resource = std::stoull(op.at("resource_creation").get<std::string>());
+        selectResource(resource);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+        QVERIFY(window.findChild<QAction *>("patchDx12Resource")->isEnabled());
+        window.patchDx12Resource(std::stoull(op.at("submission").get<std::string>()), resource,
+            std::stoull(op.at("offset").get<std::string>()), 0, false, projects + "/buffer.bin");
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeLast()[0].toBool());
+        // A selected buffer has no texture readback action. Import must not
+        // schedule a doomed automatic output request; select an output first.
+        QTest::qWait(500); QVERIFY(done.empty());
+        selectResource(167081);
+        window.findChild<QSpinBox *>("dx12Subresource")->setValue(1);
+        auto replay = window.findChild<QAction *>("replayFrame"); QVERIFY(replay->isEnabled()); replay->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        const auto exportRaw = [&](const QString &name) {
+            QTimer chooser, watchdog; watchdog.setSingleShot(true); bool chosen = false;
+            QObject::connect(&chooser, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) {
+                    chooser.stop(); chosen = true;
+                    dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                    QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                }
+            });
+            QObject::connect(&watchdog, &QTimer::timeout, &window, [&] { if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject(); });
+            chooser.start(10); watchdog.start(5000); window.findChild<QAction *>("exportOutputStorage")->trigger(); QVERIFY(chosen);
+        };
+        exportRaw("replaced"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QFile replaced(output + "/replaced.bin"); QVERIFY(replaced.open(QIODevice::ReadOnly));
+        const auto bytes = replaced.readAll(); QCOMPARE(bytes.size(), 8388608);
+        uint64_t written{};
+        for (qsizetype i = 0; i < bytes.size(); i += 2) {
+            const auto value = uint16_t(uint8_t(bytes[i])) | (uint16_t(uint8_t(bytes[i + 1])) << 8);
+            QVERIFY(value == 0 || value == 16384); if (value) ++written;
+        }
+        QCOMPARE(written, 396850ULL);
+        QCOMPARE(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex(),
+                 QByteArray("3f5d384f150e24e3b078e9c2aa316610a47595014f52dee9f77b5fbe2e738bcf"));
+        const auto sample = (1240 * 2048 + 1527) * 2;
+        QCOMPARE(uint8_t(bytes[sample]), uint8_t(0)); QCOMPARE(uint8_t(bytes[sample + 1]), uint8_t(64));
+        qInfo() << "Resource patch written pixels" << written << "SHA256" << QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex();
+        QVERIFY(window.saveDx12Experiment(output + "/replaced.json"));
+        done.clear(); window.findChild<QAction *>("undoExperiment")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        exportRaw("restored"); QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QFile restored(output + "/restored.bin"); QVERIFY(restored.open(QIODevice::ReadOnly));
+        QCOMPARE(QCryptographicHash::hash(restored.readAll(), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+        QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
     }
     void dx12ShaderExperimentWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

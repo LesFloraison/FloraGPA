@@ -2,6 +2,7 @@
 #include "NativeResources.h"
 #include "SubmissionIndex.h"
 #include "ShaderReplacement.h"
+#include "ResourcePatch.h"
 #include <set>
 
 namespace flora::dx12 {
@@ -15,6 +16,7 @@ class NativeReplay final {
     ~NativeReplay();
     void setDisabledExecutions(std::set<uint64_t> executions);
     void setShaderReplacements(std::vector<ShaderReplacement>);
+    void setResourcePatches(std::vector<ResourcePatch>);
     // Plan before initialization to restore lists recorded in the keyframe at
     // their original CPU boundaries, without executing their frame work early.
     void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false, bool performance = false);

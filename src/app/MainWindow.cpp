@@ -471,6 +471,8 @@ void MainWindow::buildUi() {
     enableAction_->setObjectName("enableExperimentEvent");
     edit->addAction("Replace DX12 Pipeline Shader…", this, &MainWindow::importDx12Shader)
         ->setObjectName("replaceDx12Shader");
+    edit->addAction("Import DX12 Resource Data…", this, &MainWindow::importDx12Resource)
+        ->setObjectName("patchDx12Resource");
     clearAction_ = edit->addAction("Edit Clear Values…", this, &MainWindow::editClear);
     clearAction_->setObjectName("editClear");
     setterAction_ = edit->addAction("Edit Setter…", this, &MainWindow::editSetter);
@@ -1615,7 +1617,7 @@ void MainWindow::setBusy(bool busy) {
     if (dx12 && busy) {
         for (auto action : {undoAction_, redoAction_, enableAction_,
                             findChild<QAction *>("openExperiment"), findChild<QAction *>("saveExperiment"),
-                            findChild<QAction *>("replaceDx12Shader")})
+                            findChild<QAction *>("replaceDx12Shader"), findChild<QAction *>("patchDx12Resource")})
             action->setEnabled(false);
     }
 }
@@ -2230,9 +2232,12 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             return;
         }
         if (report_["experiment"].isObject() && report_["backend"] == "dx12") {
-            log_->appendPlainText(QString("DX12 experiment r%1 · %2 suppressed executions")
+            const auto native = report_["native_replay"].toObject();
+            log_->appendPlainText(QString("DX12 experiment r%1 · %2 suppressed executions · %3/%4 resource patches applied")
                 .arg(report_["experiment"].toObject()["cursor"].toString())
-                .arg(report_["native_replay"].toObject()["suppressed_executions"].toArray().size()));
+                .arg(native["suppressed_executions"].toArray().size())
+                .arg(native["applied_resource_patches"].toArray().size())
+                .arg(native["resource_patches"].toArray().size()));
         } else if (report_["experiment"].isObject()) {
             const auto experiment = report_["experiment"].toObject();
             log_->appendPlainText(QString("Experiment r%1/%2 · %3 applied · %4 pending")
@@ -3274,6 +3279,7 @@ void MainWindow::updateExperimentActions() {
         return;
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
     findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy());
+    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && selection_.execution && selection_.resource);
     undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
     if (dx12) {
         findChild<QAction *>("openExperiment")->setEnabled(!busy());
@@ -3346,7 +3352,8 @@ void MainWindow::experimentChanged() {
         historyCaptures_.clear(); historyCacheOrder_.clear(); historyKey_.clear(); historyRdc_.clear();
         historyRequest_ = nullptr; pendingPixel_ = nullptr;
         updateCheckpointContext(); updateExperimentActions();
-        if (selection_.execution && boundary_->currentIndex() != 0) replayTimer_.start();
+        if (selection_.execution && boundary_->currentIndex() != 0 &&
+            session_->capability(ReplayFeature::Replay, selection_).supported()) replayTimer_.start();
         return;
     }
     stashShaderDrafts();

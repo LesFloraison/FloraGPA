@@ -83,6 +83,31 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
         const auto &operations = history.at(i).at("operations");
         if (!operations.is_array()) throw std::runtime_error("Invalid experiment operation list");
         for (const auto &op : operations) {
+            if (op.at("kind") == "resource_patch") {
+                if (op.at("scope") != "before_submission" || !op.at("submission").is_string() ||
+                    !op.at("resource_creation").is_string() || !op.at("offset").is_string() || !op.at("subresource").is_string())
+                    throw std::runtime_error("Invalid DX12 resource patch boundary or identifiers");
+                const auto submission = identifier(op.at("submission")), creation = identifier(op.at("resource_creation"));
+                const auto offset = identifier(op.at("offset")), subresource = identifier(op.at("subresource"));
+                const auto event = session.event(submission);
+                if (event.submission != submission || !event.thread || creation > submission)
+                    throw std::runtime_error("Resource patch needs a frame submission after resource creation");
+                const auto resource = session.resource(creation);
+                const auto desc = Json::parse(resource.summary);
+                const auto layout = op.at("layout").get<std::string>();
+                const bool texture = layout == "tight_subresource_rows";
+                if ((!texture && layout != "buffer_bytes") || texture == (desc.at("Dimension") == 1) || subresource > UINT32_MAX)
+                    throw std::runtime_error("Resource patch layout does not match the resource");
+                auto bytes = asset(op.at("asset"));
+                if (bytes.empty() || bytes.size() > 256ULL * 1024 * 1024) throw std::runtime_error("Resource patch must contain 1 byte to 256 MiB");
+                if (!texture) {
+                    const auto width = identifier(desc.at("Width"));
+                    if (subresource || offset > width || bytes.size() > width - offset) throw std::runtime_error("Buffer patch exceeds resource bounds");
+                } else if (offset || desc.at("SampleCount") != 1)
+                    throw std::runtime_error("Texture patches require a single-sample full subresource");
+                if (i < revision()) edits.resources.push_back({submission, creation, resource.capturedObject, offset, uint32_t(subresource), texture, std::move(bytes)});
+                continue;
+            }
             if (op.at("kind") == "pipeline_shader") {
                 if (!op.at("pipeline").is_string() || op.at("scope") != "pipeline_lifetime")
                     throw std::runtime_error("Invalid DX12 shader replacement target/scope");
@@ -119,6 +144,22 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
     }
     for (auto &[key, replacement] : shaders) edits.shaders.push_back(std::move(replacement));
     return edits;
+}
+void Experiment::setResourcePatch(const IReplaySession &session, Id submission, Id resource, uint64_t offset,
+                                  uint32_t subresource, bool texture, Bytes bytes) {
+    (void)dx12Edits(session);
+    auto candidate = project_; auto &history = candidate["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    const auto data = QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())).toBase64().toStdString();
+    history.push_back({{"label", "Patch resource " + std::to_string(resource) + " before submission " + std::to_string(submission)},
+        {"operations", Json::array({{{"kind", "resource_patch"}, {"scope", "before_submission"},
+            {"submission", std::to_string(submission)}, {"resource_creation", std::to_string(resource)},
+            {"offset", std::to_string(offset)}, {"subresource", std::to_string(subresource)},
+            {"layout", texture ? "tight_subresource_rows" : "buffer_bytes"},
+            {"asset", {{"data", data}, {"sha256", sha256(bytes)}}}}})}});
+    candidate["cursor"] = history.size(); auto old = std::move(project_); project_ = std::move(candidate);
+    try { (void)dx12Edits(session); }
+    catch (...) { project_ = std::move(old); throw; }
 }
 void Experiment::setShader(const IReplaySession &session, Id pipeline, const std::string &stage, Bytes bytecode) {
     (void)dx12Edits(session);

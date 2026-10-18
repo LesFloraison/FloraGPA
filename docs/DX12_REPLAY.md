@@ -1620,8 +1620,70 @@ without repeating the native prefix.
 
 Pixel History still reports **partial**: these are observed event-boundary depth
 values, not complete per-fragment modifications or test-failure reasons. Modified
-PS/CS/DXIL debugging, full history coverage, resource modifications, other sample
+PS/CS/DXIL debugging, full history coverage, complete resource modifications, other sample
 acceptance and portable-package verification remain unfinished.
+
+### Resource data overrides at a submission boundary
+
+The workspace's **Edit > Import DX12 Resource Data…** imports raw bytes into the
+selected buffer or texture. The operation names the resource creation and the
+selected execution's **submission**, with explicit scope `before_submission`.
+It runs once after preceding captured CPU uploads and before every command in
+that captured `ExecuteCommandLists` call. Later copies, clears and shader writes
+can overwrite it. This is not a before-Draw injection or isolation of one use
+within a submission. Repeated submissions retain separate identities.
+
+Buffers accept an offset and byte range. Single-sample textures accept complete,
+tightly packed rows for one subresource, including all depth slices. Native
+footprints supply upload row padding; the import never interprets a PNG as raw
+texture data. Default heaps use a bounded staging allocation and an auxiliary
+copy with state restoration and submission decay tracking. Upload buffers have
+a mapped write path. Reserved/tiled resources, MSAA imports and other heap types
+are explicitly rejected. The mapped path and other texture formats have not yet
+received separate GPU validation. Each asset is limited to 256 MiB.
+
+Checksummed project assets preserve undo/redo and capture identity. History order
+determines overlapping writes at the same boundary. All entries, including redo
+entries, are validated. The original directory remains read-only. The native
+report distinguishes requested patches from actually applied patches and records
+the applied boundary, method, byte count and digest. Auxiliary copy markers do
+not acquire an adjacent original execution identity. Experiment changes use the
+existing output/analysis invalidation. A selected buffer no longer schedules an
+unsupported automatic texture readback; select the output texture and Replay.
+
+Targeted Talos evidence:
+
+| Check | Observed result |
+| --- | --- |
+| Constant-buffer target | VS b0 row 2, creation **150566**, object **109459904**, byte offset **32058656**, default heap |
+| Application boundary | Submission **188940**, before first Draw execution **12675** |
+| Imported bytes | Float4 `(0, 0, 0, 0.25)`, 16 bytes |
+| Modified depth creation **167081**, subresource **1** | 396,850 pixels at D16 16384, all other pixels zero; full raw SHA-256 `3f5d384f150e24e3b078e9c2aa316610a47595014f52dee9f77b5fbe2e738bcf` |
+| Undo | Full 8 MiB readback returns to original SHA-256 `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217` |
+| Texture import before Clear execution **12667** | Entire 8 MiB subresource equals imported D16 16384; SHA-256 `2e962200f1e36f1320e619289160e9013817bb975b8658526d9aabc500e49052` |
+| Same texture import after Clear **12667** | Entire subresource is zero; SHA-256 `2daeb1f36095b44b318410b3f4e8b5d989dcc7bb023d1426c492dab0a3053e74` |
+
+`dx12-resource-project1.txt` passes project preparation, save/load, undo/redo,
+buffer bounds, invalid submission and invalid redo scope checks without GPU
+execution. `dx12-resource-workspace2.txt` passes import, output export, project
+save and undo in 40.593 seconds using two Worker replays. Its outputs are retained
+in `talos-resource-workspace2`. The modified output exactly matches the earlier
+depth-0.25 VS replacement output, obtained here without replacing the shader.
+The first workspace attempt stopped at an incorrect test invocation before GPU
+work; it is retained as `dx12-resource-workspace1.txt`.
+
+`talos-resource-texture-before1` and `talos-resource-texture-after1` contain the
+two serial CLI texture boundary checks, each using SDK 616 and the D3D12 debug
+layer with **zero validation errors**. Their 773 warnings are the existing
+buffer initial-state and ignored sampler comparison-function messages. CPU
+comparison evidence is `talos-resource-workspace2/comparison.json`; no extra GPU
+replay is used for these comparisons. Build152 builds GUI, CLI, Worker and the
+focused test target with final report fields.
+
+These checks establish default-heap buffer and D16 texture overrides at one
+Talos submission. General before-execution injection, reserved/MSAA resources,
+resource-modified debug/history validation, BF1/Hellblade2 resource experiments
+and full experiment acceptance remain unfinished.
 
 ### Full feature acceptance
 
@@ -1634,7 +1696,7 @@ acceptance and portable-package verification remain unfinished.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; modified VS and undo match native depth readbacks; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable and VS replacement change GPU output; undo restores exact bytes; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

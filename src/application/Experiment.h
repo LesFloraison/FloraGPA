@@ -2,6 +2,7 @@
 #include "core/Frame.h"
 #include "replay/Replay.h"
 #include "dx12/ShaderReplacement.h"
+#include "dx12/ResourcePatch.h"
 #include <QString>
 #include <nlohmann/json.hpp>
 
@@ -20,9 +21,12 @@ class Experiment {
     struct Dx12Edits {
         std::set<Id> disabled;
         std::vector<dx12::ShaderReplacement> shaders;
+        std::vector<dx12::ResourcePatch> resources;
     };
     Dx12Edits dx12Edits(const IReplaySession &session) const;
     void setShader(const IReplaySession &, Id pipeline, const std::string &stage, Bytes bytecode);
+    void setResourcePatch(const IReplaySession &, Id submission, Id resource, uint64_t offset,
+                          uint32_t subresource, bool texture, Bytes bytes);
     void load(const QString &path, const Frame &frame);
     void save(const QString &path, const nlohmann::json &ui = nullptr) const;
     void apply(const Frame &frame, ReplayOptions &options) const;

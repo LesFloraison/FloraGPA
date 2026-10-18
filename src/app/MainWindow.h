@@ -53,6 +53,8 @@ class MainWindow final : public QMainWindow {
     void openDx12Experiment(const QString &path);
     bool saveDx12Experiment(const QString &path);
     void replaceDx12Shader(Id pipeline, const std::string &stage, const QString &bytecodePath);
+    void patchDx12Resource(Id submission, Id resource, uint64_t offset, uint32_t subresource,
+                           bool texture, const QString &dataPath);
     bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
@@ -71,9 +73,17 @@ class MainWindow final : public QMainWindow {
     void buildUi();
     void invalidateDx12Output();
     using Dx12ShaderImport = std::tuple<Id, std::string, QString>;
+    struct Dx12ResourceImport {
+        Id submission{}, resource{};
+        uint64_t offset{};
+        uint32_t subresource{};
+        bool texture{};
+        QString path;
+    };
     void prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit = {},
-                               std::optional<Dx12ShaderImport> shader = {});
+                               std::optional<Dx12ShaderImport> shader = {}, std::optional<Dx12ResourceImport> resource = {});
     void importDx12Shader();
+    void importDx12Resource();
     QSpinBox *dx12Subresource_ = nullptr, *dx12Budget_ = nullptr;
     QAction *dx12Controls_ = nullptr;
     CompatibilityButton *compatibility_ = nullptr;

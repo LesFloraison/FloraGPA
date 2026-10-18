@@ -91,6 +91,8 @@ struct NativeReplay::Impl {
     uint64_t selectedExecution{};
     std::set<uint64_t> disabledExecutions, suppressedExecutions;
     std::vector<ShaderReplacement> shaderReplacements;
+    std::vector<ResourcePatch> resourcePatches;
+    json appliedResourcePatches = json::array();
     std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
@@ -115,6 +117,7 @@ struct NativeReplay::Impl {
     };
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
+    void applyResourcePatches(uint64_t submission);
     struct Tiling {
         UINT total{};
         D3D12_PACKED_MIP_INFO packed{};
@@ -330,6 +333,26 @@ struct NativeReplay::Impl {
 NativeReplay::NativeReplay(NativeDevice &d, const StreamDirectory &s, uint64_t limit, const CancelCheck &cancelled)
     : impl_(std::make_unique<Impl>(d, s, limit, cancelled)) {}
 NativeReplay::~NativeReplay() = default;
+void NativeReplay::setResourcePatches(std::vector<ResourcePatch> patches) {
+    auto &s = *impl_;
+    require(!s.frame && !s.attempted, "Set resource patches before preparing or initializing replay");
+    for (const auto &patch : patches) {
+        require(patch.submission > s.directory.initializationCount() && patch.submission <= s.directory.packets().size() &&
+                s.directory.packets()[size_t(patch.submission - 1)].type == 0x125482975df48ULL,
+                "Resource patch needs a frame ExecuteCommandLists record");
+        require(!patch.bytes.empty() && patch.bytes.size() <= 256ULL * 1024 * 1024, "Resource patch must contain 1 byte to 256 MiB");
+        require(s.resources.creationRecord(patch.object, patch.submission) == patch.creation,
+                "Resource patch creation is not active at the submission boundary");
+        const auto recipe = s.resources.recipe(patch.object, patch.submission);
+        require(recipe.kind != ResourceRecipe::Kind::Reserved, "Patching tiled resources needs explicit residency coverage and is not implemented");
+        const auto &desc = recipe.description;
+        require(patch.texture == (desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER), "Resource patch kind does not match the resource");
+        if (!patch.texture)
+            require(!patch.subresource && patch.offset <= desc.Width && patch.bytes.size() <= desc.Width - patch.offset, "Buffer patch exceeds resource bounds");
+        else require(!patch.offset && desc.SampleDesc.Count == 1, "Texture patches require a single-sample full subresource");
+    }
+    s.resourcePatches = std::move(patches);
+}
 void NativeReplay::setShaderReplacements(std::vector<ShaderReplacement> replacements) {
     auto &s = *impl_;
     require(!s.frame && !s.attempted, "Set shader replacements before preparing or initializing replay");
@@ -517,6 +540,91 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
         return;
     }
 }
+void NativeReplay::Impl::applyResourcePatches(uint64_t submission) {
+    for (size_t ordinal = 0; ordinal < resourcePatches.size(); ++ordinal) {
+        const auto &patch = resourcePatches[ordinal];
+        if (patch.submission != submission) continue;
+        checkCancellation(cancelled);
+        // Captured queues may reference the same allocation. Complete prior
+        // submissions before a CPU map or auxiliary copy modifies it.
+        for (const auto &[object, queue] : queues) wait(queue.Get());
+        require(resources.creationRecord(patch.object, submission) == patch.creation, "Resource patch lifetime changed before application");
+        auto destination = resources.resource(patch.object, submission); const auto desc = destination->GetDesc();
+        D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
+        check(destination->GetHeapProperties(&heap, &flags), "Read resource patch heap properties");
+        std::string method;
+        if (!patch.texture && (heap.Type == D3D12_HEAP_TYPE_UPLOAD || heap.Type == D3D12_HEAP_TYPE_GPU_UPLOAD)) {
+            void *mapped{}; D3D12_RANGE none{0, 0}; check(destination->Map(0, &none, &mapped), "Map experiment buffer");
+            memcpy(static_cast<uint8_t *>(mapped) + patch.offset, patch.bytes.data(), patch.bytes.size());
+            D3D12_RANGE written{SIZE_T(patch.offset), SIZE_T(patch.offset + patch.bytes.size())}; destination->Unmap(0, &written);
+            method = "mapped_buffer";
+        } else {
+            require(heap.Type == D3D12_HEAP_TYPE_DEFAULT, "Resource patches support default or upload heaps");
+            D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint{}; UINT rows{}; UINT64 rowBytes{}, total = patch.bytes.size();
+            if (patch.texture) {
+                D3D12_FEATURE_DATA_FORMAT_INFO format{desc.Format};
+                check(device.device()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &format, sizeof(format)), "Read patch format planes");
+                require(patch.subresource < UINT(desc.MipLevels) * (desc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? 1 : desc.DepthOrArraySize) * format.PlaneCount,
+                        "Texture patch subresource is out of range");
+                device.device()->GetCopyableFootprints(&desc, patch.subresource, 1, 0, &footprint, &rows, &rowBytes, &total);
+                require(total && total != UINT64_MAX && rows && rowBytes && footprint.Footprint.Depth &&
+                        rowBytes <= patch.bytes.size() / rows / footprint.Footprint.Depth &&
+                        rowBytes * rows * footprint.Footprint.Depth == patch.bytes.size(),
+                        "Texture patch must contain tightly packed rows for the complete subresource");
+            }
+            D3D12_RESOURCE_DESC uploadDesc{}; uploadDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            uploadDesc.Width = total; uploadDesc.Height = 1; uploadDesc.DepthOrArraySize = uploadDesc.MipLevels = 1;
+            uploadDesc.SampleDesc.Count = 1; uploadDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            const auto allocation = device.device()->GetResourceAllocationInfo(0, 1, &uploadDesc).SizeInBytes;
+            require(allocation != UINT64_MAX && allocation <= resources.remainingAllocationBudget(), "Resource patch staging exceeds allocation budget");
+            D3D12_HEAP_PROPERTIES uploadHeap{}; uploadHeap.Type = D3D12_HEAP_TYPE_UPLOAD;
+            ComPtr<ID3D12Resource> upload;
+            check(device.device()->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE, &uploadDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+                    nullptr, IID_PPV_ARGS(&upload)), "Create resource patch staging buffer");
+            void *mapped{}; D3D12_RANGE none{0, 0}; check(upload->Map(0, &none, &mapped), "Map resource patch staging");
+            if (patch.texture) {
+                for (UINT z = 0; z < footprint.Footprint.Depth; ++z)
+                    for (UINT row = 0; row < rows; ++row)
+                        memcpy(static_cast<uint8_t *>(mapped) + footprint.Offset + (uint64_t(z) * rows + row) * footprint.Footprint.RowPitch,
+                               patch.bytes.data() + (uint64_t(z) * rows + row) * rowBytes, size_t(rowBytes));
+            } else memcpy(mapped, patch.bytes.data(), patch.bytes.size());
+            upload->Unmap(0, nullptr);
+            ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
+            check(device.device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)), "Create resource patch allocator");
+            check(device.device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list)), "Create resource patch commands");
+            const auto subresource = patch.texture ? patch.subresource : D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+            const auto before = resources.state(patch.object, submission, subresource);
+            D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barrier.Transition = {destination, subresource, before, D3D12_RESOURCE_STATE_COPY_DEST};
+            const bool transition = before != D3D12_RESOURCE_STATE_COPY_DEST;
+            const auto marker = "Flora DX12 resource experiment " + std::to_string(ordinal) + " before submission " + std::to_string(submission);
+            list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+            if (transition) list->ResourceBarrier(1, &barrier);
+            if (patch.texture) {
+                D3D12_TEXTURE_COPY_LOCATION source{}, target{};
+                source.pResource = upload.Get(); source.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT; source.PlacedFootprint = footprint;
+                target.pResource = destination; target.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX; target.SubresourceIndex = patch.subresource;
+                list->CopyTextureRegion(&target, 0, 0, 0, &source, nullptr);
+            } else list->CopyBufferRegion(destination, patch.offset, upload.Get(), 0, patch.bytes.size());
+            if (transition) { std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter); list->ResourceBarrier(1, &barrier); }
+            list->EndEvent(); check(list->Close(), "Close resource patch commands");
+            ID3D12CommandQueue *queue{};
+            for (const auto &[object, native] : queues) if (queueRecipes.at(object).desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) { queue = native.Get(); break; }
+            if (!queue) for (const auto &[object, recipe] : queueRecipes) if (recipe.desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) { queue = this->queue(object); break; }
+            require(queue, "Resource patches require a direct replay queue");
+            ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists); wait(queue);
+            // The copy restored the legacy state explicitly. Account for
+            // buffer/simultaneous-access decay at this auxiliary submission.
+            resources.transition(patch.object, submission, subresource, before, before);
+            resources.completeSubmission(D3D12_COMMAND_LIST_TYPE_DIRECT);
+            method = patch.texture ? "texture_copy" : "buffer_copy";
+        }
+        appliedResourcePatches.push_back({{"patch_ordinal", std::to_string(ordinal)}, {"submission", std::to_string(submission)}, {"creation_record", std::to_string(patch.creation)},
+            {"offset", std::to_string(patch.offset)}, {"subresource", std::to_string(patch.subresource)},
+            {"bytes", std::to_string(patch.bytes.size())}, {"sha256", hash(patch.bytes)}, {"method", method},
+            {"scope", "before_submission"}, {"later_commands_may_overwrite", true}});
+    }
+}
 void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
     auto &s = *impl_;
     require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
@@ -564,6 +672,7 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             else if (s.descriptors.apply(id)) {}
             else if (p.type == 0x125482975df48ULL) {
                 submissionExtension(s.directory, p); const auto args = decodeArguments(p.type, s.directory.payload(p)).values; const auto queueId = value(args, "Queue");
+                s.applyResourcePatches(id);
                 auto queue = s.queue(queueId); std::vector<ID3D12CommandList *> lists; json executed = json::array(); std::map<std::string, uint64_t> pendingCounts;
                 for (const auto &instance : s.index.lists()) {
                     if (instance.submission != id) continue; const auto selected = instances.find({id, instance.ordinal}); if (selected == instances.end()) continue;
@@ -1039,6 +1148,17 @@ json NativeReplay::information() const {
     auto disabled = json::array(), suppressed = json::array();
     for (const auto id : s.disabledExecutions) disabled.push_back(std::to_string(id));
     for (const auto id : s.suppressedExecutions) suppressed.push_back(std::to_string(id));
+    auto patches = json::array();
+    for (size_t i = 0; i < s.resourcePatches.size(); ++i) {
+        const auto &patch = s.resourcePatches[i];
+        const auto ordinal = std::to_string(i);
+        const bool applied = std::any_of(s.appliedResourcePatches.begin(), s.appliedResourcePatches.end(),
+            [&](const auto &entry) { return entry.at("patch_ordinal") == ordinal; });
+        patches.push_back({{"patch_ordinal", ordinal}, {"submission", std::to_string(patch.submission)},
+            {"creation_record", std::to_string(patch.creation)}, {"offset", std::to_string(patch.offset)},
+            {"subresource", std::to_string(patch.subresource)}, {"bytes", std::to_string(patch.bytes.size())},
+            {"scope", "before_submission"}, {"applied", applied}});
+    }
     auto waits = json::array();
     if (s.frame) for (const auto &entry : s.frame->cpuWaits) {
         if (waits.size() == 32) break;
@@ -1064,6 +1184,7 @@ json NativeReplay::information() const {
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
         {"shader_replacements", s.frame ? s.frame->commands->pipelines().shaderReplacementInformation() : json::array()},
+        {"resource_patches", std::move(patches)}, {"applied_resource_patches", s.appliedResourcePatches},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},

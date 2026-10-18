@@ -70,6 +70,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         auto edits = experiment->dx12Edits(session);
         replay.setDisabledExecutions(std::move(edits.disabled));
         replay.setShaderReplacements(std::move(edits.shaders));
+        replay.setResourcePatches(std::move(edits.resources));
     }
     nlohmann::json report{{"backend", "dx12"},
                           {"completed", false},
