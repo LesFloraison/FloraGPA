@@ -3134,11 +3134,70 @@ Build **237** covers the workspace, CLI, Worker and focused test. This change
 performed no GPU replay; metadata and thread records were inspected without
 reading the large resource contents.
 
-Native replay still drains each submission on the CPU. The next scheduling
-change must consume these dependencies, retain in-flight resources/recordings,
-handle captured host mutations and CPU waits, and defer completion accounting
-until the GPU actually finishes. `gpu_order_resolved` remains false; an indexed
-dependency graph is not acceptance of restored queue concurrency.
+### Native frame queue scheduling and completion observations
+
+Frame replay now consumes the dependency index and submits captured GPU
+Signal/Wait operations without draining every ExecuteCommandLists on the CPU.
+Per-instance command lists/allocators and their referenced storage stay alive
+until completion. Submitted and completed operations are reported separately;
+experiment barriers and suppressed executions become completed only after a
+GPU completion drain. `gpu_order_resolved` remains false: this change does not
+certify complete original concurrency or all resource hazards.
+
+Conservative drains remain before captured CPU waits, mapped writes, descriptor
+updates, tile mapping changes, resource experiments and final readback.
+GetCompletedValue observations wait only for the captured Fence value. The
+index propagates the latest required CPU record through producer dependencies;
+an observed value whose transitive producer is not yet submitted is rejected
+before execution. A future GPU Signal separated from its Wait by a required
+host drain is also rejected rather than allowed to deadlock. Initialization
+remains serialized. Resource-state validation still follows CPU submission
+order; the future-producer fixture below does not certify resource transitions
+that need a different cross-queue order.
+
+Cancellation/failure with outstanding frame work removes this isolated replay
+device before releasing in-flight objects. It does not count pending work as
+completed. A fresh Worker/device is needed for retry. This uses
+[ID3D12Device5::RemoveDevice](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device5-removedevice).
+The report includes queued/completed/pending submissions, host drain reasons,
+Fence observations and whether the device was aborted. Maximum host pending
+submissions is bookkeeping, not evidence of simultaneous GPU execution.
+
+Focused evidence under ignored `artifacts/dx12-research`:
+
+- `native-queue-fixture3.{txt,json}`: **4 passed**, **853 ms**, including
+  setup/cleanup. The CPU graph checks cover transitive observation readiness.
+  The two-queue GPU fixture queues a consumer before its producer, observes
+  initial/completed Fence values without global drains, and executes a repeated
+  command list as a distinct instance. Three submissions complete in one drain.
+  Cancellation after the first submission leaves **1 pending / 0 completed**,
+  aborts the device, and a fresh-device retry completes with zero D3D12 errors.
+  A synchronous CPU wait before the future producer is rejected in preflight.
+- `hellblade-queue-schedule2`: execution **37104**, source boundary **613374**,
+  completes **125** frame submissions, **0** pending, **0** D3D12 errors.
+  There are **42** global drains (21 CPU wait, 15 descriptor update, 5 mapped
+  writes, 1 selected boundary), **627** Fence observations, and just **1**
+  observation requiring a value wait. Maximum host pending submissions is **32**.
+  The earlier `hellblade-queue-schedule1` implementation drained on every Fence
+  observation: **162** drains and maximum pending **1**. The second run checks
+  the specific observation refinement, not repeated whole-sample regression.
+  The RGB10 readback for creation **506294** has SHA-256
+  **2b88da15fdfaff2233486d3eb2380eb4fe30eb287a7590e5945a2b4b2d02c800**.
+  Against `hellblade-last-color3`, **7,151 / 2,304,000** pixels differ, maximum
+  RGB10 deltas **3/3/4**, alpha identical. Earlier replay variation already
+  reached these maxima; this is not a claim of full frame fidelity or an
+  original GPA comparison.
+- `bf1-queue-experiment1`: saved four-barrier experiment, execution **36560**,
+  creation **325012**, all four barriers reported completed, zero D3D12 errors.
+  The **3,870,720** raw bytes exactly retain the prior experimental SHA-256
+  **a1cec82b979735c74db4dd23e7b41bcd189128ae376bbcd6fae0abfc029b7138**.
+  The typeless output has no default display interpretation; raw readback is
+  the comparison evidence. This validates the existing experiment at its
+  selected boundary, not the unmodified complete BF1 frame.
+
+Builds **243–244** cover workspace, CLI, Worker and focused tests. The existing
+ReplaySession preview-variable shadow warning is unrelated. GPU checks were
+serial; Talos's known historical-query failure was not rerun by this change.
 
 ### Full feature acceptance
 

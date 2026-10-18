@@ -32,6 +32,7 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
     if (!lastRecord)
         lastRecord = directory.packets().size();
     require(lastRecord <= directory.packets().size(), "Unknown queue dependency boundary");
+    initializationCount_ = directory.initializationCount();
     std::map<uint64_t, Fence> fences;
     std::vector<Node> nodes;
     std::map<uint64_t, size_t> previous;
@@ -180,6 +181,7 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
         waits.push_back(std::move(row));
         waitNodes.push_back(n);
     }
+    std::vector<uint64_t> completionRecords(nodes.size());
     const auto visit = [&](bool honorMissing) {
         std::vector<size_t> incoming;
         incoming.reserve(nodes.size());
@@ -199,13 +201,25 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
             const auto n = ready.front();
             ready.pop_front();
             reached[n] = true;
-            for (const auto next : nodes[n].successors)
+            if (honorMissing)
+                completionRecords[n] = (std::max)(completionRecords[n], nodes[n].record);
+            for (const auto next : nodes[n].successors) {
+                if (honorMissing)
+                    completionRecords[next] = (std::max)(completionRecords[next], completionRecords[n]);
                 if (!--incoming[next] && (!honorMissing || !nodes[next].externalBlock))
                     ready.push_back(next);
+            }
         }
         return reached;
     };
     const auto acyclic = visit(false), resolved = visit(true);
+    for (const auto &[object, fence] : fences) {
+        FenceSources sources{fence.creation, fence.initial, fence.ambiguous};
+        for (const auto n : fence.signals)
+            sources.producers.push_back(
+                {nodes[n].value, nodes[n].record, nodes[n].queue, completionRecords[n], resolved[n]});
+        fenceSources_.emplace(object, std::move(sources));
+    }
     size_t blocked{}, cycles{};
     for (size_t i = 0; i < waitNodes.size(); ++i) {
         const auto n = waitNodes[i];
@@ -244,5 +258,46 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
          "This is a dependency index, not an executed schedule. CPU event/timeout semantics, "
          "object aliases, memory hazards and complete command-list coverage are not certified. "
          "An initial-value wait does not order work on another queue."}};
+}
+Json QueueDependencyIndex::observationDependency(uint64_t fence, uint64_t value, uint64_t record) const {
+    Json out{{"record", std::to_string(record)},
+             {"fence", std::to_string(fence)},
+             {"observed_value", std::to_string(value)},
+             {"status", "unresolved"}};
+    const auto found = fenceSources_.find(fence);
+    if (record <= initializationCount_ || record > std::stoull(report_.at("last_record").get<std::string>()))
+        out["reason"] = "Completion observation is outside the inspected frame prefix";
+    else if (found == fenceSources_.end() || found->second.ambiguous || value == UINT64_MAX)
+        out["reason"] = "Completion observation has a missing, ambiguous or reserved-value Fence";
+    else {
+        const auto &source = found->second;
+        if (source.creation > record)
+            out["reason"] = "Completion observation precedes Fence creation";
+        else if (source.initial >= value)
+            out.update({{"status", "resolved"},
+                        {"source", "initial_value"},
+                        {"required_record", std::to_string(source.creation)}});
+        else {
+            const auto producer = std::lower_bound(
+                source.producers.begin(), source.producers.end(), value,
+                [](const CompletionSource &entry, uint64_t value) { return entry.value < value; });
+            if (producer == source.producers.end())
+                out["reason"] = "No sufficient Signal for the observed value";
+            else {
+                out.update({{"source", "queue_signal"},
+                            {"producer_record", std::to_string(producer->record)},
+                            {"producer_queue", std::to_string(producer->queue)},
+                            {"required_record", std::to_string(producer->requiredRecord)}});
+                if (!producer->resolved)
+                    out["reason"] = "Observed producer has unresolved dependencies";
+                else if (producer->requiredRecord > record)
+                    out["reason"] =
+                        "Observed value depends on GPU work not yet submitted at this CPU boundary";
+                else
+                    out["status"] = "resolved";
+            }
+        }
+    }
+    return out;
 }
 } // namespace flora::dx12

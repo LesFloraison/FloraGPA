@@ -6,6 +6,7 @@
 #include "NativePerformance.h"
 #include "NativeTimeline.h"
 #include "QueryReplayIndex.h"
+#include "QueueDependencyIndex.h"
 #include "../common/PackedColor.hpp"
 #include <wrl/client.h>
 #include <dxgi1_4.h>
@@ -19,6 +20,7 @@
 #include <functional>
 #include <QSaveFile>
 #include <QImage>
+#include <QScopeGuard>
 
 namespace flora::dx12 {
 namespace {
@@ -97,6 +99,19 @@ struct NativeReplay::Impl {
     std::vector<ResourcePatch> resourcePatches;
     json appliedResourcePatches = json::array();
     std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
+    struct PendingSubmission {
+        uint64_t record{}, queue{};
+        json lists;
+        std::map<std::string, uint64_t> counts;
+    };
+    std::vector<PendingSubmission> pendingSubmissions;
+    std::set<uint64_t> dirtyQueues;
+    ComPtr<ID3D12Device5> abortDevice;
+    uint64_t queuedFrameSubmissions{}, completedFrameSubmissions{}, maxPendingSubmissions{}, frameDrainCount{};
+    bool frameAborted{};
+    json frameDrains = json::array();
+    uint64_t fenceObservations{}, waitedFenceObservations{};
+    json firstFenceObservations = json::array();
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
         std::unique_ptr<NativeCommands> commands;
@@ -119,10 +134,22 @@ struct NativeReplay::Impl {
         std::unique_ptr<NativePerformance> performance;
         std::unique_ptr<NativeTimeline> timeline;
         std::vector<CpuWait> cpuWaits;
+        std::map<uint64_t, std::string> hostDrains;
+        json queueDependencies;
     };
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
     void applyResourcePatches(uint64_t submission);
+    void drainFrame(uint64_t record, const char *reason);
+    void abortFrame() noexcept {
+        if (!dirtyQueues.empty() && abortDevice) {
+            // An interrupted future Wait may never receive its producer. Stop
+            // this isolated replay device before releasing in-flight storage.
+            frameAborted = true;
+            abortDevice->RemoveDevice();
+            dirtyQueues.clear();
+        }
+    }
     struct Tiling {
         UINT total{};
         D3D12_PACKED_MIP_INFO packed{};
@@ -155,18 +182,21 @@ struct NativeReplay::Impl {
         check(device.device()->CreateFence(r.initial, r.flags, IID_PPV_ARGS(&native)), "Create captured fence");
         auto result = native.Get(); fences.emplace(object, std::move(native)); return result;
     }
+    void awaitFence(ID3D12Fence *fence, uint64_t value) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (fence->GetCompletedValue() < value) {
+            checkCancellation(cancelled);
+            check(device.device()->GetDeviceRemovedReason(), "Replay GPU completion");
+            require(std::chrono::steady_clock::now() < deadline, "Replay GPU completion timed out; retry in a fresh Worker");
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        check(device.device()->GetDeviceRemovedReason(), "Replay GPU completion"); checkCancellation(cancelled);
+    }
     void wait(ID3D12CommandQueue *queue) {
         if (!completion) check(device.device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&completion)), "Create replay completion fence");
         require(completionValue != UINT64_MAX - 1, "Replay completion fence exhausted");
         check(queue->Signal(completion.Get(), ++completionValue), "Signal replay completion");
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
-        while (completion->GetCompletedValue() < completionValue) {
-            checkCancellation(cancelled);
-            check(device.device()->GetDeviceRemovedReason(), "Native initialization execution");
-            require(std::chrono::steady_clock::now() < deadline, "Native initialization timed out; retry in a fresh Worker");
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        }
-        check(device.device()->GetDeviceRemovedReason(), "Native initialization execution"); checkCancellation(cancelled);
+        awaitFence(completion.Get(), completionValue);
     }
     void checkLocation(const Location &location) {
         const auto desc = location.native.pResource->GetDesc();
@@ -337,7 +367,7 @@ struct NativeReplay::Impl {
 };
 NativeReplay::NativeReplay(NativeDevice &d, const StreamDirectory &s, uint64_t limit, const CancelCheck &cancelled)
     : impl_(std::make_unique<Impl>(d, s, limit, cancelled)) {}
-NativeReplay::~NativeReplay() = default;
+NativeReplay::~NativeReplay() { impl_->abortFrame(); }
 void NativeReplay::setResourcePatches(std::vector<ResourcePatch> patches) {
     auto &s = *impl_;
     require(!s.frame && !s.attempted, "Set resource patches before preparing or initializing replay");
@@ -442,6 +472,39 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
         throw std::runtime_error(issue.at("reason").get<std::string>());
     auto frame = std::make_unique<Impl::FramePlan>();
     frame->cpuWaits = planCpuWaits(s.directory, target.submission, s.cancelled);
+    const QueueDependencyIndex dependencies(s.directory, target.submission, s.cancelled);
+    frame->queueDependencies = dependencies.information();
+    require(frame->queueDependencies.at("unresolved_queue_operations") == "0",
+            "Frame queue dependencies are missing, ambiguous or cyclic; inspect command-lists queue_dependencies");
+    for (const auto &wait : frame->cpuWaits) frame->hostDrains[wait.record] = "captured_cpu_wait";
+    for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
+        if (id % 1024 == 0) checkCancellation(s.cancelled);
+        const auto type = s.directory.packets()[size_t(id - 1)].type;
+        if (type == 0x20000000000000ULL) frame->hostDrains[id] = "mapped_data_write";
+        else if (isDescriptorWrite(type) || type == 0x12793300ba04eULL || type == 0x1279345e6c880ULL)
+            frame->hostDrains[id] = "descriptor_update";
+        else if (type == 0x125482264c67fULL) frame->hostDrains[id] = "tile_mapping";
+        else if (type == 0x11469e993999dULL) {
+            Reader r(s.directory.payload(s.directory.packets()[size_t(id - 1)]));
+            const auto fence = r.read<uint64_t>(), observed = r.read<uint64_t>(); r.end();
+            const auto dependency = dependencies.observationDependency(fence, observed, id);
+            if (dependency.at("status") != "resolved")
+                throw std::runtime_error("Fence observation record " + std::to_string(id) + ": " + dependency.at("reason").get<std::string>());
+        }
+    }
+    for (const auto &patch : s.resourcePatches)
+        if (patch.submission <= target.submission) frame->hostDrains[patch.submission] = "resource_experiment";
+    for (const auto &wait : frame->queueDependencies.at("waits")) {
+        if (wait.value("producer_relation", "") != "later_cpu_record") continue;
+        const auto record = value(wait, "record"), producer = value(wait, "producer_record");
+        require(record > s.directory.initializationCount(), "Initialization queue wait requires a later producer");
+        const auto drain = frame->hostDrains.lower_bound(record);
+        if (drain != frame->hostDrains.end() && drain->first < producer)
+            throw std::runtime_error("Queue wait record " + std::to_string(record) + " needs Signal " +
+                std::to_string(producer) + " beyond host drain " + std::to_string(drain->first));
+    }
+    check(s.device.device()->QueryInterface(IID_PPV_ARGS(&s.abortDevice)),
+          "Frame queue scheduling requires device removal support for interrupted in-flight work");
     frame->execution = execution;
     frame->after = after;
     frame->markers = analysisMarkers;
@@ -592,7 +655,7 @@ void NativeReplay::Impl::applyResourcePatches(uint64_t submission) {
         checkCancellation(cancelled);
         // Captured queues may reference the same allocation. Complete prior
         // submissions before a CPU map or auxiliary copy modifies it.
-        for (const auto &[object, queue] : queues) wait(queue.Get());
+        drainFrame(submission, "resource_experiment");
         require(resources.creationRecord(patch.object, submission) == patch.creation, "Resource patch lifetime changed before application");
         auto destination = resources.resource(patch.object, submission); const auto desc = destination->GetDesc();
         D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
@@ -670,6 +733,29 @@ void NativeReplay::Impl::applyResourcePatches(uint64_t submission) {
             {"scope", "before_submission"}, {"later_commands_may_overwrite", true}});
     }
 }
+void NativeReplay::Impl::drainFrame(uint64_t record, const char *reason) {
+    if (dirtyQueues.empty()) return;
+    const auto pending = pendingSubmissions.size();
+    for (const auto queueId : dirtyQueues) wait(queue(queueId));
+    for (auto &submission : pendingSubmissions) {
+        if (frame->timeline) frame->timeline->afterComplete(submission.record, queue(submission.queue));
+        for (const auto &list : submission.lists) {
+            const auto first = value(list, "first_execution"), count = value(list, "execution_count");
+            for (auto id = uavBarriersBefore.lower_bound(first); id != uavBarriersBefore.end() && *id - first < count; ++id)
+                executedUavBarriers.insert(*id);
+            for (auto id = disabledExecutions.lower_bound(first); id != disabledExecutions.end() && *id - first < count; ++id)
+                suppressedExecutions.insert(*id);
+        }
+        for (const auto &[name, count] : submission.counts) executedCommands[name] += count;
+        submissions.push_back({{"record", std::to_string(submission.record)}, {"queue", std::to_string(submission.queue)},
+                               {"lists", std::move(submission.lists)}});
+        ++completedFrameSubmissions;
+    }
+    ++frameDrainCount;
+    if (frameDrains.size() < 128) frameDrains.push_back({{"record", std::to_string(record)}, {"reason", reason},
+        {"queues", std::to_string(dirtyQueues.size())}, {"completed_submissions", std::to_string(pending)}});
+    pendingSubmissions.clear(); dirtyQueues.clear();
+}
 void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
     auto &s = *impl_;
     require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
@@ -686,9 +772,12 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             "Prepared execution does not match replay request");
     auto &recordings = s.frame->recordings;
     auto &instances = s.frame->instances;
+    const auto abortOnFailure = qScopeGuard([&] { if (!s.boundaryReached) s.abortFrame(); });
     for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
         s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
         try {
+            if (const auto drain = s.frame->hostDrains.find(id); drain != s.frame->hostDrains.end())
+                s.drainFrame(id, drain->second.c_str());
             const auto &waits = s.frame->cpuWaits;
             const auto wait = std::lower_bound(waits.begin(), waits.end(), id,
                                               [](const CpuWait &entry, uint64_t record) { return entry.record < record; });
@@ -697,8 +786,6 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 // mapped writes are captured. Serialize outstanding GPU work at
                 // this boundary; do not invent absent Win32 event/reset state.
                 // GPU queue Wait packets retain their separate producer checks.
-                for (const auto &[object, queue] : s.queues)
-                    s.wait(queue.Get());
                 std::vector<uint64_t> values;
                 for (const auto &dependency : wait->registrations) {
                     const auto completed = s.fence(dependency.fence)->GetCompletedValue();
@@ -733,29 +820,25 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                         {"generation", std::to_string(original.generation)}, {"first_execution", std::to_string(instance.firstExecution)}, {"execution_count", std::to_string(native.count)}});
                 }
                 if (s.frame->timeline) s.frame->timeline->beforeSubmit(id, queue);
-                if (!lists.empty()) queue->ExecuteCommandLists(UINT(lists.size()), lists.data()); s.wait(queue);
-                if (s.frame->timeline) s.frame->timeline->afterComplete(id, queue);
-                for (const auto &instance : s.index.lists()) {
-                    const auto selected = instances.find({id, instance.ordinal});
-                    if (instance.submission != id || selected == instances.end()) continue;
-                    const auto count = recordings.at(selected->second).count;
-                    for (auto barrier = s.uavBarriersBefore.lower_bound(instance.firstExecution);
-                         barrier != s.uavBarriersBefore.end() && *barrier - instance.firstExecution < count; ++barrier)
-                        s.executedUavBarriers.insert(*barrier);
-                    for (auto disabled = s.disabledExecutions.lower_bound(instance.firstExecution);
-                         disabled != s.disabledExecutions.end() && *disabled - instance.firstExecution < count; ++disabled)
-                        s.suppressedExecutions.insert(*disabled);
-                }
+                s.dirtyQueues.insert(queueId);
+                if (!lists.empty()) queue->ExecuteCommandLists(UINT(lists.size()), lists.data());
+                s.pendingSubmissions.push_back({id, queueId, std::move(executed), std::move(pendingCounts)});
+                ++s.queuedFrameSubmissions;
+                s.maxPendingSubmissions = (std::max)(s.maxPendingSubmissions, uint64_t(s.pendingSubmissions.size()));
+                // Logical state decay belongs to a submission boundary. It is
+                // independent of host completion/accounting of that submission.
                 s.resources.completeSubmission(s.queueRecipes.at(queueId).desc.Type);
-                for (const auto &[name, count] : pendingCounts) s.executedCommands[name] += count;
-                s.submissions.push_back({{"record", std::to_string(id)}, {"queue", std::to_string(queueId)}, {"lists", std::move(executed)}});
             } else if (p.type == 0x12548dab1bf2dULL || p.type == 0x12548db3bfde2ULL) {
                 Reader r(s.directory.payload(p)); const auto queue = r.read<uint64_t>(), fence = r.read<uint64_t>(), value = r.read<uint64_t>();
                 check(r.read<HRESULT>(), "Captured frame synchronization"); r.end(); auto nativeQueue = s.queue(queue); auto nativeFence = s.fence(fence);
-                if (p.type == 0x12548dab1bf2dULL) { check(nativeQueue->Signal(nativeFence, value), "Replay frame signal"); s.wait(nativeQueue); }
-                else { require(nativeFence->GetCompletedValue() >= value, "Frame wait requires an unscheduled producer"); check(nativeQueue->Wait(nativeFence, value), "Replay frame wait"); }
+                s.dirtyQueues.insert(queue);
+                if (p.type == 0x12548dab1bf2dULL) check(nativeQueue->Signal(nativeFence, value), "Replay frame signal");
+                else check(nativeQueue->Wait(nativeFence, value), "Replay frame wait");
                 if (s.frame->timeline) s.frame->timeline->synchronization(id, queue, fence, value, p.type == 0x12548db3bfde2ULL);
-            } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
+            } else if (p.type == 0x125482264c67fULL) {
+                s.dirtyQueues.insert(decodeTileMapping(s.directory.payload(p)).queue);
+                s.mapTiles(id);
+            }
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
                 case 0x12793beef5413ULL: {
@@ -784,15 +867,25 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                     check(r.read<HRESULT>(), "Captured command allocator reset");
                     r.end();
                     // Every submitted recording owns a fresh native allocator.
-                    // Completion checks still precede captured allocator reuse.
+                    // Retain them until their submitted instance has completed.
                     break;
                 }
                 case 0x11469e993999dULL: {
                     Reader r(s.directory.payload(p));
-                    require(s.fenceRecipes.contains(r.read<uint64_t>()),
+                    const auto fence = r.read<uint64_t>();
+                    require(s.fenceRecipes.contains(fence),
                             "Completion observation references an unknown fence");
-                    (void)r.read<uint64_t>();
+                    const auto observed = r.read<uint64_t>();
                     r.end();
+                    auto native = s.fence(fence);
+                    const bool waited = native->GetCompletedValue() < observed;
+                    s.awaitFence(native, observed);
+                    ++s.fenceObservations;
+                    if (waited) ++s.waitedFenceObservations;
+                    if (s.firstFenceObservations.size() < 128)
+                        s.firstFenceObservations.push_back({{"record", std::to_string(id)}, {"fence", std::to_string(fence)},
+                            {"observed_value", std::to_string(observed)}, {"native_completed_value", std::to_string(native->GetCompletedValue())},
+                            {"waited_for_value", waited}});
                     break;
                 }
                 case 0x1254809e0c150ULL:
@@ -969,6 +1062,7 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
         } catch (const OperationCancelled &) { throw; }
         catch (const std::exception &e) { throw std::runtime_error("Frame record " + std::to_string(id) + ": " + e.what()); }
     }
+    s.drainFrame(target.submission, "selected_execution_boundary");
     const auto validation = s.device.information();
     require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
     s.boundaryReached = true;
@@ -1267,6 +1361,19 @@ json NativeReplay::information() const {
         waits.push_back(std::move(wait));
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
+        {"frame_queue_schedule", {{"mode", "captured_queue_fences_with_host_mutation_drains"},
+            {"dependencies", s.frame ? s.frame->queueDependencies : json()},
+            {"queued_submissions", std::to_string(s.queuedFrameSubmissions)},
+            {"completed_submissions", std::to_string(s.completedFrameSubmissions)},
+            {"pending_submissions", std::to_string(s.pendingSubmissions.size())},
+            {"maximum_host_pending_submissions", std::to_string(s.maxPendingSubmissions)},
+            {"host_drains", std::to_string(s.frameDrainCount)}, {"first_host_drains", s.frameDrains},
+            {"aborted_device", s.frameAborted},
+            {"fence_observations", std::to_string(s.fenceObservations)},
+            {"waited_fence_observations", std::to_string(s.waitedFenceObservations)}, {"first_fence_observations", s.firstFenceObservations},
+            {"scope", "Queue Signal/Wait execute on the GPU. Fence observations wait only for the captured value. Host drains protect captured CPU waits, "
+                      "mapped writes, descriptors, tile mappings, experiments and final readback. Pending counts do not prove "
+                      "GPU overlap. Initialization is serialized; complete original CPU concurrency is not restored."}}},
         {"query_replay_coverage", s.queries.information()},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
         {"uav_barrier_experiment", {{"before_executions", std::move(barrierRequests)},

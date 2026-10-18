@@ -76,6 +76,211 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void nativeQueuedSubmissions() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set captures to select the Talos SDK/device for the queue fixture");
+        dx12::StreamDirectory sdk(
+            std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        QTemporaryDir temp;
+        const auto path = fixture(temp);
+        QByteArray packets;
+        uint64_t record{};
+        const auto packet = [&](uint64_t type, const QByteArray &bytes) {
+            qword(packets, type);
+            qword(packets, ++record);
+            qword(packets, 0);
+            qword(packets, bytes.size());
+            packets += bytes;
+        };
+        const uint64_t producer = 0x123456789abcde01ULL, consumer = producer + 1, fence = producer + 2,
+                       allocator = 43;
+        const auto output = [&](QByteArray &bytes, const GUID &iid, uint64_t object) {
+            bytes.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+            bytes.append(char(1));
+            qword(bytes, 1);
+            qword(bytes, object);
+            dword(bytes, 0);
+        };
+        for (const auto queue : {producer, consumer}) {
+            QByteArray bytes;
+            qword(bytes, 1);
+            bytes.append(char(1));
+            D3D12_COMMAND_QUEUE_DESC desc{};
+            bytes.append(reinterpret_cast<const char *>(&desc), sizeof(desc));
+            output(bytes, __uuidof(ID3D12CommandQueue), queue);
+            packet(0x127932607a959ULL, bytes);
+        }
+        QByteArray bytes;
+        qword(bytes, 1);
+        dword(bytes, D3D12_COMMAND_LIST_TYPE_DIRECT);
+        output(bytes, __uuidof(ID3D12CommandAllocator), allocator);
+        packet(0x12793beef5413ULL, bytes);
+        bytes.clear();
+        qword(bytes, 1);
+        qword(bytes, 0);
+        dword(bytes, 0);
+        output(bytes, __uuidof(ID3D12Fence), fence);
+        packet(0x127930cf4f3a0ULL, bytes);
+        const auto list = [&](uint64_t object, bool creation = false) {
+            QByteArray b;
+            if (creation) {
+                qword(b, 1);
+                dword(b, 0);
+                dword(b, D3D12_COMMAND_LIST_TYPE_DIRECT);
+                qword(b, allocator);
+                qword(b, 0);
+                output(b, __uuidof(ID3D12GraphicsCommandList), object);
+                packet(0x127938b682074ULL, b);
+            } else {
+                qword(b, object);
+                qword(b, allocator);
+                qword(b, 0);
+                dword(b, 0);
+                packet(0x1ae3c721c351aULL, b);
+            }
+            b.clear();
+            qword(b, object);
+            dword(b, 0);
+            b.append(char(0));
+            packet(0x1ae3c24e5dabeULL, b);
+            b.clear();
+            qword(b, object);
+            dword(b, 0);
+            packet(0x1ae3cd6acf667ULL, b);
+        };
+        const auto submit = [&](uint64_t queue, uint64_t object) {
+            QByteArray b;
+            qword(b, queue);
+            dword(b, 1);
+            b.append(char(1));
+            qword(b, 1);
+            qword(b, object);
+            packet(0x125482975df48ULL, b);
+        };
+        const auto sync = [&](bool wait, uint64_t queue) {
+            QByteArray b;
+            qword(b, queue);
+            qword(b, fence);
+            qword(b, 1);
+            dword(b, 0);
+            packet(wait ? 0x12548db3bfde2ULL : 0x12548dab1bf2dULL, b);
+        };
+        list(50, true);
+        submit(producer, 50);
+        const auto initializationCount = record;
+        QFile headerFile(path + "/metadata");
+        QVERIFY(headerFile.open(QIODevice::ReadOnly));
+        auto metadata = headerFile.readAll();
+        headerFile.close();
+        QByteArray section;
+        qword(section, 3);
+        qword(section, 0);
+        qword(section, 0);
+        qword(section, uint64_t(metadata.size() + 40 + packets.size()));
+        dword(section, 0);
+        dword(section, 0);
+        metadata += section + packets;
+        write(path + "/metadata", metadata);
+        packets.clear();
+        list(51);
+        list(52);
+        sync(true, consumer);
+        bytes.clear();
+        qword(bytes, fence);
+        qword(bytes, 0);
+        packet(0x11469e993999dULL, bytes);
+        submit(consumer, 51);
+        submit(producer, 52);
+        sync(false, producer);
+        bytes.clear();
+        qword(bytes, fence);
+        qword(bytes, 1);
+        packet(0x11469e993999dULL, bytes);
+        submit(consumer, 51);
+        write(path + "/thread-7-0", packets);
+        dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+        QTemporaryDir conflicting;
+        const auto conflictPath = fixture(conflicting);
+        write(conflictPath + "/metadata", metadata);
+        packets.clear();
+        record = initializationCount;
+        list(51);
+        list(52);
+        sync(true, consumer);
+        bytes.clear();
+        qword(bytes, fence);
+        qword(bytes, 1);
+        qword(bytes, 0);
+        dword(bytes, 0);
+        packet(0x114699e3dba70ULL, bytes);
+        submit(consumer, 51);
+        submit(producer, 52);
+        sync(false, producer);
+        submit(consumer, 51);
+        write(conflictPath + "/thread-7-0", packets);
+        dx12::StreamDirectory conflictDirectory(std::filesystem::path(conflictPath.toStdWString()));
+        Json evidence = Json::array();
+        // The old per-submission CPU drain cannot reach the later producer.
+        // The cancellation pass stops while the consumer is waiting for it.
+        for (const bool interrupt : {false, true, false}) {
+            try {
+                dx12::NativeDevice device(sdk, true);
+                dx12::NativeReplay conflict(device, conflictDirectory, 4ULL * 1024 * 1024);
+                try {
+                    conflict.prepareExecution(4, true);
+                    QFAIL("Host drain before the future producer was accepted");
+                } catch (const std::runtime_error &error) {
+                    QVERIFY(QString::fromUtf8(error.what()).contains("beyond host drain"));
+                }
+                QCOMPARE(conflict.information().at("frame_queue_schedule").at("queued_submissions"),
+                         Json("0"));
+                bool armed{};
+                dx12::NativeReplay *active{};
+                dx12::NativeReplay replay(device, directory, 4ULL * 1024 * 1024, [&] {
+                    return armed && interrupt &&
+                           active->information().at("frame_queue_schedule").at("queued_submissions") == "1";
+                });
+                active = &replay;
+                replay.prepareExecution(4, true);
+                replay.initializeTransfers();
+                armed = true;
+                if (interrupt) {
+                    QVERIFY_THROWS_EXCEPTION(OperationCancelled, replay.replayTo(4, true));
+                    const auto report = replay.information();
+                    const auto &schedule = report.at("frame_queue_schedule");
+                    QVERIFY(schedule.at("aborted_device").get<bool>());
+                    QCOMPARE(schedule.at("queued_submissions"), Json("1"));
+                    QCOMPARE(schedule.at("completed_submissions"), Json("0"));
+                    QCOMPARE(schedule.at("pending_submissions"), Json("1"));
+                    QVERIFY(!report.at("execution_boundary_reached").get<bool>());
+                    QVERIFY(FAILED(device.device()->GetDeviceRemovedReason()));
+                    evidence.push_back(report);
+                } else {
+                    replay.replayTo(4, true);
+                    const auto report = replay.information();
+                    const auto &schedule = report.at("frame_queue_schedule");
+                    QCOMPARE(schedule.at("queued_submissions"), Json("3"));
+                    QCOMPARE(schedule.at("completed_submissions"), Json("3"));
+                    QCOMPARE(schedule.at("pending_submissions"), Json("0"));
+                    QCOMPARE(schedule.at("maximum_host_pending_submissions"), Json("3"));
+                    QCOMPARE(schedule.at("host_drains"), Json("1"));
+                    QCOMPARE(schedule.at("fence_observations"), Json("2"));
+                    QCOMPARE(schedule.at("dependencies").at("later_signal_waits"), Json("1"));
+                    QVERIFY(!schedule.at("aborted_device").get<bool>());
+                    QVERIFY(report.at("execution_boundary_reached").get<bool>());
+                    QCOMPARE(device.information().at("validation_error_count"), Json("0"));
+                    evidence.push_back(report);
+                }
+            } catch (const std::exception &error) {
+                QFAIL(error.what());
+            }
+        }
+        const auto out = qEnvironmentVariable("FLORA_DX12_QUEUE_EVIDENCE");
+        if (!out.isEmpty())
+            write(out, QByteArray::fromStdString(evidence.dump(2)));
+    }
     void queueDependencies() {
         using Json = nlohmann::json;
         QTemporaryDir temp;
@@ -121,7 +326,13 @@ class Dx12SessionTests : public QObject {
         write(path + "/thread-7-0", packets);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            const auto report = dx12::QueueDependencyIndex(directory).information();
+            const dx12::QueueDependencyIndex dependencies(directory);
+            const auto report = dependencies.information();
+            QCOMPARE(dependencies.observationDependency(fence, 5, futureWait).at("status"), Json("resolved"));
+            const auto premature = dependencies.observationDependency(fence, 7, futureWait);
+            QCOMPARE(premature.at("status"), Json("unresolved"));
+            QCOMPARE(premature.at("required_record"), Json(std::to_string(futureSignal)));
+            QCOMPARE(dependencies.observationDependency(fence, 7, futureSignal).at("status"), Json("resolved"));
             QCOMPARE(report.at("unresolved_waits"), Json("0"));
             QCOMPARE(report.at("initial_value_waits"), Json("1"));
             QCOMPARE(report.at("prior_signal_waits"), Json("1"));
@@ -139,6 +350,21 @@ class Dx12SessionTests : public QObject {
                      report);
         }
 
+        // An earlier Signal may itself depend on a producer not submitted yet.
+        packets.clear(); record = 0;
+        create(fence, 0); create(fence + 1, 0);
+        sync(true, queue, fence, 1);
+        const auto dependentSignal = sync(false, queue, fence + 1, 1);
+        const auto rootSignal = sync(false, queue + 1, fence, 1);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory transitive(std::filesystem::path(path.toStdWString()));
+            const dx12::QueueDependencyIndex dependencies(transitive);
+            const auto early = dependencies.observationDependency(fence + 1, 1, dependentSignal);
+            QCOMPARE(early.at("status"), Json("unresolved"));
+            QCOMPARE(early.at("required_record"), Json(std::to_string(rootSignal)));
+            QCOMPARE(dependencies.observationDependency(fence + 1, 1, rootSignal).at("status"), Json("resolved"));
+        }
         // Future producer edges must combine with queue order: this forms a
         // cross-queue cycle, despite both required values appearing in records.
         packets.clear();

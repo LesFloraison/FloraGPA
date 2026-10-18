@@ -127,7 +127,7 @@ Json NativeTimeline::result() const {
     return {{"source", "native_d3d12_queries"}, {"scope", "frame_prefix_submitted_lists"},
         {"qpc_origin", std::to_string(origin_)}, {"qpc_frequency_hz", std::to_string(cpuFrequency_)},
         {"entries", rows}, {"calibrations", calibrations}, {"synchronization", synchronization_},
-        {"limitations", {"Instrumented replay serializes submissions with CPU completion waits; not original-application concurrency.",
+        {"limitations", {"Replay follows captured GPU Fence dependencies with conservative host mutation/CPU wait drains; not original-application concurrency.",
             "Timestamp intervals are bottom-of-pipe completion brackets and include replay instrumentation.",
             "Initialization and resource experiment helper submissions are excluded. Fence rows are CPU observations, not GPU stall durations.",
             "Calibrated alignment can drift without stable power state; unavailable or inconsistent calibration remains queue-local."}}};
