@@ -25,12 +25,13 @@ QByteArray read(const QString &path) {
         throw std::runtime_error("Cannot read job fixture");
     return f.readAll();
 }
-Json prepare(const QString &root, const QString &mode, const Json &options = Json::object()) {
+Json prepare(const QString &root, const QString &mode, const Json &options = Json::object(),
+             const std::string &action = "inventory") {
     const auto capture = root + "/capture & 测试.rdc";
     const auto library = root + "/library.dll";
     write(capture, mode.toUtf8());
     write(library, "library");
-    return prepareRdcJob(capture, "inventory", root + "/output & 测试", library, options);
+    return prepareRdcJob(capture, action, root + "/output & 测试", library, options);
 }
 int mockWorker(const Json &job) {
     const auto out = QString::fromStdString(job.at("out").get<std::string>());
@@ -74,12 +75,13 @@ class RdcJobTests : public QObject {
                                  {{"execution", "9007199254740993"},
                                   {"resource", "18446744073709551615"},
                                   {"resource_creation", "9007199254740994"}, {"primitive", 17},
-                                  {"api_validation", true}});
+                                  {"api_validation", true}, {"readonly_depth_snapshot", true}}, "texture");
         QCOMPARE(job.at("execution"), Json("9007199254740993"));
         QCOMPARE(job.at("resource"), Json("18446744073709551615"));
         QVERIFY(job.at("gpa_event").is_null());
         QCOMPARE(job.at("primitive"), Json(17));
         QCOMPARE(job.at("api_validation"), Json(true));
+        QCOMPARE(job.at("readonly_depth_snapshot"), Json(true));
     }
     void preparation() {
         QTemporaryDir dir;
@@ -88,6 +90,7 @@ class RdcJobTests : public QObject {
         QCOMPARE(job.at("index"), Json(nullptr));
         QCOMPARE(job.at("stage"), Json("VSOut"));
         QCOMPARE(job.at("api_validation"), Json(false));
+        QCOMPARE(job.at("readonly_depth_snapshot"), Json(false));
         QCOMPARE(job.at("group"), Json::array({1, 2, 3}));
         QCOMPARE(job.at("thread"), Json::array({0, 0, 0}));
         QVERIFY(QFileInfo(QString::fromStdString(job.at("capture").get<std::string>())).isAbsolute());
@@ -101,6 +104,8 @@ class RdcJobTests : public QObject {
         QTest::addColumn<Json>("options");
         QTest::newRow("unknown") << Json{{"invented", 1}};
         QTest::newRow("validation-type") << Json{{"api_validation", "true"}};
+        QTest::newRow("depth-snapshot-type") << Json{{"readonly_depth_snapshot", "true"}};
+        QTest::newRow("depth-snapshot-action") << Json{{"readonly_depth_snapshot", true}};
         QTest::newRow("boolean") << Json{{"x", true}};
         QTest::newRow("negative") << Json{{"y", -1}};
         QTest::newRow("overflow") << Json{{"sample", uint64_t(UINT32_MAX) + 1}};

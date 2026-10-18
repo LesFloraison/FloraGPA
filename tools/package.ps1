@@ -44,6 +44,7 @@ $patchedLibrary = $null
 $patchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-d16-history.patch'
 $workgroupPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-workgroup.patch'
 $usagePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-usage-visibility.patch'
+$depthSnapshotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-readonly-depth-snapshot.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -58,6 +59,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxbc_workgroup_patch_sha256 -ne (Get-PackageSha256 $workgroupPatchPath) -or
         $patchManifest.dx12_usage_visibility_patch_version -ne 1 -or
         $patchManifest.dx12_usage_visibility_patch_sha256 -ne (Get-PackageSha256 $usagePatchPath) -or
+        $patchManifest.readonly_depth_snapshot_patch_version -ne 1 -or
+        $patchManifest.readonly_depth_snapshot_patch_sha256 -ne (Get-PackageSha256 $depthSnapshotPatchPath) -or
         $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
         throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
     }
@@ -151,6 +154,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $patchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $workgroupPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $usagePatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $depthSnapshotPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

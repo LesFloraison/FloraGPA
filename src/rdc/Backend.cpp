@@ -152,6 +152,9 @@ class Session {
     uint32_t d16HistoryPatch{};
     uint32_t dxbcWorkgroupPatch{};
     uint32_t dx12UsageVisibilityPatch{};
+    uint32_t readOnlyDepthSnapshotPatch{};
+    using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
+    DepthSnapshotCopies depthSnapshotCopies{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -176,6 +179,15 @@ class Session {
             dxbcWorkgroupPatch = patch();
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12UsageVisibilityPatchVersion")))
             dx12UsageVisibilityPatch = patch();
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraReadOnlyDepthSnapshotPatchVersion")))
+            readOnlyDepthSnapshotPatch = patch();
+        if (job.value("readonly_depth_snapshot", false)) {
+            if (readOnlyDepthSnapshotPatch != 1)
+                throw std::runtime_error("Read-only depth snapshots require the Flora RenderDoc snapshot patch version 1");
+            using Enable = void (RENDERDOC_CC *)(bool);
+            symbol<Enable>("RENDERDOC_SetFloraReadOnlyDepthSnapshotEnabled")(true);
+            depthSnapshotCopies = symbol<DepthSnapshotCopies>("RENDERDOC_GetFloraReadOnlyDepthSnapshotCopies");
+        }
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
         const auto open = symbol<decltype(&RENDERDOC_OpenCaptureFile)>("RENDERDOC_OpenCaptureFile");
@@ -197,6 +209,8 @@ class Session {
             if (!controller)
                 throw std::runtime_error("RenderDoc did not create a replay controller");
             const auto api = controller->GetAPIProperties().pipelineType;
+            if (job.value("readonly_depth_snapshot", false) && api != GraphicsAPI::D3D12)
+                throw std::runtime_error("Read-only depth snapshots require a DX12 independent capture");
             if (api != GraphicsAPI::D3D11 && api != GraphicsAPI::D3D12)
                 throw std::runtime_error(
                     "Native analysis requires a DX11 or DX12 independent replay capture");
@@ -694,6 +708,8 @@ Json rdcLoadedModules() {
 }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
+    if (job.value("readonly_depth_snapshot", false) && action != "texture" && action != "debug-pixel")
+        throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
         action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
@@ -744,6 +760,7 @@ Json runRdcJob(const Json &job) {
         {"backend_d16_history_patch", session.d16HistoryPatch},
         {"backend_dxbc_workgroup_patch", session.dxbcWorkgroupPatch},
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
+        {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"replay_environment",
          {{"gpu_vendor_enum", vendor},
           {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
@@ -755,6 +772,15 @@ Json runRdcJob(const Json &job) {
         {"gpa_command_map", mapping["gpa_command_map"]}};
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        if (session.depthSnapshotCopies) {
+            result["readonly_depth_snapshot"] = {
+                {"requested", true}, {"copies", std::to_string(session.depthSnapshotCopies())},
+                {"experimental", true},
+                {"scope", "Isolated direct DX12 draws with read-only depth/stencil state, D32 single-mip, "
+                          "single-layer, single-sample 2D depth on one node. Preserves the depth comparison "
+                          "using a GPU copy; full replay is unchanged. Copies add GPU work and waits. "
+                          "A nonzero copy count does not prove replay correctness."}};
+        }
         if (job.value("api_validation", false)) {
             const auto messages = controller.GetDebugMessages();
             Json rows = Json::array();

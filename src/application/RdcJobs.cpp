@@ -81,6 +81,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"index", nullptr},
              {"stage", "VSOut"},
              {"api_validation", false},
+             {"readonly_depth_snapshot", false},
              {"group", Json::array({0, 0, 0})},
              {"thread", Json::array({0, 0, 0})}};
     if (!options.is_object())
@@ -94,6 +95,10 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Choose GPA or RDC event, not both");
     if (!job["api_validation"].is_boolean())
         throw std::runtime_error("API validation must be a boolean");
+    if (!job["readonly_depth_snapshot"].is_boolean())
+        throw std::runtime_error("Read-only depth snapshot must be a boolean");
+    if (job["readonly_depth_snapshot"].get<bool>() && action != "texture" && action != "debug-pixel")
+        throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     for (const auto key : {"x", "y", "mip", "layer", "sample", "instance", "vertex"})
         unsignedNumber(job[key], UINT32_MAX, key);
     if (job.contains("primitive"))

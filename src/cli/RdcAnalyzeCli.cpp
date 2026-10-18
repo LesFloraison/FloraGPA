@@ -37,6 +37,7 @@ int rdcAnalyzeCli(QStringList args) {
                      flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
         p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
+        p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
         for (const auto &[key, description] :
@@ -67,6 +68,7 @@ int rdcAnalyzeCli(QStringList args) {
         using Json = nlohmann::json;
         Json options = Json::object();
         options["api_validation"] = p.isSet("api-validation");
+        options["readonly_depth_snapshot"] = p.isSet("readonly-depth-snapshot");
         auto number = [](const QString &text) -> uint64_t {
             bool valid = false;
             const auto value = text.toULongLong(&valid);

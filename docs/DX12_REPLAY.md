@@ -2809,8 +2809,8 @@ This differs from the earlier native sample and does not validate frame fidelity
 or all depth-test outcomes. The temporary allocation has no optimized clear
 value. The probes establish a dependency on the original depth attachment; they
 do **not** establish that resource contents, compression metadata, or a particular
-driver defect caused the discrepancy. No copy/disable-depth workaround has been
-added to production.
+driver defect caused the discrepancy. At this investigation stage no copy or
+disable-depth workaround had been added; the later opt-in experiment is described below.
 
 One initial PSO probe failed creation with **E_FAIL** because copying the stored
 expanded descriptor does not restore shader bytecode pointers. It supplied no
@@ -2842,6 +2842,94 @@ hook were removed. The three-patch production DLL was restored to the previously
 documented SHA-256; the worker with corrected diagnostic scope builds successfully
 (`build219.log`). The particle boundary, full-frame variation and complete debug
 acceptance remain unresolved.
+
+### Opt-in D32 depth snapshots for isolated analysis draws
+
+The latest depth producer was checked before implementing a workaround. Readback
+of creation **325024** contains **483,840** finite values in **[0,1]**: minimum
+**0**, maximum **0.3189068138599396**, with **163,146** zeros and no NaN/Inf.
+At **(836,241)** it is **0.0011842424282804132**. Producer **36149** has depth
+Always/write enabled; its PS debug trace outputs that same depth and red color
+**50.157657623291016**. The color matches the selected GPU reference. This rules
+out nonfinite/out-of-range stored depth in this readback, not an attachment or
+driver defect. Evidence: `bf1-particle-depth-storage1`,
+`bf1-half-depth-producer-{pipeline1,ps1}`.
+
+The fourth pinned RenderDoc patch, `dx12-readonly-depth-snapshot.patch`, adds an
+**experimental, default-off** path selected by `rdc-analyze --readonly-depth-snapshot`.
+It is restricted to `texture` and `debug-pixel` jobs; other analysis requests
+reject it, so it cannot silently add copies/waits to a counter measurement.
+Stock libraries reject the request because the versioned export is absent.
+Eligible isolated direct draws retain the original PSO and depth comparison,
+but bind a GPU copy of their depth attachment. Eligibility requires enabled
+depth with zero write mask, stencil disabled, a comparison other than Always/Never,
+D32 view of a single-mip/single-layer/single-sample 2D texture, and one GPU node.
+Indirect/mesh draws and other depth formats are outside this path.
+
+The source resource is transitioned from its tracked state to copy source and
+back. A temporary resource without an optimized clear value is copied and
+transitioned to the view's depth-read/depth-write state. Raw temporary descriptors
+preserve the color attachments and do not alter original resource identities or
+the stored pipeline state. The GPU is flushed before releasing the temporary
+resource/heap. Allocation failure fails analysis rather than silently running the
+known-faulty path. Full replay and the source capture remain unchanged.
+Reports include `backend_readonly_depth_snapshot_patch` and, when requested,
+`readonly_depth_snapshot` with a decimal copy count, experimental flag and scope.
+These counters describe execution of the workaround, not fidelity acceptance.
+
+A reproducible experiment replaces only PS in original pipeline creation
+**221693**, selected by source **255921** for draw **36560**. It uses the existing
+experiment overlay, verifies saved-project loading and undo, and creates two
+shaders. GPU checks were serial and limited to this failing boundary:
+
+| Replacement PS | Native vs default isolated draw | Native vs depth snapshot |
+| --- | --- | --- |
+| Constant `(1,0.5,0.25,1)`, original rasterized depth | **390,497** differing pixels; (836,241) incorrectly zero | **0** differing pixels, entire **3,870,720** bytes identical; one snapshot |
+| Same constant color, `SV_Depth` 0 on even columns / 1 on odd columns | Entire output identical | Entire output identical; one snapshot |
+
+The second control checks rejection as well as visibility: **(836,241)** remains
+zero while **(837,241)** receives the constant color. It does not reproduce the
+original defect and is not itself a fix acceptance test. The first reproduction
+retains rasterized depth and does reproduce the fault. The matching native and
+snapshot hashes are respectively
+**c6cd1c0ede67cd0bc3a544f8977af84bd4aa3f0bb4b1b5b470ef52262957e871** and
+**f01fdb28a31893419335a9ed48b072dbecfe78b36e760f315fa5099a41cea0b3**.
+Default rasterized-depth analysis hashes to
+**68fe8258f39b50e17b7f5b247cc9ee8275d6f8a19769f83dbe1ab3cb869cb0c9**.
+This difference between rasterized and PS-written depth narrows the reproduction;
+it does not identify a particular driver/compression defect.
+
+On the original unmodified particle shader the option restores a nonzero selected
+pixel, but its color remains different from the earlier native run. The prior
+cross-replay color variation is unresolved; this patch is not enabled in the
+workspace by default and does not complete BF1 fidelity or shader-debug acceptance.
+The targeted original PS debug query at **(836,241), primitive 1322** executes
+three snapshots. Its reference changes from
+**(0.037872314453125,0.03363037109375,0.0281219482421875,0.65478515625)**
+before debugging to
+**(0.035003662109375,0.031463623046875,0.02667236328125,0.65478515625)**
+after trace creation and stepping. The report correctly retains
+`selected_texel_changed` and a partial result. Nonzero references do not validate
+the simulated invocation.
+
+Evidence under ignored `artifacts/dx12-research`:
+`bf1-depth-snapshot-project{1,2}`, `bf1-depth-snapshot-original1`,
+`bf1-{depth-snapshot,raster-depth}-{native1,disabled1,enabled1}`,
+`bf1-depth-snapshot-debug1`, `bf1-depth-snapshot-stock-rejection1`,
+`depth-snapshot-comparison1.json`. The native and analysis processes use C++/GPU
+replay; Python was used only to compare saved research bytes.
+The strict pinned-source build verifies all four patches. The fourth patch SHA-256
+is **576e6907b2e8e9408d011e2c761b8bdaffdc88c8881c1be41510b24c632b991a**;
+the combined DLL SHA-256 is
+**0d82ba6d600e0b3f5ce4652af975ee93a7250f9d5b8d21a2df0efff0aaff951a**.
+The package manifest verifies the extra patch version/hash and includes its source.
+Build **223** passed. Focused default/explicit option, invalid-type and invalid-action
+checks: **6 passed**, **9 ms** (`rdc-depth-snapshot-options2.txt`). Saved GPU evidence
+comparison: **3 passed**, **68 ms** (`depth-snapshot-evidence1.txt`). The project
+generator/loading/undo check: **3 passed**, **18,714 ms** (`depth-snapshot-project2.txt`).
+Counts include setup/cleanup. The stock-library request failed before opening a
+capture with the explicit missing-patch-version error. No broad sample regression
+or portable-package acceptance run was performed for this change.
 
 ### Full feature acceptance
 

@@ -49,16 +49,19 @@
   The optional `-PatchedRenderDocRoot` packaging argument replaces only the DLL
   with a local build of the same upstream commit plus
   `third_party/renderdoc/patches/dx12-d16-history.patch`,
-  `third_party/renderdoc/patches/dx12-dxbc-workgroup.patch` and
-  `third_party/renderdoc/patches/dx12-usage-visibility.patch`. The first preserves
+  `third_party/renderdoc/patches/dx12-dxbc-workgroup.patch`,
+  `third_party/renderdoc/patches/dx12-usage-visibility.patch` and
+  `third_party/renderdoc/patches/dx12-readonly-depth-snapshot.patch`. The first preserves
   D16 depth typing and decodes its stored UNORM bits in DX12 Pixel History;
   the second initializes every simulated DXBC compute lane's Group ID in the
   DX12 debugger. The third matches resource-usage bindings to shader visibility,
   preserving the actual stage when root parameters share register numbers.
+  The fourth provides opt-in GPU depth snapshots for isolated direct draws with
+  read-only D32 depth. It is an experimental analysis workaround, disabled by default.
   All export patch-version markers for the isolated adapter.
   Build them with `tools/build_renderdoc_d16.ps1` in a clean dedicated upstream
   v1.45 checkout (the script retains its original name).
-  Patched packages include all three patches, build/source hashes, the original runtime
+  Patched packages include all four patches, build/source hashes, the original runtime
   manifest and an active manifest containing the replacement DLL hash.
 - RenderDoc 1.45 public replay headers are vendored under
   `third_party/renderdoc/replay/` for the isolated native analysis worker.

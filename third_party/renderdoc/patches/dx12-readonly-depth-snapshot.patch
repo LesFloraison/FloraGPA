@@ -1,0 +1,162 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_device.cpp b/renderdoc/driver/d3d12/d3d12_device.cpp
+index 5eab394f3..abe6cc5fe 100644
+--- a/renderdoc/driver/d3d12/d3d12_device.cpp
++++ b/renderdoc/driver/d3d12/d3d12_device.cpp
+@@ -24,6 +24,7 @@
+ 
+ #include "d3d12_device.h"
+ #include <algorithm>
++#include <atomic>
+ #include "core/core.h"
+ #include "core/settings.h"
+ #include "data/hlsl/hlsl_cbuffers.h"
+@@ -5661,6 +5662,109 @@ RDResult WrappedID3D12Device::ReadLogInitialisation(RDCFile *rdc, bool storeStru
+   return ResultCode::Succeeded;
+ }
+ 
++
++// Opt-in analysis workaround. Preserve the captured depth comparison but use a
++// GPU copy for read-only D32 attachments during isolated draw replay. Full replay
++// and captured resources remain unchanged. This is not a performance replay path.
++static bool floraReadOnlyDepthSnapshotEnabled = false;
++static std::atomic<uint64_t> floraReadOnlyDepthSnapshotCopies(0);
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraReadOnlyDepthSnapshotPatchVersion()
++{
++  return 1;
++}
++
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraReadOnlyDepthSnapshotEnabled(bool enabled)
++{
++  floraReadOnlyDepthSnapshotEnabled = enabled;
++}
++
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraReadOnlyDepthSnapshotCopies()
++{
++  return floraReadOnlyDepthSnapshotCopies.load();
++}
++
++namespace
++{
++struct FloraReadOnlyDepthSnapshot
++{
++  ID3D12Resource *resource = NULL;
++  ID3D12DescriptorHeap *heap = NULL;
++
++  ~FloraReadOnlyDepthSnapshot()
++  {
++    SAFE_RELEASE(heap);
++    SAFE_RELEASE(resource);
++  }
++
++  HRESULT Prepare(WrappedID3D12Device *device, ID3D12GraphicsCommandListX *list,
++                  const D3D12RenderState &state, uint32_t eventId)
++  {
++    const ActionDescription *action = device->GetAction(eventId);
++    if(!floraReadOnlyDepthSnapshotEnabled || !action ||
++       !(action->flags & ActionFlags::Drawcall) || (action->flags & ActionFlags::Indirect) ||
++       (action->flags & ActionFlags::MeshDispatch) || state.pipe == ResourceId() ||
++       state.dsv.GetResResourceId() == ResourceId() || device->GetReal()->GetNodeCount() != 1)
++      return S_FALSE;
++
++    auto *manager = device->GetResourceManager();
++    auto *pipeline = manager->GetResAs<WrappedID3D12PipelineState>(state.pipe);
++    if(!pipeline || !pipeline->graphics)
++      return S_FALSE;
++    const auto &depthState = pipeline->graphics->DepthStencilState;
++    const auto &view = state.dsv.GetDSV();
++    if(!depthState.DepthEnable || depthState.DepthWriteMask != D3D12_DEPTH_WRITE_MASK_ZERO ||
++       depthState.StencilEnable || depthState.DepthFunc == D3D12_COMPARISON_FUNC_ALWAYS ||
++       depthState.DepthFunc == D3D12_COMPARISON_FUNC_NEVER || view.Format != DXGI_FORMAT_D32_FLOAT ||
++       view.ViewDimension != D3D12_DSV_DIMENSION_TEXTURE2D || view.Texture2D.MipSlice != 0)
++      return S_FALSE;
++    auto *original = manager->GetResAs<ID3D12Resource>(state.dsv.GetResResourceId());
++    const auto desc = original->GetDesc();
++    if(desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.MipLevels != 1 ||
++       desc.DepthOrArraySize != 1 || desc.SampleDesc.Count != 1 ||
++       (desc.Format != DXGI_FORMAT_R32_TYPELESS && desc.Format != DXGI_FORMAT_D32_FLOAT))
++      return S_FALSE;
++
++    D3D12_HEAP_PROPERTIES properties = {};
++    properties.Type = D3D12_HEAP_TYPE_DEFAULT;
++    HRESULT hr = device->GetReal()->CreateCommittedResource(
++        &properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL,
++        IID_PPV_ARGS(&resource));
++    if(FAILED(hr))
++      return hr;
++    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
++    heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
++    heapDesc.NumDescriptors = 1;
++    hr = device->GetReal()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap));
++    if(FAILED(hr))
++      return hr;
++
++    BarrierSet barriers;
++    barriers.Configure(original, device->GetSubresourceStates(state.dsv.GetResResourceId()),
++                       BarrierSet::CopySourceAccess);
++    barriers.Apply(list);
++    Unwrap(list)->CopyResource(resource, Unwrap(original));
++    barriers.Unapply(list);
++    D3D12_RESOURCE_BARRIER ready = {};
++    ready.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
++    ready.Transition.pResource = resource;
++    ready.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
++    ready.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
++    ready.Transition.StateAfter = (view.Flags & D3D12_DSV_FLAG_READ_ONLY_DEPTH)
++                                     ? D3D12_RESOURCE_STATE_DEPTH_READ
++                                     : D3D12_RESOURCE_STATE_DEPTH_WRITE;
++    Unwrap(list)->ResourceBarrier(1, &ready);
++    D3D12_CPU_DESCRIPTOR_HANDLE dsv = heap->GetCPUDescriptorHandleForHeapStart();
++    device->GetReal()->CreateDepthStencilView(resource, &view, dsv);
++    D3D12_CPU_DESCRIPTOR_HANDLE rts[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
++    for(size_t i = 0; i < state.rts.size(); i++)
++      rts[i] = Unwrap(device->GetDebugManager()->GetTempDescriptor(state.rts[i], i));
++    Unwrap(list)->OMSetRenderTargets((UINT)state.rts.size(), rts, FALSE, &dsv);
++    return S_OK;
++  }
++};
++};
++
+ void WrappedID3D12Device::ReplayLog(uint32_t startEventID, uint32_t endEventID,
+                                     ReplayLogType replayType)
+ {
+@@ -5766,6 +5870,8 @@ void WrappedID3D12Device::ReplayLog(uint32_t startEventID, uint32_t endEventID,
+           cmd.m_RenderState;
+     }
+ 
++    FloraReadOnlyDepthSnapshot depthSnapshot;
++
+     // we'll need our own command list if we're replaying just a subsection
+     // of events within a single command list record - always if it's only
+     // one action, or if start event ID is > 0 we assume the outside code
+@@ -5780,6 +5886,16 @@ void WrappedID3D12Device::ReplayLog(uint32_t startEventID, uint32_t endEventID,
+         return;
+ 
+       cmd.m_RenderState.ApplyState(this, list);
++      if(replayType == eReplay_OnlyDraw)
++      {
++        const HRESULT hr = depthSnapshot.Prepare(this, list, cmd.m_RenderState, endEventID);
++        if(FAILED(hr))
++        {
++          SET_ERROR_RESULT(m_FatalError, ResultCode::APIReplayFailed,
++                           "Cannot create read-only depth analysis snapshot: %s", ToStr(hr).c_str());
++          return;
++        }
++      }
+     }
+ 
+     RDResult result = ResultCode::Succeeded;
+@@ -5806,5 +5922,13 @@ void WrappedID3D12Device::ReplayLog(uint32_t startEventID, uint32_t endEventID,
+ 
+       ExecuteLists();
+ 
++      // Raw temporary objects must outlive their GPU use, including failures.
++      if(depthSnapshot.resource)
++      {
++        FlushLists(true);
++        if(!HasFatalError())
++          floraReadOnlyDepthSnapshotCopies.fetch_add(1);
++      }
++
+       cmd.m_OutsideCmdList = NULL;
+     }

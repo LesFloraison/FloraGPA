@@ -349,6 +349,114 @@ class Dx12SessionTests : public QObject {
         QVERIFY(!cs->request().contains("resource"));
         QVERIFY(!cs->finish(old, {{"ok", false}, {"error", "stale reference"}}));
     }
+    void dx12ReadOnlyDepthEvidence() {
+        using Json = nlohmann::json;
+        const auto evidence = qEnvironmentVariable("FLORA_DX12_DEPTH_SNAPSHOT_EVIDENCE");
+        if (evidence.isEmpty()) QSKIP("Set read-only depth GPU reproduction evidence directory");
+        const auto read = [&](const QString &name) {
+            QFile file(evidence + '/' + name);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing depth reproduction evidence");
+            return file.readAll();
+        };
+        const auto color = QByteArray::fromHex("003c00380034003c");
+        for (const auto &prefix : {QString("bf1-depth-snapshot"), QString("bf1-raster-depth")}) {
+            const auto native = read(prefix + "-native1/output_storage.bin");
+            const auto enabled = read(prefix + "-enabled1/texture.bin");
+            const auto disabled = read(prefix + "-disabled1/texture.bin");
+            QCOMPARE(native.size(), qsizetype(960 * 504 * 8));
+            QCOMPARE(enabled, native);
+            const auto report = Json::parse(read(prefix + "-enabled1/result.json").toStdString());
+            QVERIFY(report.at("ok").get<bool>());
+            QCOMPARE(report.at("execution"), Json("36560"));
+            QCOMPARE(report.at("resource_creation"), Json("325012"));
+            QCOMPARE(report.at("readonly_depth_snapshot").at("copies"), Json("1"));
+            QVERIFY(report.at("gpa_modules_loaded").empty());
+            const auto offReport = Json::parse(read(prefix + "-disabled1/result.json").toStdString());
+            QVERIFY(!offReport.contains("readonly_depth_snapshot"));
+            const auto even = (241 * 960 + 836) * 8;
+            QCOMPARE(native.mid(even + 8, 8), color);
+            if (prefix == "bf1-raster-depth") {
+                QVERIFY(disabled != native);
+                QCOMPARE(native.mid(even, 8), color);
+                QCOMPARE(disabled.mid(even, 8), QByteArray(8, '\0'));
+            } else {
+                QCOMPARE(disabled, native);
+                QCOMPARE(native.mid(even, 8), QByteArray(8, '\0'));
+            }
+        }
+    }
+    void dx12ReadOnlyDepthProject() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_DEPTH_SNAPSHOT_PROJECT");
+        if (root.isEmpty() || output.isEmpty())
+            QSKIP("Set BF1 capture and read-only depth reproduction project output");
+        QVERIFY(QDir().mkpath(output));
+        const auto capture = std::filesystem::path(
+            (root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString());
+        const auto session = openReplaySession(capture);
+        dx12::StreamDirectory directory(capture);
+        const auto &setter = directory.packets().at(255921 - 1);
+        QCOMPARE(setter.type, uint64_t(0x1ae3c82b462fcULL));
+        format::Reader reader(directory.payload(setter));
+        reader.skip(8);
+        const auto object = reader.read<uint64_t>();
+        reader.end();
+        uint64_t creation{};
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &packet = directory.packets()[i];
+            if (!dx12::isPipelineRecipe(packet.type)) continue;
+            const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+            if (recipe.object != object) continue;
+            creation = i + 1;
+            QCOMPARE(recipe.graphics.DepthStencilState.DepthEnable, TRUE);
+            QCOMPARE(recipe.graphics.DepthStencilState.DepthWriteMask, D3D12_DEPTH_WRITE_MASK_ZERO);
+            QCOMPARE(recipe.graphics.DepthStencilState.DepthFunc, D3D12_COMPARISON_FUNC_GREATER_EQUAL);
+            QCOMPARE(recipe.graphics.DepthStencilState.StencilEnable, FALSE);
+        }
+        QVERIFY(creation);
+        // Exercise both sides of the real depth test with deterministic colors.
+        // Odd columns always pass [0,1] depth. Even columns fail positive depth.
+        const QByteArray source = R"(
+struct Output { float4 color : SV_Target0; float depth : SV_Depth; };
+Output main(float4 position : SV_Position) {
+    Output result;
+    result.color = float4(1.0, 0.5, 0.25, 1.0);
+    result.depth = ((uint)position.x & 1) ? 1.0 : 0.0;
+    return result;
+})";
+        Microsoft::WRL::ComPtr<ID3DBlob> code, errors;
+        const auto hr = D3DCompile(source.data(), size_t(source.size()), "depth-snapshot-reference.hlsl",
+                                  nullptr, nullptr, "main", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS,
+                                  0, &code, &errors);
+        QVERIFY2(SUCCEEDED(hr), errors ? static_cast<const char *>(errors->GetBufferPointer()) : "Compile failed");
+        write(output + "/depth-reference.hlsl", source);
+        const format::Bytes bytes(static_cast<const uint8_t *>(code->GetBufferPointer()), code->GetBufferSize());
+        Experiment experiment(*session);
+        experiment.save(output + "/original.json");
+        experiment.setShader(*session, creation, "PS", bytes);
+        experiment.save(output + "/depth.json");
+        Experiment loaded(*session);
+        loaded.load(output + "/depth.json", *session);
+        QCOMPARE(loaded.dx12Edits(*session).shaders.size(), size_t(1));
+        QVERIFY(experiment.undo());
+        QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+        experiment.save(output + "/restored.json");
+        qInfo() << "Depth reproduction PS pipeline creation" << creation;
+        const QByteArray fixedSource =
+            "float4 main() : SV_Target0 { return float4(1.0, 0.5, 0.25, 1.0); }";
+        code.Reset();
+        errors.Reset();
+        const auto fixedHr = D3DCompile(fixedSource.data(), size_t(fixedSource.size()),
+                                       "raster-depth-reference.hlsl", nullptr, nullptr, "main", "ps_5_0",
+                                       D3DCOMPILE_ENABLE_STRICTNESS, 0, &code, &errors);
+        QVERIFY2(SUCCEEDED(fixedHr), errors ? static_cast<const char *>(errors->GetBufferPointer()) : "Compile failed");
+        write(output + "/raster-depth-reference.hlsl", fixedSource);
+        experiment.setShader(*session, creation, "PS",
+                             format::Bytes(static_cast<const uint8_t *>(code->GetBufferPointer()), code->GetBufferSize()));
+        experiment.save(output + "/raster-depth.json");
+        QVERIFY(experiment.undo());
+        QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+    }
     void dx12ComputeWorkgroupProject() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_WORKGROUP_PROJECT");
