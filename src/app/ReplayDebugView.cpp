@@ -132,6 +132,15 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         x_ = spin("debugX", " X ", INT_MAX);
         y_ = spin("debugY", " Y ", INT_MAX);
         sample_ = spin("debugSample", " Sample ", 31);
+        inputs_->addWidget(new QLabel(" Primitive "));
+        primitive_ = new QLineEdit;
+        primitive_->setObjectName("debugPrimitive");
+        primitive_->setPlaceholderText("Automatic");
+        primitive_->setMaximumWidth(115);
+        primitive_->setToolTip("Optional primitive ID. RenderDoc chooses among matching fragments; "
+                               "this does not select an instance or a fragment index.");
+        inputs_->addWidget(primitive_);
+        connect(primitive_, &QLineEdit::textChanged, this, &ReplayDebugView::invalidate);
     } else if (stage_ == "vs") {
         auto index = [&](const char *name, const QString &label) {
             inputs_->addWidget(new QLabel(label));
@@ -469,6 +478,8 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
         dx12_ = dx12;
         key_ = key;
         event_ = event;
+        if (primitive_)
+            primitive_->clear();
         invalidate();
     }
     updateActions();
@@ -492,6 +503,11 @@ void ReplayDebugView::selectPixel(int x, int y, int sample) {
     x_->setValue(x);
     y_->setValue(y);
     sample_->setValue(sample);
+    primitive_->clear();
+}
+void ReplayDebugView::selectPrimitive(uint32_t primitive) {
+    if (!busy_ && primitive_)
+        primitive_->setText(QString::number(primitive));
 }
 Json ReplayDebugView::request() const {
     if (key_.isEmpty() || !event_)
@@ -504,9 +520,11 @@ Json ReplayDebugView::request() const {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
     }
-    if (stage_ == "ps")
+    if (stage_ == "ps") {
         job.update({{"x", x_->value()}, {"y", y_->value()}, {"sample", sample_->value()}});
-    else if (stage_ == "vs")
+        if (!primitive_->text().trimmed().isEmpty())
+            job["primitive"] = invocationIndex(primitive_);
+    } else if (stage_ == "vs")
         job.update({{"vertex", invocationIndex(vertex_)}, {"instance", invocationIndex(instance_)}});
     else
         job.update({{"group", triple(group_)}, {"thread", triple(thread_)}});

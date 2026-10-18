@@ -425,6 +425,15 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
     } else {
         DebugPixelInputs inputs;
         inputs.sample = index(job, "sample");
+        if (job.contains("primitive"))
+            inputs.primitive = index(job, "primitive", UINT32_MAX);
+        result["pixel_invocation"] = {
+            {"x", index(job, "x")},
+            {"y", index(job, "y")},
+            {"sample", inputs.sample},
+            {"primitive", inputs.primitive == UINT32_MAX ? Json() : Json(inputs.primitive)},
+            {"selection_scope",
+             "RenderDoc pixel/sample/primitive selection; fragment index and instance are not selected"}};
         trace.reset(controller.DebugPixel(index(job, "x"), index(job, "y"), inputs));
     }
     if (!trace || !trace->debugger)
@@ -500,7 +509,8 @@ Json runRdcJob(const Json &job) {
     if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
             throw std::runtime_error("Choose GPA or RDC event, not both");
-        for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index"})
+        for (const auto *key :
+             {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index", "primitive"})
             index(job, key);
         for (const auto *key : {"gpa_event", "execution", "resource", "resource_creation"})
             if (job.contains(key) && !job.at(key).is_null())

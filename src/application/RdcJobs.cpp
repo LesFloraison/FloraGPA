@@ -85,7 +85,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
@@ -93,6 +93,8 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Choose GPA or RDC event, not both");
     for (const auto key : {"x", "y", "mip", "layer", "sample", "instance", "vertex"})
         unsignedNumber(job[key], UINT32_MAX, key);
+    if (job.contains("primitive"))
+        unsignedNumber(job["primitive"], UINT32_MAX, "primitive");
     for (const auto key : {"eid", "index"})
         unsignedNumber(job[key], UINT32_MAX, key, true);
     unsignedNumber(job["gpa_event"], UINT64_MAX, "gpa_event", true);

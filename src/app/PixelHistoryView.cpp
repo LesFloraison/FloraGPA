@@ -117,6 +117,10 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     cancel_->setObjectName("cancelPixelHistory");
     locate_ = tools->addAction("Locate API");
     locate_->setObjectName("locateHistoryEvent");
+    debug_ = tools->addAction("Debug PS");
+    debug_->setObjectName("debugHistoryPixel");
+    debug_->setToolTip("Select this draw, pixel, sample and primitive for PS debugging. "
+                       "Fragment index and instance selection are unavailable.");
     export_ = tools->addAction("Export…");
     export_->setObjectName("exportPixelHistory");
     auto details = tools->addAction("Details");
@@ -210,6 +214,14 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
             emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
     });
     connect(cancel_, &QAction::triggered, this, &PixelHistoryView::cancelRequested);
+    connect(debug_, &QAction::triggered, this, [this] {
+        if (!debug_->isEnabled())
+            return;
+        const auto item = records_->currentItem();
+        const auto &row = rows_.at(item->data(0, Qt::UserRole + 1).toULongLong());
+        emit pixelDebugRequested(item->data(0, Qt::UserRole).toULongLong(), x_->value(), y_->value(),
+                                 sample_->value(), row.at("primitiveID").get<uint32_t>());
+    });
     connect(read_, &QAction::triggered, this, [this] {
         if (busy_ || key_.isEmpty())
             return;
@@ -353,6 +365,18 @@ void PixelHistoryView::updateActions() {
     }
     const auto item = records_->currentItem();
     locate_->setEnabled(!busy_ && item && item->data(0, Qt::UserRole).isValid());
+    bool debuggable = false;
+    if (locate_->isEnabled() && rows_.is_array() &&
+        item->data(0, Qt::UserRole + 1).toULongLong() < rows_.size()) {
+        const auto &row = rows_.at(item->data(0, Qt::UserRole + 1).toULongLong());
+        const auto primitive = row.value("primitiveID", Json());
+        // Resource operations and synthetic boundaries are not shader invocations.
+        debuggable = dx12_ && row.value("record_kind", "") == "backend_modification" &&
+                     row.value("name", std::string()).find("Draw") != std::string::npos &&
+                     !row.value("directShaderWrite", false) && !row.value("unboundPS", false) &&
+                     primitive.is_number_unsigned() && primitive.get<uint64_t>() < UINT32_MAX;
+    }
+    debug_->setEnabled(debuggable);
 }
 void PixelHistoryView::selected() {
     const auto item = records_->currentItem();

@@ -73,10 +73,11 @@ class RdcJobTests : public QObject {
         const auto job = prepare(dir.path(), "success",
                                  {{"execution", "9007199254740993"},
                                   {"resource", "18446744073709551615"},
-                                  {"resource_creation", "9007199254740994"}});
+                                  {"resource_creation", "9007199254740994"}, {"primitive", 17}});
         QCOMPARE(job.at("execution"), Json("9007199254740993"));
         QCOMPARE(job.at("resource"), Json("18446744073709551615"));
         QVERIFY(job.at("gpa_event").is_null());
+        QCOMPARE(job.at("primitive"), Json(17));
     }
     void preparation() {
         QTemporaryDir dir;
@@ -99,6 +100,8 @@ class RdcJobTests : public QObject {
         QTest::newRow("boolean") << Json{{"x", true}};
         QTest::newRow("negative") << Json{{"y", -1}};
         QTest::newRow("overflow") << Json{{"sample", uint64_t(UINT32_MAX) + 1}};
+        QTest::newRow("primitive-overflow") << Json{{"primitive", uint64_t(UINT32_MAX) + 1}};
+        QTest::newRow("primitive-negative") << Json{{"primitive", -1}};
         QTest::newRow("fraction") << Json{{"vertex", 1.5}};
         QTest::newRow("both-events") << Json{{"gpa_event", 1}, {"eid", 2}};
         QTest::newRow("dx12-number") << Json{{"execution", 9007199254740993ULL}};

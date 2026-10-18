@@ -1272,6 +1272,20 @@ void MainWindow::buildUi() {
     }
     debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
+    connect(history_, &PixelHistoryView::pixelDebugRequested, this,
+            [this, debugTabs](qulonglong event, int x, int y, int sample, uint32_t primitive) {
+                if (busy())
+                    return;
+                if (session_ && session_->backend() == ReplayBackend::Dx12)
+                    findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+                locateEvent(event);
+                if (selectedEvent_ != event)
+                    return;
+                replayDebug_[1]->selectPixel(x, y, sample);
+                replayDebug_[1]->selectPrimitive(primitive);
+                debugTabs->setCurrentWidget(replayDebug_[1]);
+                centerTabs_->setCurrentWidget(debugTabs);
+            });
     auto rightTabs = new QTabWidget;
     rightTabs->setObjectName("inspectorTabs");
     rightTabs->setDocumentMode(true);

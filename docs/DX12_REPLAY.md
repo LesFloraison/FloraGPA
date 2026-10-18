@@ -882,6 +882,57 @@ Release CLI, Worker, GUI, isolated analysis and focused tests build successfully
 (`build83.log` through `build85.log`). The small missing-signature/root-argument fixtures
 and existing selected-analysis capability checks pass (`bf1-analysis-gaps1.txt`).
 
+### BF1 color history and pixel shader invocation
+
+RenderDoc 1.45 queried backbuffer object `2119382448`, creation `11399`, through
+execution `37815` at `(960, 500)`, mip/layer/sample zero, using the existing
+`bf1-consumed-descriptors3/native-dx12_capture.rdc`. The query returned four
+mapped rows, without loading GPA modules (`bf1-color-history1/result.json`):
+
+| Execution | Source record | RenderDoc event | Primitive | Observed color result |
+| ---: | ---: | ---: | ---: | --- |
+| 37273 | 363202 | 47373 | 0 | RGBA8 `(0,0,0,0)` to `(34,66,73,57)` |
+| 37309 | 363255 | 47485 | 1 | Unchanged; backend reports stencil-test failure |
+| 37326 | 363288 | 47536 | 1 | Unchanged; backend reports stencil-test failure |
+| 37343 | 363321 | 47587 | 1 | Unchanged; backend reports stencil-test failure |
+
+The final RGBA8 values exactly match this pixel in the independently read native
+image `bf1-first-color-workspace1.png`. This verifies one color history chain;
+the depth/stencil value fields accompanying these color records have not been
+validated, and the reported stencil failure reasons are backend observations.
+
+The history toolbar now offers **Debug PS** for mapped DX12 Draw records with a
+known primitive. It restores a filtered event's visibility, selects its execution,
+and transfers X/Y/sample/primitive into the existing PS panel. The optional
+primitive field is passed through the isolated job and `DebugPixelInputs`; CLI
+analysis also accepts `--primitive`. Changing event or picking a new pixel clears
+the previous primitive. Primitive selection does not select a fragment index or
+an instance, and resource operations/synthetic depth boundaries do not enable
+this action.
+
+The main-window test used the real history result, selected execution `37273`,
+then generated and analyzed that native prefix through the Worker. It returned
+37 PS states, mapped to RenderDoc event `47373`, with no GPA modules loaded
+(`bf1-color-ps-workspace3.txt`, exported `bf1-color-ps-workspace1.json`). Shader
+hash `3e0cb770-f5d412fc-8252836d-963dedeb` is DXBC `ps_5_0`, sampling the main,
+distortion, bloom and 3D color-grading textures. Its final `SV_Target` equals the
+history row's GPU shader output exactly in all four components:
+`(0.13182269036769867, 0.2581216096878052, 0.2846723198890686, 0.2233850210905075)`.
+Source information is absent, so this remains instruction-level debugging.
+
+The initial targeted UI check exposed a selected-history invalidation callback
+accessing cleared rows before GPU analysis began. The row validity guard fixes
+that fault; the same workspace path subsequently passed. Tests reuse the recorded
+trace for breakpoint, Watch and invocation-invalidation checks instead of
+replaying the GPU again: instruction breakpoint 34, the following step, exact
+`SV_Target` Watch values, primitive-change trace invalidation, and clearing a
+selected history result all passed (`bf1-ps-instructions1.txt`). Existing DX11/12
+invocation-selection checks and unsigned job-option checks passed
+(`ps-primitive-selection2.txt`, `ps-primitive-jobs1.txt`). Release GUI, CLI, Worker,
+isolated analysis and focused tests build successfully (`build90.log`).
+This work does not establish full Pixel/Resource History,
+all PS invocations, DXIL debugging, or full-frame replay fidelity.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -891,8 +942,8 @@ and existing selected-analysis capability checks pass (`bf1-analysis-gaps1.txt`)
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
-| Resource/Pixel History with execution mapping | Unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, direct/indirect CS traces verified; direct CS controls and indirect CS end-to-end workspace checked; PS/geometry unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
+| Resource/Pixel History with execution mapping | One backbuffer color history chain verified and connected to PS selection; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

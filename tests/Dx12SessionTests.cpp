@@ -703,6 +703,90 @@ class Dx12SessionTests : public QObject {
                        QCryptographicHash::Sha256)
                        .toHex();
     }
+    void colorHistoryPixelDebugWorkspace() {
+        try {
+            const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+            const auto historyPath = qEnvironmentVariable("FLORA_DX12_BF1_COLOR_HISTORY");
+            const auto imagePath = qEnvironmentVariable("FLORA_DX12_BF1_COLOR");
+            if (root.isEmpty() || library.isEmpty() || historyPath.isEmpty() || imagePath.isEmpty())
+                QSKIP("Set BF1 capture, RenderDoc, color history report and native color image");
+            QFile input(historyPath);
+            QVERIFY(input.open(QIODevice::ReadOnly));
+            const auto report = nlohmann::json::parse(input.readAll().toStdString());
+            QCOMPARE(report.at("execution"), nlohmann::json("37815"));
+            QCOMPARE(report.at("history").size(), size_t(4));
+            const auto &first = report.at("history")[0];
+            QCOMPARE(first.at("execution"), nlohmann::json("37273"));
+            QCOMPARE(first.at("source_record"), nlohmann::json("363202"));
+            const QImage image(imagePath);
+            QVERIFY(!image.isNull());
+            const auto pixel = image.pixelColor(960, 500);
+            const int channels[]{pixel.red(), pixel.green(), pixel.blue(), pixel.alpha()};
+            for (size_t c = 0; c < 4; ++c)
+                QCOMPARE(
+                    int(std::lround(first.at("postMod").at("col").at("floatValue")[c].get<double>() * 255)),
+                    channels[c]);
+            for (size_t i = 1; i < 4; ++i) {
+                const auto &row = report.at("history")[i];
+                QVERIFY(row.at("stencilTestFailed").get<bool>());
+                QCOMPARE(row.at("preMod").at("col"), row.at("postMod").at("col"));
+            }
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            window.openCapture(root + "/bf1_2025_12_10__14_29_55.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("37815");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto history = window.findChild<PixelHistoryView *>("pixelHistoryView");
+            history->setDx12Resource(11399, 2119382448);
+            history->selectPixel(2119382448, 960, 500, 0, 0, 0);
+            QVERIFY(history->finish(history->requestId(), report));
+            const auto oldHistoryRequest = history->requestId();
+            auto records = history->findChild<QTreeWidget *>("historyRecords");
+            records->setCurrentItem(records->topLevelItem(0));
+            auto debug = history->findChild<QAction *>("debugHistoryPixel");
+            QVERIFY(debug->isEnabled());
+            window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+            debug->trigger();
+            QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+            QCOMPARE(
+                window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                37273ULL);
+            QVERIFY(!history->finish(oldHistoryRequest, report));
+            auto ps = window.findChild<ReplayDebugView *>("replayDebug-ps");
+            QCOMPARE(ps->request(), (nlohmann::json{{"action", "debug-pixel"},
+                                                    {"execution", "37273"},
+                                                    {"x", 960},
+                                                    {"y", 500},
+                                                    {"sample", 0},
+                                                    {"primitive", 0}}));
+            ps->setBackendPath(library, false);
+            auto read = ps->findChild<QAction *>("replayDebugRead");
+            QVERIFY(read->isEnabled());
+            done.clear();
+            read->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 90000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QVERIFY(ps->model());
+            const auto &result = ps->model()->result();
+            QCOMPARE(result.at("execution"), nlohmann::json("37273"));
+            QCOMPARE(result.at("pixel_invocation").at("primitive"), nlohmann::json(0));
+            QVERIFY(result.at("gpa_modules_loaded").empty());
+            QVERIFY(ps->model()->size() > 1);
+            ps->findChild<QAction *>("debugStep")->trigger();
+            QCOMPARE(ps->model()->position(), int64_t(1));
+            qInfo() << "BF1 PS steps" << ps->model()->size() << "RDC event"
+                    << result.at("eid").get<unsigned>();
+            const auto output = qEnvironmentVariable("FLORA_DX12_PS_REPORT");
+            if (!output.isEmpty())
+                ps->exportResult(output);
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
     void indirectAnalysisWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
@@ -823,6 +907,57 @@ class Dx12SessionTests : public QObject {
             std::runtime_error,
             wide.finish(wide.requestId(),
                         {{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740992"}}));
+    }
+    void pixelInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PS_REPORT");
+        const auto historyPath = qEnvironmentVariable("FLORA_DX12_BF1_COLOR_HISTORY");
+        if (path.isEmpty() || historyPath.isEmpty())
+            QSKIP("Set the recorded BF1 PS trace and color history report");
+        QFile input(path), historyInput(historyPath);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        QVERIFY(historyInput.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(input.readAll().toStdString());
+        const auto historyResult = nlohmann::json::parse(historyInput.readAll().toStdString());
+        ReplayDebugView view("ps");
+        view.setContext("bf1-color", 37273, true);
+        view.selectPixel(960, 500, 0);
+        view.selectPrimitive(0);
+        QVERIFY(view.finish(view.requestId(), result));
+        QCOMPARE(view.model()->size(), size_t(37));
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QLineEdit *>("debugInstruction")->setText("34");
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        view.findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(34));
+        view.findChild<QAction *>("debugStep")->trigger();
+        view.model()->addWatch("SV_Target");
+        const auto watch = view.model()->watchResults().at(0);
+        QCOMPARE(watch.at("status"), nlohmann::json("available"));
+        QCOMPARE(watch.at("values"),
+                 historyResult.at("history")[0].at("shaderOut").at("col").at("floatValue"));
+        const auto serial = view.requestId();
+        view.selectPrimitive(1);
+        QVERIFY(!view.model());
+        QVERIFY(!view.finish(serial, result));
+        PixelHistoryView history;
+        history.setContext("bf1-color-history", 37815, true);
+        history.setDx12Resource(11399, 2119382448);
+        history.selectPixel(2119382448, 960, 500, 0, 0, 0);
+        QVERIFY(history.finish(history.requestId(), historyResult));
+        auto records = history.findChild<QTreeWidget *>("historyRecords");
+        records->setCurrentItem(records->topLevelItem(1));
+        QSignalSpy invocation(&history, &PixelHistoryView::pixelDebugRequested);
+        auto action = history.findChild<QAction *>("debugHistoryPixel");
+        QVERIFY(action->isEnabled());
+        action->trigger();
+        QCOMPARE(invocation.count(), 1);
+        QCOMPARE(invocation[0][0].toULongLong(), 37309ULL);
+        QCOMPARE(invocation[0][4].toUInt(), 1U);
+        // Clearing a selected result may emit table selection callbacks during invalidation.
+        history.setDx12Resource(11395, 2119326144);
+        QVERIFY(!action->isEnabled());
+        QCOMPARE(records->topLevelItemCount(), 0);
     }
     void computeInstructionDebug() {
         const auto path = qEnvironmentVariable("FLORA_DX12_CS_TRACE");

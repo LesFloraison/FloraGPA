@@ -20,6 +20,7 @@ class ReplayDebugView final : public QWidget {
     void setContext(const QString &key, qulonglong event, bool dx12 = false);
     void setWorkerBusy(bool busy);
     void selectPixel(int x, int y, int sample);
+    void selectPrimitive(uint32_t primitive);
     void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return backendPath_; }
     uint64_t requestId() const { return requestId_; }
@@ -44,7 +45,8 @@ class ReplayDebugView final : public QWidget {
     QToolBar *inputs_, *steps_;
     QAction *read_, *cancel_, *export_, *backend_;
     QSpinBox *x_{}, *y_{}, *sample_{}, *step_, *line_;
-    QLineEdit *vertex_{}, *instance_{}, *group_{}, *thread_{}, *instruction_, *condition_, *count_, *watch_;
+    QLineEdit *primitive_{}, *vertex_{}, *instance_{}, *group_{}, *thread_{}, *instruction_, *condition_,
+        *count_, *watch_;
     QComboBox *navigation_, *interpretation_, *files_, *hitMode_;
     QLabel *summary_;
     QPlainTextEdit *assembly_, *source_, *details_;

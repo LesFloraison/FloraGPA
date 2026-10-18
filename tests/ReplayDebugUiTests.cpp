@@ -71,6 +71,15 @@ class ReplayDebugUiTests : public QObject {
         ps.selectPixel(48, 32, 2);
         QCOMPARE(ps.request(),
                  (Json{{"action", "debug-pixel"}, {"gpa_event", 105}, {"x", 48}, {"y", 32}, {"sample", 2}}));
+        ps.selectPrimitive(1);
+        QCOMPARE(ps.request().at("primitive"), Json(1));
+        ps.findChild<QLineEdit *>("debugPrimitive")->setText("4294967296");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, ps.request());
+        ps.selectPixel(48, 32, 2);
+        QVERIFY(!ps.request().contains("primitive"));
+        ps.selectPrimitive(2);
+        ps.setContext("one", 106);
+        QVERIFY(!ps.request().contains("primitive"));
         vs.findChild<QLineEdit *>("debugVertex")->setText("2");
         QCOMPARE(vs.request().at("vertex"), Json(2));
         vs.findChild<QLineEdit *>("debugInstance")->setText("4294967295");

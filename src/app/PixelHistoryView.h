@@ -29,6 +29,7 @@ class PixelHistoryView final : public QWidget {
     void readRequested();
     void cancelRequested();
     void eventRequested(qulonglong event);
+    void pixelDebugRequested(qulonglong event, int x, int y, int sample, uint32_t primitive);
     void inspectionFinished(bool success);
 
   private:
@@ -41,7 +42,7 @@ class PixelHistoryView final : public QWidget {
     bool busy_{}, dx12_{};
     qulonglong creation_{}, object_{};
     nlohmann::json result_, rows_;
-    QAction *read_, *cancel_, *locate_, *export_, *backend_;
+    QAction *read_, *cancel_, *locate_, *debug_, *export_, *backend_;
     QLineEdit *eventInput_, *resource_;
     QSpinBox *x_, *y_, *mip_, *layer_, *sample_;
     QLabel *summary_;
