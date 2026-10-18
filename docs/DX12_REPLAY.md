@@ -2284,6 +2284,78 @@ compatibility replay used the GPU. Hellblade2 was not replayed for this UI/API
 increment. Neither complete pipeline coverage nor overall milestone acceptance
 is claimed by these selected-boundary checks.
 
+### BF1 upstream raw-input comparison and texture readback metadata
+
+The tone-map input query now has a concrete producer boundary. Resource history
+for creation **324859** through execution **37273** reports a color-target use at
+execution **36758**, original record **213193**, RenderDoc event **45824**. The
+captured command list is **0x2f8005630** and its Draw/Dispatch ordinal is **14**.
+Later usage entries include mip-generation UAVs and a copy; resource-level usage
+alone does not identify the modified mip. A targeted pipeline query at execution
+**36956** confirms its `g_output` UAV is creation **324859**, **mip 1**, while
+`g_input` is creation **324867**. It must not be called a mip-0 write.
+
+The original dump layer at tone-map Draw 59 exported only the RTV and reported
+invalid input bindings (`gpa-bf1-inputs1`). Selecting the earlier producer's RTV
+instead succeeded: pre-layer `dump-resources-layer`, `command-list=0x2f8005630`,
+`draws=14`, `resource=0x2800fe6c0`, `views=0x8`, `dimensions=0x8`, `no-async=true`,
+offscreen playback through frame 1. It exported 11 mip PNGs in
+`gpa-bf1-main-input1`; only mip 0 was compared. Ghidra identified the dump
+layer's image-conversion wrapper at RVA **0x15ad0** and its DirectX::Convert call
+at **0x173d0**. The installed 2025 R1 dump binary still hashes to
+`853913de932f235341655d7f55f1d38d68e56d60df45402acff87825eaf78b72`.
+
+A bounded local debugger probe then launched its own GPA child with that exact
+filter, stopped once at the wrapper before display conversion, copied its
+`DirectX::Image` source bytes and restored the original instruction before
+continuing. The child exited 0; no installed binary or capture was edited.
+The first probe stopped at layer discovery because GPA loads/unloads the DLL
+before using it; handling its unload/reload allowed the second probe to complete.
+`gpa-bf1-main-raw2` records **1920 × 1009**, DXGI format **26**
+(R11G11B10_FLOAT), row pitch **7680**, and **7,749,120** raw bytes, SHA-256
+`93d9816bdeca2d83bb68fdd00f32373d0540468a019e18467d8788f619859d58`.
+CPU unsigned-float decoding and nearest UNORM quantization exactly reproduce
+the **same-run** exported RGB PNG. A separate CPU call into the hash-checked
+screenshot DLL's equivalent DirectX::Convert routine, RVA **0x20340**, also
+matches this decoder on the native R11G11B10 input (flags 0, destination RGBA8).
+
+The independently recaptured producer boundary (`bf1-main-input-native1`) has
+raw SHA-256 `7449f5d3b9a96865a1080e43fc8c43493bb0885890ca67a8f1b5385be5f60cea`.
+Compared with the raw original, **1,806,653** packed pixels match and **130,627**
+differ, bounding box **(0,394)..(1919,865)**. Maximum absolute float differences
+are **0.125 / 0.01953125 / 0.0234375** for RGB. At **(1674,485)**, original is
+`(0.1044921875, 0.0908203125, 0.07421875)` and native is
+`(0.1005859375, 0.087890625, 0.07421875)`. Thus differences already exist before
+tone mapping, without relying on PNG quantization or rewritten alpha.
+
+Variation remains unresolved: the two original producer PNG runs differ at
+**56,254** RGB pixels. A separate independent query at the consumer event
+(`bf1-main-input-native2`) differs from the producer query at **48,735** packed
+pixels. These are separate replay queries, **not** a same-run before/after
+measurement; they do not prove which intervening command changed mip 0.
+The precise cause in upstream state, aliasing, synchronization or shader behavior
+is still open. No tolerance or overall fidelity pass was inferred.
+
+This comparison exposed a readback reporting defect: native RDC `texture` exports
+previously supplied bytes without their texture description and did not validate
+the subresource. They now include dimensions, selected mip extent, format with
+BGRA/sRGB interpretation, resource object/creation identities, 64-bit texture byte
+size as a string, and the raw file's SHA-256. Invalid mip/layer/sample selectors,
+empty readbacks, and nonzero depth slices for a 3D texture are rejected (RenderDoc
+returns a whole 3D mip and ignores that slice selector). Existing DX11 metadata
+adapters retain their schema. A focused CPU test covers volume/array selection,
+invalid boundaries and a byte size above 2^53; it passed. The real consumer query
+verified the new metadata and file hash:
+`821f6dd581a275fa3d882538df42e34dfd577c4630d155afcc71541aa18ab948`.
+
+Evidence: `bf1-tonemap-input-history1`, `bf1-main-producer1.json`,
+`bf1-main-mip-writer1`, `bf1-main-input-{comparison1,raw-comparison1}.json`,
+`dump-{inputs1,convert1}.txt`, `screenshot-convert-direct1.txt`, raw probe metadata,
+the original/native artifacts and `texture-readback-selection1.txt`. Research
+helpers and binaries remain outside Git. This increment used four targeted RDC
+queries, three completed original-player exports and one discovery-aborted probe;
+no full sample suite or unrelated GPU tests ran.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2297,7 +2369,7 @@ is claimed by these selected-boundary checks.
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
-| Comparison with original GPA frame/intermediate resources | Both output frames and first tone-map boundary compared; RGB differences and original variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
+| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known

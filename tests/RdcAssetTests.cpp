@@ -29,6 +29,38 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void textureReadbackSelection() {
+        TextureDescription t{};
+        t.dimension = 3;
+        t.width = 16;
+        t.height = 8;
+        t.depth = 4;
+        t.mips = 3;
+        t.arraysize = 1;
+        t.msSamp = 1;
+        t.byteSize = 9007199254740993ULL;
+        t.format.type = ResourceFormatType::Regular;
+        t.format.compType = CompType::UNormSRGB;
+        t.format.compCount = 4;
+        t.format.compByteWidth = 1;
+        t.format.SetBGRAOrder(true);
+        const auto volume = rdcTextureReadbackDescription(t, Subresource(1, 0, 0));
+        QCOMPARE(volume.at("selected_extent"), Json({{"width", 8}, {"height", 4}, {"depth", 2}}));
+        QCOMPARE(volume.at("scope"), Json("whole_3d_mip"));
+        QCOMPARE(volume.at("texture").at("byteSize"), Json("9007199254740993"));
+        QVERIFY(volume.at("texture").at("format").at("bgra_order").get<bool>());
+        QVERIFY(volume.at("texture").at("format").at("srgb").get<bool>());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureReadbackDescription(t, Subresource(1, 1, 0)));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureReadbackDescription(t, Subresource(3, 0, 0)));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureReadbackDescription(t, Subresource(0, 0, 1)));
+        t.dimension = 2;
+        t.arraysize = 6;
+        t.msSamp = 4;
+        const auto array = rdcTextureReadbackDescription(t, Subresource(0, 5, 3));
+        QCOMPARE(array.at("scope"), Json("array_layer_mip_sample"));
+        QCOMPARE(array.at("selected_extent").at("depth"), Json(1));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureReadbackDescription(t, Subresource(0, 6, 0)));
+    }
     void resourceGraphAndWideValues() {
         ResourceDescription r;
         r.resourceId = resource(UINT64_MAX);

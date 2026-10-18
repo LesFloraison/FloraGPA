@@ -4,6 +4,7 @@
 namespace flora {
 nlohmann::json rdcResourceDescription(const ResourceDescription &resource);
 nlohmann::json rdcTextureDescription(const TextureDescription &texture);
+nlohmann::json rdcTextureReadbackDescription(const TextureDescription &texture, const Subresource &sub);
 nlohmann::json rdcBufferDescription(const BufferDescription &buffer);
 nlohmann::json rdcResourceFormat(const ResourceFormat &format);
 // Preserve the original Python surrogateescape representation of the annotation

@@ -1,4 +1,5 @@
 #include "Assets.h"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 namespace flora {
@@ -92,6 +93,30 @@ nlohmann::json rdcBufferDescription(const BufferDescription &b) {
             {"creationFlags", uint32_t(b.creationFlags)},
             {"gpuAddress", b.gpuAddress},
             {"length", b.length}};
+}
+nlohmann::json rdcTextureReadbackDescription(const TextureDescription &t, const Subresource &sub) {
+    if (sub.mip >= t.mips)
+        throw std::runtime_error("Texture readback mip is outside the texture");
+    // GetTextureData returns the entire 3D mip and ignores slice. Reject a
+    // nonzero depth slice rather than label that entire volume as one slice.
+    if ((t.dimension == 3 && sub.slice != 0) || (t.dimension != 3 && sub.slice >= t.arraysize))
+        throw std::runtime_error("Texture readback requires an array layer or slice 0 for a whole 3D mip");
+    if (sub.sample >= (std::max)(1U, t.msSamp))
+        throw std::runtime_error("Texture readback sample is outside the texture");
+    const auto extent = [mip = sub.mip](uint32_t size) {
+        return mip >= 32 ? 1U : (std::max)(1U, size >> mip);
+    };
+    auto description = rdcTextureDescription(t);
+    description["byteSize"] = std::to_string(t.byteSize);
+    description["format"]["bgra_order"] = t.format.BGRAOrder();
+    description["format"]["srgb"] = t.format.SRGBCorrected();
+    return {{"texture", description},
+            {"selected_extent",
+             {{"width", extent(t.width)},
+              {"height", extent(t.height)},
+              {"depth", t.dimension == 3 ? extent(t.depth) : 1U}}},
+            {"scope", t.dimension == 3 ? "whole_3d_mip" : "array_layer_mip_sample"},
+            {"encoding", "RenderDoc GetTextureData native format; no display conversion or alpha override"}};
 }
 std::string rdcInventoryText(const nlohmann::json &value) {
     if (value.is_string()) {

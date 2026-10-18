@@ -8,6 +8,7 @@
 #include "application/RdcEvents.h"
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
+#include <QCryptographicHash>
 #include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
@@ -920,7 +921,13 @@ Json runRdcJob(const Json &job) {
     const auto &tex = *found;
     const Subresource sub(index(job, "mip"), index(job, "layer"), index(job, "sample"));
     if (action == "texture") {
+        const auto description = rdcTextureReadbackDescription(tex, sub);
         const auto data = controller.GetTextureData(resource, sub);
+        if (data.empty())
+            throw std::runtime_error("Texture readback returned no data");
+        const auto digest = QCryptographicHash::hash(
+            QByteArrayView(reinterpret_cast<const char *>(data.data()), qsizetype(data.size())),
+            QCryptographicHash::Sha256);
         const auto destination = path(job.at("out")) / L"texture.bin";
         QSaveFile file(QString::fromStdWString(destination.wstring()));
         if (!file.open(QIODevice::WriteOnly) ||
@@ -936,6 +943,10 @@ Json runRdcJob(const Json &job) {
                        {"gpa_event", gpa},
                        {"resource", resourceName(resource)},
                        {"resource_name", name},
+                       {"resource_object", gpaResource},
+                       {"resource_creation", job.value("resource_creation", Json())},
+                       {"readback", description},
+                       {"sha256", digest.toHex().toStdString()},
                        {"byte_length", data.size()},
                        {"subresource", {{"mip", sub.mip}, {"slice", sub.slice}, {"sample", sub.sample}}}});
         return complete();
