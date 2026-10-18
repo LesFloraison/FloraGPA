@@ -205,6 +205,7 @@ target_sources(FloraReplay PRIVATE src/replay/OutputBindings.cpp src/replay/Text
 add_library(FloraExperiment src/application/Experiment.cpp src/application/ShaderInspector.cpp src/application/Geometry.cpp src/application/CaptureNames.cpp src/application/CommandEdits.cpp src/application/Constants.cpp src/application/UavCounterInspector.cpp src/application/ApiCommands.cpp src/application/QueryHistory.cpp src/application/ContextInspector.cpp src/application/CommandState.cpp src/application/ReplayPipeline.cpp src/application/ClassInspector.cpp src/application/StreamOutputInspector.cpp)
 target_sources(FloraExperiment PRIVATE src/application/ReplaySession.cpp src/dx12/MappedFile.cpp src/dx12/StreamDirectory.cpp src/dx12/StreamArguments.cpp src/dx12/SubmissionIndex.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/QueryReplayIndex.cpp)
+target_sources(FloraExperiment PRIVATE src/dx12/QueueDependencyIndex.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/NativeDevice.cpp src/dx12/InitializationCopy.cpp src/dx12/PipelineRecipes.cpp src/dx12/NativeResources.cpp src/dx12/NativeReplay.cpp src/dx12/NativeCommands.cpp src/dx12/TileRecipes.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/NativePerformance.cpp src/dx12/NativePerformance.h)
 target_sources(FloraExperiment PRIVATE src/dx12/NativeTimeline.cpp src/dx12/NativeTimeline.h)

@@ -4,6 +4,7 @@
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
 #include "dx12/QueryReplayIndex.h"
+#include "dx12/QueueDependencyIndex.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
 #include "dx12/NativeResources.h"
@@ -75,6 +76,136 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void queueDependencies() {
+        using Json = nlohmann::json;
+        QTemporaryDir temp;
+        const auto path = fixture(temp);
+        QByteArray packets;
+        uint64_t record{};
+        const auto packet = [&](uint64_t type, const QByteArray &bytes) {
+            qword(packets, type);
+            qword(packets, ++record);
+            qword(packets, 0);
+            qword(packets, bytes.size());
+            packets += bytes;
+            return record;
+        };
+        const uint64_t fence = UINT64_MAX - 10, queue = UINT64_MAX - 20;
+        const auto create = [&](uint64_t object, uint64_t initial) {
+            QByteArray bytes;
+            qword(bytes, 1);
+            qword(bytes, initial);
+            dword(bytes, 0);
+            const auto iid = __uuidof(ID3D12Fence);
+            bytes.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+            bytes.append(char(1));
+            qword(bytes, 1);
+            qword(bytes, object);
+            dword(bytes, 0);
+            return packet(0x127930cf4f3a0ULL, bytes);
+        };
+        const auto sync = [&](bool wait, uint64_t q, uint64_t f, uint64_t value) {
+            QByteArray bytes;
+            qword(bytes, q);
+            qword(bytes, f);
+            qword(bytes, value);
+            dword(bytes, 0);
+            return packet(wait ? 0x12548db3bfde2ULL : 0x12548dab1bf2dULL, bytes);
+        };
+        create(fence, 5);
+        sync(true, queue, fence, 5); // Already satisfied, no artificial producer edge.
+        const auto producer = sync(false, queue + 1, fence, 6);
+        sync(true, queue, fence, 6);
+        const auto futureWait = sync(true, queue, fence, 7);
+        const auto futureSignal = sync(false, queue + 1, fence, 7);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            const auto report = dx12::QueueDependencyIndex(directory).information();
+            QCOMPARE(report.at("unresolved_waits"), Json("0"));
+            QCOMPARE(report.at("initial_value_waits"), Json("1"));
+            QCOMPARE(report.at("prior_signal_waits"), Json("1"));
+            QCOMPARE(report.at("later_signal_waits"), Json("1"));
+            QCOMPARE(report.at("waits")[1].at("producer_record"), Json(std::to_string(producer)));
+            QCOMPARE(report.at("waits")[2].at("producer_record"), Json(std::to_string(futureSignal)));
+            QCOMPARE(report.at("waits")[2].at("fence"), Json(std::to_string(fence)));
+            const auto prefix = dx12::QueueDependencyIndex(directory, futureWait).information();
+            QCOMPARE(prefix.at("unresolved_waits"), Json("1"));
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     dx12::QueueDependencyIndex(directory, 0, [] { return true; }));
+            QCOMPARE(openReplaySession(std::filesystem::path(path.toStdWString()))
+                         ->submissionDetails()
+                         .at("queue_dependencies"),
+                     report);
+        }
+
+        // Future producer edges must combine with queue order: this forms a
+        // cross-queue cycle, despite both required values appearing in records.
+        packets.clear();
+        record = 0;
+        create(fence, 0);
+        create(fence + 1, 0);
+        sync(true, queue, fence, 1);
+        sync(true, queue + 1, fence + 1, 1);
+        sync(false, queue, fence + 1, 1);
+        sync(false, queue + 1, fence, 1);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory cyclic(std::filesystem::path(path.toStdWString()));
+            QCOMPARE(dx12::QueueDependencyIndex(cyclic).information().at("cyclic_or_downstream_waits"),
+                     Json("2"));
+        }
+
+        // Rewinding or multiple writers cannot be reduced to a maximum value.
+        packets.clear();
+        record = 0;
+        create(fence, 0);
+        sync(false, queue, fence, 3);
+        sync(false, queue, fence, 1);
+        sync(true, queue + 1, fence, 2);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory rewound(std::filesystem::path(path.toStdWString()));
+            QCOMPARE(dx12::QueueDependencyIndex(rewound).information().at("unresolved_waits"), Json("1"));
+        }
+        packets.clear();
+        record = 0;
+        create(fence, 0);
+        sync(false, queue, fence, 1);
+        sync(false, queue + 1, fence, 2);
+        sync(true, queue + 2, fence, 2);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory writers(std::filesystem::path(path.toStdWString()));
+            QCOMPARE(dx12::QueueDependencyIndex(writers).information().at("waits")[0].at("condition"),
+                     Json("unresolved"));
+        }
+        packets.clear();
+        record = 0;
+        create(fence, 0);
+        create(fence + 1, 0);
+        sync(true, queue, fence, 1); // No producer, blocks later operations on this queue.
+        sync(false, queue, fence + 1, 1);
+        sync(true, queue + 1, fence + 1, 1);
+        write(path + "/thread-7-0", packets);
+        {
+            dx12::StreamDirectory missing(std::filesystem::path(path.toStdWString()));
+            const auto unresolved = dx12::QueueDependencyIndex(missing).information();
+            QCOMPARE(unresolved.at("unresolved_waits"), Json("2"));
+            QCOMPARE(unresolved.at("cyclic_or_downstream_waits"), Json("0"));
+            QCOMPARE(unresolved.at("waits")[1].at("condition"), Json("queue_signal"));
+            QCOMPARE(unresolved.at("waits")[1].at("dependency_status"), Json("unresolved_or_upstream"));
+        }
+        packets.clear();
+        record = 0;
+        create(fence, UINT64_MAX);
+        sync(true, queue, fence, 1);
+        write(path + "/thread-7-0", packets);
+        dx12::StreamDirectory reserved(std::filesystem::path(path.toStdWString()));
+        const auto opaque = dx12::QueueDependencyIndex(reserved).information();
+        QCOMPARE(opaque.at("invalid_fence_creation_count"), Json("0"));
+        QCOMPARE(opaque.at("unresolved_waits"), Json("1"));
+    }
     void fixedPipelineComposite() {
         using Json = nlohmann::json;
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

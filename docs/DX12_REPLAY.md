@@ -3082,6 +3082,64 @@ Saved GPU evidence and panel integration: **3 passed**, **228 ms**
 expected `propagateSizeHints` warnings; the rendered panel was inspected.
 GPU queries were serial and limited to this particle failure and its controls.
 
+### Queue dependency index for restoring submission scheduling
+
+`command-lists` and the shared session submission report now include
+`queue_dependencies`. The cancellable CPU index combines captured per-queue
+Submit/Signal/Wait order with Fence producer edges. It distinguishes waits
+satisfied by a captured initial value from waits requiring an earlier or later
+CPU-recorded Signal. It analyzes a requested record prefix independently, so a
+Signal outside that prefix cannot satisfy a selected-boundary dependency.
+
+The supported proof is restricted to unique Fence lifetimes with one signal
+queue and monotonically nondecreasing values. A Fence can legally rewind and
+multiple queues can race to signal it; taking the maximum observed value would
+invent a guarantee. See Microsoft's [multi-engine synchronization documentation](https://learn.microsoft.com/en-us/windows/win32/direct3d12/user-mode-heap-synchronization).
+Those cases remain unresolved, as do reserved `UINT64_MAX` values. BF1 has two
+successfully captured Fence creations with that initial value (records **475**
+and **667**) but no queue operations referencing them; they are retained without
+misreporting the captured creation calls as failed.
+
+Two topological traversals distinguish cycles/downstream nodes from missing
+dependencies and their downstream operations. No CPU-global edge is invented
+between separate queues. Queue/Fence/record/value identities are decimal strings;
+the index limits queue operations and Fence objects to one million each and
+caps detailed invalid-creation/blocked-operation examples at 32.
+
+The native CPU implementation matches the independent record audit:
+
+| Capture | Queues with indexed operations | Submit/Signal/Wait operations | Initial-value waits | Signal-dependent waits | Unresolved waits |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| BF1 | 2 | 108 | 0 | 0 | 0 |
+| Talos | 3 | 84 | 0 | 0 | 0 |
+| Hellblade2 | 4 | 584 | 124 | 29 | 0 |
+
+All 153 Hellblade2 waits are frame records. Its 29 producer Signals precede
+their corresponding Waits in the captured CPU record sequence. For example,
+Wait **594612**, queue **2131165364544**, Fence **2131166327360**, value
+**449717**, depends on Signal **594216** from queue **2131165365824**.
+The 124 initial-value waits do not establish new cross-queue ordering edges.
+No indexed graph cycles or unresolved queue operations were found in these
+three complete record ranges. This does not resolve Talos's separate missing
+occlusion results, prove resource synchronization, or validate GPU execution.
+
+Evidence under ignored `artifacts/dx12-research`:
+`queue-source-audit1.{json,txt}`, `queue-dependencies-bf12`,
+`queue-dependencies-talos1`, `queue-dependencies-hellblade1`.
+The fixture covers 64-bit identities, prefix truncation before a future Signal,
+cross-queue cycles, missing upstream producers, rewinds, multiple writers,
+reserved values, cancellation and shared-session report integration:
+**3 passed**, **12 ms** including setup/cleanup (`queue-dependency-fixture3.txt`).
+Build **237** covers the workspace, CLI, Worker and focused test. This change
+performed no GPU replay; metadata and thread records were inspected without
+reading the large resource contents.
+
+Native replay still drains each submission on the CPU. The next scheduling
+change must consume these dependencies, retain in-flight resources/recordings,
+handle captured host mutations and CPU waits, and defer completion accounting
+until the GPU actually finishes. `gpu_order_resolved` remains false; an indexed
+dependency graph is not acceptance of restored queue concurrency.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

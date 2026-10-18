@@ -4,6 +4,7 @@
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
 #include "dx12/QueryReplayIndex.h"
+#include "dx12/QueueDependencyIndex.h"
 #include "dx12/NativeCommands.h"
 #include "dx12/BackBufferIndex.h"
 #include <QUuid>
@@ -71,6 +72,7 @@ class Dx12Session final : public IReplaySession {
     dx12::StreamDirectory directory_;
     dx12::SubmissionIndex submissions_;
     dx12::QueryReplayIndex queries_;
+    dx12::QueueDependencyIndex queueDependencies_;
     dx12::BackBufferIndex backBuffers_;
     mutable std::mutex contentMutex_;
     mutable std::string contentHash_;
@@ -153,7 +155,7 @@ class Dx12Session final : public IReplaySession {
   public:
     Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled)
         : directory_(path, cancelled), submissions_(directory_, cancelled), queries_(directory_, submissions_, cancelled),
-          backBuffers_(directory_, cancelled) {
+          queueDependencies_(directory_, 0, cancelled), backBuffers_(directory_, cancelled) {
         ids_.reserve(directory_.packets().size());
         for (Id i = 1; i <= directory_.packets().size(); ++i) {
             if (i % 1024 == 0)
@@ -287,7 +289,8 @@ class Dx12Session final : public IReplaySession {
     nlohmann::json submissionDetails() const override {
         nlohmann::json out{{"backend", "dx12"}, {"gpu_order_resolved", false},
             {"lists", nlohmann::json::array()}, {"synchronization", nlohmann::json::array()},
-            {"query_replay_coverage", queries_.information()}};
+            {"query_replay_coverage", queries_.information()},
+            {"queue_dependencies", queueDependencies_.information()}};
         for (const auto &list : submissions_.lists()) {
             nlohmann::json row{{"submission_record", std::to_string(list.submission)}, {"queue", std::to_string(list.queue)},
                 {"list_ordinal", std::to_string(list.ordinal)}, {"command_list", std::to_string(list.list)},
@@ -304,7 +307,7 @@ class Dx12Session final : public IReplaySession {
         for (const auto &sync : submissions_.synchronization())
             out["synchronization"].push_back({{"record", std::to_string(sync.record)}, {"queue", std::to_string(sync.queue)},
                 {"fence", std::to_string(sync.fence)}, {"value", std::to_string(sync.value)}, {"wait", sync.wait}});
-        out["note"] = "CPU submission records and distinct list invocations; fence dependencies and object aliases are not resolved";
+        out["note"] = "CPU submission records and distinct list invocations with scoped Fence dependencies; native concurrency and object aliases remain unresolved";
         return out;
     }
     std::string argumentText(Id id) const override {
