@@ -573,8 +573,9 @@ the missing values can be reconstructed. Flora's pre-submit guard remains.
 The original player's `screen-1.png` and Flora's accepted execution-16000 color
 readback have **identical RGB values at all 2,073,600 pixels**. Alpha differs at
 957,622 pixels: the original screenshot is entirely opaque, whereas the native
-resource retains varying alpha. The source of that difference is not established,
-so RGBA equality and complete-frame correctness are not claimed. The screenshot
+resource retains varying alpha. The screenshot-alpha audit below now establishes
+that the screenshot writer forces alpha to 255; screenshots cannot validate raw
+resource alpha. RGBA equality and complete-frame correctness are not claimed. The screenshot
 layer additionally reports a PRESENT/COPY_SOURCE state error; it is separate
 from the 140 undefined-query errors. Local evidence:
 `gpa-talos-debug-reference.log`, `gpa-talos-reference1/screen-1.png`, and
@@ -980,8 +981,9 @@ Original playback varies between runs. However, 35,403 native-differing pixels
 were unchanged between those two original runs, so this repeat does not explain
 all differences. Their producing passes remain to be isolated. The original
 screenshots are opaque while native alpha differs at 1,887,436 / 1,887,447 pixels
-for the first / last output. As for Talos, the reason for the alpha difference
-has not been established. GPA also logs a missing capture-root D3D12Core.dll and
+for the first / last output. The screenshot-alpha audit below establishes that
+GPA forces screenshot alpha to 255; this difference is not a raw-resource alpha
+comparison. GPA also logs a missing capture-root D3D12Core.dll and
 a captured/replay GPU-ID mismatch; neither is treated as proof of the difference's
 cause. Local evidence: `gpa-bf1-reference1.log`, `gpa-bf1-reference2.log`, both
 screenshot directories, `bf1-original-color-comparison1.json`,
@@ -2127,6 +2129,93 @@ rejection types still require separate evidence.
 cleanup. Its `rejected.png` was visually checked for visible fragment identities,
 depths, rejection label and intermediate-value provenance.
 
+### GPA screenshot alpha and BF1 intermediate comparison audit
+
+The previously unexplained screenshot alpha discrepancy is now traced to the
+local GPA **2025.1.3.1269** `Streams/layers/screenshot-x64.dll`, SHA-256
+`b5a9414064c18a9450e509d5cccfa9c8b2aca25593526bc08753c682923343f3`.
+Ghidra's `FloraDX12` project contains the independently imported module with
+preferred image base `0x180000000`. Relevant RVAs:
+
+- `0xc700`: D3D12 screenshot readback/dispatch. With `async=false`, it invokes
+  the synchronous completion path at `0xbf20`.
+- `0xbf20` → `0x1eb20` → `0x1e490`: the synchronous path passes an explicit true
+  opacity flag through mapped readback/image conversion to the writer.
+- `0xde30` → `0x1e6b0`: the asynchronous path also passes true.
+- `0x1e150`: for formats 28/29 (RGBA8 UNORM/sRGB), walks width × height using
+  row pitch and writes **255** to byte `row + 4*x + 3`. RGB and padding are
+  untouched. This runs before `0x1e340` selects the writer; PNG uses `0x1ec60`.
+
+A bounded research-only CPU fixture directly invoked the identified function
+in the hash-checked DLL with a 3×2 RGBA8 image, 16-byte row pitch, six different
+alpha values and nonzero padding. Every alpha became 255; RGB and both padding
+regions remained exact (`screenshot-alpha-fixture1.json`). No capture or binary
+was modified. This establishes the screenshot transformation, **not** equality
+of native and original raw alpha. Flora keeps its raw channels unchanged.
+Talos' previously exact screenshot RGB comparison remains valid, while its
+screenshot alpha is unsuitable as a raw GPU reference.
+
+BF1 RGB differences were investigated at an actual intermediate boundary.
+`dump-resources-layer-x64.dll` SHA-256 is
+`853913de932f235341655d7f55f1d38d68e56d60df45402acff87825eaf78b72`.
+The first post-layer attempt crashed during keyframe restore (Windows reports
+`D3D12Core.dll` 10.0.26100.9278, access violation at RVA `0x23bf54`); no output
+from that run was accepted. Moving the dump to `--pre-layer` completed replay.
+The changed state-tracker loading order was observed; the precise crash cause
+was not established. A frame-1 filter produced no files. Targeted inspection of
+the dump predicate at RVA `0xab30` shows it checks the current runtime frame at
+**command recording** time. Removing only this frame filter exposed files
+labelled **frame 0**, while screenshot numbering begins at 1.
+
+The successful export retained command-list and resource filters:
+
+```text
+--offscreen --exit-after-frame 1
+--pre-layer dump-resources-layer:path=<new-output>,resource=0x7e5335b0,command-list=0x27b2b8bb0,views=0x8,dimensions=0x8,no-async=true
+```
+
+The two exported RTV files are draw ordinals **59/60**, captured command list
+**10656385968**, resource **2119382448** (creation **11399**). Walking that
+list's recorded Draw/Dispatch/Indirect calls identifies source records
+**363202/363213** respectively, including its earlier keyframe recording.
+The first maps to Flora execution **37273** and RenderDoc event **47373**.
+Both exports in `gpa-bf1-tonemap3` have identical decoded RGBA bytes. Their alpha
+is opaque, so only RGB is compared. GPA reports invalid-binding/state warnings;
+these two files do not establish completeness of its resource-dump service.
+
+The existing independent native RDC was replayed to execution 37273 and its
+texture read back (`bf1-tonemap-native1`). Across **1,937,280** pixels, the
+same-boundary comparison has **1,868,269 exact RGB pixels**, mean absolute
+channel error **0.0246044282**, maximum **4**. At (1674,485), native RDC returns
+RGB **(59,77,76)** and GPA dump returns **(55,75,76)**. This is before subsequent
+HUD/output draws, so later drawing alone cannot explain the difference.
+
+There is also variation within each playback path: at that pixel, the earlier
+native final output has **(55,75,76)**, whereas the earlier GPA screenshot has
+**(59,77,76)**. Of the **68,673** RGB-disagreeing pixels in the original first-frame
+comparison, the new GPA intermediate matches the earlier native final at
+**68,163**; the remaining **510** lie in (1534,429)..(1623,461), where later
+output operations prevent direct intermediate/final equivalence. This is
+evidence against a single fixed color-conversion offset, not a fidelity pass.
+
+One combined original run then recorded both the same filtered intermediate and
+the final screenshot (`gpa-bf1-tonemap4` / `gpa-bf1-tonemap4-screen`). The two
+GPA intermediate runs themselves differ at **87,079** RGB pixels, maximum **9**,
+MAE **0.0456858757**. In the combined run, intermediate/final differ at **50,944**
+pixels because subsequent operations still run. Native earlier final vs the new
+GPA final has **1,850,538 exact RGB pixels**, maximum **9**, MAE **0.0454931657**.
+No numeric tolerance was promoted to an acceptance threshold. Original runtime
+variation and the unresolved native/original differences remain separate facts;
+their cause in upstream inputs, state or synchronization still needs isolation.
+
+Evidence includes `screenshot-{analysis,encoder,conversion,alpha,sync}1.txt`,
+`dump-selection1.txt`, `bf1-tonemap-draws1.json`,
+`bf1-tonemap-boundary-comparison1.json`, `bf1-tonemap-same-run-comparison1.json`,
+and the original logs/images. This turn used four targeted original-player
+invocations (one crash, one filtered-empty run, two resource exports), one
+independent RDC texture query, and one CPU alpha fixture. No native full sample
+suite, capture changes, runtime GPA dependency or unrelated tests were added.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2139,7 +2228,7 @@ depths, rejection label and intermediate-value provenance.
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
-| Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
+| Comparison with original GPA frame/intermediate resources | Both output frames and first tone-map boundary compared; RGB differences and original variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
