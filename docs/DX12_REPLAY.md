@@ -319,6 +319,62 @@ here have zero entries; nonempty remapping data is explicitly rejected pending
 indirect-argument reconstruction. Runtime code loads no GPA/Python component;
 portable-package replay/analysis acceptance is still outstanding.
 
+### Descriptor and address restoration prerequisite (2026-10-18)
+
+`AddressIndex` resolves captured GPU virtual addresses to a creation record and
+byte offset using an interval index. It checks access length, boundary and
+resource lifetime before querying the native resource address. Overlapping
+active resource address ranges remain explicit unresolved aliases; the index
+does not guess a resource from the nearest address. Native CBV descriptors and
+acceleration-structure SRV addresses use this translation.
+
+`NativeDescriptors` reconstructs descriptor heaps and CPU/GPU handle offsets
+using each captured device/type's recorded descriptor increment and the native
+device's increment. It restores CBV/SRV/UAV/RTV/DSV/sampler writes, including UAV
+counter resources, and implements range/simple descriptor copies. Per-slot
+provenance retains the originating write and most recent copy; unknown source
+slots remain unknown. Copy provenance staging is limited to 64 MiB. This is not
+yet a shader-access or Resource History acceptance result.
+
+Frame integration must preserve descriptor consumption boundaries: CPU RTV/DSV
+bindings are recorded against the descriptor contents at the command's recording
+time, while shader-visible tables can be updated before submission. Rebuilding a
+frame command list at submission using only the latest CPU descriptors is not a
+valid replacement for this distinction. Initialization transfer lists do not
+consume descriptors and are unaffected by that pending integration.
+
+`BackBufferIndex` reconstructs offscreen resources from captured swapchain
+descriptions and `GetBuffer` identities, including forward initialization
+references (Talos buffer query 35118 precedes parent creation 42874). Repeated
+queries preserve one buffer lifetime; resize generations remain separate.
+Descriptions are derived from recorded swapchain dimensions, format, samples
+and usage. No window is created, and this does not recreate missing initial
+backbuffer contents or claim successful presentation. Unresolved dimensions,
+stereo layouts and unsupported interface identities fail explicitly.
+
+CPU decoding covered all three samples' descriptor records:
+
+| Sample | Heaps | Writes | Copies | Backbuffer lifetimes |
+| --- | ---: | ---: | ---: | ---: |
+| BF1 | 19 | 180,773 | 4,141 | 3 |
+| Talos | 9 | 25,046 | 0 | 3 |
+| Hellblade2 | 26 | 512,622 | 4,378 | 4 |
+
+Native initialization with descriptor restoration succeeded for Talos (9 heaps,
+24,974 write calls, 23,150 known slots) and BF1 (19 heaps, 171,892 write calls,
+171,098 known slots). The initialization portions contain no descriptor-copy
+calls; native frame copy execution remains to be verified. Hellblade2's new
+descriptor path has CPU decoding evidence only. Targeted checks also verified
+native GPU descriptor increment translation, invalid alignment rejection,
+GPU address offsets/access bounds, cancellation and truncated descriptor input.
+
+Ghidra reader RVAs: `0x677480` / `0x60e8f0` (CPU heap handle), `0x53a2f0`
+(GPU handle), `0x53ba30` (increment), `0x50dbe0` (GPU virtual address),
+`0x67a3d0`, `0x67a560`, `0x679d80`, `0x679e30`, `0x67a310` (views/sampler),
+`0x679750`, `0x679810` (copies), `0x5f47a0`, `0x5e3f30`, `0x5ce7f0`
+(swapchain descriptions). The legacy swapchain descriptor omits native padding
+and is decoded field-by-field rather than copied as a 72-byte native structure.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -335,9 +391,8 @@ portable-package replay/analysis acceptance is still outstanding.
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
-implementation gaps include integrating PSO/root-signature reconstruction into
-command execution, descriptor reconstruction,
-resource lifetime and address remapping, complete command arguments, initialization
-dependency scheduling and cross-queue synchronization. The existing analysis
+implementation gaps include integrating PSO/root-signature and descriptor state
+into frame command execution, full resource lifetime and address-alias handling,
+complete command arguments, dependency scheduling and cross-queue synchronization. The existing analysis
 backend still requires DX11 captures; its request envelope is shared, but its
 pipeline and execution mapping have not yet been ported to DX12.

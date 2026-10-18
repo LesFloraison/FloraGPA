@@ -1,4 +1,6 @@
 #include "NativeResources.h"
+#include "AddressIndex.h"
+#include "BackBufferIndex.h"
 #include <wrl/client.h>
 #include <algorithm>
 #include <map>
@@ -94,6 +96,8 @@ HeapRecipe decodeHeapRecipe(format::Bytes bytes) {
 }
 struct NativeResources::Impl {
     NativeDevice &device; const StreamDirectory &directory; CancelCheck cancelled;
+    AddressIndex addresses;
+    BackBufferIndex backbuffers;
     uint64_t limit{}, allocated{}, peakAllocated{}, created{}, uploaded{}, uploadRecords{};
     std::set<uint64_t> retired;
     std::map<uint64_t, std::vector<uint64_t>> resourceRecords, heapRecords;
@@ -105,7 +109,7 @@ struct NativeResources::Impl {
         std::map<UINT, D3D12_RESOURCE_STATES> states;
     };
     std::map<uint64_t, Resource> resources;
-    Impl(NativeDevice &d, const StreamDirectory &s, uint64_t l, CancelCheck c) : device(d), directory(s), cancelled(std::move(c)), limit(l) {}
+    Impl(NativeDevice &d, const StreamDirectory &s, uint64_t l, CancelCheck c) : device(d), directory(s), cancelled(std::move(c)), addresses(s, cancelled), backbuffers(s, cancelled), limit(l) {}
     void budget(uint64_t size, uint64_t record) const {
         if (size == UINT64_MAX) throw std::runtime_error("Device rejected allocation description at creation record " + std::to_string(record));
         if (allocated > limit || size > limit - allocated)
@@ -113,6 +117,11 @@ struct NativeResources::Impl {
                 ": requested " + std::to_string(size) + ", allocated " + std::to_string(allocated) + ", limit " + std::to_string(limit));
     }
     ResourceRecipe recipe(uint64_t record) const {
+        if (const auto it = backbuffers.buffers().find(record); it != backbuffers.buffers().end()) {
+            ResourceRecipe r; r.object = it->second.object; r.description = it->second.description;
+            r.properties.Type = D3D12_HEAP_TYPE_DEFAULT; r.properties.CreationNodeMask = r.properties.VisibleNodeMask = 1;
+            r.initialState = D3D12_RESOURCE_STATE_PRESENT; return r;
+        }
         const auto &p = directory.packets().at(size_t(record - 1)); return decodeResourceRecipe(p.type, directory.payload(p));
     }
     ID3D12Heap *heap(uint64_t object, uint64_t at, const D3D12_RESOURCE_ALLOCATION_INFO &placement, uint64_t offset) {
@@ -132,7 +141,9 @@ NativeResources::NativeResources(NativeDevice &device, const StreamDirectory &di
     require(allocationLimit, "Resource allocation budget cannot be zero");
     for (size_t i = 0; i < directory.packets().size(); ++i) {
         if (i % 1024 == 0) checkCancellation(cancelled); const auto &p = directory.packets()[i];
-        if (isResourceRecipe(p.type)) {
+        if (const auto it = impl_->backbuffers.buffers().find(i + 1); it != impl_->backbuffers.buffers().end()) {
+            impl_->resourceRecords[it->second.object].push_back(i + 1);
+        } else if (isResourceRecipe(p.type)) {
             const auto r = decodeResourceRecipe(p.type, directory.payload(p));
             if (SUCCEEDED(r.result) && r.object) impl_->resourceRecords[r.object].push_back(i + 1);
         } else if (p.type == 0x1279335a5747bULL) {
@@ -205,6 +216,12 @@ void NativeResources::restoreMappedData(uint64_t record) {
 }
 ID3D12Heap *NativeResources::tileHeap(uint64_t object, uint64_t atRecord) {
     return impl_->heap(object, atRecord, D3D12_RESOURCE_ALLOCATION_INFO{0, D3D12_TILED_RESOURCE_TILE_SIZE_IN_BYTES}, 0);
+}
+D3D12_GPU_VIRTUAL_ADDRESS NativeResources::gpuAddress(uint64_t captured, uint64_t atRecord, uint64_t bytes) {
+    if (!captured) return 0;
+    const auto reference = impl_->addresses.resolve(captured, atRecord, bytes);
+    const auto base = resource(reference.object, atRecord)->GetGPUVirtualAddress();
+    require(base && reference.offset <= UINT64_MAX - base, "Native resource has no usable GPU virtual address"); return base + reference.offset;
 }
 void NativeResources::releaseCompleted(uint64_t releaseRecord) {
     auto &s = *impl_; const auto &p = s.directory.packets().at(size_t(releaseRecord - 1));

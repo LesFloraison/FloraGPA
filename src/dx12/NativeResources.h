@@ -33,6 +33,7 @@ class NativeResources final {
     uint64_t creationRecord(uint64_t object, uint64_t atRecord) const;
     ID3D12Resource *resource(uint64_t object, uint64_t atRecord);
     ID3D12Heap *tileHeap(uint64_t object, uint64_t atRecord);
+    D3D12_GPU_VIRTUAL_ADDRESS gpuAddress(uint64_t captured, uint64_t atRecord, uint64_t bytes = 1);
     ResourceRecipe recipe(uint64_t object, uint64_t atRecord) const;
     void restoreMappedData(uint64_t record);
     // Caller must complete submitted GPU work before retiring a captured object.

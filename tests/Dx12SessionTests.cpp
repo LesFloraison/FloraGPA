@@ -8,6 +8,10 @@
 #include "dx12/NativeResources.h"
 #include "dx12/TileRecipes.h"
 #include "dx12/NativeReplay.h"
+#include "dx12/AddressIndex.h"
+#include "dx12/DescriptorRecipes.h"
+#include "dx12/NativeDescriptors.h"
+#include "dx12/BackBufferIndex.h"
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
@@ -268,6 +272,89 @@ class Dx12SessionTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,8530,1024));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,13,256ULL*1024*1024));
         QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::prepareInitializationCopy(directory,8530,256ULL*1024*1024,[]{return true;}));
+    }
+    void swapchainBufferIndex() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for swapchain buffer indexing");
+        for(const auto name : {"bf1_2025_12_10__14_29_55.gpa_frame", "Talos_2026_10_18__00_55_08.gpa_frame",
+                              "Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame"}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root+'/'+name).toStdWString())); dx12::BackBufferIndex index(directory);
+            QVERIFY(!index.buffers().empty()); qInfo()<<name<<"backbuffer lifetimes"<<index.buffers().size();
+            for(const auto &[record,buffer]:index.buffers()) { QVERIFY(buffer.object); QVERIFY(buffer.description.Width); QVERIFY(buffer.description.Height); }
+            if(QString(name).startsWith("Talos")) {
+                QCOMPARE(index.buffers().size(),size_t(3)); const auto &buffer=index.buffers().at(35118);
+                QCOMPARE(buffer.index,1U); QCOMPARE(buffer.description.Width,1920ULL); QCOMPARE(buffer.description.Height,1080U);
+            }
+        }
+    }
+    void nativeDescriptorHandles() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for native descriptor translation");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(directory); dx12::NativeResources resources(device,directory,256ULL*1024*1024);
+        dx12::NativeDescriptors descriptors(device,directory,resources);
+        for(size_t i=0;i<directory.packets().size();++i) {
+            const auto &p=directory.packets()[i]; if(p.type!=0x15a3edf3ce2bbULL) continue;
+            format::Reader r(directory.payload(p)); const auto object=r.read<uint64_t>(); QVERIFY(r.flag()); const auto base=r.read<uint64_t>();
+            const auto reference=descriptors.resolve(base,i+1,true); QCOMPARE(reference.heap,object); QCOMPARE(reference.index,0U);
+            const auto &creation=directory.packets()[size_t(reference.creation-1)]; const auto recipe=dx12::decodeDescriptorHeap(directory.payload(creation));
+            UINT increment{};
+            for(const auto &query:directory.packets()) if(query.type==0x127932ffcb166ULL) {
+                format::Reader q(directory.payload(query)); const auto owner=q.read<uint64_t>(); const auto type=q.read<UINT>(), stride=q.read<UINT>();
+                if(owner==recipe.device && type==UINT(recipe.description.Type)) increment=stride;
+            }
+            QVERIFY(increment); QVERIFY(recipe.description.NumDescriptors>1);
+            const auto translated=descriptors.gpu(base+increment,i+1); auto native=descriptors.heap(object,i+1);
+            QCOMPARE(descriptors.resolve(base+increment,i+1,true).index,1U);
+            QCOMPARE(translated.ptr,native->GetGPUDescriptorHandleForHeapStart().ptr+device.device()->GetDescriptorHandleIncrementSize(recipe.description.Type));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,descriptors.gpu(base+1,i+1));
+            QCOMPARE(resources.information().at("allocation_bytes").get<std::string>(),std::string("0"));
+            format::Reader address(directory.payload(directory.packets()[13])); const auto buffer=address.read<uint64_t>(), captured=address.read<uint64_t>();
+            const auto nativeAddress=resources.gpuAddress(captured+7,14,16);
+            QCOMPARE(nativeAddress,resources.resource(buffer,14)->GetGPUVirtualAddress()+7);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,resources.gpuAddress(captured,14,UINT64_MAX)); return;
+        }
+        QFAIL("Capture has no shader-visible descriptor heap");
+    }
+    void descriptorRecipeDecoding() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for descriptor decoding");
+        for(const auto name : {"bf1_2025_12_10__14_29_55.gpa_frame", "Talos_2026_10_18__00_55_08.gpa_frame",
+                              "Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame"}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root+'/'+name).toStdWString()));
+            size_t heaps{},writes{},copies{};
+            for(size_t i=0;i<directory.packets().size();++i) {
+                const auto &p=directory.packets()[i]; const auto bytes=directory.payload(p);
+                try {
+                    if(p.type==0x127932eb2eb14ULL) {
+                        const auto recipe=dx12::decodeDescriptorHeap(bytes); ++heaps;
+                        if(SUCCEEDED(recipe.result)) { QVERIFY(recipe.object); QVERIFY(recipe.description.NumDescriptors); }
+                        if(heaps==1) QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeDescriptorHeap(bytes.first(bytes.size()-1)));
+                    } else if(dx12::isDescriptorWrite(p.type)) {
+                        const auto recipe=dx12::decodeDescriptorWrite(p.type,bytes); ++writes; QVERIFY(recipe.destination);
+                        if(writes==1) QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeDescriptorWrite(p.type,bytes.first(bytes.size()-1)));
+                    } else if(p.type==0x12793300ba04eULL || p.type==0x1279345e6c880ULL) {
+                        const auto recipe=dx12::decodeDescriptorCopy(p.type,bytes); ++copies;
+                        QCOMPARE(recipe.sources.size(),recipe.sourceSizes.size()); QCOMPARE(recipe.destinations.size(),recipe.destinationSizes.size());
+                        if(copies==1) QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodeDescriptorCopy(p.type,bytes.first(bytes.size()-1)));
+                    }
+                } catch(const std::exception &e) { QFAIL(qPrintable(QString("%1 record %2: %3").arg(name).arg(i+1).arg(e.what()))); }
+            }
+            QVERIFY(heaps>0); QVERIFY(writes>0); qInfo()<<name<<"heaps"<<heaps<<"descriptor writes"<<writes<<"descriptor copies"<<copies;
+        }
+    }
+    void capturedGpuAddressResolution() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for GPU address resolution");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::AddressIndex addresses(directory);
+        format::Reader r(directory.payload(directory.packets()[13])); const auto object=r.read<uint64_t>(), base=r.read<uint64_t>();
+        const auto ref=addresses.resolve(base+7,14,16); QCOMPARE(ref.object,object); QCOMPARE(ref.creation,13ULL); QCOMPARE(ref.offset,7ULL);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,addresses.resolve(base,14,UINT64_MAX));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,addresses.resolve(UINT64_MAX,14));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,addresses.resolve(base,0));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::AddressIndex(directory,[]{return true;}));
+        qInfo()<<"captured address ranges"<<addresses.rangeCount();
     }
     void nativeInitializationGuards() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

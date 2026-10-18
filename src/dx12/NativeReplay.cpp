@@ -1,6 +1,7 @@
 #include "NativeReplay.h"
 #include "StreamArguments.h"
 #include "TileRecipes.h"
+#include "NativeDescriptors.h"
 #include <wrl/client.h>
 #include <QCryptographicHash>
 #include <QByteArrayView>
@@ -69,7 +70,7 @@ std::string hash(format::Bytes bytes) {
 }
 struct NativeReplay::Impl {
     NativeDevice &device; const StreamDirectory &directory; CancelCheck cancelled;
-    SubmissionIndex index; NativeResources resources;
+    SubmissionIndex index; NativeResources resources; NativeDescriptors descriptors;
     std::map<uint64_t, QueueRecipe> queueRecipes;
     std::map<uint64_t, FenceRecipe> fenceRecipes;
     std::map<uint64_t, AllocatorRecipe> allocatorRecipes;
@@ -82,7 +83,7 @@ struct NativeReplay::Impl {
     std::map<uint64_t, Tiling> tilings;
     uint64_t tileMappingCalls{};
     Impl(NativeDevice &d, const StreamDirectory &s, uint64_t limit, CancelCheck c)
-        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled), resources(d, s, limit, cancelled) {
+        : device(d), directory(s), cancelled(std::move(c)), index(s, cancelled), resources(d, s, limit, cancelled), descriptors(d, s, resources, cancelled) {
         for (size_t i = 0; i < s.initializationCount(); ++i) {
             if (i % 1024 == 0) checkCancellation(cancelled); const auto &p = s.packets()[i]; const auto bytes = s.payload(p);
             if (p.type == 0x127932607a959ULL) { const auto r = queueRecipe(bytes, i + 1); require(queueRecipes.emplace(r.object, r).second, "Ambiguous initialization queue lifetime"); }
@@ -296,6 +297,7 @@ void NativeReplay::initializeTransfers() {
         s.currentRecord = i + 1; if (i % 256 == 0) checkCancellation(s.cancelled); const auto &p = s.directory.packets()[i];
         try {
             if (p.type == 0x20000000000000ULL) s.resources.restoreMappedData(i + 1);
+            else if (s.descriptors.apply(i + 1)) {}
             else if (p.type == 0x14538e8691d1cULL) s.resources.releaseCompleted(i + 1);
             else if (p.type == 0x125482975df48ULL) s.submit(i + 1);
             else if (p.type == 0x12548dab1bf2dULL || p.type == 0x12548db3bfde2ULL) {
@@ -421,6 +423,7 @@ json NativeReplay::information() const {
     const auto &s = *impl_; return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
-        {"frame_replayed", false}, {"note", "Captured initialization transfers only; descriptor/binding restoration and frame commands remain unfinished"}};
+        {"descriptors", s.descriptors.information()},
+        {"frame_replayed", false}, {"note", "Captured initialization transfers and descriptor restoration; shader access and frame commands remain unverified"}};
 }
 }
