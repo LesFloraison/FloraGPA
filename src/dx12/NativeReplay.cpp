@@ -1128,10 +1128,12 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
                 qsizetype(footprint.Footprint.RowPitch), bgra ? QImage::Format_ARGB32 : QImage::Format_RGBA8888);
             auto imagePath = output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
             require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish GPU texture PNG"); imageFile = imagePath.filename().string();
-        } else if (pixelFormat == DXGI_FORMAT_R10G10B10A2_UNORM && footprint.Footprint.Depth == 1) {
-            displayInterpretation = "unorm10_rgb_unorm2_alpha_to_rgba8_no_color_space_transform";
+        } else if ((pixelFormat == DXGI_FORMAT_R10G10B10A2_UNORM || pixelFormat == DXGI_FORMAT_R11G11B10_FLOAT) && footprint.Footprint.Depth == 1) {
+            const bool packedFloat = pixelFormat == DXGI_FORMAT_R11G11B10_FLOAT;
+            displayInterpretation = packedFloat ? "unsigned_float_rgb_linear_clamp_0_to_1_nan_zero_inf_one_alpha_one_no_color_space_transform"
+                                                : "unorm10_rgb_unorm2_alpha_to_rgba8_no_color_space_transform";
             QImage image(int(footprint.Footprint.Width), int(footprint.Footprint.Height), QImage::Format_RGBA8888);
-            require(!image.isNull(), "Cannot allocate RGB10 display image");
+            require(!image.isNull(), "Cannot allocate packed-color display image");
             for (int y = 0; y < image.height(); ++y) {
                 checkCancellation(s.cancelled);
                 const auto row = static_cast<const uint8_t *>(mapped) + footprint.Offset + uint64_t(y) * footprint.Footprint.RowPitch;
@@ -1139,13 +1141,13 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
                 for (int x = 0; x < image.width(); ++x) {
                     uint32_t packed{};
                     memcpy(&packed, row + size_t(x) * 4, 4);
-                    const auto components = unpack_rgb10a2(packed);
+                    const auto components = packedFloat ? display_r11g11b10(packed) : unpack_rgb10a2(packed);
                     std::copy(components.begin(), components.end(), pixels + size_t(x) * 4);
                 }
             }
             auto imagePath = output; imagePath.replace_extension(L".png");
             QSaveFile png(QString::fromStdWString(imagePath.wstring()));
-            require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish RGB10 display PNG");
+            require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish packed-color display PNG");
             imageFile = imagePath.filename().string();
         } else if (footprint.Footprint.Depth == 1 && (pixelFormat == DXGI_FORMAT_R16_UNORM || pixelFormat == DXGI_FORMAT_D16_UNORM ||
             (pixelFormat == DXGI_FORMAT_R16_TYPELESS && (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)))) {

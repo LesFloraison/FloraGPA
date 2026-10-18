@@ -179,6 +179,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                                                ? "Native GPU readback; selected execution only"
                                                : "Raw GPU texture saved; this display format is unsupported")
                                         : "Execution replayed; select a texture creation record for readback";
+        if (report["image_available"] == true && report.at("native_texture").at("format") == 26)
+            report["image_status"] = "Native GPU readback; R11G11B10 preview uses linear RGB clamped to [0,1], alpha 1; raw HDR storage preserved";
     } catch (...) {
         if (capture)
             capture->discard();

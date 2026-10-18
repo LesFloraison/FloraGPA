@@ -1,4 +1,5 @@
 #include "app/WorkerImage.h"
+#include "common/PackedColor.hpp"
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
@@ -10,6 +11,27 @@ using namespace flora;
 class WorkerImageTests final : public QObject {
     Q_OBJECT
   private slots:
+    void packedFloatPreview() {
+        const auto bits = [](uint32_t r, uint32_t g, uint32_t b) { return r | (g << 11) | (b << 22); };
+        QCOMPARE(unpack_r11g11b10(bits(15U << 6, 14U << 6, 13U << 5)),
+                 (std::array<float, 3>{1.0f, 0.5f, 0.25f}));
+        QCOMPARE(display_r11g11b10(bits(15U << 6, 14U << 6, 13U << 5)),
+                 (std::array<uint8_t, 4>{255, 128, 64, 255}));
+        QCOMPARE(unpack_r11g11b10(bits(1, 63, 1)), (std::array<float, 3>{0x1p-20f, 63 * 0x1p-20f, 0x1p-19f}));
+        QCOMPARE(unpack_r11g11b10(bits(64, 64, 32)), (std::array<float, 3>{0x1p-14f, 0x1p-14f, 0x1p-14f}));
+        QCOMPARE(unpack_r11g11b10(bits(1983, 1983, 991)), (std::array<float, 3>{65024, 65024, 64512}));
+        const auto special = unpack_r11g11b10(bits(31U << 6, (31U << 6) | 1, 31U << 5));
+        QVERIFY(std::isinf(special[0]));
+        QVERIFY(std::isnan(special[1]));
+        QVERIFY(std::isinf(special[2]));
+        QCOMPARE(display_r11g11b10(bits(31U << 6, (31U << 6) | 1, 31U << 5)),
+                 (std::array<uint8_t, 4>{255, 0, 255, 255}));
+        QCOMPARE(display_r11g11b10(0), (std::array<uint8_t, 4>{0, 0, 0, 255}));
+        // Independent known storage word from the BF1 producer readback.
+        QCOMPARE(unpack_r11g11b10(0x5996d2e7U),
+                 (std::array<float, 3>{0.1005859375f, 0.087890625f, 0.07421875f}));
+        QCOMPARE(display_r11g11b10(0x5996d2e7U), (std::array<uint8_t, 4>{26, 22, 19, 255}));
+    }
     void cancellation() {
         QTemporaryDir dir;
         QVERIFY(dir.isValid());

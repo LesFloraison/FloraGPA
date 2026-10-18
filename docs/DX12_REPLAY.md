@@ -2416,9 +2416,9 @@ CLI selectors are `--resource`, `--resource-creation`, `--x`, `--y`, `--mip`,
 sets this independent reference in the CS panel; **Clear reference** removes it.
 Invocation coordinates are unchanged. Context/experiment changes clear it and
 reject old results, including exact identities above 2^53. A selected texel is
-not proof of a write by the selected invocation. R11G11B10 native preview is
-still unavailable, so this BF1 resource was selected explicitly through the CLI;
-no workspace pixel-picking pass is claimed for that format.
+not proof of a write by the selected invocation. R11G11B10 native preview was
+unavailable in this increment, so this BF1 resource was selected explicitly
+through the CLI. The following preview increment closes that navigation gap.
 
 The reference exposed an actual RenderDoc 1.45 defect. In the pinned upstream
 `renderdoc/driver/d3d12/d3d12_shaderdebug.cpp`, DebugThread initializes GroupID only
@@ -2471,6 +2471,41 @@ local combined DLL SHA:
 `1dee5c374c07cc6046eb8c61558251a4b0a0231e4c9c225dc433ab484af33540`.
 The analyzer loaded no GPA modules in the compared traces. Full portable package
 acceptance remains unfinished.
+
+### R11G11B10 preview and workspace compute-reference selection
+
+Native texture readback now renders **R11G11B10_FLOAT** alongside its unchanged
+raw storage export. Each unsigned floating component is decoded with its own
+mantissa width (6/6/5 bits), including subnormals and nonfinite values. The preview
+uses linear RGB clamped to **[0,1]**, rounds to RGBA8, and supplies alpha 1; NaN
+displays as zero and positive infinity as one. No exposure or color-space
+conversion is implied. The output status/tooltip and exported metadata state
+this interpretation. Raw HDR bytes and their hash remain independent of the
+display image. Other unsupported formats and volume previews are unchanged.
+
+The focused CPU decoder check (`packed-float-preview1.txt`) covers known finite
+values, minimum subnormals, the normal boundary, maximum finite values, infinity,
+NaN and the earlier BF1 packed word **0x5996d2e7**, which decodes exactly to
+**(0.1005859375,0.087890625,0.07421875)** and displays as **(26,22,19,255)**.
+It passed in **1 ms**.
+
+`packed-float-workspace1.txt` then opened the real BF1 directory, loaded the prior
+workgroup-reproduction CS experiment, selected execution **36666** and resource
+creation **299115**, and replayed once through the normal workspace worker.
+All **1,937,280** preview pixels equal **(255,128,64,255)**. Exporting raw storage
+from the workspace retains the previously verified SHA-256
+`97bc49991a49c2a76383d607da01363aeb595af412fc3fa8b6f9e6466de42b1f`.
+The exported metadata still reports DXGI **26** and explicitly identifies the
+linear-clamp preview.
+
+Selecting preview pixel **(1674,485)** populates the CS request with resource
+object **10432933744**, creation **299115**, mip/layer/sample **0**, while preserving
+group **(209,60,0)** and thread **(2,5,0)**. Switching to another dispatch clears
+the reference and rejects an old result. The workspace check passed in
+**45.922 s**. Its preview, raw bytes, metadata and exact debug request are saved
+under ignored `bf1-packed-float-workspace1`. It verifies resource display and
+selection; it does not rerun Shader Debug or resolve the original BF1 temporal
+shader discrepancy. Only this one GPU replay ran for the preview change.
 
 ### Full feature acceptance
 

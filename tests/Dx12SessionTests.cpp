@@ -74,6 +74,103 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void packedFloatWorkspaceReference() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto project = qEnvironmentVariable("FLORA_DX12_PACKED_FLOAT_PROJECT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_PACKED_FLOAT_WORKSPACE");
+        if (root.isEmpty() || project.isEmpty() || output.isEmpty())
+            QSKIP("Set BF1 capture, workgroup experiment project and packed float workspace output");
+        QVERIFY(QDir().mkpath(output));
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window;
+        window.resize(1500, 1000);
+        window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy prepared(&window, &MainWindow::experimentFinished);
+        window.openCapture(root + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.openDx12Experiment(project);
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+        QVERIFY(prepared.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("36666");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        QModelIndex selected;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 299115) {
+                selected = index;
+                break;
+            }
+        }
+        QVERIFY(selected.isValid());
+        resources->setCurrentIndex(selected);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+        done.clear();
+        window.replay();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QVERIFY(!window.busy());
+        auto image = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(image->image().size(), QSize(1920, 1009));
+        const auto color = QColor(255, 128, 64, 255);
+        QImage expected(1920, 1009, QImage::Format_RGBA8888);
+        expected.fill(color);
+        QCOMPARE(image->image().convertToFormat(QImage::Format_RGBA8888), expected);
+        QVERIFY(image->image().save(output + "/preview.png"));
+        QSignalSpy exported(&window, &MainWindow::exportFinished);
+        QTimer chooser, watchdog;
+        watchdog.setSingleShot(true);
+        bool chosen = false;
+        connect(&chooser, &QTimer::timeout, &window, [&] {
+            if (auto dialog = window.findChild<QFileDialog *>()) {
+                chooser.stop();
+                chosen = true;
+                dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + "/storage.bin");
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            }
+        });
+        connect(&watchdog, &QTimer::timeout, &window, [&] {
+            if (auto dialog = window.findChild<QFileDialog *>())
+                dialog->reject();
+        });
+        chooser.start(10);
+        watchdog.start(5000);
+        window.findChild<QAction *>("exportOutputStorage")->trigger();
+        QVERIFY(chosen);
+        QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000);
+        QVERIFY(exported.takeLast()[0].toBool());
+        QFile raw(output + "/storage.bin");
+        QVERIFY(raw.open(QIODevice::ReadOnly));
+        QCOMPARE(QCryptographicHash::hash(raw.readAll(), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("97bc49991a49c2a76383d607da01363aeb595af412fc3fa8b6f9e6466de42b1f"));
+        QFile metadata(output + "/storage.bin.json");
+        QVERIFY(metadata.open(QIODevice::ReadOnly));
+        const auto storage = nlohmann::json::parse(metadata.readAll().toStdString());
+        QCOMPARE(storage.at("format"), nlohmann::json(26));
+        QVERIFY(storage.at("display_interpretation").get<std::string>().find("linear_clamp_0_to_1") !=
+                std::string::npos);
+        auto cs = window.findChild<ReplayDebugView *>("replayDebug-cs");
+        cs->findChild<QLineEdit *>("debugGroup")->setText("209 60 0");
+        cs->findChild<QLineEdit *>("debugThread")->setText("2 5 0");
+        image->pixelSelected(1674, 485, color);
+        const auto request = cs->request();
+        QCOMPARE(request.at("resource"), nlohmann::json("10432933744"));
+        QCOMPARE(request.at("resource_creation"), nlohmann::json("299115"));
+        QCOMPARE(request.at("x"), nlohmann::json(1674));
+        QCOMPARE(request.at("y"), nlohmann::json(485));
+        QCOMPARE(request.at("group"), nlohmann::json::array({209, 60, 0}));
+        QCOMPARE(request.at("thread"), nlohmann::json::array({2, 5, 0}));
+        QVERIFY(cs->findChild<QAction *>("replayDebugRead")->isEnabled());
+        write(output + "/debug-request.json", QByteArray::fromStdString(request.dump(2)));
+        const auto old = cs->requestId();
+        locate->setText("36671");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(!cs->request().contains("resource"));
+        QVERIFY(!cs->finish(old, {{"ok", false}, {"error", "stale reference"}}));
+    }
     void dx12ComputeWorkgroupProject() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_WORKGROUP_PROJECT");
