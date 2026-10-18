@@ -2003,6 +2003,68 @@ Focused evidence:
   builds the final GUI/CLI/Worker. No other full sample replay
   was run for this change.
 
+### D16 Pixel History decoder patch
+
+The optional patched RenderDoc 1.45 backend restores D16 values for the verified
+Talos depth pixel. Upstream commit is
+`2fc0bc04cb95499635f63986a55bc6f67849dd9f`. In
+`renderdoc/driver/d3d12/d3d12_pixelhistory.cpp`, generic typeless conversion
+selected `R16_FLOAT` for a depth resource; `GetDepthValue` then interpreted D16
+storage bits as half floats. The patch preserves `D16_UNORM` for typeless D16
+depth resources and explicitly divides their 16-bit storage value by 65535.
+It leaves the separate D32 intermediate-fragment path intact. Two preliminary
+fixes (format reporting alone, then only terminal decoding) still returned
+**6.234375** and failed acceptance. The final fix addresses both conversions.
+
+The isolated worker detects the explicit
+`RENDERDOC_GetFloraD16HistoryPatchVersion` export and records
+`backend_d16_history_patch: 1` plus `patched_backend_values`. The UI identifies
+the patched backend. Stock 1.45 continues withholding unreliable fragment
+depths and reporting separate raw event boundaries. A patch marker does not
+establish correctness for other formats, MSAA or failure reasons.
+
+Focused GPU evidence (serial, existing native RDC captures):
+
+| Report under `artifacts/dx12-research` | Execution / primitive | Shader depth | Post depth | D16 quantization |
+| --- | --- | --- | --- | --- |
+| `talos-d16-patched-history3/result.json` | 12675 / 12999 | 0.2743619382381439 | 0.2743571996688843 | 17980 |
+| `talos-d16-patched-modified1/result.json` | 12675 / 12999 | 0.25 | 0.2500038146972656 | 16384 |
+
+Both query object **4980699392**, creation **167081**, pixel **(1527,1240)**,
+mip **0**, layer **1**, sample **0**. Clear execution **12667** and Draw
+execution **12675**, source **185550**, retain their exact mapping. Quantized
+post depths match the previously verified native raw readbacks. The modified
+capture contains the real constant-buffer override; no new full-frame replay
+was needed. These two single-fragment passing draws do **not** validate multiple
+fragments, rejected fragments, all depth-test reasons or full history coverage.
+
+Build the backend from a dedicated upstream v1.45 checkout:
+
+```powershell
+./tools/build_renderdoc_d16.ps1 -SourceDirectory <dedicated-renderdoc-checkout>
+./tools/package.ps1 -PatchedRenderDocRoot <checkout>/x64/Release -OutputDirectory <new-package>
+```
+
+The builder verifies the upstream commit and exact tracked patch, uses v143
+Release x64, and emits source/patch/DLL provenance. Packaging validates this
+manifest, retains the pinned official helper and license notices, includes the
+patch, and distinguishes shipped DLL hashes from original archive provenance.
+Default packaging remains the pinned official runtime. Tested patch SHA-256:
+`c5c15d9b6694a732348952d70c1335777af5e72866bcdfe1aa0fac37efefb117`;
+local DLL SHA-256:
+`1e0eb5dc09208833988369859416333c304675d07de9b3b849952a4918ce92c1`.
+Local rebuilds may differ in binary hash; each build records its actual hash.
+
+`d16-portable1` successfully executes the modified query with PATH restricted
+to Windows directories. Its module inventory uses bundled Qt, CRT, compiler
+and patched RenderDoc, with no GPA/Python module. This validates this isolated
+analysis path only; full portable native replay/analysis acceptance remains
+unfinished. Build173 builds GUI/RDC; Build174 builds the focused CPU history
+report check. `d16PatchedReports` checks quantization against the native values,
+mapping/navigation, exact export, and the stock fallback without GPU execution.
+`d16-history-ui1/test.txt` reports **3 passed, 0 failed, 89 ms**, including setup
+and cleanup. No all-sample replay or unrelated regression suite was run.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -2012,7 +2074,7 @@ Focused evidence:
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; modified VS and undo match native depth readbacks; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and raw D16 boundaries verified; optional patched backend restores original/modified single-fragment depths; multi-fragment/failure reasons and full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |

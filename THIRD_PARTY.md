@@ -46,6 +46,14 @@
   and upstream third-party notice files accompany it under `RenderDoc/`.
   Ordinary replay remains independent of this backend. No Python runtime is
   redistributed with FloraGPA.
+  The optional `-PatchedRenderDocRoot` packaging argument replaces only the DLL
+  with a local build of the same upstream commit plus
+  `third_party/renderdoc/patches/dx12-d16-history.patch`. This patch preserves
+  D16 depth typing and decodes its stored UNORM bits in DX12 Pixel History;
+  it also exports a patch-version marker for the isolated adapter. Build with
+  `tools/build_renderdoc_d16.ps1` in a dedicated upstream v1.45 checkout.
+  Patched packages include the patch, build/source hashes, the original runtime
+  manifest and an active manifest containing the replacement DLL hash.
 - RenderDoc 1.45 public replay headers are vendored under
   `third_party/renderdoc/replay/` for the isolated native analysis worker.
   MIT, Copyright (c) 2015-2026 Baldur Karlsson and (c) 2014 Crytek; per-file

@@ -460,6 +460,9 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
         summary_->setText(
             summary_->text() +
             "\nD16: event-boundary depths only; fragment depths and depth-test reasons unavailable.");
+    else if (scope.value("depth_value_status", "") == "patched_backend_values")
+        summary_->setText(summary_->text() +
+                          "\nD16: patched RenderDoc 1.45 decoding; backend test-reason limitations apply.");
     summary_->setToolTip(QString::fromStdString(scope.dump(2)));
     details_->setPlainText(QString::fromStdString(scope.dump(2)));
     updateActions();

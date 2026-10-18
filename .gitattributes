@@ -7,6 +7,8 @@
 src/application/shaders/quad_counter.hlsl -text whitespace=cr-at-eol
 # Preserve upstream replay-header whitespace for source/hash comparisons.
 third_party/renderdoc/replay/*.h whitespace=-blank-at-eol
+# Unified diffs retain a leading context space on empty lines.
+third_party/renderdoc/patches/*.patch whitespace=-blank-at-eol
 # Preserve pinned Intel public interface bytes for provenance comparisons.
 third_party/metrics-discovery/* -text whitespace=-blank-at-eol
 

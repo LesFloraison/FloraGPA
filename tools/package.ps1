@@ -4,6 +4,7 @@ param(
     [string]$OutputDirectory = '',
     [string]$VisualStudioRoot = '',
     [string]$RenderDocRoot = '',
+    [string]$PatchedRenderDocRoot = '',
     [string]$BuildDirectory = "$PSScriptRoot\..\build\vs2022"
 )
 $ErrorActionPreference = 'Stop'
@@ -37,6 +38,22 @@ foreach ($file in $rdcManifest.files.PSObject.Properties) {
     }
     if ((Get-PackageSha256 $candidate) -ne $file.Value) {
         throw "RenderDoc runtime differs from the pinned official 1.45 x64 build: $candidate"
+    }
+}
+$patchedLibrary = $null
+$patchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-d16-history.patch'
+if ($PatchedRenderDocRoot) {
+    $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
+    $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
+    $patchManifest = Get-Content -LiteralPath $patchManifestPath -Raw | ConvertFrom-Json
+    $patchedLibrary = Join-Path $PatchedRenderDocRoot 'renderdoc.dll'
+    if ($patchManifest.format -ne 'flora-renderdoc-d16-build-1' -or
+        $patchManifest.upstream_commit -ne $rdcManifest.commit -or
+        $patchManifest.version -ne '1.45' -or $patchManifest.patch_version -ne 1 -or
+        $patchManifest.configuration -ne 'Release|x64' -or
+        $patchManifest.patch_sha256 -ne (Get-PackageSha256 $patchPath) -or
+        $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
+        throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
     }
 }
 $rdcLicenses = Join-Path $repo 'third_party\renderdoc\runtime-licenses'
@@ -117,6 +134,16 @@ foreach ($name in @('msvcp140.dll','vcruntime140.dll')) {
     Copy-Item -LiteralPath (Join-Path $crt $name) -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcManifestPath -Destination (Join-Path $rdcDestination 'runtime-manifest.json')
+if ($patchedLibrary) {
+    Copy-Item -LiteralPath $patchedLibrary -Destination (Join-Path $rdcDestination 'renderdoc.dll') -Force
+    # Retain official provenance separately; the active manifest must describe the shipped DLL.
+    Copy-Item -LiteralPath $rdcManifestPath -Destination (Join-Path $rdcDestination 'upstream-runtime-manifest.json')
+    $rdcManifest.files.'renderdoc.dll' = $patchManifest.renderdoc_sha256
+    $rdcManifest | Add-Member -NotePropertyName flora_patch -NotePropertyValue $patchManifest
+    $rdcManifest | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $rdcDestination 'runtime-manifest.json') -Encoding utf8
+    Copy-Item -LiteralPath $patchManifestPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $patchPath -Destination $rdcDestination
+}
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force
 $licenses = Join-Path $destination 'licenses'

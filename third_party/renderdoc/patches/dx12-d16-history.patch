@@ -1,0 +1,47 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+index 7dca50bba..c5934812e 100644
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -316,6 +316,11 @@ static void ConvertAndFillInColor(const ResourceFormat &srcFmt, const D3D12Pixel
+ 
+ static float GetDepthValue(DXGI_FORMAT depthFormat, const D3D12PixelHistoryValue &value)
+ {
++  // D16 copies retain UNORM storage bits, including for typeless backing resources.
++  // The generic two-byte Depth/Typeless component decoder treats these as half floats.
++  if(depthFormat == DXGI_FORMAT_D16_UNORM || depthFormat == DXGI_FORMAT_R16_TYPELESS ||
++     depthFormat == DXGI_FORMAT_R16_UNORM)
++    return float(value.depth.udepth & 0xffff) / 65535.0f;
+   FloatVector v4 = DecodeFormattedComponents(MakeResourceFormat(depthFormat), (byte *)&value.depth);
+   return v4.x;
+ }
+@@ -3031,8 +3036,12 @@ rdcarray<PixelModification> D3D12Replay::PixelHistory(rdcarray<EventUsage> event
+     return history;
+   }
+ 
++  // Preserve D16 storage semantics instead of selecting the generic half-float cast.
++  if(resDesc.Format == DXGI_FORMAT_R16_TYPELESS &&
++     (resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL))
++    resDesc.Format = DXGI_FORMAT_D16_UNORM;
+   // If the resource desc format is typeless, replace it with a typed format
+-  if(IsTypelessFormat(resDesc.Format))
++  else if(IsTypelessFormat(resDesc.Format))
+     resDesc.Format = GetTypedFormat(resDesc.Format, typeCast);
+ 
+   const bool targetImageIsDepth = IsDepthFormat(resDesc.Format);
+diff --git a/renderdoc/replay/entry_points.cpp b/renderdoc/replay/entry_points.cpp
+index 5ca99ee89..f6e6d98b5 100644
+--- a/renderdoc/replay/entry_points.cpp
++++ b/renderdoc/replay/entry_points.cpp
+@@ -218,6 +218,12 @@ extern "C" RENDERDOC_API const char *RENDERDOC_CC RENDERDOC_GetCommitHash()
+   return GitVersionHash;
+ }
+ 
++// FloraGPA's isolated adapter can distinguish this fix from stock 1.45.
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraD16HistoryPatchVersion()
++{
++  return 1;
++}
++
+ extern "C" RENDERDOC_API DriverInformation RENDERDOC_CC RENDERDOC_GetDriverInformation(GraphicsAPI api)
+ {
+   return RenderDoc::Inst().GetDriverInformation(api);

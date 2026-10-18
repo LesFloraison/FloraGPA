@@ -12,6 +12,8 @@
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
+#include <QLabel>
+#include <cmath>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QSettings>
@@ -70,6 +72,45 @@ class HistoryUiTests : public QObject {
         QCOMPARE(counters.backendPath(), bundled);
         QVERIFY(historyBackendCompatible(bundled));
         QVERIFY(!QSettings().contains("analysis/renderdoc"));
+    }
+    void d16PatchedReports() {
+        const auto root = qEnvironmentVariable("FLORA_D16_HISTORY_REPORTS");
+        if (root.isEmpty()) QSKIP("Set FLORA_D16_HISTORY_REPORTS to the focused Talos D16 reports");
+        QTemporaryDir temporary;
+        for (const auto &name : {QString("original"), QString("modified")}) {
+            const auto result = read(root + '/' + name + ".json");
+            QVERIFY(result.at("ok").get<bool>());
+            QCOMPARE(result.at("backend_d16_history_patch"), Json(1));
+            QCOMPARE(result.at("history_scope").at("depth_value_status"), Json("patched_backend_values"));
+            QCOMPARE(result.at("history").size(), size_t(2));
+            const auto &draw = result.at("history").back();
+            QCOMPARE(draw.at("execution"), Json("12675"));
+            QCOMPARE(draw.at("source_record"), Json("185550"));
+            QCOMPARE(draw.at("primitiveID"), Json(12999));
+            QCOMPARE(std::lround(draw.at("postMod").at("depth").get<double>() * 65535),
+                     name == "original" ? 17980L : 16384L);
+            PixelHistoryView view;
+            view.setContext("d16-fixture", 12675, true);
+            view.setDx12Resource(167081, 4980699392ULL);
+            QVERIFY(view.finish(view.requestId(), result));
+            QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("patched RenderDoc 1.45"));
+            auto rows = view.findChild<QTreeWidget *>("historyRecords");
+            QCOMPARE(rows->topLevelItemCount(), 2);
+            rows->setCurrentItem(rows->topLevelItem(1));
+            QSignalSpy jump(&view, &PixelHistoryView::eventRequested);
+            action(view, "locateHistoryEvent")->trigger();
+            QCOMPARE(jump.size(), 1);
+            QCOMPARE(jump.front().front().toULongLong(), 12675ULL);
+            const auto exported = temporary.path() + '/' + name + ".json";
+            view.exportResult(exported);
+            QCOMPARE(read(exported), result);
+        }
+        const auto stock = read(root + "/stock.json");
+        PixelHistoryView view;
+        view.setContext("stock-d16-fixture", 12675, true);
+        QVERIFY(view.finish(view.requestId(), stock));
+        QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("event-boundary depths only"));
+        QVERIFY(stock.at("history").back().at("postMod").at("depth").is_null());
     }
     void backendReports() {
         const auto root = qEnvironmentVariable("FLORA_HISTORY_REPORTS");

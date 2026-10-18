@@ -146,6 +146,7 @@ class Session {
   public:
     std::unique_ptr<IReplayController, Shutdown> controller;
     std::string version, commit;
+    uint32_t d16HistoryPatch{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -163,6 +164,9 @@ class Session {
         if (version != "1.45" || !symbol<decltype(&RENDERDOC_IsReleaseBuild)>("RENDERDOC_IsReleaseBuild")())
             throw std::runtime_error("Native replay requires the RenderDoc 1.45 release ABI");
         commit = symbol<decltype(&RENDERDOC_GetCommitHash)>("RENDERDOC_GetCommitHash")();
+        using PatchVersion = uint32_t (RENDERDOC_CC *)();
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraD16HistoryPatchVersion")))
+            d16HistoryPatch = patch();
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
         const auto open = symbol<decltype(&RENDERDOC_OpenCaptureFile)>("RENDERDOC_OpenCaptureFile");
@@ -556,6 +560,7 @@ Json runRdcJob(const Json &job) {
         {"backend", dx12 ? "dx12" : "dx11"},
         {"backend_version", session.version},
         {"backend_commit", session.commit},
+        {"backend_d16_history_patch", session.d16HistoryPatch},
         {"replay_environment",
          {{"gpu_vendor_enum", vendor},
           {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
@@ -936,10 +941,11 @@ Json runRdcJob(const Json &job) {
     // format for a depth target. GetDepthValue then decodes UNORM bits as half
     // floats. Fragment values cannot be recovered reliably (NaNs lose bits,
     // and intermediate fragments take a different conversion path).
-    const bool unreliableD16 = dx12 && session.version == "1.45" &&
+    const bool d16History = dx12 && session.version == "1.45" &&
                                bool(tex.creationFlags & TextureCategory::DepthTarget) &&
                                tex.format.type == ResourceFormatType::Regular && tex.format.compCount == 1 &&
                                tex.format.compByteWidth == 2;
+    const bool unreliableD16 = d16History && session.d16HistoryPatch != 1;
     Json depthBoundaries = Json::array(), depthGaps = Json::array();
     std::set<uint32_t> existing;
     for (const auto &v : controller.PixelHistory(resource, x, y, sub, CompType::Typeless)) {
@@ -1072,7 +1078,7 @@ Json runRdcJob(const Json &job) {
            {"unmapped_records", unmapped},
            {"cpu_write_snapshots", added},
            {"cpu_write_gaps", gaps},
-           {"depth_value_status", unreliableD16 ? "event_boundaries_only" : "backend_values"},
+           {"depth_value_status", unreliableD16 ? "event_boundaries_only" : d16History ? "patched_backend_values" : "backend_values"},
            {"depth_boundary_gaps", depthGaps},
            {"unrepresented_api_commands", unrepresented},
            {"limitations",
@@ -1081,9 +1087,9 @@ Json runRdcJob(const Json &job) {
              "Old captures may lack GPA CPU-write markers; unknown structured layouts remain explicit gaps.",
              "Resource operations can appear with unchanged selected-subresource values; no shader fragment "
              "or test pass is implied.",
-             "RenderDoc 1.45 DX12 D16 fragment depths are withheld because of typeless decoding; separate "
-             "raw UNORM event boundaries do not recover fragment depths or validate depth-test "
-             "reasons."}}}}});
+             unreliableD16 ? "Stock RenderDoc 1.45 DX12 D16 fragment depths are withheld because of typeless decoding; separate raw UNORM event boundaries do not recover fragment depths or validate depth-test reasons."
+                           : d16History ? "D16 depth values use the explicitly identified Flora patch to RenderDoc 1.45. Backend test-failure reasons retain RenderDoc's per-event/per-fragment limitations."
+                                        : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
     if (unreliableD16)
         result["partial"] = true;
