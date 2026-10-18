@@ -31,11 +31,13 @@ int rdcAnalyzeCli(QStringList args) {
         p.addHelpOption();
         p.addPositionalArgument("capture", "Independent .rdc capture");
         p.addPositionalArgument("action", "inventory | postmesh | history | debug-pixel | debug-vertex | "
-                                          "debug-thread | counters | texture | resource-history");
+                                          "debug-thread | counters | texture | resource-history | pipeline");
         p.addOption({"out", "New or empty output directory", "path"});
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
                      flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
+        p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
+        p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
         for (const auto &[key, description] :
              {std::pair{"gpa-event", "Original GPA draw, dispatch or resource-write command ID"},
               std::pair{"eid", "Native RenderDoc event ID (alternative to --gpa-event)"},
@@ -75,6 +77,11 @@ int rdcAnalyzeCli(QStringList args) {
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = number(p.value(key));
         options["stage"] = p.value("stage").toStdString();
+        for (const auto key : {"execution", "resource-creation"})
+            if (p.isSet(key))
+                options[QString(key).replace('-', '_').toStdString()] = std::to_string(number(p.value(key)));
+        if (p.isSet("execution") && p.isSet("resource"))
+            options["resource"] = std::to_string(number(p.value("resource")));
         for (const auto key : {"group", "thread"})
             if (p.isSet(key)) {
                 const auto parts = p.value(key).split(',');

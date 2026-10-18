@@ -24,6 +24,7 @@
 #include "app/ReplayMeshView.h"
 #include "app/PixelHistoryView.h"
 #include "app/ResourceHistoryView.h"
+#include "app/Dx12PipelineView.h"
 #include "app/RdcCountersView.h"
 #include "application/NativeDebugConfig.h"
 #include <QAction>
@@ -73,6 +74,68 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void dx12PipelineWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        const auto output = qEnvironmentVariable("FLORA_DX12_PIPELINE_WORKSPACE");
+        if (root.isEmpty() || library.isEmpty() || output.isEmpty())
+            QSKIP("Set Talos capture, RenderDoc and pipeline workspace output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto view = window.findChild<Dx12PipelineView *>(); QVERIFY(view);
+        auto pipelineTabs = window.findChild<QTabWidget *>("pipelineTabs");
+        QVERIFY(pipelineTabs); QCOMPARE(pipelineTabs->currentWidget(), view);
+        view->setBackendPath(library, false);
+        auto readAction = view->findChild<QAction *>("readDx12Pipeline"); QVERIFY(readAction->isEnabled());
+        done.clear(); readAction->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 90000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        const auto report = view->result();
+        QCOMPARE(report.at("execution"), nlohmann::json("12675"));
+        QCOMPARE(report.at("captured_call").at("source_record"), nlohmann::json("185550"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        view->exportResult(output + "/pipeline.json");
+        const auto capture = QString::fromStdString(report.at("capture").get<std::string>());
+        QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+        auto rows = view->findChild<QTreeWidget *>("dx12PipelineRows");
+        bool foundConstant = false;
+        for (int i = 0; i < rows->topLevelItemCount(); ++i) {
+            const auto &row = report.at("pipeline_rows")[i];
+            if (row.at("section") != "VS" || row.at("resource").value("resource_creation", nlohmann::json()) != "150566") continue;
+            rows->setCurrentItem(rows->topLevelItem(i));
+            view->findChild<QAction *>("inspectPipelineResource")->trigger();
+            auto properties = window.findChild<QTreeWidget *>("properties");
+            QVERIFY(properties); QCOMPARE(properties->topLevelItem(0)->text(0), QString("DX12 resource creation"));
+            bool foundId = false;
+            for (int child = 0; child < properties->topLevelItem(0)->childCount(); ++child) {
+                auto item = properties->topLevelItem(0)->child(child);
+                if (item->text(0) == "id") { QCOMPARE(item->text(1), QString("150566")); foundId = true; }
+            }
+            QVERIFY(foundId);
+            foundConstant = true; break;
+        }
+        QVERIFY(foundConstant);
+        const auto request = view->requestId();
+        locate->setText("12676"); QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(view->result().is_null()); QVERIFY(!view->finish(request, report));
+        qInfo() << "Talos pipeline execution 12675: shader constants linked to capture creation 150566";
+        done.clear(); window.openCapture(root + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!pipelineTabs->isTabVisible(pipelineTabs->indexOf(view)));
+        QVERIFY(!readAction->isEnabled()); QVERIFY(!view->finish(request, report));
+        auto image = window.findChild<ImageView *>("frameOutput")->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(image.size(), QSize(2560, 1440));
+        const QByteArray pixels(reinterpret_cast<const char *>(image.constBits()), image.sizeInBytes());
+        QCOMPARE(QCryptographicHash::hash(pixels, QCryptographicHash::Sha256).toHex(),
+                 QByteArray("2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"));
+        auto api = window.findChild<QTableView *>("apiLog"); api->setCurrentIndex(api->model()->index(2, 0));
+        QVERIFY(window.findChild<QAction *>("inspectGeometry")->isEnabled());
+    }
     void nativeTimelineQueues() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty()) QSKIP("Set Talos capture for the local SDK/device configuration");

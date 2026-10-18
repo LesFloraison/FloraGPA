@@ -2216,12 +2216,81 @@ invocations (one crash, one filtered-empty run, two resource exports), one
 independent RDC texture query, and one CPU alpha fixture. No native full sample
 suite, capture changes, runtime GPA dependency or unrelated tests were added.
 
+### DX12 pipeline and binding inspection
+
+The existing Pipeline workspace now selects **DX12 Bindings** for directory
+captures and restores the existing DX11 tabs on a backend switch. Read uses the
+same isolated recapture/analysis route and experiment-keyed cache as history and
+shader debugging. A `PipelineInspection` capability requires a supported executed
+Draw/Dispatch (including mesh dispatch); a disabled or unsupported execution is
+not presented as a completed query. CLI analysis also accepts decimal-string
+DX12 selectors without converting them through floating JSON:
+
+```text
+FloraGPA.Cli rdc-analyze <capture.rdc> pipeline --execution 37273 --out <new-directory> --renderdoc <renderdoc.dll>
+```
+
+The report includes PSO/root-signature identities, active shaders and entry
+points, descriptor heaps, root constants/descriptors/table ranges/static
+samplers, reflected shader bindings, descriptor view ranges/formats and sampler
+parameters, vertex/index buffer bindings, output targets and predication.
+Descriptor tables are not expanded blindly: only RenderDoc's reported potential
+shader accesses are queried, with a 16,384-entry hard limit that fails explicitly
+instead of silently truncating. Unbounded root table declarations remain metadata.
+Descriptor byte sizes are RenderDoc's binding ranges (root descriptors can extend
+to the end of their buffer), not measured shader read spans. A non-unused binding
+does **not** establish that the GPU accessed it.
+
+Resource links use the exact native replay resource marker's object/creation
+pair, cross-checked against the open session before the workspace accepts the
+result. Unknown PSO/root-signature/shader provenance remains RenderDoc-only;
+no neighboring creation record is substituted. Selecting a resource opens its
+existing buffer/resource inspection route. Read/cancel, JSON export and stale
+request rejection are connected; event, backend, library and experiment changes
+invalidate the displayed result. All resource identities and 64-bit offsets/sizes
+remain strings. The report is explicitly **partial**: full fixed-function and
+stream-output state, unaccessed descriptor entries and original pipeline-object
+identity mapping remain gaps.
+
+Targeted evidence under ignored `artifacts/dx12-research`:
+
+- `bf1-pipeline1`: one query of the existing independent BF1 recapture, execution
+  **37273**, RenderDoc event **47373**, **27** rows and **10** potential descriptor
+  accesses. The tone-map PS references `mainTexture` creation **324859** (object
+  **10738460352**), `colorGradingTexture` **299996** (**8092623872**),
+  `distortionTexture` **325118** (**10737193296**) and `tonemapBloomTexture`
+  **211712** (**870027664**). VS/PS constants use creation **156161**; RTV 0 is
+  creation **11399**, object **2119382448**. These identify the upstream inputs for
+  the unresolved RGB comparison; binding inspection alone is not a fidelity pass.
+- `talos-pipeline-workspace1`: a real workspace recapture/read of execution
+  **12675**, source record **185550**, RenderDoc event **151**, followed by resource
+  navigation. VS `cbuffer0` links to creation **150566**, byte offset **32058624**;
+  its reported root descriptor range is **1495808** bytes. DSV creation **167081**
+  is preserved. The native report completed using SDK **616**; the debug layer
+  was not enabled in this workspace run. The isolated analyzer loaded no GPA
+  modules. Changing execution rejected the old pipeline request. Switching to
+  DX11 hid the DX12 bindings tab, replayed GF2 with the existing exact RGBA hash
+  `2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`,
+  and retained the selected-draw geometry analysis entry. This focused workspace
+  test passed in **10.035 s**.
+- `pipeline-ui2.txt` / `pipeline-ui2/pipeline.png`: the real BF1 report was checked
+  for populated shaders/RTV mapping, resource navigation, exact export, stale
+  experiment/session rejection, and integer-string identity **9007199254740993**.
+  A numeric JSON identity and a mismatched execution were rejected. The focused
+  CPU UI test passed in **184 ms**, and the rendered view was inspected.
+
+Only the BF1 analysis query, one Talos native recapture/analysis and the DX11
+compatibility replay used the GPU. Hellblade2 was not replayed for this UI/API
+increment. Neither complete pipeline coverage nor overall milestone acceptance
+is claimed by these selected-boundary checks.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
+| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | Workspace shader-constant resource navigation and event/backend invalidation verified; full state unfinished | Not verified |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |

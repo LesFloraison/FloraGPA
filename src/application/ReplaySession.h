@@ -7,7 +7,7 @@
 namespace flora {
 enum class CapabilityStatus { Supported, NotImplemented, MissingData, UnsupportedDevice, Failed };
 enum class ReplayFeature { ApiInspection, ResourceInspection, Replay, PixelHistory, ResourceHistory,
-                           ShaderDebug, Geometry, Performance, Experiments };
+                           ShaderDebug, Geometry, Performance, Experiments, PipelineInspection };
 struct SessionCapability {
     CapabilityStatus status = CapabilityStatus::NotImplemented;
     std::string reason;

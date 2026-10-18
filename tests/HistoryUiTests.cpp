@@ -5,6 +5,7 @@
 #include "app/ReplayDebugView.h"
 #include "app/ReplayMeshView.h"
 #include "app/RdcCountersView.h"
+#include "app/Dx12PipelineView.h"
 #include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QApplication>
@@ -48,6 +49,57 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dx12PipelineReport() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PIPELINE_REPORT");
+        if (path.isEmpty()) QSKIP("Set FLORA_DX12_PIPELINE_REPORT to a real pipeline result");
+        const auto report = read(path);
+        QVERIFY(report.at("ok").get<bool>());
+        Dx12PipelineView view;
+        view.resize(1400, 850); view.show();
+        view.setContext("bf1:experiment:1", 37273);
+        QCOMPARE(view.request().at("execution"), Json("37273"));
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows");
+        QCOMPARE(rows->topLevelItemCount(), int(report.at("pipeline_rows").size()));
+        QSignalSpy jump(&view, &Dx12PipelineView::resourceRequested);
+        bool targetFound = false, shaderFound = false;
+        for (int i = 0; i < rows->topLevelItemCount(); ++i) {
+            const auto &row = report.at("pipeline_rows")[i];
+            rows->setCurrentItem(rows->topLevelItem(i));
+            if (row.at("section") == "PS" && row.at("binding") == "Shader") {
+                shaderFound = true; QVERIFY(!action(view, "inspectPipelineResource")->isEnabled());
+            }
+            if (row.at("section") == "OM" && row.at("binding") == "RTV 0") {
+                QCOMPARE(row.at("resource").at("resource_creation"), Json("11399"));
+                QCOMPARE(row.at("resource").at("resource_object"), Json("2119382448"));
+                action(view, "inspectPipelineResource")->trigger();
+                QCOMPARE(jump.size(), 1); QCOMPARE(jump.takeFirst()[0].toULongLong(), 11399ULL);
+                targetFound = true;
+            }
+        }
+        QVERIFY(targetFound); QVERIFY(shaderFound);
+        for (int i = 0; i < rows->topLevelItemCount(); ++i)
+            if (rows->topLevelItem(i)->text(1).startsWith("SRV mainTexture ")) rows->setCurrentItem(rows->topLevelItem(i));
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/pipeline.png"));
+        QTemporaryDir dir;
+        view.exportResult(dir.path() + "/pipeline.json"); QCOMPARE(read(dir.path() + "/pipeline.json"), report);
+        const auto previous = view.requestId();
+        view.setContext("bf1:experiment:2", 37273);
+        QVERIFY(!view.finish(previous, report)); QCOMPARE(rows->topLevelItemCount(), 0);
+        auto huge = report;
+        huge["pipeline_rows"][0]["resource"].update({{"mapping_status", "capture_resource_marker"},
+            {"resource_creation", "9007199254740993"}, {"resource_object", "18446744073709551615"}});
+        QVERIFY(view.finish(view.requestId(), huge)); rows->setCurrentItem(rows->topLevelItem(0));
+        action(view, "inspectPipelineResource")->trigger();
+        QCOMPARE(jump.takeFirst()[0].toULongLong(), 9007199254740993ULL);
+        huge["pipeline_rows"][0]["resource"]["resource_creation"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), huge));
+        huge = report; huge["execution"] = "37274";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), huge));
+        const auto beforeSwitch = view.requestId(); view.setContext("", 0);
+        QVERIFY(!view.finish(beforeSwitch, report)); QVERIFY(!action(view, "readDx12Pipeline")->isEnabled());
+    }
     void initTestCase() {
         QSettings::setDefaultFormat(QSettings::IniFormat);
         QCoreApplication::setOrganizationName("FloraGPA");

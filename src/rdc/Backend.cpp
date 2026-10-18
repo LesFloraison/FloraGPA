@@ -4,6 +4,7 @@
 #include "Counters.h"
 #include "DebugTrace.h"
 #include "InputMesh.h"
+#include "PipelineState.h"
 #include "application/RdcEvents.h"
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
@@ -515,7 +516,7 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
-        action != "texture" && action != "resource-history" && action != "postmesh" && !debugging)
+        action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
     if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
@@ -621,6 +622,14 @@ Json runRdcJob(const Json &job) {
         !(eid == 0 && action == "inventory"))
         throw std::runtime_error("No selectable replay action");
     controller.SetFrameEvent(eid, true);
+    if (action == "pipeline") {
+        const auto *selected = findAction(controller.GetRootActions(), eid);
+        if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
+            throw std::runtime_error("Pipeline inspection requires an executed DX12 Draw or Dispatch");
+        result.update(readDx12Pipeline(controller));
+        result["eid"] = eid;
+        return complete();
+    }
     if (action == "postmesh") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
         const auto stage = job.value("stage", std::string("VSOut"));

@@ -402,6 +402,22 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Supported, "Partial replay-prefix usage history; bindings are potential "
                     "accesses, content changes and complete subresource/synchronization coverage are not measured"};
         }
+        if (feature == ReplayFeature::PipelineInspection) {
+            auto executionOnly = selection;
+            executionOnly.resource = 0;
+            executionOnly.before = false;
+            const auto replay = capability(ReplayFeature::Replay, executionOnly);
+            if (!replay.supported())
+                return replay;
+            const auto kind = executionEvent(*selection.execution).workKind;
+            if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch &&
+                kind != ReplayWorkKind::MeshDispatch)
+                return {CapabilityStatus::NotImplemented,
+                        "Select a supported Draw or Dispatch for pipeline inspection"};
+            return {CapabilityStatus::Supported,
+                    "Partial replayed shader/root/IA/OM bindings through RenderDoc 1.45; "
+                    "potential accesses, not measured GPU reads or writes"};
+        }
         if (feature == ReplayFeature::Performance) {
             auto executionOnly = selection; executionOnly.resource = 0; executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);

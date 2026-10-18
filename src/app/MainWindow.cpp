@@ -25,6 +25,7 @@
 #include "RasterizerDialog.h"
 #include "RdcCountersView.h"
 #include "ResourceHistoryView.h"
+#include "Dx12PipelineView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
@@ -219,6 +220,12 @@ MainWindow::MainWindow() : loader_(this) {
             else resources_->setSession(session_);
             chart_->clear();
             pipeline_->clear();
+            if (auto tabs = findChild<QTabWidget *>("pipelineTabs")) {
+                for (int i = 0; i < tabs->count(); ++i)
+                    tabs->setTabVisible(i, (tabs->widget(i) == dx12Pipeline_) != bool(frame_));
+                if (!frame_)
+                    tabs->setCurrentWidget(dx12Pipeline_);
+            }
             capturedState_->setSelection(frame_, 0);
             replayedState_->setSelection(frame_, 0);
             predicateView_->setSelection(frame_, 0);
@@ -1250,6 +1257,20 @@ void MainWindow::buildUi() {
     });
     history_ = new PixelHistoryView;
     leftTabs_->insertTab(1, history_, "Pixel History");
+    dx12Pipeline_ = new Dx12PipelineView;
+    pipelineTabs->addTab(dx12Pipeline_, "DX12 Bindings");
+    connect(dx12Pipeline_, &Dx12PipelineView::readRequested, this,
+            [this] { readRdcAnalysis(nullptr, RdcAnalysis::Pipeline); });
+    connect(dx12Pipeline_, &Dx12PipelineView::cancelRequested, this, &MainWindow::cancel);
+    connect(dx12Pipeline_, &Dx12PipelineView::error, this, &MainWindow::showError);
+    connect(dx12Pipeline_, &Dx12PipelineView::resourceRequested, this, [this](qulonglong id) {
+        try {
+            inspectResource(id);
+            updateCheckpointContext();
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+        }
+    });
     resourceHistory_ = new ResourceHistoryView;
     leftTabs_->insertTab(2, resourceHistory_, "Resource History");
     connect(resourceHistory_, &ResourceHistoryView::readRequested, this,
@@ -1546,6 +1567,8 @@ void MainWindow::setBusy(bool busy) {
         rdcCounters_->setWorkerBusy(busy);
     if (resourceHistory_)
         resourceHistory_->setWorkerBusy(busy);
+    if (dx12Pipeline_)
+        dx12Pipeline_->setWorkerBusy(busy);
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
@@ -1665,6 +1688,11 @@ void MainWindow::updateCheckpointContext() {
                                     dx12 ? selection_.resource : 0,
                                     dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
     }
+    if (dx12Pipeline_) {
+        const bool supported =
+            dx12 && session_->capability(ReplayFeature::PipelineInspection, selection_).supported();
+        dx12Pipeline_->setContext(supported ? analysisKey : QString{}, selection_.execution.value_or(0));
+    }
     if (replayMesh_)
         replayMesh_->setContext((draw || meshDispatch) ? analysisKey : QString{}, selectedEvent_, dx12, meshDispatch);
     for (size_t i = 0; i < replayDebug_.size(); ++i)
@@ -1697,6 +1725,24 @@ QString MainWindow::historyContextKey() const {
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
 bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
+    if (runningAnalysis_ == RdcAnalysis::Pipeline) {
+        if (historyRequestId_ != dx12Pipeline_->requestId())
+            return false;
+        auto enriched = result;
+        if (enriched.value("ok", false)) {
+            enriched["captured_call"] = session_->executionDetails(*selection_.execution);
+            for (const auto &row : enriched.at("pipeline_rows")) {
+                const auto &ref = row.at("resource");
+                if (ref.value("mapping_status", "") != "capture_resource_marker")
+                    continue;
+                const auto creation = std::stoull(ref.at("resource_creation").get<std::string>());
+                if (std::to_string(session_->resource(creation).capturedObject) !=
+                    ref.at("resource_object").get<std::string>())
+                    throw std::runtime_error("Pipeline resource identity does not match capture");
+            }
+        }
+        return dx12Pipeline_->finish(historyRequestId_, enriched);
+    }
     if (runningAnalysis_ == RdcAnalysis::ResourceHistory) {
         if (historyRequestId_ != resourceHistory_->requestId())
             return false;
@@ -1753,7 +1799,8 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         }
         return;
     }
-    if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History && kind != RdcAnalysis::ResourceHistory)
+    if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History &&
+        kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
@@ -1764,18 +1811,22 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
     const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
     const bool resourceHistory = kind == RdcAnalysis::ResourceHistory;
-    historyRequestId_ = resourceHistory ? resourceHistory_->requestId()
+    const bool pipeline = kind == RdcAnalysis::Pipeline;
+    historyRequestId_ = pipeline ? dx12Pipeline_->requestId()
+                        : resourceHistory ? resourceHistory_->requestId()
                         : mesh       ? replayMesh_->requestId()
                         : counters ? rdcCounters_->requestId()
                         : view     ? view->requestId()
                                    : history_->requestId();
     try {
-        historyRequest_ = resourceHistory ? resourceHistory_->request()
+        historyRequest_ = pipeline ? dx12Pipeline_->request()
+                          : resourceHistory ? resourceHistory_->request()
                           : mesh       ? replayMesh_->request()
                           : counters ? rdcCounters_->request()
                           : view     ? view->request()
                                      : history_->request();
-        const auto library = QFileInfo(resourceHistory ? resourceHistory_->backendPath()
+        const auto library = QFileInfo(pipeline ? dx12Pipeline_->backendPath()
+                                       : resourceHistory ? resourceHistory_->backendPath()
                                        : mesh       ? replayMesh_->backendPath()
                                        : counters ? rdcCounters_->backendPath()
                                        : view     ? view->backendPath()
@@ -1849,6 +1900,7 @@ void MainWindow::startHistoryWorker() {
     workerTimedOut_ = false;
     setBusy(true);
     statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
+                             : runningAnalysis_ == RdcAnalysis::Pipeline ? "Reading DX12 pipeline bindings…"
                              : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Reading resource history…"
                              : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
                              : runningDebug_                             ? "Reading shader trace…"
@@ -2194,6 +2246,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
             statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
+                                                 : runningAnalysis_ == RdcAnalysis::Pipeline ? "DX12 pipeline bindings ready"
                                                  : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Resource history ready"
                                                  : runningAnalysis_ == RdcAnalysis::Counters
                                                      ? "Replay metrics ready"
