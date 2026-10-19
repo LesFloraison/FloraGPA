@@ -3730,6 +3730,93 @@ Ignored evidence under `artifacts/dx12-research`: `hellblade-main-ps1`,
 `pixel-output-comparison1.txt`, and `pixel-output-ui1.txt`. The numerical
 debugging discrepancy remains an explicit unfinished backend gap.
 
+### Hellblade2 MainPS boundary comparison and failure reports
+
+The MainPS output (creation **553172**) and `ColorTexture` input (creation
+**571530**) were read at execution **37003** using independent native prefix
+queries and the existing output-producer RDC. Both are 1920x1200 textures.
+Captured `_RootShaderParameters` values at offsets **176** and **288** establish
+both color-input and output viewport rectangles as **[0,1920) × [0,803)**.
+The comparison uses that rectangle; it does not infer validity from the full
+allocation extent.
+
+| Resource | Format | Differing RGB pixels in the rectangle | Maximum channel differences |
+| --- | --- | --- | --- |
+| MainPS output, 553172 | RGB10A2 | 8,646 | 47, 50, 69 RGB10 levels |
+| ColorTexture input, 571530 | R11G11B10_FLOAT | 10,842 | 0.0078125, 0.0078125, 0.015625 |
+
+The largest output difference is at **(1596,0)**: RDC RGB10 `(243,300,455)` versus
+native `(196,250,386)`. The input's largest decoded difference is at **(1549,42)**:
+RDC `(0.6796875,0.6328125,0.84375)` versus native
+`(0.6796875,0.6328125,0.828125)`. All compared input texels are finite. Outside
+the declared rectangle, **358,202** raw input texels differ and the native
+readback contains **17,820** nonfinite texels; these are reported separately,
+not counted as valid-rectangle output failures. Whole-resource initialization
+and sampling coverage are not established by this comparison.
+
+These are separate replay queries, not same-run snapshots or original GPA
+measurements. They establish an upstream input discrepancy between native and
+RDC playback; neither its cause nor its contribution to native/original final
+frame differences is established. Both successful native queries report zero
+D3D12 validation errors and SDK **616**. The first output attempt used a 4 GiB
+allocation budget and failed during initialization; it was retried with the
+previously successful Hellblade2 **12 GiB** budget.
+
+Resource History for creation **571530** reports **25** mapped uses. Its latest
+compute writes are four `ExecuteIndirect` executions **36766**, **36770**,
+**36775**, **36779**, source records **611527**, **611532**, **611539**, **611544**.
+The last maps to exactly one generated Dispatch at RenderDoc event **90443**,
+submission **613234**, list **2152464446256**, recording generation **10**.
+Pipeline inspection identifies `MainCS`, binding creation **571530**, mip **0**,
+as `SceneColorOutputMip0`. Its other output bindings named `SceneColorOutputMip1`
+and `SceneColorOutputMip2` refer to separate resources **570673** and **562718**,
+both with view mip **0**. Names alone must not be interpreted as mip indices.
+
+An original GPA intermediate-output attempt selected command list
+**0x1f3444cb7b0**, Draw/Dispatch ordinal **17**, resource **0x1f46f067bd0**,
+RTV views only, with the existing synchronous dump-layer raw-image probe.
+GPA exits **0xc0000005** during restoration before producing an image. A second
+diagnostic launch identifies both first- and second-chance access violations
+at `dump-resources-layer-x64.dll` RVA **0x80c8**, reading address **0x8**.
+The installed DLL's SHA-256 remains
+`853913de932f235341655d7f55f1d38d68e56d60df45402acff87825eaf78b72`.
+Read-only Ghidra inspection locates the fault in a tree-access helper at RVA
+**0x80b0** (`MOV RBP,[RCX]`). One caller at RVA **0xa360** passes a device-private
+data result plus eight without checking it; the actual runtime caller and the
+missing state are not yet established. No installed binary or capture is
+modified, and no original intermediate image is claimed.
+
+The allocation failure also exposed a Worker reporting gap: replay exceptions
+were rethrown before `report.json` or the response identity could be saved.
+The native replay path now persists failed reports with the execution, requested
+resource, allocation budget, failing phase, available device/replay diagnostics
+and `completed:false`. It returns a failure exit code and retains the stderr
+error, while the existing request envelope is written normally. Partial files
+are explicitly not completed images. Capture hooks remain alive until replay
+and device teardown. Errors before a valid replay request is prepared retain
+their existing argument-validation behavior.
+
+Release build **259** covers CLI, Worker and the focused session test; build
+**260** corrects the test's expected failure phase to the observed
+`initialize_transfers`. With a **1-byte** allocation budget, the Talos Worker
+returns failure, saves the report before any resource allocation, and echoes
+request **18446744073709551615** and experiment revision
+**18446744073709551614** as strings. The old response is rejected after changing
+the request. A fresh Worker retry with **4 GiB** reaches execution **12675** and
+reproduces the existing texture SHA-256
+`c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`.
+This focused failure/retry check passes (**3 passed including setup/cleanup,
+4,447 ms**); it does not exercise every possible device/driver failure. Build
+**261** names the separate construction phase `create_replay`; the observed
+allocation failure remains in `initialize_transfers`.
+
+Ignored evidence under `artifacts/dx12-research` includes
+`hellblade-main-boundary-evidence1.json`, the `hellblade-main-output-*` and
+`hellblade-main-color-*` reports, `gpa-hellblade-main-raw1/2`, and
+`hellblade-dump-crash*.txt`, `allocation-failure-report2`, and
+`allocation-failure-test2.txt`. Original-output fidelity, upstream execution
+semantics and complete initialization remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

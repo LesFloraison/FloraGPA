@@ -12,6 +12,7 @@
 #include <QImage>
 #include <QCryptographicHash>
 #include <set>
+#include <memory>
 
 namespace flora {
 namespace {
@@ -96,18 +97,10 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     }
     dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
     std::optional<RenderDocCapture> capture;
-    if (options.isSet("renderdoc"))
-        capture.emplace(std::filesystem::path(options.value("renderdoc").toStdWString()),
-                        std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
-    dx12::NativeDevice device(directory, options.isSet("debug-device"));
-    dx12::NativeReplay replay(device, directory, budget);
-    if (experiment) {
-        auto edits = experiment->dx12Edits(session);
-        replay.setDisabledExecutions(std::move(edits.disabled));
-        replay.setUavBarriersBefore(std::move(edits.uavBarriersBefore));
-        replay.setShaderReplacements(std::move(edits.shaders));
-        replay.setResourcePatches(std::move(edits.resources));
-    }
+    // Keep the capture hook alive until the replay and device are destroyed,
+    // including device/replay construction failures.
+    std::unique_ptr<dx12::NativeDevice> deviceOwner;
+    std::unique_ptr<dx12::NativeReplay> replayOwner;
     nlohmann::json report{{"backend", "dx12"},
                           {"completed", false},
                           {"frame_complete", false},
@@ -119,6 +112,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"width", nullptr},
                           {"height", nullptr},
                           {"resource", nullptr},
+                          {"requested_resource", creation ? nlohmann::json(std::to_string(creation)) : nlohmann::json()},
+                          {"allocation_limit", std::to_string(budget)},
                           {"rgba_sha256", nullptr}};
     if (experiment) {
         const auto document = QByteArray::fromStdString(experiment->document().dump());
@@ -126,16 +121,40 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             {"cursor", std::to_string(experiment->revision())},
             {"document_sha256", QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex().toStdString()}};
     }
+    std::string stage = "load_analysis_library";
     try {
+        if (options.isSet("renderdoc"))
+            capture.emplace(std::filesystem::path(options.value("renderdoc").toStdWString()),
+                            std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
+        stage = "create_device";
+        deviceOwner = std::make_unique<dx12::NativeDevice>(directory, options.isSet("debug-device"));
+        auto &device = *deviceOwner;
+        stage = "create_replay";
+        replayOwner = std::make_unique<dx12::NativeReplay>(device, directory, budget);
+        auto &replay = *replayOwner;
+        stage = "apply_experiment";
+        if (experiment) {
+            auto edits = experiment->dx12Edits(session);
+            replay.setDisabledExecutions(std::move(edits.disabled));
+            replay.setUavBarriersBefore(std::move(edits.uavBarriersBefore));
+            replay.setShaderReplacements(std::move(edits.shaders));
+            replay.setResourcePatches(std::move(edits.resources));
+        }
+        stage = "prepare_execution";
         replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
+        stage = "initialize_transfers";
         replay.initializeTransfers();
+        stage = "start_analysis_capture";
         if (capture)
             capture->start(device.device(), "FloraGPA independent DX12 replay");
+        stage = "replay_execution";
         replay.replayTo(execution, !options.isSet("before"), bool(capture));
         if (options.isSet("measure-event"))
             report["performance"] = replay.performanceResult();
+        stage = "finish_analysis_capture";
         if (capture)
             report["rdc_capture"] = QString::fromStdWString(capture->finish().wstring()).toStdString();
+        stage = buffer ? "buffer_readback" : "texture_readback";
         if (buffer) {
             const auto bytes = replay.inspectBuffer(creation, offset, length,
                 std::filesystem::path(output.filePath("buffer.bin").toStdWString()));
@@ -189,18 +208,28 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                                         : "Execution replayed; select a texture creation record for readback";
         if (report["image_available"] == true && report.at("native_texture").at("format") == 26)
             report["image_status"] = "Native GPU readback; R11G11B10 preview uses linear RGB clamped to [0,1], alpha 1; raw HDR storage preserved";
-    } catch (...) {
+    } catch (const std::exception &error) {
         if (capture)
             capture->discard();
-        throw;
+        report["error"] = error.what();
+        report["failure_stage"] = stage;
+        report["completed"] = false;
+        report["image_available"] = false;
+        report["image_status"] = "Replay failed; any partial artifacts are not a completed result";
     }
-    report["device"] = device.information();
-    report["native_replay"] = replay.information();
+    report["device"] = deviceOwner ? deviceOwner->information() : nlohmann::json();
+    report["native_replay"] = replayOwner ? replayOwner->information() : nlohmann::json();
     QSaveFile file(output.filePath("report.json"));
     const auto bytes = QByteArray::fromStdString(report.dump(2));
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
         throw std::runtime_error("Cannot save DX12 replay report");
     QTextStream(stdout) << QString::fromUtf8(bytes) << Qt::endl;
+    if (!report.at("completed").get<bool>()) {
+        const nlohmann::json error{{"completed", false}, {"error", report.at("error")},
+                                   {"failure_stage", report.at("failure_stage")}};
+        QTextStream(stderr) << QString::fromStdString(error.dump()) << Qt::endl;
+        return 1;
+    }
     return 0;
 }
 } // namespace

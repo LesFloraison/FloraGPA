@@ -2614,6 +2614,58 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(decoded.resources, std::vector<uint64_t>{UINT64_MAX});
         QCOMPARE(decoded.values.at("ShadingRateImage"), nlohmann::json("18446744073709551615"));
     }
+    void replayAllocationFailureReport() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_FAILURE_REPORT_OUTPUT");
+        if (captures.isEmpty() || output.isEmpty())
+            QSKIP("Set capture and new output paths for the allocation failure/retry check");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto capture = captures + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        ReplayRequestIdentity identity{"allocation-retry", ReplayBackend::Dx12, UINT64_MAX, UINT64_MAX-1};
+        const auto request = output + "/request.json";
+        const auto run = [&](const QString &name, const QString &budget, int exitCode) {
+            writeReplayIdentity(request, identity);
+            QProcess process;
+            process.setStandardOutputFile(output + '/' + name + ".stdout.txt");
+            process.setStandardErrorFile(output + '/' + name + ".stderr.txt");
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                {"replay", capture, "--event", "12675", "--id", "167081", "--subresource", "1",
+                 "--max-bytes", budget, "--out", output + '/' + name, "--replay-identity", request});
+            if (!process.waitForStarted(5000) || !process.waitForFinished(60000)) {
+                process.kill(); process.waitForFinished(5000); return false;
+            }
+            return process.exitStatus() == QProcess::NormalExit && process.exitCode() == exitCode;
+        };
+        QVERIFY(run("failed", "1", 1));
+        requireReplayIdentity(output + "/failed/response-identity.json", identity);
+        const auto read = [&](const QString &name) {
+            QFile file(output + '/' + name + "/report.json");
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing persisted replay report");
+            return nlohmann::json::parse(file.readAll().toStdString());
+        };
+        const auto failed = read("failed");
+        QCOMPARE(failed.at("completed"), nlohmann::json(false));
+        QCOMPARE(failed.at("image_available"), nlohmann::json(false));
+        QCOMPARE(failed.at("failure_stage"), nlohmann::json("initialize_transfers"));
+        QCOMPARE(failed.at("allocation_limit"), nlohmann::json("1"));
+        QCOMPARE(failed.at("execution"), nlohmann::json("12675"));
+        QCOMPARE(failed.at("requested_resource"), nlohmann::json("167081"));
+        QVERIFY(failed.at("error").get<std::string>().find("allocation budget") != std::string::npos);
+        QCOMPARE(failed.at("native_replay").at("execution_boundary_reached"), nlohmann::json(false));
+        QCOMPARE(failed.at("native_replay").at("resources").at("allocation_bytes"), nlohmann::json("0"));
+        QVERIFY(failed.at("device").is_object());
+        QVERIFY(!QFileInfo::exists(output + "/failed/frame.png"));
+        --identity.request;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            requireReplayIdentity(output + "/failed/response-identity.json", identity));
+        QVERIFY(run("retry", "4294967296", 0));
+        requireReplayIdentity(output + "/retry/response-identity.json", identity);
+        const auto retry = read("retry");
+        QCOMPARE(retry.at("completed"), nlohmann::json(true));
+        QVERIFY(!retry.contains("failure_stage"));
+        QCOMPARE(retry.at("native_texture").at("sha256"),
+            nlohmann::json("c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217"));
+    }
     void workerIdentityEnvelope() {
         QTemporaryDir temp; const auto path=fixture(temp);
         const ReplayRequestIdentity expected{"test-session",ReplayBackend::Dx12,UINT64_MAX,UINT64_MAX-1};
