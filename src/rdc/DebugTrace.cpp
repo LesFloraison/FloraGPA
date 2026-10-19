@@ -132,35 +132,41 @@ Json rdcDebugState(const ShaderDebugState &state) {
                  return Json{{"before", rdcVariable(v.before)}, {"after", rdcVariable(v.after)}};
              })}};
 }
-Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace,
-                          const Json &steps, const Json &reference) {
+static Json compareOutput(const ShaderReflection &reflection, const Json &trace,
+                          const Json &steps, const Json &reference, bool position) {
     Json result{{"status", "unavailable"}, {"output_index", 0},
                 {"comparison", "exact_32_bit_components"},
-                {"scope", "Final mapped shader output versus a separate GPU fragment replay; "
+                {"scope", "Final mapped shader output versus a separate instrumented GPU replay; "
                           "equality does not validate intermediate instructions or input stability."}};
+    if (position) { result.erase("output_index"); result["semantic"] = "SV_Position"; }
     auto unavailable = [&](const char *reason) {
         result["reason"] = reason;
         return result;
     };
     if (reference.value("status", "") != "read")
-        return unavailable("GPU fragment reference is not eligible for comparison");
+        return unavailable("GPU output reference is not eligible for comparison");
+    if (position && reflection.stage != ShaderStage::Vertex)
+        return unavailable("Position comparison requires a vertex shader");
     int signatureIndex = -1;
     for (size_t i = 0; i < reflection.outputSignature.size(); ++i) {
         const auto &signature = reflection.outputSignature[i];
-        if (signature.systemValue == ShaderBuiltin::ColorOutput && signature.regIndex == 0) {
+        if (position ? signature.systemValue == ShaderBuiltin::Position && signature.stream == 0
+                     : signature.systemValue == ShaderBuiltin::ColorOutput && signature.regIndex == 0) {
             if (signatureIndex >= 0)
-                return unavailable("Target-0 output signature is ambiguous");
+                return unavailable("Selected output signature is ambiguous");
             signatureIndex = int(i);
         }
     }
     if (signatureIndex < 0)
-        return unavailable("No reflected target-0 color output");
+        return unavailable(position ? "No reflected SV_Position output" : "No reflected target-0 color output");
     const auto &signature = reflection.outputSignature[size_t(signatureIndex)];
     const auto count = signature.compCount;
     const auto type = signature.varType;
+    if (position && (type != VarType::Float || count != 4))
+        return unavailable("Only float4 SV_Position outputs are compared");
     if (!count || count > 4 || signature.regChannelMask != (1U << count) - 1 ||
         (type != VarType::Float && type != VarType::UInt && type != VarType::SInt))
-        return unavailable("Only contiguous 32-bit target-0 signature components are compared");
+        return unavailable("Only contiguous 32-bit output signature components are compared");
     const auto interpretation = type == VarType::Float ? "float" : type == VarType::UInt ? "uint" : "sint";
     if (reference.value("interpretation", "") != interpretation)
         return unavailable("GPU reference and output signature interpretations differ");
@@ -176,11 +182,11 @@ Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace
             }))
             continue;
         if (mapping)
-            return unavailable("Target-0 debugger output mapping is ambiguous");
+            return unavailable("Selected debugger output mapping is ambiguous");
         mapping = &candidate;
     }
     if (!mapping)
-        return unavailable("No complete debugger mapping for target-0 output");
+        return unavailable("No complete debugger mapping for selected output");
     Json actual = Json::array(), expected = Json::array(), mismatched = Json::array();
     for (size_t lane = 0; lane < count; ++lane) {
         const auto &binding = mapping->at("variables")[lane];
@@ -227,6 +233,14 @@ Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace
     result["gpu_bits"] = expected;
     result["mismatched_components"] = mismatched;
     return result;
+}
+Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace,
+                          const Json &steps, const Json &reference) {
+    return compareOutput(reflection, trace, steps, reference, false);
+}
+Json rdcCompareVertexPosition(const ShaderReflection &reflection, const Json &trace,
+                             const Json &steps, const Json &reference) {
+    return compareOutput(reflection, trace, steps, reference, true);
 }
 Json rdcDebugInfo(const ShaderDebugInfo &info) {
     return {{"compileFlags",

@@ -1,6 +1,8 @@
 #include "Invocation.h"
 #include <stdexcept>
 #include <cstring>
+#include <bit>
+#include <cmath>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
@@ -101,6 +103,81 @@ Json rdcVertexInvocation(const ActionDescription &action, const D3D12Pipe::Input
         throw std::runtime_error("Actual vertex index is outside uint32");
     result["actual_vertex_index"] = uint32_t(actual);
     result["index_source"] = action.flags & ActionFlags::Indexed ? "replayed_index_buffer" : "draw_vertex_offset";
+    return result;
+}
+Json rdcVertexPositionReference(const ActionDescription &action, const MeshFormat &mesh,
+                                uint32_t vertex, uint32_t instance,
+                                const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
+    Json result{{"status", "unavailable"}, {"vertex_ordinal", vertex}, {"instance", instance},
+                {"event_id", action.eventId}, {"interpretation", "float"},
+                {"method", "RenderDoc GetPostVSData VSOut, view 0; selected position buffer read"},
+                {"scope", "Separate instrumented VS replay. Matching position does not validate other "
+                          "outputs, intermediate instructions or input/replay stability."}};
+    const auto unavailable = [&](const char *reason) { result["reason"] = reason; return result; };
+    if (!(action.flags & ActionFlags::Drawcall) || action.flags & ActionFlags::MeshDispatch ||
+        vertex >= action.numIndices || instance >= action.numInstances)
+        return unavailable("Selected invocation is outside a vertex Draw");
+    if (mesh.vertexResourceId == ResourceId::Null())
+        return unavailable("No post-VS vertex buffer was returned");
+    if (!mesh.unproject || mesh.format.type != ResourceFormatType::Regular ||
+        mesh.format.compType != CompType::Float || mesh.format.compCount != 4 ||
+        mesh.format.compByteWidth != 4 || mesh.vertexByteStride < 16)
+        return unavailable("Post-VS data does not identify a float4 position");
+    if (mesh.numIndices != action.numIndices)
+        return unavailable("Post-VS invocation count differs from the selected Draw");
+    // RenderDoc 1.45 D3D12 VSOut stores equally sized instance blocks and
+    // reports the whole allocation size. Do not let a bad index reach the next
+    // instance, or accept its internally truncated uint32 instance stride.
+    if (mesh.vertexByteSize % action.numInstances)
+        return unavailable("Post-VS instance block sizes are inconsistent");
+    const auto instanceBytes = mesh.vertexByteSize / action.numInstances;
+    if ((action.numInstances > 1 && !(action.flags & ActionFlags::Instanced)) ||
+        mesh.vertexByteOffset != instanceBytes * instance)
+        return unavailable("Post-VS instance offset differs from the selected Draw");
+    const auto address = [](uint64_t start, uint64_t relative, uint64_t size, uint64_t count,
+                            uint64_t &out) {
+        if (start > UINT64_MAX - relative) return false;
+        out = start + relative;
+        return out <= size && count <= size - out;
+    };
+    uint64_t row = vertex;
+    if (mesh.indexByteStride) {
+        if (mesh.indexResourceId == ResourceId::Null() ||
+            (mesh.indexByteStride != 2 && mesh.indexByteStride != 4))
+            return unavailable("Post-VS index mapping is missing or unsupported");
+        uint64_t offset{};
+        if (!address(mesh.indexByteOffset, uint64_t(vertex) * mesh.indexByteStride,
+                     mesh.indexByteSize, mesh.indexByteStride, offset))
+            return unavailable("Post-VS index address exceeds the returned buffer");
+        const auto bytes = read(mesh.indexResourceId, offset, mesh.indexByteStride);
+        if (bytes.size() != mesh.indexByteStride)
+            return unavailable("Truncated post-VS index data");
+        uint32_t raw{}; memcpy(&raw, bytes.data(), mesh.indexByteStride);
+        const int64_t adjusted = int64_t(raw) + mesh.baseVertex;
+        if (adjusted < 0 || uint64_t(adjusted) > UINT32_MAX)
+            return unavailable("Post-VS remapped vertex is outside uint32");
+        row = uint64_t(adjusted);
+        result.update({{"post_index", raw}, {"post_base_vertex", mesh.baseVertex},
+                       {"index_byte_offset", std::to_string(offset)}});
+    } else if (action.flags & ActionFlags::Indexed) {
+        return unavailable("Indexed Draw has no post-VS index mapping");
+    }
+    uint64_t offset{};
+    const auto relative = row * mesh.vertexByteStride;
+    if (relative > instanceBytes || 16 > instanceBytes - relative ||
+        !address(mesh.vertexByteOffset, relative, mesh.vertexByteSize, 16, offset))
+        return unavailable("Post-VS position address exceeds the returned buffer");
+    const auto bytes = read(mesh.vertexResourceId, offset, 16);
+    if (bytes.size() != 16) return unavailable("Truncated post-VS position data");
+    Json bits = Json::array(), values = Json::array();
+    for (size_t i = 0; i < 4; ++i) {
+        uint32_t word{}; memcpy(&word, bytes.data() + i * 4, 4); bits.push_back(word);
+        const auto value = std::bit_cast<float>(word);
+        values.push_back(std::isfinite(value) ? Json(value) : Json(std::isnan(value) ? "nan" : value < 0 ? "-inf" : "inf"));
+    }
+    result.update({{"status", "read"}, {"post_vertex", std::to_string(row)},
+                   {"position_byte_offset", std::to_string(offset)},
+                   {"value", {{"uintValue", bits}, {"floatValue", values}}}});
     return result;
 }
 } // namespace flora

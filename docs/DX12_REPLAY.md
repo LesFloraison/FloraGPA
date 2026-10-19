@@ -4236,6 +4236,52 @@ change does not fix Hellblade2's DXIL contraction-sensitive dither. No full
 capture replay, DX11 GPU regression or portable-package acceptance was added
 for this focused numerical check.
 
+### VS position reference in the debug workspace
+
+DX12 VS Debug now reads an instrumented GPU `SV_Position` after stepping and
+compares its four raw float32 components with the final reflected debugger
+output. It uses `GetPostVSData(VSOut)` for the selected instance/view 0, then the
+returned post-VS index mapping and base vertex. The original capture's vertex
+index is not assumed to be the post-VS row. CPU readback requests cover only the
+selected 16-byte position and, for indexed draws, one 16/32-bit index;
+RenderDoc's preceding stream-output extraction still processes the mesh.
+
+Missing position semantics, unsupported formats, missing/truncated index data,
+count mismatches, invalid instance offsets and out-of-range positions report
+an unavailable reference with a reason. Checked 64-bit offsets are serialized
+as decimal strings. Bounds follow the pinned D3D12 backend's full buffer size
+and equal instance blocks, preventing an index from reaching a neighbouring
+instance. GPU fatal errors reject the job. Output comparison reuses the existing
+reflected mapping logic used by PS debugging, handles nested output variables,
+and never substitutes an input or removed/stale variable for the final output.
+
+The existing VS invocation label shows the GPU position, exact match/mismatch,
+or unavailable reason; its tooltip retains the mapping and raw bits. A mismatch
+marks the result partial. A match explicitly leaves other outputs, intermediate
+instructions and input/replay stability unverified. Legacy reports still show
+their invocation information, and session/request invalidation clears the
+reference. No new panel or separate replay workspace is introduced.
+
+Builds **283/284** pass for the backend, application and focused tests. One GPU
+query, `bf1-vertex-position1`, selects execution **36560**, Draw ordinal **3966**,
+instance **0**. Returned index **1428** at byte **7932** maps to position byte
+**159936** in the 112-byte vertex stride. All four position components match
+the **159-step** trace exactly, including corrected W bits **1085587053**;
+the job records **13** GPU dots and **0** failures. The UI case and selection
+invalidation pass (**4 including setup/cleanup, 354 ms**), and its screenshot
+`vs-position-ui1/replay-debug/bf1-vs-position.png` was inspected.
+
+Build **285** adds the instance-block guard; CPU addressing/comparison checks
+pass (**4 including setup/cleanup, 1 ms**) with offsets above 4 GiB, negative
+base vertices, index remapping, cross-instance bounds, truncation, missing
+semantics/mappings, nonindexed reads and exact one-bit differences. Saved
+Hellblade2 PS mismatch evidence and its UI still pass (**3 including setup/cleanup
+each, 146/339 ms**); neither check replays the GPU. Evidence is
+`vs-position-bounds2.txt`, `vs-position-ui1.txt`, `vs-position-ps-compat1.txt`
+and `vs-position-ps-ui1.txt` under `artifacts/dx12-research`.
+No additional full-capture replay or multi-instance GPU validation was performed.
+Other VS outputs and complete geometry/debugging acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

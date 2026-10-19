@@ -15,6 +15,65 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void vertexPositionAddressing() {
+        using Json = nlohmann::json;
+        ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Indexed | ActionFlags::Instanced;
+        draw.numIndices = 10; draw.numInstances = 2;
+        MeshFormat mesh; uint64_t vb = 11, ib = 12;
+        memcpy(&mesh.vertexResourceId, &vb, 8); memcpy(&mesh.indexResourceId, &ib, 8);
+        mesh.unproject = true; mesh.numIndices = 10;
+        mesh.format.type = ResourceFormatType::Regular; mesh.format.compCount = 4;
+        mesh.format.compByteWidth = 4; mesh.format.compType = CompType::Float;
+        mesh.indexByteStride = 2; mesh.indexByteOffset = (1ULL << 33);
+        mesh.indexByteSize = mesh.indexByteOffset + 20;
+        mesh.vertexByteOffset = (1ULL << 34); mesh.vertexByteStride = 112;
+        mesh.vertexByteSize = 2 * mesh.vertexByteOffset;
+        mesh.baseVertex = -2; // Returned index 4 maps to row 2, not invocation ordinal 7.
+        unsigned reads{}; bool truncated = false;
+        const auto read = [&](ResourceId resource, uint64_t offset, uint64_t length) {
+            ++reads; bytebuf bytes;
+            if (resource == mesh.indexResourceId) {
+                if (offset != (1ULL << 33) + 14 || length != 2) throw std::runtime_error("Wrong remapped index read");
+                uint16_t raw = 4; bytes.resize(truncated ? 1 : 2); memcpy(bytes.data(), &raw, bytes.size());
+            } else {
+                if (resource != mesh.vertexResourceId || offset != (1ULL << 34) + 224 || length != 16)
+                    throw std::runtime_error("Wrong position read");
+                const uint32_t values[]{1068914556,1067567186,1031109634,1085587053};
+                bytes.resize(16); memcpy(bytes.data(), values, 16);
+            }
+            return bytes;
+        };
+        auto result = rdcVertexPositionReference(draw, mesh, 7, 1, read);
+        QCOMPARE(result.at("status"), Json("read")); QCOMPARE(reads, 2u);
+        QCOMPARE(result.at("post_vertex"), Json("2"));
+        QCOMPARE(result.at("position_byte_offset"), Json("17179869408"));
+        QCOMPARE(result.at("value").at("uintValue")[3], Json(1085587053));
+        auto bad = mesh; bad.vertexByteSize = mesh.vertexByteOffset + 239;
+        QCOMPARE(rdcVertexPositionReference(draw, bad, 7, 1, read).at("status"), Json("unavailable"));
+        bad = mesh; bad.vertexByteOffset = UINT64_MAX - 15; bad.vertexByteSize = UINT64_MAX;
+        QCOMPARE(rdcVertexPositionReference(draw, bad, 7, 1, read).at("status"), Json("unavailable"));
+        bad = mesh; bad.baseVertex = -5;
+        QCOMPARE(rdcVertexPositionReference(draw, bad, 7, 1, read).at("status"), Json("unavailable"));
+        bad = mesh; bad.baseVertex = 2; bad.vertexByteStride = UINT32_MAX;
+        QCOMPARE(rdcVertexPositionReference(draw, bad, 7, 1, read).at("status"), Json("unavailable"));
+        truncated = true;
+        QCOMPARE(rdcVertexPositionReference(draw, mesh, 7, 1, read).at("status"), Json("unavailable"));
+        const auto count = reads;
+        for (int kind = 0; kind < 5; ++kind) {
+            bad = mesh;
+            if (kind == 0) bad.unproject = false;
+            if (kind == 1) bad.numIndices = 9;
+            if (kind == 2) bad.indexByteStride = 0;
+            if (kind == 3) bad.indexByteOffset = UINT64_MAX - 3;
+            if (kind == 4) bad.format.compType = CompType::UInt;
+            QCOMPARE(rdcVertexPositionReference(draw, bad, 7, 1, read).at("status"), Json("unavailable"));
+        }
+        QCOMPARE(rdcVertexPositionReference(draw, mesh, 7, 2, read).at("status"), Json("unavailable"));
+        QCOMPARE(reads, count);
+        draw.flags = ActionFlags::Drawcall | ActionFlags::Instanced; mesh.indexByteStride = 0;
+        mesh.indexResourceId = {}; mesh.baseVertex = 0;
+        QCOMPARE(rdcVertexPositionReference(draw, mesh, 2, 1, read).at("status"), Json("read"));
+    }
     void vertexInvocationBounds() {
         using Json = nlohmann::json;
         ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Indexed;
@@ -157,6 +216,19 @@ class RdcDebugTests : public QObject {
         steps.erase(1);
         reflection.outputSignature[0].regChannelMask = 10;
         QCOMPARE(compare().at("status"), Json("unavailable"));
+        reflection.stage = ShaderStage::Vertex;
+        reflection.outputSignature[0].systemValue = ShaderBuiltin::Position;
+        reflection.outputSignature[0].regChannelMask = 15;
+        reflection.outputSignature[0].regIndex = 3; // Position need not be register zero.
+        auto position = [&] { return rdcCompareVertexPosition(reflection, traceJson, steps, reference); };
+        QCOMPARE(position().at("status"), Json("output_mismatch"));
+        reference["value"]["uintValue"][1] = 1073741824u;
+        QCOMPARE(position().at("status"), Json("exact_output_match"));
+        reflection.outputSignature[0].compCount = 3;
+        QCOMPARE(position().at("status"), Json("unavailable"));
+        reflection.outputSignature[0].compCount = 4;
+        reflection.stage = ShaderStage::Geometry;
+        QCOMPARE(position().at("status"), Json("unavailable"));
     }
     void hellbladePixelOutputEvidence() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PIXEL_DEBUG_REPORT");

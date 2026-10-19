@@ -124,6 +124,42 @@ class ReplayDebugUiTests : public QObject {
         view.setContext("new-session", 1, true);
         QVERIFY(label->isHidden());
     }
+    void vertexPositionReference() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_VERTEX_DEBUG_REPORT");
+        if (path.isEmpty()) QSKIP("Set the DX12 VS report with GPU position comparison");
+        auto result = read(path);
+        QCOMPARE(result.at("execution"), Json("36560"));
+        const auto &reference = result.at("gpu_vertex_reference");
+        QCOMPARE(reference.at("post_vertex"), Json("1428"));
+        QCOMPARE(reference.at("vertex_ordinal"), Json(3966));
+        QCOMPARE(reference.at("trace_output_comparison").at("status"), Json("exact_output_match"));
+        QCOMPARE(reference.at("value").at("uintValue")[3], Json(1085587053));
+        ReplayDebugView view("vs"); view.resize(1380, 1000); view.show();
+        view.setContext("bf1-vs-position", 36560, true); view.selectVertex(3966, 0);
+        QVERIFY(view.finish(view.requestId(), result));
+        auto label = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(!label->isHidden()); QVERIFY(label->text().contains("ordinal 3966"));
+        QVERIFY(label->text().contains("actual vertex 1428"));
+        QVERIFY(label->text().contains("Final position components match exactly"));
+        QVERIFY(label->text().contains("input stability remain unverified"));
+        QCOMPARE(Json::parse(label->toolTip().toStdString()).at("gpu_vertex_reference"), reference);
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(int(result.at("steps").size() - 1));
+        QVERIFY(label->text().contains("match exactly"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/bf1-vs-position.png"));
+        auto changed = result;
+        changed["gpu_vertex_reference"]["trace_output_comparison"]["status"] = "output_mismatch";
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("differs from GPU output"));
+        QVERIFY(!label->text().contains("match exactly"));
+        changed["gpu_vertex_reference"] = {{"status", "unavailable"}, {"reason", "No post-VS index mapping"}};
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("GPU VS position unavailable: No post-VS index mapping"));
+        changed.erase("gpu_vertex_reference");
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("ordinal 3966")); QVERIFY(!label->text().contains("GPU VS position"));
+        const auto old = view.requestId(); view.setContext("other-session", 36560, true);
+        QVERIFY(!view.finish(old, result)); QVERIFY(label->isHidden());
+    }
     void indirectComputeInvocation() {
         const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
         if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");

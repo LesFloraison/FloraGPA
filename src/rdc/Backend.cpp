@@ -702,6 +702,29 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                                "GPU reference cannot validate this trace; inspect replay/input stability.");
         }
     }
+    if (dx12 && vertex) {
+        // Free the interpreter before the stream-output replay. This is a
+        // separate reference phase, not a stability check of the original draw.
+        trace.reset();
+        const auto mesh = controller.GetPostVSData(index(job, "instance"), 0, MeshDataStage::VSOut);
+        checked(controller.GetFatalErrorStatus());
+        auto reference = flora::rdcVertexPositionReference(*selected, mesh,
+            index(job, "vertex"), index(job, "instance"),
+            [&](ResourceId resource, uint64_t offset, uint64_t length) {
+                return controller.GetBufferData(resource, offset, length);
+            });
+        checked(controller.GetFatalErrorStatus());
+        reference["trace_output_comparison"] = flora::rdcCompareVertexPosition(
+            *reflection, result.at("trace"), result.at("steps"), reference);
+        if (reference.at("trace_output_comparison").at("status") == "output_mismatch") {
+            result["partial"] = true;
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null()) warnings = Json::array();
+            warnings.push_back("The final simulated VS position differs from the instrumented GPU VS output. "
+                               "Inspect replay inputs and shader arithmetic; this trace is not validated.");
+        }
+        result["gpu_vertex_reference"] = std::move(reference);
+    }
     if (job.value("pixel_history_reference", false)) {
         // This query has its own replay phase. Never present its shader output
         // as the blended target or silently select among duplicate primitives.

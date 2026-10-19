@@ -787,6 +787,30 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         if (invocation.value("indirect", false))
             invocationReference_->setText(invocationReference_->text() +
                 "\nIndirect arguments may change between replays; bounds use the indexed action.");
+        if (const auto reference = result.value("gpu_vertex_reference", Json()); reference.is_object()) {
+            invocationReference_->setToolTip(QString::fromStdString(
+                Json{{"invocation", invocation}, {"gpu_vertex_reference", reference}}.dump(2)));
+            if (reference.value("status", "") == "read") {
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nGPU VS position " + text(reference.at("value").at("floatValue")));
+                const auto comparison = reference.value("trace_output_comparison", Json::object());
+                const auto status = comparison.value("status", "");
+                if (status == "exact_output_match")
+                    invocationReference_->setText(invocationReference_->text() +
+                        "\nFinal position components match exactly.");
+                else if (status == "output_mismatch")
+                    invocationReference_->setText(invocationReference_->text() +
+                        "\nFinal trace position differs from GPU output; this trace is not validated.");
+                else
+                    invocationReference_->setText(invocationReference_->text() +
+                        "\nPosition comparison unavailable: " + text(comparison.value("reason", Json("Unknown"))));
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nSeparate instrumented replay; other outputs, instructions and input stability remain unverified.");
+            } else {
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nGPU VS position unavailable: " + text(reference.value("reason", Json("Unknown"))));
+            }
+        }
         invocationReference_->show();
     }
     if (const auto invocation = result.value("compute_invocation", Json());

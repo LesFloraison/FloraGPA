@@ -15,4 +15,8 @@ nlohmann::json rdcComparePixelOutput(const ShaderReflection &reflection,
                                     const nlohmann::json &trace,
                                     const nlohmann::json &steps,
                                     const nlohmann::json &reference);
+nlohmann::json rdcCompareVertexPosition(const ShaderReflection &reflection,
+                                       const nlohmann::json &trace,
+                                       const nlohmann::json &steps,
+                                       const nlohmann::json &reference);
 } // namespace flora
