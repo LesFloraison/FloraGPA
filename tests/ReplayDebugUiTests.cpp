@@ -242,6 +242,28 @@ class ReplayDebugUiTests : public QObject {
         const auto old = view.requestId(); view.setContext("other-session", 36560, true);
         QVERIFY(!view.finish(old, result)); QVERIFY(label->isHidden());
     }
+    void computeInputStabilityNotice() {
+        const auto path = qEnvironmentVariable("FLORA_COMPUTE_INPUT_REPORT");
+        if (path.isEmpty()) QSKIP("Set a recorded compute input-stability report");
+        const auto result = read(path);
+        QCOMPARE(result.at("compute_buffer_inputs").at("status"), Json("observed_bytes_changed"));
+        QVERIFY(result.at("partial").get<bool>());
+        ReplayDebugView view("cs"); view.resize(1450, 1000); view.show();
+        view.setContext("hellblade-input-stability", 36779, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        bool found{};
+        for (const auto label : view.findChildren<QLabel *>())
+            if (label->text().contains("Compute read-only buffer inputs changed")) {
+                QVERIFY(!label->isHidden()); found = true;
+            }
+        QVERIFY(found);
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/compute-input-stability.png"));
+        const auto serial = view.requestId();
+        view.setContext("new-experiment", 36779, true);
+        QVERIFY(!view.finish(serial, result));
+        for (const auto label : view.findChildren<QLabel *>())
+            QVERIFY(label->isHidden() || !label->text().contains("Compute read-only buffer inputs changed"));
+    }
     void indirectComputeInvocation() {
         const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
         if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");

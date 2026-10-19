@@ -5,11 +5,48 @@
 #include <cmath>
 #include <map>
 #include <optional>
+#include <QCryptographicHash>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
 Json triple(const rdcfixedarray<uint32_t, 3> &value) { return {value[0], value[1], value[2]}; }
 } // namespace
+Json rdcBufferInputSnapshot(const std::vector<RdcBufferInputRange> &ranges,
+                             const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read,
+                             uint64_t byteBudget) {
+    Json result{{"status", "unavailable"}, {"ranges", Json::array()}};
+    if (ranges.size() > 256) { result["reason"] = "Buffer input snapshot exceeds 256 views"; return result; }
+    uint64_t total{};
+    bool complete = true;
+    for (const auto &range : ranges) {
+        uint64_t resource{}; memcpy(&resource, &range.resource, sizeof resource);
+        Json row{{"resource", "ResourceId::" + std::to_string(resource)},
+                 {"offset", std::to_string(range.offset)}, {"bytes", std::to_string(range.size)},
+                 {"status", "unavailable"}};
+        if (!resource || !range.size || range.offset > range.bufferSize || range.size > range.bufferSize - range.offset)
+            row["reason"] = "Input view is empty, unbound or outside its buffer";
+        else if (range.size > byteBudget - total)
+            row["reason"] = "Input snapshot byte budget exceeded";
+        else {
+            total += range.size;
+            try {
+                const auto bytes = read(range.resource, range.offset, range.size);
+                if (bytes.size() != range.size) row["reason"] = "Incomplete input buffer read";
+                else {
+                    row["sha256"] = QCryptographicHash::hash(
+                        QByteArrayView(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())),
+                        QCryptographicHash::Sha256).toHex().toStdString();
+                    row["status"] = "read";
+                }
+            } catch (const std::exception &e) { row["reason"] = e.what(); }
+        }
+        complete &= row.at("status") == "read";
+        result["ranges"].push_back(std::move(row));
+    }
+    result["status"] = ranges.empty() ? "no_buffer_views" : complete ? "read" : "incomplete";
+    result["requested_bytes"] = std::to_string(total);
+    return result;
+}
 Json rdcVertexOutputLayout(const ShaderReflection &shader, uint32_t stride) {
     Json result{{"status", "unavailable"}, {"scope", "RenderDoc 1.45 D3D12 VSOut stream-output layout"}};
     if (shader.stage != ShaderStage::Vertex || shader.outputSignature.empty() || shader.outputSignature.size() > 1024) {

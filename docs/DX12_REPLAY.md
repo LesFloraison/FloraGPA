@@ -4716,6 +4716,76 @@ run. Ignored evidence includes `counter-catalog-evidence1.json`,
 `counter-selection1.txt`, `counter-options1.txt`, `counter-catalog-ui2.txt`, and
 the inspected `counter-catalog-ui2/rdc-counters/dx12-counter-catalog.png`.
 
+### Hellblade2 compute inputs and invocation instability
+
+A bounded temporary probe of execution **36779**, Group **[0,0,0]**, Thread
+**[0,0,0]** reads the five reflected CS SRV views before debugging, after trace
+creation and after instruction stepping. It covers buffer creation **571506**
+(`TileListsBuffer`, **122,400 bytes**), color texture **531690** (two mips,
+**9,216,000 / 2,304,000 bytes**), flat velocity **573318** (**9,216,000 bytes**),
+velocity tiles **555318** (**48,960 bytes**) and the single-texel translucency
+texture **510486** (**4 bytes**). These are observation points, not captured
+values of every simulated load. The temporary code and raw bytes remain outside
+Git; production no longer includes that texture probe.
+
+`hellblade-compute-input-probe1` produces **588** steps. Buffer word **18360**
+starts with tile **0x250034**, coordinate **(52,37)**, both before debugging and
+after trace creation. After stepping it is **0x300030**, coordinate **(48,48)**.
+The trace's actual `_102` is **3145776** (`0x300030`), and its `_130/_131` are
+**768/768**; the downsample store coordinates `_658/_659` are **384/384**.
+The earlier trace used **832/592** and **416/296**. Thus the same selected Group
+and Thread do not identify a stable shader-computed output location across these
+replays. The separately requested GPU texel **(416,296)** cannot be assumed to
+belong to this trace's invocation.
+
+The indexed **1,174-entry** window starting at word 18360 is not merely an equal
+multiset in a different order at these observation points; later actual indirect
+counts were not read, so this is not a claim about each later complete work list.
+Across the entire buffer, **6,518** words change before-to-trace and **5,865**
+trace-to-steps. The color input changes **342,028 / 12,503** words in mip 0 and
+**85,930 / 2,958** in mip 1. Flat velocity and velocity tiles change **1,372**
+and **302** words before-to-trace, then remain unchanged. Translucency's four
+bytes remain unchanged. This establishes input variation before judging the
+WaveReadLaneAt-derived output; it does not establish a wave-instruction bug,
+missing barrier, or the initial source of the variation.
+
+The pinned RenderDoc source replays the prefix without the selected Dispatch in
+`D3D12Replay::DebugThread`, lazily prepares resources in
+`D3D12APIWrapper::PrepareReplayForResources`, and restores the Dispatch through
+`ResetReplay`. `ContinueDebug` also calls that restoration after a returned
+batch. A follow-up actual run with the production buffer-only check reports
+**one batch of 332 steps**. Consequently inter-batch replay is **not** established
+as this case's cause; no speculative runtime replay-freezing patch was applied.
+
+DX12 CS reports now include `compute_buffer_inputs`: the potential read-only
+buffer bindings and byte-range SHA-256 snapshots at the three points. Each
+point is bounded to **16 MiB / 256 views**; malformed ranges, incomplete reads
+and budget exclusions remain explicit. Offsets, sizes and resource IDs retain
+exact 64-bit text. Changed or incomplete observations mark the trace partial
+and display a warning in the existing debugger. Textures, UAVs and constant
+buffers are outside this production check, and unchanged snapshots do not prove
+complete or continuous input stability. `debug_batch_sizes` records actual
+nonempty ContinueDebug return sizes instead of inferring batch boundaries.
+
+The production query `hellblade-compute-buffer-stability1` reads only the
+**122,400-byte** buffer at each point. Its SHA-256 values begin
+**f52eaf8b**, **d4e999a6**, **8d3dda40**; all differ, and the returned trace and
+workspace warning explicitly remain partial. Both queries use the existing
+independent RDC; no native full-sample recapture or GPA process was needed.
+The original capture is unchanged. Ignored evidence includes
+`compute-input-probe1.patch`, `hellblade-compute-input-evidence1.json`,
+`hellblade-compute-input-probe1`, and `hellblade-compute-buffer-stability1`.
+
+Builds **311–313** pass. The bounded-range test verifies byte changes, exact
+identities/offsets above 2^53, short reads and budget rejection before reading
+(**3 passed including setup/cleanup, 1 ms**). The workspace consumes the actual
+new report, shows the instability warning, and rejects it after experiment
+context changes (**3 passed, 269 ms**). Its inspected screenshot is
+`compute-input-ui1/replay-debug/compute-input-stability.png`; logs are
+`compute-input-snapshot1.txt` and `compute-input-ui1.txt`. The production query
+loads neither GPA nor Python. Full compute numerical fidelity and stable
+invocation-to-output correspondence remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

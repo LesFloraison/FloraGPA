@@ -15,6 +15,34 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void computeBufferInputSnapshots() {
+        using Json = nlohmann::json;
+        ResourceId resource; const uint64_t id = 9007199254740993ULL;
+        memcpy(&resource, &id, sizeof id);
+        std::vector<RdcBufferInputRange> ranges{{resource, id, 4, id + 4}};
+        unsigned reads{}; unsigned char first = 1;
+        const auto reader = [&](ResourceId object, uint64_t offset, uint64_t size) {
+            if (object != resource || offset != id || size != 4) throw std::runtime_error("Wrong input range");
+            ++reads; bytebuf result; result.resize(4); result[0] = first; return result;
+        };
+        const auto before = rdcBufferInputSnapshot(ranges, reader, 4);
+        QCOMPARE(before.at("status"), Json("read"));
+        QCOMPARE(before.at("ranges")[0].at("offset"), Json("9007199254740993"));
+        QCOMPARE(before.at("ranges")[0].at("resource"), Json("ResourceId::9007199254740993"));
+        QCOMPARE(rdcBufferInputSnapshot(ranges, reader, 4), before);
+        first = 2;
+        QVERIFY(rdcBufferInputSnapshot(ranges, reader, 4).at("ranges")[0].at("sha256") != before.at("ranges")[0].at("sha256"));
+        QCOMPARE(reads, 3U);
+        QCOMPARE(rdcBufferInputSnapshot(ranges, reader, 3).at("status"), Json("incomplete"));
+        QCOMPARE(reads, 3U);
+        ranges[0].bufferSize = id + 3;
+        QCOMPARE(rdcBufferInputSnapshot(ranges, reader).at("status"), Json("incomplete"));
+        QCOMPARE(reads, 3U);
+        ranges[0].bufferSize = id + 4;
+        const auto shortRead = rdcBufferInputSnapshot(ranges, [](auto, auto, auto) { return bytebuf(); });
+        QCOMPARE(shortRead.at("ranges")[0].at("reason"), Json("Incomplete input buffer read"));
+        QCOMPARE(rdcBufferInputSnapshot({}, reader).at("status"), Json("no_buffer_views"));
+    }
     void vertexInputSnapshots() {
         using Json = nlohmann::json;
         ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Instanced;

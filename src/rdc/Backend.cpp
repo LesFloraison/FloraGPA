@@ -487,6 +487,35 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     if (dx12 && compute)
         result["compute_invocation"] = flora::rdcComputeInvocation(
             *selected, *reflection, coordinates(job, "group"), coordinates(job, "thread"));
+    std::vector<flora::RdcBufferInputRange> computeBufferRanges;
+    if (dx12 && compute) {
+        const auto buffers = controller.GetBuffers();
+        const auto resources = controller.GetResources();
+        Json bindings = Json::array();
+        const auto &accesses = controller.GetDescriptorAccess();
+        if (accesses.size() > 16384) throw std::runtime_error("Compute descriptor access limit exceeded");
+        for (const auto &access : accesses) {
+            if (access.stage != ShaderStage::Compute || CategoryForDescriptorType(access.type) != DescriptorCategory::ReadOnlyResource) continue;
+            rdcarray<DescriptorRange> ranges; ranges.push_back(DescriptorRange(access));
+            const auto views = controller.GetDescriptors(access.descriptorStore, ranges);
+            if (views.size() != 1) throw std::runtime_error("Incomplete compute input descriptor response");
+            const auto &view = views[0];
+            const auto buffer = std::find_if(buffers.begin(), buffers.end(), [&](const auto &b) { return b.resourceId == view.resource; });
+            if (buffer == buffers.end()) continue; // Texture/UAV/CBV inputs are outside this check.
+            if (computeBufferRanges.size() == 256) throw std::runtime_error("Compute input buffer view limit exceeded");
+            computeBufferRanges.push_back({view.resource, view.byteOffset, view.byteSize, buffer->length});
+            const auto resource = std::find_if(resources.begin(), resources.end(), [&](const auto &r) { return r.resourceId == view.resource; });
+            bindings.push_back({{"resource", resourceName(view.resource)}, {"name", resource == resources.end() ? "" : text(resource->name)},
+                {"reflection_index", access.index}, {"array_element", access.arrayElement}, {"statically_unused", access.staticallyUnused}});
+        }
+        result["compute_buffer_inputs"]["bindings"] = std::move(bindings);
+    }
+    const auto computeInputs = [&] {
+        return flora::rdcBufferInputSnapshot(computeBufferRanges, [&](ResourceId resource, uint64_t offset, uint64_t length) {
+            return controller.GetBufferData(resource, offset, length);
+        });
+    };
+    if (dx12 && compute) result["compute_buffer_inputs"]["before_debug"] = computeInputs();
     struct ReferenceSelection {
         ResourceId resource;
         uint32_t x, y;
@@ -656,6 +685,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     }
     if (!trace || !trace->debugger)
         throw std::runtime_error("No debugger trace at the selected invocation");
+    if (dx12 && compute) result["compute_buffer_inputs"]["after_trace_creation"] = computeInputs();
     if (referenceSelection) {
         const auto &selection = *referenceSelection;
         result["gpu_reference"]["after_trace_creation_value"] =
@@ -698,10 +728,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         }
     }
     Json steps = Json::array();
+    Json batches = Json::array();
     for (;;) {
         const auto batch = controller.ContinueDebug(trace->debugger);
         if (batch.empty())
             break;
+        batches.push_back(batch.size());
         if (batch.size() > 250000 - steps.size())
             throw std::runtime_error("Debug trace exceeded 250000 steps");
         for (const auto &state : batch)
@@ -711,6 +743,25 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         throw std::runtime_error("Shader debugger returned no steps");
     result["step_count"] = steps.size();
     result["steps"] = std::move(steps);
+    result["debug_batch_sizes"] = std::move(batches);
+    if (dx12 && compute) {
+        auto &snapshots = result["compute_buffer_inputs"];
+        snapshots["after_steps"] = computeInputs();
+        checked(controller.GetFatalErrorStatus());
+        const auto &before = snapshots.at("before_debug");
+        const bool complete = before.at("status") == "read" && snapshots.at("after_trace_creation").at("status") == "read" && snapshots.at("after_steps").at("status") == "read";
+        const bool same = before == snapshots.at("after_trace_creation") && before == snapshots.at("after_steps");
+        snapshots["status"] = computeBufferRanges.empty() ? "no_buffer_views" : !complete ? "incomplete" : same ? "observed_bytes_unchanged" : "observed_bytes_changed";
+        snapshots["scope"] = "Potential CS read-only buffer views at three observation points, up to 16 MiB each point. Textures, UAVs and constant buffers are not checked. Unchanged bytes do not prove stable invocation inputs during simulation.";
+        if (!computeBufferRanges.empty() && (!complete || !same)) {
+            result["partial"] = true;
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null()) warnings = Json::array();
+            warnings.push_back(complete
+                ? "Compute read-only buffer inputs changed during debug replays. The same Group/Thread coordinates may select different work; an earlier GPU texel cannot validate this invocation."
+                : "Compute read-only buffer input snapshots are incomplete; input stability is unverified.");
+        }
+    }
     // Debugging can replay the capture again, including when a DXBC UAV is
     // fetched lazily. Do not silently compare a trace against an earlier
     // output when those replays have changed even the selected reference.
