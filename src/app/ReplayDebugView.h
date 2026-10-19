@@ -50,6 +50,7 @@ class ReplayDebugView final : public QWidget {
     bool dx12_{};
     std::unique_ptr<ReplayDebugModel> model_;
     QToolBar *inputs_, *steps_;
+    QToolBar *depthOptions_{};
     QAction *read_, *cancel_, *export_, *backend_;
     QAction *clearReference_{};
     QSpinBox *x_{}, *y_{}, *sample_{}, *step_, *line_;
@@ -61,6 +62,7 @@ class ReplayDebugView final : public QWidget {
     QLabel *indirectActionLabel_{};
     QCheckBox *pixelHistoryReference_{};
     QCheckBox *readOnlyDepthSnapshot_{};
+    QCheckBox *depthRoundtrip_{};
     QCheckBox *fastContraction_{};
     QLabel *invocationReference_;
     QPlainTextEdit *assembly_, *source_, *details_;

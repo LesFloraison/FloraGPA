@@ -170,7 +170,7 @@ class RdcJobTests : public QObject {
     void depthRoundtripScope() {
         QTemporaryDir dir;
         const Json option{{"execution", "36222"}, {"depth_roundtrip", true}};
-        for (const auto *action : {"history", "debug-pixel", "debug-vertex", "debug-thread", "counters"})
+        for (const auto *action : {"history", "debug-vertex", "debug-thread", "counters"})
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", option, action));
         auto conflict = option;
         conflict["readonly_depth_snapshot"] = true;
@@ -181,6 +181,8 @@ class RdcJobTests : public QObject {
         const auto job = prepare(dir.path(), "success", option, "texture");
         QCOMPARE(job.at("depth_roundtrip"), Json(true));
         QCOMPARE(job.at("execution"), Json("36222"));
+        const auto pixel = prepare(dir.path(), "success", option, "debug-pixel");
+        QCOMPARE(pixel.at("depth_roundtrip"), Json(true));
     }
     void invalidOptions_data() {
         QTest::addColumn<Json>("options");

@@ -53,6 +53,66 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void depthRoundtripPixelDebug() {
+        const auto root = qEnvironmentVariable("FLORA_DEPTH_ROUNDTRIP_DEBUG_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the selected D32S8 pixel debug evidence directory");
+        const auto report = read(root + "/enabled/result.json");
+        const auto baseline = read(root + "/disabled/result.json");
+        QCOMPARE(report.at("depth_roundtrip").at("copies"), Json("3"));
+        QCOMPARE(report.at("steps").size(), size_t(131));
+        const auto &gpu = report.at("gpu_reference");
+        QCOMPARE(gpu.at("value"), gpu.at("after_trace_creation_value"));
+        QCOMPARE(gpu.at("value"), gpu.at("after_debug_value"));
+        QCOMPARE(gpu.at("consistency"), Json("selected_texel_unchanged"));
+        QCOMPARE(baseline.at("gpu_reference").at("value").at("uintValue"), Json::array({0,0,0,0}));
+        QVERIFY(gpu.at("value") != baseline.at("gpu_reference").at("value"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        ReplayDebugView view("ps"); view.resize(1500, 950); view.show();
+        view.setContext("hellblade:roundtrip", 36222, true);
+        view.selectPixel(456, 206, 0);
+        auto refresh = view.findChild<QCheckBox *>("debugDepthRoundtrip");
+        auto snapshot = view.findChild<QCheckBox *>("debugReadOnlyDepthSnapshot");
+        QVERIFY(refresh); QVERIFY(snapshot); QVERIFY(!refresh->isChecked());
+        const auto old = view.requestId();
+        refresh->setChecked(true);
+        QVERIFY(!view.finish(old, baseline));
+        QCOMPARE(view.request().at("depth_roundtrip"), Json(true));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), baseline));
+        snapshot->setChecked(true); QVERIFY(!refresh->isChecked());
+        refresh->setChecked(true); QVERIFY(!snapshot->isChecked());
+        view.setWorkerBusy(true); QVERIFY(!refresh->isEnabled());
+        view.setWorkerBusy(false); QVERIFY(refresh->isEnabled());
+        QVERIFY(view.finish(view.requestId(), report));
+        QVERIFY(view.findChild<QLabel *>("debugBackendNotice")->text().contains("3 completed copies"));
+        QSignalSpy errors(&view, &ReplayDebugView::error);
+        view.findChild<QLineEdit *>("debugInstruction")->setText("137");
+        action(view, "debugToggleInstructionBreakpoint")->trigger();
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(125));
+        view.findChild<QLineEdit *>("debugWatchExpression")->setText("_175");
+        action(view, "debugAddWatch")->trigger();
+        const auto watch = view.model()->watchResults().at(0);
+        QCOMPARE(watch.at("status"), Json("available"));
+        QCOMPARE(watch.at("values").at(0), Json(0.14453497529029846));
+        // This unresolved difference is retained, not accepted as shader equivalence.
+        QVERIFY(std::abs(watch.at("values").at(0).get<double>() -
+                         gpu.at("value").at("floatValue").at(3).get<double>()) > 0.001);
+        auto tabs = view.findChild<QTabWidget *>("debugValueTabs");
+        for (int i = 0; i < tabs->count(); ++i)
+            if (tabs->tabText(i) == "Watches") tabs->setCurrentIndex(i);
+        QCoreApplication::processEvents();
+        QVERIFY(refresh->isVisible()); QVERIFY(snapshot->isVisible());
+        if (!output_.isEmpty()) {
+            QVERIFY(view.grab().save(output_ + "/depth-roundtrip-pixel-debug.png"));
+            view.exportResult(output_ + "/depth-roundtrip-pixel-debug.json");
+            QCOMPARE(read(output_ + "/depth-roundtrip-pixel-debug.json").at("depth_roundtrip"), report.at("depth_roundtrip"));
+        }
+        QVERIFY(errors.empty());
+        const auto stale = view.requestId();
+        view.setContext("next-experiment", 36222, true);
+        QVERIFY(!refresh->isChecked()); QVERIFY(!view.finish(stale, report));
+        view.setContext("dx11", 1, false); QVERIFY(refresh->isHidden());
+    }
     void indirectHistoryBoundaryMismatch() {
         const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
         if (root.isEmpty()) QSKIP("Set the Hellblade indirect boundary evidence directory");

@@ -149,12 +149,28 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
                                            "Runs additional Pixel History replays to read shader output before blending.");
         inputs_->addWidget(pixelHistoryReference_);
         connect(pixelHistoryReference_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
+        depthOptions_ = new QToolBar;
+        layout->addWidget(depthOptions_);
         readOnlyDepthSnapshot_ = new QCheckBox("D32 depth snapshot (experimental)");
         readOnlyDepthSnapshot_->setObjectName("debugReadOnlyDepthSnapshot");
         readOnlyDepthSnapshot_->setToolTip("Requires the patched RenderDoc library. Copies read-only, single-sample "
                                             "D32 depth for isolated draws; preserves depth comparison and adds GPU work.");
-        inputs_->addWidget(readOnlyDepthSnapshot_);
+        depthOptions_->addWidget(readOnlyDepthSnapshot_);
         connect(readOnlyDepthSnapshot_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
+        depthRoundtrip_ = new QCheckBox("D32S8 depth refresh (experimental)");
+        depthRoundtrip_->setObjectName("debugDepthRoundtrip");
+        depthRoundtrip_->setToolTip("Requires the patched RenderDoc library. Copies depth out and back before "
+                                   "the selected isolated Draw, preserving the original attachment and depth writes. "
+                                   "D32S8 only, stencil disabled, one mip/layer/sample/node and legacy depth states. "
+                                   "Adds GPU work; does not establish full replay correctness.");
+        depthOptions_->addWidget(depthRoundtrip_);
+        connect(depthRoundtrip_, &QCheckBox::toggled, this, [this](bool enabled) {
+            if (enabled) readOnlyDepthSnapshot_->setChecked(false);
+            invalidate();
+        });
+        connect(readOnlyDepthSnapshot_, &QCheckBox::toggled, this, [this](bool enabled) {
+            if (enabled) depthRoundtrip_->setChecked(false);
+        });
     } else if (stage_ == "vs") {
         auto index = [&](const char *name, const QString &label) {
             inputs_->addWidget(new QLabel(label));
@@ -586,6 +602,8 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
             pixelHistoryReference_->setChecked(false);
         if (readOnlyDepthSnapshot_)
             readOnlyDepthSnapshot_->setChecked(false);
+        if (depthRoundtrip_)
+            depthRoundtrip_->setChecked(false);
         invalidate();
     }
     updateActions();
@@ -673,6 +691,8 @@ Json ReplayDebugView::request() const {
         }
         if (dx12_ && readOnlyDepthSnapshot_->isChecked())
             job["readonly_depth_snapshot"] = true;
+        if (dx12_ && depthRoundtrip_->isChecked())
+            job["depth_roundtrip"] = true;
     } else if (stage_ == "vs")
         job.update({{"vertex", invocationIndex(vertex_)}, {"instance", invocationIndex(instance_)}});
     else {
@@ -715,6 +735,10 @@ void ReplayDebugView::updateActions() {
     cancel_->setEnabled(busy_);
     backend_->setEnabled(!busy_);
     inputs_->setEnabled(!busy_);
+    if (depthOptions_) {
+        depthOptions_->setVisible(dx12_);
+        depthOptions_->setEnabled(!busy_);
+    }
     indirectAction_->setVisible(dx12_);
     indirectActionLabel_->setVisible(dx12_);
     fastContraction_->setVisible(dx12_);
@@ -722,6 +746,8 @@ void ReplayDebugView::updateActions() {
         pixelHistoryReference_->setVisible(dx12_);
     if (readOnlyDepthSnapshot_)
         readOnlyDepthSnapshot_->setVisible(dx12_);
+    if (depthRoundtrip_)
+        depthRoundtrip_->setVisible(dx12_);
     if (clearReference_) {
         clearReference_->setVisible(dx12_);
         clearReference_->setEnabled(!busy_ && textureReference_.is_object());
@@ -749,6 +775,9 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("Shader trace does not match the DX12 execution selection");
     if (dx12_ && result.value("dxil_fast_contraction", Json::object()).value("enabled", false) != fastContraction_->isChecked())
         throw std::runtime_error("Shader trace does not match the DXIL contraction mode");
+    if (dx12_ && depthRoundtrip_ &&
+        result.value("depth_roundtrip", Json::object()).value("requested", false) != depthRoundtrip_->isChecked())
+        throw std::runtime_error("Shader trace does not match the D32S8 depth refresh mode");
     if (dx12_ && !indirectAction_->text().trimmed().isEmpty() &&
         result.value("indirect_selection", Json::object()).value("indirect_action", Json()) != invocationIndex(indirectAction_))
         throw std::runtime_error("Shader trace does not match the selected indirect action");
@@ -766,6 +795,10 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
+    if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
+        warnings.prepend(QString("Experimental D32S8 depth refresh: %1 completed copies. "
+                                 "Original depth writes preserved; full replay correctness is not established.")
+                             .arg(text(refresh.value("copies", Json("unknown")))));
     if (result.contains("texture_stores"))
         warnings.append("Texture writes show this lane's operands before storage conversion. GPU values follow the whole dispatch and may include later writes; they do not validate individual stores.");
     const auto lifecycle = result.value("compute_input_lifecycle", Json());

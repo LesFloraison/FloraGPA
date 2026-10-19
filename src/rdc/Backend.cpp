@@ -1258,8 +1258,8 @@ Json rdcLoadedModules() {
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     if (job.value("depth_roundtrip", false) &&
-        (action != "texture" || job.value("readonly_depth_snapshot", false)))
-        throw std::runtime_error("Depth roundtrip requires texture analysis without read-only depth snapshots");
+        ((action != "texture" && action != "debug-pixel") || job.value("readonly_depth_snapshot", false)))
+        throw std::runtime_error("Depth roundtrip requires texture or debug-pixel analysis without read-only depth snapshots");
     if (job.value("readonly_depth_snapshot", false) && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     if (job.value("pixel_history_reference", false) &&

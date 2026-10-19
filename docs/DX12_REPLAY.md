@@ -5648,8 +5648,9 @@ states. Mesh draws, enhanced layouts and other depth formats are outside this
 experiment. Both planes are copied; the original DSV remains bound and the
 tracked states are restored before the Draw. The temporary resource survives
 GPU completion. Full/prefix replays and capture loading do not enable it.
-Shader Debug, Pixel History and the workspace UI do not yet expose this
-option. It cannot be combined with the older read-only D32 snapshot option.
+This first milestone exposes the option only for texture analysis; the
+following section records the subsequent PS debugger integration. It cannot
+be combined with the older read-only D32 snapshot option.
 
 The worker checks the extension version, rejects a request when no eligible
 selected Draw was processed, and records `depth_roundtrip.copies` as a decimal
@@ -5686,6 +5687,56 @@ normalization the exact fourteen-patch source/build verification passes.
 Package-script parsing passes; full portable-package acceptance remains
 unverified. This restores one demonstrated texture boundary through an
 explicit workaround, not general selected replay, analysis or frame fidelity.
+
+### D32S8 refresh in pixel debugging
+
+`--depth-roundtrip` now also accepts `debug-pixel`. The PS workspace exposes
+**D32S8 depth refresh (experimental)** beside the older D32 snapshot in a
+separate options row. Both default off and are mutually exclusive. The option
+is disabled while work runs, clears on event/session/experiment changes and
+is hidden for DX11. Changing it invalidates the request; incoming traces must
+also report the matching refresh mode. Completed-copy counts and the limited
+correctness scope remain visible and survive JSON export. Pixel History has
+not yet been integrated with this option.
+
+Real CLI comparison `hellblade-depth-roundtrip-debug1/{disabled,enabled}` uses
+execution **36222**, automatic pixel invocation at **(456,206)**, sample 0.
+Both return **131** steps. Without refresh, all three target observations are
+zero. With refresh, the observations before DebugPixel, after trace creation
+and after stepping all equal
+`(0.5280842185020447, 0.4600290060043335, 0.7161363959312439, 0.1428091824054718)`.
+These match the independently read UNORM16 texture values from the previous
+section. The enabled report records **three** completed roundtrips. Both
+workers load neither GPA nor Python; the fourteen-patch DLL is unchanged.
+
+This fixes the GPU target reference, **not shader arithmetic equivalence**.
+Both traces produce target-0 SSA values `_163`, `_164`, `_170`, `_175` of
+`(0.5280897617340088, 0.46003520488739014, 0.7161379456520081, 0.14453497529029846)`.
+Their UNORM16 conversion is `(34608,30148,46932,9472)`, versus GPU
+`(34608,30148,46932,9359)`. The alpha difference remains **113 stored units**.
+The earlier Pixel History shader output has alpha `0.14281071722507477`, also
+different from the interpreter. No selected-instance/fragment equivalence is
+inferred for this 380-instance Draw.
+
+The disassembly encodes the low bits of `_142 = _55/_56 - _51/_52` into alpha.
+Both traces have numerator bits `0x3f7fffff`, denominator bits `0x43e48853`
+and `0x43e33824`, and interpreted difference `0xb7542500`. A separate numeric
+calculation using rounded reciprocals and fusing the first product with the
+subtraction gives `0xb754248f`, consistent with the observed encoded GPU
+alpha. This narrows the next investigation to division lowering/contraction
+and invocation inputs; it is **not evidence of the actual GPU instruction
+sequence**, and no arithmetic substitution is shipped by this change.
+
+The targeted workspace check loads the actual enabled report, stops at
+instruction **137** / step **125**, and watches `_175`, keeping its unresolved
+difference visible alongside the GPU target values. It verifies option
+exclusion, request invalidation, stale/mismatched result rejection, busy state,
+context reset, DX11 hiding and JSON export: **3 passed**, **0 failed**,
+**1,362 ms**, including setup/cleanup. Screenshot
+`depth-roundtrip-debug-ui1/depth-roundtrip-pixel-debug.png` was inspected.
+Request-scope validation passes separately: **3 passed**, **22 ms**.
+Builds **372–374** pass. Complete PS correctness and the remaining acceptance
+items below remain unfinished.
 
 ### Full feature acceptance
 

@@ -122,8 +122,8 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!job["depth_roundtrip"].is_boolean())
         throw std::runtime_error("Depth roundtrip must be a boolean");
     if (job["depth_roundtrip"].get<bool>() &&
-        (action != "texture" || job["readonly_depth_snapshot"].get<bool>()))
-        throw std::runtime_error("Depth roundtrip requires texture analysis without read-only depth snapshots");
+        ((action != "texture" && action != "debug-pixel") || job["readonly_depth_snapshot"].get<bool>()))
+        throw std::runtime_error("Depth roundtrip requires texture or debug-pixel analysis without read-only depth snapshots");
     if (job["readonly_depth_snapshot"].get<bool>() && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     if (!job["pixel_history_reference"].is_boolean())

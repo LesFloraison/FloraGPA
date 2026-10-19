@@ -40,7 +40,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
         p.addOption({"dxil-fast-contraction", "Experimental GPU evaluation of adjacent single-use fast DXIL multiply/add pairs"});
         p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
-        p.addOption({"depth-roundtrip", "Experimental selected DX12 D32S8 depth refresh for texture analysis; preserves original depth writes"});
+        p.addOption({"depth-roundtrip", "Experimental selected DX12 D32S8 depth refresh for texture/debug-pixel analysis; preserves original depth writes"});
         p.addOption({"pixel-history-reference", "Read the selected DX12 primitive's GPU shader output using extra pixel-history replays"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
