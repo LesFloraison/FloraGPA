@@ -514,6 +514,41 @@ to be included even when the output view selects a before-event boundary.
 Malformed query records report a separate failure. Existing native deferred
 query checks remain as an execution-time guard.
 
+Query destination preflight now also identifies the resource lifetime and its
+captured allocation: resource creation, dimension, width, heap type and, for
+placed buffers, heap creation/offset/size. These are allocation facts, not proof
+that a query result is unused. Talos executions 16001 and 19409 resolve 1,888
+bytes each into resource creations 78132 and 12800 respectively. Both are
+65,536-byte buffers on READBACK heap creation 42957, at heap offsets 327680 and
+458752. The report retains the missing-result status and 140/146 missing slots.
+No query is omitted or replaced with an invented value.
+
+CPU preflight rejects missing destinations, non-buffer destinations, unaligned
+offsets and writes beyond the selected resource lifetime. Native recording uses
+the same overflow-safe size check. Pipeline-statistics-1 results occupy 112
+bytes, correcting the previous fallback to eight bytes; this layout check does
+not certify mesh-shader query support on the replay device. Unknown result
+layouts fail explicitly. These checks follow the destination requirements in
+[Microsoft's ResolveQueryData reference](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-resolvequerydata).
+
+A follow-up address audit scanned every byte offset in all 192,535 Talos
+serialized packet payloads for values within the two 65,536-byte GPU address
+ranges (bases 12696485888 and 12696616960). Its only matches were the respective
+GetGPUVirtualAddress return values, at records 78133 and 12801. This audit did
+not scan resource contents, establish all indirect dependencies or prove that
+the missing historical values can be discarded. It does not authorize partial
+query execution or change the full-frame blocker.
+
+Focused evidence: `query-destinations1.txt` records four passing cases (plus
+setup/cleanup) in 0.519 s: repeated submissions and resource-pointer reuse,
+destination range/layout checks including offsets above 4 GiB, the two real
+Talos destinations, and workspace navigation around execution 16001. The
+reports are `talos-query-destinations1.json` and `talos-query-addresses1.json`.
+All are ignored local artifacts; this validation created no GPU device.
+The rebuilt CLI/Worker (build272) also preserve preflight rejection:
+`talos-query-destination-preflight1/report.json` returns exit 2, `missing_data`,
+`completed: false` and `device_created: false`, with the destination evidence.
+
 Targeted CPU evidence, without GPU replay:
 
 - `query-coverage3`: all submitted query ranges in the three supplied captures.

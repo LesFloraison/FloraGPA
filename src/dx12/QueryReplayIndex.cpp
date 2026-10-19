@@ -1,4 +1,5 @@
 #include "QueryReplayIndex.h"
+#include "NativeResources.h"
 #include <d3d12.h>
 #include <set>
 
@@ -15,10 +16,76 @@ struct Heap {
     std::map<uint32_t, uint32_t> active, completed;
     std::map<std::pair<uint32_t, uint32_t>, std::set<uint64_t>> recordedEnds;
 };
+// Resource recipes are indexed without creating a device or reading resource
+// contents. Initialization may enumerate a unique heap after its placed buffer.
+class Destinations {
+    const StreamDirectory &directory_;
+    std::map<uint64_t, std::vector<uint64_t>> resources_, heaps_;
+    uint64_t at(const std::map<uint64_t, std::vector<uint64_t>> &index, uint64_t object, uint64_t record) const {
+        const auto found = index.find(object);
+        require(found != index.end(), "Query destination resource or heap creation is missing");
+        uint64_t selected{};
+        for (const auto creation : found->second) if (creation <= record) selected = creation;
+        if (!selected && record <= directory_.initializationCount())
+            for (const auto creation : found->second) if (creation <= directory_.initializationCount()) {
+                require(!selected, "Ambiguous initialization query destination lifetime"); selected = creation;
+            }
+        require(selected, "Query destination precedes its resource or heap creation");
+        return selected;
+    }
+  public:
+    Destinations(const StreamDirectory &directory, const CancelCheck &cancelled) : directory_(directory) {
+        for (size_t i = 0; i < directory.packets().size(); ++i) {
+            if (i % 1024 == 0) checkCancellation(cancelled);
+            const auto &p = directory.packets()[i];
+            try {
+                if (isResourceRecipe(p.type)) {
+                    const auto recipe = decodeResourceRecipe(p.type, directory.payload(p));
+                    if (SUCCEEDED(recipe.result) && recipe.object) resources_[recipe.object].push_back(i + 1);
+                } else if (p.type == 0x1279335a5747bULL) {
+                    const auto recipe = decodeHeapRecipe(directory.payload(p));
+                    if (SUCCEEDED(recipe.result) && recipe.object) heaps_[recipe.object].push_back(i + 1);
+                }
+            } catch (const std::exception &) {} // Report only when a resolve needs this invalid recipe.
+        }
+    }
+    Json describe(uint64_t object, uint64_t record) const {
+        const auto creation = at(resources_, object, record);
+        const auto &p = directory_.packets().at(size_t(creation - 1));
+        const auto recipe = decodeResourceRecipe(p.type, directory_.payload(p));
+        Json out{{"creation", std::to_string(creation)}, {"dimension", recipe.description.Dimension},
+            {"width", std::to_string(recipe.description.Width)}, {"heap_type", nullptr},
+            {"scope", "Captured allocation metadata; does not prove absence of GPU consumers or recover query values"}};
+        if (recipe.kind == ResourceRecipe::Kind::Placed) {
+            const auto heapCreation = at(heaps_, recipe.heap, creation);
+            const auto heap = decodeHeapRecipe(directory_.payload(directory_.packets().at(size_t(heapCreation - 1))));
+            out.update({{"heap", std::to_string(recipe.heap)}, {"heap_creation", std::to_string(heapCreation)},
+                {"heap_offset", std::to_string(recipe.heapOffset)}, {"heap_size", std::to_string(heap.description.SizeInBytes)},
+                {"heap_type", heap.description.Properties.Type}});
+        } else if (recipe.kind != ResourceRecipe::Kind::Reserved) out["heap_type"] = recipe.properties.Type;
+        return out;
+    }
+};
+}
+uint32_t queryResultStride(uint32_t type) {
+    switch (type) {
+    case D3D12_QUERY_TYPE_OCCLUSION: case D3D12_QUERY_TYPE_BINARY_OCCLUSION: case D3D12_QUERY_TYPE_TIMESTAMP: return 8;
+    case D3D12_QUERY_TYPE_PIPELINE_STATISTICS: return sizeof(D3D12_QUERY_DATA_PIPELINE_STATISTICS);
+    case D3D12_QUERY_TYPE_PIPELINE_STATISTICS1: return sizeof(D3D12_QUERY_DATA_PIPELINE_STATISTICS1);
+    case D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0: case D3D12_QUERY_TYPE_SO_STATISTICS_STREAM1:
+    case D3D12_QUERY_TYPE_SO_STATISTICS_STREAM2: case D3D12_QUERY_TYPE_SO_STATISTICS_STREAM3:
+        return sizeof(D3D12_QUERY_DATA_SO_STATISTICS);
+    default: throw std::runtime_error("Unsupported query result layout");
+    }
+}
+void validateQueryDestination(uint32_t type, uint32_t count, uint64_t offset, uint64_t width) {
+    const auto size = uint64_t(count) * queryResultStride(type);
+    require(offset % 8 == 0 && offset <= width && size <= width - offset, "Query result exceeds its buffer or has an unaligned offset");
 }
 QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const SubmissionIndex &index,
                                  const CancelCheck &cancelled) {
     std::map<uint64_t, std::vector<Heap>> heaps;
+    const Destinations destinations(directory, cancelled);
     const auto heapAt = [&](uint64_t object, uint64_t record) -> Heap & {
         const auto found = heaps.find(object);
         require(found != heaps.end(), "Query heap creation is missing or invalid");
@@ -130,6 +197,12 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                     entry["reason"] = "ResolveQueryData execution " + std::to_string(execution) + " (record " + std::to_string(record) +
                         ") lacks " + std::to_string(missing) + " of " + std::to_string(count) + " completed query results from heap " + std::to_string(object);
                 }
+                entry["destination_resource"] = destinations.describe(destination, record);
+                const auto &resource = entry.at("destination_resource");
+                require(resource.at("dimension") == D3D12_RESOURCE_DIMENSION_BUFFER, "Query destination must be a buffer");
+                validateQueryDestination(type, count, offset, std::stoull(resource.at("width").get<std::string>()));
+                entry["result_stride"] = queryResultStride(type);
+                entry["result_bytes"] = std::to_string(uint64_t(count) * queryResultStride(type));
             } catch (const OperationCancelled &) { throw; }
             catch (const std::exception &e) { entry["status"] = "invalid_query_data"; entry["reason"] = e.what(); }
             entries_.emplace(execution, std::move(entry));

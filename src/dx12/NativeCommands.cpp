@@ -1,4 +1,5 @@
 #include "NativeCommands.h"
+#include "QueryReplayIndex.h"
 #include <wrl/client.h>
 #include <map>
 #include <sstream>
@@ -381,9 +382,7 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
         const auto object = r.read<uint64_t>(); const auto type = r.read<D3D12_QUERY_TYPE>(); const auto start = r.read<UINT>(), count = r.read<UINT>();
         const auto destination = r.read<uint64_t>(), offset = r.read<uint64_t>(); r.end(); auto &heap = s.query(object, id, start, count);
         auto buffer = s.resources.resource(destination, id); require(buffer->GetDesc().Dimension == D3D12_RESOURCE_DIMENSION_BUFFER, "Query destination must be a buffer");
-        const UINT stride = type == D3D12_QUERY_TYPE_PIPELINE_STATISTICS ? sizeof(D3D12_QUERY_DATA_PIPELINE_STATISTICS) :
-            type >= D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0 && type <= D3D12_QUERY_TYPE_SO_STATISTICS_STREAM3 ? sizeof(D3D12_QUERY_DATA_SO_STATISTICS) : 8;
-        require(offset % 8 == 0 && offset <= buffer->GetDesc().Width && uint64_t(count) * stride <= buffer->GetDesc().Width - offset, "Query result exceeds its buffer");
+        validateQueryDestination(type, count, offset, buffer->GetDesc().Width);
         executionChecks.push_back([&heap, start, count, type, id, destination, &resources = s.resources] {
             for (UINT i = 0; i < count; ++i) if (!heap.completed.contains(start + i) || heap.completed.at(start + i) != type)
                 throw std::runtime_error("Query resolve at source record " + std::to_string(id) + " needs historical query " + std::to_string(start + i) + " from heap " + std::to_string(heap.object) + "; no completed replay query supplies its value");

@@ -1407,6 +1407,17 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             qword(packets, type); qword(packets, ++timestamp); qword(packets, 0); qword(packets, bytes.size()); packets += bytes;
         };
         const uint64_t heap = UINT64_MAX - 4, queue = UINT64_MAX - 3, list = UINT64_MAX - 2;
+        const auto resource = [&](uint64_t object, uint64_t width, D3D12_RESOURCE_DIMENSION dimension = D3D12_RESOURCE_DIMENSION_BUFFER) {
+            QByteArray p; qword(p, 1); p.append(char(1));
+            D3D12_HEAP_PROPERTIES properties{}; properties.Type = D3D12_HEAP_TYPE_READBACK;
+            p.append(reinterpret_cast<const char *>(&properties), sizeof(properties)); dword(p, 0); p.append(char(1));
+            D3D12_RESOURCE_DESC desc{}; desc.Dimension = dimension; desc.Width = width;
+            desc.Height = desc.DepthOrArraySize = desc.MipLevels = desc.SampleDesc.Count = 1; desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            p.append(reinterpret_cast<const char *>(&desc), sizeof(desc)); dword(p, D3D12_RESOURCE_STATE_COPY_DEST); p.append(char(0));
+            const auto iid = __uuidof(ID3D12Resource); p.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+            p.append(char(1)); qword(p, 1); qword(p, object); dword(p, 0); packet(0x12793f58d8f79ULL, p);
+        };
+        resource(42, 24); resource(43, 24, D3D12_RESOURCE_DIMENSION_TEXTURE2D);
         QByteArray creation; qword(creation, 1); creation.append(char(1));
         dword(creation, 0); dword(creation, 3); dword(creation, 0);
         const auto iid = __uuidof(ID3D12QueryHeap); creation.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
@@ -1419,8 +1430,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto query = [&](uint64_t object, uint64_t type, uint32_t slot) {
             QByteArray p; qword(p, object); qword(p, heap); dword(p, 0); dword(p, slot); packet(type, p);
         };
-        const auto resolve = [&](uint32_t count, bool truncate = false) {
-            QByteArray p; qword(p, list); qword(p, heap); dword(p, 0); dword(p, 0); dword(p, count); qword(p, 42); qword(p, 0);
+        const auto resolve = [&](uint32_t count, bool truncate = false, uint64_t offset = 0, uint64_t destination = 42) {
+            QByteArray p; qword(p, list); qword(p, heap); dword(p, 0); dword(p, 0); dword(p, count); qword(p, destination); qword(p, offset);
             if (truncate) p.chop(3); packet(0x1ae3cdc411c2dULL, p);
         };
         const auto submit = [&] {
@@ -1431,6 +1442,11 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         reset(list); query(list, 0x1ae3c6601dd2cULL, 0); query(list, 0x1ae3c64a8e138ULL, 0); resolve(2); close(list);
         submit(); submit();
         reset(list); query(list, 0x1ae3c6601dd2cULL, 1); query(list, 0x1ae3c64a8e138ULL, 1); resolve(2); resolve(3); resolve(4); resolve(1, true); close(list); submit();
+        reset(list); resolve(2, false, 16); resolve(2, false, 1); resolve(2, false, UINT64_MAX - 7);
+        resolve(2, false, 0, 43); resolve(2, false, 0, 44); close(list); submit();
+        // A reused captured pointer must use the new, smaller resource lifetime.
+        resource(42, 8); const auto reusedCreation = timestamp;
+        reset(list); resolve(2); close(list); submit();
         write(path + "/thread-7-0", packets);
         dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString())); dx12::SubmissionIndex submissions(directory);
         dx12::QueryReplayIndex queries(directory, submissions);
@@ -1444,6 +1460,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(queries.details(10).at("missing_slots_without_recorded_end"), nlohmann::json(0));
         QCOMPARE(queries.details(11).at("status"), nlohmann::json("invalid_query_data"));
         QCOMPARE(queries.details(12).at("status"), nlohmann::json("invalid_query_data"));
+        QCOMPARE(queries.details(9).at("result_bytes"), nlohmann::json("16"));
+        QCOMPARE(queries.details(9).at("destination_resource").at("creation"), nlohmann::json("1"));
+        QCOMPARE(queries.details(9).at("destination_resource").at("heap_type"), nlohmann::json(3));
+        for (uint64_t execution = 13; execution <= 18; ++execution)
+            QCOMPARE(queries.details(execution).at("status"), nlohmann::json("invalid_query_data"));
+        QCOMPARE(queries.details(18).at("destination_resource").at("creation"), nlohmann::json(std::to_string(reusedCreation)));
+        QCOMPARE(queries.details(18).at("destination_resource").at("width"), nlohmann::json("8"));
         QVERIFY_THROWS_EXCEPTION(OperationCancelled, dx12::QueryReplayIndex(directory, submissions, [] { return true; }));
         const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
         ReplaySelection selection; selection.execution = 3; selection.before = true;
@@ -1452,6 +1475,41 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         selection.before = false;
         QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::MissingData);
         QCOMPARE(session->executionDetails(3).at("query_replay_coverage"), queries.details(3));
+    }
+    void queryResultLayouts() {
+        QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_OCCLUSION), 8U);
+        QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_PIPELINE_STATISTICS), 88U);
+        QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_PIPELINE_STATISTICS1), 112U);
+        QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_SO_STATISTICS_STREAM3), 16U);
+        dx12::validateQueryDestination(D3D12_QUERY_TYPE_PIPELINE_STATISTICS1, 2, 8, 232);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::validateQueryDestination(D3D12_QUERY_TYPE_PIPELINE_STATISTICS1, 2, 8, 231));
+        const uint64_t offset = 1ULL << 33;
+        dx12::validateQueryDestination(D3D12_QUERY_TYPE_TIMESTAMP, 2, offset, offset + 16);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::validateQueryDestination(D3D12_QUERY_TYPE_TIMESTAMP, 2, UINT64_MAX - 7, UINT64_MAX));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::queryResultStride(UINT32_MAX));
+    }
+    void talosQueryDestinations() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_QUERY_DESTINATIONS_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set Talos capture and a new query destination evidence file");
+        dx12::StreamDirectory directory(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex submissions(directory); dx12::QueryReplayIndex queries(directory, submissions);
+        const auto first = queries.details(16001), second = queries.details(19409);
+        QCOMPARE(first.at("missing_count"), nlohmann::json(140));
+        QCOMPARE(second.at("missing_count"), nlohmann::json(146));
+        for (const auto &entry : {first, second}) {
+            QCOMPARE(entry.at("status"), nlohmann::json("missing_query_results"));
+            QCOMPARE(entry.at("result_bytes"), nlohmann::json("1888"));
+            const auto &resource = entry.at("destination_resource");
+            QCOMPARE(resource.at("heap_type"), nlohmann::json(3));
+            QCOMPARE(resource.at("heap_creation"), nlohmann::json("42957"));
+            QCOMPARE(resource.at("width"), nlohmann::json("65536"));
+        }
+        QCOMPARE(first.at("destination_resource").at("creation"), nlohmann::json("78132"));
+        QCOMPARE(second.at("destination_resource").at("creation"), nlohmann::json("12800"));
+        QCOMPARE(first.at("destination_resource").at("heap_offset"), nlohmann::json("327680"));
+        QCOMPARE(second.at("destination_resource").at("heap_offset"), nlohmann::json("458752"));
+        QVERIFY(!QFileInfo::exists(output)); write(output, QByteArray::fromStdString(queries.information().dump(2)));
     }
     void queryWorkspaceBoundary() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
