@@ -5195,6 +5195,65 @@ wrong resource/source identities. Whole-frame fidelity remains unfinished.
 `hellblade-mip1-discard-ui2.png` shows the selected whole-resource discard and
 its original command payload in the existing history panel.
 
+### Indexed work and the remaining mip-1 producer failure
+
+The four post-Discard binding rows now have exact action metadata from the
+existing output-producer RDC. This metadata belongs to capture loading, not a
+fresh measurement of every subsequent replay:
+
+| Execution / source | RDC action | Indexed groups | Focused result |
+| --- | --- | --- | --- |
+| 36766 / 611527 | 90398 | 4902 × 1 × 1 | Group/thread zero produces a 412-state DXIL trace |
+| 36770 / 611532 | 90412 | 0 × 1 × 1 | Debug request correctly rejects a zero-workgroup action |
+| 36775 / 611539 | 90429 | 44 × 1 × 1 | Group/thread zero fails GPU lane probing; unresolved |
+| 36779 / 611544 | 90443 | 1174 × 1 × 1 | Previously recorded trace remains the reference |
+
+For 36766, the actual constants again give c2 `(0,0,1920,803)` and c22
+`(12,1,0,0)`. Its disassembly computes `_346/_347` by clearing the low bit of
+`_344/_345`; `_594` checks those coordinates against the viewport maximum.
+The mip-1 coordinates `_601/_602` are arithmetic right shifts by one, selected
+only when `_594` and OutputMip1 are true. Consequently in-bounds mip-1 writes
+cannot reach rows 402–599. The selected invocation records four mip-0 writes,
+one mip-1 write at **(0,384)** (instruction **564**, creation **570673**), and an
+out-of-bounds disabled mip-2 write. This bounds the shader's output region; it
+does not measure coverage of all 4902 groups or establish whole-image fidelity.
+
+36775 failed twice with `No debugger trace at the selected invocation`. After
+adding failure-log preservation, the reproduction records RenderDoc
+`d3d12_shaderdebug.cpp:3876`, **“No hit for this event”**: the instrumented GPU
+lane fetch returned zero hits. That is a different failure from the explicit
+zero-workgroup rejection at 36770. Whether its indexed 44 groups differ from
+replayed indirect arguments, or another probe/replay defect prevents the hit,
+remains unproven. Do not replace the failure with an empty successful trace or
+use it to conclude that this Dispatch writes no pixels.
+
+Resource History now includes `indexed_action` for exact Draw/Dispatch action
+IDs and an **Indexed work** column. Zero group dimensions are labeled as no
+shader invocations **in the index**; nonzero dimensions still retain
+`bound_use` / `content_change: not_measured`. Draw rows show element and instance
+counts. Tooltips retain the source and indirect-replay limitation. Older reports
+without these fields remain readable and get no invented work counts. Lookup
+uses the existing bounded action-tree traversal, with no extra per-use replay.
+
+Analysis failures preserve up to the last **1 MiB** of the backend log before
+RenderDoc shutdown, with an explicit truncation notice when applicable. The
+worker's failure result references `backend-diagnostic.log`; stderr and CLI
+errors expose its job-local path. Failure to save diagnostics does not replace
+the original exception. Forced process termination cannot use this unwind path.
+
+Focused evidence: `hellblade-mip1-writer36766`, `hellblade-mip1-writer36770`,
+`hellblade-mip1-writer36775`, `hellblade-mip1-writer36775-diagnostic1`,
+`hellblade-mip1-work-index1`, and compact `hellblade-mip1-work-evidence1.json`.
+Builds **336–339** passed. `hellblade-indexed-work-ui2.txt` records **4 passed,
+0 failed, 0 skipped** in **188 ms**, including initialization/cleanup, the real
+four-row metadata check, old-report compatibility and indirect navigation.
+The first fixture incorrectly included earlier pre-Discard uses; its scope was
+corrected before the passing run. `hellblade-indexed-work-ui2.png` was inspected.
+The tiny invalid-RDC fixture `diagnostic-invalid1` verifies constructor-failure
+log retention and CLI error-path reporting without opening a GPU capture.
+The real 36775 failure verifies preservation during analysis unwinding.
+All capture queries were serial; no additional native frame replay was run.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

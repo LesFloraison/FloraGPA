@@ -241,9 +241,13 @@ QString runRdcAnalysis(const Json &job, const QString &worker, double timeoutSec
     const auto document = QJsonDocument::fromJson(report.readAll(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject())
         throw std::runtime_error("Invalid analysis result; inspect worker.log");
-    if (!document.object().value("ok").isBool() || !document.object().value("ok").toBool())
-        throw std::runtime_error(
-            document.object().value("error").toString("RenderDoc analysis failed").toStdString());
+    if (!document.object().value("ok").isBool() || !document.object().value("ok").toBool()) {
+        auto message = document.object().value("error").toString("RenderDoc analysis failed");
+        const auto diagnostic = QDir(output).filePath("backend-diagnostic.log");
+        if (document.object().value("backend_diagnostic_log").toString() == "backend-diagnostic.log" && QFile::exists(diagnostic))
+            message += "\nRenderDoc diagnostics: " + diagnostic;
+        throw std::runtime_error(message.toStdString());
+    }
     if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0)
         throw std::runtime_error("Native analysis worker failed; inspect worker.log");
     return report.fileName();

@@ -55,7 +55,7 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     auto split = new QSplitter(Qt::Vertical);
     rows_ = new QTreeWidget;
     rows_->setObjectName("resourceHistoryRows");
-    rows_->setHeaderLabels({"Execution", "Use", "Evidence", "Queue", "Captured range / state"});
+    rows_->setHeaderLabels({"Execution", "Use", "Evidence", "Queue", "Captured range / state", "Indexed work"});
     rows_->setRootIsDecorated(false);
     rows_->setUniformRowHeights(true);
     rows_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -203,6 +203,24 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                 ranges << (barrier.at("Type") == 1 ? "Aliasing barrier" : "UAV barrier");
         }
         item->setText(4, ranges.isEmpty() ? "Unknown" : ranges.join("; "));
+        if (row.contains("indexed_action")) {
+            const auto &work = row.at("indexed_action");
+            QString description;
+            if (work.contains("group_count")) {
+                const auto &groups = work.at("group_count");
+                description = QString("%1 × %2 × %3 groups")
+                    .arg(groups.at(0).get<uint32_t>()).arg(groups.at(1).get<uint32_t>()).arg(groups.at(2).get<uint32_t>());
+                if (!work.at("has_workgroups").get<bool>()) description += " · no shader invocations in index";
+            } else {
+                const bool indexed = work.at("kind") == "indexed_draw";
+                description = QString("%1 %2 × %3 instances")
+                    .arg(field(work, indexed ? "index_count" : "vertex_count"))
+                    .arg(indexed ? "indices" : "vertices").arg(field(work, "instance_count"));
+            }
+            item->setText(5, description);
+            item->setToolTip(5, field(work, "source") + '\n' + field(work, "scope") +
+                "\nNonzero work does not establish which resource locations were accessed.");
+        }
         item->setData(0, Qt::UserRole + 1, qulonglong(i));
         if (row.value("selectable", false))
             item->setData(0, Qt::UserRole, qulonglong(identity(row.at("execution"))));

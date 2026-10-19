@@ -10,6 +10,7 @@
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
 #include <QCryptographicHash>
+#include <QFile>
 #include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
@@ -18,6 +19,7 @@
 #include <algorithm>
 #include <charconv>
 #include <cmath>
+#include <exception>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -146,6 +148,29 @@ void checked(ResultDetails status) {
 }
 class Session {
     bool initialized_{};
+    QString failureLog_;
+
+    void preserveFailureLog() noexcept {
+        // ShutdownReplay may remove its temporary log. Preserve a bounded tail
+        // before closing so an isolated failed analysis remains diagnosable.
+        try {
+            const auto getLog = reinterpret_cast<decltype(&RENDERDOC_GetLogFile)>(
+                GetProcAddress(library, "RENDERDOC_GetLogFile"));
+            if (!getLog || failureLog_.isEmpty()) return;
+            QFile source(QString::fromUtf8(getLog()));
+            if (!source.open(QIODevice::ReadOnly)) return;
+            constexpr qint64 limit = 1024 * 1024;
+            const bool truncated = source.size() > limit;
+            if (truncated && !source.seek(source.size() - limit)) return;
+            auto bytes = source.read(limit);
+            if (truncated) bytes.prepend("[Earlier RenderDoc diagnostics omitted; last 1 MiB follows]\n");
+            QSaveFile destination(failureLog_);
+            if (destination.open(QIODevice::WriteOnly) && destination.write(bytes) == bytes.size() && destination.commit())
+                fprintf(stderr, "RenderDoc diagnostics: %s\n", failureLog_.toUtf8().constData());
+        } catch (...) {
+            // Diagnostics must not replace the original backend exception.
+        }
+    }
 
   public:
     std::unique_ptr<IReplayController, Shutdown> controller;
@@ -175,6 +200,7 @@ class Session {
     DotCounter uavTextureReads{}, uavTextureFailures{};
     DotCounter packedStores{};
     explicit Session(const Json &job) {
+        failureLog_ = QString::fromStdString(job.at("out").get<std::string>()) + "/backend-diagnostic.log";
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
         used = true;
@@ -294,6 +320,7 @@ class Session {
                 flora::parseReplayIdentity(job.at("request_identity")).backend != backend)
                 throw std::runtime_error("Analysis request backend does not match the independent capture");
         } catch (...) {
+            preserveFailureLog();
             const auto log = reinterpret_cast<decltype(&RENDERDOC_GetLogFile)>(
                 GetProcAddress(library, "RENDERDOC_GetLogFile"));
             if (log)
@@ -309,12 +336,16 @@ class Session {
             initialized_ = false;
         }
     }
-    ~Session() { close(); }
+    ~Session() {
+        if (std::uncaught_exceptions()) preserveFailureLog();
+        close();
+    }
 };
 struct Events {
     Json native = Json::object();
     std::map<uint32_t, const SDObject *> chunks;
     std::set<uint32_t> actions;
+    std::map<uint32_t, const ActionDescription *> actionDetails;
     size_t visited{};
     Json walk(const rdcarray<ActionDescription> &nodes, const SDFile &file, unsigned depth = 0) {
         if (depth > 128)
@@ -324,6 +355,7 @@ struct Events {
             if (++visited > 1000000)
                 throw std::runtime_error("Too many RenderDoc actions");
             actions.insert(node.eventId);
+            actionDetails.emplace(node.eventId, &node);
             Json events = Json::array();
             for (const auto &event : node.events) {
                 events.push_back({{"eventId", event.eventId}});
@@ -1614,6 +1646,10 @@ Json runRdcJob(const Json &job) {
                      {"subresource", nullptr},
                      {"subresource_status", "not_provided_by_usage_index"}};
             row.update(rdcProvenance(usage.eventId, mapping["reverse"]));
+            const auto actionDetail = events.actionDetails.find(usage.eventId);
+            if (actionDetail != events.actionDetails.end() &&
+                (actionDetail->second->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
+                row["indexed_action"] = flora::rdcExecutedAction(*actionDetail->second);
             if (dx12 && !row.value("selectable", false))
                 ++unmapped;
             rows.push_back(std::move(row));

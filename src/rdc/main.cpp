@@ -75,6 +75,8 @@ int main(int argc, char **argv) {
         }
     }
     if (!output.isEmpty()) {
+        if (!result.value("ok", false) && QFile::exists(QDir(output).filePath("backend-diagnostic.log")))
+            result["backend_diagnostic_log"] = "backend-diagnostic.log";
         if (identity) {
             try { flora::writeReplayIdentity(QDir(output).filePath("response-identity.json"), *identity); }
             catch (const std::exception &e) { fprintf(stderr, "%s\n", e.what()); return 2; }

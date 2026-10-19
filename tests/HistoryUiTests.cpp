@@ -53,6 +53,45 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void indexedComputeResourceUses() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_INDEXED_HISTORY");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 mip-1 indexed history report");
+        const auto report = read(path);
+        ResourceHistoryView view; view.setContext("indexed-work", 36779, 570673, 2149346324304ULL);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        const std::map<std::string, uint32_t> expected{{"36766",4902}, {"36770",0}, {"36775",44}, {"36779",1174}};
+        size_t checked{};
+        for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
+            const auto &row = report.at("resource_history")[i];
+            if (row.at("usage_name") != "CS_RWResource") continue;
+            const auto found = expected.find(row.at("execution").get<std::string>());
+            if (found == expected.end()) continue; // Earlier lifetime uses precede the selected Discard.
+            const auto count = found->second;
+            const auto &work = row.at("indexed_action");
+            QCOMPARE(work.at("event_id"), row.at("eventId"));
+            QCOMPARE(work.at("group_count"), Json::array({count,1,1}));
+            QCOMPARE(work.at("has_workgroups"), Json(count != 0));
+            QCOMPARE(row.at("evidence"), Json("bound_use"));
+            QCOMPARE(row.at("content_change"), Json("not_measured"));
+            auto item = rows->topLevelItem(int(i));
+            QCOMPARE(item->text(5).contains("no shader invocations"), count == 0);
+            QVERIFY(item->toolTip(5).contains("may differ"));
+            if (count == 0) { rows->setCurrentItem(item); rows->scrollToItem(item); }
+            ++checked;
+        }
+        QCOMPARE(checked, size_t(4));
+        const auto screenshot = qEnvironmentVariable("FLORA_DX12_UI_SCREENSHOT");
+        if (!screenshot.isEmpty()) {
+            applyAppearance(*qApp); view.resize(1650, 650); view.show();
+            QVERIFY(view.grab().save(screenshot));
+        }
+        // Old reports lack work metadata and must remain readable without guessed counts.
+        auto legacy = report;
+        for (auto &row : legacy["resource_history"]) row.erase("indexed_action");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        for (int i = 0; i < rows->topLevelItemCount(); ++i) QVERIFY(rows->topLevelItem(i)->text(5).isEmpty());
+    }
     void indirectHistoryNavigation() {
         // Synthetic multi-action provenance; no claim of GPU multi-action coverage.
         Json row{{"execution", "9007199254740993"}, {"name", "ID3D12GraphicsCommandListExecuteIndirect"},
