@@ -97,6 +97,17 @@ class RdcTests : public QObject {
         QCOMPARE(rdcProvenance(10, result["reverse"])["indirect_action"], Json(0));
         QCOMPARE(rdcProvenance(11, result["reverse"])["indirect_action"], Json(1));
         QCOMPARE(rdcProvenance(11, result["reverse"])["indirect_action_count"], Json(2));
+        auto provenance = rdcProvenance(11, result["reverse"]); provenance["eventId"] = 11;
+        QVERIFY(provenance.at("selectable").get<bool>());
+        QCOMPARE(provenance.at("indirect_action_kind"), Json("draw"));
+        QCOMPARE(indirectActionOrdinal(provenance), int64_t(1));
+        QCOMPARE(indirectActionOrdinal(Json::object()), int64_t(-1));
+        auto invalid = provenance; invalid["eventId"] = 10;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, indirectActionOrdinal(invalid));
+        invalid = provenance; invalid.erase("indirect_action_count");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, indirectActionOrdinal(invalid));
+        invalid = provenance; invalid["indirect_action"] = 2;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, indirectActionOrdinal(invalid));
         QCOMPARE(selectDx12RdcExecution(result, "35808").at("eid"), Json(3));
         QCOMPARE(selectDx12RdcExecution(result, "35834", 0).at("eid"), Json(10));
         QCOMPARE(selectDx12RdcExecution(result, "35834", 1).at("eid"), Json(11));

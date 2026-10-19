@@ -50,10 +50,11 @@ int rdcAnalyzeCli(QStringList args) {
               std::pair{"sample", "MSAA sample index"}, std::pair{"instance", "Zero-based draw instance"},
               std::pair{"primitive", "PS primitive ID (default: automatic fragment selection)"},
               std::pair{"indirect-action", "Zero-based generated action within --execution ExecuteIndirect"},
+              std::pair{"attribute", "Zero-based DX12 VSIn input layout attribute"},
               std::pair{"vertex", "Vertex invocation within the draw"},
               std::pair{"index", "Override actual vertex index (default: derive from draw/index buffer)"}})
             p.addOption({key, description, "integer"});
-        p.addOption({"stage", "Post-shader stage: VSOut or GSOut", "stage", "VSOut"});
+        p.addOption({"stage", "Geometry stage: VSIn (DX12), VSOut, GSOut or MeshOut", "stage", "VSOut"});
         p.addOption({"group", "Compute group: X Y Z", "coordinates"});
         p.addOption({"thread", "Compute thread: X Y Z", "coordinates"});
         if (!p.parse(normalized))
@@ -80,7 +81,7 @@ int rdcAnalyzeCli(QStringList args) {
             return value;
         };
         for (const auto key : {"gpa-event", "eid", "resource", "x", "y", "mip", "layer", "sample", "instance",
-                               "vertex", "index", "primitive", "indirect-action"})
+                               "vertex", "index", "primitive", "indirect-action", "attribute"})
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = number(p.value(key));
         options["stage"] = p.value("stage").toStdString();

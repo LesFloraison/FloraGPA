@@ -4493,9 +4493,8 @@ collapsed into one execution-map entry to become individually selectable.
 debugging exposes the same optional **Indirect action** field. Results retain
 the selected ordinal, count and replay EID. Changing the field invalidates the
 trace; the view rejects mismatched ordinals and ambiguous automatic results, and
-clears the field when switching execution/session/backend. Other workspace panels
-do not yet expose a generated-action chooser or propagate it through history
-navigation. Their CLI analysis paths can use the explicit selector.
+clears the field when switching execution/session/backend. The subsequent
+navigation milestone below extends this identity to histories and Replay Mesh.
 
 DX12 inventory now exports `indirect_executions`, including generated EIDs and
 their original provenance. It lists capture-loading metadata without an extra
@@ -4532,8 +4531,60 @@ screenshot is `indirect-selection-ui1/replay-debug/bf1-indirect-action.png`.
 Logs are `indirect-selection-mapping1.txt`, `indirect-selection-options1.txt`
 and `indirect-selection-ui1.txt`. This turn ran two targeted inventory loads
 and one debug query, with no new native recapture or broad regression.
-Changing indirect arguments across replay phases, complete multi-action UI
-navigation and full shader/replay fidelity remain unfinished.
+Changing indirect arguments across replay phases, actual multi-action GPU
+validation and full shader/replay fidelity remain unfinished.
+
+### Generated-action navigation and VS input request transport
+
+Pixel and Resource History rows now retain the generated-action ordinal when
+locating an execution. An indirect Draw's pixel modification can prepare PS
+debugging with its pixel, sample, primitive and child ordinal. Replay Mesh offers
+the same optional **Indirect action** selector and forwards it when opening VS
+debugging at a vertex's first reference. Navigation prepares requests without
+launching GPU work. Returning to an ordinary history row clears the previous
+child selection. Native execution selection remains the parent ExecuteIndirect;
+this does not implement native stopping inside one of its generated actions.
+
+The mapping records generated Draw/Dispatch/MeshDispatch kinds. Each uniquely
+mapped child can be selected even when its multi-action parent cannot be selected
+automatically. A shared validator checks ordinal/count, parent API, and agreement
+with the replay event array. History, mesh and debugger views reject inconsistent
+child provenance; changed selection invalidates pending results. Older direct
+reports without child metadata remain accepted. Actual multi-action GPU behavior
+remains unverified: the inspected BF1/Hellblade2 inventories contain only
+single-action expansions, and the multi-action navigation checks use explicit
+synthetic metadata rather than claiming GPU evidence.
+
+This work also exposed a real geometry transport gap: Replay Mesh constructed
+`stage: VSIn` and `attribute`, but `prepareRdcJob` rejected both. Job preparation
+now accepts unsigned input attributes specifically for DX12 postmesh requests;
+CLI exposes `--stage VSIn --attribute N`. DX11 input-stage requests and attributes
+on other stages remain rejected.
+
+Builds **297–298** pass. One actual CLI/isolated-worker query,
+`bf1-input-cli1`, reads execution **36560**, input attribute **1**, instance **0**:
+**3,316 vertices**, **4,974 indices**, **1,658 candidate faces**. The raw selected
+vertex bytes (**265,208**) have SHA-256
+`f351e596c83ed3ef92052aa24821019f401d806775e9828c4c271df791f9170f`; the index bytes
+(**9,948**) have SHA-256
+`59dd2e1242c7a945d00e5d6ee0bad70f934e5b49254e7b94b5a436c146d833db`.
+Both match the earlier independent input read. Its module list contains neither
+GPA nor Python. This verifies the request path and selected input bytes, not
+whole-frame fidelity or a complete portable installation.
+
+Focused mapping/options checks pass (**3 / 4 including setup/cleanup**).
+History navigation passes (**3, 54 ms**), mesh selection and MainWindow navigation
+pass (**4, 1,267 ms**), and debugger provenance checks pass (**3, 1,017 ms**).
+The MainWindow test loads the fresh VSIn report, verifies direct vertex navigation,
+then injects child identities to check all three navigation paths and clearing,
+without starting a replay. An initial test assertion incorrectly requested a
+complete CS job while a Draw was selected; the unavailable CS context correctly
+rejected it, and the assertion now inspects the propagated field instead.
+Evidence under ignored `artifacts/dx12-research` is
+`bf1-input-cli-evidence1.json`, `indirect-navigation-mapping1.txt`,
+`indirect-navigation-options1.txt`, `indirect-navigation-history-ui1.txt`,
+`indirect-navigation-mesh-ui2.txt` and `indirect-navigation-debug-ui1.txt`.
+No new native recapture, full-frame replay or broad regression was run.
 
 ### Full feature acceptance
 

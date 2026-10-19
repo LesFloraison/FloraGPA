@@ -1,5 +1,6 @@
 #include "ResourceHistoryView.h"
 #include "application/RenderDocLibrary.h"
+#include "application/RdcEvents.h"
 #include <QAction>
 #include <QFileDialog>
 #include <QHeaderView>
@@ -73,7 +74,8 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     connect(cancel_, &QAction::triggered, this, &ResourceHistoryView::cancelRequested);
     connect(locate_, &QAction::triggered, this, [this] {
         if (locate_->isEnabled())
-            emit eventRequested(rows_->currentItem()->data(0, Qt::UserRole).toULongLong());
+            emit eventRequested(rows_->currentItem()->data(0, Qt::UserRole).toULongLong(),
+                indirectActionOrdinal(result_.at("resource_history").at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())));
     });
     connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
     connect(rows_, &QTreeWidget::itemSelectionChanged, this, [this] {
@@ -163,8 +165,10 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         throw std::runtime_error("Resource history identity does not match selection");
     const auto &uses = result.at("resource_history");
     for (const auto &row : uses)
-        if (row.value("selectable", false))
+        if (row.value("selectable", false)) {
             (void)identity(row.at("execution"));
+            (void)indirectActionOrdinal(row);
+        }
     const QSignalBlocker block(rows_);
     result_ = result;
     rows_->clear();
@@ -172,6 +176,7 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         const auto &row = uses[i];
         auto item = new QTreeWidgetItem(rows_, {field(row, "execution"), field(row, "usage_name"),
                                                 field(row, "evidence"), field(row, "queue")});
+        if (row.contains("indirect_action")) item->setText(0, item->text(0) + " · action " + field(row, "indirect_action"));
         QStringList ranges;
         for (const auto &barrier : row.value("captured_resource_barriers", Json::array())) {
             if (barrier.at("Type") == 0)

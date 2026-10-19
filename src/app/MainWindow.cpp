@@ -1288,20 +1288,23 @@ void MainWindow::buildUi() {
             [this] { readRdcAnalysis(nullptr, RdcAnalysis::ResourceHistory); });
     connect(resourceHistory_, &ResourceHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(resourceHistory_, &ResourceHistoryView::error, this, &MainWindow::showError);
-    connect(resourceHistory_, &ResourceHistoryView::eventRequested, this, [this](qulonglong id) {
-        if (!busy()) {
+    const auto locateAnalysisAction = [this](qulonglong id, qint64 indirectAction) {
+        if (busy()) return false;
+        if (session_ && session_->backend() == ReplayBackend::Dx12)
             findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
-            locateEvent(id);
-        }
+        locateEvent(id);
+        if (selectedEvent_ != id) return false;
+        for (auto view : replayDebug_) view->selectIndirectAction(indirectAction);
+        replayMesh_->selectIndirectAction(indirectAction);
+        return true;
+    };
+    connect(resourceHistory_, &ResourceHistoryView::eventRequested, this, [locateAnalysisAction](qulonglong id, qint64 action) {
+        locateAnalysisAction(id, action);
     });
     connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
-    connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
-        if (!busy()) {
-            if (session_ && session_->backend() == ReplayBackend::Dx12)
-                findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
-            locateEvent(id);
-        }
+    connect(history_, &PixelHistoryView::eventRequested, this, [locateAnalysisAction](qulonglong id, qint64 action) {
+        locateAnalysisAction(id, action);
     });
     auto debugTabs = new QTabWidget;
     debugTabs->setObjectName("checkpointStageTabs");
@@ -1342,24 +1345,16 @@ void MainWindow::buildUi() {
     debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
     connect(replayMesh_, &ReplayMeshView::vertexDebugRequested, this,
-            [this, debugTabs](qulonglong event, uint32_t ordinal, uint32_t instance) {
+            [this, debugTabs, locateAnalysisAction](qulonglong event, uint32_t ordinal, uint32_t instance, qint64 action) {
                 if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
-                findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
-                locateEvent(event);
-                if (selectedEvent_ != event) return;
+                if (!locateAnalysisAction(event, action)) return;
                 replayDebug_[0]->selectVertex(ordinal, instance);
                 debugTabs->setCurrentWidget(replayDebug_[0]);
                 centerTabs_->setCurrentWidget(debugTabs);
             });
     connect(history_, &PixelHistoryView::pixelDebugRequested, this,
-            [this, debugTabs](qulonglong event, int x, int y, int sample, uint32_t primitive) {
-                if (busy())
-                    return;
-                if (session_ && session_->backend() == ReplayBackend::Dx12)
-                    findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
-                locateEvent(event);
-                if (selectedEvent_ != event)
-                    return;
+            [this, debugTabs, locateAnalysisAction](qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 action) {
+                if (!locateAnalysisAction(event, action)) return;
                 replayDebug_[1]->selectPixel(x, y, sample);
                 replayDebug_[1]->selectPrimitive(primitive);
                 debugTabs->setCurrentWidget(replayDebug_[1]);

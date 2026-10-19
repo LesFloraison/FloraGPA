@@ -142,7 +142,10 @@ class ReplayDebugUiTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), result));
         auto multiple = result; multiple["indirect_selection"]["indirect_action_count"] = 2;
         multiple["indirect_selection"]["indirect_action"] = 1;
+        multiple["indirect_selection"]["event_ids"] = {42908, 42909};
         QVERIFY(view.finish(view.requestId(), multiple));
+        auto wrongEvent = multiple; wrongEvent["indirect_selection"]["eid"] = 42908;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), wrongEvent));
         edit->clear(); QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), multiple));
         edit->setText("-1"); QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
         view.setContext("dx11", 42, false); QVERIFY(edit->isHidden()); QVERIFY(edit->text().isEmpty());

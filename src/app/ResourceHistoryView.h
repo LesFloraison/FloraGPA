@@ -23,7 +23,7 @@ class ResourceHistoryView final : public QWidget {
   signals:
     void readRequested();
     void cancelRequested();
-    void eventRequested(qulonglong execution);
+    void eventRequested(qulonglong execution, qint64 indirectAction = -1);
     void error(const QString &message);
 
   private:

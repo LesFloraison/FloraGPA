@@ -69,6 +69,21 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void inputAttributePreparation() {
+        QTemporaryDir dir;
+        const Json options{{"execution", "36560"}, {"stage", "VSIn"}, {"attribute", 1}};
+        const auto job = prepare(dir.path(), "success", options, "postmesh");
+        QCOMPARE(job.at("attribute"), Json(1)); QCOMPARE(job.at("stage"), Json("VSIn"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "debug-vertex"));
+        auto invalid = options; invalid.erase("execution"); invalid["gpa_event"] = 36560;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "postmesh"));
+        invalid = options; invalid["stage"] = "VSOut";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "postmesh"));
+        for (const auto value : {Json(-1), Json(0.5), Json(uint64_t(UINT32_MAX) + 1)}) {
+            invalid = options; invalid["attribute"] = value;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "postmesh"));
+        }
+    }
     void indirectActionPreparation() {
         QTemporaryDir dir;
         for (const auto &invalid : {Json{{"indirect_action", 0}},

@@ -2,6 +2,7 @@
 #include "Views.h"
 #include "application/RenderDocLibrary.h"
 #include "application/ReplayMesh.h"
+#include "application/RdcEvents.h"
 #include <QAbstractTableModel>
 #include <QAction>
 #include <QComboBox>
@@ -85,6 +86,11 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     instance_->setMaximumWidth(100);
     instance_->setToolTip("Zero-based instance in the selected draw");
     bar->addWidget(instance_);
+    indirectLabel_ = new QLabel(" Indirect action "); bar->addWidget(indirectLabel_);
+    indirectAction_ = new QLineEdit; indirectAction_->setObjectName("replayMeshIndirectAction");
+    indirectAction_->setMaximumWidth(85); indirectAction_->setPlaceholderText("Auto");
+    indirectAction_->setToolTip("Zero-based generated action inside ExecuteIndirect; automatic only for a unique action");
+    bar->addWidget(indirectAction_);
     attribute_ = new QLineEdit("0"); attribute_->setObjectName("replayMeshAttribute");
     attribute_->setMaximumWidth(65); attribute_->setToolTip("Zero-based input layout attribute; see Details for semantic and slot");
     bar->addWidget(attribute_); attribute_->hide();
@@ -124,7 +130,8 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     connect(debugVertex_, &QAction::triggered, this, [this] {
         if (!debugVertex_->isEnabled()) return;
         const auto ordinal = model_->firstReference(table_->currentIndex().row());
-        if (ordinal != UINT32_MAX) emit vertexDebugRequested(event_, ordinal, uint32_t(request().at("instance")));
+        if (ordinal != UINT32_MAX) emit vertexDebugRequested(event_, ordinal, uint32_t(request().at("instance")),
+            dx12_ ? indirectActionOrdinal(result_.value("indirect_selection", Json::object())) : -1);
     });
     split->addWidget(table);
     details_ = new QPlainTextEdit;
@@ -149,6 +156,7 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     connect(stage_, &QComboBox::currentIndexChanged, this, &ReplayMeshView::invalidate);
     connect(attribute_, &QLineEdit::textChanged, this, &ReplayMeshView::invalidate);
     connect(instance_, &QLineEdit::textChanged, this, &ReplayMeshView::invalidate);
+    connect(indirectAction_, &QLineEdit::textChanged, this, &ReplayMeshView::invalidate);
     connect(backend_, &QAction::triggered, this, [this] {
         auto path = QFileDialog::getOpenFileName(this, "Select RenderDoc 1.45", backendPath_,
                                                  "RenderDoc (renderdoc.dll)");
@@ -201,7 +209,13 @@ void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12,
     dx12_ = dx12;
     key_ = key;
     event_ = event;
+    indirectAction_->clear();
     invalidate();
+}
+void ReplayMeshView::selectIndirectAction(qint64 ordinal) {
+    if (busy_ || !dx12_) return;
+    if (ordinal < -1 || ordinal > UINT32_MAX) throw std::runtime_error("Invalid indirect action ordinal");
+    indirectAction_->setText(ordinal < 0 ? QString() : QString::number(ordinal));
 }
 void ReplayMeshView::setBackendPath(const QString &path, bool persist) {
     if (path == backendPath_)
@@ -223,6 +237,8 @@ void ReplayMeshView::updateActions() {
     backend_->setEnabled(!busy_);
     stage_->setEnabled(!busy_);
     instance_->setEnabled(!busy_ && !meshDispatch_);
+    indirectLabel_->setVisible(dx12_); indirectAction_->setVisible(dx12_);
+    indirectAction_->setEnabled(!busy_);
     attribute_->setVisible(stage_->currentData() == "VSIn"); attribute_->setEnabled(!busy_);
     outputAttribute_->setVisible(outputAttribute_->count() > 0);
     outputAttribute_->setEnabled(!busy_ && outputAttribute_->count() > 0);
@@ -248,6 +264,12 @@ ReplayMeshView::Json ReplayMeshView::request() const {
     if (dx12_) {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
+        if (!indirectAction_->text().trimmed().isEmpty()) {
+            const auto ordinal = indirectAction_->text().toUInt(&ok);
+            if (!ok || indirectAction_->text() != QString::number(ordinal))
+                throw std::runtime_error("Indirect action must be a decimal uint32 ordinal");
+            job["indirect_action"] = ordinal;
+        }
     }
     return job;
 }
@@ -264,6 +286,15 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         throw std::runtime_error("Mesh result does not match the DX12 execution selection");
     if (result.value("action", "") != "postmesh" || !result.at("stage").is_string())
         throw std::runtime_error("Invalid mesh result");
+    if (dx12_) {
+        const auto selection = result.value("indirect_selection", Json::object());
+        const auto ordinal = indirectActionOrdinal(selection);
+        const auto requested = this->request();
+        if ((requested.contains("indirect_action") && (ordinal < 0 || requested.at("indirect_action") != ordinal)) ||
+            (ordinal >= 0 && (selection.at("execution") != std::to_string(event_) ||
+                (!requested.contains("indirect_action") && selection.at("indirect_action_count") != 1))))
+            throw std::runtime_error("Mesh result does not match the indirect action selection");
+    }
     if (result.at("stage") != stage_->currentData().toString().toStdString())
         throw std::runtime_error("Mesh result does not match the selected output stage");
     if (result.contains("instance") && result.at("instance") != this->request().at("instance"))
@@ -359,6 +390,8 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                           .arg(QString::fromStdString(result.at("stage").get<std::string>()))
                           .arg(meshData->positions.size())
                           .arg(meshData->faces.size()));
+    if (dx12_ && result.contains("indirect_selection"))
+        summary_->setText(summary_->text() + QString(" · indirect action %1").arg(indirectActionOrdinal(result.at("indirect_selection"))));
     summary_->setToolTip(finite ? QString()
                                 : "Preview unavailable: positions lack three finite components. Raw values "
                                   "and exports are preserved.");

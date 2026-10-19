@@ -2,6 +2,7 @@
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include "app/PixelHistoryView.h"
+#include "app/ResourceHistoryView.h"
 #include "app/ReplayDebugView.h"
 #include "app/ReplayMeshView.h"
 #include "app/RdcCountersView.h"
@@ -52,6 +53,44 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void indirectHistoryNavigation() {
+        // Synthetic multi-action provenance; no claim of GPU multi-action coverage.
+        Json row{{"execution", "9007199254740993"}, {"name", "ID3D12GraphicsCommandListExecuteIndirect"},
+            {"selectable", true}, {"indirect_action", 1}, {"indirect_action_count", 2},
+            {"indirect_action_kind", "draw"}, {"event_ids", {10, 11}}, {"eventId", 11},
+            {"record_kind", "backend_modification"}, {"primitiveID", uint32_t(17)},
+            {"preMod", {{"col", {{"floatValue", {0, 0, 0, 0}}}}}},
+            {"postMod", {{"col", {{"floatValue", {1, 1, 1, 1}}}}}}};
+        Json report{{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740993"},
+            {"history", {row}}, {"x", 4}, {"y", 5},
+            {"history_scope", {{"cpu_write_snapshots", 0}, {"cpu_write_gaps", Json::array()}, {"unmapped_records", 0}}}};
+        PixelHistoryView pixel; pixel.setContext("fixture", 9007199254740993ULL, true);
+        pixel.setDx12Resource(7, 8); pixel.selectPixel(8, 4, 5, 0, 0, 0);
+        QVERIFY(pixel.finish(pixel.requestId(), report));
+        auto rows = pixel.findChild<QTreeWidget *>("historyRecords"); rows->setCurrentItem(rows->topLevelItem(0));
+        QSignalSpy locate(&pixel, &PixelHistoryView::eventRequested), debug(&pixel, &PixelHistoryView::pixelDebugRequested);
+        action(pixel, "locateHistoryEvent")->trigger(); action(pixel, "debugHistoryPixel")->trigger();
+        QCOMPARE(locate.size(), 1); QCOMPARE(locate[0][0].toULongLong(), 9007199254740993ULL);
+        QCOMPARE(locate[0][1].toLongLong(), 1LL); QCOMPARE(debug.size(), 1);
+        QCOMPARE(debug[0][4].toUInt(), 17U); QCOMPARE(debug[0][5].toLongLong(), 1LL);
+        auto invalid = report; invalid["history"][0]["indirect_action"] = 0;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixel.finish(pixel.requestId(), invalid));
+        QCOMPARE(rows->topLevelItemCount(), 1);
+        report["history"][0]["indirect_action_kind"] = "dispatch";
+        QVERIFY(pixel.finish(pixel.requestId(), report)); rows->setCurrentItem(rows->topLevelItem(0));
+        QVERIFY(!action(pixel, "debugHistoryPixel")->isEnabled());
+        ResourceHistoryView resource; resource.setContext("fixture", 9007199254740993ULL, 7, 8);
+        Json uses{{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740993"},
+            {"resource_object", "8"}, {"resource_creation", "7"}, {"resource_history", {row}}};
+        QVERIFY(resource.finish(resource.requestId(), uses));
+        auto resourceRows = resource.findChild<QTreeWidget *>("resourceHistoryRows");
+        resourceRows->setCurrentItem(resourceRows->topLevelItem(0));
+        QSignalSpy resourceLocate(&resource, &ResourceHistoryView::eventRequested);
+        action(resource, "locateResourceHistoryEvent")->trigger();
+        QCOMPARE(resourceLocate.size(), 1); QCOMPARE(resourceLocate[0][1].toLongLong(), 1LL);
+        uses["resource_history"][0].erase("indirect_action_count");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, resource.finish(resource.requestId(), uses));
+    }
     void dx12PixelInvocationReference() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PS_FRAGMENT_REPORT");
         if (path.isEmpty()) QSKIP("Set the BF1 particle fragment reference report");

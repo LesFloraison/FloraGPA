@@ -28,8 +28,8 @@ class PixelHistoryView final : public QWidget {
   signals:
     void readRequested();
     void cancelRequested();
-    void eventRequested(qulonglong event);
-    void pixelDebugRequested(qulonglong event, int x, int y, int sample, uint32_t primitive);
+    void eventRequested(qulonglong event, qint64 indirectAction = -1);
+    void pixelDebugRequested(qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 indirectAction = -1);
     void inspectionFinished(bool success);
 
   private:

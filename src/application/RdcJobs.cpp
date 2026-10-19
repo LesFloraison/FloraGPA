@@ -88,7 +88,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
@@ -139,8 +139,14 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         for (const auto &v : coords)
             unsignedNumber(v, UINT32_MAX, key);
     }
-    if (job["stage"] != "VSOut" && job["stage"] != "GSOut" && job["stage"] != "MeshOut")
-        throw std::runtime_error("Stage must be VSOut, GSOut or MeshOut");
+    if (job["stage"] != "VSOut" && job["stage"] != "GSOut" && job["stage"] != "MeshOut" && job["stage"] != "VSIn")
+        throw std::runtime_error("Stage must be VSIn, VSOut, GSOut or MeshOut");
+    if (job["stage"] == "VSIn" && (action != "postmesh" || !job.contains("execution")))
+        throw std::runtime_error("Input attributes require DX12 postmesh analysis");
+    if (job.contains("attribute")) {
+        unsignedNumber(job["attribute"], UINT32_MAX, "attribute");
+        if (job["stage"] != "VSIn") throw std::runtime_error("Attribute selection requires VSIn");
+    }
     job["capture"] = existingFile(capture, "RDC capture").toStdString();
     job["renderdoc"] = existingFile(library, "RenderDoc library").toStdString();
     emptyOutput(output);

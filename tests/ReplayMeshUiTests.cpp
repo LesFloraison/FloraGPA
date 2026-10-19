@@ -2,6 +2,8 @@
 #include "app/MainWindow.h"
 #include "app/ReplayDebugView.h"
 #include "app/ReplayMeshView.h"
+#include "app/PixelHistoryView.h"
+#include "app/ResourceHistoryView.h"
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
@@ -33,6 +35,32 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void indirectMeshSelection() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
+        if (root.isEmpty()) QSKIP("Set BF1 mesh evidence directory");
+        const auto directory = root + "/bf1-particle-vsout2";
+        auto report = read(directory + "/result.json");
+        // Preserve real geometry, inject synthetic multi-action provenance for UI validation.
+        report["indirect_selection"] = {{"name", "ID3D12GraphicsCommandListExecuteIndirect"},
+            {"execution", "36560"}, {"indirect_action", 1}, {"indirect_action_count", 2},
+            {"event_ids", {10, 11}}, {"eid", 11}};
+        ReplayMeshView view; view.setContext("fixture", 36560, true);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report, directory));
+        view.selectIndirectAction(1); QCOMPARE(view.request().at("indirect_action"), Json(1));
+        QVERIFY(view.finish(view.requestId(), report, directory));
+        auto table = view.findChild<QTableView *>("replayMeshPositions"); table->selectRow(1428);
+        QSignalSpy selected(&view, &ReplayMeshView::vertexDebugRequested);
+        action(view, "replayMeshDebugVertex")->trigger();
+        QCOMPARE(selected.size(), 1); QCOMPARE(selected[0][3].toLongLong(), 1LL);
+        auto wrong = report; wrong["indirect_selection"]["eid"] = 10;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), wrong, directory));
+        wrong = report; wrong.erase("indirect_selection");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), wrong, directory));
+        const auto serial = view.requestId(); view.selectIndirectAction(0);
+        QVERIFY(!view.finish(serial, report, directory));
+        QVERIFY(!action(view, "replayMeshDebugVertex")->isEnabled());
+        view.setContext("other", 36560, true); QVERIFY(!view.request().contains("indirect_action"));
+    }
     void vertexOutputAttributes() {
         const auto directory = qEnvironmentVariable("FLORA_DX12_VS_ATTRIBUTES_ROOT");
         if (directory.isEmpty()) QSKIP("Set the BF1 post-VS attribute report directory");
@@ -90,7 +118,8 @@ class ReplayMeshUiTests : public QObject {
         QVERIFY(debug);
         done.clear();
         for (const auto input : {true, false}) {
-            const auto directory = root + (input ? "/bf1-input-half1" : "/bf1-particle-vsout2");
+            const auto directory = input ? qEnvironmentVariable("FLORA_DX12_INPUT_REPORT_DIR", root + "/bf1-input-half1")
+                                         : root + "/bf1-particle-vsout2";
             const auto report = read(directory + "/result.json");
             stage->setCurrentIndex(stage->findData(input ? "VSIn" : "VSOut"));
             if (input) geometry->findChild<QLineEdit *>("replayMeshAttribute")->setText("1");
@@ -118,6 +147,24 @@ class ReplayMeshUiTests : public QObject {
             }
         }
         QVERIFY(done.empty()); QVERIFY(!window.busy()); // Navigation prepares invocation; it does not launch replay.
+        // Synthetic child identities exercise navigation transport only: this BF1 Draw is direct.
+        auto pixelHistory = window.findChild<PixelHistoryView *>();
+        auto resourceHistory = window.findChild<ResourceHistoryView *>();
+        QVERIFY(pixelHistory); QVERIFY(resourceHistory);
+        emit pixelHistory->eventRequested(36560, 1);
+        QCOMPARE(debug->request().at("indirect_action"), Json(1));
+        QCOMPARE(geometry->request().at("indirect_action"), Json(1));
+        emit resourceHistory->eventRequested(36560, 2);
+        QCOMPARE(debug->request().at("indirect_action"), Json(2));
+        emit geometry->vertexDebugRequested(36560, 3966, 0, 1);
+        QCOMPARE(debug->request().at("indirect_action"), Json(1));
+        emit pixelHistory->pixelDebugRequested(36560, 836, 241, 0, 1322, 2);
+        for (auto candidate : window.findChildren<ReplayDebugView *>())
+            QCOMPARE(candidate->findChild<QLineEdit *>("debugIndirectAction")->text(), QString("2"));
+        emit resourceHistory->eventRequested(36560);
+        QVERIFY(!debug->request().contains("indirect_action"));
+        QVERIFY(!geometry->request().contains("indirect_action"));
+        QVERIFY(done.empty()); QVERIFY(!window.busy());
         locate->setText("36561"); QTest::keyClick(locate, Qt::Key_Return);
         QVERIFY(!action(*geometry, "replayMeshDebugVertex")->isEnabled());
     }

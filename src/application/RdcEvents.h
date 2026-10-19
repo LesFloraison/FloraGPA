@@ -8,4 +8,6 @@ nlohmann::json indexDx12RdcEvents(const nlohmann::json &roots, const nlohmann::j
 nlohmann::json rdcProvenance(uint32_t event, const nlohmann::json &reverse);
 nlohmann::json selectDx12RdcExecution(const nlohmann::json &mapping, const std::string &execution,
                                      const nlohmann::json &indirectAction = nullptr);
+// -1 denotes a legacy/direct action; generated ordinals must have complete provenance.
+int64_t indirectActionOrdinal(const nlohmann::json &provenance);
 } // namespace flora

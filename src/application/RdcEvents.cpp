@@ -163,6 +163,7 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
         std::set<uint32_t> events, api;
     };
     std::map<std::string, std::vector<std::unique_ptr<Execution>>> groups;
+    std::map<uint32_t, std::string> actionKinds;
     Json actions = Json::array(), selected = Json::object(), commands = Json::object(),
          reverse = Json::object(), records = Json::object();
     size_t visited{};
@@ -220,7 +221,8 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
                 if (flags & (draw | dispatch | meshDispatch | clear | copy | resolve))
                     current->events.insert(eid);
             }
-            if (flags & (draw | dispatch | meshDispatch))
+            if (flags & (draw | dispatch | meshDispatch)) {
+                actionKinds[eid] = flags & meshDispatch ? "mesh_dispatch" : flags & dispatch ? "dispatch" : "draw";
                 actions.push_back({{"eid", eid},
                                    {"name", name},
                                    {"indices", action.at("numIndices")},
@@ -228,6 +230,7 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
                                    {"dispatch_groups", action.value("dispatchDimension", Json(nullptr))},
                                    {"dispatch_threads", action.value("dispatchThreadsDimension", Json(nullptr))},
                                    {"flags", action.at("flags_text")}});
+            }
             walk(action.at("children"), current, depth + 1);
         }
     };
@@ -259,7 +262,8 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
             for (const auto eid : eids) {
                 auto provenance = command;
                 if (command.at("name") == "ID3D12GraphicsCommandListExecuteIndirect")
-                    provenance.update({{"indirect_action", ordinal++}, {"indirect_action_count", eids.size()}});
+                    provenance.update({{"indirect_action", ordinal++}, {"indirect_action_count", eids.size()},
+                                       {"indirect_action_kind", actionKinds.contains(eid) ? actionKinds.at(eid) : "unknown"}});
                 reverse[std::to_string(eid)] = std::move(provenance);
             }
             if (eids.size() == 1)
@@ -310,6 +314,8 @@ Json rdcProvenance(uint32_t event, const Json &reverse) {
         auto result = *found;
         result["mapping_status"] = "mapped";
         result["gpa_event"] = nullptr;
+        if (result.contains("indirect_action") && result.value("indirect_action_kind", "unknown") != "unknown")
+            result["selectable"] = true;
         return result;
     }
     if (found != reverse.end())
@@ -321,5 +327,22 @@ Json rdcProvenance(uint32_t event, const Json &reverse) {
             {"gpa_command", nullptr},
             {"gpa_command_kind", nullptr},
             {"mapping_status", "unmapped_replay_action"}};
+}
+int64_t indirectActionOrdinal(const Json &p) {
+    if (!p.contains("indirect_action") && !p.contains("indirect_action_count")) return -1;
+    if (p.value("name", "") != "ID3D12GraphicsCommandListExecuteIndirect" ||
+        !p.contains("indirect_action") || !p.contains("indirect_action_count"))
+        throw std::runtime_error("Incomplete indirect action provenance");
+    const auto ordinal = number(p.at("indirect_action")), count = number(p.at("indirect_action_count"));
+    if (ordinal >= count) throw std::runtime_error("Indirect action ordinal exceeds its expansion");
+    if (p.contains("event_ids")) {
+        const auto &events = p.at("event_ids");
+        if (!events.is_array() || events.size() != count)
+            throw std::runtime_error("Indirect action count differs from its event mapping");
+        const auto event = p.value("eventId", p.value("eid", Json()));
+        if (!event.is_null() && number(event) != number(events.at(ordinal)))
+            throw std::runtime_error("Indirect action ordinal identifies a different replay event");
+    }
+    return ordinal;
 }
 } // namespace flora

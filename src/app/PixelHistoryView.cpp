@@ -1,5 +1,6 @@
 #include "PixelHistoryView.h"
 #include "application/RenderDocLibrary.h"
+#include "application/RdcEvents.h"
 #include <QAction>
 #include <QDir>
 #include <QFileDialog>
@@ -221,7 +222,8 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     connect(locate_, &QAction::triggered, this, [this] {
         auto item = records_->currentItem();
         if (item && !busy_ && item->data(0, Qt::UserRole).isValid())
-            emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
+            emit eventRequested(item->data(0, Qt::UserRole).toULongLong(),
+                dx12_ ? indirectActionOrdinal(rows_.at(item->data(0, Qt::UserRole + 1).toULongLong())) : -1);
     });
     connect(cancel_, &QAction::triggered, this, &PixelHistoryView::cancelRequested);
     connect(debug_, &QAction::triggered, this, [this] {
@@ -230,7 +232,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
         const auto item = records_->currentItem();
         const auto &row = rows_.at(item->data(0, Qt::UserRole + 1).toULongLong());
         emit pixelDebugRequested(item->data(0, Qt::UserRole).toULongLong(), x_->value(), y_->value(),
-                                 sample_->value(), row.at("primitiveID").get<uint32_t>());
+                                 sample_->value(), row.at("primitiveID").get<uint32_t>(), indirectActionOrdinal(row));
     });
     connect(read_, &QAction::triggered, this, [this] {
         if (busy_ || key_.isEmpty())
@@ -385,7 +387,8 @@ void PixelHistoryView::updateActions() {
         const auto primitive = row.value("primitiveID", Json());
         // Resource operations and synthetic boundaries are not shader invocations.
         debuggable = dx12_ && row.value("record_kind", "") == "backend_modification" &&
-                     row.value("name", std::string()).find("Draw") != std::string::npos &&
+                     (row.value("name", std::string()).find("Draw") != std::string::npos ||
+                      row.value("indirect_action_kind", "") == "draw") &&
                      !row.value("directShaderWrite", false) && !row.value("unboundPS", false) &&
                      primitive.is_number_unsigned() && primitive.get<uint64_t>() < UINT32_MAX;
     }
@@ -422,17 +425,20 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
         color(r, "preMod");
         color(r, "postMod");
         outcome(r);
-        if (dx12_ && r.value("selectable", false))
+        if (dx12_ && r.value("selectable", false)) {
             (void)executionId(r.at("execution"));
+            (void)indirectActionOrdinal(r);
+        }
     }
     result_ = result;
     rows_ = std::move(rows);
     records_->clear();
     size_t index = 0;
     for (const auto &r : rows_) {
-        const auto command =
+        auto command =
             dx12_ ? scalar(r.value("name", Json("Unmapped")))
                   : (r.at("gpa_command").is_null() ? QString("Unmapped") : scalar(r.at("gpa_command")));
+        if (dx12_ && r.contains("indirect_action")) command += " · action " + scalar(r.at("indirect_action"));
         auto item = new QTreeWidgetItem(
             records_, {scalar(r.value(dx12_ ? "execution" : "gpa_event", Json())), scalar(r.at("eventId")),
                        scalar(r.value("fragIndex", Json())) + (dx12_ ? " / " + scalar(r.value("primitiveID", Json())) : QString()), command + " · " + outcome(r), color(r, "preMod"),

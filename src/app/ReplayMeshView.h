@@ -19,6 +19,7 @@ class ReplayMeshView final : public QWidget {
     explicit ReplayMeshView(QWidget *parent = nullptr);
     void setContext(const QString &key, qulonglong event, bool dx12 = false, bool meshDispatch = false);
     void setWorkerBusy(bool busy);
+    void selectIndirectAction(qint64 ordinal);
     QString backendPath() const { return backendPath_; }
     void setBackendPath(const QString &path, bool persist = true);
     Json request() const;
@@ -31,7 +32,7 @@ class ReplayMeshView final : public QWidget {
     void cancelRequested();
     void error(const QString &message);
     void inspectionFinished(bool success);
-    void vertexDebugRequested(qulonglong event, uint32_t vertexOrdinal, uint32_t instance);
+    void vertexDebugRequested(qulonglong event, uint32_t vertexOrdinal, uint32_t instance, qint64 indirectAction = -1);
 
   private:
     void invalidate();
@@ -51,6 +52,8 @@ class ReplayMeshView final : public QWidget {
     QByteArray selectedCsv_;
     QLineEdit *instance_;
     QLineEdit *attribute_;
+    QLineEdit *indirectAction_;
+    QLabel *indirectLabel_;
     QLabel *summary_;
     QPlainTextEdit *details_;
     MeshView *preview_;

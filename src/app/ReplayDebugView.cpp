@@ -1,6 +1,7 @@
 #include "ReplayDebugView.h"
 #include "application/NativeDebugConfig.h"
 #include "application/RenderDocLibrary.h"
+#include "application/RdcEvents.h"
 #include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
@@ -580,6 +581,11 @@ void ReplayDebugView::selectVertex(uint32_t ordinal, uint32_t instance) {
     vertex_->setText(QString::number(ordinal));
     instance_->setText(QString::number(instance));
 }
+void ReplayDebugView::selectIndirectAction(qint64 ordinal) {
+    if (busy_ || !dx12_) return;
+    if (ordinal < -1 || ordinal > UINT32_MAX) throw std::runtime_error("Invalid indirect action ordinal");
+    indirectAction_->setText(ordinal < 0 ? QString() : QString::number(ordinal));
+}
 void ReplayDebugView::selectTextureReference(qulonglong object, qulonglong creation, int x, int y, int mip,
                                              int layer, int sample) {
     if (busy_ || !dx12_ || stage_ != "cs" || !object || !creation || x < 0 || y < 0 || mip < 0 || layer < 0 ||
@@ -704,8 +710,7 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("Shader trace does not match the selected indirect action");
     if (dx12_ && result.contains("indirect_selection")) {
         const auto &selection = result.at("indirect_selection");
-        if (selection.at("execution") != std::to_string(event_) ||
-            selection.at("indirect_action") >= selection.at("indirect_action_count") ||
+        if (indirectActionOrdinal(selection) < 0 || selection.at("execution") != std::to_string(event_) ||
             (indirectAction_->text().trimmed().isEmpty() && selection.at("indirect_action_count") != 1))
             throw std::runtime_error("Shader trace has ambiguous or mismatched indirect provenance");
     }
