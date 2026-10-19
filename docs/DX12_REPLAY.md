@@ -13,7 +13,7 @@ drag-and-drop use the existing API log. Initialization records are explicitly
 distinguished from frame-thread records. CPU timestamp order is not GPU execution
 order, and an indexed record is not yet a command-list execution instance.
 
-`inventory`, `commands`, `command-lists`, `replay` and `validate-frame` accept DX12 directories. Validation
+`inventory`, `commands`, `command-lists`, `replay`, `buffer`, `shader` and `validate-frame` accept DX12 directories. Validation
 reports `blocked` while complete frame replay and feature acceptance remain unfinished;
 the selected native execution and isolated analysis paths below are available for investigation.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
@@ -3965,6 +3965,41 @@ Ignored evidence: `hellblade-cs-projects1`, `hellblade-cs-projects1.txt`,
 `hellblade-cs-experiment-evidence1.json`. This adds a verified DXIL CS modification
 at an actual indirect boundary; full CS stage coverage, downsampled-UAV fidelity
 and whole-frame repeatability are still unfinished.
+
+### DX12 pipeline shader CLI export
+
+`shader` now accepts a DX12 directory with `--id <PSO creation record>` and an
+explicit `--pipeline-stage VS/PS/CS/HS/DS/GS/AS/MS` (case-insensitive). It exports
+`shader.dxbc` or `shader.dxil`, plus `shader.json` and `report.json`. The reports
+preserve the capture identity, PSO/root objects, selected stage, format, byte
+count and SHA-256 as checked metadata; 64-bit identities and sizes use strings.
+DXBC also gets system-compiler disassembly when available. DXIL bytecode is
+validated as executable DXIL, not passed to the DX11 signature-only inspector;
+this export explicitly reports its missing DXIL disassembly. Replay debugging
+remains a separate operation.
+
+`--experiment <project>` exports the selected stage's current replacement or
+original bytes after undo, retaining the original digest, revision and project
+digest. Stage, missing pipeline, out-of-range identity and incompatible project
+errors remain failures. Export performs no GPU work and does not validate PSO
+creation or root-signature compatibility. Example:
+
+```powershell
+FloraGPA.Cli.exe shader "D:/CDXrepo/captures/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame" --id 512699 --pipeline-stage CS --experiment modified.json --out shader-export
+```
+
+Release build **268** passes `dx12ShaderCliExport` (**3 passed including
+setup/cleanup, 95,537 ms**): Talos VS **156847** exports the known 892-byte DXBC
+and assembly; Hellblade2 CS **512699** exports the exact modified and undone
+digests from the preceding GPU experiment. Missing stage, absent CS slot and
+record **18446744073709551615** are rejected with specific errors. The first
+build exposed an MSVC string/JSON comparison ambiguity, corrected before these
+checks. A DX11 GF2 `shader --id 102` export also succeeds with the existing
+bytecode, assembly and metadata outputs. An initial GF2 request using an older
+research reference **887** correctly failed because it is not a shader in this
+capture; inventory supplied the current **102** identity. No GPU tests ran.
+Ignored evidence is in `shader-cli-export1`, `shader-cli-export1.txt`, and
+`shader-cli-dx11-compat2`.
 
 ### Full feature acceptance
 

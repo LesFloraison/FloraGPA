@@ -41,6 +41,7 @@ bool isPipelineRecipe(uint64_t type);
 RootSignatureRecipe decodeRootSignature(format::Bytes);
 PipelineRecipe decodePipelineRecipe(uint64_t type, format::Bytes);
 nlohmann::json describePipelineRecipe(const PipelineRecipe &);
+nlohmann::json describeShaderBytecode(format::Bytes);
 
 // Native objects are keyed by creation record, never by an execution event or
 // a rounded JSON number. The directory and device must outlive this cache.

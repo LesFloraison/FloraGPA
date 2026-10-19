@@ -2622,6 +2622,65 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(decoded.resources, std::vector<uint64_t>{UINT64_MAX});
         QCOMPARE(decoded.values.at("ShadingRateImage"), nlohmann::json("18446744073709551615"));
     }
+    void dx12ShaderCliExport() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto projects = qEnvironmentVariable("FLORA_HELLBLADE_SHADER_PROJECT_OUTPUT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_EXPORT_OUTPUT");
+        if (captures.isEmpty() || projects.isEmpty() || output.isEmpty())
+            QSKIP("Set captures, Hellblade2 CS projects and a new shader export output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto run = [&](const QString &name, const QString &capture, QStringList arguments, int expected) {
+            QProcess process;
+            process.setStandardOutputFile(output + '/' + name + ".stdout.txt");
+            process.setStandardErrorFile(output + '/' + name + ".stderr.txt");
+            arguments.prepend(captures + '/' + capture); arguments.prepend("shader");
+            arguments.append({"--out", output + '/' + name});
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", arguments);
+            if (!process.waitForStarted(5000) || !process.waitForFinished(180000)) {
+                process.kill(); process.waitForFinished(5000); return false;
+            }
+            return process.exitStatus() == QProcess::NormalExit && process.exitCode() == expected;
+        };
+        const auto read = [&](const QString &name, const QString &file) {
+            QFile input(output + '/' + name + '/' + file);
+            if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing shader export artifact");
+            return input.readAll();
+        };
+        const auto talos = QString("Talos_2026_10_18__00_55_08.gpa_frame");
+        QVERIFY(run("dxbc", talos, {"--id", "156847", "--pipeline-stage", "vs"}, 0));
+        auto report = nlohmann::json::parse(read("dxbc", "report.json").toStdString());
+        QCOMPARE(report.at("format"), nlohmann::json("DXBC"));
+        QCOMPARE(report.at("stage"), nlohmann::json("VS"));
+        QVERIFY(report.at("disassembly").at("available").get<bool>());
+        QVERIFY(!read("dxbc", "shader.asm").isEmpty());
+        QCOMPARE(QCryptographicHash::hash(read("dxbc", "shader.dxbc"), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("81f4477676e4cb210da4408c77314811ab233c99192d3709a222fa8bdc3daec5"));
+        for (const auto &bad : {QStringList{"--id", "156847", "--pipeline-stage", "CS"},
+                               QStringList{"--id", "18446744073709551615", "--pipeline-stage", "VS"},
+                               QStringList{"--id", "156847"}}) {
+            const auto name = QString("invalid-%1").arg(QDir(output).entryList(QDir::Dirs | QDir::NoDotAndDotDot).size());
+            QVERIFY(run(name, talos, bad, 1));
+            QVERIFY(!QFileInfo::exists(output + '/' + name + "/report.json"));
+        }
+        const auto hellblade = QString("Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        for (const auto &name : {QString("modified"), QString("restored")}) {
+            QVERIFY(run(name, hellblade, {"--id", "512699", "--pipeline-stage", "CS", "--experiment", projects + '/' + name + ".json"}, 0));
+            report = nlohmann::json::parse(read(name, "report.json").toStdString());
+            QCOMPARE(report.at("pipeline_creation"), nlohmann::json("512699"));
+            QCOMPARE(report.at("pipeline_object"), nlohmann::json("2130520907296"));
+            QCOMPARE(report.at("format"), nlohmann::json("DXIL"));
+            QCOMPARE(report.at("stage"), nlohmann::json("CS"));
+            QCOMPARE(report.at("gpu_commands_executed"), nlohmann::json(false));
+            QVERIFY(!report.at("disassembly").at("available").get<bool>());
+            QCOMPARE(report.at("replaced"), nlohmann::json(name == "modified"));
+            const auto original = QByteArray("ff26fc08d0880e1ef3dbac56bad4111a6b74853fa6561aeba882c17cb2906e93");
+            const auto expected = name == "modified" ? QByteArray("886d2f0680d3ef3783f814fca40fe7a1385a76448f0d85169122bb96af526378") : original;
+            QCOMPARE(QCryptographicHash::hash(read(name, "shader.dxil"), QCryptographicHash::Sha256).toHex(), expected);
+            QCOMPARE(report.at("original").at("sha256"), nlohmann::json(original.toStdString()));
+            QCOMPARE(report.at("sha256"), nlohmann::json(expected.toStdString()));
+            QCOMPARE(read(name, "report.json"), read(name, "shader.json"));
+        }
+    }
     void replayAllocationFailureReport() {
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_FAILURE_REPORT_OUTPUT");

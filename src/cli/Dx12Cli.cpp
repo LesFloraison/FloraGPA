@@ -1,6 +1,7 @@
 #include "Dx12Cli.h"
 #include "application/ReplaySession.h"
 #include "application/Experiment.h"
+#include "application/SystemDisassembly.h"
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
@@ -16,6 +17,73 @@
 
 namespace flora {
 namespace {
+int exportDx12Shader(const IReplaySession &session, const QCommandLineParser &options, const QDir &output) {
+    const auto idText = options.value("id");
+    bool valid{};
+    const auto creation = idText.toULongLong(&valid);
+    if (!options.isSet("id") || !valid || !creation ||
+        std::any_of(idText.begin(), idText.end(), [](QChar c) { return c < '0' || c > '9'; }))
+        throw std::runtime_error("DX12 shader requires --id <pipeline creation record>");
+    const auto stage = options.value("pipeline-stage").toUpper().toStdString();
+    if (stage.empty()) throw std::runtime_error("DX12 shader requires --pipeline-stage <VS/PS/CS/HS/DS/GS/AS/MS>");
+    dx12::StreamDirectory directory(session.path());
+    if (creation > directory.packets().size()) throw std::runtime_error("Pipeline creation record is out of range");
+    const auto &packet = directory.packets()[size_t(creation - 1)];
+    if (!dx12::isPipelineRecipe(packet.type)) throw std::runtime_error("Selected record is not a pipeline creation");
+    const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+    const auto found = std::find_if(recipe.shaders.begin(), recipe.shaders.end(),
+        [&](const auto &shader) { return shader.first == stage; });
+    if (found == recipe.shaders.end()) throw std::runtime_error("Selected pipeline has no shader for stage " + stage);
+    const auto original = dx12::describeShaderBytecode(found->second);
+    if (original.at("stage") != stage) throw std::runtime_error("Captured shader stage does not match its pipeline slot");
+    std::vector<uint8_t> bytecode(found->second.begin(), found->second.end());
+    nlohmann::json experimentInfo = nullptr;
+    bool replaced = false;
+    if (options.isSet("experiment")) {
+        Experiment experiment(session);
+        experiment.load(options.value("experiment"), session);
+        for (const auto &edit : experiment.dx12Edits(session).shaders) {
+            if (edit.pipeline != creation || edit.stage != stage) continue;
+            if (edit.originalSha256 != original.at("sha256").get<std::string>())
+                throw std::runtime_error("Original pipeline shader digest mismatch");
+            bytecode = edit.bytecode;
+            replaced = true;
+        }
+        const auto document = QByteArray::fromStdString(experiment.document().dump());
+        experimentInfo = {{"cursor", std::to_string(experiment.revision())},
+            {"document_sha256", QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex().toStdString()}};
+    }
+    auto report = dx12::describeShaderBytecode(bytecode);
+    if (report.at("stage") != stage) throw std::runtime_error("Replacement shader stage mismatch");
+    const auto filename = report.at("format") == "DXIL" ? "shader.dxil" : "shader.dxbc";
+    report.update({{"backend", "dx12"}, {"completed", true}, {"status", "bytecode_exported"},
+        {"capture_identity", session.captureIdentity()}, {"pipeline_creation", std::to_string(creation)},
+        {"pipeline_object", std::to_string(recipe.object)}, {"root_signature_object", std::to_string(recipe.rootSignature)},
+        {"original", original}, {"experiment", experimentInfo}, {"replaced", replaced}, {"file", filename},
+        {"gpu_commands_executed", false},
+        {"scope", "Selected captured PSO stage; export does not validate root-signature compatibility or GPU execution"},
+        {"disassembly", {{"available", false}, {"reason", "DXIL disassembly is available through the isolated replay debugger; this export preserves bytecode only"}}}});
+    const auto save = [&](const QString &name, const QByteArray &bytes) {
+        QSaveFile file(output.filePath(name));
+        if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
+            throw std::runtime_error("Cannot save DX12 shader export");
+    };
+    if (report.at("format") == "DXBC") {
+        try {
+            const auto assembly = systemDisassembly(bytecode, 0x80);
+            save("shader.asm", QByteArray::fromStdString(assembly));
+            report["disassembly"] = {{"available", true}, {"file", "shader.asm"}};
+        } catch (const std::exception &error) {
+            report["disassembly"] = {{"available", false}, {"reason", error.what()}};
+        }
+    }
+    save(filename, QByteArray(reinterpret_cast<const char *>(bytecode.data()), qsizetype(bytecode.size())));
+    const auto json = QByteArray::fromStdString(report.dump(2) + "\n");
+    save("shader.json", json);
+    save("report.json", json);
+    QTextStream(stdout) << json << Qt::endl;
+    return 0;
+}
 int replayDx12(const IReplaySession &session, const QString &path, const QCommandLineParser &options,
                const QDir &output, bool buffer = false) {
     const auto number = [&](const char *key) {
@@ -235,12 +303,13 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
 } // namespace
 int runDx12Cli(const QString &command, const QString &path, const QCommandLineParser &options) {
     if (command != "inventory" && command != "commands" && command != "validate-frame" &&
-        command != "command-lists" && command != "replay" && command != "buffer")
+        command != "command-lists" && command != "replay" && command != "buffer" && command != "shader")
         throw std::runtime_error("DX12 " + command.toStdString() +
                                  " is not implemented; use inventory or commands for stream inspection");
     std::set<QString> allowed{"out", "replay-identity"};
     if (command == "commands")
         allowed.insert("filter");
+    if (command == "shader") allowed.insert({"id", "pipeline-stage", "experiment"});
     if (command == "replay")
         allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
     if (command == "buffer")
@@ -265,6 +334,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("Output directory must be new or empty");
     auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
     if (!QDir().mkpath(output.path())) throw std::runtime_error("Cannot create DX12 inspection output directory");
+    if (command == "shader") return exportDx12Shader(*session, options, output);
     if (command == "replay" || command == "buffer") return replayDx12(*session,path,options,output,command == "buffer");
     const auto filename = command == "commands" ? "commands.json" : command == "validate-frame" ? "validation.json" :
                           command == "command-lists" ? "command-lists.json" : "inventory.json";

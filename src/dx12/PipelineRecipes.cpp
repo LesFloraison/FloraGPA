@@ -222,6 +222,10 @@ std::string shaderBytecodeStage(Bytes bytes) {
     require(stages.contains(type) && (dxil || type < 6), "Unsupported replacement shader stage");
     return stages.at(type);
 }
+json describeShaderBytecode(Bytes bytes) {
+    return {{"stage", shaderBytecodeStage(bytes)}, {"format", shaderFormat(bytes)},
+            {"bytes", std::to_string(bytes.size())}, {"sha256", digest(bytes)}};
+}
 bool isPipelineRecipe(uint64_t type) {
     return type == 0x127938a579e5bULL || type == 0x12793a04eeae1ULL || type == 0x1b0ef747d2b24ULL || type == 0x121f7e63b7766ULL;
 }

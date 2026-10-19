@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
     p.addPositionalArgument("capture", "DX11 .gpa_frame file or DX12 single-frame directory");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
+    p.addOption({"pipeline-stage", "DX12 shader export stage (VS/PS/CS/HS/DS/GS/AS/MS); --id is a PSO creation record", "stage"});
     p.addOption({"source", "HLSL translation unit or shader project JSON", "path"});
     p.addOption({"entry", "HLSL entry point", "name", "main"});
     p.addOption({"profile", "Optional shader target profile for compile", "profile"});
@@ -265,6 +266,7 @@ int main(int argc, char **argv) {
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
         if (QFileInfo(args[1]).isDir()) return runDx12Cli(command, args[1], p);
+        if (p.isSet("pipeline-stage")) throw std::runtime_error("--pipeline-stage requires DX12 shader export");
         if (p.isSet("uav-barrier-before")) throw std::runtime_error("--uav-barrier-before requires DX12 replay");
         if (p.isSet("measure-event")) throw std::runtime_error("--measure-event requires native DX12 replay");
         if (command == "validate-frame") {
