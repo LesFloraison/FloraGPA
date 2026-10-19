@@ -3,6 +3,8 @@
 #include <cstring>
 #include <bit>
 #include <cmath>
+#include <map>
+#include <optional>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
@@ -139,7 +141,61 @@ Json rdcVertexInvocation(const ActionDescription &action, const D3D12Pipe::Input
     result["index_source"] = action.flags & ActionFlags::Indexed ? "replayed_index_buffer" : "draw_vertex_offset";
     return result;
 }
-Json rdcVertexPositionReference(const ActionDescription &action, const MeshFormat &mesh,
+Json rdcVertexInputSnapshot(const ActionDescription &action, const D3D12Pipe::InputAssembly &ia,
+                            uint32_t vertex, uint32_t instance,
+                            const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
+    Json result{{"status", "unavailable"}, {"attributes", Json::array()}};
+    if (ia.layouts.size() > 128) { result["reason"] = "Input layout exceeds snapshot limit"; return result; }
+    try { result["invocation"] = rdcVertexInvocation(action, ia, vertex, instance, read); }
+    catch (const std::exception &e) { result["reason"] = e.what(); return result; }
+    std::map<uint32_t, std::optional<uint64_t>> next;
+    bool complete = true;
+    for (const auto &layout : ia.layouts) {
+        Json entry{{"semantic", std::string(layout.semanticName.c_str())}, {"semantic_index", layout.semanticIndex},
+                   {"slot", layout.inputSlot}, {"status", "unavailable"}};
+        const auto &f = layout.format;
+        const bool regular = f.type == ResourceFormatType::Regular && f.compCount && f.compCount <= 4 &&
+                             (f.compByteWidth == 1 || f.compByteWidth == 2 || f.compByteWidth == 4 || f.compByteWidth == 8);
+        const auto previous = next.find(layout.inputSlot);
+        const std::optional<uint64_t> offset = layout.byteOffset == D3D12Pipe::Layout::TightlyPacked
+            ? (previous == next.end() ? std::optional<uint64_t>(0) : previous->second)
+            : std::optional<uint64_t>(layout.byteOffset);
+        const uint64_t length = uint64_t(f.compCount) * f.compByteWidth;
+        next[layout.inputSlot] = regular && offset ? std::optional<uint64_t>(*offset + length) : std::nullopt;
+        if (!regular || !offset) entry["reason"] = "Packed input size or append offset is unavailable";
+        else if (layout.inputSlot >= ia.vertexBuffers.size()) entry["reason"] = "Input slot is unbound";
+        else {
+            const auto &vb = ia.vertexBuffers[layout.inputSlot];
+            const uint64_t element = layout.perInstance
+                ? uint64_t(action.instanceOffset) + (layout.instanceDataStepRate ? instance / layout.instanceDataStepRate : 0)
+                : result.at("invocation").at("actual_vertex_index").get<uint32_t>();
+            uint64_t id{}; memcpy(&id, &vb.resourceId, 8);
+            entry.update({{"resource", "ResourceId::" + std::to_string(id)}, {"element", std::to_string(element)}});
+            if (vb.resourceId == ResourceId::Null() || (vb.byteStride && element > (UINT64_MAX - *offset) / vb.byteStride))
+                entry["reason"] = "Input binding is null or address overflows";
+            else {
+                const uint64_t relative = element * vb.byteStride + *offset;
+                if (relative > vb.byteSize || length > vb.byteSize - relative ||
+                    vb.byteOffset > UINT64_MAX - relative || vb.byteOffset + relative > UINT64_MAX - length)
+                    entry["reason"] = "Selected input exceeds its binding";
+                else {
+                    entry["byte_offset"] = std::to_string(vb.byteOffset + relative);
+                    const auto bytes = read(vb.resourceId, vb.byteOffset + relative, length);
+                    if (bytes.size() != length) entry["reason"] = "Truncated selected input data";
+                    else {
+                        entry["status"] = "read"; entry["bytes"] = Json::array();
+                        for (const auto byte : bytes) entry["bytes"].push_back(byte);
+                    }
+                }
+            }
+        }
+        complete = complete && entry.at("status") == "read";
+        result["attributes"].push_back(std::move(entry));
+    }
+    result["status"] = complete ? "read" : "partial";
+    return result;
+}
+static Json vertexReference(const ActionDescription &action, const MeshFormat &mesh, const ShaderReflection *shader,
                                 uint32_t vertex, uint32_t instance,
                                 const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
     Json result{{"status", "unavailable"}, {"vertex_ordinal", vertex}, {"instance", instance},
@@ -196,13 +252,17 @@ Json rdcVertexPositionReference(const ActionDescription &action, const MeshForma
     } else if (action.flags & ActionFlags::Indexed) {
         return unavailable("Indexed Draw has no post-VS index mapping");
     }
+    const auto layout = shader ? rdcVertexOutputLayout(*shader, mesh.vertexByteStride) : Json();
+    const bool allOutputs = layout.is_object() && layout.value("status", "") == "mapped";
+    const uint64_t readBytes = allOutputs ? mesh.vertexByteStride : 16;
+    if (shader) result["output_layout"] = layout;
     uint64_t offset{};
     const auto relative = row * mesh.vertexByteStride;
-    if (relative > instanceBytes || 16 > instanceBytes - relative ||
-        !address(mesh.vertexByteOffset, relative, mesh.vertexByteSize, 16, offset))
+    if (relative > instanceBytes || readBytes > instanceBytes - relative ||
+        !address(mesh.vertexByteOffset, relative, mesh.vertexByteSize, readBytes, offset))
         return unavailable("Post-VS position address exceeds the returned buffer");
-    const auto bytes = read(mesh.vertexResourceId, offset, 16);
-    if (bytes.size() != 16) return unavailable("Truncated post-VS position data");
+    const auto bytes = read(mesh.vertexResourceId, offset, readBytes);
+    if (bytes.size() != readBytes) return unavailable("Truncated post-VS vertex data");
     Json bits = Json::array(), values = Json::array();
     for (size_t i = 0; i < 4; ++i) {
         uint32_t word{}; memcpy(&word, bytes.data() + i * 4, 4); bits.push_back(word);
@@ -212,6 +272,35 @@ Json rdcVertexPositionReference(const ActionDescription &action, const MeshForma
     result.update({{"status", "read"}, {"post_vertex", std::to_string(row)},
                    {"position_byte_offset", std::to_string(offset)},
                    {"value", {{"uintValue", bits}, {"floatValue", values}}}});
+    if (allOutputs) {
+        result["method"] = "RenderDoc GetPostVSData VSOut, view 0; one selected output vertex";
+        result["outputs"] = Json::array();
+        for (const auto &attribute : layout.at("attributes")) {
+            auto output = attribute; output["status"] = "unavailable";
+            if (attribute.at("supported") == true) {
+                const auto start = attribute.at("byte_offset").get<size_t>();
+                const auto count = attribute.at("format").at("compCount").get<size_t>();
+                const auto type = attribute.at("format").at("compType").get<uint32_t>();
+                Json words = Json::array();
+                for (size_t c = 0; c < count; ++c) {
+                    uint32_t word{}; memcpy(&word, bytes.data() + start + 4 * c, 4); words.push_back(word);
+                }
+                output.update({{"status", "read"}, {"interpretation", type == uint32_t(CompType::Float) ? "float" : type == uint32_t(CompType::UInt) ? "uint" : "sint"},
+                    {"value", {{"uintValue", words}}}, {"buffer_byte_offset", std::to_string(offset + start)}});
+            }
+            result["outputs"].push_back(std::move(output));
+        }
+    }
     return result;
+}
+Json rdcVertexPositionReference(const ActionDescription &action, const MeshFormat &mesh,
+                                uint32_t vertex, uint32_t instance,
+                                const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
+    return vertexReference(action, mesh, nullptr, vertex, instance, read);
+}
+Json rdcVertexOutputReference(const ActionDescription &action, const MeshFormat &mesh, const ShaderReflection &shader,
+                              uint32_t vertex, uint32_t instance,
+                              const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
+    return vertexReference(action, mesh, &shader, vertex, instance, read);
 }
 } // namespace flora

@@ -458,6 +458,14 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         throw std::runtime_error("No shader bound at the selected stage");
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
+    const std::optional<D3D12Pipe::InputAssembly> vertexIA = dx12 && vertex
+        ? std::optional<D3D12Pipe::InputAssembly>(pipe12->inputAssembly) : std::nullopt;
+    const auto vertexInputs = [&] {
+        return flora::rdcVertexInputSnapshot(*selected, *vertexIA, index(job, "vertex"), index(job, "instance"),
+            [&](ResourceId resource, uint64_t offset, uint64_t length) {
+                return controller.GetBufferData(resource, offset, length);
+            });
+    };
     Json result = Json::object();
     if (dx12 && compute)
         result["compute_invocation"] = flora::rdcComputeInvocation(
@@ -587,6 +595,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
             if (job.contains("index") && !job.at("index").is_null() && index(job, "index") != actual)
                 throw std::runtime_error("Explicit DX12 vertex index does not match the selected Draw invocation");
             result["vertex_invocation"] = invocation;
+            result["vertex_input_snapshots"]["before_debug"] = vertexInputs();
         } else if (job.contains("index") && !job.at("index").is_null()) {
             actual = index(job, "index");
         } else if (selected->flags & ActionFlags::Indexed) {
@@ -712,24 +721,45 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         }
     }
     if (dx12 && vertex) {
+        auto &snapshots = result["vertex_input_snapshots"];
+        snapshots["after_steps"] = vertexInputs();
         // Free the interpreter before the stream-output replay. This is a
         // separate reference phase, not a stability check of the original draw.
         trace.reset();
         const auto mesh = controller.GetPostVSData(index(job, "instance"), 0, MeshDataStage::VSOut);
         checked(controller.GetFatalErrorStatus());
-        auto reference = flora::rdcVertexPositionReference(*selected, mesh,
+        auto reference = flora::rdcVertexOutputReference(*selected, mesh, *reflection,
             index(job, "vertex"), index(job, "instance"),
             [&](ResourceId resource, uint64_t offset, uint64_t length) {
                 return controller.GetBufferData(resource, offset, length);
             });
         checked(controller.GetFatalErrorStatus());
-        reference["trace_output_comparison"] = flora::rdcCompareVertexPosition(
-            *reflection, result.at("trace"), result.at("steps"), reference);
-        if (reference.at("trace_output_comparison").at("status") == "output_mismatch") {
+        snapshots["after_output_replay"] = vertexInputs();
+        checked(controller.GetFatalErrorStatus());
+        const bool completeInputs = snapshots.at("before_debug").at("status") == "read" &&
+            snapshots.at("after_steps").at("status") == "read" && snapshots.at("after_output_replay").at("status") == "read";
+        const bool sameInputs = snapshots.at("before_debug").value("invocation", Json()) == result.at("vertex_invocation") &&
+                                snapshots.at("before_debug") == snapshots.at("after_steps") &&
+                                snapshots.at("before_debug") == snapshots.at("after_output_replay");
+        snapshots["status"] = completeInputs ? sameInputs ? "observed_bytes_unchanged" : "observed_bytes_changed" : "unavailable";
+        snapshots["scope"] = "Selected index and regular vertex attributes at three observation points. "
+                             "Unchanged bytes do not prove stable inputs during execution; textures, constants and other vertices are not checked.";
+        if (completeInputs && !sameInputs) {
             result["partial"] = true;
             auto &warnings = result["debug_scope"]["warnings"];
             if (warnings.is_null()) warnings = Json::array();
-            warnings.push_back("The final simulated VS position differs from the instrumented GPU VS output. "
+            warnings.push_back("Selected vertex input bytes changed during debug/output replays; output equality cannot validate this trace.");
+        }
+        reference["trace_output_comparison"] = flora::rdcCompareVertexPosition(
+            *reflection, result.at("trace"), result.at("steps"), reference);
+        reference["output_comparison"] = flora::rdcCompareVertexOutputs(
+            *reflection, result.at("trace"), result.at("steps"), reference);
+        if (reference.at("trace_output_comparison").at("status") == "output_mismatch" ||
+            reference.at("output_comparison").at("status") == "output_mismatch") {
+            result["partial"] = true;
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null()) warnings = Json::array();
+            warnings.push_back("A final simulated VS output differs from the instrumented GPU VS output. "
                                "Inspect replay inputs and shader arithmetic; this trace is not validated.");
         }
         result["gpu_vertex_reference"] = std::move(reference);

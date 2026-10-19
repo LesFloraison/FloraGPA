@@ -3,6 +3,8 @@
 #include <nlohmann/json.hpp>
 
 namespace flora {
+nlohmann::json rdcCompareVertexOutputs(const ShaderReflection &, const nlohmann::json &trace,
+                                      const nlohmann::json &steps, const nlohmann::json &reference);
 // Preserve the public replay API's full typed values, including aliases of the
 // same raw storage. Non-finite floats use the reference worker's JSON strings.
 nlohmann::json rdcVariable(const ShaderVariable &value);

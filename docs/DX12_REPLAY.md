@@ -4418,6 +4418,66 @@ large-workgroup cost remain unverified. Hellblade2's DXIL contraction discrepanc
 is unaffected. Validation was limited to one microprobe and one saved-RDC debug
 query; it does not complete full Shader Debug or portable-package acceptance.
 
+### VS output comparisons and selected input observations
+
+DX12 VS Debug now reads the selected post-VS vertex's reflected output layout
+and compares each supported output with its final debugger mapping. This extends
+the existing remapped-index/instance-bounded position reference; it reads one
+vertex stride, not the complete output buffer. Float32, uint32 and sint32
+components are compared as exact bits. Missing mappings, unsupported types,
+noncontiguous component masks and incomplete/duplicate signature layouts remain
+unavailable; an empty comparison cannot pass. Mismatches mark the trace partial.
+The existing workspace invocation area reports matching, differing and
+unavailable output counts, names differing semantics, and exposes component bits
+and provenance in Details/the tooltip. Legacy position-only reports still work.
+
+The backend also observes the selected original index and regular input-layout
+attributes before DebugVertex, after stepping and after the instrumented output
+replay. It bounds each read to the selected attribute, checks binding limits and
+64-bit address arithmetic, handles per-instance step rates, and serializes
+resource identities/offsets as strings. It checks the first snapshot's index
+against the invocation actually supplied to DebugVertex. Unsupported packed
+formats and truncated data are explicit missing observations. Changed complete
+observations mark the trace partial. Unchanged observations are not a claim that
+inputs remained stable during execution; constants, textures and other vertices
+are outside this check.
+
+The new typed-layout check found and fixes a regression in the preceding mesh
+attribute implementation: RenderDoc `CompType::UInt/SInt` are **4/5**, whereas
+**2/3** are UNorm/SNorm. Integer mesh decoding and selector labels now use the
+correct values, and normalized formats are rejected instead of being interpreted
+as integers. BF1's seven float outputs were unaffected by that bug. CPU tests
+cover signed/unsigned extrema and values beyond float32 integer precision;
+integer GPU-output coverage is not claimed.
+
+Builds **289–292** pass for the affected backend, application and tests. The
+initial typed-output check failed on the enum mismatch and passes after the fix.
+Final addressing/layout/comparison checks pass (**6 including setup/cleanup,
+1 ms**); the added signed/unsigned comparison case passes (**3 including
+setup/cleanup, 1 ms**). The mesh model checks also pass. These cover offsets above
+4 GiB, instance step rates, append offsets, truncation, binding overflow, output
+packing/remapping, unavailable references and exact one-bit differences.
+
+One GPU query, `bf1-vertex-all-outputs1`, uses execution **36560**, ordinal
+**3966**, vertex **1428**, instance **0**. All **28 components** of its **7**
+outputs match in this query; the **159-step** trace executes **24** GPU MADs and
+**13** GPU dots without failure. All **9** selected input attributes (**84
+bytes** per observation) and the index are unchanged at the three points.
+Slot-1 TEXCOORD8 at byte **5712**, resource **5189**, contains shadow-factor bits
+**1055312006** (`0.45074862241744995`) at every point. The job loads neither GPA
+nor Python. This observation does **not** resolve the earlier cross-query
+TEXCOORD2.xyz variation.
+
+The workspace check verifies the real report, injected mismatch/unavailable
+display states, old position-only reports and stale-session rejection (**4
+including setup/cleanup, 452 ms**). The inspected screenshot is
+`vs-all-output-ui1/replay-debug/bf1-vs-outputs.png`. Other local evidence is
+`bf1-vertex-all-outputs-evidence1.json`, `vs-output-reference-bounds3.txt`,
+`vs-output-integer-comparison1.txt`, `vs-output-integer-model1.txt` and
+`vs-all-output-ui1.txt`. No repeated GPU query, full-frame replay or portable
+acceptance run was added. Complete shader instruction fidelity and replay
+stability remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

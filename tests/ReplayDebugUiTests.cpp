@@ -124,6 +124,36 @@ class ReplayDebugUiTests : public QObject {
         view.setContext("new-session", 1, true);
         QVERIFY(label->isHidden());
     }
+    void vertexOutputReferences() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_VERTEX_OUTPUT_DEBUG_REPORT");
+        if (path.isEmpty()) QSKIP("Set the saved DX12 VS output/input comparison report");
+        auto result = read(path);
+        const auto &outputs = result.at("gpu_vertex_reference").at("output_comparison");
+        QCOMPARE(outputs.at("outputs").size(), size_t(7));
+        QCOMPARE(result.at("vertex_input_snapshots").at("before_debug").at("attributes").size(), size_t(9));
+        ReplayDebugView view("vs"); view.resize(1380, 1000); view.show();
+        view.setContext("bf1-vs-output", 36560, true); view.selectVertex(3966, 0);
+        QVERIFY(view.finish(view.requestId(), result));
+        auto label = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(label->text().contains("VS outputs:")); QVERIFY(label->text().contains("Selected vertex input"));
+        QCOMPARE(Json::parse(label->toolTip().toStdString()).at("vertex_input_snapshots"), result.at("vertex_input_snapshots"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/bf1-vs-outputs.png"));
+        auto changed = result;
+        auto &comparison = changed["gpu_vertex_reference"]["output_comparison"];
+        comparison.update({{"status", "output_mismatch"}, {"matched", 6}, {"mismatched", 1}, {"unavailable", 0}});
+        comparison["outputs"][3].update({{"status", "output_mismatch"}, {"mismatched_components", Json::array({0,1,2})}});
+        changed["vertex_input_snapshots"]["status"] = "observed_bytes_changed";
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("6 match")); QVERIFY(label->text().contains("TEXCOORD2"));
+        QVERIFY(label->text().contains("input bytes changed")); QVERIFY(label->text().contains("not validated"));
+        comparison.update({{"status", "partial_comparison"}, {"matched", 6}, {"mismatched", 0}, {"unavailable", 1}});
+        comparison["outputs"][3]["status"] = "unavailable";
+        changed["vertex_input_snapshots"]["status"] = "unavailable";
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(label->text().contains("1 unavailable")); QVERIFY(!label->text().contains("Output differences:"));
+        const auto request = view.requestId(); view.setContext("new-session", 36560, true);
+        QVERIFY(!view.finish(request, result)); QVERIFY(label->isHidden());
+    }
     void vertexPositionReference() {
         const auto path = qEnvironmentVariable("FLORA_DX12_VERTEX_DEBUG_REPORT");
         if (path.isEmpty()) QSKIP("Set the DX12 VS report with GPU position comparison");

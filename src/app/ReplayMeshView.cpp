@@ -345,7 +345,7 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                 outputAttribute_->addItem(QString("%1%2 · %3%4")
                     .arg(QString::fromStdString(attr.at("semantic").get<std::string>()))
                     .arg(attr.at("semantic_index").get<unsigned>())
-                    .arg(type == 1 ? "float" : type == 2 ? "uint" : "int")
+                    .arg(type == 1 ? "float" : type == 4 ? "uint" : "int")
                     .arg(attr.at("format").at("compCount").get<unsigned>()), int(i));
             }
         }

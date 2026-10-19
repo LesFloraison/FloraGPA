@@ -789,7 +789,8 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                 "\nIndirect arguments may change between replays; bounds use the indexed action.");
         if (const auto reference = result.value("gpu_vertex_reference", Json()); reference.is_object()) {
             invocationReference_->setToolTip(QString::fromStdString(
-                Json{{"invocation", invocation}, {"gpu_vertex_reference", reference}}.dump(2)));
+                Json{{"invocation", invocation}, {"gpu_vertex_reference", reference},
+                     {"vertex_input_snapshots", result.value("vertex_input_snapshots", Json())}}.dump(2)));
             if (reference.value("status", "") == "read") {
                 invocationReference_->setText(invocationReference_->text() +
                     "\nGPU VS position " + text(reference.at("value").at("floatValue")));
@@ -804,12 +805,35 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                 else
                     invocationReference_->setText(invocationReference_->text() +
                         "\nPosition comparison unavailable: " + text(comparison.value("reason", Json("Unknown"))));
-                invocationReference_->setText(invocationReference_->text() +
-                    "\nSeparate instrumented replay; other outputs, instructions and input stability remain unverified.");
+                const auto outputs = reference.value("output_comparison", Json::object());
+                if (outputs.value("status", "unavailable") != "unavailable") {
+                    invocationReference_->setText(invocationReference_->text() +
+                        QString("\nVS outputs: %1 match · %2 differ · %3 unavailable")
+                            .arg(text(outputs.at("matched")), text(outputs.at("mismatched")), text(outputs.at("unavailable"))));
+                    QStringList differences;
+                    for (const auto &output : outputs.at("outputs"))
+                        if (output.value("status", "") == "output_mismatch" && differences.size() < 6)
+                            differences << text(output.at("semantic")) + text(output.at("semantic_index")) +
+                                " components " + text(output.at("mismatched_components"));
+                    if (!differences.empty()) invocationReference_->setText(invocationReference_->text() +
+                        "\nOutput differences: " + differences.join("; ") + "; this trace is not validated.");
+                    invocationReference_->setText(invocationReference_->text() +
+                        "\nSeparate instrumented replay; instructions and input stability remain unverified.");
+                } else {
+                    invocationReference_->setText(invocationReference_->text() +
+                        "\nSeparate instrumented replay; other outputs, instructions and input stability remain unverified.");
+                }
             } else {
                 invocationReference_->setText(invocationReference_->text() +
                     "\nGPU VS position unavailable: " + text(reference.value("reason", Json("Unknown"))));
             }
+        }
+        if (const auto snapshots = result.value("vertex_input_snapshots", Json()); snapshots.is_object()) {
+            const auto status = snapshots.value("status", "unavailable");
+            invocationReference_->setText(invocationReference_->text() + (status == "observed_bytes_changed"
+                ? "\nSelected vertex input bytes changed between replays; this trace is not validated."
+                : status == "observed_bytes_unchanged" ? "\nSelected vertex input bytes unchanged at three observation points."
+                                                      : "\nSelected vertex input byte comparison unavailable."));
         }
         invocationReference_->show();
     }

@@ -50,8 +50,9 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
             throw std::runtime_error("Invalid input mesh first vertex identity");
     }
     const auto &format = m.at("format");
-    const auto componentType = number(format.at("compType"), 3);
-    if (!componentType || format.at("compByteWidth") != 4)
+    // RenderDoc CompType: Float=1, UInt=4, SInt=5 (2/3 are normalized).
+    const auto componentType = number(format.at("compType"), 5);
+    if ((componentType != 1 && componentType != 4 && componentType != 5) || format.at("compByteWidth") != 4)
         throw std::runtime_error("Mesh component is not float32/uint32/sint32");
     result.components = uint32_t(number(format.at("compCount"), 4));
     const auto stride = number(m.at("vertexByteStride"), UINT32_MAX);
@@ -72,7 +73,7 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
         for (uint32_t c = 0; c < result.components; ++c) {
             const auto *data = raw.data() + offset + c * 4;
             if (componentType == 1) { float value{}; std::memcpy(&value, data, 4); position[c] = value; }
-            else if (componentType == 2) { uint32_t value{}; std::memcpy(&value, data, 4); position[c] = value; }
+            else if (componentType == 4) { uint32_t value{}; std::memcpy(&value, data, 4); position[c] = value; }
             else { int32_t value{}; std::memcpy(&value, data, 4); position[c] = value; }
         }
         result.positions.push_back(position);

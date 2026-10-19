@@ -15,6 +15,42 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void vertexInputSnapshots() {
+        using Json = nlohmann::json;
+        ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Instanced;
+        draw.numIndices = 4; draw.numInstances = 6; draw.vertexOffset = 2; draw.instanceOffset = 7;
+        D3D12Pipe::InputAssembly ia; ia.vertexBuffers.resize(2); ia.layouts.resize(3);
+        for (unsigned i = 0; i < 2; ++i) {
+            uint64_t id = i + 1; memcpy(&ia.vertexBuffers[i].resourceId, &id, 8);
+            ia.vertexBuffers[i].byteOffset = 1ULL << 33; ia.vertexBuffers[i].byteSize = 1024;
+            ia.vertexBuffers[i].byteStride = i ? 4 : 16;
+        }
+        for (unsigned i = 0; i < 3; ++i) {
+            auto &l = ia.layouts[i]; l.semanticName = "TEXCOORD"; l.semanticIndex = i;
+            l.inputSlot = i == 2 ? 1 : 0; l.byteOffset = i == 1 ? D3D12Pipe::Layout::TightlyPacked : 0;
+            l.format.type = ResourceFormatType::Regular; l.format.compByteWidth = 4; l.format.compCount = i == 2 ? 1 : 2;
+            l.perInstance = i == 2; l.instanceDataStepRate = i == 2 ? 3 : 0;
+        }
+        bool truncated{}; unsigned reads{};
+        const auto read = [&](ResourceId, uint64_t offset, uint64_t length) {
+            ++reads;
+            if (offset != (1ULL << 33) + 48 && offset != (1ULL << 33) + 56 && offset != (1ULL << 33) + 32)
+                throw std::runtime_error("Wrong selected input address");
+            bytebuf bytes; bytes.resize(size_t(length - (truncated ? 1 : 0)));
+            for (auto &b : bytes) b = 127;
+            return bytes;
+        };
+        auto snapshot = rdcVertexInputSnapshot(draw, ia, 1, 5, read);
+        QCOMPARE(snapshot.at("status"), Json("read")); QCOMPARE(reads, 3u);
+        QCOMPARE(snapshot.at("attributes")[1].at("byte_offset"), Json("8589934648"));
+        QCOMPARE(snapshot.at("attributes")[2].at("element"), Json("8"));
+        truncated = true; QCOMPARE(rdcVertexInputSnapshot(draw, ia, 1, 5, read).at("status"), Json("partial"));
+        truncated = false; ia.vertexBuffers[0].byteSize = 55;
+        QCOMPARE(rdcVertexInputSnapshot(draw, ia, 1, 5, read).at("attributes")[0].at("status"), Json("unavailable"));
+        ia.vertexBuffers[0].byteOffset = UINT64_MAX - 3; ia.vertexBuffers[0].byteSize = 1024;
+        QCOMPARE(rdcVertexInputSnapshot(draw, ia, 1, 5, read).at("status"), Json("partial"));
+        QCOMPARE(rdcVertexInputSnapshot(draw, ia, 4, 5, read).at("status"), Json("unavailable"));
+    }
     void vertexOutputLayout() {
         using Json = nlohmann::json;
         ShaderReflection shader; shader.stage = ShaderStage::Vertex;
@@ -38,6 +74,26 @@ class RdcDebugTests : public QObject {
         QCOMPARE(rdcVertexOutputLayout(shader, 28).at("status"), Json("unavailable"));
         shader.stage = ShaderStage::Geometry;
         QCOMPARE(rdcVertexOutputLayout(shader, 28).at("status"), Json("unavailable"));
+        shader.stage = ShaderStage::Vertex; shader.outputSignature = {uv, position, id};
+        ActionDescription draw; draw.flags = ActionFlags::Drawcall; draw.numIndices = 2; draw.numInstances = 1;
+        MeshFormat mesh; uint64_t resource = 1; memcpy(&mesh.vertexResourceId, &resource, 8);
+        mesh.numIndices = 2; mesh.unproject = true; mesh.vertexByteStride = 28; mesh.vertexByteSize = 56;
+        mesh.format.type = ResourceFormatType::Regular; mesh.format.compType = CompType::Float;
+        mesh.format.compCount = 4; mesh.format.compByteWidth = 4;
+        bool truncated{};
+        auto read = [&](ResourceId, uint64_t offset, uint64_t length) {
+            if (offset != 28 || length != 28) throw std::runtime_error("Wrong selected output vertex range");
+            uint32_t words[]{1,2,3,4,5,6,UINT32_MAX}; bytebuf bytes; bytes.resize(truncated ? 27 : 28);
+            memcpy(bytes.data(), words, bytes.size()); return bytes;
+        };
+        auto reference = rdcVertexOutputReference(draw, mesh, shader, 1, 0, read);
+        QCOMPARE(reference.at("status"), Json("read"));
+        QCOMPARE(reference.at("outputs")[1].at("value").at("uintValue"), Json::array({5,6}));
+        QCOMPARE(reference.at("outputs")[2].at("value").at("uintValue"), Json::array({UINT32_MAX}));
+        QCOMPARE(reference.at("outputs")[2].at("interpretation"), Json("uint"));
+        QCOMPARE(reference.at("outputs")[2].at("buffer_byte_offset"), Json("52"));
+        truncated = true;
+        QCOMPARE(rdcVertexOutputReference(draw, mesh, shader, 1, 0, read).at("status"), Json("unavailable"));
     }
     void vertexPositionAddressing() {
         using Json = nlohmann::json;
@@ -251,6 +307,37 @@ class RdcDebugTests : public QObject {
         reflection.outputSignature[0].compCount = 3;
         QCOMPARE(position().at("status"), Json("unavailable"));
         reflection.outputSignature[0].compCount = 4;
+        Json allReference{{"status", "read"}, {"outputs", Json::array({reference})}};
+        allReference["outputs"][0].update({{"signature_index", 0}, {"semantic", "SV_Position"}, {"semantic_index", 0}});
+        auto all = [&] { return rdcCompareVertexOutputs(reflection, traceJson, steps, allReference); };
+        QCOMPARE(all().at("status"), Json("exact_output_match"));
+        QCOMPARE(all().at("matched"), Json(1));
+        allReference["outputs"][0]["value"]["uintValue"][0] = 1065353217;
+        QCOMPARE(all().at("status"), Json("output_mismatch"));
+        QCOMPARE(all().at("mismatched"), Json(1));
+        allReference["outputs"][0]["status"] = "unavailable";
+        QCOMPARE(all().at("status"), Json("partial_comparison"));
+        QCOMPARE(all().at("unavailable"), Json(1));
+        allReference["outputs"][0]["signature_index"] = 2;
+        QCOMPARE(all().at("status"), Json("unavailable"));
+        auto integers = reflection;
+        integers.outputSignature[0].varType = VarType::UInt;
+        integers.outputSignature[0].systemValue = ShaderBuiltin::Undefined;
+        auto integerTrace = traceJson, integerSteps = steps;
+        integerTrace["sourceVars"][0]["type"] = uint32_t(VarType::UInt);
+        auto &integerOutput = integerSteps[0]["changes"][0]["after"]["members"][0];
+        integerOutput["type"] = uint32_t(VarType::UInt);
+        const auto words = Json::array({UINT32_MAX, 16777217u, 0x80000000u, 0u});
+        for (size_t i = 0; i < 4; ++i) integerOutput["value"]["u32v"][i] = words[i];
+        auto integerReference = allReference;
+        integerReference["outputs"][0].update({{"signature_index", 0}, {"status", "read"},
+            {"interpretation", "uint"}, {"value", {{"uintValue", words}}}});
+        QCOMPARE(rdcCompareVertexOutputs(integers, integerTrace, integerSteps, integerReference).at("status"), Json("exact_output_match"));
+        integers.outputSignature[0].varType = VarType::SInt;
+        integerTrace["sourceVars"][0]["type"] = uint32_t(VarType::SInt);
+        integerOutput["type"] = uint32_t(VarType::SInt);
+        integerReference["outputs"][0]["interpretation"] = "sint";
+        QCOMPARE(rdcCompareVertexOutputs(integers, integerTrace, integerSteps, integerReference).at("status"), Json("exact_output_match"));
         reflection.stage = ShaderStage::Geometry;
         QCOMPARE(position().at("status"), Json("unavailable"));
     }

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <stdexcept>
+#include <set>
 
 namespace flora {
 namespace {
@@ -133,7 +134,7 @@ Json rdcDebugState(const ShaderDebugState &state) {
              })}};
 }
 static Json compareOutput(const ShaderReflection &reflection, const Json &trace,
-                          const Json &steps, const Json &reference, bool position) {
+                          const Json &steps, const Json &reference, bool position, int explicitSignature = -1) {
     Json result{{"status", "unavailable"}, {"output_index", 0},
                 {"comparison", "exact_32_bit_components"},
                 {"scope", "Final mapped shader output versus a separate instrumented GPU replay; "
@@ -147,8 +148,8 @@ static Json compareOutput(const ShaderReflection &reflection, const Json &trace,
         return unavailable("GPU output reference is not eligible for comparison");
     if (position && reflection.stage != ShaderStage::Vertex)
         return unavailable("Position comparison requires a vertex shader");
-    int signatureIndex = -1;
-    for (size_t i = 0; i < reflection.outputSignature.size(); ++i) {
+    int signatureIndex = explicitSignature;
+    for (size_t i = 0; explicitSignature < 0 && i < reflection.outputSignature.size(); ++i) {
         const auto &signature = reflection.outputSignature[i];
         if (position ? signature.systemValue == ShaderBuiltin::Position && signature.stream == 0
                      : signature.systemValue == ShaderBuiltin::ColorOutput && signature.regIndex == 0) {
@@ -159,10 +160,17 @@ static Json compareOutput(const ShaderReflection &reflection, const Json &trace,
     }
     if (signatureIndex < 0)
         return unavailable(position ? "No reflected SV_Position output" : "No reflected target-0 color output");
+    if (size_t(signatureIndex) >= reflection.outputSignature.size())
+        return unavailable("Output signature index is out of range");
     const auto &signature = reflection.outputSignature[size_t(signatureIndex)];
+    if (explicitSignature >= 0) {
+        result["semantic"] = std::string(signature.semanticName.c_str());
+        result["semantic_index"] = signature.semanticIndex;
+        result["signature_index"] = signatureIndex;
+    }
     const auto count = signature.compCount;
     const auto type = signature.varType;
-    if (position && (type != VarType::Float || count != 4))
+    if (position && explicitSignature < 0 && (type != VarType::Float || count != 4))
         return unavailable("Only float4 SV_Position outputs are compared");
     if (!count || count > 4 || signature.regChannelMask != (1U << count) - 1 ||
         (type != VarType::Float && type != VarType::UInt && type != VarType::SInt))
@@ -241,6 +249,34 @@ Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace
 Json rdcCompareVertexPosition(const ShaderReflection &reflection, const Json &trace,
                              const Json &steps, const Json &reference) {
     return compareOutput(reflection, trace, steps, reference, true);
+}
+Json rdcCompareVertexOutputs(const ShaderReflection &reflection, const Json &trace,
+                             const Json &steps, const Json &reference) {
+    Json result{{"status", "unavailable"}, {"outputs", Json::array()}, {"matched", 0}, {"mismatched", 0}, {"unavailable", 0}};
+    if (reference.value("status", "") != "read" || !reference.contains("outputs") ||
+        reference.at("outputs").size() != reflection.outputSignature.size() || reference.at("outputs").empty()) {
+        result["reason"] = "No complete GPU output layout is available"; return result;
+    }
+    std::set<int> seen;
+    for (const auto &output : reference.at("outputs")) {
+        const auto index = output.at("signature_index").get<int>();
+        if (index < 0 || size_t(index) >= reflection.outputSignature.size() || !seen.insert(index).second) {
+            result["reason"] = "GPU output layout has invalid or duplicate signatures"; return result;
+        }
+    }
+    unsigned matched{}, mismatched{}, unavailable{};
+    for (const auto &output : reference.at("outputs")) {
+        auto comparison = compareOutput(reflection, trace, steps, output, true, output.at("signature_index").get<int>());
+        comparison["semantic"] = output.at("semantic"); comparison["semantic_index"] = output.at("semantic_index");
+        const auto status = comparison.at("status");
+        if (status == "exact_output_match") ++matched;
+        else if (status == "output_mismatch") ++mismatched;
+        else ++unavailable;
+        result["outputs"].push_back(std::move(comparison));
+    }
+    result.update({{"status", mismatched ? "output_mismatch" : unavailable ? "partial_comparison" : "exact_output_match"},
+                   {"matched", matched}, {"mismatched", mismatched}, {"unavailable", unavailable}});
+    return result;
 }
 Json rdcDebugInfo(const ShaderDebugInfo &info) {
     return {{"compileFlags",
