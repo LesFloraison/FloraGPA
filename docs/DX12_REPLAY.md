@@ -5537,6 +5537,22 @@ in `indirect-boundary-probe1`. Temporary logging changes were removed and the
 production thirteen-patch DLL restored. This is not an event-after correctness
 pass and does not change the acceptance table below.
 
+`indirect-state-probe1` compares those two selections without shifting the
+requested event. Both read indirect words **(6,380,0,0,0)** at offset **180**.
+The six shared buffers (**54,120,244,578,2471,3168**) are byte-identical. The
+following event changes VS root table **2** from descriptor offset **339779**
+to **339784**, switching particle-float input **231** (capture creation
+**575886**) to **230** (creation **549918**). The other reported pipeline-row
+changes are the corresponding VS descriptor accesses; PSO, output and
+depth/stencil rows agree. The first selection still reads zero velocity and
+the following selection reads the previously recorded nonzero value. This
+narrows the investigation but does not prove the actual GPU state used by the
+split Draw. Buffer 231 was sampled only at the first selection, so its equality
+across both boundaries has not been established. The temporary bounded probe
+was removed and production code recompiled in build **362**. The existing
+`computeInvocationBounds` check passed (**3 passed**, including setup/cleanup,
+**1 ms**); no unrelated regression suite or repeated full-frame replay was run.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
