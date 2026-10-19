@@ -42,6 +42,18 @@ class RdcWorkerTests : public QObject {
             << QJsonObject{{"action", "history"}, {"y", 4294967296.0}} << "uint32";
         QTest::newRow("boolean-resource")
             << QJsonObject{{"action", "history"}, {"resource", true}} << "unsigned integer";
+        QTest::newRow("creation-without-object")
+            << QJsonObject{{"action", "resource-history"}, {"execution", "37053"},
+                           {"resource_creation", "544656"}} << "requires a DX12 resource object";
+        QTest::newRow("creation-null-object")
+            << QJsonObject{{"action", "texture"}, {"resource", QJsonValue::Null},
+                           {"resource_creation", "544656"}} << "requires a DX12 resource object";
+        QTest::newRow("creation-zero-object")
+            << QJsonObject{{"action", "resource-history"}, {"resource", "0"},
+                           {"resource_creation", "544656"}} << "nonzero decimal strings";
+        QTest::newRow("creation-null-lifetime")
+            << QJsonObject{{"action", "debug-thread"}, {"resource", "2149346361024"},
+                           {"resource_creation", QJsonValue::Null}} << "nonzero decimal strings";
         QTest::newRow("counters-both-events")
             << QJsonObject{{"action", "counters"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
         QTest::newRow("counters-negative-event")

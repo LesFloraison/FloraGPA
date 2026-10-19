@@ -3356,17 +3356,86 @@ Ignored local evidence: `gpa-hellblade-reference1`, `gpa-hellblade-raw1`,
 The original-output comparison remains partial; intermediate-resource fidelity,
 remaining debug features and portable acceptance are still unfinished.
 
+### Hellblade2 output producer and strict analysis resource selection
+
+Offline localization of the existing outputs finds **7,151 RGB pixels** differing
+between `hellblade-queue-schedule2` and `hellblade-last-color3`, versus **6,402**
+between the former and the original GPA output. Both differences occupy scene
+rows **199–1001**, not the letterbox bars. Of the 6,402 original/native differences,
+2,751 occur where those two native outputs agree. This three-output observation
+does not establish a deterministic error, acceptable tolerance, or root cause.
+
+Following the actual copied resource identifies creation **544605**, object
+**2149283438960**, as the RGB10 source of CopyResource **613353**. Its captured
+debug name is `nv.sl.dlss_g.tex2d.fake-swapchain-buffer`; that name alone does not
+prove which algorithm causes the difference. One targeted native replay captures
+through the preceding full-screen Draw, execution **37053**, source record
+**611838**, submission **613257**, list **2144334559152**, generation **6**,
+ordinal **1**, direct queue **2131165365824**. It exports this resource and a
+**2,852,854,375-byte** RDC. The capture is analysis evidence, not a preview image.
+
+RenderDoc 1.45 maps the selected Draw to event **91276**, VS `ScreenPassVS` and
+DXIL SM6.6 PS `LensSoftnessPS`. The pipeline query maps its RTV to creation
+**544605**, `InputTexture` to **544656** / object **2149346361024**, and
+`SoftnessMap1`/`SoftnessMap2` to creations **511126**/**511100**. Viewport and
+scissor are **1920 x 803 at (0,199)**. PSO/root-signature creation mapping remains
+unavailable; these are potential shader bindings, not observed per-instruction
+accesses. The native raw output SHA-256 is
+`3fda4fe6a245919c7ae1e4ea639ea12e2e91e669e23cd9dda465833aadc13749`.
+It differs from original GPA's final Present at **6,297 RGB pixels**, maximum
+RGB10 deltas **3,3,4**. At this earlier boundary, all 762,240 pixels outside the
+viewport are still zero including alpha, whereas original final-Present alpha
+is 3 everywhere. This expected boundary distinction is separated from the
+unexplained RGB differences, not counted as another color-replay defect.
+
+At pixel **(541,451)** the saved native RGB10 value is **(86,121,160)** versus
+original **(85,120,156)**. One PS query yields **230 instruction steps** for
+primitive 0, with no embedded source files or available PDB. The selected GPU
+texel changes during debugger/PixelHistory replays. The existing consistency
+checks correctly report **`unverified_replay_changed`**; neither the simulated
+trace nor the fragment output is accepted as validated shader execution.
+
+The input-history query also exposed a direct Worker validation defect. A job
+containing `resource_creation: "544656"` without `resource` silently selected the
+current RTV (creation 544605), then labelled the report with the requested
+creation. The workspace's `prepareRdcJob` already rejected that combination, but
+direct Worker requests bypassed it. The Worker now requires a nonzero decimal
+string object/creation pair before opening RenderDoc, and rejects creation
+selection for a DX11 capture. It can no longer fall back to the RTV for that
+malformed explicit selection. Four process-level invalid-selection cases pass
+without opening a GPU capture (**6 passed including setup/cleanup, 1,954 ms**),
+with release build **250**.
+
+After the fix, a complete object/creation request returns the actual input,
+**ResourceId::693**, creation **544656**, and **11 mapped usage entries** with
+zero unmapped uses. Its latest ColorTarget binding is execution **37041**, source
+record **611825**; transition **37052** precedes PS binding at **37053** in the
+same submitted list. These are resource-usage evidence, not measured content
+changes. This identifies the next upstream comparison boundary. The malformed
+`hellblade-output-input-history1` result is excluded from input-resource evidence.
+The earlier debug query also used creation without object and is retained only
+as a diagnostic of the implicitly selected RTV; it is not a validated explicit
+resource-selection query.
+
+Ignored evidence under `artifacts/dx12-research`: `hellblade-difference-localization1.json`,
+`hellblade-output-producer1`, `hellblade-output-pipeline1`, `hellblade-output-ps1`,
+`hellblade-output-input-history2`, `hellblade-output-evidence1.json`, and
+`rdc-resource-identity1.txt`. All three successful analysis reports list no loaded
+GPA modules. GPU capture/analysis ran serially; no full-sample sweep, repeatability
+loop or additional original-GPA replay was performed. Output stability, original
+intermediate comparison and full debugging acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
-| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | Workspace shader-constant resource navigation and event/backend invalidation verified; full state unfinished | Not verified |
+| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | Workspace shader-constant resource navigation and event/backend invalidation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; PSO/root creation and full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; byte-preserving MS/PS import creates a PSO; changed shader execution, full performance and experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |

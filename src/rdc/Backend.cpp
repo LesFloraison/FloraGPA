@@ -789,6 +789,16 @@ Json runRdcJob(const Json &job) {
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
         action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
+    // Direct worker jobs must not bypass the resource-lifetime check performed
+    // by prepareRdcJob. Otherwise the implicit RTV gets the requested creation
+    // label even though it belongs to a different captured resource.
+    if (job.contains("resource_creation")) {
+        if (job.value("resource", Json()).is_null())
+            throw std::runtime_error("Resource creation requires a DX12 resource object");
+        for (const auto key : {"resource", "resource_creation"})
+            if (!job.at(key).is_string() || !number(job.at(key)))
+                throw std::runtime_error("DX12 resource identities must be nonzero decimal strings");
+    }
     if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
             throw std::runtime_error("Choose GPA or RDC event, not both");
@@ -807,6 +817,8 @@ Json runRdcJob(const Json &job) {
     auto &controller = *session.controller;
     const auto properties = controller.GetAPIProperties();
     const bool dx12 = properties.pipelineType == GraphicsAPI::D3D12;
+    if (!dx12 && job.contains("resource_creation"))
+        throw std::runtime_error("Resource creation selection requires a DX12 capture");
     if (job.value("pixel_history_reference", false) && !dx12)
         throw std::runtime_error("Pixel history invocation reference currently requires DX12");
     if (dx12)
