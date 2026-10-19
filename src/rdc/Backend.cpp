@@ -2056,6 +2056,30 @@ Json runRdcJob(const Json &job) {
     } catch (const std::exception &e) {
         consistency["after_error"] = e.what();
     }
+    Json boundary{{"status", "not_compared"},
+        {"scope", "Final backend modification at the selected event versus the selected texel before and after history. Equal color components do not validate intermediate fragments or other events."}};
+    if (modifications.empty() || modifications.back().eventId != eid)
+        boundary["reason"] = "No final backend modification at the selected event";
+    else if (depthTarget || tex.format.type != ResourceFormatType::Regular ||
+             !tex.format.compCount || tex.format.compCount > 4)
+        boundary["reason"] = "Selected-event comparison supports regular color formats only";
+    else if (!consistency.contains("before_history") || !consistency.contains("after_restoration"))
+        boundary["reason"] = "Selected texel observation is unavailable";
+    else {
+        const auto post = pixel(modifications.back().postMod.col);
+        auto matches = [&](const Json &observation) {
+            for (uint32_t component = 0; component < tex.format.compCount; ++component)
+                if (post.at("uintValue")[component] != observation.at("uintValue")[component]) return false;
+            return true;
+        };
+        const bool before = matches(consistency.at("before_history"));
+        const bool after = matches(consistency.at("after_restoration"));
+        boundary.update({{"status", before && after ? "matches_selected_texel" : "differs_from_selected_texel"},
+            {"event_id", eid}, {"component_count", tex.format.compCount}, {"post_modification", post},
+            {"matches_before_history", before}, {"matches_after_restoration", after},
+            {"comparison", "Exact backend component bits for the stored color channels; conversion differences are not treated as verified equality"}});
+    }
+    consistency["history_boundary"] = boundary;
     std::stable_sort(records.begin(), records.end(), [](const Json &a, const Json &b) {
         return std::pair(a.at("eventId").get<uint32_t>(),
                          a.at("fragIndex").is_null() ? int64_t(-1) : a.at("fragIndex").get<int64_t>()) <
@@ -2099,7 +2123,8 @@ Json runRdcJob(const Json &job) {
                            : d16History ? "D16 event boundaries use the Flora decoding patch. Intermediate fragment depths come from a D32 scratch DSV and may differ in quantization or depth bias; they are not observed D16 storage values. Depth-test reasons include backend comparisons of reconstructed depths, not independent per-fragment hardware queries."
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
-    if (unreliableD16 || reconstructedDepthValues || consistency.at("status") != "selected_texel_unchanged")
+    if (unreliableD16 || reconstructedDepthValues || consistency.at("status") != "selected_texel_unchanged" ||
+        boundary.at("status") == "differs_from_selected_texel")
         result["partial"] = true;
     for (const auto &r : resources)
         if (r.resourceId == resource)

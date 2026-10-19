@@ -5553,6 +5553,68 @@ was removed and production code recompiled in build **362**. The existing
 `computeInvocationBounds` check passed (**3 passed**, including setup/cleanup,
 **1 ms**); no unrelated regression suite or repeated full-frame replay was run.
 
+### Selected-event history boundary contradiction
+
+The follow-up `indirect-state-probe2` reads both particle buffers and the full
+depth/velocity textures before the indirect child (**88693**), after it
+(**88694**, execution **36222**) and after the following API (**88698**,
+execution **36223**). The first two boundaries have byte-identical depth and
+velocity images. The following boundary differs at **53** pixels in each
+image, within **[206,206,1052,483]**. At **(456,206)**, depth changes from
+**0.0015414863592013717** to **0.0021878723055124283**, and velocity from zero
+to the previously recorded UNORM16 values. A second observation of execution
+36222 reproduces both entire images exactly.
+
+Particle buffer **231** varies in raw byte order between these observations,
+while the other seven sampled buffers agree. The selected VS constants
+confirm float stride **448** and disabled sorted indices. All **380** particle
+tuples, each containing **45** float-component bit patterns, are identical
+after sorting the tuples; their canonical SHA-256 is
+`9902a61a1ee8ec6aade07c96eddda897136a47a87c48270b056200ee859fdc8d`.
+This is evidence of permutation, not missing/different particle attributes,
+and does not explain the unchanged Draw-only image. Resource History locates
+the preceding write binding at execution **33725**, source record **608018**,
+RenderDoc event **80963**, a **(7,1,1)** Dispatch. It also records the earlier
+draw use at execution **35152**. Full producer correctness remains unverified.
+
+The targeted direct-Draw substitution in `indirect-direct-probe1` also returns
+the unchanged velocity image. `indirect-validation-probe1` reads the actual
+D3D12 information queue after the selected Draw, since the public replay
+message API only returns loading-stage messages. It reports one address-alias
+warning (**926**) for a stale, unused vertex-buffer view, with no Draw error.
+The logged PSO/root bindings, heaps, IB/VB views, viewport/scissor, depth bias,
+stencil, predication and render-pass state agree across the prefix, OnlyDraw
+and continuous-prefix paths. This does not prove identical actual GPU state;
+state application/resource behavior remains unresolved. No address, state or
+Draw substitution from these diagnostics ships in production.
+
+`hellblade-indirect36222-history1` demonstrates an additional analysis defect:
+both selected-texel observations are zero, yet the final Pixel History record
+for that exact selected event reports the nonzero color above. Reporting only
+“selected texel unchanged” misses this contradiction. The worker now compares
+the final backend modification at the selected event with both observations
+for regular color formats, using the stored channel count. A difference marks
+the report partial and preserves both values under
+`history_scope.replay_consistency.history_boundary`. Depth, packed formats,
+missing observations and histories without a final modification at the
+selected event explicitly remain not compared. Exact backend component-bit
+equality is used; a conversion difference is not presented as verified
+equality. This check adds no GPU replay and cannot validate intermediate
+fragments or complete history.
+
+The workspace displays the boundary conflict while retaining all five rows,
+the exact **36222 / action 0** navigation and JSON export. Production report
+`hellblade-indirect36222-history2` detects the mismatch. The positive control
+at execution **12574** / event **11753** reports matching zero color before
+and after, without the new partial flag. The new conflict UI check and the
+existing legacy heap-restoration report check pass: **4 passed**, **0 failed**,
+**0 skipped**, including setup/cleanup, **306 ms**. The screenshot was
+inspected. Builds **364–368** passed; build 363 was an unchanged build after a
+failed probe-preparation command. Temporary source changes were removed,
+production code recompiled, and the original thirteen-patch DLL hash restored.
+The selected-event replay fault and the full acceptance requirements remain
+unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

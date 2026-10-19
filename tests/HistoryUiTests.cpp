@@ -53,6 +53,35 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void indirectHistoryBoundaryMismatch() {
+        const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the Hellblade indirect boundary evidence directory");
+        const auto report = read(root + "/hellblade-indirect36222-history2/result.json");
+        const auto &audit = report.at("history_scope").at("replay_consistency");
+        QCOMPARE(audit.at("status"), Json("selected_texel_unchanged"));
+        QCOMPARE(audit.at("before_history"), audit.at("after_restoration"));
+        QCOMPARE(audit.at("history_boundary").at("status"), Json("differs_from_selected_texel"));
+        QCOMPARE(audit.at("history_boundary").at("post_modification"), report.at("history").back().at("postMod").at("col"));
+        QVERIFY(report.at("partial").get<bool>());
+        PixelHistoryView view; view.setContext("indirect-boundary", 36222, true);
+        view.setDx12Resource(511789, 2152463529088ULL);
+        view.selectPixel(2152463529088ULL, 456, 206, 0, 0, 0);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords");
+        QCOMPARE(rows->topLevelItemCount(), 5);
+        rows->setCurrentItem(rows->topLevelItem(4));
+        QSignalSpy locate(&view, &PixelHistoryView::eventRequested);
+        action(view, "locateHistoryEvent")->trigger();
+        QCOMPARE(locate.size(), 1); QCOMPARE(locate[0][0].toULongLong(), 36222ULL);
+        QCOMPARE(locate[0][1].toLongLong(), 0LL);
+        QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("History post-event color differs"));
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/indirect-boundary-history.json");
+            QCOMPARE(read(output_ + "/indirect-boundary-history.json"), report);
+            view.resize(1600, 760); view.show();
+            QVERIFY(view.grab().save(output_ + "/indirect-boundary-history.png"));
+        }
+    }
     void placedHeapRestoredHistory() {
         const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
         if (root.isEmpty()) QSKIP("Set the Hellblade2 placed heap restoration evidence directory");

@@ -485,6 +485,10 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
             "\nSelected texel unchanged before/after history; intermediate fragments and history completeness are not validated.");
     else
         summary_->setText(summary_->text() + "\nReplay consistency not measured or unavailable.");
+    const auto boundary = consistency.value("history_boundary", Json::object());
+    if (boundary.value("status", "") == "differs_from_selected_texel")
+        summary_->setText(summary_->text() +
+            "\nHistory post-event color differs from the selected texel. The reported history boundary is not validated.");
     if (scope.value("depth_value_status", "") == "event_boundaries_only")
         summary_->setText(
             summary_->text() +
