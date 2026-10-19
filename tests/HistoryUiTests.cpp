@@ -21,6 +21,7 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QTextBlock>
 #include <QSettings>
 #include <QSignalSpy>
 #include <QSpinBox>
@@ -133,6 +134,51 @@ class HistoryUiTests : public QObject {
         emit history->pixelDebugRequested(36560, 836, 241, 0, 1322);
         QVERIFY(!pixel->request().contains("depth_roundtrip"));
         QVERIFY(done.empty()); QVERIFY(!window.busy());
+    }
+    void dxilInstructionFlags() {
+        const auto path = qEnvironmentVariable("FLORA_DXIL_FLAGS_REPORT");
+        if (path.isEmpty()) QSKIP("Set the actual DXIL instruction-flags debug report");
+        const auto report = read(path);
+        const auto &flags = report.at("debug_scope").at("dxil_instruction_flags");
+        QCOMPARE(flags.at("status"), Json("included"));
+        QCOMPARE(flags.at("patch_version"), Json(1));
+        QCOMPARE(flags.at("annotated_lines"), Json(53));
+        QCOMPARE(flags.at("driver_instructions_observed"), Json(false));
+        ReplayDebugView view("ps"); view.resize(1500, 950); view.show();
+        view.setContext("hellblade:instruction-flags", 36222, true);
+        view.selectPixel(456, 206, 0); view.selectDepthRoundtrip(true);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto notice = view.findChild<QLabel *>("debugBackendNotice");
+        QVERIFY(notice->text().contains("allowed compiler optimizations"));
+        auto assembly = view.findChild<QPlainTextEdit *>("debugAssembly");
+        QVERIFY(assembly);
+        // Breakpoints still follow the original trace line mapping. Both
+        // divisions and their subtraction retain their captured fast flag.
+        for (const auto instruction : {99, 100, 103}) {
+            view.findChild<QLineEdit *>("debugInstruction")->setText(QString::number(instruction));
+            action(view, "debugToggleInstructionBreakpoint")->trigger();
+            action(view, "debugContinue")->trigger();
+            const auto &step = report.at("steps").at(size_t(view.model()->position()));
+            QCOMPARE(step.at("nextInstruction"), Json(instruction));
+            const auto info = view.model()->instructionInfo(instruction);
+            QCOMPARE(assembly->textCursor().blockNumber() + 1,
+                     info.at("lineInfo").at("disassemblyLine").get<int>());
+            QVERIFY(assembly->textCursor().block().text().contains("// fast-math: fast"));
+        }
+        if (!output_.isEmpty()) {
+            QCoreApplication::processEvents();
+            assembly->centerCursor();
+            QVERIFY(assembly->viewport()->rect().intersects(assembly->cursorRect()));
+            QVERIFY(view.grab().save(output_ + "/dxil-instruction-flags.png"));
+            view.exportResult(output_ + "/dxil-instruction-flags.json");
+            const auto exported = read(output_ + "/dxil-instruction-flags.json");
+            QCOMPARE(exported.at("disassembly"), report.at("disassembly"));
+            QCOMPARE(exported.at("debug_scope").at("dxil_instruction_flags"), flags);
+        }
+        // Legacy reports remain loadable without claiming annotation support.
+        auto legacy = report; legacy["debug_scope"].erase("dxil_instruction_flags");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        QVERIFY(!notice->text().contains("allowed compiler optimizations"));
     }
     void depthRoundtripPixelDebug() {
         const auto root = qEnvironmentVariable("FLORA_DEPTH_ROUNDTRIP_DEBUG_REPORTS");

@@ -72,8 +72,9 @@
   `third_party/renderdoc/patches/dx12-dxil-texture-stores.patch`,
   `third_party/renderdoc/patches/dx12-dxil-packed-store.patch`,
   `third_party/renderdoc/patches/dx12-dxil-prepared-compute.patch`,
-  `third_party/renderdoc/patches/dx12-placed-heap-restore.patch` and
-  `third_party/renderdoc/patches/dx12-depth-roundtrip.patch`. The first preserves
+  `third_party/renderdoc/patches/dx12-placed-heap-restore.patch`,
+  `third_party/renderdoc/patches/dx12-depth-roundtrip.patch` and
+  `third_party/renderdoc/patches/dx12-dxil-instruction-flags.patch`. The first preserves
   D16 depth typing and decodes its stored UNORM bits in DX12 Pixel History;
   the second initializes every simulated DXBC compute lane's Group ID in the
   DX12 debugger. The third matches resource-usage bindings to shader visibility,
@@ -99,10 +100,12 @@
   The fourteenth adds an opt-in selected-event D32S8 depth copy out and back before
   an isolated Draw, retaining the original attachment and its subsequent writes.
   It is an experimental texture/history/pixel-debug analysis workaround, disabled by default.
+  The fifteenth preserves captured fast-math permissions as comments in friendly
+  DXIL disassembly, without moving instruction lines or changing execution.
   All export patch-version markers for the isolated adapter.
   Build them with `tools/build_renderdoc_d16.ps1` in a clean dedicated upstream
   v1.45 checkout (the script retains its original name).
-  Patched packages include all fourteen patches, build/source hashes, the original runtime
+  Patched packages include all fifteen patches, build/source hashes, the original runtime
   manifest and an active manifest containing the replacement DLL hash.
 - RenderDoc 1.45 public replay headers are vendored under
   `third_party/renderdoc/replay/` for the isolated native analysis worker.

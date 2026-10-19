@@ -1,0 +1,36 @@
+diff --git a/renderdoc/driver/shaders/dxil/dxil_disassemble.cpp b/renderdoc/driver/shaders/dxil/dxil_disassemble.cpp
+index e81515b3d..8556b1cb4 100644
+--- a/renderdoc/driver/shaders/dxil/dxil_disassemble.cpp
++++ b/renderdoc/driver/shaders/dxil/dxil_disassemble.cpp
+@@ -38,6 +38,11 @@
+ 
+ #endif
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilInstructionFlagsPatchVersion()
++{
++  return 1;
++}
++
+ namespace DXIL
+ {
+ bool needsEscaping(const rdcstr &name)
+@@ -5192,6 +5197,19 @@ void Program::MakeRDDisassemblyString(const DXBC::Reflection *reflection)
+         if(IsDXCNop(inst))
+           lineStr = "nop";
+ 
++        // Preserve captured IR permissions in the friendly listing. Keep the
++        // annotation on the same line so debugger instruction locations do not
++        // move. These flags do not identify the driver's machine instructions.
++        const InstructionFlags fastFlags = inst.opFlags() &
++            (InstructionFlags::FastMath | InstructionFlags::NoNaNs | InstructionFlags::NoInfs |
++             InstructionFlags::NoSignedZeros | InstructionFlags::AllowReciprocal);
++        if(fastFlags != InstructionFlags::NoFlags)
++        {
++          if(!commentStr.empty())
++            commentStr += "; ";
++          commentStr += "fast-math: " + ToStr(fastFlags);
++        }
++
+         if(!lineStr.empty())
+         {
+           lineStr += ";";

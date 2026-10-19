@@ -180,6 +180,7 @@ class Session {
     uint32_t dx12UsageVisibilityPatch{};
     uint32_t readOnlyDepthSnapshotPatch{};
     uint32_t depthRoundtripPatch{};
+    uint32_t dxilInstructionFlagsPatch{};
     uint32_t dxbcGpuDotPatch{};
     uint32_t dxbcGpuMadPatch{};
     uint32_t dxilContractPatch{};
@@ -228,6 +229,10 @@ class Session {
             throw std::runtime_error("Native replay requires the RenderDoc 1.45 release ABI");
         commit = symbol<decltype(&RENDERDOC_GetCommitHash)>("RENDERDOC_GetCommitHash")();
         using PatchVersion = uint32_t (RENDERDOC_CC *)();
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilInstructionFlagsPatchVersion"))) {
+            dxilInstructionFlagsPatch = patch();
+            if (dxilInstructionFlagsPatch != 1) throw std::runtime_error("Unsupported DXIL instruction flags patch version");
+        }
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraD16HistoryPatchVersion")))
             d16HistoryPatch = patch();
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxbcWorkgroupPatchVersion")))
@@ -931,6 +936,16 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
         !file.commit())
         throw std::runtime_error("Cannot export shader disassembly");
     result["disassembly"] = text(assembly);
+    if (reflection->encoding == ShaderEncoding::DXIL) {
+        uint64_t annotated{};
+        const auto listing = text(assembly);
+        for (size_t at = 0; (at = listing.find("fast-math: ", at)) != std::string::npos; at += 11) ++annotated;
+        result["debug_scope"]["dxil_instruction_flags"] = {
+            {"patch_version", session.dxilInstructionFlagsPatch},
+            {"status", session.dxilInstructionFlagsPatch == 1 ? "included" : "unavailable"},
+            {"annotated_lines", annotated}, {"driver_instructions_observed", false},
+            {"scope", "Fast-math comments describe captured DXIL optimization permissions. They do not identify driver machine instructions or validate interpreter intermediates."}};
+    }
     // Keep the actual bound program alongside the trace. A decompiled listing
     // alone cannot preserve fast-math flags or the original compiler context.
     result["shader_bytecode"] = {{"status", "unavailable"},
@@ -1360,6 +1375,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
+        {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
         {"backend_dxbc_gpu_dot_patch", session.dxbcGpuDotPatch},
         {"backend_dxbc_gpu_mad_patch", session.dxbcGpuMadPatch},
         {"replay_environment",

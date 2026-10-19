@@ -821,6 +821,9 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (const auto selection = result.value("indirect_selection", Json()); selection.is_object())
         warnings.prepend(QString("ExecuteIndirect action %1 of %2 (zero-based) · replay event %3")
             .arg(text(selection.at("indirect_action")), text(selection.at("indirect_action_count")), text(selection.at("eid"))));
+    const auto instructionFlags = result.value("debug_scope", Json::object()).value("dxil_instruction_flags", Json::object());
+    if (instructionFlags.value("status", std::string()) == "included" && instructionFlags.value("annotated_lines", uint64_t(0)))
+        warnings.prepend("DXIL fast-math comments show allowed compiler optimizations, not observed driver instructions. Stepping values follow the interpreter.");
     backendNotice_->setText(warnings.join('\n'));
     backendNotice_->setVisible(!warnings.isEmpty());
     const auto reference = result.value("gpu_reference", Json());

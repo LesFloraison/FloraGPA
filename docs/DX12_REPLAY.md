@@ -5960,6 +5960,48 @@ in `talos-query-blob-addresses1.json` outside Git. No missing resolve is skipped
 no substitute query values are generated, and the complete Talos replay
 acceptance item remains unfinished.
 
+### Captured DXIL fast-math flags in instruction debugging
+
+The friendly DXIL disassembly previously hid the `fast` permissions on the
+two divisions and subtraction involved in the original-context experiment.
+The fifteenth RenderDoc patch now appends captured fast-math permissions to
+the existing instruction line, for example
+`float _142 = _138 - _139; // fast-math: fast`. It preserves the parsed `fast`,
+`nnan`, `ninf`, `nsz` and `arcp` flags through RenderDoc's existing flag formatter.
+It adds no lines and changes neither bytecode nor interpreter arithmetic.
+
+The worker detects version **1** of the annotation patch and reports availability,
+annotated-line count and scope under `debug_scope.dxil_instruction_flags`.
+The debugger displays the comments while stepping, explains their meaning as
+compiler permissions, and preserves them in exported reports. Older libraries
+and reports remain readable without claiming annotation support. These comments
+do not reveal the driver's instruction sequence or resolve the numerical
+discrepancy described above.
+
+One actual Hellblade2 PS trace at **36222**, pixel **(456,206)** with selected-depth
+refresh produces **53** annotated lines, matching the count of fast arithmetic
+and comparisons in the original DXC listing. Removing only those comments makes
+the entire friendly disassembly exactly equal to the previous report. All
+**131** steps, complete trace metadata, GPU reference fields and bound Shader
+bytecode metadata are unchanged. No GPA/Python modules were loaded. Evidence is
+in `dxil-instruction-flags1`, including the offline comparison report.
+
+The focused UI check stops at instructions **99 / 100 / 103** and verifies
+their original disassembly lines **635 / 636 / 639**, visible annotations,
+exported text/metadata and legacy-report handling: **3 passed**, **0 failed**,
+**1,394 ms**, including setup/cleanup. The inspected screenshot is
+`dxil-instruction-flags-ui2/dxil-instruction-flags.png`; the current subtraction
+and both preceding division breakpoints are visible. The UI checks consume the
+saved trace and launch no further GPU replay. Builds **380 / 382 / 383** pass;
+the intervening test compile needed an explicit `QTextBlock` include.
+
+The exact fifteen-patch build passes the source-tree check. DLL SHA-256 is
+`d5740e85ab0543944b480ce5b44a356b3ab7cd16ac5faf261cbeb50b0d381ac2`;
+the new patch SHA-256 is
+`8a2708ef82b12b70fac91b4eabb82a09813b7a71e9f6babcce130ce503033346`.
+Build and packaging manifests now require and include this patch. Full portable
+package acceptance and the remaining feature table below remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
