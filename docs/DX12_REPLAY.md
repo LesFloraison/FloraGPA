@@ -4788,6 +4788,13 @@ invocation-to-output correspondence remain unfinished.
 
 ### Retain DXIL compute inputs through a debug trace
 
+**Historical version-1 evidence, superseded below:** the later UAV read/write
+fixture found that ReplayController re-executed the event after DebugThread.
+The buffer hashes and numeric observations in this section remain recorded
+facts, but the claims that those observations were pre-dispatch are invalid.
+Version 2 fixes that additional controller boundary; old reports are visibly
+marked obsolete and the current worker disables version-1 retention.
+
 Resource history locates the Hellblade2 tile-list writer at execution **36748**
 (record **611505**) and the selected consumer at **36779** (record **611544**),
 both in submission **613234**. Starting analysis capture at that submission
@@ -4842,6 +4849,90 @@ Worker/application builds **315–317** pass (314 used an invalid target name).
 The focused UI test consumes the actual new report, checks phase separation,
 visible notices and stale experiment rejection: **3 passed**, including
 setup/cleanup. Complete portable-package acceptance remains outstanding.
+
+### DXIL UAV texture addressing and corrected retained-input phase
+
+Tracing actual texture writes exposed two independent RenderDoc 1.45 defects:
+DXIL TextureLoad/TextureStore and texture atomics narrow coordinates through
+`int8_t`; D3D12 FetchUAV always reads subresource zero and derives pitches from
+the full resource. A new standalone GPU fixture reproduces them on a 512-wide
+R32_UINT texture with a view of mip **1**, starting at layer/depth slice **1**.
+The fixture's first read is at x **200**, followed by a store, read, atomic add,
+read and out-of-range/sentinel checks. A second valid read at x **128** checks
+the signed-byte boundary. Out-of-range x **256** must not alias the next row;
+negative coordinates must not wrap into the view.
+
+The ninth patch, `dx12-dxil-uav-texture.patch`, preserves 32-bit coordinates,
+uses 64-bit byte pitches/offset products, and checks each coordinate axis and
+the remaining byte span. Cached texture data now contains the selected mip
+and only the UAV's array or W slices, including the 1D-array y-coordinate
+convention. The same address validation covers texture atomics. Unsupported
+nonzero planes, invalid view ranges and incomplete readback increment a failure
+counter; the worker rejects the trace rather than accepting missing-data zeros.
+Unpatched DXIL shaders declaring UAV textures receive a visible warning.
+Buffer-address handling and DXBC texture-view loading are not changed here.
+
+The first repaired-view reproduction uncovered a flaw in input-retention
+version **1**: `ReplayController::DebugThread` called `SetFrameEvent` after the
+driver created the trace, so the first UAV load observed **784** (post-dispatch)
+instead of **21300** (pre-dispatch). Read-only buffer hashes could not distinguish
+these phases. Version **2** registers the exact retained trace through an internal,
+thread-local hook and skips that controller replay only for that successful trace.
+It does not change the public replay ABI. FreeTrace restores the dispatch as
+before. The current worker disables version-1 retention, preserving unrelated
+analysis and DX11 jobs; workspace loading of an old report
+warns that its input-phase claims are invalid.
+
+The three targeted fixtures each return **34** debug states. Every selected
+store operand matches the eight GPU result words:
+
+| View | GPU and corrected debugger words |
+| --- | --- |
+| 1D array, mip 1, layers 1..2 | 21200, 777, 777, 784, 21000, 0, 0, 21128 |
+| 2D array, mip 1, layers 1..2 | 21300, 777, 777, 784, 21100, 0, 0, 21228 |
+| 3D, mip 1, W slices 1..2 | 21300, 777, 777, 784, 21100, 0, 0, 21228 |
+
+The pre-fix 2D debugger returned eight zeros. With the view fix but retention
+version 1 it returned the wrong first word, 784; the final fixture comparisons
+require retention version 2 and verify all eight words. `FloraRdcDebugTests
+dxilUavTextureViews` consumes these real GPU/trace files and passes (**3 including
+setup/cleanup, 25 ms**). Source is in `tests/fixtures/dx12-dxil-uav-view.cpp` and
+`.hlsl`. The standalone fixture is deliberately not an automatic GPU CTest.
+Compile its C++ file in a VS developer shell with `/std:c++20 /EHsc`, include
+`third_party/renderdoc`, and link `d3d12.lib dxgi.lib`. Compile HLSL with DXC
+`-T cs_6_0 -E main -Od`; define `VIEW_1D=1` or `VIEW_3D=1` for those variants.
+Run the executable with shader path, RenderDoc DLL, capture prefix and
+`1d|2d|3d`; it checks its GPU words before returning success. Then use
+`rdc-analyze <capture> debug-thread --execution 1 --group 0 0 0 --thread 0 0 0`.
+
+One actual Hellblade2 integration query (`hellblade-uav-texture1`) returns
+**332** steps, reads **three** UAV texture views with no failures, and uses
+retention version 2. Tile buffer 661's SHA-256 is
+**266b3da37d835dce4f703af03d972df107b4b6f08770f263d18e2ed546d27fe9**
+at trace creation, after stepping and after dispatch restoration. The selected
+store remains at **(416,296)**; its RGB operands and restored GPU RGB match the
+previously recorded positive R11G11B10 truncation comparison. The earlier replay
+still differs, so the report remains partial. Automatic write-to-resource
+navigation, all-store validation and whole-frame fidelity remain unfinished.
+
+Worker/application/test builds **318–322** pass. The UI test uses the new
+Hellblade2 report, verifies the current notice, checks obsolete-version handling
+and stale experiment rejection (**3 passed, 343 ms**); its inspected screenshot
+is `uav-texture-ui1/replay-debug/retained-compute.png`. The fixtures and real query
+load no GPA/Python modules. GPU checks ran serially; no full native sample was
+recaptured or added to a recurring test loop. Evidence directories are
+`dxil-uav-view-before1`, `dxil-uav-view-after2d`, `dxil-uav-view-final1d`,
+`dxil-uav-view-final2d`, `dxil-uav-view-final3d` and `hellblade-uav-texture1`.
+GPU words are `dxil-uav-view-gpu1d.json`, `dxil-uav-view-gpu2d.json` and
+`dxil-uav-view-gpu3d.json`; the CPU comparison log is `dxil-uav-view-check1.txt`.
+These queries used runtime SHA-256
+**e236df968e32ed08494f74beec93963a572cf4f2659d6d9d714505eb125a8c34**;
+the final runtime additionally stops unbound atomic evaluation before using
+missing format data, and has SHA-256
+**2ad054e713857063638f59017c8ee3235f03fea0cb41bb2c23dc9531289c4636**.
+That unbound branch was compile-checked, not GPU-validated. Build/package
+manifests verify all nine patches; complete portable-package acceptance remains
+outstanding.
 
 ### Full feature acceptance
 

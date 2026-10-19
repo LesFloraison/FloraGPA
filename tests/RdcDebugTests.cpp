@@ -1,10 +1,13 @@
 #include "rdc/DebugTrace.h"
 #include "rdc/Invocation.h"
 #include <QFile>
+#include <QRegularExpression>
 #include <QtTest>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <map>
+#include <set>
 
 // These tests create API containers locally and never load RenderDoc. The
 // production executable uses allocation bridges to the selected replay DLL.
@@ -15,6 +18,40 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void dxilUavTextureViews() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DXIL_UAV_VIEW_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the targeted UAV view GPU/trace evidence directory");
+        const auto read = [](const QString &path) {
+            QFile file(path);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing UAV view evidence");
+            const auto bytes = file.readAll(); return Json::parse(bytes.begin(), bytes.end());
+        };
+        const QRegularExpression store(R"(\.Store\((\d+), byteOffset = 0, \{(_\d+)\}\))");
+        for (const QString dimension : {"1d", "2d", "3d"}) {
+            const auto result = read(root + "/dxil-uav-view-final" + dimension + "/result.json");
+            const auto gpu = read(root + "/dxil-uav-view-gpu" + dimension + ".json");
+            QVERIFY(result.at("ok").get<bool>());
+            QCOMPARE(result.at("dxil_uav_texture").at("patch_version"), Json(1));
+            QCOMPARE(result.at("dxil_uav_texture").at("views_read"), Json("1"));
+            QCOMPARE(result.at("dxil_uav_texture").at("failures"), Json("0"));
+            QCOMPARE(result.at("compute_input_lifecycle").at("patch_version"), Json(2));
+            std::map<std::string, Json> values;
+            for (const auto &step : result.at("steps"))
+                for (const auto &change : step.at("changes")) {
+                    const auto &v = change.at("after");
+                    values[v.at("name").get<std::string>()] = v.at("value").at("u32v")[0];
+                }
+            auto stores = store.globalMatch(QString::fromStdString(result.at("disassembly").get<std::string>()));
+            std::set<unsigned> seen;
+            while (stores.hasNext()) {
+                const auto match = stores.next(); const auto index = match.captured(1).toUInt();
+                QVERIFY(index < 8); QVERIFY(seen.insert(index).second);
+                QCOMPARE(values.at(match.captured(2).toStdString()), gpu.at("bits").at(index));
+            }
+            QCOMPARE(seen.size(), size_t(8));
+        }
+    }
     void computeBufferInputSnapshots() {
         using Json = nlohmann::json;
         ResourceId resource; const uint64_t id = 9007199254740993ULL;

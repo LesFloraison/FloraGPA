@@ -11,7 +11,7 @@ diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d1
 +
 +static std::atomic<bool> floraRetainComputeInputs(false);
 +static std::atomic<uint64_t> floraRetainedComputeTraces(0);
-+extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputePatchVersion() { return 1; }
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputePatchVersion() { return 2; }
 +extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraRetainedComputeEnabled(bool value) { floraRetainComputeInputs = value; }
 +extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputeTraces() { return floraRetainedComputeTraces.load(); }
 +
@@ -41,15 +41,16 @@ diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d1
 diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.h b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
 --- a/renderdoc/driver/d3d12/d3d12_dxil_debug.h
 +++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
-@@ -88,6 +88,7 @@
+@@ -88,6 +88,8 @@
    bool IsShaderDirectAccessCached(const DXDebug::BindingSlot &slot) override;
  
    void ResetReplay();
 +  void RetainComputeInputs();
++  bool RetainsComputeInputs() const { return m_RetainComputeInputs; }
  
    void SetBuiltins(const BuiltinInputs &builtins) { m_Builtins = builtins; }
    void SetWorkgroupProperties(const rdcarray<DXILDebug::ThreadProperties> &workgroupProperties)
-@@ -223,6 +224,7 @@
+@@ -223,6 +225,7 @@
    const uint64_t m_DeviceThreadID;
    const uint32_t m_EventId;
    bool m_ResourcesDirty = true;
@@ -60,7 +61,16 @@ diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.h b/renderdoc/driver/d3d12/
 diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
 --- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
 +++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
-@@ -4190,6 +4190,7 @@
+@@ -23,6 +23,8 @@
+  ******************************************************************************/
+ 
+ #include "d3d12_shaderdebug.h"
++
++void FloraRetainComputeTrace(ShaderDebugger *debugger);
+ #include <atomic>
+ #include "core/settings.h"
+ #include "driver/dx/official/d3dcompiler.h"
+@@ -4190,10 +4192,13 @@
      apiWrapper->SetBuiltins(globalBuiltins);
  
      // Fetch constant buffer data from root signature
@@ -68,3 +78,42 @@ diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d
      apiWrapper->FetchConstantBufferData(rs.compute);
  
      DXILDebug::Debugger *debugger = new DXILDebug::Debugger();
+     ret = debugger->BeginDebug(apiWrapper, eventId, dxbc, refl, activeLaneIndex, numThreads);
++    if(ret && ret->debugger && apiWrapper->RetainsComputeInputs())
++      FloraRetainComputeTrace(ret->debugger);
+ 
+     apiWrapper->ResetReplay();
+   }
+diff --git a/renderdoc/replay/replay_controller.cpp b/renderdoc/replay/replay_controller.cpp
+--- a/renderdoc/replay/replay_controller.cpp
++++ b/renderdoc/replay/replay_controller.cpp
+@@ -40,6 +40,11 @@
+ #include "stb/stb_image_write.h"
+ #include "strings/string_utils.h"
+ #include "tinyexr/tinyexr.h"
++
++// The isolated D3D12 DXIL worker may retain pre-dispatch inputs until FreeTrace.
++// Only the exact trace returned by this DebugThread call can consume the hook.
++static thread_local ShaderDebugger *floraRetainedComputeTrace = NULL;
++void FloraRetainComputeTrace(ShaderDebugger *debugger) { floraRetainedComputeTrace = debugger; }
+ 
+ static void fileWriteFunc(void *context, void *data, int size)
+ {
+@@ -1671,10 +1676,14 @@
+ 
+   RENDERDOC_PROFILEFUNCTION();
+ 
++  floraRetainedComputeTrace = NULL;
+   ShaderDebugTrace *ret = m_pDevice->DebugThread(m_EventID, groupid, threadid);
+-  FatalErrorCheck();
+-
+-  SetFrameEvent(m_EventID, true);
++  const bool retained = ret && ret->debugger && ret->debugger == floraRetainedComputeTrace;
++  floraRetainedComputeTrace = NULL;
++  FatalErrorCheck();
++
++  if(!retained)
++    SetFrameEvent(m_EventID, true);
+ 
+   if(ret->debugger)
+     m_Debuggers.push_back(ret->debugger);

@@ -733,7 +733,10 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
-    if (const auto lifecycle = result.value("compute_input_lifecycle", Json()); lifecycle.is_object()) {
+    const auto lifecycle = result.value("compute_input_lifecycle", Json());
+    if (lifecycle.is_object() && lifecycle.value("patch_version", 0) < 2) {
+        warnings.prepend("Obsolete DXIL input-retention report: the controller replayed the dispatch after trace creation. Its input-phase claims are invalid; regenerate this trace with the current analysis library.");
+    } else if (lifecycle.is_object()) {
         const auto status = result.value("compute_buffer_inputs", Json::object()).value("status", "");
         const auto buffers = status == "observed_bytes_unchanged" ? "Read-only buffer observations match."
                            : status == "observed_bytes_changed" ? "Read-only buffer observations differ."

@@ -158,6 +158,7 @@ class Session {
     uint32_t dxbcGpuMadPatch{};
     uint32_t dxilContractPatch{};
     uint32_t retainedComputePatch{};
+    uint32_t uavTexturePatch{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
@@ -165,6 +166,7 @@ class Session {
     DotCounter madOperations{}, madFailures{};
     DotCounter contractOperations{}, contractFailures{};
     DotCounter retainedComputeTraces{};
+    DotCounter uavTextureReads{}, uavTextureFailures{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -218,10 +220,14 @@ class Session {
         }
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraRetainedComputePatchVersion"))) {
             retainedComputePatch = patch();
-            if (retainedComputePatch != 1) throw std::runtime_error("Unsupported DXIL retained compute patch version");
+            if (retainedComputePatch != 1 && retainedComputePatch != 2)
+                throw std::runtime_error("Unsupported DXIL retained compute patch version");
             retainedComputeTraces = symbol<DotCounter>("RENDERDOC_GetFloraRetainedComputeTraces");
             using Enable = void (RENDERDOC_CC *)(bool);
-            symbol<Enable>("RENDERDOC_SetFloraRetainedComputeEnabled")(job.value("action", "") == "debug-thread");
+            // Version 1 misses ReplayController's post-DebugThread replay. Keep its
+            // retention disabled while allowing unrelated analysis and DX11 jobs.
+            symbol<Enable>("RENDERDOC_SetFloraRetainedComputeEnabled")(
+                retainedComputePatch == 2 && job.value("action", "") == "debug-thread");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -229,6 +235,12 @@ class Session {
             using Enable = void (RENDERDOC_CC *)(bool);
             symbol<Enable>("RENDERDOC_SetFloraReadOnlyDepthSnapshotEnabled")(true);
             depthSnapshotCopies = symbol<DepthSnapshotCopies>("RENDERDOC_GetFloraReadOnlyDepthSnapshotCopies");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilUavTexturePatchVersion"))) {
+            uavTexturePatch = patch();
+            if (uavTexturePatch != 1) throw std::runtime_error("Unsupported DXIL UAV texture patch version");
+            uavTextureReads = symbol<DotCounter>("RENDERDOC_GetFloraDxilUavTextureReads");
+            uavTextureFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxilUavTextureFailures");
         }
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
@@ -461,7 +473,7 @@ rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     return result;
 }
 Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_t dxbcWorkgroupPatch,
-           uint32_t retainedComputePatch) {
+           uint32_t retainedComputePatch, uint32_t uavTexturePatch) {
     const auto kind = job.at("action").get<std::string>();
     const auto *selected = findAction(controller.GetRootActions(), eid);
     const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
@@ -485,7 +497,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         throw std::runtime_error("Fast contraction requires a DXIL shader at the selected stage");
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
-    const bool retainedCompute = dx12 && compute && reflection->encoding == ShaderEncoding::DXIL && retainedComputePatch == 1;
+    const bool retainedCompute = dx12 && compute && reflection->encoding == ShaderEncoding::DXIL && retainedComputePatch == 2;
     const std::optional<D3D12Pipe::InputAssembly> vertexIA = dx12 && vertex
         ? std::optional<D3D12Pipe::InputAssembly>(pipe12->inputAssembly) : std::nullopt;
     const auto vertexInputs = [&] {
@@ -717,6 +729,13 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         result["compute_input_lifecycle"] = {
             {"status", "retained_until_trace_release"}, {"patch_version", retainedComputePatch},
             {"scope", "DXIL compute pre-dispatch application resources retained after lane probing; no prefix replays between trace creation and stepping. FreeTrace executes the original dispatch to restore post-event state."}};
+    }
+    if (dx12 && reflection->encoding == ShaderEncoding::DXIL && !uavTexturePatch &&
+        std::any_of(reflection->readWriteResources.begin(), reflection->readWriteResources.end(),
+                    [](const auto &resource) { return resource.isTexture; })) {
+        result["partial"] = true;
+        result["debug_scope"]["warnings"] = {
+            "This RenderDoc library lacks the DXIL UAV texture fix. Texture coordinates and view mip/slices may be incorrect; this trace is not validated. Use the patched analysis library."};
     }
     result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
     const auto assembly = controller.DisassembleShader(
@@ -1376,7 +1395,15 @@ Json runRdcJob(const Json &job) {
         const auto madStart = session.madOperations ? session.madOperations() : 0;
         const auto madFailureStart = session.madFailures ? session.madFailures() : 0;
         const auto retainedStart = session.retainedComputeTraces ? session.retainedComputeTraces() : 0;
-        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch, session.retainedComputePatch));
+        const auto uavReadStart = session.uavTextureReads ? session.uavTextureReads() : 0;
+        const auto uavFailureStart = session.uavTextureFailures ? session.uavTextureFailures() : 0;
+        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch, session.retainedComputePatch, session.uavTexturePatch));
+        const auto uavFailures = session.uavTextureFailures ? session.uavTextureFailures() - uavFailureStart : 0;
+        if (uavFailures) throw std::runtime_error("DXIL UAV texture view read failed or is unsupported; incomplete shader trace rejected");
+        result["dxil_uav_texture"] = {{"patch_version", session.uavTexturePatch},
+            {"views_read", std::to_string(session.uavTextureReads ? session.uavTextureReads() - uavReadStart : 0)},
+            {"failures", std::to_string(uavFailures)},
+            {"scope", "DX12 DXIL typed UAV texture loads/stores and atomics: full-width coordinates, view mip/slices and per-axis bounds"}};
         if (result.contains("compute_input_lifecycle")) {
             const auto count = session.retainedComputeTraces() - retainedStart;
             if (count != 1) throw std::runtime_error("DXIL compute input retention was not activated exactly once");

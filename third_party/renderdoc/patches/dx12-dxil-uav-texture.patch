@@ -1,0 +1,246 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+@@ -712,6 +712,10 @@
+ 
+ static std::atomic<bool> floraRetainComputeInputs(false);
+ static std::atomic<uint64_t> floraRetainedComputeTraces(0);
++static std::atomic<uint64_t> floraUavTextureReads(0), floraUavTextureFailures(0);
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilUavTexturePatchVersion() { return 1; }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxilUavTextureReads() { return floraUavTextureReads.load(); }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxilUavTextureFailures() { return floraUavTextureFailures.load(); }
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputePatchVersion() { return 2; }
+ extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraRetainedComputeEnabled(bool value) { floraRetainComputeInputs = value; }
+ extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputeTraces() { return floraRetainedComputeTraces.load(); }
+@@ -1504,14 +1508,81 @@
+       else
+       {
+         uavData.tex = true;
+-        m_Device->GetReplay()->GetTextureData(uavId, Subresource(), GetTextureDataParams(), data);
+-
+         uavDesc.Format = D3D12ShaderDebug::GetUAVResourceFormat(uavDesc, pResource);
+         DXILDebug::FillViewFmtFromResourceFormat(uavDesc.Format, uavData.resInfo.format);
+-        D3D12_RESOURCE_DESC resDesc = pResource->GetDesc();
+-        uavData.rowPitch = GetByteSize((int)resDesc.Width, 1, 1, uavDesc.Format, 0);
+-        uavData.depthPitch =
+-            GetByteSize((int)resDesc.Width, (int)(resDesc.Height), 1, uavDesc.Format, 0);
++        const D3D12_RESOURCE_DESC resDesc = pResource->GetDesc();
++        uint32_t mip = 0, firstSlice = 0, slices = 1, plane = 0;
++        const bool volume = uavDesc.ViewDimension == D3D12_UAV_DIMENSION_TEXTURE3D;
++        const bool array1D = uavDesc.ViewDimension == D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
++        switch(uavDesc.ViewDimension)
++        {
++          case D3D12_UAV_DIMENSION_TEXTURE1D: mip = uavDesc.Texture1D.MipSlice; break;
++          case D3D12_UAV_DIMENSION_TEXTURE1DARRAY:
++            mip = uavDesc.Texture1DArray.MipSlice;
++            firstSlice = uavDesc.Texture1DArray.FirstArraySlice;
++            slices = uavDesc.Texture1DArray.ArraySize;
++            break;
++          case D3D12_UAV_DIMENSION_TEXTURE2D:
++            mip = uavDesc.Texture2D.MipSlice; plane = uavDesc.Texture2D.PlaneSlice; break;
++          case D3D12_UAV_DIMENSION_TEXTURE2DARRAY:
++            mip = uavDesc.Texture2DArray.MipSlice;
++            firstSlice = uavDesc.Texture2DArray.FirstArraySlice;
++            slices = uavDesc.Texture2DArray.ArraySize;
++            plane = uavDesc.Texture2DArray.PlaneSlice;
++            break;
++          case D3D12_UAV_DIMENSION_TEXTURE3D:
++            mip = uavDesc.Texture3D.MipSlice;
++            firstSlice = uavDesc.Texture3D.FirstWSlice;
++            slices = uavDesc.Texture3D.WSize;
++            break;
++          default: ++floraUavTextureFailures; return UAVInfo();
++        }
++        if(mip >= resDesc.MipLevels || plane != 0)
++        {
++          ++floraUavTextureFailures;
++          return UAVInfo();
++        }
++        const uint32_t available = volume ? RDCMAX(1U, uint32_t(resDesc.DepthOrArraySize) >> mip)
++                                          : resDesc.DepthOrArraySize;
++        if(slices == ~0U && firstSlice < available) slices = available - firstSlice;
++        if(firstSlice >= available || slices == 0 || slices > available - firstSlice)
++        {
++          ++floraUavTextureFailures;
++          return UAVInfo();
++        }
++        uavData.width = RDCMAX(1U, uint32_t(resDesc.Width >> mip));
++        const uint32_t mipHeight = RDCMAX(1U, resDesc.Height >> mip);
++        uavData.height = array1D ? slices : mipHeight;
++        uavData.depth = array1D ? 1 : slices;
++        uavData.rowPitch = GetByteSize(uavData.width, 1, 1, uavDesc.Format, 0);
++        const uint64_t sliceBytes = uavData.rowPitch * mipHeight;
++        uavData.depthPitch = uavData.rowPitch * uavData.height;
++        if(volume)
++        {
++          bytebuf allSlices;
++          m_Device->GetReplay()->GetTextureData(uavId, Subresource(mip, 0, 0), GetTextureDataParams(), allSlices);
++          if(allSlices.size() != sliceBytes * available)
++          {
++            ++floraUavTextureFailures;
++            return UAVInfo();
++          }
++          data.assign(allSlices.data() + firstSlice * sliceBytes, slices * sliceBytes);
++        }
++        else
++        {
++          for(uint32_t slice = 0; slice < slices; ++slice)
++          {
++            bytebuf layer;
++            m_Device->GetReplay()->GetTextureData(uavId, Subresource(mip, firstSlice + slice, 0), GetTextureDataParams(), layer);
++            if(layer.size() != sliceBytes)
++            {
++              ++floraUavTextureFailures;
++              return UAVInfo();
++            }
++            data.append(layer);
++          }
++        }
++        ++floraUavTextureReads;
+       }
+     }
+   }
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.h b/renderdoc/driver/shaders/dxil/dxil_debug.h
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.h
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.h
+@@ -252,8 +252,17 @@
+ 
+   ResourceInfo resInfo;
+ 
+-  uint32_t rowPitch = 0;
+-  uint32_t depthPitch = 0;
++  uint64_t rowPitch = 0;
++  uint64_t depthPitch = 0;
++  uint32_t width = 0, height = 0, depth = 0;
++  bool TexelOffset(const uint32_t coords[3], uint32_t stride, uint64_t &offset) const
++  {
++    if(coords[0] >= width || coords[1] >= height || coords[2] >= depth)
++      return false;
++    offset = uint64_t(coords[0]) * stride + uint64_t(coords[1]) * rowPitch +
++             uint64_t(coords[2]) * depthPitch;
++    return offset <= resInfo.dataSize && stride <= resInfo.dataSize - offset;
++  }
+   uint32_t hiddenCounter = 0;
+   bool tex = false;
+ };
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.cpp b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.cpp
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+@@ -2112,8 +2112,8 @@
+ 
+             uint32_t structOffset = 0;
+             bool texData = false;
+-            uint32_t rowPitch = 0;
+-            uint32_t depthPitch = 0;
++            uint64_t rowPitch = 0;
++            uint64_t depthPitch = 0;
+             uint32_t firstElem = 0;
+             uint32_t numElems = 0;
+             ViewFmt fmt;
+@@ -2124,13 +2124,13 @@
+ 
+             RDCASSERT((resClass == ResourceClass::SRV || resClass == ResourceClass::UAV), resClass);
+             ResourceInfo resInfo;
++            UAVInfo uav;
+             DeviceOpResult opResult = DeviceOpResult::Unknown;
+             const BindingSlot &slot = resRefInfo.binding;
+             switch(resClass)
+             {
+               case ResourceClass::UAV:
+               {
+-                UAVInfo uav;
+                 opResult = m_Debugger.GetUAV(slot, uav);
+                 if(opResult == DeviceOpResult::Succeeded)
+                 {
+@@ -2234,11 +2234,11 @@
+               // TextureStore(srv,coord0,coord1,coord2,value0,value1,value2,value3,mask)
+               size_t offsetStart = (dxOpCode == DXOp::TextureLoad) ? 3 : 2;
+               if(GetShaderVariable(inst.args[offsetStart], opCode, dxOpCode, arg))
+-                texCoords[0] = (int8_t)arg.value.u32v[0];
++                texCoords[0] = arg.value.u32v[0];
+               if(GetShaderVariable(inst.args[offsetStart + 1], opCode, dxOpCode, arg))
+-                texCoords[1] = (int8_t)arg.value.u32v[0];
++                texCoords[1] = arg.value.u32v[0];
+               if(GetShaderVariable(inst.args[offsetStart + 2], opCode, dxOpCode, arg))
+-                texCoords[2] = (int8_t)arg.value.u32v[0];
++                texCoords[2] = arg.value.u32v[0];
+             }
+ 
+             // buffer offsets are in bytes
+@@ -2252,11 +2252,10 @@
+               numElems *= RDCMIN(4, fmt.byteWidth);
+             }
+ 
++            bool texInBounds = true;
+             if(texData)
+             {
+-              dataOffset += texCoords[0] * stride;
+-              dataOffset += texCoords[1] * rowPitch;
+-              dataOffset += texCoords[2] * depthPitch;
++              texInBounds = uav.TexelOffset(texCoords, stride, dataOffset);
+             }
+             else
+             {
+@@ -2266,7 +2265,7 @@
+ 
+             const uint64_t dataSize = resInfo.dataSize;
+             // NULL resource or out of bounds
+-            if((!texData && elemIdx >= numElems) || (texData && dataOffset >= dataSize))
++            if((!texData && elemIdx >= numElems) || (texData && !texInBounds))
+             {
+               if(load)
+               {
+@@ -3326,8 +3325,8 @@
+ 
+             uint32_t structOffset = 0;
+             bool texData = false;
+-            uint32_t rowPitch = 0;
+-            uint32_t depthPitch = 0;
++            uint64_t rowPitch = 0;
++            uint64_t depthPitch = 0;
+             uint32_t firstElem = 0;
+             uint32_t numElems = 0;
+             ViewFmt fmt;
+@@ -3350,10 +3349,8 @@
+             if(!resInfo.hasData)
+             {
+               RDCERR("Unbound resource %s", GetArgumentName(1).c_str());
+-              a.value.u32v[0] = 0;
+-              a.value.u32v[1] = 0;
+-              a.value.u32v[2] = 0;
+-              a.value.u32v[3] = 0;
++              result.value = ShaderValue();
++              break;
+             }
+ 
+             firstElem = resInfo.firstElement;
+@@ -3412,11 +3409,11 @@
+             else
+             {
+               if(GetShaderVariable(inst.args[offsetStart], opCode, dxOpCode, arg))
+-                texCoords[0] = (int8_t)arg.value.u32v[0];
++                texCoords[0] = arg.value.u32v[0];
+               if(GetShaderVariable(inst.args[offsetStart + 1], opCode, dxOpCode, arg))
+-                texCoords[1] = (int8_t)arg.value.u32v[0];
++                texCoords[1] = arg.value.u32v[0];
+               if(GetShaderVariable(inst.args[offsetStart + 2], opCode, dxOpCode, arg))
+-                texCoords[2] = (int8_t)arg.value.u32v[0];
++                texCoords[2] = arg.value.u32v[0];
+             }
+ 
+             // buffer offsets are in bytes
+@@ -3432,9 +3429,11 @@
+ 
+             if(texData)
+             {
+-              dataOffset += texCoords[0] * stride;
+-              dataOffset += texCoords[1] * rowPitch;
+-              dataOffset += texCoords[2] * depthPitch;
++              if(!uavInfo.TexelOffset(texCoords, stride, dataOffset))
++              {
++                result.value = ShaderValue();
++                break; // An out-of-range atomic must not modify an adjacent row/slice.
++              }
+             }
+             else
+             {

@@ -270,6 +270,7 @@ class ReplayDebugUiTests : public QObject {
         const auto result = read(path);
         QCOMPARE(result.at("compute_input_lifecycle").at("status"), Json("released_dispatch_restored"));
         QCOMPARE(result.at("compute_input_lifecycle").at("retained_traces"), Json("1"));
+        QCOMPARE(result.at("compute_input_lifecycle").at("patch_version"), Json(2));
         const auto &inputs = result.at("compute_buffer_inputs");
         QCOMPARE(inputs.at("status"), Json("observed_bytes_unchanged"));
         QCOMPARE(inputs.at("after_trace_creation"), inputs.at("after_steps"));
@@ -286,6 +287,11 @@ class ReplayDebugUiTests : public QObject {
         QVERIFY(notice->text().contains("inputs retained during stepping"));
         QVERIFY(notice->text().contains("earlier GPU reference cannot validate", Qt::CaseInsensitive));
         if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/retained-compute.png"));
+        auto obsolete = result;
+        obsolete["compute_input_lifecycle"]["patch_version"] = 1;
+        QVERIFY(view.finish(view.requestId(), obsolete));
+        QVERIFY(notice->text().contains("Obsolete DXIL input-retention report"));
+        QVERIFY(!notice->text().contains("inputs retained during stepping"));
         const auto serial = view.requestId(); view.setContext("new-experiment", 36779, true);
         QVERIFY(!view.finish(serial, result)); QVERIFY(notice->isHidden());
     }
