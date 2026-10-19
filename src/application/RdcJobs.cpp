@@ -82,6 +82,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"stage", "VSOut"},
              {"api_validation", false},
              {"readonly_depth_snapshot", false},
+             {"dxil_fast_contraction", false},
              {"pixel_history_reference", false},
              {"group", Json::array({0, 0, 0})},
              {"thread", Json::array({0, 0, 0})}};
@@ -96,6 +97,10 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Choose GPA or RDC event, not both");
     if (!job["api_validation"].is_boolean())
         throw std::runtime_error("API validation must be a boolean");
+    if (!job["dxil_fast_contraction"].is_boolean() ||
+        (job["dxil_fast_contraction"].get<bool>() && (!job.contains("execution") ||
+         (action != "debug-pixel" && action != "debug-vertex" && action != "debug-thread"))))
+        throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (!job["readonly_depth_snapshot"].is_boolean())
         throw std::runtime_error("Read-only depth snapshot must be a boolean");
     if (job["readonly_depth_snapshot"].get<bool>() && action != "texture" && action != "debug-pixel")

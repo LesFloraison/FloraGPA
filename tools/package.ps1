@@ -50,6 +50,7 @@ $usagePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-usage-visi
 $depthSnapshotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-readonly-depth-snapshot.patch'
 $gpuDotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-dot.patch'
 $gpuMadPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-mad.patch'
+$dxilContractPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-fast-contraction.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -70,6 +71,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxbc_gpu_dot_patch_sha256 -ne (Get-PackageSha256 $gpuDotPatchPath) -or
         $patchManifest.dxbc_gpu_mad_patch_version -ne 1 -or
         $patchManifest.dxbc_gpu_mad_patch_sha256 -ne (Get-PackageSha256 $gpuMadPatchPath) -or
+        $patchManifest.dxil_fast_contraction_patch_version -ne 1 -or
+        $patchManifest.dxil_fast_contraction_patch_sha256 -ne (Get-PackageSha256 $dxilContractPatchPath) -or
         $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
         throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
     }

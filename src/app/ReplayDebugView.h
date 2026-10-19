@@ -58,6 +58,7 @@ class ReplayDebugView final : public QWidget {
     QLabel *indirectActionLabel_{};
     QCheckBox *pixelHistoryReference_{};
     QCheckBox *readOnlyDepthSnapshot_{};
+    QCheckBox *fastContraction_{};
     QLabel *invocationReference_;
     QPlainTextEdit *assembly_, *source_, *details_;
     QTabWidget *code_, *values_;

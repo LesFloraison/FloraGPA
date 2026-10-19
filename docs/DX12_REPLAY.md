@@ -4586,6 +4586,55 @@ Evidence under ignored `artifacts/dx12-research` is
 `indirect-navigation-mesh-ui2.txt` and `indirect-navigation-debug-ui1.txt`.
 No new native recapture, full-frame replay or broad regression was run.
 
+### Opt-in DXIL fast-contraction experiment
+
+The MainPS discrepancy now has an executable, opt-in model in the pinned
+RenderDoc backend. `--dxil-fast-contraction` and the VS/PS/CS workspace checkbox
+**Fast DXIL contraction (experimental)** enable GPU multiply-add for adjacent
+float32 FMul/FAdd instructions in one basic block, only when both have fast flags
+and the multiply has one semantic use. Precise, shared-product, non-adjacent,
+cross-block and other-type chains remain on the existing path. This follows
+the transformations permitted by [DXIL precise/fast semantics](https://github.com/microsoft/DirectXShaderCompiler/blob/main/docs/DXIL.rst#precise-qualifier),
+but does not observe the driver's actual contraction choices. Default debugging
+is unchanged. Intermediate FMul steps retain uncontracted IR values; eligible
+FAdd steps consume saved multiply operands through the GPU helper. Results stay
+partial and disclose this distinction even when their final output matches.
+
+One actual Hellblade2 query (`hellblade-main-contract1`) at execution **37003**,
+pixel **(541,451)**, primitive **0**, completes **317** steps with **24** queued
+GPU contractions and no queue failures across the simulated quad. The selected
+target is unchanged and the history boundary matches. Final target-0 bits are
+**[1026307110, 1028810213, 1034362365, 0]**, exactly equal to the GPU fragment
+reference. Previously all three RGB components differed. The dither angle changes
+from bits **1129100242** to **1129100243**, matching the earlier fast GPU
+reproduction; the preceding IR multiply remains unchanged. **22** final variable
+values differ from the previous trace. This does not establish other invocations,
+intermediate machine values, whole-frame stability or general DXIL fidelity.
+
+The focused `tests/fixtures/dx12-fast-contraction.hlsl` reproduction snapshots
+four constants before its stores, preserving distinct fast/precise/shared chains
+under DXC `-T cs_6_6 -E main`. One native micro-capture and one CS debug query
+produce exactly **one** contraction. Fast angle bits **1129100243**, precise
+angle bits **1129100242**, and the shared-product sum **1123188759** all match
+GPU readback. The precise and shared products remain separate. Neither this
+debug query nor the Hellblade2 query loads GPA or Python.
+
+The new seventh patch is `dx12-dxil-fast-contraction.patch`; the build script
+verifies the complete patched tree and package checks include its version/hash.
+The built DLL SHA-256 is
+`be0f45accedf9f666ba3835eb7085a2fa443407230e56dbe7a820bdfe33e961d`.
+Builds **299–302** and the pinned runtime build pass. Focused option checks pass
+(**3 including setup/cleanup, 11 ms**); UI checks cover explicit enabling,
+mode-mismatch and stale-result rejection, visible scope, and session/DX11 reset
+(**3 including setup/cleanup, 435 ms**). Non-DXIL shaders reject the experiment.
+The inspected screenshot is `dxil-contract-ui1/replay-debug/hellblade-contraction.png`.
+Other ignored evidence is `hellblade-contract-evidence1.json`,
+`dxil-contract-probe-gpu1.json`, `dxil-contract-probe-debug1`,
+`dxil-contract-options1.txt` and `dxil-contract-ui2.txt`. No additional full native
+sample recapture or broad regression was run. The default MainPS mismatch and
+full shader numerical fidelity remain unfinished; this experiment is not a
+replacement for those acceptance requirements.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

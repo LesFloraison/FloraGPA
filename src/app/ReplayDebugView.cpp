@@ -197,6 +197,12 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     indirectAction_->setToolTip("Optional zero-based Draw/Dispatch within ExecuteIndirect. Empty selects only an unambiguous single action.");
     inputs_->addWidget(indirectAction_);
     connect(indirectAction_, &QLineEdit::textChanged, this, &ReplayDebugView::invalidate);
+    fastContraction_ = new QCheckBox("Fast DXIL contraction (experimental)");
+    fastContraction_->setObjectName("debugFastContraction");
+    fastContraction_->setToolTip("GPU multiply-add for adjacent single-use fast float32 pairs. "
+        "Precise and shared products stay separate. This models permitted contraction; original driver intermediates are not observed.");
+    inputs_->addWidget(fastContraction_);
+    connect(fastContraction_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
     steps_ = new QToolBar;
     layout->addWidget(steps_);
     navigation_ = new QComboBox;
@@ -539,6 +545,7 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
         event_ = event;
         textureReference_ = Json();
         indirectAction_->clear();
+        fastContraction_->setChecked(false);
         if (referenceSelection_)
             referenceSelection_->clear();
         if (primitive_)
@@ -620,6 +627,7 @@ Json ReplayDebugView::request() const {
     if (dx12_) {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
+        if (fastContraction_->isChecked()) job["dxil_fast_contraction"] = true;
         if (!indirectAction_->text().trimmed().isEmpty()) job["indirect_action"] = invocationIndex(indirectAction_);
     }
     if (stage_ == "ps") {
@@ -676,6 +684,7 @@ void ReplayDebugView::updateActions() {
     inputs_->setEnabled(!busy_);
     indirectAction_->setVisible(dx12_);
     indirectActionLabel_->setVisible(dx12_);
+    fastContraction_->setVisible(dx12_);
     if (pixelHistoryReference_)
         pixelHistoryReference_->setVisible(dx12_);
     if (readOnlyDepthSnapshot_)
@@ -705,6 +714,8 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
                   result.value("execution", Json()) != Json(std::to_string(event_))))
         throw std::runtime_error("Shader trace does not match the DX12 execution selection");
+    if (dx12_ && result.value("dxil_fast_contraction", Json::object()).value("enabled", false) != fastContraction_->isChecked())
+        throw std::runtime_error("Shader trace does not match the DXIL contraction mode");
     if (dx12_ && !indirectAction_->text().trimmed().isEmpty() &&
         result.value("indirect_selection", Json::object()).value("indirect_action", Json()) != invocationIndex(indirectAction_))
         throw std::runtime_error("Shader trace does not match the selected indirect action");

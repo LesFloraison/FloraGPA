@@ -1,0 +1,167 @@
+diff --git a/renderdoc/data/hlsl/hlsl_cbuffers.h b/renderdoc/data/hlsl/hlsl_cbuffers.h
+--- a/renderdoc/data/hlsl/hlsl_cbuffers.h
++++ b/renderdoc/data/hlsl/hlsl_cbuffers.h
+@@ -441,6 +441,7 @@
+ #define DEBUG_SAMPLE_MATH_DXIL_LOG 10010
+ #define DEBUG_SAMPLE_MATH_DXIL_SQRT 10011
+ #define DEBUG_SAMPLE_MATH_DXIL_RSQRT 10012
++#define DEBUG_SAMPLE_MATH_DXIL_CONTRACT 10013
+ 
+ // some constants available to both C++ and HLSL for configuring display
+ #define CUBEMAP_FACE_RIGHT 0
+diff --git a/renderdoc/data/hlsl/shaderdebug.hlsl b/renderdoc/data/hlsl/shaderdebug.hlsl
+--- a/renderdoc/data/hlsl/shaderdebug.hlsl
++++ b/renderdoc/data/hlsl/shaderdebug.hlsl
+@@ -49,6 +49,7 @@
+       break;
+     case DEBUG_SAMPLE_MATH_DXIL_COS: outBuf[0].outf[0] = cos(mathInVal); break;
+     case DEBUG_SAMPLE_MATH_DXIL_SIN: outBuf[0].outf[0] = sin(mathInVal); break;
++    case DEBUG_SAMPLE_MATH_DXIL_CONTRACT: outBuf[0].outf[0] = mad(mathInVal.x, mathInVal.y, mathInVal.z); break;
+     case DEBUG_SAMPLE_MATH_DXIL_TAN: outBuf[0].outf[0] = tan(mathInVal); break;
+     case DEBUG_SAMPLE_MATH_DXIL_ACOS: outBuf[0].outf[0] = acos(mathInVal); break;
+     case DEBUG_SAMPLE_MATH_DXIL_ASIN: outBuf[0].outf[0] = asin(mathInVal); break;
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+@@ -23,6 +23,7 @@
+  ******************************************************************************/
+ 
+ #include "d3d12_dxil_debug.h"
++#include <atomic>
+ #include "data/hlsl/hlsl_cbuffers.h"
+ #include "driver/dxgi/dxgi_common.h"
+ #include "maths/formatpacking.h"
+@@ -1713,10 +1714,19 @@
+   return FetchUAV(slot);
+ }
+ 
++static std::atomic<bool> floraDxilContractEnabled(false);
++static std::atomic<uint64_t> floraDxilContractAttempts(0), floraDxilContractQueued(0);
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilContractPatchVersion() { return 1; }
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraDxilContractEnabled(bool value) { floraDxilContractEnabled = value; }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxilContractOperations() { return floraDxilContractQueued.load(); }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxilContractFailures() { return floraDxilContractAttempts.load() - floraDxilContractQueued.load(); }
++bool D3D12APIWrapper::UsesGPUFastContraction() const { return floraDxilContractEnabled.load(); }
++
+ // Must be called from the replay manager thread (the debugger thread)
+ bool D3D12APIWrapper::QueueMathIntrinsic(DXIL::DXOp dxOp, const ShaderVariable &input)
+ {
+   CHECK_DEVICE_THREAD();
++  if(dxOp == DXOp::FMad) ++floraDxilContractAttempts;
+   ID3D12GraphicsCommandListX *cmdList = m_QueuedOpCmdList;
+   if(!cmdList)
+   {
+@@ -1740,6 +1750,7 @@
+   {
+     case DXOp::Cos: mathOp = DEBUG_SAMPLE_MATH_DXIL_COS; break;
+     case DXOp::Sin: mathOp = DEBUG_SAMPLE_MATH_DXIL_SIN; break;
++    case DXOp::FMad: mathOp = DEBUG_SAMPLE_MATH_DXIL_CONTRACT; break;
+     case DXOp::Tan: mathOp = DEBUG_SAMPLE_MATH_DXIL_TAN; break;
+     case DXOp::Acos: mathOp = DEBUG_SAMPLE_MATH_DXIL_ACOS; break;
+     case DXOp::Asin: mathOp = DEBUG_SAMPLE_MATH_DXIL_ASIN; break;
+@@ -1763,6 +1774,7 @@
+                                           m_QueuedMathOpIndex))
+   {
+     m_QueuedMathOpIndex++;
++    if(dxOp == DXOp::FMad) ++floraDxilContractQueued;
+     return true;
+   }
+   return false;
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.h b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.h
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
+@@ -56,6 +56,7 @@
+   UAVInfo GetUAV(const BindingSlot &slot) override;
+   SRVInfo GetSRV(const BindingSlot &slot) override;
+ 
++  bool UsesGPUFastContraction() const override;
+   bool QueueMathIntrinsic(DXIL::DXOp dxOp, const ShaderVariable &input) override;
+   bool QueueSampleGather(DXIL::DXOp dxOp, SampleGatherResourceData resourceData,
+                          SampleGatherSamplerData samplerData, const ShaderVariable &uv,
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.cpp b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.cpp
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+@@ -5481,6 +5481,26 @@
+       RDCASSERTEQUAL(a.type, b.type);
+       const uint32_t c = 0;
+ 
++      if(opCode == Operation::FMul && m_Debugger.GetAPIWrapper()->UsesGPUFastContraction() &&
++         m_FunctionInfo->contractMuls.count(&inst))
++      {
++        m_ContractMultiply = &inst;
++        m_ContractOperands = a;
++        m_ContractOperands.value.f32v[1] = b.value.f32v[0];
++      }
++      const auto contracted = m_FunctionInfo->contractAdds.find(&inst);
++      if(opCode == Operation::FAdd && m_Debugger.GetAPIWrapper()->UsesGPUFastContraction() &&
++         contracted != m_FunctionInfo->contractAdds.end() && m_ContractMultiply == contracted->second)
++      {
++        if(IsPendingResultReady()) result = GetPendingResult();
++        else
++        {
++          ShaderVariable operands = m_ContractOperands;
++          operands.value.f32v[2] = inst.args[0] == m_ContractMultiply ? b.value.f32v[0] : a.value.f32v[0];
++          QueueMathOp(DXOp::FMad, operands, result);
++        }
++        break;
++      }
+       if(opCode == Operation::FAdd)
+       {
+ #undef _IMPL
+@@ -9543,6 +9563,27 @@
+            inst.op == Operation::Switch || inst.op == Operation::Ret)
+           ++curBlock;
+       }
++      // Optional driver-model experiment: only adjacent, single-use float32
++      // multiply/add pairs with fast flags on both instructions. Do not infer
++      // contraction across control flow, shared products, precise or other types.
++      std::map<const Value *, uint32_t> uses;
++      for(const Instruction *candidate : f->instructions)
++        if(!IsLLVMDebugCall(*candidate) && !DXIL::IsLLVMIntrinsicCall(*candidate))
++          for(const Value *arg : candidate->args) ++uses[arg];
++      for(uint32_t i = 1; i < countInstructions; ++i)
++      {
++        const Instruction *mul = f->instructions[i - 1], *add = f->instructions[i];
++        if(mul->op != Operation::FMul || add->op != Operation::FAdd ||
++           uses[mul] != 1 || info.instructionToBlock[i - 1] != info.instructionToBlock[i] ||
++           (mul->opFlags() & InstructionFlags::FastMath) == InstructionFlags::NoFlags ||
++           (add->opFlags() & InstructionFlags::FastMath) == InstructionFlags::NoFlags ||
++           ConvertDXILTypeToVarType(mul->type) != VarType::Float ||
++           ConvertDXILTypeToVarType(add->type) != VarType::Float ||
++           add->args.size() != 2 || (add->args[0] != mul && add->args[1] != mul))
++          continue;
++        info.contractMuls.insert(mul);
++        info.contractAdds[add] = mul;
++      }
+       // If these do not match in size that means there is a result SSA that is never read
+       RDCASSERTEQUAL(ssaRefs.size(), ssaMaxRefs.size());
+ 
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.h b/renderdoc/driver/shaders/dxil/dxil_debug.h
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.h
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.h
+@@ -151,6 +151,8 @@
+   DXIL::ControlFlow controlFlow;
+   std::map<uint32_t, Callstack> callstacks;
+   rdcarray<uint32_t> instructionToBlock;
++  std::map<const DXIL::Instruction *, const DXIL::Instruction *> contractAdds;
++  std::set<const DXIL::Instruction *> contractMuls;
+ };
+ 
+ struct StackFrame
+@@ -320,6 +322,7 @@
+   virtual UAVInfo GetUAV(const BindingSlot &slot) = 0;
+   virtual SRVInfo GetSRV(const BindingSlot &slot) = 0;
+ 
++  virtual bool UsesGPUFastContraction() const { return false; }
+   virtual bool QueueMathIntrinsic(DXIL::DXOp dxOp, const ShaderVariable &input) = 0;
+   virtual bool QueueSampleGather(DXIL::DXOp dxOp, SampleGatherResourceData resourceData,
+                                  SampleGatherSamplerData samplerData, const ShaderVariable &uv,
+@@ -741,6 +744,8 @@
+   ShaderDebugState m_PendingDebugState;
+   ShaderVariable m_PendingResultData;
+   GpuMathOperation m_QueuedGpuMathOp;
++  const DXIL::Instruction *m_ContractMultiply = NULL;
++  ShaderVariable m_ContractOperands;
+   GpuSampleGatherOperation m_QueuedGpuSampleGatherOp;
+ 
+   // Track memory allocations

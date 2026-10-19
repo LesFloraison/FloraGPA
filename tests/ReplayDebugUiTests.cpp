@@ -6,6 +6,7 @@
 #include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDir>
 #include <QFileDialog>
@@ -51,6 +52,30 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void dxilFastContraction() {
+        const auto path = qEnvironmentVariable("FLORA_DXIL_CONTRACTION_REPORT");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 experimental contraction report");
+        const auto result = read(path);
+        QCOMPARE(result.at("dxil_fast_contraction").at("operations"), Json("24"));
+        QCOMPARE(result.at("dxil_fast_contraction").at("failures"), Json("0"));
+        QCOMPARE(result.at("gpu_invocation_reference").at("trace_output_comparison").at("status"), Json("exact_output_match"));
+        QVERIFY(result.at("partial").get<bool>());
+        ReplayDebugView view("ps"); view.resize(1500, 1000); view.show(); view.setContext("contract", 37003, true);
+        view.selectPixel(541, 451, 0); view.selectPrimitive(0);
+        view.findChild<QCheckBox *>("debugPixelHistoryReference")->setChecked(true);
+        auto option = view.findChild<QCheckBox *>("debugFastContraction");
+        QVERIFY(!option->isChecked()); QVERIFY(!view.request().contains("dxil_fast_contraction"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), result));
+        option->setChecked(true); QCOMPARE(view.request().at("dxil_fast_contraction"), Json(true));
+        QVERIFY(view.finish(view.requestId(), result)); QVERIFY(view.model());
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(int(result.at("steps").size() - 1));
+        QVERIFY(view.findChild<QLabel *>("debugBackendNotice")->text().contains("Original driver intermediates are not observed"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/hellblade-contraction.png"));
+        const auto serial = view.requestId(); option->setChecked(false);
+        QVERIFY(!view.model()); QVERIFY(!view.finish(serial, result));
+        option->setChecked(true); view.setContext("new-session", 37003, true);
+        QVERIFY(!option->isChecked()); view.setContext("dx11", 1, false); QVERIFY(option->isHidden());
+    }
     void initTestCase() {
         QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
         QSettings::setDefaultFormat(QSettings::IniFormat);

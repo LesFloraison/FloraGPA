@@ -37,6 +37,7 @@ int rdcAnalyzeCli(QStringList args) {
                      flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
         p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
+        p.addOption({"dxil-fast-contraction", "Experimental GPU evaluation of adjacent single-use fast DXIL multiply/add pairs"});
         p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
         p.addOption({"pixel-history-reference", "Read the selected DX12 primitive's GPU shader output using extra pixel-history replays"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
@@ -71,6 +72,7 @@ int rdcAnalyzeCli(QStringList args) {
         using Json = nlohmann::json;
         Json options = Json::object();
         options["api_validation"] = p.isSet("api-validation");
+        options["dxil_fast_contraction"] = p.isSet("dxil-fast-contraction");
         options["readonly_depth_snapshot"] = p.isSet("readonly-depth-snapshot");
         options["pixel_history_reference"] = p.isSet("pixel-history-reference");
         auto number = [](const QString &text) -> uint64_t {

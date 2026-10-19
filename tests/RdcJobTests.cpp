@@ -69,6 +69,17 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void fastContractionPreparation() {
+        QTemporaryDir dir;
+        const Json options{{"execution", "37003"}, {"dxil_fast_contraction", true}};
+        const auto job = prepare(dir.path(), "success", options, "debug-pixel");
+        QCOMPARE(job.at("dxil_fast_contraction"), Json(true));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "postmesh"));
+        auto invalid = options; invalid.erase("execution"); invalid["gpa_event"] = 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "debug-pixel"));
+        invalid = options; invalid["dxil_fast_contraction"] = 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "debug-pixel"));
+    }
     void inputAttributePreparation() {
         QTemporaryDir dir;
         const Json options{{"execution", "36560"}, {"stage", "VSIn"}, {"attribute", 1}};

@@ -156,11 +156,13 @@ class Session {
     uint32_t readOnlyDepthSnapshotPatch{};
     uint32_t dxbcGpuDotPatch{};
     uint32_t dxbcGpuMadPatch{};
+    uint32_t dxilContractPatch{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
     DotCounter dotOperations{}, dotFailures{};
     DotCounter madOperations{}, madFailures{};
+    DotCounter contractOperations{}, contractFailures{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -201,6 +203,17 @@ class Session {
             madOperations = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuMadOperations");
             madFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuMadFailures");
         }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilContractPatchVersion"))) {
+            dxilContractPatch = patch();
+            if (dxilContractPatch != 1) throw std::runtime_error("Unsupported DXIL contraction patch version");
+            contractOperations = symbol<DotCounter>("RENDERDOC_GetFloraDxilContractOperations");
+            contractFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxilContractFailures");
+        }
+        if (job.value("dxil_fast_contraction", false)) {
+            if (dxilContractPatch != 1) throw std::runtime_error("Fast contraction requires the Flora DXIL contraction patch");
+            using Enable = void (RENDERDOC_CC *)(bool);
+            symbol<Enable>("RENDERDOC_SetFloraDxilContractEnabled")(true);
+        }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
                 throw std::runtime_error("Read-only depth snapshots require the Flora RenderDoc snapshot patch version 1");
@@ -231,6 +244,8 @@ class Session {
             const auto api = controller->GetAPIProperties().pipelineType;
             if (job.value("readonly_depth_snapshot", false) && api != GraphicsAPI::D3D12)
                 throw std::runtime_error("Read-only depth snapshots require a DX12 independent capture");
+            if (job.value("dxil_fast_contraction", false) && api != GraphicsAPI::D3D12)
+                throw std::runtime_error("Fast contraction requires a DX12 independent capture");
             if (api != GraphicsAPI::D3D11 && api != GraphicsAPI::D3D12)
                 throw std::runtime_error(
                     "Native analysis requires a DX11 or DX12 independent replay capture");
@@ -456,6 +471,8 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                                                 : pipe->pixelShader.reflection);
     if (!reflection)
         throw std::runtime_error("No shader bound at the selected stage");
+    if (job.value("dxil_fast_contraction", false) && reflection->encoding != ShaderEncoding::DXIL)
+        throw std::runtime_error("Fast contraction requires a DXIL shader at the selected stage");
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
     const std::optional<D3D12Pipe::InputAssembly> vertexIA = dx12 && vertex
@@ -881,6 +898,8 @@ Json runRdcJob(const Json &job) {
         (action != "debug-pixel" || index(job, "primitive", UINT32_MAX) == UINT32_MAX))
         throw std::runtime_error("Pixel history reference requires debug-pixel and an explicit primitive");
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
+    if (job.value("dxil_fast_contraction", false) && (!debugging || !job.contains("execution")))
+        throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
         action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
@@ -1241,11 +1260,26 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (debugging) {
+        const auto contractStart = session.contractOperations ? session.contractOperations() : 0;
+        const auto contractFailureStart = session.contractFailures ? session.contractFailures() : 0;
         const auto dotStart = session.dotOperations ? session.dotOperations() : 0;
         const auto failureStart = session.dotFailures ? session.dotFailures() : 0;
         const auto madStart = session.madOperations ? session.madOperations() : 0;
         const auto madFailureStart = session.madFailures ? session.madFailures() : 0;
         result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch));
+        const auto contractFailures = session.contractFailures ? session.contractFailures() - contractFailureStart : 0;
+        if (contractFailures) throw std::runtime_error("DXIL contraction GPU operation failed; incomplete trace rejected");
+        result["dxil_fast_contraction"] = {{"enabled", job.value("dxil_fast_contraction", false)},
+            {"patch_version", session.dxilContractPatch},
+            {"operations", std::to_string(session.contractOperations ? session.contractOperations() - contractStart : 0)},
+            {"failures", std::to_string(contractFailures)},
+            {"scope", "Experimental adjacent single-use fast float32 FMul/FAdd; driver instruction contraction is not observed"}};
+        if (job.value("dxil_fast_contraction", false)) {
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null()) warnings = Json::array();
+            warnings.push_back("Experimental fast DXIL contraction is enabled. Multiply steps retain uncontracted IR values; eligible Add steps use GPU multiply-add. Original driver intermediates are not observed.");
+            result["partial"] = true;
+        }
         const auto failures = session.dotFailures ? session.dotFailures() - failureStart : 0;
         if (failures)
             throw std::runtime_error("DXBC GPU dot product failed; incomplete shader trace rejected");
