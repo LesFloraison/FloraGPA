@@ -126,7 +126,7 @@ Json rdcVertexOutputLayout(const ShaderReflection &shader, uint32_t stride) {
 Json rdcExecutedAction(const ActionDescription &action) {
     Json result{{"event_id", action.eventId},
                 {"indirect", bool(action.flags & ActionFlags::Indirect)},
-                {"generated_action_index", action.drawIndex},
+                {"backend_draw_index", action.drawIndex},
                 {"source", "RenderDoc action metadata; indirect arguments decoded during capture loading"},
                 {"scope", "Invocation bounds use the indexed action. Nondeterministic indirect arguments may "
                           "differ on subsequent replays."}};

@@ -5502,6 +5502,41 @@ syntax checks passed. `placed-heap-restoration-evidence1.json` records hashes,
 raw comparisons and the remaining boundary discrepancy. Full portable and
 whole-frame fidelity acceptance is still unfinished.
 
+### Indirect command ordinal and selected-event boundary follow-up
+
+The worker now locates a dispatch-only indirect argument with the mapped
+generated command ordinal, cross-checking the synthetic structured command's
+`CommandIndex` and `ArgumentIndex`. RenderDoc 1.45's D3D12 `drawIndex` is an
+argument position within the signature, not a generated command ordinal. It is
+retained only as `backend_draw_index` in invocation metadata; reports no longer
+mislabel it as `generated_action_index`. Invalid or inconsistent mappings yield
+an unavailable argument snapshot with a reason, never a guessed offset.
+
+The existing heap fixture has an optional `--indirect` mode with
+`dx12-indirect-command-index.hlsl`. Compile that shader as `cs_6_0` with debug
+information, then pass the mode after the output prefix. Its two dispatches
+use group counts **(1,1,1)** and **(2,1,1)**, stride **12**, and initial offset
+**32**. Atomic additions give independent GPU words **(24,7)**. Selecting
+execution **1**, indirect action **1**, group **(1,0,0)** reproduces the bug:
+the previous worker reads offset **32**, claims action index **0**, and rejects
+the valid group as outside the prepared dispatch. The corrected worker reads
+offset **44**, confirms command index **1** and groups **(2,1,1)**, then returns
+**5** debug steps for RenderDoc event **9**. The fixture and reports are in
+`indirect-command-index1`; this verifies multiple-command argument selection,
+not the unrelated Hellblade raster boundary. Build **360** passed after fixing
+the missing namespace qualifier reported by build 359. No GPA/Python modules
+were loaded by the successful analysis.
+
+A bounded diagnostic of Hellblade execution **36222** rules out a skipped
+synthetic child: partial replay resolves **88694** to that exact API event,
+finds indirect parent **88693**, and issues one `ExecuteIndirect` at argument
+offset **180**. The selected velocity texel is still zero. The disagreement
+with following execution **36223** remains unresolved; state/resource behavior
+across the prefix/OnlyDraw split needs further investigation. Diagnostics are
+in `indirect-boundary-probe1`. Temporary logging changes were removed and the
+production thirteen-patch DLL restored. This is not an event-after correctness
+pass and does not change the acceptance table below.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

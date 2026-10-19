@@ -1,6 +1,7 @@
 // Targeted heap-restoration capture, initialized before StartFrameCapture.
 // MSVC C++20; link d3d12.lib/dxgi.lib; include third_party/renderdoc.
-// Arguments: compiled cs_6_0 fixture shader, RenderDoc DLL, output prefix.
+// Arguments: compiled cs_6_0 fixture shader, RenderDoc DLL, output prefix,
+// optional --indirect (use dx12-indirect-command-index.hlsl).
 // Independent GPU result: {17, 99}. Replaying the dispatch must always produce
 // the same result; a skipped heap reset instead increments the first word.
 #include "renderdoc_app.h"
@@ -18,7 +19,9 @@ void check(HRESULT hr) {
     if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr)));
 }
 int main(int argc, char **argv) try {
-    if (argc != 4) throw std::runtime_error("Expected shader, RenderDoc DLL and capture prefix");
+    if (argc != 4 && (argc != 5 || std::string(argv[4]) != "--indirect"))
+        throw std::runtime_error("Expected shader, RenderDoc DLL, capture prefix and optional --indirect");
+    const bool indirect = argc == 5;
     const auto library = LoadLibraryA(argv[2]);
     if (!library) throw std::runtime_error("Cannot load RenderDoc");
     const auto getApi = reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI"));
@@ -74,7 +77,15 @@ int main(int argc, char **argv) try {
     void *mapped{}; check(upload->Map(0, nullptr, &mapped));
     memset(mapped, 0, 256);
     static_cast<UINT *>(mapped)[0] = 10; static_cast<UINT *>(mapped)[2] = 99;
+    const UINT dispatches[]{1, 1, 1, 2, 1, 1};
+    memcpy(static_cast<char *>(mapped) + 32, dispatches, sizeof(dispatches));
     upload->Unmap(0, nullptr);
+    ComPtr<ID3D12CommandSignature> signature;
+    if (indirect) {
+        D3D12_INDIRECT_ARGUMENT_DESC argument{}; argument.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+        D3D12_COMMAND_SIGNATURE_DESC desc{12, 1, &argument, 0};
+        check(device->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&signature)));
+    }
     D3D12_COMMAND_QUEUE_DESC qd{};
     ComPtr<ID3D12CommandQueue> queue;
     check(device->CreateCommandQueue(&qd, IID_PPV_ARGS(&queue)));
@@ -111,8 +122,11 @@ int main(int argc, char **argv) try {
     list->SetComputeRootSignature(root.Get());
     list->SetComputeRootUnorderedAccessView(0, values->GetGPUVirtualAddress());
     list->SetComputeRootShaderResourceView(1, input->GetGPUVirtualAddress());
-    const char marker[] = "Flora DX12 execution 1 record 1 submission 1 queue 1 list 1 generation 1 ordinal 1: ID3D12GraphicsCommandListDispatch";
-    list->BeginEvent(1, marker, sizeof(marker)); list->Dispatch(1, 1, 1); list->EndEvent();
+    const std::string marker = std::string("Flora DX12 execution 1 record 1 submission 1 queue 1 list 1 generation 1 ordinal 1: ID3D12GraphicsCommandList") + (indirect ? "ExecuteIndirect" : "Dispatch");
+    list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+    if (indirect) list->ExecuteIndirect(signature.Get(), 2, upload.Get(), 32, nullptr, 0);
+    else list->Dispatch(1, 1, 1);
+    list->EndEvent();
     transition(values.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
     list->CopyBufferRegion(readback.Get(), 0, values.Get(), 0, 8);
     execute();
@@ -124,7 +138,8 @@ int main(int argc, char **argv) try {
     if (!output) throw std::runtime_error("Cannot save independent GPU result");
     CloseHandle(event);
     std::cout << words[0] << ',' << words[1] << '\n';
-    if (words[0] != 17 || words[1] != 99) throw std::runtime_error("Unexpected independent GPU result");
+    if (words[0] != (indirect ? 24U : 17U) || words[1] != (indirect ? 7U : 99U))
+        throw std::runtime_error("Unexpected independent GPU result");
     return 0;
 } catch (const std::exception &e) {
     std::cerr << e.what() << '\n'; return 1;

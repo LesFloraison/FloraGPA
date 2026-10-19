@@ -562,8 +562,20 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
             field(*arguments.GetChild(0), "Type") != 2)
             throw std::runtime_error("Argument snapshot supports dispatch-only signatures");
         const auto stride = field(*description, "ByteStride");
-        if (stride < 12 || stride % 4 || offset % 4 || action.drawIndex >= maximum ||
-            uint64_t(action.drawIndex) > (UINT64_MAX - offset) / stride)
+        // D3D12 drawIndex is the argument's position in the signature, not
+        // the command's ordinal. Check our execution mapping against the
+        // synthetic subcommand recorded by RenderDoc before reading its bytes.
+        auto selectedProvenance = provenance;
+        selectedProvenance["eid"] = action.eventId;
+        const auto ordinal = flora::indirectActionOrdinal(selectedProvenance);
+        const auto subcommand = events.chunks.find(action.eventId);
+        if (ordinal < 0 || subcommand == events.chunks.end() ||
+            field(*subcommand->second, "CommandIndex") != uint64_t(ordinal) ||
+            field(*subcommand->second, "ArgumentIndex") != 0)
+            throw std::runtime_error("Indirect command index differs from its execution mapping");
+        const auto commandIndex = uint64_t(ordinal);
+        if (stride < 12 || stride % 4 || offset % 4 || commandIndex >= maximum ||
+            commandIndex > (UINT64_MAX - offset) / stride)
             throw std::runtime_error("Invalid indirect argument range");
         const auto buffers = controller.GetBuffers();
         auto read = [&](uint64_t resourceId, uint64_t start, uint64_t length) {
@@ -582,13 +594,13 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
             count = (std::min)(count, uint64_t(value));
             result["count_buffer_value"] = value;
         }
-        const auto selectedOffset = offset + uint64_t(action.drawIndex) * stride;
+        const auto selectedOffset = offset + commandIndex * stride;
         const auto bytes = read(argument, selectedOffset, 12);
         uint32_t groups[3]{}; memcpy(groups, bytes.data(), 12);
         result.update({{"status", "read"}, {"argument_resource", std::to_string(argument)},
             {"argument_offset", std::to_string(selectedOffset)}, {"signature_resource", std::to_string(signature)},
             {"stride", std::to_string(stride)}, {"maximum_count", maximum}, {"effective_count", count},
-            {"action_index", action.drawIndex}, {"action_present", uint64_t(action.drawIndex) < count},
+            {"action_index", commandIndex}, {"action_present", commandIndex < count},
             {"groups", {groups[0], groups[1], groups[2]}},
             {"matches_index", groups[0] == action.dispatchDimension[0] && groups[1] == action.dispatchDimension[1] && groups[2] == action.dispatchDimension[2]}});
     } catch (const std::exception &e) { result["reason"] = e.what(); }
