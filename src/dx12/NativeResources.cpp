@@ -1,6 +1,7 @@
 #include "NativeResources.h"
 #include "AddressIndex.h"
 #include "BackBufferIndex.h"
+#include "QueryReplayIndex.h"
 #include <wrl/client.h>
 #include <algorithm>
 #include <map>
@@ -119,6 +120,7 @@ struct NativeResources::Impl {
         UINT subresources = 1;
     };
     std::map<uint64_t, Resource> resources;
+    std::map<uint64_t, QueryReadbackState> isolatedQueries;
     Impl(NativeDevice &d, const StreamDirectory &s, uint64_t l, CancelCheck c) : device(d), directory(s), cancelled(std::move(c)), addresses(s, cancelled), backbuffers(s, cancelled), limit(l) {}
     void budget(uint64_t size, uint64_t record) const {
         if (size == UINT64_MAX) throw std::runtime_error("Device rejected allocation description at creation record " + std::to_string(record));
@@ -170,6 +172,72 @@ uint64_t NativeResources::creationRecord(uint64_t object, uint64_t atRecord) con
 }
 ResourceRecipe NativeResources::recipe(uint64_t object, uint64_t atRecord) const { return impl_->recipe(creationRecord(object, atRecord)); }
 ID3D12Resource *NativeResources::resource(uint64_t object, uint64_t atRecord) {
+    const auto creation = creationRecord(object, atRecord);
+    if (impl_->isolatedQueries.contains(creation))
+        throw std::runtime_error("Ordinary access to isolated query READBACK creation " + std::to_string(creation) +
+            " at record " + std::to_string(atRecord) + " is unsupported; it may consume unavailable query bytes");
+    return materialize(object, atRecord);
+}
+void NativeResources::isolateQueryReadback(uint64_t creation) {
+    auto &s = *impl_;
+    if (s.isolatedQueries.contains(creation)) return;
+    require(s.resources.empty(), "Query readbacks must be isolated before materializing resources");
+    const auto recipe = s.recipe(creation);
+    require(s.resourceRecords.at(recipe.object).size() == 1 && !recipe.protectedSession &&
+                recipe.description.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && recipe.description.Width &&
+                legacyState(recipe) == D3D12_RESOURCE_STATE_COPY_DEST,
+            "Isolated query readback requires one buffer lifetime in COPY_DEST");
+    auto properties = recipe.properties; auto flags = recipe.heapFlags;
+    if (recipe.kind == ResourceRecipe::Kind::Placed) {
+        require(s.heapRecords.at(recipe.heap).size() == 1, "Isolated query heap has multiple captured lifetimes");
+        const auto heapCreation = s.heapRecords.at(recipe.heap).front();
+        const auto heap = decodeHeapRecipe(s.directory.payload(s.directory.packets().at(size_t(heapCreation - 1))));
+        properties = heap.description.Properties; flags = heap.description.Flags;
+        const auto size = s.device.device()->GetResourceAllocationInfo(0, 1, &recipe.description).SizeInBytes;
+        require(size && size != UINT64_MAX && recipe.heapOffset <= heap.description.SizeInBytes &&
+                    size <= heap.description.SizeInBytes - recipe.heapOffset, "Invalid isolated query placement");
+        // Check every captured placement, including future aliases. Native
+        // allocation sizes include padding and are stricter than buffer widths.
+        for (const auto &[object, records] : s.resourceRecords) for (const auto record : records) {
+            checkCancellation(s.cancelled);
+            if (record == creation) continue;
+            const auto other = s.recipe(record);
+            if (other.kind != ResourceRecipe::Kind::Placed || other.heap != recipe.heap) continue;
+            require(other.description.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER,
+                    "Isolated query heap contains a non-buffer placement");
+            const auto otherSize = s.device.device()->GetResourceAllocationInfo(0, 1, &other.description).SizeInBytes;
+            require(otherSize && otherSize != UINT64_MAX && other.heapOffset <= heap.description.SizeInBytes &&
+                        otherSize <= heap.description.SizeInBytes - other.heapOffset, "Invalid query heap alias placement");
+            require(recipe.heapOffset + size <= other.heapOffset || other.heapOffset + otherSize <= recipe.heapOffset,
+                    "Isolated query readback overlaps another captured resource allocation");
+        }
+    } else require(recipe.kind == ResourceRecipe::Kind::Committed, "Unsupported isolated query allocation kind");
+    require(properties.Type == D3D12_HEAP_TYPE_READBACK &&
+                !(flags & (D3D12_HEAP_FLAG_SHARED | D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER)),
+            "Isolated query output requires a private READBACK heap");
+    s.isolatedQueries.emplace(creation, QueryReadbackState(recipe.description.Width));
+}
+ID3D12Resource *NativeResources::queryDestination(uint64_t object, uint64_t atRecord) {
+    return materialize(object, atRecord);
+}
+void NativeResources::queryWrite(uint64_t object, uint64_t atRecord, uint64_t offset, uint64_t bytes, bool available) {
+    auto &s = *impl_;
+    if (auto found = s.isolatedQueries.find(creationRecord(object, atRecord)); found != s.isolatedQueries.end()) {
+        const auto &resource = s.resources.at(found->first);
+        require(resource.uniform == D3D12_RESOURCE_STATE_COPY_DEST && resource.states.empty(),
+                "Isolated query readback state changed");
+        found->second.write(offset, bytes, available);
+    } else {
+        require(available, "Missing query write requires an isolated readback");
+        requireState(object, atRecord, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+    }
+}
+ID3D12Resource *NativeResources::readableBuffer(uint64_t object, uint64_t atRecord, uint64_t offset, uint64_t bytes) {
+    if (const auto found = impl_->isolatedQueries.find(creationRecord(object, atRecord)); found != impl_->isolatedQueries.end())
+        found->second.requireReadable(offset, bytes);
+    return materialize(object, atRecord);
+}
+ID3D12Resource *NativeResources::materialize(uint64_t object, uint64_t atRecord) {
     auto &s = *impl_; checkCancellation(s.cancelled); const auto record = creationRecord(object, atRecord);
     require(!s.retired.contains(record), "Captured resource was released before this boundary");
     if (auto it = s.resources.find(record); it != s.resources.end()) return it->second.native.Get();
@@ -236,6 +304,8 @@ void NativeResources::restoreMappedData(uint64_t record) {
     D3D12_RANGE written{SIZE_T(destinationOffset), SIZE_T(destinationOffset + data.size)}; native->Unmap(0, &written); s.uploaded += data.size; ++s.uploadRecords;
 }
 ID3D12Heap *NativeResources::tileHeap(uint64_t object, uint64_t atRecord) {
+    for (const auto &[creation, state] : impl_->isolatedQueries)
+        require(impl_->recipe(creation).heap != object, "Tile mapping of an isolated query heap is unsupported");
     return impl_->heap(object, atRecord, D3D12_RESOURCE_ALLOCATION_INFO{0, D3D12_TILED_RESOURCE_TILE_SIZE_IN_BYTES}, 0);
 }
 D3D12_GPU_VIRTUAL_ADDRESS NativeResources::gpuAddress(uint64_t captured, uint64_t atRecord, uint64_t bytes) {
@@ -355,7 +425,13 @@ void NativeResources::completeSubmission(D3D12_COMMAND_LIST_TYPE queueType) {
 }
 uint64_t NativeResources::remainingAllocationBudget() const { return impl_->limit - impl_->allocated; }
 nlohmann::json NativeResources::information() const {
+    auto isolated = nlohmann::json::array();
+    for (const auto &[creation, state] : impl_->isolatedQueries) {
+        auto entry = state.information(); entry["creation"] = std::to_string(creation); isolated.push_back(std::move(entry));
+    }
     return {{"created_resources", impl_->created}, {"resident_resources", impl_->resources.size()}, {"retired_resources", impl_->retired.size()}, {"created_heaps", impl_->heaps.size()},
+        {"isolated_query_readbacks", std::move(isolated)},
+        {"query_availability_scope", "Submission-state model; CPU inspection requires a successfully completed GPU boundary"},
         {"allocation_bytes", std::to_string(impl_->allocated)}, {"allocation_limit", std::to_string(impl_->limit)},
         {"peak_allocation_bytes", std::to_string(impl_->peakAllocated)},
         {"equivalent_placed_address_bindings", std::to_string(impl_->equivalentAddressBindings)},

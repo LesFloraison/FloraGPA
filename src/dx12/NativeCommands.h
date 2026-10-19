@@ -20,6 +20,7 @@ class NativeCommands final {
     NativeCommands(NativeDevice &, const StreamDirectory &, NativeResources &, NativeDescriptors &, const CancelCheck &);
     ~NativeCommands();
     NativePipelines &pipelines();
-    void record(ID3D12GraphicsCommandList *, uint64_t record, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks);
+    void record(ID3D12GraphicsCommandList *, uint64_t record, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks,
+                const nlohmann::json &queryCoverage = nullptr);
 };
 }

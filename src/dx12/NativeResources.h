@@ -27,11 +27,18 @@ HeapRecipe decodeHeapRecipe(format::Bytes bytes);
 class NativeResources final {
     struct Impl;
     std::unique_ptr<Impl> impl_;
+    ID3D12Resource *materialize(uint64_t object, uint64_t atRecord);
   public:
     NativeResources(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeResources();
     uint64_t creationRecord(uint64_t object, uint64_t atRecord) const;
     ID3D12Resource *resource(uint64_t object, uint64_t atRecord);
+    // Reserve before materialization. All ordinary resource/address access is
+    // rejected, including writes, barriers, aliases and descriptor bindings.
+    void isolateQueryReadback(uint64_t creation);
+    ID3D12Resource *queryDestination(uint64_t object, uint64_t atRecord);
+    void queryWrite(uint64_t object, uint64_t atRecord, uint64_t offset, uint64_t bytes, bool available);
+    ID3D12Resource *readableBuffer(uint64_t object, uint64_t atRecord, uint64_t offset, uint64_t bytes);
     ID3D12Heap *tileHeap(uint64_t object, uint64_t atRecord);
     D3D12_GPU_VIRTUAL_ADDRESS gpuAddress(uint64_t captured, uint64_t atRecord, uint64_t bytes = 1);
     ResourceRecipe recipe(uint64_t object, uint64_t atRecord) const;

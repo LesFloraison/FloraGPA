@@ -83,6 +83,7 @@ std::string hash(format::Bytes bytes) {
 struct NativeReplay::Impl {
     NativeDevice &device; const StreamDirectory &directory; CancelCheck cancelled;
     SubmissionIndex index; QueryReplayIndex queries; NativeResources resources; NativeDescriptors descriptors;
+    bool isolateMissingQueries = false;
     std::map<uint64_t, QueueRecipe> queueRecipes;
     std::map<uint64_t, FenceRecipe> fenceRecipes;
     std::map<uint64_t, AllocatorRecipe> allocatorRecipes;
@@ -379,6 +380,10 @@ struct NativeReplay::Impl {
 NativeReplay::NativeReplay(NativeDevice &d, const StreamDirectory &s, uint64_t limit, const CancelCheck &cancelled)
     : impl_(std::make_unique<Impl>(d, s, limit, cancelled)) {}
 NativeReplay::~NativeReplay() { impl_->abortFrame(); }
+void NativeReplay::setIsolateMissingQueries(bool enabled) {
+    require(!impl_->frame && !impl_->attempted, "Set query isolation before preparing or initializing replay");
+    impl_->isolateMissingQueries = enabled;
+}
 void NativeReplay::setResourcePatches(std::vector<ResourcePatch> patches) {
     auto &s = *impl_;
     require(!s.frame && !s.attempted, "Set resource patches before preparing or initializing replay");
@@ -479,7 +484,12 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     const auto target = s.index.execution(execution);
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
-    if (const auto issue = s.queries.firstIssue(execution, !after); !issue.is_null())
+    if (s.isolateMissingQueries) {
+        require(!analysisMarkers && !performance, "Isolated query replay does not support analysis capture or performance measurement");
+        require(s.disabledExecutions.empty() && s.uavBarriersBefore.empty() && s.shaderReplacements.empty() && s.resourcePatches.empty(),
+                "Isolated query replay cannot be combined with modification experiments");
+        for (const auto creation : s.queries.isolatedReadbacks(execution, !after)) s.resources.isolateQueryReadback(creation);
+    } else if (const auto issue = s.queries.firstIssue(execution, !after); !issue.is_null())
         throw std::runtime_error(issue.at("reason").get<std::string>());
     auto frame = std::make_unique<Impl::FramePlan>();
     frame->cpuWaits = planCpuWaits(s.directory, target.submission, s.cancelled);
@@ -656,7 +666,8 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             else if (transfer(p.type))
                 s.record(native.list.Get(), id, original.list, &native.states);
             else {
-                commands->record(native.list.Get(), id, original.list, native.states);
+                commands->record(native.list.Get(), id, original.list, native.states,
+                    s.isolateMissingQueries && p.type == 0x1ae3cdc411c2dULL ? s.queries.details(executionId) : json());
                 ++s.recordedCommands[streamPacketName(p.type)];
             }
             if (analysisMarkers)
@@ -1177,7 +1188,7 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
     require(creation && creation <= at, "Buffer creation is outside the inspection boundary");
     const auto &packet = s.directory.packets()[size_t(creation - 1)]; const auto recipe = decodeResourceRecipe(packet.type, s.directory.payload(packet));
     require(creation == s.resources.creationRecord(recipe.object, at), "Selected buffer lifetime is no longer active at the inspection boundary");
-    auto source = s.resources.resource(recipe.object, at); const auto desc = source->GetDesc();
+    auto source = s.resources.readableBuffer(recipe.object, at, offset, length); const auto desc = source->GetDesc();
     require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && length && offset <= desc.Width && length <= desc.Width - offset, "Invalid buffer inspection range");
     require(length <= 256ULL * 1024 * 1024, "Buffer inspection is limited to 256 MiB per request");
     const auto publish = [&](ID3D12Resource *resource, uint64_t mappedOffset) {
@@ -1484,6 +1495,9 @@ json NativeReplay::information() const {
                       "mapped writes, descriptors, tile mappings, experiments and final readback. Pending counts do not prove "
                       "GPU overlap. Initialization is serialized; complete original CPU concurrency is not restored."}}},
         {"query_replay_coverage", s.queries.information()},
+        {"missing_query_policy", s.isolateMissingQueries ? "isolate_readback_outputs" : "fail"},
+        {"query_readback_availability_valid", s.boundaryReached},
+        {"query_command_count_scope", "Original execution instances; an isolated ResolveQueryData records one native call per available contiguous range"},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},
         {"uav_barrier_experiment", {{"before_executions", std::move(barrierRequests)},
             {"recorded_before_executions", std::move(barrierRecords)}, {"executed_before_executions", std::move(barrierExecutions)},

@@ -14,6 +14,9 @@ class NativeReplay final {
   public:
     NativeReplay(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeReplay();
+    // Explicit incomplete replay; never reconstructs historical query values.
+    // Isolated readbacks reject ordinary consumers and unknown CPU reads.
+    void setIsolateMissingQueries(bool enabled);
     void setDisabledExecutions(std::set<uint64_t> executions);
     // Explicit experiment: insert a global UAV barrier before selected direct
     // Draw/Dispatch instances. Does not repair or modify the original capture.

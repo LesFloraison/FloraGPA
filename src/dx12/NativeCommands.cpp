@@ -163,7 +163,8 @@ NativeCommands::NativeCommands(NativeDevice &d, const StreamDirectory &s, Native
     : impl_(std::make_unique<Impl>(d, s, r, h, c)) {}
 NativeCommands::~NativeCommands() = default;
 NativePipelines &NativeCommands::pipelines() { return impl_->pipelines; }
-void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks) {
+void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks,
+                            const nlohmann::json &queryCoverage) {
     auto &s = *impl_; const auto &packet = s.directory.packets().at(size_t(id - 1)); Reader r(s.directory.payload(packet));
     require(r.read<uint64_t>() == capturedList, "Graphics command belongs to another list");
     switch (packet.type) {
@@ -381,14 +382,30 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
     case 0x1ae3cdc411c2dULL: {
         const auto object = r.read<uint64_t>(); const auto type = r.read<D3D12_QUERY_TYPE>(); const auto start = r.read<UINT>(), count = r.read<UINT>();
         const auto destination = r.read<uint64_t>(), offset = r.read<uint64_t>(); r.end(); auto &heap = s.query(object, id, start, count);
-        auto buffer = s.resources.resource(destination, id); require(buffer->GetDesc().Dimension == D3D12_RESOURCE_DIMENSION_BUFFER, "Query destination must be a buffer");
+        auto buffer = s.resources.queryDestination(destination, id); require(buffer->GetDesc().Dimension == D3D12_RESOURCE_DIMENSION_BUFFER, "Query destination must be a buffer");
         validateQueryDestination(type, count, offset, buffer->GetDesc().Width);
-        executionChecks.push_back([&heap, start, count, type, id, destination, &resources = s.resources] {
-            for (UINT i = 0; i < count; ++i) if (!heap.completed.contains(start + i) || heap.completed.at(start + i) != type)
-                throw std::runtime_error("Query resolve at source record " + std::to_string(id) + " needs historical query " + std::to_string(start + i) + " from heap " + std::to_string(heap.object) + "; no completed replay query supplies its value");
-            resources.requireState(destination, id, 0, D3D12_RESOURCE_STATE_COPY_DEST);
-        });
-        list->ResolveQueryData(heap.native.Get(), type, start, count, buffer, offset); break;
+        std::vector<QueryResultRange> ranges{{start, count, offset, uint64_t(count) * queryResultStride(type), true}};
+        if (!queryCoverage.is_null()) {
+            require(queryCoverage.at("source_record") == std::to_string(id) &&
+                        queryCoverage.at("destination") == std::to_string(destination) &&
+                        queryCoverage.at("query_heap") == std::to_string(object), "Query execution coverage mismatch");
+            if (count) ranges = queryResultRanges(queryCoverage);
+        }
+        for (const auto &range : ranges) {
+            executionChecks.push_back([&heap, range, type, id, destination, &resources = s.resources] {
+                for (UINT i = 0; i < range.count; ++i) {
+                    const auto slot = range.start + i;
+                    const bool completed = heap.completed.contains(slot) && heap.completed.at(slot) == type;
+                    if (completed != range.available)
+                        throw std::runtime_error("Query execution coverage changed at source record " + std::to_string(id) +
+                            ", slot " + std::to_string(slot));
+                }
+                if (range.bytes) resources.queryWrite(destination, id, range.offset, range.bytes, range.available);
+                else resources.requireState(destination, id, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+            });
+            if (range.available) list->ResolveQueryData(heap.native.Get(), type, range.start, range.count, buffer, range.offset);
+        }
+        break;
     }
     default: throw std::runtime_error("Unsupported native frame command: " + streamPacketName(packet.type));
     }

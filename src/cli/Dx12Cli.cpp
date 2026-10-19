@@ -134,7 +134,20 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     selection.before = options.isSet("before");
     selection.resource = buffer ? 0 : creation;
     const auto capability = session.capability(ReplayFeature::Replay, selection);
-    if (!capability.supported()) {
+    const bool isolateQueries = options.isSet("isolate-missing-queries");
+    if (isolateQueries)
+        for (const auto flag : {"renderdoc", "measure-event", "experiment", "disable", "uav-barrier-before"})
+            if (options.isSet(flag)) throw std::runtime_error(std::string("Query isolation cannot be combined with --") + flag);
+    bool isolatedIssue = false;
+    if (isolateQueries && capability.status == CapabilityStatus::MissingData) {
+        const auto submissions = session.submissionDetails();
+        for (const auto &entry : submissions.at("query_replay_coverage").at("resolves_and_issues")) {
+            if (entry.at("status") == "missing_query_results" && entry.at("reason") == capability.reason) {
+                isolatedIssue = true; break;
+            }
+        }
+    }
+    if (!capability.supported() && !isolatedIssue) {
         const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
                             capability.status == CapabilityStatus::NotImplemented ? "not_implemented" :
                             capability.status == CapabilityStatus::UnsupportedDevice ? "unsupported_device" : "failed";
@@ -180,6 +193,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     nlohmann::json report{{"backend", "dx12"},
                           {"completed", false},
                           {"frame_complete", false},
+                          {"missing_query_policy", isolateQueries ? "isolate_readback_outputs" : "fail"},
                           {"replay_scope", "selected_execution"},
                           {"execution", std::to_string(execution)},
                           {"event", std::to_string(execution)},
@@ -208,6 +222,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         stage = "create_replay";
         replayOwner = std::make_unique<dx12::NativeReplay>(device, directory, budget);
         auto &replay = *replayOwner;
+        replay.setIsolateMissingQueries(isolateQueries);
         stage = "apply_experiment";
         if (experiment) {
             auto edits = experiment->dx12Edits(session);
@@ -284,6 +299,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                                         : "Execution replayed; select a texture creation record for readback";
         if (report["image_available"] == true && report.at("native_texture").at("format") == 26)
             report["image_status"] = "Native GPU readback; R11G11B10 preview uses linear RGB clamped to [0,1], alpha 1; raw HDR storage preserved";
+        if (isolateQueries) report["image_status"] = report.at("image_status").get<std::string>() +
+            "; incomplete query outputs isolated; historical values and full-frame fidelity are not restored";
     } catch (const std::exception &error) {
         if (capture)
             capture->discard();
@@ -322,7 +339,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
     if (command == "buffer")
         allowed.insert({"event", "before", "id", "offset", "length", "max-bytes", "debug-device", "experiment", "disable", "no-buffer-csv"});
-    if (command == "replay" || command == "buffer") allowed.insert("uav-barrier-before");
+    if (command == "replay" || command == "buffer") allowed.insert({"uav-barrier-before", "isolate-missing-queries"});
     if (command == "validate-frame") {
         allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");

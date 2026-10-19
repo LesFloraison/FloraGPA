@@ -8,8 +8,8 @@ namespace flora::dx12 {
 namespace {
 using Json = nlohmann::json;
 using format::Reader;
-constexpr uint64_t create = 0x127937e9603edULL, begin = 0x1ae3c6601dd2cULL,
-                   end = 0x1ae3c64a8e138ULL, resolve = 0x1ae3cdc411c2dULL;
+constexpr uint64_t create = 0x127937e9603edULL, beginQuery = 0x1ae3c6601dd2cULL,
+                   endQuery = 0x1ae3c64a8e138ULL, resolve = 0x1ae3cdc411c2dULL;
 void require(bool valid, const char *message) { if (!valid) throw std::runtime_error(message); }
 struct Heap {
     struct Completion { uint32_t type{}; uint64_t execution{}, submission{}, queue{}; };
@@ -85,6 +85,68 @@ void validateQueryDestination(uint32_t type, uint32_t count, uint64_t offset, ui
     const auto size = uint64_t(count) * queryResultStride(type);
     require(offset % 8 == 0 && offset <= width && size <= width - offset, "Query result exceeds its buffer or has an unaligned offset");
 }
+std::vector<QueryResultRange> queryResultRanges(const Json &entry) {
+    require(entry.at("status") == "covered" || entry.at("status") == "missing_query_results",
+            "Query ranges require valid, ordered query coverage");
+    const auto start = entry.at("start").get<uint32_t>(), count = entry.at("count").get<uint32_t>();
+    const auto type = entry.at("query_type").get<uint32_t>();
+    const auto offset = std::stoull(entry.at("destination_offset").get<std::string>());
+    const auto width = std::stoull(entry.at("destination_resource").at("width").get<std::string>());
+    validateQueryDestination(type, count, offset, width);
+    require(count <= UINT32_MAX - start, "Query slot range overflows");
+    const auto stride = queryResultStride(type);
+    std::vector<QueryResultRange> out;
+    const auto append = [&](uint32_t at, uint32_t n, bool available) {
+        if (n) out.push_back({at, n, offset + uint64_t(at - start) * stride, uint64_t(n) * stride, available});
+    };
+    uint32_t next = start, missing{};
+    for (const auto &range : entry.at("missing_ranges")) {
+        const auto at = range.at("start").get<uint32_t>(), n = range.at("count").get<uint32_t>();
+        require(at >= next && at <= start + count && n && n <= start + count - at,
+                "Invalid missing query range");
+        append(next, at - next, true); append(at, n, false); next = at + n; missing += n;
+    }
+    append(next, start + count - next, true);
+    require(missing == entry.at("missing_count").get<uint32_t>(), "Query range coverage mismatch");
+    return out;
+}
+void QueryReadbackState::write(uint64_t offset, uint64_t bytes, bool available) {
+    require(bytes && offset <= width_ && bytes <= width_ - offset, "Query write exceeds isolated readback");
+    const auto end = offset + bytes;
+    auto next = known_.lower_bound(offset);
+    if (next != known_.begin() && std::prev(next)->second > offset) --next;
+    while (next != known_.end() && next->first < end) {
+        const auto begin = next->first, previousEnd = next->second;
+        next = known_.erase(next);
+        if (begin < offset) known_.emplace(begin, offset);
+        if (previousEnd > end) { known_.emplace(end, previousEnd); break; }
+    }
+    if (!available) return;
+    auto begin = offset, last = end;
+    next = known_.lower_bound(offset);
+    if (next != known_.begin() && std::prev(next)->second == offset) {
+        const auto previous = std::prev(next); begin = previous->first; known_.erase(previous);
+    }
+    if (next != known_.end() && next->first == end) { last = next->second; known_.erase(next); }
+    known_.emplace(begin, last);
+}
+void QueryReadbackState::requireReadable(uint64_t offset, uint64_t bytes) const {
+    require(bytes && offset <= width_ && bytes <= width_ - offset, "Invalid isolated query readback range");
+    auto next = known_.upper_bound(offset);
+    if (next == known_.begin() || std::prev(next)->second < offset + bytes)
+        throw std::runtime_error("Query readback bytes [" + std::to_string(offset) + ", " +
+            std::to_string(offset + bytes) + ") include unavailable data; historical query values were not reconstructed");
+}
+Json QueryReadbackState::information() const {
+    Json ranges = Json::array(); uint64_t next{};
+    const auto append = [&](uint64_t begin, uint64_t end, bool available) {
+        if (begin != end) ranges.push_back({{"offset", std::to_string(begin)}, {"bytes", std::to_string(end - begin)},
+            {"available", available}});
+    };
+    for (const auto &[begin, end] : known_) { append(next, begin, false); append(begin, end, true); next = end; }
+    append(next, width_, false);
+    return {{"width", std::to_string(width_)}, {"ranges", std::move(ranges)}, {"historical_values_reconstructed", false}};
+}
 QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const SubmissionIndex &index,
                                  const CancelCheck &cancelled) {
     std::map<uint64_t, std::vector<Heap>> heaps;
@@ -133,7 +195,7 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
     // missing-result evidence, including historical/unsubmitted recordings.
     for (size_t i = 0; i < directory.packets().size(); ++i) {
         if (i % 1024 == 0) checkCancellation(cancelled);
-        const auto &packet = directory.packets()[i]; if (packet.type != end) continue;
+        const auto &packet = directory.packets()[i]; if (packet.type != endQuery) continue;
         try {
             Reader r(directory.payload(packet)); r.skip(8); const auto object = r.read<uint64_t>();
             const auto type = r.read<uint32_t>(), slot = r.read<uint32_t>(); r.end();
@@ -150,7 +212,7 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
             require(visited <= 4000000, "Query coverage exceeds four million submitted commands");
             const auto record = recording.records[n], execution = list.firstExecution + n;
             const auto &packet = directory.packets().at(size_t(record - 1));
-            if (packet.type != begin && packet.type != end && packet.type != resolve) continue;
+            if (packet.type != beginQuery && packet.type != endQuery && packet.type != resolve) continue;
             Json entry{{"execution", std::to_string(execution)}, {"source_record", std::to_string(record)},
                 {"submission", std::to_string(list.submission)}, {"queue", std::to_string(list.queue)},
                 {"recording_generation", std::to_string(recording.generation)}, {"status", "covered"}};
@@ -163,7 +225,7 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                 require(recording.hasBeginning && recording.closed, "Query is in an incomplete command-list recording");
                 if (packet.type != resolve) {
                     r.end(); require(start < heap.desc.Count, "Query index exceeds heap bounds");
-                    if (packet.type == begin) {
+                    if (packet.type == beginQuery) {
                         require(type != D3D12_QUERY_TYPE_TIMESTAMP && !heap.active.contains(start), "Invalid query begin boundary");
                         heap.active[start] = type; heap.completed.erase(start);
                     } else {
@@ -236,6 +298,13 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                 validateQueryDestination(type, count, offset, std::stoull(resource.at("width").get<std::string>()));
                 entry["result_stride"] = queryResultStride(type);
                 entry["result_bytes"] = std::to_string(uint64_t(count) * queryResultStride(type));
+                if (entry.at("status") != "unresolved_query_dependency") {
+                    entry["destination_byte_ranges"] = Json::array();
+                    for (const auto &range : queryResultRanges(entry))
+                        entry["destination_byte_ranges"].push_back({{"query_start", range.start}, {"query_count", range.count},
+                            {"offset", std::to_string(range.offset)}, {"bytes", std::to_string(range.bytes)},
+                            {"available_from_replayed_queries", range.available}});
+                }
             } catch (const OperationCancelled &) { throw; }
             catch (const std::exception &e) { entry["status"] = "invalid_query_data"; entry["reason"] = e.what(); }
             entries_.emplace(execution, std::move(entry));
@@ -251,6 +320,32 @@ nlohmann::json QueryReplayIndex::firstIssue(uint64_t execution, bool before) con
         if (entry.at("status") != "covered") return entry;
     }
     return nullptr;
+}
+std::set<uint64_t> QueryReplayIndex::isolatedReadbacks(uint64_t execution, bool before) const {
+    std::set<uint64_t> creations;
+    for (const auto &[id, entry] : entries_) {
+        if (entry.at("status") == "covered") continue;
+        if (entry.at("status") != "missing_query_results") {
+            if (id > execution || (before && id == execution)) continue;
+            throw std::runtime_error(entry.at("reason").get<std::string>());
+        }
+        // Reserve these allocations even before their first missing resolve;
+        // their initial, uncaptured READBACK bytes are unknown as well.
+        require(entry.at("destination_resource").at("heap_type") == D3D12_HEAP_TYPE_READBACK,
+                "Missing query results can only be isolated in READBACK buffers");
+        creations.insert(std::stoull(entry.at("destination_resource").at("creation").get<std::string>()));
+    }
+    std::map<uint64_t, std::string> queues;
+    for (const auto &[id, entry] : entries_) {
+        if (id > execution || (before && id == execution)) break;
+        const auto creation = std::stoull(entry.at("destination_resource").at("creation").get<std::string>());
+        if (!creations.contains(creation)) continue;
+        const auto queue = entry.at("queue").get<std::string>();
+        require(entry.at("cross_queue_completed_count") == 0 && (!queues.contains(creation) || queues.at(creation) == queue),
+                "Isolated query readback requires single-queue query completion and writes");
+        queues[creation] = queue;
+    }
+    return creations;
 }
 nlohmann::json QueryReplayIndex::information() const {
     Json entries = Json::array(); for (const auto &[id, entry] : entries_) entries.push_back(entry);

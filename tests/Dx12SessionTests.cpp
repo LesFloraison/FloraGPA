@@ -1468,6 +1468,16 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QCOMPARE(queries.details(execution).at("status"), nlohmann::json("invalid_query_data"));
         QCOMPARE(queries.details(18).at("destination_resource").at("creation"), nlohmann::json(std::to_string(reusedCreation)));
         QCOMPARE(queries.details(18).at("destination_resource").at("width"), nlohmann::json("8"));
+        const auto partial = dx12::queryResultRanges(queries.details(3));
+        QCOMPARE(partial.size(), size_t(2)); QVERIFY(partial[0].available); QVERIFY(!partial[1].available);
+        QCOMPARE(partial[0].offset, 0ULL); QCOMPARE(partial[1].offset, 8ULL); QCOMPARE(partial[1].bytes, 8ULL);
+        QCOMPARE(dx12::queryResultRanges(queries.details(6))[1].offset, 8ULL);
+        QCOMPARE(dx12::queryResultRanges(queries.details(9)).size(), size_t(1));
+        auto high = queries.details(3); const uint64_t highOffset = (1ULL << 53) + 8;
+        high["destination_offset"] = std::to_string(highOffset);
+        high["destination_resource"]["width"] = std::to_string(highOffset + 16);
+        QCOMPARE(dx12::queryResultRanges(high)[1].offset, highOffset + 8);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, queries.isolatedReadbacks(18, false));
         QVERIFY_THROWS_EXCEPTION(OperationCancelled, dx12::QueryReplayIndex(directory, submissions, [] { return true; }));
         const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
         ReplaySelection selection; selection.execution = 3; selection.before = true;
@@ -1578,6 +1588,40 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::validateQueryDestination(D3D12_QUERY_TYPE_TIMESTAMP, 2, UINT64_MAX - 7, UINT64_MAX));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::queryResultStride(UINT32_MAX));
     }
+    void queryReadbackAvailability() {
+        // Overwriting part of a prior result with a missing query must revoke
+        // those bytes, even if an earlier execution populated the allocation.
+        dx12::QueryReadbackState state(UINT64_MAX);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, state.requireReadable(0, 8));
+        state.write(8, 32, true); state.write(16, 8, false);
+        state.requireReadable(8, 8); state.requireReadable(24, 16);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, state.requireReadable(8, 17));
+        state.write(16, 8, true); state.requireReadable(8, 32);
+        state.write(0, 16, false); state.requireReadable(16, 24);
+        state.write(32, 32, false); state.requireReadable(16, 16);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, state.requireReadable(16, 17));
+        const auto high = (1ULL << 53) + 8;
+        state.write(high, 16, true); state.requireReadable(high, 16);
+        state.write(UINT64_MAX - 8, 8, true); state.requireReadable(UINT64_MAX - 8, 8);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, state.write(UINT64_MAX - 8, 9, true));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, state.requireReadable(UINT64_MAX - 8, 9));
+        const auto report = state.information();
+        QCOMPARE(report.at("width"), nlohmann::json("18446744073709551615"));
+        QVERIFY(report.dump().find(std::to_string(high)) != std::string::npos);
+        // Exercise interval splits/merges against an independent byte mask.
+        dx12::QueryReadbackState maskState(32); std::array<bool, 32> expected{};
+        for (uint32_t i = 0; i < 96; ++i) {
+            const uint32_t offset = (i * 7) % 32, count = 1 + (i * 11) % (32 - offset);
+            const bool available = i % 3 != 0;
+            maskState.write(offset, count, available);
+            std::fill(expected.begin() + offset, expected.begin() + offset + count, available);
+            for (uint32_t at = 0; at < 32; ++at) for (uint32_t n = 1; n <= 32 - at; ++n) {
+                bool readable = true;
+                try { maskState.requireReadable(at, n); } catch (const std::runtime_error &) { readable = false; }
+                QCOMPARE(readable, std::all_of(expected.begin() + at, expected.begin() + at + n, [](bool b) { return b; }));
+            }
+        }
+    }
     void talosQueryDestinations() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_QUERY_DESTINATIONS_OUTPUT");
@@ -1600,6 +1644,72 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(first.at("destination_resource").at("heap_offset"), nlohmann::json("327680"));
         QCOMPARE(second.at("destination_resource").at("heap_offset"), nlohmann::json("458752"));
         QVERIFY(!QFileInfo::exists(output)); write(output, QByteArray::fromStdString(queries.information().dump(2)));
+    }
+    void talosIsolatedQueryReplay() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_ISOLATED_QUERY_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set Talos capture directory and a new isolated-query GPU evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        dx12::StreamDirectory directory(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex submissions(directory); dx12::QueryReplayIndex queries(directory, submissions);
+        QCOMPARE(queries.isolatedReadbacks(16001, true), (std::set<uint64_t>{12800, 78132}));
+        dx12::NativeDevice device(directory, true);
+        {
+            dx12::NativeResources resources(device, directory, 4ULL * 1024 * 1024 * 1024);
+            for (const auto creation : queries.isolatedReadbacks(19410, false)) resources.isolateQueryReadback(creation);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.resource(1643440736, 188923));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.gpuAddress(12696485888ULL, 188923, 8));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.tileHeap(1646217152, 188923));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.readableBuffer(1643440736, 188923, 0, 8));
+            QCOMPARE(resources.information().at("created_resources"), nlohmann::json(0));
+        }
+        // An alias introduced in any later captured placement must be rejected
+        // before allocation, even if the selected replay prefix does not use it.
+        {
+            QTemporaryDir temp; const auto path = fixture(temp); QByteArray packets; uint64_t time{};
+            for (const auto id : {42957ULL, 78132ULL, 12800ULL}) {
+                const auto &original = directory.packets()[id - 1]; const auto bytes = directory.payload(original);
+                QByteArray body(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size()));
+                if (id == 12800) { const uint64_t aliasOffset = 327680; memcpy(body.data() + 16, &aliasOffset, 8); }
+                qword(packets, original.type); qword(packets, ++time); qword(packets, 0); qword(packets, body.size()); packets += body;
+            }
+            write(path + "/thread-7-0", packets);
+            dx12::StreamDirectory aliases(std::filesystem::path(path.toStdWString()));
+            dx12::NativeResources resources(device, aliases, 4ULL * 1024 * 1024 * 1024);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.isolateQueryReadback(2));
+            QCOMPARE(resources.information().at("created_resources"), nlohmann::json(0));
+        }
+        dx12::NativeReplay replay(device, directory, 4ULL * 1024 * 1024 * 1024);
+        replay.setIsolateMissingQueries(true); replay.prepareExecution(19410, true); replay.initializeTransfers();
+        replay.replayTo(19410, true);
+        const auto texture = replay.readTexture(1651480816, 0,
+            std::filesystem::path((output + "/output_storage.bin").toStdWString()), 35118);
+        auto reads = nlohmann::json::array();
+        for (const auto execution : {16001ULL, 19409ULL}) {
+            const auto entry = queries.details(execution);
+            const auto creation = std::stoull(entry.at("destination_resource").at("creation").get<std::string>());
+            const auto ranges = dx12::queryResultRanges(entry);
+            bool inspected = false, rejected = false;
+            for (const auto &range : ranges) {
+                if (range.available && !inspected) {
+                    reads.push_back(replay.inspectBuffer(creation, range.offset, range.bytes)); inspected = true;
+                } else if (!range.available && !rejected) {
+                    const auto filename = output + "/unavailable-" + QString::number(creation) + ".bin";
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.inspectBuffer(creation, range.offset, 1,
+                        std::filesystem::path(filename.toStdWString())));
+                    QVERIFY(!QFileInfo::exists(filename)); rejected = true;
+                }
+            }
+            QVERIFY(inspected && rejected);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.inspectBuffer(creation, 0, 1888));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.inspectBuffer(creation, 1888, 8));
+        }
+        const nlohmann::json report{{"texture", texture}, {"known_query_reads", reads}, {"native_replay", replay.information()},
+            {"device", device.information()}, {"unknown_reads_rejected", true}, {"ordinary_consumers_rejected", true},
+            {"overlapping_placement_rejected", true}, {"frame_complete", false}};
+        write(output + "/report.json", QByteArray::fromStdString(report.dump(2)));
+        QCOMPARE(report.at("device").at("validation_error_count"), nlohmann::json("0"));
+        QCOMPARE(texture.at("sha256"), nlohmann::json("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
     }
     void queryWorkspaceBoundary() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
