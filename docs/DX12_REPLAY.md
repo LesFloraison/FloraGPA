@@ -3763,7 +3763,7 @@ allocation budget and failed during initialization; it was retried with the
 previously successful Hellblade2 **12 GiB** budget.
 
 Resource History for creation **571530** reports **25** mapped uses. Its latest
-compute writes are four `ExecuteIndirect` executions **36766**, **36770**,
+potential compute UAV uses are four `ExecuteIndirect` executions **36766**, **36770**,
 **36775**, **36779**, source records **611527**, **611532**, **611539**, **611544**.
 The last maps to exactly one generated Dispatch at RenderDoc event **90443**,
 submission **613234**, list **2152464446256**, recording generation **10**.
@@ -3782,8 +3782,12 @@ The installed DLL's SHA-256 remains
 `853913de932f235341655d7f55f1d38d68e56d60df45402acff87825eaf78b72`.
 Read-only Ghidra inspection locates the fault in a tree-access helper at RVA
 **0x80b0** (`MOV RBP,[RCX]`). One caller at RVA **0xa360** passes a device-private
-data result plus eight without checking it; the actual runtime caller and the
-missing state are not yet established. No installed binary or capture is
+data result plus eight without checking it. A subsequent debugger launch records
+**RCX = 0x8** and return RVA **0xa476**, confirming that caller and a null
+device-private state result. The reason the state is absent remains unresolved.
+A targeted `--post-layer` launch, placing the dump layer after implicit playback,
+fails at the same instruction with the same caller and produces no image. This
+configuration change does not resolve the missing state. No installed binary or capture is
 modified, and no original intermediate image is claimed.
 
 The allocation failure also exposed a Worker reporting gap: replay exceptions
@@ -3816,6 +3820,44 @@ Ignored evidence under `artifacts/dx12-research` includes
 `hellblade-dump-crash*.txt`, `allocation-failure-report2`, and
 `allocation-failure-test2.txt`. Original-output fidelity, upstream execution
 semantics and complete initialization remain unfinished.
+
+### Executed invocation parameters and compute bounds
+
+DX12 pipeline reports now include an **Execution / Invocation parameters** row.
+It records indexed/non-indexed Draw counts and offsets (including signed base
+vertex), Dispatch dimensions, the generated indirect action index and the
+RenderDoc event. Compute shader reflection supplies the thread-group dimensions.
+The action's optional group-size override is separate: zero means no override,
+not an unknown reflected shader size. Indirect dimensions come from RenderDoc's
+indexed action metadata; nondeterministic arguments can differ on later replays.
+This report does not certify stability across replay passes.
+
+DX12 compute debugging checks all three Group and Thread coordinates before
+invoking `DebugThread`. It rejects zero-workgroup actions, missing reflected
+dimensions, out-of-range coordinates and a dispatch-thread coordinate exceeding
+32 bits. A valid result includes the checked group, local thread and derived
+dispatch-thread coordinates. Existing DX11 behavior is unchanged.
+
+For Hellblade2 execution **36779** / source **611544**, RenderDoc event **90443**
+reports **1174 x 1 x 1** groups and `MainCS` reflection reports **16 x 16 x 1**
+threads per group. This is a nonempty indirect Dispatch. A targeted request for
+Group **[1174,0,0]**, Thread **[0,0,0]** returns `ok:false` with
+`Selected compute group is outside the executed Dispatch dimensions`, producing
+only a failure report and no debug trace. A nonempty Dispatch and its UAV
+bindings do not prove that every bound output is written.
+
+Release builds **262–264** cover the analysis worker and focused tests. The CPU
+boundary check covers each axis, the last valid invocation, zero counts, missing
+shader dimensions, absent action overrides, coordinate overflow and signed Draw
+offsets. The workspace check consumes the real pipeline report, verifies that
+the invocation row displays its recorded dimensions without resource actions,
+and rejects it after an experiment change. Both checks pass (**3 passed including
+setup/cleanup** each, **1 ms** and **106 ms** respectively). These checks do not
+launch additional GPU replays. The saved pipeline report and rejected GPU debug request are under
+`hellblade-main-color-producer-pipeline3` and `hellblade-indirect-invalid-group1`;
+GPA fault evidence is under `gpa-hellblade-main-raw3` and
+`gpa-hellblade-main-post-raw1`. All are ignored research artifacts. Valid UAV
+store validation and the upstream color discrepancy remain unfinished.
 
 ### Full feature acceptance
 

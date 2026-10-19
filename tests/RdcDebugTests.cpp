@@ -1,4 +1,5 @@
 #include "rdc/DebugTrace.h"
+#include "rdc/Invocation.h"
 #include <QFile>
 #include <QtTest>
 #include <cmath>
@@ -14,6 +15,46 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void computeInvocationBounds() {
+        using Json = nlohmann::json;
+        ActionDescription action;
+        action.eventId = 90443; action.flags = ActionFlags::Dispatch | ActionFlags::Indirect;
+        action.dispatchDimension = {17, 3, 2}; action.dispatchThreadsDimension = {8, 4, 2};
+        ShaderReflection shader; shader.dispatchThreadsDimension = {8, 4, 2};
+        auto result = rdcComputeInvocation(action, shader, {16, 2, 1}, {7, 3, 1});
+        QCOMPARE(result.at("indirect"), Json(true));
+        QCOMPARE(result.at("group_count"), Json::array({17,3,2}));
+        QCOMPARE(result.at("dispatch_thread"), Json::array({135,11,3}));
+        action.dispatchThreadsDimension = {0, 0, 0};
+        result = rdcComputeInvocation(action, shader, {16, 2, 1}, {7, 3, 1});
+        QCOMPARE(result.at("has_group_size_override"), Json(false));
+        QCOMPARE(result.at("shader_group_size"), Json::array({8, 4, 2}));
+        QCOMPARE(result.at("dispatch_thread"), Json::array({135, 11, 3}));
+        for (size_t axis = 0; axis < 3; ++axis) {
+            rdcfixedarray<uint32_t,3> group{0,0,0}, thread{0,0,0};
+            group[axis] = action.dispatchDimension[axis];
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcComputeInvocation(action, shader, group, thread));
+            group[axis] = 0; thread[axis] = shader.dispatchThreadsDimension[axis];
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcComputeInvocation(action, shader, group, thread));
+            auto empty = action; empty.dispatchDimension[axis] = 0;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcComputeInvocation(empty, shader, {0,0,0}, {0,0,0}));
+            auto unknown = shader; unknown.dispatchThreadsDimension[axis] = 0;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcComputeInvocation(action, unknown, {0,0,0}, {0,0,0}));
+        }
+        action.dispatchDimension = {UINT32_MAX,1,1};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {UINT32_MAX-1,0,0}, {0,0,0}));
+        action.flags = ActionFlags::Drawcall | ActionFlags::Indexed | ActionFlags::Indirect;
+        action.numIndices = 6; action.numInstances = 2; action.indexOffset = 4;
+        action.baseVertex = -3; action.instanceOffset = 5;
+        result = rdcExecutedAction(action);
+        QCOMPARE(result.at("base_vertex"), Json(-3));
+        QCOMPARE(result.at("first_index"), Json(4));
+        QCOMPARE(result.at("instance_count"), Json(2));
+        QVERIFY(!result.contains("first_vertex"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0,0,0}, {0,0,0}));
+    }
     void pixelOutputComparison() {
         using Json = nlohmann::json;
         ShaderReflection reflection;

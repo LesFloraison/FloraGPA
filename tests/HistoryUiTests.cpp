@@ -426,6 +426,37 @@ class HistoryUiTests : public QObject {
         QVERIFY(view.finish(view.requestId(), legacy));
         QVERIFY(label->isHidden());
     }
+    void dx12IndirectInvocationReport() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_INDIRECT_PIPELINE_REPORT");
+        if (path.isEmpty()) QSKIP("Set FLORA_DX12_INDIRECT_PIPELINE_REPORT to the Hellblade2 indirect pipeline result");
+        const auto report = read(path);
+        QVERIFY(report.at("ok").get<bool>());
+        Dx12PipelineView view;
+        view.setContext("hellblade:indirect", 36779);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows");
+        bool found = false;
+        for (int i = 0; i < rows->topLevelItemCount(); ++i) {
+            const auto &row = report.at("pipeline_rows")[i];
+            if (row.at("section") != "Execution") continue;
+            const auto &details = row.at("details");
+            QCOMPARE(details.at("group_count"), Json::array({1174, 1, 1}));
+            QCOMPARE(details.at("shader_group_size"), Json::array({16, 16, 1}));
+            QCOMPARE(details.at("indirect"), Json(true));
+            rows->setCurrentItem(rows->topLevelItem(i));
+            const auto displayed = view.findChild<QPlainTextEdit *>()->toPlainText();
+            QCOMPARE(Json::parse(displayed.toStdString()), row);
+            QVERIFY(!action(view, "inspectPipelineResource")->isEnabled());
+            QVERIFY(!action(view, "locatePipelineCreation")->isEnabled());
+            QVERIFY(!action(view, "replaceBoundPipelineShader")->isEnabled());
+            found = true;
+        }
+        QVERIFY(found);
+        const auto serial = view.requestId();
+        view.setContext("hellblade:changed-experiment", 36779);
+        QCOMPARE(rows->topLevelItemCount(), 0);
+        QVERIFY(!view.finish(serial, report));
+    }
     void dx12PipelineReport() {
         const auto path = qEnvironmentVariable("FLORA_DX12_PIPELINE_REPORT");
         if (path.isEmpty()) QSKIP("Set FLORA_DX12_PIPELINE_REPORT to a real pipeline result");

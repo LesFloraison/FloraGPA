@@ -3,6 +3,7 @@
 #include "Assets.h"
 #include "Counters.h"
 #include "DebugTrace.h"
+#include "Invocation.h"
 #include "InputMesh.h"
 #include "PipelineState.h"
 #include "application/RdcEvents.h"
@@ -439,6 +440,9 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
     Json result = Json::object();
+    if (dx12 && compute)
+        result["compute_invocation"] = flora::rdcComputeInvocation(
+            *selected, *reflection, coordinates(job, "group"), coordinates(job, "thread"));
     struct ReferenceSelection {
         ResourceId resource;
         uint32_t x, y;
@@ -962,7 +966,7 @@ Json runRdcJob(const Json &job) {
         const auto *selected = findAction(controller.GetRootActions(), eid);
         if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
             throw std::runtime_error("Pipeline inspection requires an executed DX12 Draw or Dispatch");
-        result.update(readDx12Pipeline(controller));
+        result.update(readDx12Pipeline(controller, *selected));
         result["eid"] = eid;
         return complete();
     }

@@ -1,4 +1,5 @@
 #include "PipelineState.h"
+#include "Invocation.h"
 #include "dx12/CapturedObjectMarker.h"
 #include <QCryptographicHash>
 #include <QByteArrayView>
@@ -98,7 +99,7 @@ Json sampler(const SamplerDescriptor &s) {
               s.borderColorValue.uintValue[2], s.borderColorValue.uintValue[3]}}};
 }
 } // namespace
-Json readDx12Pipeline(IReplayController &controller) {
+Json readDx12Pipeline(IReplayController &controller, const ActionDescription &action) {
     const auto *state = controller.GetD3D12PipelineState();
     if (!state)
         throw std::runtime_error("DX12 pipeline state is unavailable");
@@ -161,6 +162,13 @@ Json readDx12Pipeline(IReplayController &controller) {
                         {"details", std::move(details)}});
     };
     const auto pipelineReference = reference(state->pipelineResourceId);
+    auto invocation = rdcExecutedAction(action);
+    if ((action.flags & ActionFlags::Dispatch) && state->computeShader.reflection) {
+        const auto &size = state->computeShader.reflection->dispatchThreadsDimension;
+        invocation["shader_group_size"] = {size[0], size[1], size[2]};
+        invocation["shader_group_size_available"] = size[0] && size[1] && size[2];
+    }
+    add("Execution", "Invocation parameters", reference(ResourceId()), std::move(invocation));
     add("Pipeline", "PSO", pipelineReference, Json::object());
     add("Pipeline", "Root signature", reference(state->rootSignature.resourceId), Json::object());
     struct Stage {
