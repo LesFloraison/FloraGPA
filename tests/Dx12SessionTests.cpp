@@ -1796,6 +1796,63 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             experiment.save(output + '/' + name + "-restored.json");
         }
     }
+    void hellbladeLensShaderProjects() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_HELLBLADE_SHADER_PROJECT_OUTPUT");
+        const auto shaderPath = qEnvironmentVariable("FLORA_HELLBLADE_SHADER_FILE");
+        if (root.isEmpty() || output.isEmpty() || shaderPath.isEmpty())
+            QSKIP("Set Hellblade2 capture, replacement DXIL and new project output paths");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto path = std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString());
+        auto session = openReplaySession(path);
+        dx12::StreamDirectory directory(path); dx12::SubmissionIndex submissions(directory);
+        const auto selected = submissions.execution(37053);
+        QCOMPARE(selected.record, uint64_t(611838));
+        const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(selected.record));
+        uint64_t object{}, creation{};
+        for (auto id : recording.records) {
+            if (id > selected.record) break;
+            const auto &packet = directory.packets().at(size_t(id - 1));
+            if (packet.type == 0x1ae3c82b462fcULL) {
+                format::Reader reader(directory.payload(packet)); reader.skip(8);
+                object = reader.read<uint64_t>(); reader.end();
+            }
+        }
+        QVERIFY(object);
+        for (size_t i = 0; i < directory.initializationCount(); ++i) {
+            const auto &packet = directory.packets()[i];
+            if (!dx12::isPipelineRecipe(packet.type)) continue;
+            const auto recipe = dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+            if (recipe.object != object) continue;
+            QVERIFY(!creation); creation = i + 1;
+        }
+        QVERIFY(creation);
+        QFile shader(shaderPath); QVERIFY(shader.open(QIODevice::ReadOnly));
+        const auto bytes = shader.readAll();
+        const format::Bytes bytecode(reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size()));
+        QCOMPARE(dx12::shaderBytecodeStage(bytecode), std::string("PS"));
+        Experiment experiment(*session);
+        experiment.setShader(*session, creation, "PS", bytecode);
+        experiment.save(output + "/modified.json");
+        const auto edits = experiment.dx12Edits(*session);
+        QCOMPARE(edits.shaders.size(), size_t(1));
+        QVERIFY(edits.disabled.empty()); QVERIFY(edits.resources.empty());
+        QVERIFY(experiment.undo()); QVERIFY(experiment.dx12Edits(*session).shaders.empty());
+        experiment.save(output + "/restored.json");
+        QVERIFY(experiment.redo());
+        QCOMPARE(experiment.dx12Edits(*session).shaders.front().bytecode, edits.shaders.front().bytecode);
+        experiment.save(output + "/redone.json");
+        Experiment loaded(*session); loaded.load(output + "/modified.json", *session);
+        QCOMPARE(loaded.document(), experiment.document());
+        const auto &packet = directory.packets().at(size_t(creation - 1));
+        auto report = dx12::describePipelineRecipe(dx12::decodePipelineRecipe(packet.type, directory.payload(packet)));
+        report["pipeline_creation"] = std::to_string(creation);
+        report["execution"] = "37053"; report["source_record"] = "611838";
+        QFile evidence(output + "/pipeline.json"); QVERIFY(evidence.open(QIODevice::WriteOnly));
+        evidence.write(QByteArray::fromStdString(report.dump(2)));
+        qInfo() << "Hellblade2 PS replacement pipeline" << creation << "object" << object;
+    }
     void dx12ShaderExperimentProjects() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_EXPERIMENT_OUTPUT");

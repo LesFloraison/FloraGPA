@@ -3425,6 +3425,81 @@ GPA modules. GPU capture/analysis ran serially; no full-sample sweep, repeatabil
 loop or additional original-GPA replay was performed. Output stability, original
 intermediate comparison and full debugging acceptance remain unfinished.
 
+### Hellblade2 changed DXIL PS execution and undo
+
+Further queries of the existing RDC identify execution **37041** (source
+**611825**) as another `LensSoftnessPS` variant. It reads creation **571418**,
+object **2149346363472**, and writes creation **544656**. Its input history has
+**15 mapped usage entries**, including multiple barriers at the same execution;
+these are not 15 distinct GPU actions. The latest ColorTarget binding is execution
+**37029**, source **611812**. That pipeline uses `ChromaticAberrationPS`, reading
+creation **538909** plus displacement maps **264** and **511220**. This extends
+the known dependency chain; it does not establish where the small original-output
+differences first arise. All these queries reuse the saved RDC.
+
+The branch now has actual changed-DXIL execution evidence for Hellblade2, beyond
+the earlier byte-preserving PSO reconstruction. `hellbladeLensShaderProjects`
+resolves the PSO selected at execution **37053** from the original command-list
+recording: creation **516663**, object **2144063289680**, pipeline-stream kind,
+root signature **2130678974784**. It replaces only the PS using the existing
+`Experiment::setShader` overlay, saves the project, calls undo and saves the
+restored project, then calls redo and verifies that the reloaded modified project
+matches. No capture bytes are edited. The replacement has pipeline-lifetime
+scope, applying to all uses of that captured PSO, not only the selected Draw.
+
+The versioned source is `tests/fixtures/dx12-solid-magenta.hlsl`, compiled with the
+installed Windows SDK 10.0.26100.0 x64 `dxc.exe`, entry `main`, target `ps_6_6`:
+
+```hlsl
+float4 main() : SV_Target0 { return float4(1, 0, 1, 1); }
+```
+
+Recompiling the versioned fixture yields the same **2,516-byte** DXIL asset used
+in the experiment. Its SHA-256 is
+`a055d6ca631bf89c706375397008ba5ce6efdc6ebbb597df1e4919fe932ccd12`;
+the original PS is
+`b7102e6005be2b941f05ae8f841fe539ed1b0d84d00fdf2a4e3e40b35556e366`.
+DXC is a development fixture compiler, not a new replay dependency.
+
+One native replay with `modified.json`, event **37053**, resource creation
+**544605**, the debug device and a 12 GiB allocation budget reconstructs the
+edited PSO and executes successfully. All **2,304,000 raw RGB10 pixels** match
+the exact expected image: **1,541,760** pixels in the 1920 x 803 viewport at
+(0,199) are packed **0xfff003ff**, and **762,240** pixels outside it are zero.
+There are **zero D3D12 validation errors**. Modified raw SHA-256:
+`323629e3a6909e4f676e16594780245d4c4ad16b02cc674627632615bda02404`.
+
+One corresponding native replay with the saved undo state reports no active
+shader replacements and restores the visible scene. Every viewport pixel differs
+from the fixed magenta output, viewport alpha is 3, and pixels outside remain
+zero at this boundary. It also reports zero D3D12 validation errors. Restored raw
+SHA-256 is `170af2c6f2bf5d55fdd1af41bbe7b690e3a982bcd525867a464ea51fc2f239ff`.
+Compared with the earlier unmodified producer readback, **4,633 pixels differ**,
+with maximum RGB10 deltas **2,3,4**. Thus undo restores the original PSO and scene,
+but exact original-output restoration remains unproven because replay variation
+is unresolved. No tolerance is accepted. Redo project bytes equal the modified
+project bytes; redo was not another GPU replay, and this check does not claim
+Hellblade2 workspace cache-invalidation coverage.
+
+Both reports retain capture identity
+`bd0f79862269d4dc291ec0d8354c647c1f64d1b9122e7d7d8dd20f7efa161941`,
+with distinct experiment document hashes and cursors **1** and **0**. Preparation
+passes **3 tests including setup/cleanup, 50,096 ms** with release build **251**.
+To reproduce preparation, set `FLORA_DX12_CAPTURE_DIR`,
+`FLORA_HELLBLADE_SHADER_FILE` to the compiled fixture, and
+`FLORA_HELLBLADE_SHADER_PROJECT_OUTPUT` to a new directory, then run the single
+`FloraDx12SessionTests hellbladeLensShaderProjects` case. GPU validation uses the
+normal CLI `replay` command with `--event 37053 --id 544605 --debug-device
+--max-bytes 12884901888 --experiment <modified-or-restored.json>` and separate
+new output directories. It is not added to the default GPU test workload.
+
+Ignored evidence: `hellblade-prelens-pipeline1`, `hellblade-prelens-input-history1`,
+`hellblade-prelens-source-pipeline1`, `hellblade-magenta-projects1`,
+`hellblade-magenta-native1`, `hellblade-magenta-restored1`, and
+`hellblade-shader-experiment-evidence1.json` under `artifacts/dx12-research`.
+Exactly two native GPU replays served the change/undo check, serially; no new RDC
+capture, original-GPA run, all-sample sweep or repeatability loop was added.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3437,7 +3512,7 @@ intermediate comparison and full debugging acceptance remain unfinished.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; byte-preserving MS/PS import creates a PSO; changed shader execution, full performance and experiments unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; undo restores original PSO/scene with unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
