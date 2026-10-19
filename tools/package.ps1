@@ -56,6 +56,7 @@ $uavTexturePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-
 $textureStoresPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-texture-stores.patch'
 $packedStorePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-packed-store.patch'
 $preparedComputePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-prepared-compute.patch'
+$placedHeapPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-placed-heap-restore.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -82,6 +83,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxil_texture_stores_patch_version -ne 1 -or
         $patchManifest.dxil_packed_store_patch_version -ne 1 -or
         $patchManifest.dxil_prepared_compute_patch_version -ne 1 -or
+        $patchManifest.dx12_placed_heap_restore_patch_version -ne 1 -or
+        $patchManifest.dx12_placed_heap_restore_patch_sha256 -ne (Get-PackageSha256 $placedHeapPatchPath) -or
         $patchManifest.dxil_prepared_compute_patch_sha256 -ne (Get-PackageSha256 $preparedComputePatchPath) -or
         $patchManifest.dxil_packed_store_patch_sha256 -ne (Get-PackageSha256 $packedStorePatchPath) -or
         $patchManifest.dxil_texture_stores_patch_sha256 -ne (Get-PackageSha256 $textureStoresPatchPath) -or
@@ -191,6 +194,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $textureStoresPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $packedStorePatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $preparedComputePatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $placedHeapPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

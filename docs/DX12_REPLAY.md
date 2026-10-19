@@ -5431,6 +5431,77 @@ No indirect counts, simulation data or barriers were modified to force matching
 output. Pixel History now reports the changing state, but the particle replay
 variation and full-frame fidelity remain unfinished.
 
+### Restoring modified placed heaps between analysis replays
+
+The particle variation has a confirmed RenderDoc initial-state cause. In the
+pinned 1.45 source, `D3D12ResourceManager::Prepare_InitialState` deliberately
+stores placed-buffer contents on the heap rather than each buffer. During log
+loading, `WrappedID3D12Device` builds `m_ModResources` from resource flags and
+recorded writes. However, those entries do not include the owning heaps.
+`Apply_InitialState` then treats the heap as read-only during active replay and
+skips its initial copy, retaining GPU writes from the preceding replay.
+
+The thirteenth patch, `dx12-placed-heap-restore.patch`, propagates each modified
+placed resource to its owning heap after resource-usage classification. This
+includes writes through a placed texture that can alias a placed buffer. It
+preserves the existing optimization for heaps with no modified placed resource;
+it does not synthesize initial contents, alter captured counts, or insert frame
+barriers. The isolated worker reports
+`backend_dx12_placed_heap_restore_patch`; build and package scripts check and
+ship the version-1 patch and its hash. The new runtime SHA-256 is
+`66b344ba61e2900a77bd672a2bf3bd10da69c135b810a8ac3bee19d953885aeb`.
+
+The focused source fixture is
+`tests/fixtures/dx12-placed-heap-restore.cpp` with its adjacent HLSL. Compile
+the shader with DXC `-T cs_6_0 -E main -Zi -Qembed_debug`, and compile the C++
+with MSVC C++20, `third_party/renderdoc` on the include path, `d3d12.lib` and
+`dxgi.lib`. Pass the shader, RenderDoc DLL and capture prefix. It initializes
+two non-overlapping buffers on a 128 KiB default heap **before** starting
+capture. The captured dispatch adds 7 to a value initialized to 10 and reads
+99 from the other placed buffer. Independent GPU readback is **(17,99)**.
+The small capture and readback are in `placed-heap-restore1`.
+
+First-time compute debugging alone passes with either runtime, so it is not
+used as the regression proof. A bounded temporary worker selected and fully
+replayed the same dispatch twice within one controller, reading both buffers
+after each selection. `placed-heap-fixture-repeat-before1`, using the previous
+twelve-patch DLL, changes the writable buffer from **(17,99)** to **(24,99)**.
+`placed-heap-fixture-repeat-after1` stays **(17,99)** for both observations and
+matches independent GPU output; the read-only buffer remains **99** in both
+runtimes. This reproduces and distinguishes the actual repeated-replay fault.
+
+The real sample confirms the effect at the previously failing boundary.
+`hellblade-particle-indirect36226-restored1` reads **(6,18,0,0,0)** from the
+argument buffer at offset **200** after both selections. All **seven** bound/
+argument buffers are byte-identical between them, including particle float data
+RDC **230** and indirect arguments RDC **578**. The corresponding old probe had
+18 then 1 instance and changes in both buffers. `hellblade-scenevelocity-heap-restored1`
+now retains the nonzero **(456,206)** velocity through Pixel History and event
+restoration, adding a fifth history row for execution **36222**, action **0**,
+RenderDoc event **88694**. Its final value matches the selected texel observation.
+The two repeat probes and real analysis load no GPA/Python modules.
+
+An additional boundary check exposes a **separate, unresolved selection issue**:
+`hellblade-velocity-restored36222` still reads zero when directly selecting that
+indirect child, while `hellblade-velocity-restored36223` reads the exact nonzero
+UNORM16 words **34608,30148,46932,9359** at the following API event. Thus the
+earlier boundary localization to 36226 cannot be treated as verified attribution;
+the split event-before/OnlyDraw path needs investigation. The restored history
+row and UI navigation are preserved as backend observations, not complete
+validation of indirect event-after replay. No selection is silently shifted to
+a neighboring API to conceal the discrepancy.
+
+The focused UI check confirms the fifth row, nonzero value, unchanged-texel
+label and exact reported execution/action navigation: **3 passed, 0 failed,
+0 skipped**, **161 ms**, including initialization/cleanup, in
+`placed-heap-history-ui1.txt`; its screenshot was inspected. Builds **353–355**
+and **357** passed; build 356 hit an in-use worker executable and was rerun after
+the analysis finished. Temporary probes were removed, the production source
+was recompiled, and the thirteen-patch source/build check and package-script
+syntax checks passed. `placed-heap-restoration-evidence1.json` records hashes,
+raw comparisons and the remaining boundary discrepancy. Full portable and
+whole-frame fidelity acceptance is still unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

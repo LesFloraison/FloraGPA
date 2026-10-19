@@ -187,6 +187,7 @@ class Session {
     uint32_t textureStoresPatch{};
     uint32_t packedStorePatch{};
     uint32_t preparedComputePatch{};
+    uint32_t placedHeapRestorePatch{};
     bool computePrepared{};
     using PrepareCompute = uint32_t (RENDERDOC_CC *)(IReplayController *, uint32_t);
     PrepareCompute prepareCompute{};
@@ -272,6 +273,10 @@ class Session {
             if (preparedComputePatch != 1) throw std::runtime_error("Unsupported prepared compute patch version");
             prepareCompute = symbol<PrepareCompute>("RENDERDOC_PrepareFloraComputeDebug");
             preparedComputeConsumed = symbol<DotCounter>("RENDERDOC_GetFloraPreparedComputeConsumed");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12PlacedHeapRestorePatchVersion"))) {
+            placedHeapRestorePatch = patch();
+            if (placedHeapRestorePatch != 1) throw std::runtime_error("Unsupported placed heap restoration patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1303,6 +1308,7 @@ Json runRdcJob(const Json &job) {
         {"backend_d16_history_patch", session.d16HistoryPatch},
         {"backend_dxbc_workgroup_patch", session.dxbcWorkgroupPatch},
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
+        {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_dxbc_gpu_dot_patch", session.dxbcGpuDotPatch},
         {"backend_dxbc_gpu_mad_patch", session.dxbcGpuMadPatch},

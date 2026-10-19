@@ -1,0 +1,29 @@
+--- a/renderdoc/driver/d3d12/d3d12_device.cpp
++++ b/renderdoc/driver/d3d12/d3d12_device.cpp
+@@ -5618,6 +5618,17 @@
+     }
+   }
+ 
++  // Placed buffer initial contents belong to the heap, not the resource.
++  // A write through any placed resource (including an aliased texture) must
++  // invalidate the heap's read-only optimization as well. Otherwise repeated
++  // replays can keep prior GPU writes instead of restoring captured contents.
++  for(const auto &resource : GetResourceList())
++  {
++    WrappedID3D12Heap *heap = resource.second->GetHeap();
++    if(heap && !IsReadOnlyResource(GetResID(resource.second)))
++      m_ModResources.insert(GetResID(heap));
++  }
++
+   const bool develMode =
+ #if ENABLED(RDOC_DEVEL)
+       true;
+@@ -6004,3 +6015,8 @@
+                          cmdData->m_IndirectData.argsOffset, NULL, 0);
+   }
+ }
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12PlacedHeapRestorePatchVersion()
++{
++  return 1;
++}

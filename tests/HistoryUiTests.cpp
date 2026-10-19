@@ -53,6 +53,38 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void placedHeapRestoredHistory() {
+        const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the Hellblade2 placed heap restoration evidence directory");
+        const auto previous = read(root + "/hellblade-scenevelocity-consistency1/result.json");
+        const auto restored = read(root + "/hellblade-scenevelocity-heap-restored1/result.json");
+        QCOMPARE(previous.at("history_scope").at("replay_consistency").at("status"), Json("selected_texel_changed"));
+        const auto &audit = restored.at("history_scope").at("replay_consistency");
+        QCOMPARE(audit.at("status"), Json("selected_texel_unchanged"));
+        QCOMPARE(audit.at("before_history"), audit.at("after_restoration"));
+        QCOMPARE(previous.at("history").size(), size_t(4));
+        QCOMPARE(restored.at("history").size(), size_t(5));
+        const auto &last = restored.at("history").back();
+        QCOMPARE(last.at("execution"), Json("36222"));
+        QCOMPARE(last.at("eventId"), Json(88694));
+        QCOMPARE(last.at("indirect_action"), Json(0));
+        QCOMPARE(last.at("postMod").at("col").at("uintValue"), audit.at("after_restoration").at("uintValue"));
+        PixelHistoryView view; view.setContext("heap-restored", 36670, true);
+        view.setDx12Resource(511789, 2152463529088ULL);
+        view.selectPixel(2152463529088ULL, 456, 206, 0, 0, 0);
+        QVERIFY(view.finish(view.requestId(), restored));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords");
+        rows->setCurrentItem(rows->topLevelItem(4));
+        QSignalSpy locate(&view, &PixelHistoryView::eventRequested);
+        action(view, "locateHistoryEvent")->trigger();
+        QCOMPARE(locate.size(), 1); QCOMPARE(locate[0][0].toULongLong(), 36222ULL);
+        QCOMPARE(locate[0][1].toLongLong(), 0LL);
+        QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("Selected texel unchanged"));
+        if (!output_.isEmpty()) {
+            view.resize(1600, 720); view.show();
+            QVERIFY(view.grab().save(output_ + "/heap-restored-history.png"));
+        }
+    }
     void pixelHistoryReplayConsistency() {
         const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
         if (root.isEmpty()) QSKIP("Set the velocity variation and stable depth history evidence directory");
