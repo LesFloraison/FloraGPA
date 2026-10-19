@@ -355,6 +355,32 @@ Json ReplayDebugModel::expressionValues(const State &state) const {
                            {"rows", rows}, {"columns", columns}, {"status", "available"},
                            {"values", std::move(values)}, {"origin", "typed_instruction_variable"}});
     }
+    // Explicit register interpretations are separate from source declarations.
+    // Do not make an untyped DXBC register implicitly float, or hide a genuine
+    // source declaration named "registers" (including an unavailable one).
+    if (!declared.contains("registers")) {
+        auto raw = instruction;
+        if (const auto constants = static_.find(2); constants != static_.end())
+            for (const auto &[name, variable] : constants->second)
+                if (!raw.emplace(name, variable).second) raw[name] = nullptr;
+        for (const auto &[name, variable] : raw) {
+            if (!variable || name.empty() || members(variable)) continue;
+            const auto kind = variable->value("type", 255);
+            const auto rows = variable->value("rows", 0), columns = variable->value("columns", 0);
+            if ((kind != 255 && kind != 0 && kind != 3 && kind != 4 && kind != 11 && kind != 12) ||
+                rows != 1 || columns < 1 || columns > 4) continue;
+            for (const auto &[interpretation, field] :
+                 std::map<std::string, const char *>{{"float", "f32v"}, {"int", "s32v"}, {"uint", "u32v"}}) {
+                const auto data = variable->value("value", Json::object()).value(field, Json::array());
+                if (!data.is_array() || data.size() < size_t(columns)) continue;
+                auto values = Json::array();
+                for (int i = 0; i < columns; ++i) values.push_back(data[size_t(i)]);
+                records.push_back({{"name", "registers." + name + "." + interpretation},
+                    {"scope", "global"}, {"type", interpretation}, {"rows", rows}, {"columns", columns},
+                    {"status", "available"}, {"values", std::move(values)}, {"origin", "register_interpretation"}});
+            }
+        }
+    }
     return records;
 }
 Json ReplayDebugModel::registerRows(const std::string &mode) const {

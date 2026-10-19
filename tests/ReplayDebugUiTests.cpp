@@ -53,6 +53,46 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void talosRegisterWatch() {
+        const auto root = qEnvironmentVariable("FLORA_TALOS_FILTER_DEBUG");
+        if (root.isEmpty()) QSKIP("Set the Talos filter debug evidence directory");
+        for (const auto policy : {QString("native"), QString("diagnostic")}) {
+            const auto report = read(root + "/" + policy + "-debug/result.json");
+            ReplayDebugView view("ps"); view.resize(1450, 950); view.show();
+            view.setContext("talos-register-" + policy, 14684, true); view.selectPixel(1438, 0, 0);
+            QVERIFY(view.finish(view.requestId(), report));
+            QSignalSpy errors(&view, &ReplayDebugView::error);
+            auto step = view.findChild<QSpinBox *>("debugStepIndex"); step->setValue(21);
+            auto registers = view.findChild<QTreeWidget *>("debugRegisters");
+            const auto r2 = registers->findItems("r2", Qt::MatchExactly);
+            QCOMPARE(r2.size(), 1);
+            QVERIFY(QMetaObject::invokeMethod(registers, "itemDoubleClicked", Qt::DirectConnection,
+                Q_ARG(QTreeWidgetItem *, r2.front()), Q_ARG(int, 1)));
+            auto watches = view.findChild<QTreeWidget *>("debugWatchValues");
+            QCOMPARE(watches->topLevelItem(0)->text(0), QString("registers.r2.float"));
+            QVERIFY(watches->isVisible());
+            auto expression = view.findChild<QLineEdit *>("debugWatchExpression");
+            for (const auto text : {"registers.r0.float.y", "registers.r0.uint.y", "registers.cb0[2].float.x"}) {
+                expression->setText(text); action(view, "debugAddWatch")->trigger();
+            }
+            QCOMPARE(watches->topLevelItemCount(), 4);
+            QCOMPARE(watches->topLevelItem(1)->text(2), QString("0"));
+            step->setValue(22);
+            const auto expected = policy == "native" ? 1.0 : 0.5000076293945312;
+            QVERIFY(std::abs(watches->topLevelItem(1)->text(2).toDouble() - expected) < 1e-7);
+            QCOMPARE(watches->topLevelItem(2)->text(2), policy == "native" ? QString("1065353216") : QString("1056964736"));
+            QVERIFY(std::abs(watches->topLevelItem(3)->text(2).toDouble() - 0.0005208333604969084) < 1e-9);
+            // Register-table presentation changes must not change an existing Watch interpretation.
+            view.findChild<QComboBox *>("debugInterpretation")->setCurrentText("hex");
+            QCOMPARE(watches->topLevelItem(0)->text(1), QString("float"));
+            step->setValue(21); QCOMPARE(watches->topLevelItem(1)->text(2), QString("0"));
+            step->setValue(22);
+            const auto exported = view.exportReport();
+            QCOMPARE(exported.at("watch_snapshot").at("expressions")[1].at("values"), Json::array({expected}));
+            if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/talos-register-" + policy + ".png"));
+            QVERIFY(errors.isEmpty());
+        }
+    }
     void talosDiscardSample() {
         const auto root = qEnvironmentVariable("FLORA_TALOS_FILTER_DEBUG");
         if (root.isEmpty()) QSKIP("Set the Talos filter debug evidence directory");

@@ -131,6 +131,54 @@ Json fixture() {
 class ReplayDebugModelTests : public QObject {
     Q_OBJECT
   private slots:
+    void explicitRegisterWatch() {
+        auto result = fixture();
+        const Json raw{{"name", "r0"}, {"type", 255}, {"rows", 1}, {"columns", 2},
+            {"value", {{"f32v", {1.0, -0.0}}, {"s32v", {1065353216, INT32_MIN}},
+                       {"u32v", {1065353216U, 2147483648U}}}}};
+        auto changed = raw;
+        changed["value"] = {{"f32v", {0.5, -1.0}}, {"s32v", {1056964608, -1082130432}},
+                            {"u32v", {1056964608U, 3212836864U}}};
+        auto constant = raw; constant["name"] = "[2]";
+        result["trace"]["inputs"] = Json::array({raw});
+        result["trace"]["constantBlocks"] = Json::array({{{"name", "cb0"}, {"members", Json::array({constant})}}});
+        result["steps"][1]["changes"] = Json::array({{{"before", raw}, {"after", changed}}});
+        result["steps"][2]["changes"] = Json::array({{{"before", changed}, {"after", {{"name", ""}}}}});
+        ReplayDebugModel model(result);
+        for (const auto expression : {"registers.r0.float.xy", "registers.r0.int.y", "registers.r0.uint.y",
+                                      "registers.cb0[2].float.x", "r0"}) model.addWatch(expression);
+        model.move(0);
+        QCOMPARE(model.watchResults()[0]["values"], Json::array({1.0, -0.0}));
+        QCOMPARE(model.watchResults()[1]["values"], Json::array({INT32_MIN}));
+        QCOMPARE(model.watchResults()[2]["values"], Json::array({2147483648U}));
+        QCOMPARE(model.watchResults()[3]["values"], Json::array({1.0}));
+        QCOMPARE(model.watchResults()[4]["status"], Json("unavailable"));
+        QVERIFY(model.sourceValues().empty());
+        model.move(1);
+        QCOMPARE(model.watchResults()[0]["values"], Json::array({0.5, -1.0}));
+        QCOMPARE(model.watchResults()[2]["values"], Json::array({3212836864U}));
+        model.move(2);
+        QCOMPARE(model.watchResults()[0]["status"], Json("unavailable"));
+        QCOMPARE(model.watchResults()[3]["values"], Json::array({1.0}));
+        model.move(0);
+        QCOMPARE(model.watchResults()[0]["values"], Json::array({1.0, -0.0}));
+        ReplayDebugModel restored(result);
+        restored.importConfiguration(model.configuration()); restored.move(1);
+        QCOMPARE(restored.watchResults()[0]["values"], Json::array({0.5, -1.0}));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, model.evaluate(0, "registers.r0.float.z"));
+        // Unavailable source roots still take precedence; opaque/wide values
+        // must not acquire a fabricated 32-bit interpretation.
+        result["trace"]["sourceVars"] = Json::array({{{"name", "registers"}, {"type", 0}, {"rows", 1},
+            {"columns", 1}, {"variables", Json::array()}}});
+        ReplayDebugModel collision(result);
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, collision.evaluate(0, "registers.r0.float.x"));
+        result["trace"].erase("sourceVars");
+        for (const auto kind : {8, 16, 18}) {
+            result["trace"]["inputs"][0]["type"] = kind;
+            ReplayDebugModel unsupported(result);
+            QVERIFY_THROWS_EXCEPTION(ExpressionError, unsupported.evaluate(0, "registers.r0.uint.x"));
+        }
+    }
     void typedInstructionWatchLifetime() {
         auto result = fixture();
         const Json temporary{{"name", "_tmp"}, {"type", 4}, {"rows", 1}, {"columns", 1},

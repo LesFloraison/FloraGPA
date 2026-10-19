@@ -529,6 +529,7 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     watch_ = new QLineEdit;
     watch_->setObjectName("debugWatchExpression");
     watch_->setPlaceholderText("Watch expression");
+    watch_->setToolTip("Source or typed instruction expression; explicit register interpretation, e.g. registers.r0.float.y or registers.cb0[2].uint.x. Double-click a register to add a Watch.");
     watchBar->addWidget(watch_);
     auto add = action(watchBar, "debugAddWatch", "Add", [this] {
         if (model_) {
@@ -545,8 +546,25 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         }
     });
     watches_ = table("debugWatchValues", {"Expression", "Type", "Value / Status"});
+    watches_->header()->setStretchLastSection(false);
+    watches_->setColumnWidth(0, 260);
+    watches_->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    watches_->header()->setSectionResizeMode(2, QHeaderView::Stretch);
     watchLayout->addWidget(watches_, 1);
     values_->addTab(watchPage, "Watches");
+    registers_->setToolTip("Double-click to watch this register using the selected interpretation (hex uses uint).");
+    connect(registers_, &QTreeWidget::itemDoubleClicked, this, [this, watchPage](QTreeWidgetItem *item, int) {
+        if (!model_ || busy_ || !item) return;
+        invoke([&] {
+            const auto mode = interpretation_->currentText();
+            const auto expression = "registers." + item->text(0) + "." + (mode == "hex" ? "uint" : mode);
+            // Reject unsupported/opaque values before adding an unusable Watch.
+            model_->evaluate(size_t(model_->position()), expression.toStdString());
+            model_->addWatch(expression.toStdString());
+            refreshWatches();
+            values_->setCurrentWidget(watchPage);
+        });
+    });
     details_ = new QPlainTextEdit;
     details_->setReadOnly(true);
     details_->setObjectName("replayDebugDetails");

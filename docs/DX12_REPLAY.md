@@ -6449,6 +6449,39 @@ patch SHA-256:
 `8ce9be37937a967393599f4d04f9a2e298cb6b29493ea71a186979d568a0d8fb`.
 Full portable-package acceptance has not been run.
 
+### Explicit register Watch during instruction debugging
+
+Recorded DXBC typeless registers can now be watched with an explicit 32-bit
+interpretation, for example `registers.r0.float.y`, `registers.r0.int.xy`,
+`registers.r0.uint[1]` or `registers.cb0[2].float.x`. Double-clicking a register
+adds a vector Watch in the selected register-table interpretation (hex selects
+uint). Subsequent display-mode changes do not alter existing expressions.
+These are readings of the trace's stored register representations, not numeric
+casts or fabricated source declarations. Bare typeless `r0` remains unavailable.
+Opaque handles and wide/packed types do not acquire guessed 32-bit views;
+missing representations remain unavailable. A source declaration named
+`registers` takes precedence over these aliases, including when unavailable.
+
+The aliases follow forward/backward trace changes and register lifetime, include
+captured constant-block members, and persist through existing debug configuration
+and report export. Source variable tables and source mappings are unchanged.
+
+The two saved Talos execution **14684** / pixel **(1438, 0)** traces verify this
+workflow without another GPU replay. At step 21, r0.y is zero; after instruction
+21 it becomes **1.0** under native discard policy or **0.5000076293945312** with
+diagnostic patterns. The corresponding uint bit patterns are **1065353216** and
+**1056964736**. UI checks cover register double-click, fixed interpretations,
+constant-block Watch, reverse stepping and exported values. Screenshots under
+ignored `artifacts/dx12-research/talos-register-watch-ui1/replay-debug` retain
+the current instruction and watches. Targeted model tests additionally cover
+lifetime expiry/restoration, signed/unsigned views, configuration round-trip,
+source-name collisions and unsupported opaque/wide types. Full stage/debugger
+acceptance remains unfinished.
+
+Builds **400/401** pass. Focused model checks report **5 passed** (4 ms), and
+the final saved-trace UI check reports **3 passed** (369 ms), including
+setup/cleanup. No GPU replay or broad sample regression was added for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
