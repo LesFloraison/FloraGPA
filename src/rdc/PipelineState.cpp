@@ -1,5 +1,7 @@
 #include "PipelineState.h"
 #include "dx12/CapturedObjectMarker.h"
+#include <QCryptographicHash>
+#include <QByteArrayView>
 #include <charconv>
 #include <cmath>
 #include <map>
@@ -158,7 +160,8 @@ Json readDx12Pipeline(IReplayController &controller) {
                         {"resource", std::move(resource)},
                         {"details", std::move(details)}});
     };
-    add("Pipeline", "PSO", reference(state->pipelineResourceId), Json::object());
+    const auto pipelineReference = reference(state->pipelineResourceId);
+    add("Pipeline", "PSO", pipelineReference, Json::object());
     add("Pipeline", "Root signature", reference(state->rootSignature.resourceId), Json::object());
     struct Stage {
         const char *name;
@@ -172,9 +175,25 @@ Json readDx12Pipeline(IReplayController &controller) {
         if (stage.shader->resourceId == ResourceId())
             continue;
         const auto *reflection = stage.shader->reflection;
-        add(stage.name, "Shader", reference(stage.shader->resourceId),
+        auto shaderReference = reference(stage.shader->resourceId);
+        if (pipelineReference.value("mapping_status", "") == "capture_object_marker" &&
+            pipelineReference.at("object_kind") == "pipeline") {
+            shaderReference["mapping_status"] = "capture_pipeline_stage";
+            shaderReference["pipeline"] = pipelineReference;
+            shaderReference["shader_stage"] = stage.name;
+        }
+        Json digest;
+        if (reflection && !reflection->rawBytes.empty())
+            digest = QCryptographicHash::hash(
+                QByteArrayView(reinterpret_cast<const char *>(reflection->rawBytes.data()),
+                               qsizetype(reflection->rawBytes.size())),
+                QCryptographicHash::Sha256).toHex().toStdString();
+        add(stage.name, "Shader", std::move(shaderReference),
             {{"reflection_available", reflection != nullptr},
-             {"entry_point", reflection ? Json(reflection->entryPoint.c_str()) : Json(nullptr)}});
+             {"entry_point", reflection ? Json(reflection->entryPoint.c_str()) : Json(nullptr)},
+             {"bytecode_sha256", digest},
+             {"bytecode_bytes", reflection ? Json(std::to_string(reflection->rawBytes.size())) : Json(nullptr)},
+             {"bytecode_scope", "Currently bound replay shader, including any experiment replacement; not a claim of original bytecode equality"}});
     }
     for (size_t i = 0; i < state->descriptorHeaps.size(); ++i)
         add("Heaps", std::to_string(i), reference(state->descriptorHeaps[i]), Json::object());
@@ -420,10 +439,10 @@ Json readDx12Pipeline(IReplayController &controller) {
               {"descriptor_access_limit", maxAccesses},
               {"descriptor_access_count", accesses.size()},
               {"graphics_state_applicable", graphics},
+              {"shader_identity", "Stage ownership comes from the currently bound PSO, not a global shader-ID lookup; current bytecode digests require comparison with the capture or experiment"},
               {"gaps",
                {"Stream-output declarations and PSO sample description not exposed by this adapter",
                 "Unaccessed descriptor table entries",
-                "PSO/root-signature identity requires capture object markers; older RDCs remain unmapped",
-                "Shader-to-original-PSO-stage identity mapping"}}}}};
+                "PSO/root-signature and stage ownership require capture object markers; older RDCs remain unmapped"}}}}};
 }
 } // namespace flora

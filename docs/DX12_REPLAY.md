@@ -3513,7 +3513,7 @@ The RenderDoc pipeline adapter parses only exact markers with canonical nonzero
 decimal uint64 values. References expose `captured_object`, `object_creation` and
 `object_kind` with `mapping_status: capture_object_marker`. Texture/buffer
 `resource_creation` remains separate: pipeline objects must not be sent to the
-texture/resource browser. Shader-to-original-PSO-stage mapping remains a gap.
+texture/resource browser. Shader-stage ownership is addressed separately below.
 Existing RDCs without these names retain their unmapped status; the adapter does
 not infer creation identities from generated RenderDoc IDs or shader names.
 
@@ -3551,13 +3551,68 @@ BF1/Hellblade2 were not replayed for this change. Their previously saved RDCs do
 not retroactively acquire the new markers. Full pipeline coverage, shader stage
 mapping, original-output fidelity and portable acceptance remain unfinished.
 
+### Bound Shader stage ownership and direct replacement
+
+Shader rows now retain their RenderDoc shader identity and separately describe
+the original owning PSO and stage. `capture_pipeline_stage` contains a nested
+`pipeline` reference and `shader_stage`; it does not pretend that a DX12 shader
+blob has an independent captured resource-creation call. Ownership comes from
+the currently bound PSO, so a shared RenderDoc shader ID cannot supply a global
+PSO mapping. Without a valid PSO marker, old RDCs remain unmapped.
+
+Each reflected Shader row also reports the currently bound bytecode's SHA-256
+and byte count. The scope explicitly includes experiment replacements. Ownership
+of an original PSO stage is not a claim that its current bytes equal the original
+shader. Missing reflection/raw bytes leaves the digest unavailable.
+
+The DX12 Bindings panel supports **Locate creation** on these Shader rows and
+adds **Replace shader…**. The import targets the row's PSO/stage directly and
+states that replacement affects all uses of that pipeline. It uses the existing
+experiment overlay, stage validation and PSO reconstruction. Textures retain
+their resource-inspection action. A busy worker disables import; changing the
+session or experiment while the file chooser is open discards that old target.
+
+The original Talos execution **12675** reuses the previously captured marked RDC.
+Its VS maps to PSO creation **156847**, object **1657098320**, with **892 bytes**
+and SHA-256 `81f4477676e4cb210da4408c77314811ab233c99192d3709a222fa8bdc3daec5`.
+The workspace check compares this digest against the original pipeline recipe,
+imports the existing depth-0.25 VS from the Shader row, then saves an experiment
+targeting exactly that PSO/VS. Experiment change invalidates the displayed result
+and rejects the previous request (**3 passed including setup/cleanup, 11,239 ms**).
+
+One native replay/capture of that saved experiment reaches the same Draw with
+zero D3D12 errors. The subsequent pipeline query still identifies original PSO
+creation **156847** and VS, but reports **1,172 bytes** and SHA-256
+`d064afb7f6c1ab01305773dc38feea9364fddc1f886a30a1c92e91748f40bb7a`.
+This exactly matches the imported asset and differs from the original digest.
+RenderDoc-local shader/PSO IDs change between captures without changing the
+captured stage owner. Both analysis reports list no loaded GPA modules.
+
+Focused CPU/UI checks cover shared shader IDs with different PSO owners, 64-bit
+creation identities, invalid stage/row associations, numeric identity rejection,
+busy/stale results, and cancellation of the old import target when its chooser
+outlives the context (**3 passed including setup/cleanup, 110 ms**). Release build
+**254** covers the application, CLI, Worker, analysis service and tests; build
+**255** adds the modal-context check. The offscreen Qt plugin emits its existing
+`propagateSizeHints` warning during file chooser tests; no test fails.
+
+Evidence under ignored `artifacts/dx12-research`: `talos-stage-pipeline1`,
+`talos-stage-workspace1`, `talos-stage-replaced-native1`,
+`talos-stage-replaced-pipeline1`, `pipeline-stage-evidence1.json`,
+`pipeline-stage-cpu2.txt`, and `pipeline-stage-workspace1.txt`.
+Only the changed Talos Draw required a new native replay/capture; its original
+query reused the preceding capture. BF1/Hellblade2 were not replayed. GPU
+verification of this stage-mapping change covers VS; other stages still need
+their own evidence. Full shader debugging, original-output stability and portable
+acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
-| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root-signature creation identities and filtered workspace navigation verified; shader-constant resource navigation and event/backend invalidation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
+| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |

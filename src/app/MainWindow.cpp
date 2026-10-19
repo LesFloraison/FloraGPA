@@ -1263,6 +1263,11 @@ void MainWindow::buildUi() {
             [this] { readRdcAnalysis(nullptr, RdcAnalysis::Pipeline); });
     connect(dx12Pipeline_, &Dx12PipelineView::cancelRequested, this, &MainWindow::cancel);
     connect(dx12Pipeline_, &Dx12PipelineView::error, this, &MainWindow::showError);
+    connect(dx12Pipeline_, &Dx12PipelineView::shaderReplacementRequested, this,
+            [this](qulonglong pipeline, const QString &stage, const QString &path) {
+                if (!busy() && session_ && session_->backend() == ReplayBackend::Dx12)
+                    replaceDx12Shader(pipeline, stage.toStdString(), path);
+            });
     connect(dx12Pipeline_, &Dx12PipelineView::creationRequested, this, [this](qulonglong id) {
         if (!busy()) {
             findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);

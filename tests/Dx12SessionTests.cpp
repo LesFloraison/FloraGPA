@@ -77,6 +77,109 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void pipelineShaderNavigation() {
+        using Json = nlohmann::json;
+        Dx12PipelineView view;
+        QSignalSpy creation(&view, &Dx12PipelineView::creationRequested);
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows");
+        auto replace = view.findChild<QAction *>("replaceBoundPipelineShader");
+        Json report{{"ok", true}, {"backend", "dx12"}, {"execution", "1"},
+            {"pipeline_scope", Json::object()}, {"pipeline_rows", Json::array()}};
+        for (const auto id : {9007199254740993ULL, 9007199254740994ULL}) {
+            view.setContext(QString::number(id), 1);
+            const Json owner{{"mapping_status", "capture_object_marker"}, {"object_kind", "pipeline"},
+                {"object_creation", std::to_string(id)}, {"captured_object", "18446744073709551615"}};
+            // A shared RenderDoc shader ID must resolve through this bound PSO,
+            // not through a shader-ID-only cache from a different pipeline.
+            report["pipeline_rows"] = Json::array({{{"section", "VS"}, {"binding", "Shader"},
+                {"details", Json::object()}, {"resource", {{"mapping_status", "capture_pipeline_stage"},
+                    {"name", "Shared shader"}, {"rdc_id", "ResourceId::50"}, {"shader_stage", "VS"},
+                    {"resource_creation", nullptr}, {"resource_object", nullptr}, {"pipeline", owner}}}}});
+            QVERIFY(view.finish(view.requestId(), report)); rows->setCurrentItem(rows->topLevelItem(0));
+            QVERIFY(replace->isEnabled()); QVERIFY(!view.findChild<QAction *>("inspectPipelineResource")->isEnabled());
+            view.findChild<QAction *>("locatePipelineCreation")->trigger();
+            QCOMPARE(creation.takeFirst()[0].toULongLong(), id);
+            auto invalid = report; invalid["pipeline_rows"][0]["resource"]["shader_stage"] = "PS";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), invalid));
+            invalid = report; invalid["pipeline_rows"][0]["resource"]["pipeline"]["object_creation"] = id;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), invalid));
+            QCOMPARE(view.result(), report);
+            view.setWorkerBusy(true); QVERIFY(!replace->isEnabled()); view.setWorkerBusy(false);
+        }
+        const auto old = view.requestId(); view.setContext("changed-experiment", 1);
+        QVERIFY(!replace->isEnabled()); QVERIFY(!view.finish(old, report));
+        // A modal chooser may outlive the selected session/experiment. Its old
+        // target must not be submitted after that context is invalidated.
+        QVERIFY(view.finish(view.requestId(), report)); rows->setCurrentItem(rows->topLevelItem(0));
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        QTemporaryDir temp; const auto path = temp.path() + "/shader.dxbc"; write(path, "fixture");
+        QSignalSpy imports(&view, &Dx12PipelineView::shaderReplacementRequested);
+        QTimer chooser, watchdog; watchdog.setSingleShot(true); bool chosen{};
+        connect(&chooser, &QTimer::timeout, &view, [&] {
+            if (auto dialog = view.findChild<QFileDialog *>()) {
+                chooser.stop(); chosen = true; view.setContext("different-session", 1);
+                dialog->findChild<QLineEdit *>("fileNameEdit")->setText(path);
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            }
+        });
+        connect(&watchdog, &QTimer::timeout, &view, [&] { if (auto dialog = view.findChild<QFileDialog *>()) dialog->reject(); });
+        chooser.start(10); watchdog.start(5000); replace->trigger();
+        QVERIFY(chosen); QVERIFY(imports.empty());
+    }
+    void pipelineShaderWorkspace() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto evidence = qEnvironmentVariable("FLORA_DX12_STAGE_PIPELINE_REPORT");
+        const auto replacement = qEnvironmentVariable("FLORA_DX12_STAGE_REPLACEMENT");
+        const auto output = qEnvironmentVariable("FLORA_DX12_STAGE_PROJECT_OUTPUT");
+        if (root.isEmpty() || evidence.isEmpty() || replacement.isEmpty() || output.isEmpty())
+            QSKIP("Set Talos capture, pipeline report, VS replacement and new project output");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile file(evidence); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = Json::parse(file.readAll().toStdString());
+        size_t shaderRow = SIZE_MAX;
+        for (size_t i = 0; i < report.at("pipeline_rows").size(); ++i)
+            if (report["pipeline_rows"][i]["section"] == "VS" && report["pipeline_rows"][i]["binding"] == "Shader") shaderRow = i;
+        QVERIFY(shaderRow != SIZE_MAX);
+        const auto &row = report["pipeline_rows"][shaderRow];
+        QCOMPARE(row["resource"]["pipeline"]["object_creation"], Json("156847"));
+        QCOMPARE(row["resource"]["shader_stage"], Json("VS"));
+        const auto session = openReplaySession(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        const auto info = session->eventDetails(156847).at("pipeline");
+        bool matched{};
+        for (const auto &shader : info.at("shaders")) if (shader.at("stage") == "VS") {
+            QCOMPARE(row["details"]["bytecode_sha256"], shader.at("sha256")); matched = true;
+        }
+        QVERIFY(matched);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), prepared(&window, &MainWindow::experimentFinished);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+        auto view = window.findChild<Dx12PipelineView *>(); QVERIFY(view->finish(view->requestId(), report));
+        auto rows = view->findChild<QTreeWidget *>("dx12PipelineRows"); rows->setCurrentItem(rows->topLevelItem(int(shaderRow)));
+        const auto old = view->requestId();
+        QTimer chooser, watchdog; watchdog.setSingleShot(true); bool chosen{};
+        connect(&chooser, &QTimer::timeout, &window, [&] {
+            if (auto dialog = view->findChild<QFileDialog *>()) {
+                chooser.stop(); chosen = true;
+                dialog->findChild<QLineEdit *>("fileNameEdit")->setText(replacement);
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            }
+        });
+        connect(&watchdog, &QTimer::timeout, &window, [&] { if (auto dialog = view->findChild<QFileDialog *>()) dialog->reject(); });
+        chooser.start(10); watchdog.start(5000); view->findChild<QAction *>("replaceBoundPipelineShader")->trigger();
+        QVERIFY(chosen); QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QVERIFY(view->result().is_null()); QVERIFY(!view->finish(old, report));
+        QVERIFY(window.saveDx12Experiment(output + "/replaced.json"));
+        QFile project(output + "/replaced.json"); QVERIFY(project.open(QIODevice::ReadOnly));
+        const auto document = Json::parse(project.readAll().toStdString());
+        const auto &op = document.at("history").at(0).at("operations").at(0);
+        QCOMPARE(op.at("pipeline"), Json("156847")); QCOMPARE(op.at("stage"), Json("VS"));
+        QCOMPARE(op.at("original_sha256"), row["details"]["bytecode_sha256"]);
+        QVERIFY(op.at("asset").at("sha256") != op.at("original_sha256"));
+    }
     void pipelineObjectMarkers() {
         for (const auto kind : {dx12::CapturedObjectKind::Pipeline, dx12::CapturedObjectKind::RootSignature}) {
             const auto name = dx12::capturedObjectMarker(kind, UINT64_MAX, 9007199254740993ULL);

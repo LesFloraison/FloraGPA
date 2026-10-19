@@ -39,6 +39,9 @@ Dx12PipelineView::Dx12PipelineView(QWidget *parent) : QWidget(parent) {
     locate_->setObjectName("inspectPipelineResource");
     creation_ = tools->addAction("Locate creation");
     creation_->setObjectName("locatePipelineCreation");
+    replaceShader_ = tools->addAction("Replace shader…");
+    replaceShader_->setObjectName("replaceBoundPipelineShader");
+    replaceShader_->setToolTip("Replace this stage for every use of its captured pipeline");
     export_ = tools->addAction("Export…");
     auto overview = tools->addAction("Scope");
     layout->addWidget(tools);
@@ -73,6 +76,18 @@ Dx12PipelineView::Dx12PipelineView(QWidget *parent) : QWidget(parent) {
     connect(creation_, &QAction::triggered, this, [this] {
         if (creation_->isEnabled())
             emit creationRequested(rows_->currentItem()->data(0, Qt::UserRole + 2).toULongLong());
+    });
+    connect(replaceShader_, &QAction::triggered, this, [this] {
+        if (!replaceShader_->isEnabled()) return;
+        const auto item = rows_->currentItem();
+        const auto pipeline = item->data(0, Qt::UserRole + 2).toULongLong();
+        const auto stage = item->data(0, Qt::UserRole + 3).toString();
+        const auto serial = serial_;
+        const auto path = QFileDialog::getOpenFileName(this,
+            QString("Replace %1 in pipeline %2 (all uses)").arg(stage).arg(pipeline), {},
+            "Shader bytecode (*.cso *.dxbc *.dxil *.bin);;All files (*)");
+        if (!path.isEmpty() && serial == serial_ && !busy_)
+            emit shaderReplacementRequested(pipeline, stage, path);
     });
     connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] {
         if (creation_->isEnabled()) creation_->trigger();
@@ -146,6 +161,8 @@ void Dx12PipelineView::updateActions() {
                         rows_->currentItem()->data(0, Qt::UserRole).isValid());
     creation_->setEnabled(!busy_ && rows_->currentItem() &&
                           rows_->currentItem()->data(0, Qt::UserRole + 2).isValid());
+    replaceShader_->setEnabled(creation_->isEnabled() &&
+                              rows_->currentItem()->data(0, Qt::UserRole + 3).isValid());
 }
 Dx12PipelineView::Json Dx12PipelineView::request() const {
     if (key_.isEmpty() || !execution_)
@@ -172,6 +189,15 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
             (void)identity(ref.at("captured_object"));
             if (ref.at("object_kind") != "pipeline" && ref.at("object_kind") != "root_signature")
                 throw std::runtime_error("Unsupported captured pipeline object kind");
+        } else if (ref.value("mapping_status", "") == "capture_pipeline_stage") {
+            const auto &pipeline = ref.at("pipeline");
+            (void)identity(pipeline.at("object_creation"));
+            (void)identity(pipeline.at("captured_object"));
+            const auto stage = ref.at("shader_stage").get<std::string>();
+            const QStringList stages{"VS", "HS", "DS", "GS", "PS", "CS", "AS", "MS"};
+            if (pipeline.at("mapping_status") != "capture_object_marker" || pipeline.at("object_kind") != "pipeline" ||
+                !stages.contains(QString::fromStdString(stage)) || row.at("section") != stage || row.at("binding") != "Shader")
+                throw std::runtime_error("Invalid captured pipeline stage ownership");
         }
     }
     const QSignalBlocker block(rows_);
@@ -183,6 +209,7 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
         const auto name = ref.value("name", "");
         const auto status = ref.value("mapping_status", "");
         const auto mapping = status == "capture_resource_marker" ? "Captured resource"
+                             : status == "capture_pipeline_stage" ? "Captured pipeline stage"
                              : status == "capture_object_marker" ?
                                  (ref.at("object_kind") == "pipeline" ? "Captured pipeline" : "Captured root signature")
                              : status == "unbound"               ? "No resource"
@@ -198,6 +225,10 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
             item->setData(0, Qt::UserRole, qulonglong(identity(ref.at("resource_creation"))));
         else if (ref.at("mapping_status") == "capture_object_marker")
             item->setData(0, Qt::UserRole + 2, qulonglong(identity(ref.at("object_creation"))));
+        else if (ref.at("mapping_status") == "capture_pipeline_stage") {
+            item->setData(0, Qt::UserRole + 2, qulonglong(identity(ref.at("pipeline").at("object_creation"))));
+            item->setData(0, Qt::UserRole + 3, QString::fromStdString(ref.at("shader_stage")));
+        }
     }
     details_->setPlainText(QString::fromStdString(result.at("pipeline_scope").dump(2)));
     summary_->setText(
