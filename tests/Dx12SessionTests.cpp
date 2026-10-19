@@ -1992,6 +1992,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         }
     }
     void hellbladeLensShaderProjects() {
+        prepareHellbladeShaderProjects(37053, 611838, "PS");
+    }
+    void hellbladeIndirectShaderProjects() {
+        prepareHellbladeShaderProjects(36779, 611544, "CS");
+    }
+  private:
+    void prepareHellbladeShaderProjects(uint64_t execution, uint64_t source, const char *stage) {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_HELLBLADE_SHADER_PROJECT_OUTPUT");
         const auto shaderPath = qEnvironmentVariable("FLORA_HELLBLADE_SHADER_FILE");
@@ -2002,8 +2009,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString());
         auto session = openReplaySession(path);
         dx12::StreamDirectory directory(path); dx12::SubmissionIndex submissions(directory);
-        const auto selected = submissions.execution(37053);
-        QCOMPARE(selected.record, uint64_t(611838));
+        const auto selected = submissions.execution(execution);
+        QCOMPARE(selected.record, source);
         const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(selected.record));
         uint64_t object{}, creation{};
         for (auto id : recording.records) {
@@ -2026,9 +2033,9 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QFile shader(shaderPath); QVERIFY(shader.open(QIODevice::ReadOnly));
         const auto bytes = shader.readAll();
         const format::Bytes bytecode(reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size()));
-        QCOMPARE(dx12::shaderBytecodeStage(bytecode), std::string("PS"));
+        QCOMPARE(dx12::shaderBytecodeStage(bytecode), std::string(stage));
         Experiment experiment(*session);
-        experiment.setShader(*session, creation, "PS", bytecode);
+        experiment.setShader(*session, creation, stage, bytecode);
         experiment.save(output + "/modified.json");
         const auto edits = experiment.dx12Edits(*session);
         QCOMPARE(edits.shaders.size(), size_t(1));
@@ -2043,11 +2050,12 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto &packet = directory.packets().at(size_t(creation - 1));
         auto report = dx12::describePipelineRecipe(dx12::decodePipelineRecipe(packet.type, directory.payload(packet)));
         report["pipeline_creation"] = std::to_string(creation);
-        report["execution"] = "37053"; report["source_record"] = "611838";
+        report["execution"] = std::to_string(execution); report["source_record"] = std::to_string(source);
         QFile evidence(output + "/pipeline.json"); QVERIFY(evidence.open(QIODevice::WriteOnly));
         evidence.write(QByteArray::fromStdString(report.dump(2)));
-        qInfo() << "Hellblade2 PS replacement pipeline" << creation << "object" << object;
+        qInfo() << "Hellblade2" << stage << "replacement pipeline" << creation << "object" << object;
     }
+  private slots:
     void dx12ShaderExperimentProjects() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_SHADER_EXPERIMENT_OUTPUT");

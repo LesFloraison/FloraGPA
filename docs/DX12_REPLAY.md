@@ -3912,6 +3912,60 @@ Ignored evidence: `hellblade-indirect-valid-group1`,
 `indirect-compute-ui1/replay-debug/indirect-compute.png`. The downsampled output,
 other invocations and the upstream whole-resource discrepancy remain unverified.
 
+### Hellblade2 indirect CS replacement and undo
+
+The current native execution **36779** / source **611544** uses PSO creation
+**512699**, captured object **2130520907296**, root signature
+**2143972372848**. This ownership comes from the command-list recording and
+captured pipeline recipe, not the older RDC's unmapped pipeline ID. Its original
+CS is **12,936 bytes**, SHA-256
+`ff26fc08d0880e1ef3dbac56bad4111a6b74853fa6561aeba882c17cb2906e93`.
+
+The versioned fixture `tests/fixtures/dx12-tile-magenta-cs.hlsl` retains the
+captured `t0` TileListsBuffer, `b0` viewport and tile-offset layout, `u0` output,
+and **16 x 16** Morton lane addressing. It writes **(1,0,1,0)** to valid selected
+tiles. The Windows SDK **10.0.26100.0** compiler, `cs_6_6`, entry `main`, `-O3`,
+produces **4,300 bytes**, SHA-256
+`886d2f0680d3ef3783f814fca40fe7a1385a76448f0d85169122bb96af526378`.
+The original capture stays read-only; replacement applies through the existing
+pipeline-lifetime experiment overlay.
+
+A native replay to **36779**, reading creation **571530**, with a **12 GiB**
+allocation budget and D3D12 debug layer creates the replacement PSO and produces
+**295,552** exact R11G11B10 marker texels (`0x780003c0`). They form **1,150** full
+16 x 16 tiles and **24** bottom-clipped 16 x 3 tiles, matching the indexed
+**1,174** groups. All clipped tiles are at tile row **50** (pixel rows 800–802).
+The selected **(832,592)** texel is the exact marker. No exact marker occurs
+outside the declared **1920 x 803** active rectangle. The remainder of the
+1200-row allocation is not claimed initialized or validated. The displayed
+readback was inspected; acceptance uses raw storage, not PNG color conversion.
+
+The saved undo project removes the shader replacement, and a second native
+replay to the same execution restores the selected texel's original raw value
+**1389662880**. No marker remains in the active rectangle. Both GPU runs finish
+with zero D3D12 validation errors. The restored image differs at **7,336** active
+texels from the earlier independent native readback at **37003**, after the
+last recorded UAV use of this output. That comparison is not an exact same-run
+baseline, and full-image undo repeatability remains unverified. The modified
+and redone project files are identical; cursor 1/0 and capture identities are
+preserved in the modified/undo replay reports.
+
+Build **266** and `hellbladeIndirectShaderProjects` prepare and reload the
+actual CS experiment, verify undo/redo and locate its original PSO (**3 passed
+including setup/cleanup, 54,041 ms**). The existing PS preparation shares that
+helper without changing its selected event or stage. Exactly two serial native
+GPU requests were used for the changed and undo states; no new analysis capture,
+GPA process or all-sample regression was needed. Native output SHA-256 values:
+
+- Modified: `fdec1f94a0c34b8c564611bfdc462286445d2c5840345d4e187f70c1fbc2e1bb`.
+- Restored: `dc2b4998b6d902fe0555de2bb3657118f81ff577616f963e1d92179847131dbd`.
+
+Ignored evidence: `hellblade-cs-projects1`, `hellblade-cs-projects1.txt`,
+`hellblade-cs-magenta-native1`, `hellblade-cs-restored-native1`, and
+`hellblade-cs-experiment-evidence1.json`. This adds a verified DXIL CS modification
+at an actual indirect boundary; full CS stage coverage, downsampled-UAV fidelity
+and whole-frame repeatability are still unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3924,7 +3978,7 @@ other invocations and the upstream whole-resource discrepancy remain unverified.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; one indirect CS store's RGB operands match GPU output, downsampled output rejected as changing; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; undo restores original PSO/scene with unresolved raw variation; full stage/resource experiments and performance unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
