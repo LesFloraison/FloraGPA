@@ -5801,6 +5801,72 @@ original GPU lowering and PS alpha discrepancy remain unresolved; further
 work must retain the original program context rather than infer it from the
 minimal expression.
 
+### Original-context PS precision experiment
+
+The manual `tests/fixtures/dx12-ps-precision.cpp` reproduction keeps the original
+Hellblade2 PS program and its existing replay bindings, pipeline, Draw and
+selected-event depth refresh. It uses the previously recorded independent RDC,
+execution **36222** / replay event **88694**, resource **383**, and pixel
+**(456,206)**. It is specific to those observed capture identities and is not a
+general replay command or an automatic GPU regression test.
+
+`tests/fixtures/dxil-assemble.cpp` assembles DXC textual IR directly with
+`IDxcAssembler`, then validates the resulting DXIL container. It does not run an
+HLSL optimizer. The control's complete `MainPixelShader` body exactly equals the
+original DXC disassembly. The precision variant differs at exactly three
+instructions, removing `fast` from `%99 = fdiv`, `%100 = fdiv` and
+`%103 = fsub`; all other body instructions are identical. Reassembly strips
+container/reflection metadata, so bytecode identity with the original is not
+claimed. Both variants pass DXIL validation, and their SHA-256 values are:
+
+- Control, **7,756** bytes: `e515389f5c1ffb23fe4e092afcc9ade96edd386d42ed0eac965154b6b0fc92fa`.
+- Precision variant, **7,752** bytes: `59f90e3fc1922e5910b2db660a92bff0a0fce5d6150fa6353210cff38cf4e1fa`.
+
+One successful GPU session observes original, control replacement, precision
+replacement and restored original in sequence. The freshly exported bound
+original matches the previously recorded **33,072**-byte PS digest. The entire
+**1920 x 1200** UNORM16x4 texture is exactly equal for original, control and
+restored original, with SHA-256
+`df87584674035f2ae0ce0439a61f64b072b043423596462f1192661bf5e9112f`.
+The precision variant changes **31** pixels, exclusively in alpha; RGB remains
+exact across the whole image. Its texture SHA-256 is
+`4d3b8b770369912ea9e5499d85a6e1b32002b56d565e37c06fcec2354d9d1a30`.
+
+At the selected pixel, original/control/restored storage is
+**(34608,30148,46932,9359)**. The precision variant is
+**(34608,30148,46932,9472)**, exactly the earlier interpreter's output after
+UNORM16 conversion. Thus tightening the original program's division/subtraction
+flags reproduces the stored alpha discrepancy without replacing the program
+with a minimal expression. This supports a fast-math lowering cause for this
+pixel, but does not reveal the original machine instructions, certify all
+intermediate values or establish a general fusion rule. Production replay and
+interpreter arithmetic are unchanged; complete original PS correctness remains
+unfinished. The experimental replacement affects all uses of this PS in the
+RDC, not only the selected Draw, and this direct RenderDoc probe is not evidence
+of workspace experiment persistence or portable-package acceptance.
+
+From a Visual Studio x64 developer shell, with generated files outside Git:
+
+```powershell
+cl /nologo /std:c++20 /EHsc /O2 tests/fixtures/dxil-assemble.cpp /Fe:<assembler.exe>
+cl /nologo /std:c++20 /EHsc /O2 /I third_party tests/fixtures/dx12-ps-precision.cpp /Fe:<probe.exe> /link artifacts/renderdoc-1.45-d16/x64/Release/renderdoc.lib
+# Dump the bound original PS with the pinned v1.8.2505.1 DXC. Preserve a control
+# listing, and remove fast only from the three instructions named above in a copy.
+<assembler.exe> <dxcompiler.dll> <original.ll> <new-control.dxil>
+<assembler.exe> <dxcompiler.dll> <precise.ll> <new-precise.dxil>
+# Put the fourteen-patch RenderDoc DLL directory first in PATH for this process.
+<probe.exe> <native-dx12_capture.rdc> <new-control.dxil> <new-precise.dxil> <new-output-directory>
+```
+
+Both committed fixtures compile. The assembler fixture reproduces the control
+digest exactly. Before the successful run, the standalone probe lacked the
+RenderDoc replay-marker export and crashed during capture opening without
+producing observations; the corrected fixture includes the marker. That failed
+run is not counted as validation. Evidence, disassembly, generated binaries and
+texture readbacks remain in `original-ps-precision1` outside Git. The offline
+verifier confirms complete function-body comparisons and whole-image equalities;
+no further GPU replay was run to verify those files.
+
 ### Selected depth refresh in Pixel History
 
 The same default-off `--depth-roundtrip` option now supports `history`, and
