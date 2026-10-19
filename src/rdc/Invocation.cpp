@@ -1,5 +1,6 @@
 #include "Invocation.h"
 #include <stdexcept>
+#include <cstring>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
@@ -63,6 +64,43 @@ Json rdcComputeInvocation(const ActionDescription &action, const ShaderReflectio
     result["thread"] = triple(thread);
     result["shader_group_size"] = triple(shader.dispatchThreadsDimension);
     result["dispatch_thread"] = global;
+    return result;
+}
+Json rdcVertexInvocation(const ActionDescription &action, const D3D12Pipe::InputAssembly &ia,
+                         uint32_t vertex, uint32_t instance,
+                         const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read) {
+    if (!(action.flags & ActionFlags::Drawcall) || action.flags & ActionFlags::MeshDispatch)
+        throw std::runtime_error("Vertex invocation requires a Draw action");
+    if (vertex >= action.numIndices)
+        throw std::runtime_error("Selected vertex ordinal is outside the executed Draw");
+    if (instance >= action.numInstances)
+        throw std::runtime_error("Selected vertex instance is outside the executed Draw");
+    auto result = rdcExecutedAction(action);
+    result.update({{"vertex_ordinal", vertex}, {"instance", instance}});
+    int64_t actual{};
+    if (action.flags & ActionFlags::Indexed) {
+        const auto &ib = ia.indexBuffer;
+        if (ib.resourceId == ResourceId::Null() || (ib.byteStride != 2 && ib.byteStride != 4))
+            throw std::runtime_error("DX12 vertex invocation requires a bound 16/32-bit index buffer");
+        const uint64_t relative = (uint64_t(action.indexOffset) + vertex) * ib.byteStride;
+        if (relative > ib.byteSize || ib.byteStride > ib.byteSize - relative ||
+            ib.byteOffset > UINT64_MAX - relative || ib.byteOffset + relative > UINT64_MAX - ib.byteStride)
+            throw std::runtime_error("Selected vertex index exceeds the bound index range");
+        const auto offset = ib.byteOffset + relative;
+        const auto bytes = read(ib.resourceId, offset, ib.byteStride);
+        if (bytes.size() != ib.byteStride) throw std::runtime_error("Truncated vertex invocation index data");
+        uint32_t raw{}; memcpy(&raw, bytes.data(), ib.byteStride);
+        if (IsStrip(ia.topology) && ia.indexStripCutValue && raw == ia.indexStripCutValue)
+            throw std::runtime_error("Selected index is a strip-cut marker, not a vertex invocation");
+        actual = int64_t(raw) + action.baseVertex;
+        uint64_t resource{}; memcpy(&resource, &ib.resourceId, sizeof(resource));
+        result.update({{"raw_index", raw}, {"index_byte_offset", std::to_string(offset)},
+            {"index_byte_stride", ib.byteStride}, {"index_resource", "ResourceId::" + std::to_string(resource)}});
+    } else actual = int64_t(action.vertexOffset) + vertex;
+    if (actual < 0 || uint64_t(actual) > UINT32_MAX)
+        throw std::runtime_error("Actual vertex index is outside uint32");
+    result["actual_vertex_index"] = uint32_t(actual);
+    result["index_source"] = action.flags & ActionFlags::Indexed ? "replayed_index_buffer" : "draw_vertex_offset";
     return result;
 }
 } // namespace flora

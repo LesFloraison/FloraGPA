@@ -15,6 +15,59 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void vertexInvocationBounds() {
+        using Json = nlohmann::json;
+        ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Indexed;
+        draw.numIndices = 6; draw.numInstances = 2; draw.indexOffset = 4; draw.baseVertex = -3;
+        draw.instanceOffset = 7;
+        D3D12Pipe::InputAssembly ia; uint64_t resource = 42;
+        memcpy(&ia.indexBuffer.resourceId, &resource, 8);
+        ia.indexBuffer.byteOffset = 1ULL << 33; ia.indexBuffer.byteSize = 32; ia.indexBuffer.byteStride = 2;
+        ia.topology = Topology::TriangleList;
+        unsigned reads{}; uint32_t raw = 9;
+        const auto read = [&](ResourceId id, uint64_t offset, uint64_t length) {
+            ++reads;
+            if (id != ia.indexBuffer.resourceId || offset != ia.indexBuffer.byteOffset + 12 || length != 2)
+                throw std::runtime_error("Unexpected vertex index read");
+            bytebuf bytes; bytes.resize(2); memcpy(bytes.data(), &raw, 2); return bytes;
+        };
+        auto result = rdcVertexInvocation(draw, ia, 2, 1, read);
+        QCOMPARE(result.at("actual_vertex_index"), Json(6));
+        QCOMPARE(result.at("index_byte_offset"), Json("8589934604"));
+        QCOMPARE(result.at("raw_index"), Json(9));
+        QCOMPARE(result.at("first_instance"), Json(7));
+        const auto invalid = [&](const ActionDescription &action, const D3D12Pipe::InputAssembly &state,
+                                 uint32_t vertex, uint32_t instance) {
+            const auto before = reads;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(action, state, vertex, instance, read));
+            QCOMPARE(reads, before); // Invalid request must not touch the index resource.
+        };
+        invalid(draw, ia, 6, 0); invalid(draw, ia, 0, 2);
+        auto changed = draw; changed.numInstances = 0; invalid(changed, ia, 0, 0);
+        changed = draw; changed.indexOffset = UINT32_MAX; invalid(changed, ia, 2, 0);
+        auto bad = ia; bad.indexBuffer.byteSize = 13; invalid(draw, bad, 2, 0);
+        bad = ia; bad.indexBuffer.byteOffset = UINT64_MAX - 12; invalid(draw, bad, 2, 0);
+        bad = ia; bad.indexBuffer.byteStride = 1; invalid(draw, bad, 2, 0);
+        bad = ia; bad.indexBuffer.resourceId = ResourceId::Null(); invalid(draw, bad, 2, 0);
+        raw = 2;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(draw, ia, 2, 0, read));
+        raw = 0xffff; ia.indexStripCutValue = 0xffff;
+        QCOMPARE(rdcVertexInvocation(draw, ia, 2, 0, read).at("actual_vertex_index"), Json(65532));
+        ia.topology = Topology::TriangleStrip;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(draw, ia, 2, 0, read));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(draw, ia, 2, 0,
+            [](ResourceId, uint64_t, uint64_t) { return bytebuf(); }));
+        ia.indexBuffer.byteStride = 4; ia.indexStripCutValue = 0; draw.baseVertex = 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(draw, ia, 2, 0,
+            [](ResourceId, uint64_t, uint64_t) { bytebuf bytes; bytes.resize(4); memset(bytes.data(), 255, 4); return bytes; }));
+        draw.flags = ActionFlags::Drawcall; draw.vertexOffset = 10;
+        result = rdcVertexInvocation(draw, ia, 2, 1, {});
+        QCOMPARE(result.at("actual_vertex_index"), Json(12));
+        QVERIFY(!result.contains("raw_index"));
+        draw.vertexOffset = UINT32_MAX;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcVertexInvocation(draw, ia, 2, 0, {}));
+        draw.flags = ActionFlags::Dispatch; invalid(draw, ia, 0, 0);
+    }
     void computeInvocationBounds() {
         using Json = nlohmann::json;
         ActionDescription action;

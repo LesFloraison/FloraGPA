@@ -8,6 +8,8 @@
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
+#include <QLabel>
+#include <qfloat16.h>
 #include <QPlainTextEdit>
 #include <QSettings>
 #include <QSignalSpy>
@@ -31,6 +33,67 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void bf1VertexInvocation() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
+        if (root.isEmpty()) QSKIP("Set the BF1 input/vertex invocation evidence directory");
+        const auto directory = root + "/bf1-input-half1";
+        const auto mesh = read(directory + "/result.json");
+        const auto debug = read(root + "/bf1-vertex-invocation1/result.json");
+        QVERIFY(mesh.at("ok").get<bool>()); QVERIFY(debug.at("ok").get<bool>());
+        const auto &invocation = debug.at("vertex_invocation");
+        QCOMPARE(invocation.at("vertex_ordinal"), Json(3966));
+        QCOMPARE(invocation.at("actual_vertex_index"), Json(1428));
+        QCOMPARE(invocation.at("index_byte_offset"), Json("7932"));
+        QCOMPARE(mesh.at("index_count"), Json(4974));
+        const auto &input = mesh.at("mesh").at("input");
+        QCOMPARE(input.at("index_width"), Json(2));
+        QCOMPARE(input.at("first_vertex"), Json("0"));
+        QCOMPARE(input.at("layouts")[1].at("format").at("compByteWidth"), Json(2));
+        const auto rawIndices = readBytes(directory + "/input_indices.bin");
+        uint16_t index{}; memcpy(&index, rawIndices.constData() + 7932, 2); QCOMPARE(index, uint16_t(1428));
+        const auto rawVertices = readBytes(directory + "/input_vertices.bin");
+        const auto vertices = readBytes(directory + "/post_vertices.bin");
+        const auto &inputs = debug.at("trace").at("inputs");
+        const auto v1 = std::find_if(inputs.begin(), inputs.end(), [](const Json &v) { return v.at("name") == "v1"; });
+        QVERIFY(v1 != inputs.end());
+        for (size_t i = 0; i < 4; ++i) {
+            qfloat16 half; memcpy(&half, rawVertices.constData() + 1428 * 80 + i * 2, 2);
+            float converted; memcpy(&converted, vertices.constData() + 1428 * 16 + i * 4, 4);
+            QCOMPARE(converted, float(half));
+            QCOMPARE(converted, v1->at("value").at("f32v")[i].get<float>());
+        }
+        ReplayMeshView geometry; geometry.resize(1200, 850); geometry.show();
+        geometry.setContext("bf1-input", 36560, true);
+        auto stage = geometry.findChild<QComboBox *>("replayMeshStage");
+        stage->setCurrentIndex(stage->findData("VSIn"));
+        geometry.findChild<QLineEdit *>("replayMeshAttribute")->setText("1");
+        QVERIFY(geometry.finish(geometry.requestId(), mesh, directory));
+        auto table = geometry.findChild<QTableView *>("replayMeshPositions");
+        QCOMPARE(table->model()->rowCount(), 3316);
+        QCOMPARE(table->model()->index(1428, 0).data().toString(), QString("1428"));
+        QCOMPARE(table->model()->index(1428, 1).data().toString().toDouble(), 0.498046875);
+        table->selectRow(1428); table->scrollTo(table->model()->index(1428, 0));
+        ReplayDebugView view("vs"); view.resize(1200, 850); view.show();
+        view.setContext("bf1-input", 36560, true);
+        view.findChild<QLineEdit *>("debugVertex")->setText("3966");
+        QVERIFY(view.finish(view.requestId(), debug));
+        auto label = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(!label->isHidden()); QVERIFY(label->text().contains("ordinal 3966"));
+        QVERIFY(label->text().contains("actual vertex 1428")); QVERIFY(label->text().contains("7932"));
+        QCOMPARE(Json::parse(label->toolTip().toStdString()), invocation);
+        QTemporaryDir temp; geometry.exportResult(temp.filePath("mesh.csv"));
+        QCOMPARE(readBytes(temp.filePath("mesh.csv")), readBytes(directory + "/post_vertices.csv"));
+        geometry.exportResult(temp.filePath("mesh.vbin"));
+        QCOMPARE(readBytes(temp.filePath("mesh.vbin")), rawVertices);
+        if (!output_.isEmpty()) {
+            QVERIFY(geometry.grab().save(output_ + "/bf1-half-input.png"));
+            QVERIFY(view.grab().save(output_ + "/bf1-vertex-invocation.png"));
+        }
+        const auto serial = view.requestId(); view.setContext("changed", 36560, true);
+        QVERIFY(!view.finish(serial, debug)); QVERIFY(label->isHidden());
+        auto legacy = debug; legacy.erase("vertex_invocation");
+        QVERIFY(view.finish(view.requestId(), legacy)); QVERIFY(label->isHidden());
+    }
     void initTestCase() {
         QSettings::setDefaultFormat(QSettings::IniFormat);
         QCoreApplication::setOrganizationName("FloraGPATests");

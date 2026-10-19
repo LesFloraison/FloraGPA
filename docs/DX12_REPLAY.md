@@ -4097,6 +4097,57 @@ This work consumes saved traces and performs no GPU replay. It does not resolve
 the outstanding DXIL numerical mismatch, changing UAV results, absent source
 data or full stage-coverage requirements.
 
+### DX12 vertex invocation bounds and BF1 half-precision inputs
+
+VS Debug now checks the selected vertex ordinal and instance against the indexed
+Draw parameters before calling RenderDoc DebugVertex. Indexed selections require
+a bound 16/32-bit index buffer and an in-binding, overflow-safe read; truncated
+data, negative/overflowing base-vertex results and strip-cut markers are rejected.
+An explicit DX12 index must agree with the resolved invocation. DX11 retains its
+existing index handling. The report and VS workspace label distinguish Draw-local
+ordinal, instance, raw index, base vertex, actual vertex and index-buffer byte
+offset. The 64-bit byte offset remains a decimal string. Bounds use the captured
+action index; changing indirect arguments remain an explicit limitation.
+
+The RenderDoc 1.45 API contract defines `vertid` and `instid` as Draw-relative
+ordinals and `idx` as the input index with Draw offsets applied (vendored
+`third_party/renderdoc/replay/renderdoc_replay.h`, DebugVertex). Strip-cut handling
+uses the current strip topology and configured marker; a matching value in a
+triangle list remains an ordinary index. See Microsoft's
+[strip-cut definition](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_index_buffer_strip_cut_value).
+
+Three serial analysis jobs on the existing BF1 recapture provide focused evidence:
+
+- `bf1-input-half1`: execution **36560**, VSIn attribute **1 / TEXCOORD1**,
+  16-bit float4 at byte offset **16** in an **80-byte** stride. The input has
+  **3,316** vertices, **4,974** 16-bit indices and **1,658** triangle-list faces.
+  All **13,264** components convert bit-exactly from retained half bytes to the
+  float32 table/export. Raw vertex SHA-256 is
+  `f351e596c83ed3ef92052aa24821019f401d806775e9828c4c271df791f9170f`;
+  raw index SHA-256 is
+  `59dd2e1242c7a945d00e5d6ee0bad70f934e5b49254e7b94b5a436c146d833db`.
+- `bf1-vertex-invocation1`: ordinal **3966**, instance **0**, reads index **1428**
+  at byte offset **7932**, with base vertex **0**. Its **159-step** VS trace input
+  `v1` matches geometry vertex 1428 exactly:
+  `[0.498046875, 1, 0, 0.43994140625]`.
+- `bf1-vertex-invalid1`: ordinal **4974** is rejected as outside the Draw, with
+  `ok: false` and no trace. Capture loading/event replay still occurs; the check
+  prevents starting the invalid vertex debugger, not all GPU work.
+
+Build **277** fixes the initial missing namespace qualification and builds the
+backend; **278/279** build the application and focused UI tests. CPU vertex and
+compute boundary cases pass (**4 including setup/cleanup, 1 ms**), covering
+non-indexed offsets, negative base vertices, offsets above 4 GiB, empty Draws,
+bad strides, truncation, strip cuts and overflow. The real input/trace UI case
+and selection test pass (**4 including setup/cleanup, 300 ms**): vertex 1428 is
+shown in the table, the invocation label reports the mapping, CSV/raw exports
+retain their bytes, and stale/legacy results behave correctly. Both screenshots
+were inspected. Evidence is `vertex-invocation-bounds1.txt`,
+`bf1-vertex-input-evidence1.json`, `bf1-vertex-ui1.txt` and `bf1-vertex-ui1/`.
+This verifies the selected input and invocation mapping; it does not establish
+all transformed geometry, VS instruction numerical fidelity or whole-frame
+replay correctness.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -765,6 +765,25 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                 text(invocationReference.value("reason", Json("Unknown"))));
         }
     }
+    if (const auto invocation = result.value("vertex_invocation", Json());
+        dx12_ && stage_ == "vs" && invocation.is_object()) {
+        invocationReference_->setToolTip(QString::fromStdString(invocation.dump(2)));
+        invocationReference_->setText(
+            QString("Vertex invocation · ordinal %1 · instance %2 · actual vertex %3\n"
+                    "Draw instances %4 · start instance %5")
+                .arg(text(invocation.at("vertex_ordinal")), text(invocation.at("instance")),
+                     text(invocation.at("actual_vertex_index")), text(invocation.at("instance_count")),
+                     text(invocation.at("first_instance"))));
+        if (invocation.contains("raw_index"))
+            invocationReference_->setText(invocationReference_->text() +
+                QString("\nIndex %1 · base vertex %2 · index-buffer byte offset %3")
+                    .arg(text(invocation.at("raw_index")), text(invocation.at("base_vertex")),
+                         text(invocation.at("index_byte_offset"))));
+        if (invocation.value("indirect", false))
+            invocationReference_->setText(invocationReference_->text() +
+                "\nIndirect arguments may change between replays; bounds use the indexed action.");
+        invocationReference_->show();
+    }
     if (const auto invocation = result.value("compute_invocation", Json());
         dx12_ && stage_ == "cs" && invocation.is_object()) {
         invocationReference_->setToolTip(QString::fromStdString(invocation.dump(2)));

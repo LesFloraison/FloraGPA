@@ -558,7 +558,17 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         trace.reset(controller.DebugThread(coordinates(job, "group"), coordinates(job, "thread")));
     } else if (vertex) {
         int64_t actual = 0;
-        if (job.contains("index") && !job.at("index").is_null()) {
+        if (dx12) {
+            const auto invocation = flora::rdcVertexInvocation(*selected, pipe12->inputAssembly,
+                index(job, "vertex"), index(job, "instance"),
+                [&](ResourceId resource, uint64_t offset, uint64_t length) {
+                    return controller.GetBufferData(resource, offset, length);
+                });
+            actual = invocation.at("actual_vertex_index").get<uint32_t>();
+            if (job.contains("index") && !job.at("index").is_null() && index(job, "index") != actual)
+                throw std::runtime_error("Explicit DX12 vertex index does not match the selected Draw invocation");
+            result["vertex_invocation"] = invocation;
+        } else if (job.contains("index") && !job.at("index").is_null()) {
             actual = index(job, "index");
         } else if (selected->flags & ActionFlags::Indexed) {
             const auto stride = pipe12 ? pipe12->inputAssembly.indexBuffer.byteStride
