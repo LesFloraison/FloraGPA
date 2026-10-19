@@ -5381,6 +5381,56 @@ in `history-consistency-ui1.txt`. Its screenshot was inspected. Builds
 contribution remain unresolved; this check detects the inconsistency rather
 than repairing or concealing it.
 
+### Narrowing the missing velocity contribution to indirect particle work
+
+The same fault is now localized further without recapturing the frame.
+`hellblade-velocity-before-lastdraws1` observes zero velocity both before and
+after history at execution **35926**, before the final 72 velocity-target draws.
+Six targeted raw texture boundaries then narrow pixel **(456,206)**: executions
+**36169,36207,36222** produce zero, while **36328,36253,36226** produce the exact
+UNORM16 words **34608,30148,46932,9359** seen in the earlier varying input.
+Executions **36222** and **36226** are adjacent velocity-target operations.
+The latter is source **608815**, submission **613105**, command list
+**2149339136512**, generation **4**, ordinal **1**, queue **2131165365824**,
+RenderDoc child event **88708**. Its indexed ExecuteIndirect action has six
+indices and **18 instances**. These observations locate a changed contribution;
+they do not prove all earlier writes are stable or identify its exact instance.
+
+A bounded temporary worker compared the same selected Draw twice, saving its
+bound buffers and argument buffer. `hellblade-particle-indirect36226-inputs1`
+finds the 5,120-byte argument buffer creation **571657**, object
+**2149338317744**, RDC **578**, at byte offset **200**. Signature RDC **5713**
+has one argument and stride **20**; there is no count buffer. The five argument
+words change from **(6,18,0,0,0)** to **(6,1,0,0,0)**. GPU particle float data
+creation **549918**, object **2145650368480**, RDC **230**, changes **103 bytes**
+of its **12,288 bytes**; the complete argument buffer changes **39 bytes**.
+The other five bound buffers and the reported pipeline rows are identical.
+The earlier direct particle draw **35953** instead has five identical buffers
+(56 MiB total) in `hellblade-particle-prefix-inputs1`; its CPU particle buffer
+RDC **53** is not the affected GPU particle buffer. Its two CPU updates at RDC
+events **26146/71773** are complete 8 MiB Unmap payloads. Neither observation
+establishes that all texture inputs or all upstream execution are stable.
+
+`hellblade-gpuparticle-history1` maps the affected float buffer to an earlier
+compute read at **20069** and a compute write binding at **33732** (source
+**608027**, RDC **80984**, one workgroup), followed by VS uses **35228/36226**.
+`hellblade-gpuparticle-producer33732-pipeline1` identifies InputFloat creation
+**572516** / RDC **80**, InputInt **556514** / RDC **505**, output float **549918**
+/ RDC **230**, output integer **535315** / RDC **506**, and RWInstanceCounts
+**543675** / RDC **485**. The constants include current and previous Niagara
+external parameters. These are the next upstream inputs to inspect. The float
+buffer is placed; the lack of a per-resource Initial Contents chunk is **not**
+evidence of missing initialization, since this RenderDoc version stores placed
+buffer initial contents on the heap. Heap restoration, aliasing and the actual
+simulation inputs still need verification before assigning a cause.
+
+This research used only serial queries of the existing independent capture.
+Temporary probes from builds **350–352** were removed and the production worker
+restored; an initial research-only compile error in build **349** was corrected.
+No indirect counts, simulation data or barriers were modified to force matching
+output. Pixel History now reports the changing state, but the particle replay
+variation and full-frame fidelity remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
