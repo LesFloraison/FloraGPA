@@ -931,6 +931,26 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
         !file.commit())
         throw std::runtime_error("Cannot export shader disassembly");
     result["disassembly"] = text(assembly);
+    // Keep the actual bound program alongside the trace. A decompiled listing
+    // alone cannot preserve fast-math flags or the original compiler context.
+    result["shader_bytecode"] = {{"status", "unavailable"},
+        {"reason", "No DXBC/DXIL bytecode is available from the selected shader reflection"}};
+    if (!reflection->rawBytes.empty() &&
+        (reflection->encoding == ShaderEncoding::DXBC || reflection->encoding == ShaderEncoding::DXIL)) {
+        const bool dxil = reflection->encoding == ShaderEncoding::DXIL;
+        const auto filename = dxil ? "debug_shader.dxil" : "debug_shader.dxbc";
+        const auto bytes = QByteArrayView(reinterpret_cast<const char *>(reflection->rawBytes.data()),
+                                         qsizetype(reflection->rawBytes.size()));
+        QSaveFile bytecodeFile(QString::fromStdString(job.at("out").get<std::string>()) + '/' + filename);
+        if (!bytecodeFile.open(QIODevice::WriteOnly) ||
+            bytecodeFile.write(bytes.data(), bytes.size()) != bytes.size() || !bytecodeFile.commit())
+            throw std::runtime_error("Cannot export selected shader bytecode");
+        result["shader_bytecode"] = {{"status", "exported"}, {"format", dxil ? "DXIL" : "DXBC"},
+            {"file", filename}, {"byte_length", std::to_string(reflection->rawBytes.size())},
+            {"sha256", QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toStdString()},
+            {"scope", "Currently bound replay shader, including any experiment replacement. "
+                      "This is not a claim of equality with the original capture shader or root-signature compatibility."}};
+    }
     if (dx12 && compute && reflection->encoding == ShaderEncoding::DXIL && !session.computePrepared) {
         result["partial"] = true;
         auto &warnings = result["debug_scope"]["warnings"];

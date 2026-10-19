@@ -5738,6 +5738,69 @@ Request-scope validation passes separately: **3 passed**, **22 ms**.
 Builds **372–374** pass. Complete PS correctness and the remaining acceptance
 items below remain unfinished.
 
+### Division fusion counterexample and bound Shader export
+
+The targeted `tests/fixtures/dx12-fast-div-sub.{cpp,hlsl}` GPU reproduction
+uses the exact four operand words from the preceding section. Fast and precise
+paths read separate root-constant copies, so precise propagation cannot change
+the fast expression through shared SSA values. DXC output confirms separate
+fast `fdiv/fsub`, precise `fdiv/fsub`, and explicit `FMad` operations.
+On the current adapter (vendor **4318**, device **11352**), independent GPU
+readback produces:
+
+| Computation | Float32 bits |
+| --- | --- |
+| Fast `a/b - c/d` | `0xb7542570` |
+| Precise separate divisions and subtraction | `0xb7542500` |
+| Explicit `mad(a, rcp(b), -preciseRight)` | `0xb754248f` |
+
+The fast minimal expression matches the numeric result of the **opposite
+fusion candidate** from the one matching the original PS's encoded alpha;
+this does not identify the actual machine instruction sequence. The original trace's
+separate arithmetic agrees with the precise control. Thus fast flags and
+operand values alone do not establish a unique driver lowering, and replacing
+all eligible divisions/subtractions with one GPU helper would not be a proven
+fix. The existing fast-multiply/add experiment is unchanged. No new arithmetic
+substitution or sample-specific numerical correction is shipped.
+
+The fixture is a manual, single-Dispatch reproduction of this concrete fault:
+
+```powershell
+dxc.exe -T cs_6_6 -E main -O3 tests/fixtures/dx12-fast-div-sub.hlsl -Fo <probe.dxil>
+# From a Visual Studio developer shell:
+cl /nologo /std:c++20 /EHsc /O2 /I third_party/renderdoc tests/fixtures/dx12-fast-div-sub.cpp /Fe:<probe.exe> /link d3d12.lib dxgi.lib
+<probe.exe> <probe.dxil> <RenderDoc-1.45.dll> <new-capture-prefix>
+```
+
+The precise control initially shared loads with the fast expression; DXC
+propagated precise requirements and removed the intended distinction. That
+version was rejected by disassembly inspection before GPU execution. The
+corrected fixture was run once; generated shader SHA-256 is
+`09c34a5a1db80c0d0f202e884a4006484d9b8395048669fe517a6755251d8a8b`.
+Observed GPU values are not portable expected constants for other drivers.
+
+Shader debug workers now save available bound DXBC/DXIL bytes beside
+`debug_shader.asm` as `debug_shader.dxbc` or `debug_shader.dxil` in the worker
+output directory. `shader_bytecode` records status, relative filename, format,
+decimal byte count, SHA-256 and scope. Missing or other-encoding bytes are
+explicitly unavailable. Exported bytes include active replacements and are
+not automatically labelled original-capture bytes or root-compatible code.
+The output preserves compilation context that the readable RenderDoc listing
+does not retain. Exporting a report JSON elsewhere does not copy this sibling
+binary artifact.
+
+`hellblade-depth-roundtrip-debug1/bytecode` exports **33,072** bytes with SHA-256
+`eb1ff531c6d8ca0024880c8f3be0667c3b467bb9345246716d03c671706c3d66`,
+equal to the previously observed bound PS digest. DXC successfully reads it
+and identifies the original fast divisions `%99/%100` and subtraction `%103`.
+All **131** debug steps and all GPU reference fields exactly equal the prior
+enabled report; the worker loads no GPA/Python modules. Build **375** passes.
+Evidence is retained in `dxil-div-sub-gpu1.json`, `dxil-div-sub-evidence1.json`,
+the tiny RDC and the bound-shader export directory, outside Git. The actual
+original GPU lowering and PS alpha discrepancy remain unresolved; further
+work must retain the original program context rather than infer it from the
+minimal expression.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
