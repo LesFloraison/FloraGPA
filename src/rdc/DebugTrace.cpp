@@ -1,4 +1,5 @@
 #include "DebugTrace.h"
+#include <algorithm>
 #include <bit>
 #include <cmath>
 #include <cstring>
@@ -130,6 +131,102 @@ Json rdcDebugState(const ShaderDebugState &state) {
             {"changes", array(state.changes, [](const auto &v) {
                  return Json{{"before", rdcVariable(v.before)}, {"after", rdcVariable(v.after)}};
              })}};
+}
+Json rdcComparePixelOutput(const ShaderReflection &reflection, const Json &trace,
+                          const Json &steps, const Json &reference) {
+    Json result{{"status", "unavailable"}, {"output_index", 0},
+                {"comparison", "exact_32_bit_components"},
+                {"scope", "Final mapped shader output versus a separate GPU fragment replay; "
+                          "equality does not validate intermediate instructions or input stability."}};
+    auto unavailable = [&](const char *reason) {
+        result["reason"] = reason;
+        return result;
+    };
+    if (reference.value("status", "") != "read")
+        return unavailable("GPU fragment reference is not eligible for comparison");
+    int signatureIndex = -1;
+    for (size_t i = 0; i < reflection.outputSignature.size(); ++i) {
+        const auto &signature = reflection.outputSignature[i];
+        if (signature.systemValue == ShaderBuiltin::ColorOutput && signature.regIndex == 0) {
+            if (signatureIndex >= 0)
+                return unavailable("Target-0 output signature is ambiguous");
+            signatureIndex = int(i);
+        }
+    }
+    if (signatureIndex < 0)
+        return unavailable("No reflected target-0 color output");
+    const auto &signature = reflection.outputSignature[size_t(signatureIndex)];
+    const auto count = signature.compCount;
+    const auto type = signature.varType;
+    if (!count || count > 4 || signature.regChannelMask != (1U << count) - 1 ||
+        (type != VarType::Float && type != VarType::UInt && type != VarType::SInt))
+        return unavailable("Only contiguous 32-bit target-0 signature components are compared");
+    const auto interpretation = type == VarType::Float ? "float" : type == VarType::UInt ? "uint" : "sint";
+    if (reference.value("interpretation", "") != interpretation)
+        return unavailable("GPU reference and output signature interpretations differ");
+    const Json *mapping = nullptr;
+    for (const auto &candidate : trace.at("sourceVars")) {
+        if (candidate.at("signatureIndex") != signatureIndex || candidate.at("undefinedValue") != false ||
+            candidate.at("type") != uint32_t(type) || candidate.at("rows") != 1 || candidate.at("columns") != count)
+            continue;
+        const auto &variables = candidate.at("variables");
+        if (variables.size() != count ||
+            !std::all_of(variables.begin(), variables.end(), [](const auto &v) {
+                return v.at("type") == uint32_t(DebugVariableType::Variable);
+            }))
+            continue;
+        if (mapping)
+            return unavailable("Target-0 debugger output mapping is ambiguous");
+        mapping = &candidate;
+    }
+    if (!mapping)
+        return unavailable("No complete debugger mapping for target-0 output");
+    Json actual = Json::array(), expected = Json::array(), mismatched = Json::array();
+    for (size_t lane = 0; lane < count; ++lane) {
+        const auto &binding = mapping->at("variables")[lane];
+        const auto name = binding.at("name").get<std::string>();
+        const auto component = binding.at("component").get<uint32_t>();
+        const auto split = name.find('.');
+        const auto root = name.substr(0, split);
+        const Json *value = nullptr;
+        bool observed = false;
+        // Last change wins, including removal. Do not recover stale values from
+        // earlier steps when the final output is absent or has a new shape.
+        for (auto step = steps.rbegin(); step != steps.rend() && !observed; ++step)
+            for (auto change = step->at("changes").rbegin(); change != step->at("changes").rend(); ++change) {
+                const auto &after = change->at("after");
+                if (after.at("name") != root && change->at("before").at("name") != root)
+                    continue;
+                observed = true;
+                if (after.at("name") == root) value = &after;
+                break;
+            }
+        size_t cursor = split;
+        while (value && cursor != std::string::npos) {
+            const auto next = name.find('.', cursor + 1);
+            const auto memberName = name.substr(cursor + 1, next == std::string::npos ? next : next - cursor - 1);
+            const Json *memberValue = nullptr;
+            for (const auto &member : value->at("members"))
+                if (member.at("name") == memberName) {
+                    if (memberValue) return unavailable("Ambiguous debugger output member");
+                    memberValue = &member;
+                }
+            value = memberValue;
+            cursor = next;
+        }
+        if (!value || value->at("type") != uint32_t(type) || value->at("rows") != 1 ||
+            component >= value->at("columns").get<uint32_t>() || component >= 4)
+            return unavailable("Final debugger output component is unavailable");
+        actual.push_back(value->at("value").at("u32v").at(component));
+        expected.push_back(reference.at("value").at("uintValue").at(lane));
+        if (actual.back() != expected.back()) mismatched.push_back(lane);
+    }
+    result["status"] = mismatched.empty() ? "exact_output_match" : "output_mismatch";
+    result["interpretation"] = interpretation;
+    result["trace_bits"] = actual;
+    result["gpu_bits"] = expected;
+    result["mismatched_components"] = mismatched;
+    return result;
 }
 Json rdcDebugInfo(const ShaderDebugInfo &info) {
     return {{"compileFlags",

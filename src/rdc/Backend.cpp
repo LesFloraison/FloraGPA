@@ -748,6 +748,15 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                 warnings.push_back("The GPU fragment reference comes from a changing replay and cannot validate this trace.");
             }
         }
+        reference["trace_output_comparison"] = flora::rdcComparePixelOutput(
+            *reflection, result.at("trace"), result.at("steps"), reference);
+        if (reference.at("trace_output_comparison").at("status") == "output_mismatch") {
+            result["partial"] = true;
+            auto &warnings = result["debug_scope"]["warnings"];
+            if (warnings.is_null()) warnings = Json::array();
+            warnings.push_back("The simulated target-0 output differs from the GPU fragment output. "
+                               "This trace is not validated; inspect inputs and shader arithmetic.");
+        }
         result["gpu_invocation_reference"] = std::move(reference);
     }
     return result;

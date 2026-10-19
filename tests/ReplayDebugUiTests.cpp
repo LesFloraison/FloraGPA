@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QSaveFile>
@@ -102,6 +103,25 @@ class ReplayDebugUiTests : public QObject {
         QVERIFY(action(ps, "replayDebugCancel")->isEnabled());
         ps.setWorkerBusy(false);
         QVERIFY(action(ps, "replayDebugRead")->isEnabled());
+    }
+    void pixelOutputMismatchReport() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PIXEL_DEBUG_REPORT");
+        if (path.isEmpty()) QSKIP("Set the saved DX12 debug report with output comparison");
+        auto result = read(path);
+        QCOMPARE(result.at("gpu_invocation_reference").at("trace_output_comparison").at("status"),
+                 Json("output_mismatch"));
+        ReplayDebugView view("ps");
+        view.setContext("hellblade-main-ps", 37003, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        const auto label = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(label); QVERIFY(!label->isHidden());
+        QVERIFY(label->text().contains("Final trace output differs"));
+        QVERIFY(label->text().contains("not validated"));
+        auto step = view.findChild<QSpinBox *>("debugStepIndex");
+        step->setValue(int(result.at("steps").size() - 1));
+        QVERIFY(label->text().contains("Final trace output differs"));
+        view.setContext("new-session", 1, true);
+        QVERIFY(label->isHidden());
     }
     void backendReports() {
         const auto root = qEnvironmentVariable("FLORA_REPLAY_DEBUG_REPORTS");

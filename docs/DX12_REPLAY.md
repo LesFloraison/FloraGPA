@@ -3663,6 +3663,73 @@ Ignored evidence: `hellblade-chromatic-input-history1`,
 under `artifacts/dx12-research`. Full output fidelity and all unfinished feature
 acceptance items remain open.
 
+### Hellblade2 contraction-sensitive DXIL debugging discrepancy
+
+A targeted `MainPS` query at execution **37003**, source **611784**, pixel
+**(541,451)**, primitive **0**, returns **317** DXIL SM6.6 steps. The selected
+target remains unchanged across debugger and Pixel History replays, and the
+history's final event value exactly matches the target. The GPU fragment
+reference is therefore eligible for comparison, but the simulated RGB output
+does **not** match it. No source/PDB is available for this shader.
+
+| Component | Simulated final output | GPU fragment output before storage |
+| --- | --- | --- |
+| R | 0.04267866164445877 | 0.04204192012548447 |
+| G | 0.05200344696640968 | 0.05136670544743538 |
+| B | 0.08223690837621689 | 0.08160016685724258 |
+
+The last RGB operations add a shared quantization dither. Its hash starts with
+`sin(y * 543.31 + x)`, followed by multiplication by `493013` and a fractional
+part. Captured interpolant bits are **1049650790** and **1052812248**. The
+RenderDoc trace separately rounds multiplication and addition; its angle is
+**204.70242309570312**, hash **0.96875**, and dither
+**0.00073313782922923565**. The pinned DXIL interpreter executes `FMul`/`FAdd`
+separately, while `Sin` itself already uses a GPU helper.
+
+The small SM6.6 compute reproduction in
+`tests/fixtures/dx12-contracted-dither.hlsl` runs both fast and `precise`
+expressions on the NVIDIA device (vendor **4318**, device **11352**). The fast
+path produces angle **204.70243835449219**, hash **0.59375**, and dither
+**0.000096395102445967495**; the precise path exactly reproduces the debugger's
+angle, sine, product, hash and dither bits. Adding the fast dither to the three
+pre-dither values from the trace reproduces the GPU fragment RGB bits exactly;
+adding the precise dither reproduces the simulated output bits exactly.
+The fixture is compiled with Windows SDK **10.0.26100.0** DXC, `-T cs_6_6 -E main`.
+Its two input pairs intentionally use separate constant loads: the first
+research attempt shared loads, allowing common-subexpression elimination to
+make both paths precise, and did not distinguish contraction.
+
+This localizes the selected discrepancy to contraction-sensitive dithering.
+It does not directly observe intermediate values in the original GPU shader,
+establish a general interpreter fix, or explain variation between whole-frame
+runs. Applying fused arithmetic to every simulated multiply/add would not
+establish equivalence to the driver's compiled program, so no such change or
+numeric tolerance has been introduced.
+
+The analysis service now compares the final mapped target-0 shader output with
+an eligible GPU fragment reference as exact 32-bit components. It uses the
+reflected color-output signature and debugger variable mappings, excludes input
+mappings, and declines ambiguous, missing, removed or unsupported output shapes
+and references from changing replays. Mismatches mark the result partial and
+appear in the debugging panel. Exact output matches explicitly leave intermediate
+instructions and input stability unverified. The comparison is attached to the
+existing opt-in `pixel_history_reference` query; ordinary stepping does not add
+another GPU query.
+
+Release builds **257–258** cover the analysis service, application and focused
+tests. CPU checks, including the saved real trace, pass (**4 passed including
+setup/cleanup, 184 ms**). A single repeated query at this same invocation
+verifies the new report flags all three RGB components as mismatched. The
+workspace displays that report, preserves the warning while stepping and clears
+it on session change (**3 passed including setup/cleanup, 486 ms**). No new full
+native capture or other sample replay was needed.
+
+Ignored evidence under `artifacts/dx12-research`: `hellblade-main-ps1`,
+`hellblade-main-ps2`, `hellblade-main-trace-values1.json`,
+`hellblade-dither-probe2.json`, `hellblade-dither-evidence1.json`,
+`pixel-output-comparison1.txt`, and `pixel-output-ui1.txt`. The numerical
+debugging discrepancy remains an explicit unfinished backend gap.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3674,7 +3741,7 @@ acceptance items remain open.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; undo restores original PSO/scene with unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

@@ -739,6 +739,17 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                         "Separate Pixel History replay; compare with the selected shader output, not the final texture.")
                     .arg(text(invocationReference.at("primitive")), QString::fromStdString(kind),
                          text(invocationReference.at("value").at(field))));
+            const auto comparison = invocationReference.value("trace_output_comparison", Json::object());
+            const auto status = comparison.value("status", "");
+            if (status == "output_mismatch")
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nFinal trace output differs from the GPU fragment. This trace is not validated.");
+            else if (status == "exact_output_match")
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nFinal mapped output components match exactly; intermediate instructions remain unverified.");
+            else if (comparison.contains("reason"))
+                invocationReference_->setText(invocationReference_->text() +
+                    "\nOutput comparison unavailable: " + text(comparison.at("reason")));
         } else {
             invocationReference_->setText("GPU fragment reference unavailable: " +
                 text(invocationReference.value("reason", Json("Unknown"))));

@@ -1,4 +1,5 @@
 #include "rdc/DebugTrace.h"
+#include <QFile>
 #include <QtTest>
 #include <cmath>
 #include <cstdlib>
@@ -13,6 +14,75 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void pixelOutputComparison() {
+        using Json = nlohmann::json;
+        ShaderReflection reflection;
+        SigParameter signature;
+        signature.systemValue = ShaderBuiltin::ColorOutput;
+        signature.compCount = 4; signature.regChannelMask = 15;
+        reflection.outputSignature.push_back(signature);
+        ShaderDebugTrace trace;
+        SourceVariableMapping mapping;
+        mapping.name = "SV_Target0"; mapping.type = VarType::Float;
+        mapping.rows = 1; mapping.columns = 4; mapping.signatureIndex = 0;
+        mapping.offset = 0; mapping.undefinedValue = false;
+        for (uint32_t i = 0; i < 4; ++i) {
+            DebugVariableReference variable;
+            variable.name = "_OUT.SV_Target0"; variable.type = DebugVariableType::Variable;
+            variable.component = i; mapping.variables.push_back(variable);
+        }
+        trace.sourceVars.push_back(mapping);
+        ShaderVariable output;
+        output.name = "_OUT"; output.type = VarType::Struct;
+        output.members.push_back(ShaderVariable("SV_Target0", 1.f, 2.f, 3.f, 0.f));
+        auto steps = Json::array({{{"changes", Json::array({{{"before", rdcVariable({})},
+                                                            {"after", rdcVariable(output)}}})}}});
+        Json reference{{"status", "read"}, {"interpretation", "float"},
+                       {"value", {{"uintValue", Json::array({1065353216u,1073741824u,1077936128u,0u})}}}};
+        auto traceJson = rdcDebugTrace(trace);
+        auto compare = [&] { return rdcComparePixelOutput(reflection, traceJson, steps, reference); };
+        QCOMPARE(compare().at("status"), Json("exact_output_match"));
+        // A one-bit difference must not be hidden behind a default tolerance.
+        reference["value"]["uintValue"][1] = 1073741825u;
+        QCOMPARE(compare().at("status"), Json("output_mismatch"));
+        QCOMPARE(compare().at("mismatched_components"), Json::array({1}));
+        reference["status"] = "unverified_replay_changed";
+        QCOMPARE(compare().at("status"), Json("unavailable"));
+        reference["status"] = "read";
+        // Matching input signature indices must not become output mappings.
+        auto input = traceJson["sourceVars"][0];
+        for (auto &v : input["variables"]) v["type"] = uint32_t(DebugVariableType::Input);
+        traceJson["sourceVars"].push_back(input);
+        QCOMPARE(compare().at("status"), Json("output_mismatch"));
+        traceJson["sourceVars"].push_back(traceJson["sourceVars"][0]);
+        QCOMPARE(compare().at("status"), Json("unavailable"));
+        traceJson["sourceVars"].erase(2);
+        steps.push_back({{"changes", Json::array({{{"before", rdcVariable(output)},
+                                                   {"after", rdcVariable({})}}})}});
+        QCOMPARE(compare().at("status"), Json("unavailable"));
+        steps.erase(1);
+        reflection.outputSignature[0].regChannelMask = 10;
+        QCOMPARE(compare().at("status"), Json("unavailable"));
+    }
+    void hellbladePixelOutputEvidence() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_PIXEL_DEBUG_REPORT");
+        if (path.isEmpty()) QSKIP("Set the saved Hellblade2 MainPS report for this CPU evidence check");
+        QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
+        using Json = nlohmann::json;
+        const auto report = Json::parse(file.readAll().toStdString());
+        QCOMPARE(report.at("execution"), Json("37003"));
+        ShaderReflection reflection;
+        SigParameter signature;
+        signature.systemValue = ShaderBuiltin::ColorOutput;
+        signature.compCount = 4; signature.regChannelMask = 15;
+        reflection.outputSignature.push_back(signature);
+        const auto comparison = rdcComparePixelOutput(reflection, report.at("trace"), report.at("steps"),
+                                                      report.at("gpu_invocation_reference"));
+        QCOMPARE(comparison.at("status"), Json("output_mismatch"));
+        QCOMPARE(comparison.at("mismatched_components"), Json::array({0,1,2}));
+        QCOMPARE(comparison.at("trace_bits"), Json::array({1026478034u,1028981137u,1034447827u,0u}));
+        QCOMPARE(comparison.at("gpu_bits"), Json::array({1026307110u,1028810213u,1034362365u,0u}));
+    }
     void typedValues() {
         ShaderVariable v;
         v.name = "wide";
