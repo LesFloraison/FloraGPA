@@ -6198,6 +6198,63 @@ This connects the previously verified partial native path to the shared
 workspace. It does not recover query values, validate original-GPA full-frame
 fidelity or enable analysis of the incomplete continuation.
 
+### Query-isolated analysis capture and Talos color discrepancy
+
+Native `replay --isolate-missing-queries --renderdoc <dll>` now embeds a
+versioned queue marker in the RDC itself. Its bounded JSON records the selected
+execution/boundary, reserved resource lifetimes and widths, and each missing
+resolve's submission, queue and contiguous known/unknown byte ranges. All
+64-bit identities and offsets remain decimal strings. No sidecar is needed to
+identify an incomplete capture. Duplicate, malformed, oversized or inconsistent
+policies are rejected.
+
+`rdc-analyze --isolate-missing-queries` explicitly accepts that marker for
+`inventory` and `texture` only. Request and capture policies must agree; request
+identity includes the policy. Results preserve the policy and
+`frame_complete=false`. Query destination buffers remain inaccessible in their
+entirety: a range known after a later resolve cannot establish availability at
+an earlier analysis event. Histories, debugging, geometry and counters remain
+unsupported for isolated captures. The GUI does not yet enable these analysis
+paths. This is a capture/provenance milestone, not analysis correctness acceptance.
+
+Targeted evidence in ignored `artifacts/dx12-research/talos-isolated-analysis1`:
+
+- The original Talos capture reaches execution **19410** with zero native
+  validation errors and unchanged native output SHA-256
+  `e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+  Its RDC preserves both isolated resources/resolves, **1,046 Draws** and
+  **661 resources**; execution **19410** maps to RenderDoc **20538**.
+- RenderDoc final texture readback succeeds but differs from native in
+  **204,352 pixels**, maximum BGRA deltas **58/60/72/112**. Channel order is
+  unchanged. Successful readback is not a fidelity pass.
+- The same RDC's first depth Draw **12675**, resource creation **167081**,
+  layer **1**, exactly matches the native 8 MiB texture hash
+  `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217`.
+  First color **16000**, creation **42877**, differs in **564,384 pixels**,
+  before the first missing-query resolve **16001**.
+- A fresh **strict** native capture ending at **16000** reproduces the known
+  native first-color hash
+  `4fcac91107578f2a4a96ec8ffaaaa1d1cf343155205ecf28beb3861c843eb2e8`.
+  Its RenderDoc readback still differs in **218,373 pixels** (maximum BGRA
+  deltas **65/82/93/111**). Thus the discrepancy also occurs without query
+  isolation; its cause remains unresolved. The strict and longer RDC reads
+  are themselves different and are not interchangeable reference results.
+- Indexed resource usage identifies four writes to this color target:
+  **15981, 15988, 15996, 16000**. Comparing native and RDC immediately after
+  the first write **15981** already gives **217,348 differing pixels**.
+  The mapped PSO is creation **156649**; PS texture input is creation
+  **156503**, object **1657132384**, and PS constants use buffer creation
+  **150566** at offset **32457728**. These locate the next input comparison;
+  they do not establish that the shader or any particular input is faulty.
+
+Builds **389–391** pass. Focused marker/mapping tests report **5 passed** and
+job-preparation tests **4 passed**, including setup/cleanup. They cover uint64
+identity preservation, range/boundary validation, duplicate markers, policy
+mismatch, prohibited buffer access/actions and option typing. GPU checks were
+serial and limited to this capture path and the newly reproduced color fault.
+The analysis processes report no loaded GPA modules. Full Talos fidelity,
+isolated histories/debugging and portable-package acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

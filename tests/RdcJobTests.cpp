@@ -69,6 +69,18 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void queryIsolationPreparation() {
+        QTemporaryDir dir;
+        QCOMPARE(prepare(dir.path(), "success").at("isolate_missing_queries"), Json(false));
+        const Json options{{"isolate_missing_queries", true}};
+        for (const auto *action : {"inventory", "texture"})
+            QCOMPARE(prepare(dir.path(), "success", options, action).at("isolate_missing_queries"), Json(true));
+        for (const auto *action : {"resource-history", "history", "debug-pixel", "postmesh", "counters"})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, action));
+        for (const auto &value : {Json(1), Json("true"), Json(nullptr)})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                prepare(dir.path(), "success", {{"isolate_missing_queries", value}}));
+    }
     void counterSelectionPreparation() {
         QTemporaryDir dir;
         const Json options{{"counter_ids", Json::array({3000001, 1})}, {"execution", "21895"}};

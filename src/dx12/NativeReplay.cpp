@@ -7,6 +7,7 @@
 #include "NativeTimeline.h"
 #include "QueryReplayIndex.h"
 #include "QueueDependencyIndex.h"
+#include "application/RdcEvents.h"
 #include "../common/PackedColor.hpp"
 #include <wrl/client.h>
 #include <dxgi1_4.h>
@@ -131,6 +132,8 @@ struct NativeReplay::Impl {
         std::map<uint64_t, std::vector<Key>> starts;
         uint64_t execution{};
         bool after{}, markers{};
+        json queryPolicy;
+        std::string queryPolicyMarker;
         bool measure{};
         std::unique_ptr<NativePerformance> performance;
         std::unique_ptr<NativeTimeline> timeline;
@@ -485,7 +488,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
     if (s.isolateMissingQueries) {
-        require(!analysisMarkers && !performance, "Isolated query replay does not support analysis capture or performance measurement");
+        require(!performance, "Isolated query replay does not support performance measurement");
         require(s.disabledExecutions.empty() && s.uavBarriersBefore.empty() && s.shaderReplacements.empty() && s.resourcePatches.empty(),
                 "Isolated query replay cannot be combined with modification experiments");
         for (const auto creation : s.queries.isolatedReadbacks(execution, !after)) s.resources.isolateQueryReadback(creation);
@@ -541,6 +544,30 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     frame->execution = execution;
     frame->after = after;
     frame->markers = analysisMarkers;
+    if (s.isolateMissingQueries && analysisMarkers) {
+        frame->queryPolicy = {{"schema", 1}, {"policy", "isolate_readback_outputs"}, {"frame_complete", false},
+            {"selected_execution", std::to_string(execution)}, {"after", after},
+            {"resources", json::array()}, {"resolves", json::array()}};
+        const auto resourceInfo = s.resources.information();
+        for (const auto &resource : resourceInfo.at("isolated_query_readbacks")) {
+            const auto creation = std::stoull(resource.at("creation").get<std::string>());
+            const auto &packet = s.directory.packets().at(size_t(creation - 1));
+            const auto recipe = decodeResourceRecipe(packet.type, s.directory.payload(packet));
+            frame->queryPolicy["resources"].push_back({{"creation", resource.at("creation")},
+                {"width", resource.at("width")}, {"object", std::to_string(recipe.object)}});
+        }
+        const auto coverage = s.queries.information();
+        for (const auto &entry : coverage.at("resolves_and_issues")) {
+            const auto id = std::stoull(entry.at("execution").get<std::string>());
+            if (id > execution || (id == execution && !after)) break;
+            if (entry.at("status") != "missing_query_results") continue;
+            frame->queryPolicy["resolves"].push_back({{"execution", entry.at("execution")},
+                {"source_record", entry.at("source_record")}, {"submission", entry.at("submission")}, {"queue", entry.at("queue")},
+                {"creation", entry.at("destination_resource").at("creation")}, {"offset", entry.at("destination_offset")},
+                {"bytes", entry.at("result_bytes")}, {"ranges", entry.at("destination_byte_ranges")}});
+        }
+        frame->queryPolicyMarker = rdcQueryIsolationMarker(frame->queryPolicy);
+    }
     require(!performance || after, "Performance queries require an after-event replay boundary");
     require(!performance || !s.disabledExecutions.contains(execution), "Selected execution is disabled by the experiment");
     require(!performance || !analysisMarkers, "Native performance queries cannot be combined with RenderDoc capture");
@@ -914,6 +941,8 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 s.frame->markers == analysisMarkers,
             "Prepared execution does not match replay request");
     const auto abortOnFailure = qScopeGuard([&] { if (!s.boundaryReached) s.abortFrame(); });
+    if (!s.frame->queryPolicyMarker.empty())
+        s.queue(target.queue)->SetMarker(1, s.frame->queryPolicyMarker.c_str(), UINT(s.frame->queryPolicyMarker.size() + 1));
     for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
         s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
         try {
@@ -1496,6 +1525,7 @@ json NativeReplay::information() const {
                       "GPU overlap. Initialization is serialized; complete original CPU concurrency is not restored."}}},
         {"query_replay_coverage", s.queries.information()},
         {"missing_query_policy", s.isolateMissingQueries ? "isolate_readback_outputs" : "fail"},
+        {"analysis_query_isolation", s.frame ? s.frame->queryPolicy : json()},
         {"query_readback_availability_valid", s.boundaryReached},
         {"query_command_count_scope", "Original execution instances; an isolated ResolveQueryData records one native call per available contiguous range"},
         {"disabled_executions", std::move(disabled)}, {"suppressed_executions", std::move(suppressed)},

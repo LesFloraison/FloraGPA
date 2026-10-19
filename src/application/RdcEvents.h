@@ -10,4 +10,8 @@ nlohmann::json selectDx12RdcExecution(const nlohmann::json &mapping, const std::
                                      const nlohmann::json &indirectAction = nullptr);
 // -1 denotes a legacy/direct action; generated ordinals must have complete provenance.
 int64_t indirectActionOrdinal(const nlohmann::json &provenance);
+// Embedded capture policy, independent of sidecars and analysis job filenames.
+std::string rdcQueryIsolationMarker(const nlohmann::json &policy);
+nlohmann::json readRdcQueryIsolation(const nlohmann::json &roots);
+void requireRdcQueryIsolation(const nlohmann::json &policy, const nlohmann::json &job);
 } // namespace flora

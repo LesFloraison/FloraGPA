@@ -1,4 +1,5 @@
 #include "application/RdcEvents.h"
+#include "application/ReplayRequest.h"
 #include <QCoreApplication>
 #include <QFile>
 #include <QtTest>
@@ -23,6 +24,41 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void isolatedQueryCapturePolicy() {
+        const auto high = std::to_string((1ULL << 53) + 8);
+        Json policy{{"schema", 1}, {"policy", "isolate_readback_outputs"}, {"frame_complete", false},
+            {"selected_execution", "18446744073709551615"}, {"after", true},
+            {"resources", Json::array({{{"creation", high}, {"object", "123"}, {"width", "18446744073709551615"}}})},
+            {"resolves", Json::array({{{"execution", "18446744073709551615"}, {"source_record", high}, {"submission", "8"},
+                {"queue", "9"}, {"creation", high}, {"offset", high}, {"bytes", "16"},
+                {"ranges", Json::array({{{"offset", high}, {"bytes", "8"}, {"available_from_replayed_queries", false}},
+                    {{"offset", std::to_string((1ULL << 53) + 16)}, {"bytes", "8"}, {"available_from_replayed_queries", true}}})}}})}};
+        const auto marker = node(1, rdcQueryIsolationMarker(policy), 0x20);
+        QCOMPARE(readRdcQueryIsolation(Json::array({marker})), policy);
+        QVERIFY(readRdcQueryIsolation(Json::array()).is_null());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readRdcQueryIsolation(Json::array({marker, marker})));
+        auto invalid = policy; invalid["resources"][0]["creation"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::exception, rdcQueryIsolationMarker(invalid));
+        invalid = policy; invalid["resources"][0]["width"] = high;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcQueryIsolationMarker(invalid));
+        invalid = policy; invalid["resolves"][0]["ranges"][1]["offset"] = high;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcQueryIsolationMarker(invalid));
+        invalid = policy; invalid["after"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcQueryIsolationMarker(invalid));
+        Json job{{"action", "inventory"}, {"isolate_missing_queries", true}};
+        requireRdcQueryIsolation(policy, job);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(nullptr, job));
+        job["isolate_missing_queries"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
+        job["isolate_missing_queries"] = true; job["action"] = "debug-pixel";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
+        job["action"] = "texture"; job["resource"] = "123"; job["resource_creation"] = high;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
+        job["resource"] = "124"; requireRdcQueryIsolation(policy, job);
+        const ReplayRequestIdentity identity{"isolated", ReplayBackend::Dx12, UINT64_MAX, UINT64_MAX, false};
+        job["request_identity"] = replayIdentityJson(identity);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
+    }
     void dx12ExecutionProvenance() {
         const auto marker = [](const char *execution, const char *record, const char *submission,
                                const char *method) {

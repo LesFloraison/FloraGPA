@@ -1,4 +1,5 @@
 #include "RdcEvents.h"
+#include "ReplayRequest.h"
 #include <charconv>
 #include <functional>
 #include <map>
@@ -327,6 +328,93 @@ Json rdcProvenance(uint32_t event, const Json &reverse) {
             {"gpa_command", nullptr},
             {"gpa_command_kind", nullptr},
             {"mapping_status", "unmapped_replay_action"}};
+}
+namespace {
+constexpr const char *queryPolicyPrefix = "Flora DX12 query isolation v1: ";
+uint64_t policyNumber(const Json &value) {
+    const auto &text = value.get_ref<const std::string &>(); uint64_t result{};
+    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+    if (text.empty() || parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || std::to_string(result) != text)
+        throw std::runtime_error("Invalid uint64 query-isolation identity/range");
+    return result;
+}
+void validateQueryPolicy(const Json &p) {
+    if (p.at("schema") != 1 || p.at("policy") != "isolate_readback_outputs" || p.at("frame_complete") != false ||
+        !p.at("after").is_boolean() || !p.at("resources").is_array() || p.at("resources").size() > 4096 ||
+        !p.at("resolves").is_array() || p.at("resolves").size() > 16384)
+        throw std::runtime_error("Invalid query-isolation capture policy");
+    const auto selected = policyNumber(p.at("selected_execution"));
+    if (!selected) throw std::runtime_error("Missing query-isolation execution boundary");
+    std::map<uint64_t, uint64_t> widths;
+    for (const auto &resource : p.at("resources")) {
+        const auto creation = policyNumber(resource.at("creation")), width = policyNumber(resource.at("width"));
+        if (!creation || !width || !policyNumber(resource.at("object")) || !widths.emplace(creation, width).second)
+            throw std::runtime_error("Invalid or duplicate isolated query resource");
+    }
+    std::set<uint64_t> executions;
+    for (const auto &entry : p.at("resolves")) {
+        const auto execution = policyNumber(entry.at("execution")), creation = policyNumber(entry.at("creation"));
+        const auto offset = policyNumber(entry.at("offset")), bytes = policyNumber(entry.at("bytes"));
+        if (!execution || execution > selected || (execution == selected && !p.at("after").get<bool>()) ||
+            !executions.insert(execution).second || !widths.contains(creation) || !policyNumber(entry.at("source_record")) ||
+            !policyNumber(entry.at("queue")) || !policyNumber(entry.at("submission")) ||
+            !bytes || offset > widths.at(creation) || bytes > widths.at(creation) - offset || !entry.at("ranges").is_array())
+            throw std::runtime_error("Invalid isolated query resolve provenance");
+        uint64_t next = offset; bool missing = false;
+        for (const auto &range : entry.at("ranges")) {
+            const auto at = policyNumber(range.at("offset")), count = policyNumber(range.at("bytes"));
+            if (at != next || !count || count > offset + bytes - next || !range.at("available_from_replayed_queries").is_boolean())
+                throw std::runtime_error("Invalid isolated query destination ranges");
+            next += count; missing |= !range.at("available_from_replayed_queries").get<bool>();
+        }
+        if (next != offset + bytes || !missing) throw std::runtime_error("Incomplete missing-query range coverage");
+    }
+}
+}
+std::string rdcQueryIsolationMarker(const Json &policy) {
+    validateQueryPolicy(policy);
+    const auto marker = std::string(queryPolicyPrefix) + policy.dump();
+    if (marker.size() > 1048576) throw std::runtime_error("Query-isolation marker exceeds one MiB");
+    return marker;
+}
+Json readRdcQueryIsolation(const Json &roots) {
+    Json result; size_t visited{};
+    std::function<void(const Json &, unsigned)> walk = [&](const Json &nodes, unsigned depth) {
+        if (!nodes.is_array() || depth > 128) throw std::runtime_error("Invalid query-policy action tree");
+        for (const auto &node : nodes) {
+            if (++visited > 1000000) throw std::runtime_error("Query-policy action limit exceeded");
+            const auto name = node.at("customName").get<std::string>();
+            if (name.starts_with("Flora DX12 query isolation")) {
+                if (!result.is_null() || !name.starts_with(queryPolicyPrefix) || name.size() > 1048576)
+                    throw std::runtime_error("Ambiguous or unsupported query-isolation capture marker");
+                result = Json::parse(name.substr(std::char_traits<char>::length(queryPolicyPrefix)),
+                    [](int depth, Json::parse_event_t, Json &) {
+                        if (depth > 64) throw std::runtime_error("Query-isolation marker nesting limit exceeded");
+                        return true;
+                    });
+                validateQueryPolicy(result);
+            }
+            walk(node.at("children"), depth + 1);
+        }
+    };
+    walk(roots, 0); return result;
+}
+void requireRdcQueryIsolation(const Json &policy, const Json &job) {
+    const bool requested = job.value("isolate_missing_queries", false);
+    if (job.contains("request_identity") && parseReplayIdentity(job.at("request_identity")).isolateMissingQueries != requested)
+        throw std::runtime_error("Analysis request query policy does not match its identity");
+    if (requested != !policy.is_null()) throw std::runtime_error("Analysis query policy does not match the embedded capture marker");
+    if (!requested) return;
+    validateQueryPolicy(policy);
+    const auto action = job.at("action").get<std::string>();
+    if (action != "inventory" && action != "texture")
+        throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
+    // Query readbacks remain excluded as a whole: later completed writes must
+    // not be mistaken for valid bytes at an earlier selected analysis event.
+    if (!job.value("resource", Json()).is_null()) for (const auto &resource : policy.at("resources"))
+        if (job.at("resource") == resource.at("object") &&
+            (!job.contains("resource_creation") || job.at("resource_creation") == resource.at("creation")))
+            throw std::runtime_error("Analysis cannot read isolated query output resources");
 }
 int64_t indirectActionOrdinal(const Json &p) {
     if (!p.contains("indirect_action") && !p.contains("indirect_action_count")) return -1;

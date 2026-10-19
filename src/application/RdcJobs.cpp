@@ -81,6 +81,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"index", nullptr},
              {"stage", "VSOut"},
              {"api_validation", false},
+             {"isolate_missing_queries", false},
              {"readonly_depth_snapshot", false},
              {"depth_roundtrip", false},
              {"dxil_fast_contraction", false},
@@ -113,6 +114,9 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Choose GPA or RDC event, not both");
     if (!job["api_validation"].is_boolean())
         throw std::runtime_error("API validation must be a boolean");
+    if (!job.at("isolate_missing_queries").is_boolean() ||
+        (job.at("isolate_missing_queries").get<bool>() && action != "inventory" && action != "texture"))
+        throw std::runtime_error("Query-isolated analysis currently supports inventory and texture readback only");
     if (!job["dxil_fast_contraction"].is_boolean() ||
         (job["dxil_fast_contraction"].get<bool>() && (!job.contains("execution") ||
          (action != "debug-pixel" && action != "debug-vertex" && action != "debug-thread"))))

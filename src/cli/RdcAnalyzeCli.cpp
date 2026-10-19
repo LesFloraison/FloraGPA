@@ -38,6 +38,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
         p.addOption({"counter", "Counter ID to sample (repeatable; counters action only). Default: built-in counters. Sampling covers capture actions, not only --execution.", "integer"});
         p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
+        p.addOption({"isolate-missing-queries", "Accept a marked incomplete DX12 capture for inventory or texture readback"});
         p.addOption({"dxil-fast-contraction", "Experimental GPU evaluation of adjacent single-use fast DXIL multiply/add pairs"});
         p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
         p.addOption({"depth-roundtrip", "Experimental selected DX12 D32S8 depth refresh for texture/history/debug-pixel analysis; preserves original depth writes"});
@@ -74,6 +75,7 @@ int rdcAnalyzeCli(QStringList args) {
         using Json = nlohmann::json;
         Json options = Json::object();
         options["api_validation"] = p.isSet("api-validation");
+        options["isolate_missing_queries"] = p.isSet("isolate-missing-queries");
         options["dxil_fast_contraction"] = p.isSet("dxil-fast-contraction");
         options["readonly_depth_snapshot"] = p.isSet("readonly-depth-snapshot");
         options["depth_roundtrip"] = p.isSet("depth-roundtrip");

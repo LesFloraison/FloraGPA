@@ -1292,6 +1292,8 @@ Json rdcLoadedModules() {
 }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
+    if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture")
+        throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
     if (job.value("depth_roundtrip", false) &&
         ((action != "texture" && action != "debug-pixel" && action != "history") || job.value("readonly_depth_snapshot", false)))
         throw std::runtime_error("Depth roundtrip requires texture, history or debug-pixel analysis without read-only depth snapshots");
@@ -1362,11 +1364,15 @@ Json runRdcJob(const Json &job) {
                                         "Verisilicon", "Software", "Samsung"};
     Events events;
     const auto roots = events.walk(controller.GetRootActions(), controller.GetStructuredFile());
+    const auto queryPolicy = readRdcQueryIsolation(roots);
+    requireRdcQueryIsolation(queryPolicy, job);
+    if (!queryPolicy.is_null() && !dx12) throw std::runtime_error("Query isolation requires a DX12 capture");
     auto mapping = dx12 ? indexDx12RdcEvents(roots, events.native) : indexRdcEvents(roots, events.native);
     Json result{
         {"ok", true},
         {"action", action},
         {"backend", dx12 ? "dx12" : "dx11"},
+        {"query_isolation", queryPolicy},
         {"backend_version", session.version},
         {"backend_commit", session.commit},
         {"backend_d16_history_patch", session.d16HistoryPatch},
@@ -1387,6 +1393,7 @@ Json runRdcJob(const Json &job) {
           {"local_renderer_enum", uint32_t(properties.localRenderer)}}},
         {"gpa_event_map", mapping["gpa_event_map"]},
         {"gpa_command_map", mapping["gpa_command_map"]}};
+    if (!queryPolicy.is_null()) result["frame_complete"] = false;
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
         if (session.depthRoundtripCopies) {

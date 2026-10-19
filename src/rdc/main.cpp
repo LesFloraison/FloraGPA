@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
         if (!QDir().mkpath(destination))
             throw std::runtime_error("Cannot create output directory");
         output = destination;
-        if (identity && identity->isolateMissingQueries)
-            throw std::runtime_error("Analysis of isolated query replay is not yet supported");
+        if (identity && identity->isolateMissingQueries && job.at("action") != "inventory" && job.at("action") != "texture")
+            throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
         result = flora::runRdcJob(job);
     } catch (const std::exception &e) {
         result["error"] = e.what();
