@@ -5615,6 +5615,78 @@ production code recompiled, and the original thirteen-patch DLL hash restored.
 The selected-event replay fault and the full acceptance requirements remain
 unfinished.
 
+### Selected D32S8 depth roundtrip experiment
+
+Further targeted probes isolate the execution **36222** discrepancy to the
+depth attachment path. An explicit queue wait does not change the result.
+GPU pipeline statistics around that exact ExecuteIndirect report the same
+**2,280 IA vertices, 760 IA primitives, 1,520 VS invocations and 386 clipped
+primitives** for split and continuous replay, but **4 versus 299 PS
+invocations**. The Draw executes; this is not evidence of a skipped command.
+
+Copying the D32S8 depth contents to an identical temporary resource and binding
+that resource restores the entire velocity image. Copying out while retaining
+the original attachment does not. Copying out **and back into the original
+resource before the Draw** restores both velocity and the original depth
+image, preserving the Draw's depth writes. The latter probe reports **971 PS
+invocations**; exact final images do not imply identical early-depth behavior
+or performance. No specific driver/compression fault has been established.
+
+The fourteenth pinned patch, `dx12-depth-roundtrip.patch`, exposes this as an
+**experimental, default-off** texture-analysis option:
+
+```powershell
+FloraGPA.Cli rdc-analyze capture.rdc texture --execution 36222 `
+  --resource 2152463529088 --resource-creation 511789 --depth-roundtrip `
+  --renderdoc <fourteen-patch-renderdoc.dll> --out <new-output-directory>
+```
+
+It applies only to the explicitly resolved selected event's isolated Draw,
+including an indirect child. Eligibility requires a depth-writing D32S8 2D
+attachment, stencil disabled, one mip/layer/sample/node and legacy depth
+states. Mesh draws, enhanced layouts and other depth formats are outside this
+experiment. Both planes are copied; the original DSV remains bound and the
+tracked states are restored before the Draw. The temporary resource survives
+GPU completion. Full/prefix replays and capture loading do not enable it.
+Shader Debug, Pixel History and the workspace UI do not yet expose this
+option. It cannot be combined with the older read-only D32 snapshot option.
+
+The worker checks the extension version, rejects a request when no eligible
+selected Draw was processed, and records `depth_roundtrip.copies` as a decimal
+string with the experimental scope. A copy count is not a correctness claim.
+The build/package scripts verify and include all fourteen patches and hashes.
+
+Production CLI evidence in `hellblade-depth-roundtrip1`, using the unmodified
+Hellblade2 RDC and no temporary instrumentation:
+
+| Observation | Result |
+| --- | --- |
+| Enabled velocity readback | All 2,304,000 pixels equal the continuous prefix through execution 36223; 53 pixels differ from the incorrect split replay |
+| Enabled original depth readback | Entire depth/stencil byte image equals that same prefix; 53 pixels differ from the incorrect split replay |
+| Selected pixel (456,206) | Velocity UNORM16 `(34608,30148,46932,9359)`; depth `0.0021878723055124283` |
+| Option disabled | Reproduces the previous incorrect velocity image exactly; no roundtrip report |
+| Following API 36223 selected | Rejected as not applied; no texture file produced |
+
+Each enabled readback reports one completed roundtrip. Velocity SHA-256 is
+`df87584674035f2ae0ce0439a61f64b072b043423596462f1192661bf5e9112f`;
+depth/stencil SHA-256 is
+`3d43f75f10d0dd834dfd0ac55d54b6a5a49a0503e30c87f961b3bb921ff5c2ae`.
+The runtime SHA-256 is
+`02a0cca7fe646be42a716b4c1f1f65d7caf85080675e9eb951203bf34a2815ea`,
+and this patch SHA-256 is
+`35e3ee498bedb1122353489d8c9b6cc1e070b344009e7c1b7511e1e043545168`.
+The enabled workers load neither GPA nor Python. Research sources, GPU query
+hooks, hard-coded event probes and success-log preservation are removed.
+
+The request-scope/default checks pass (**4 passed**, **0 failed**, **17 ms**,
+including setup/cleanup). Build 370 compiled worker/CLI/UI but ended with a
+misspelled test-target name; build 371 compiled the correct test target. The
+first patch build rejected CRLF patch context before compilation; after LF
+normalization the exact fourteen-patch source/build verification passes.
+Package-script parsing passes; full portable-package acceptance remains
+unverified. This restores one demonstrated texture boundary through an
+explicit workaround, not general selected replay, analysis or frame fidelity.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

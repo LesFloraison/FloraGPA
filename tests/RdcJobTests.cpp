@@ -144,6 +144,7 @@ class RdcJobTests : public QObject {
         QCOMPARE(job.at("stage"), Json("VSOut"));
         QCOMPARE(job.at("api_validation"), Json(false));
         QCOMPARE(job.at("readonly_depth_snapshot"), Json(false));
+        QCOMPARE(job.at("depth_roundtrip"), Json(false));
         QCOMPARE(job.at("pixel_history_reference"), Json(false));
         QCOMPARE(job.at("group"), Json::array({1, 2, 3}));
         QCOMPARE(job.at("thread"), Json::array({0, 0, 0}));
@@ -165,6 +166,21 @@ class RdcJobTests : public QObject {
         const auto job = prepare(dir.path(), "success", options, "debug-pixel");
         QCOMPARE(job.at("pixel_history_reference"), Json(true));
         QCOMPARE(job.at("primitive"), Json(1322));
+    }
+    void depthRoundtripScope() {
+        QTemporaryDir dir;
+        const Json option{{"execution", "36222"}, {"depth_roundtrip", true}};
+        for (const auto *action : {"history", "debug-pixel", "debug-vertex", "debug-thread", "counters"})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", option, action));
+        auto conflict = option;
+        conflict["readonly_depth_snapshot"] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", conflict, "texture"));
+        auto invalid = option;
+        invalid["depth_roundtrip"] = "true";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "texture"));
+        const auto job = prepare(dir.path(), "success", option, "texture");
+        QCOMPARE(job.at("depth_roundtrip"), Json(true));
+        QCOMPARE(job.at("execution"), Json("36222"));
     }
     void invalidOptions_data() {
         QTest::addColumn<Json>("options");

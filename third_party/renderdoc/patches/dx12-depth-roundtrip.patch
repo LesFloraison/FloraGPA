@@ -1,0 +1,153 @@
+--- a/renderdoc/driver/d3d12/d3d12_device.cpp
++++ b/renderdoc/driver/d3d12/d3d12_device.cpp
+@@ -5695,6 +5695,109 @@
+   return floraReadOnlyDepthSnapshotCopies.load();
+ }
+ 
++// Explicit selected-event experiment. Never enabled during capture loading or full replay.
++static uint32_t floraDepthRoundtripEvent = 0;
++static std::atomic<uint64_t> floraDepthRoundtripCopies(0);
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDepthRoundtripPatchVersion()
++{
++  return 1;
++}
++
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraDepthRoundtripEvent(uint32_t eventId)
++{
++  floraDepthRoundtripEvent = eventId;
++}
++
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDepthRoundtripCopies()
++{
++  return floraDepthRoundtripCopies.load();
++}
++
++namespace
++{
++struct FloraDepthRoundtrip
++{
++  ID3D12Resource *resource = NULL;
++  ~FloraDepthRoundtrip() { SAFE_RELEASE(resource); }
++
++  HRESULT Prepare(WrappedID3D12Device *device, ID3D12GraphicsCommandListX *list,
++                  const D3D12RenderState &state, uint32_t eventId)
++  {
++    if(eventId == 0 || eventId != floraDepthRoundtripEvent)
++      return S_FALSE;
++    const ActionDescription *action = device->GetAction(eventId);
++    if(!action || !(action->flags & ActionFlags::Drawcall) ||
++       (action->flags & ActionFlags::MeshDispatch) || state.pipe == ResourceId() ||
++       state.dsv.GetResResourceId() == ResourceId() || device->GetReal()->GetNodeCount() != 1)
++      return S_FALSE;
++    auto *manager = device->GetResourceManager();
++    auto *pipeline = manager->GetResAs<WrappedID3D12PipelineState>(state.pipe);
++    if(!pipeline || !pipeline->graphics)
++      return S_FALSE;
++    const auto &depth = pipeline->graphics->DepthStencilState;
++    const auto &view = state.dsv.GetDSV();
++    if(!depth.DepthEnable || depth.DepthWriteMask != D3D12_DEPTH_WRITE_MASK_ALL ||
++       depth.StencilEnable || depth.DepthFunc == D3D12_COMPARISON_FUNC_ALWAYS ||
++       depth.DepthFunc == D3D12_COMPARISON_FUNC_NEVER ||
++       view.Format != DXGI_FORMAT_D32_FLOAT_S8X24_UINT ||
++       view.ViewDimension != D3D12_DSV_DIMENSION_TEXTURE2D || view.Texture2D.MipSlice != 0 ||
++       (view.Flags & D3D12_DSV_FLAG_READ_ONLY_DEPTH))
++      return S_FALSE;
++    auto *original = manager->GetResAs<ID3D12Resource>(state.dsv.GetResResourceId());
++    const auto desc = original->GetDesc();
++    if(desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.MipLevels != 1 ||
++       desc.DepthOrArraySize != 1 || desc.SampleDesc.Count != 1 ||
++       (desc.Format != DXGI_FORMAT_R32G8X24_TYPELESS &&
++        desc.Format != DXGI_FORMAT_D32_FLOAT_S8X24_UINT))
++      return S_FALSE;
++    const auto &states = device->GetSubresourceStates(state.dsv.GetResResourceId());
++    if(states.empty())
++      return S_FALSE;
++    // The temporary transitions below require legacy COPY_SOURCE for every plane.
++    // Limit this experiment to known depth states; do not reinterpret enhanced layouts.
++    for(const auto &subresource : states)
++      if(!subresource.IsStates() ||
++         !(subresource.ToStates() & (D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_DEPTH_WRITE)) ||
++         (subresource.ToStates() & D3D12_RESOURCE_STATE_COPY_SOURCE))
++        return S_FALSE;
++
++    D3D12_HEAP_PROPERTIES properties = {};
++    properties.Type = D3D12_HEAP_TYPE_DEFAULT;
++    HRESULT hr = device->GetReal()->CreateCommittedResource(
++        &properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL,
++        IID_PPV_ARGS(&resource));
++    if(FAILED(hr))
++      return hr;
++    BarrierSet barriers;
++    barriers.Configure(original, states, BarrierSet::CopySourceAccess);
++    barriers.Apply(list);
++    Unwrap(list)->CopyResource(resource, Unwrap(original));
++    D3D12_RESOURCE_BARRIER copies[2] = {};
++    for(auto &barrier : copies)
++    {
++      barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
++      barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
++    }
++    copies[0].Transition.pResource = Unwrap(original);
++    copies[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE;
++    copies[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
++    copies[1].Transition.pResource = resource;
++    copies[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
++    copies[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
++    Unwrap(list)->ResourceBarrier(2, copies);
++    Unwrap(list)->CopyResource(Unwrap(original), resource);
++    for(auto &barrier : copies)
++      std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
++    Unwrap(list)->ResourceBarrier(2, copies);
++    barriers.Unapply(list);
++    // Keep the original DSV bound. Subsequent depth writes and aliases still refer
++    // to the captured resource; the temporary allocation is not an output target.
++    return S_OK;
++  }
++};
++};
++
+ namespace
+ {
+ struct FloraReadOnlyDepthSnapshot
+@@ -5882,6 +5985,7 @@
+     }
+ 
+     FloraReadOnlyDepthSnapshot depthSnapshot;
++    FloraDepthRoundtrip depthRoundtrip;
+ 
+     // we'll need our own command list if we're replaying just a subsection
+     // of events within a single command list record - always if it's only
+@@ -5899,6 +6003,13 @@
+       cmd.m_RenderState.ApplyState(this, list);
+       if(replayType == eReplay_OnlyDraw)
+       {
++        const HRESULT roundtrip = depthRoundtrip.Prepare(this, list, cmd.m_RenderState, endEventID);
++        if(FAILED(roundtrip))
++        {
++          SET_ERROR_RESULT(m_FatalError, ResultCode::APIReplayFailed,
++                           "Cannot refresh selected depth contents: %s", ToStr(roundtrip).c_str());
++          return;
++        }
+         const HRESULT hr = depthSnapshot.Prepare(this, list, cmd.m_RenderState, endEventID);
+         if(FAILED(hr))
+         {
+@@ -5934,11 +6045,16 @@
+       ExecuteLists();
+ 
+       // Raw temporary objects must outlive their GPU use, including failures.
+-      if(depthSnapshot.resource)
++      if(depthSnapshot.resource || depthRoundtrip.resource)
+       {
+         FlushLists(true);
+         if(!HasFatalError())
+-          floraReadOnlyDepthSnapshotCopies.fetch_add(1);
++        {
++          if(depthSnapshot.resource)
++            floraReadOnlyDepthSnapshotCopies.fetch_add(1);
++          if(depthRoundtrip.resource)
++            floraDepthRoundtripCopies.fetch_add(1);
++        }
+       }
+ 
+       cmd.m_OutsideCmdList = NULL;

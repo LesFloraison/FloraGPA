@@ -82,6 +82,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"stage", "VSOut"},
              {"api_validation", false},
              {"readonly_depth_snapshot", false},
+             {"depth_roundtrip", false},
              {"dxil_fast_contraction", false},
              {"pixel_history_reference", false},
              {"group", Json::array({0, 0, 0})},
@@ -118,6 +119,11 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (!job["readonly_depth_snapshot"].is_boolean())
         throw std::runtime_error("Read-only depth snapshot must be a boolean");
+    if (!job["depth_roundtrip"].is_boolean())
+        throw std::runtime_error("Depth roundtrip must be a boolean");
+    if (job["depth_roundtrip"].get<bool>() &&
+        (action != "texture" || job["readonly_depth_snapshot"].get<bool>()))
+        throw std::runtime_error("Depth roundtrip requires texture analysis without read-only depth snapshots");
     if (job["readonly_depth_snapshot"].get<bool>() && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     if (!job["pixel_history_reference"].is_boolean())

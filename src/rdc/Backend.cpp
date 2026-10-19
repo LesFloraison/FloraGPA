@@ -179,6 +179,7 @@ class Session {
     uint32_t dxbcWorkgroupPatch{};
     uint32_t dx12UsageVisibilityPatch{};
     uint32_t readOnlyDepthSnapshotPatch{};
+    uint32_t depthRoundtripPatch{};
     uint32_t dxbcGpuDotPatch{};
     uint32_t dxbcGpuMadPatch{};
     uint32_t dxilContractPatch{};
@@ -197,6 +198,9 @@ class Session {
     TextureStoreRead textureStoreRead{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
+    DepthSnapshotCopies depthRoundtripCopies{};
+    using SetDepthRoundtripEvent = void (RENDERDOC_CC *)(uint32_t);
+    SetDepthRoundtripEvent setDepthRoundtripEvent{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
     DotCounter dotOperations{}, dotFailures{};
     DotCounter madOperations{}, madFailures{};
@@ -285,6 +289,14 @@ class Session {
             symbol<Enable>("RENDERDOC_SetFloraReadOnlyDepthSnapshotEnabled")(true);
             depthSnapshotCopies = symbol<DepthSnapshotCopies>("RENDERDOC_GetFloraReadOnlyDepthSnapshotCopies");
         }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDepthRoundtripPatchVersion")))
+            depthRoundtripPatch = patch();
+        if (job.value("depth_roundtrip", false)) {
+            if (depthRoundtripPatch != 1)
+                throw std::runtime_error("Depth roundtrip requires the Flora RenderDoc depth roundtrip patch version 1");
+            setDepthRoundtripEvent = symbol<SetDepthRoundtripEvent>("RENDERDOC_SetFloraDepthRoundtripEvent");
+            depthRoundtripCopies = symbol<DepthSnapshotCopies>("RENDERDOC_GetFloraDepthRoundtripCopies");
+        }
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilUavTexturePatchVersion"))) {
             uavTexturePatch = patch();
             if (uavTexturePatch != 1) throw std::runtime_error("Unsupported DXIL UAV texture patch version");
@@ -325,6 +337,8 @@ class Session {
             const auto api = controller->GetAPIProperties().pipelineType;
             if (job.value("readonly_depth_snapshot", false) && api != GraphicsAPI::D3D12)
                 throw std::runtime_error("Read-only depth snapshots require a DX12 independent capture");
+            if (job.value("depth_roundtrip", false) && api != GraphicsAPI::D3D12)
+                throw std::runtime_error("Depth roundtrip requires a DX12 independent capture");
             if (job.value("dxil_fast_contraction", false) && api != GraphicsAPI::D3D12)
                 throw std::runtime_error("Fast contraction requires a DX12 independent capture");
             if (api != GraphicsAPI::D3D11 && api != GraphicsAPI::D3D12)
@@ -1243,6 +1257,9 @@ Json rdcLoadedModules() {
 }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
+    if (job.value("depth_roundtrip", false) &&
+        (action != "texture" || job.value("readonly_depth_snapshot", false)))
+        throw std::runtime_error("Depth roundtrip requires texture analysis without read-only depth snapshots");
     if (job.value("readonly_depth_snapshot", false) && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     if (job.value("pixel_history_reference", false) &&
@@ -1322,6 +1339,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
         {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
+        {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxbc_gpu_dot_patch", session.dxbcGpuDotPatch},
         {"backend_dxbc_gpu_mad_patch", session.dxbcGpuMadPatch},
         {"replay_environment",
@@ -1335,6 +1353,15 @@ Json runRdcJob(const Json &job) {
         {"gpa_command_map", mapping["gpa_command_map"]}};
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        if (session.depthRoundtripCopies) {
+            result["depth_roundtrip"] = {
+                {"requested", true}, {"copies", std::to_string(session.depthRoundtripCopies())},
+                {"experimental", true},
+                {"scope", "Selected isolated DX12 Draw only: D32S8, depth writes enabled, stencil disabled, "
+                          "one mip/layer/sample/node and legacy depth states. Copies both planes out and "
+                          "back before the Draw, preserving the original DSV and subsequent depth writes. "
+                          "Adds GPU work and a wait; does not validate full replay correctness."}};
+        }
         if (session.depthSnapshotCopies) {
             result["readonly_depth_snapshot"] = {
                 {"requested", true}, {"copies", std::to_string(session.depthSnapshotCopies())},
@@ -1427,6 +1454,7 @@ Json runRdcJob(const Json &job) {
     if ((!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid))) &&
         !(eid == 0 && action == "inventory"))
         throw std::runtime_error("No selectable replay action");
+    if (session.setDepthRoundtripEvent) session.setDepthRoundtripEvent(eid);
     // GetUsage is an index built while loading the capture. An explicit DX12
     // resource identity does not require a replayed pipeline/RTV to resolve it.
     // Keep replay for implicit targets and for all value/state analysis paths.
@@ -1441,6 +1469,9 @@ Json runRdcJob(const Json &job) {
         if (prepared > 2) throw std::runtime_error("Invalid compute preparation response");
         session.computePrepared = prepared == 1;
         if (!prepared) controller.SetFrameEvent(eid, true);
+        if (session.depthRoundtripCopies && session.depthRoundtripCopies() == 0)
+            throw std::runtime_error("Depth roundtrip was not applied: select a depth-writing D32S8 Draw with "
+                                     "stencil disabled, one mip/layer/sample/node and legacy depth states");
     }
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
