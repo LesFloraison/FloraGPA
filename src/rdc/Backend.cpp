@@ -160,6 +160,7 @@ class Session {
     uint32_t retainedComputePatch{};
     uint32_t uavTexturePatch{};
     uint32_t textureStoresPatch{};
+    uint32_t packedStorePatch{};
     using TextureStoreCount = uint32_t (RENDERDOC_CC *)(ShaderDebugger *);
     using TextureStoreRead = bool (RENDERDOC_CC *)(ShaderDebugger *, uint32_t, uint32_t *, uint32_t);
     TextureStoreCount textureStoreCount{};
@@ -172,6 +173,7 @@ class Session {
     DotCounter contractOperations{}, contractFailures{};
     DotCounter retainedComputeTraces{};
     DotCounter uavTextureReads{}, uavTextureFailures{};
+    DotCounter packedStores{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -246,6 +248,11 @@ class Session {
             if (uavTexturePatch != 1) throw std::runtime_error("Unsupported DXIL UAV texture patch version");
             uavTextureReads = symbol<DotCounter>("RENDERDOC_GetFloraDxilUavTextureReads");
             uavTextureFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxilUavTextureFailures");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilPackedStorePatchVersion"))) {
+            packedStorePatch = patch();
+            if (packedStorePatch != 1) throw std::runtime_error("Unsupported DXIL packed store patch version");
+            packedStores = symbol<DotCounter>("RENDERDOC_GetFloraDxilPackedStores");
         }
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilTextureStoresPatchVersion"))) {
@@ -520,6 +527,19 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
             });
     };
     Json result = Json::object();
+    bool unpatchedPackedUav = false;
+    if (dx12 && reflection->encoding == ShaderEncoding::DXIL && !session.packedStorePatch) {
+        const auto stage = compute ? ShaderStage::Compute : vertex ? ShaderStage::Vertex : ShaderStage::Pixel;
+        const auto &accesses = controller.GetDescriptorAccess();
+        if (accesses.size() > 16384) throw std::runtime_error("Shader descriptor access limit exceeded");
+        for (const auto &access : accesses) {
+            if (access.stage != stage || CategoryForDescriptorType(access.type) != DescriptorCategory::ReadWriteResource) continue;
+            rdcarray<DescriptorRange> ranges; ranges.push_back(DescriptorRange(access));
+            const auto views = controller.GetDescriptors(access.descriptorStore, ranges);
+            if (views.size() != 1) throw std::runtime_error("Incomplete shader UAV descriptor response");
+            if (views[0].format.type == ResourceFormatType::R11G11B10) unpatchedPackedUav = true;
+        }
+    }
     if (dx12 && compute)
         result["compute_invocation"] = flora::rdcComputeInvocation(
             *selected, *reflection, coordinates(job, "group"), coordinates(job, "thread"));
@@ -751,6 +771,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
             "This RenderDoc library lacks the DXIL UAV texture fix. Texture coordinates and view mip/slices may be incorrect; this trace is not validated. Use the patched analysis library."};
     }
     result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
+    if (unpatchedPackedUav) {
+        result["partial"] = true;
+        auto &warnings = result["debug_scope"]["warnings"];
+        if (warnings.is_null()) warnings = Json::array();
+        warnings.push_back("This RenderDoc library lacks the DXIL R11G11B10 store-conversion fix. The bound packed UAV can round stores upward or turn finite overflow into infinity; later loads may be incorrect. Use the patched analysis library.");
+    }
     const auto assembly = controller.DisassembleShader(
         pipe12 ? pipe12->pipelineResourceId : ResourceId::Null(), reflection, "");
     auto exportedAssembly = QByteArray(assembly.c_str(), qsizetype(assembly.size()));
@@ -1481,7 +1507,11 @@ Json runRdcJob(const Json &job) {
         const auto retainedStart = session.retainedComputeTraces ? session.retainedComputeTraces() : 0;
         const auto uavReadStart = session.uavTextureReads ? session.uavTextureReads() : 0;
         const auto uavFailureStart = session.uavTextureFailures ? session.uavTextureFailures() : 0;
+        const auto packedStart = session.packedStores ? session.packedStores() : 0;
         result.update(debug(controller, eid, job, session));
+        result["dxil_packed_store"] = {{"patch_version", session.packedStorePatch},
+            {"stores", std::to_string(session.packedStores ? session.packedStores() - packedStart : 0)},
+            {"scope", "DX12 DXIL R11G11B10 typed stores: direct float32 round-toward-zero, finite saturation and subnormal preservation. Count includes all simulated lanes, not only the selected lane."}};
         const auto uavFailures = session.uavTextureFailures ? session.uavTextureFailures() - uavFailureStart : 0;
         if (uavFailures) throw std::runtime_error("DXIL UAV texture view read failed or is unsupported; incomplete shader trace rejected");
         result["dxil_uav_texture"] = {{"patch_version", session.uavTexturePatch},

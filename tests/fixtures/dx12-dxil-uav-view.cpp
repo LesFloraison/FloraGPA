@@ -1,5 +1,5 @@
 // Targeted DXIL UAV view/coordinate regression capture. Build with MSVC, d3d12.lib and dxgi.lib.
-// Arguments: compiled fixture shader, RenderDoc DLL, capture prefix, 1d|2d|3d.
+// Arguments: compiled fixture shader, RenderDoc DLL, capture prefix, 1d|2d|3d, optional r11g11b10.
 #include "renderdoc_app.h"
 #include <d3d12.h>
 #include <dxgi1_6.h>
@@ -17,8 +17,11 @@ void check(HRESULT hr) {
         throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr)));
 }
 int main(int argc, char **argv) try {
-    if (argc != 5)
+    if (argc != 5 && argc != 6)
         throw std::runtime_error("Expected shader, RenderDoc library, capture prefix and 1d|2d|3d");
+    const bool packed = argc == 6 && std::string(argv[5]) == "r11g11b10";
+    if (argc == 6 && !packed) throw std::runtime_error("Unsupported fixture format");
+    const UINT resultCount = packed ? 32 : 8;
     const std::string dimension = argv[4];
     const bool one = dimension == "1d", volume = dimension == "3d";
     if (!one && !volume && dimension != "2d")
@@ -96,7 +99,11 @@ int main(int argc, char **argv) try {
     td.Height = one ? 1 : 4;
     td.DepthOrArraySize = volume ? 6 : 3;
     td.MipLevels = 2;
-    td.Format = DXGI_FORMAT_R32_UINT;
+    td.Format = packed ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R32_UINT;
+    D3D12_FEATURE_DATA_FORMAT_SUPPORT support{td.Format};
+    check(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &support, sizeof(support)));
+    const auto required = D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD | D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE;
+    if ((support.Support2 & required) != required) throw std::runtime_error("Typed UAV load/store unsupported");
     td.SampleDesc.Count = 1;
     td.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
     heap.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -184,7 +191,7 @@ int main(int argc, char **argv) try {
     barrier.Transition = {output.Get(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
                           D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE};
     list->ResourceBarrier(1, &barrier);
-    list->CopyBufferRegion(readback.Get(), 0, output.Get(), 0, 32);
+    list->CopyBufferRegion(readback.Get(), 0, output.Get(), 0, resultCount * 4);
     check(list->Close());
     ID3D12CommandList *lists[]{list.Get()};
     queue->ExecuteCommandLists(1, lists);
@@ -201,20 +208,22 @@ int main(int argc, char **argv) try {
         throw std::runtime_error("GPU probe timed out");
     if (!api->EndFrameCapture(device.Get(), nullptr))
         throw std::runtime_error("Capture failed");
-    D3D12_RANGE readRange{0, 32};
+    D3D12_RANGE readRange{0, resultCount * 4};
     void *mapped{};
     check(readback->Map(0, &readRange, &mapped));
     auto words = static_cast<const uint32_t *>(mapped);
     std::cout << std::setprecision(17) << "{\"vendor_id\":" << adapterDesc.VendorId
               << ",\"device_id\":" << adapterDesc.DeviceId << ",\"bits\":[";
-    for (int i = 0; i < 8; ++i)
+    for (UINT i = 0; i < resultCount; ++i)
         std::cout << (i ? "," : "") << words[i];
     std::cout << "]}\n";
     const UINT expected[]{one ? 21200U : 21300U, 777, 777, 784,
                           one ? 21000U : 21100U, 0,   0,   one ? 21128U : 21228U};
     bool matched = true;
-    for (UINT i = 0; i < 8; ++i)
-        matched &= words[i] == expected[i];
+    // Packed-format output is compared with the debugger by the focused evidence test.
+    if (!packed)
+        for (UINT i = 0; i < 8; ++i)
+            matched &= words[i] == expected[i];
     D3D12_RANGE written{};
     readback->Unmap(0, &written);
     if (!matched)

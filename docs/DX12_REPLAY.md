@@ -5004,6 +5004,84 @@ against existing sample RDCs plus the small loop fixture, without another full
 native sample replay. Whole-frame fidelity, complete store validation and full
 portable-package acceptance remain unfinished.
 
+### DXIL R11G11B10 store conversion
+
+Following the actual Hellblade2 stores exposed a separate debugger defect:
+the D3D12 DXIL typed-store helper converted float32 operands to float16 first,
+then discarded mantissa bits to pack R11G11B10. Intermediate rounding could
+raise a value to the next representable level, turn finite overflow into
+infinity, or change a subnormal boundary. A subsequent load in the same shader
+therefore read the wrong cached value. The original capture and native GPU
+execution are unaffected by this debugger defect.
+
+The eleventh pinned patch converts the float32 bits directly to the unsigned
+11/10-bit representation. It truncates toward zero, saturates finite overflow,
+preserves representable subnormals, clamps negative values to zero, preserves
+positive infinity and retains NaN classification. These rules follow Microsoft's
+[floating-point conversion specification, section 3.2.2](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm)
+and its unsigned float format definition in section 3.1.6. NaN payloads are not
+claimed to match the GPU. The shared upstream conversion utility, DXBC and other
+typed formats are unchanged; their complete conversion fidelity is not proven.
+
+The new HLSL fixture `tests/fixtures/dx12-dxil-uav-packed.hlsl` uses the existing
+UAV-view harness with `2d r11g11b10`, a mip-1/slice-2 UAV, one compute thread and
+explicit device-memory barriers between stores and loads. It exports 32 raw
+float32 words. Compile with DXC `-T cs_6_0 -E main -Od`; compile the harness as
+documented above, then supply shader, DLL, capture prefix and those two arguments.
+Format load/store support is queried before resource creation. Packed-mode
+success means capture/readback succeeded; the evidence comparison separately
+checks the debugger against those GPU words.
+
+The actual Hellblade2 RGB operands form the first case. Additional values
+exercise the identified rounding boundary, finite overflow, negative values,
+infinities, subnormals, smallest normal, NaNs and zero:
+
+| Input / condition | Before fix | GPU and corrected debugger |
+| --- | --- | --- |
+| R float32 bits `3f81ffff` | 1.015625 | 1.0 |
+| G float32 bits `3fffffff` | 2.0 | 1.984375 |
+| B float32 bits `3f83ffff` | 1.03125 | 1.0 |
+| Finite overflow, R/G | Infinity | 65024 |
+| Finite overflow, B | Infinity | 64512 |
+| G float32 bits `35ffffff` | 0.0000019073486328125 | 0.00000095367431640625 |
+| G float32 bits `387fffff` | 0.00006103515625 | 0.00006008148193359375 |
+| B float32 bits `35ffffff` | 0.0000019073486328125 | 0 |
+
+Both traces contain **133** states. Before the fix, **9** numeric components
+differed. Afterward, all **29 non-NaN words match exactly**, and all **3 NaNs**
+match classification. The patch counter records eight cached packed stores.
+Evidence is `dxil-uav-packed2_capture.rdc`, `dxil-uav-packed-gpu2.json`,
+`dxil-uav-packed-before2` and `dxil-uav-packed-after1` under the ignored research
+directory. The initial two-store diagnostic is retained as `dxil-uav-packed1`
+and `dxil-uav-packed-before1`; it established three mismatches before expanding
+only the conversion boundary cases.
+
+A separate query with the existing older `renderdoc-before-dxil-contract.dll`
+verifies that the worker detects a bound R11G11B10 UAV and marks the result
+partial with a conversion warning (`dxil-uav-packed-unpatched1`). This check
+does not use the old trace as conversion evidence, since that library also
+lacks subsequent view and input-retention fixes.
+
+Hellblade2 execution **36779**, group/thread zero, remains **332** states with
+the same selected instructions **612/614/616** and captured resource mappings.
+The new conversion path executes **40** times across all simulated lanes; this
+is not a selected-lane write count. Three UAV views are read with no failures.
+The selected RGB operands and restored GPU values retain the observations above.
+`hellblade-packed-store1` loads no GPA or Python modules. This verifies integration,
+not full shader equivalence, input stability or full-frame fidelity. GPU queries
+ran serially against existing RDCs plus the small conversion reproduction.
+
+The final DLL SHA-256 is
+**c6b369ee674037f84a4190f93df0b3adfdd7b66bd9539b7013961c642f7c3e80**.
+Worker/CLI and focused-test builds **330–331** pass. `FloraRdcDebugTests
+dxilPackedTextureStores` checks the actual before/after reports, all GPU words
+and the older-library warning (**3 passed including setup/cleanup, 62 ms**;
+`packed-store-check2.txt`). Set `FLORA_DXIL_PACKED_STORE_REPORTS` to the research
+directory to run that evidence check. No UI code changed in this correction.
+The isolated worker reports patch version and store count; package/build
+manifests verify all eleven patches. Full portable-package acceptance remains
+outstanding.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -1,0 +1,51 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+@@ -45,6 +45,35 @@
+ 
+ namespace DXILDebug
+ {
++static std::atomic<uint64_t> floraPackedStores{0};
++
++// D3D floating-point format conversion rounds toward zero. Going through half
++// first rounds some inputs upward before truncating and can overflow to INF.
++static uint32_t FloraUnsignedFloatRTZ(uint32_t bits, uint32_t fractionBits)
++{
++  const uint32_t exponent = (bits >> 23) & 0xff;
++  const uint32_t fraction = bits & 0x7fffff;
++  const uint32_t infinity = 31U << fractionBits;
++  if(exponent == 0xff && fraction)
++    return infinity | (1U << (fractionBits - 1)); // NaN payload is not prescribed.
++  if(bits & 0x80000000)
++    return 0;
++  if(exponent == 0xff)
++    return infinity;
++  const int32_t targetExponent = int32_t(exponent) - 127 + 15;
++  if(targetExponent >= 31)
++    return infinity - 1; // Finite overflow saturates to the largest finite value.
++  if(targetExponent <= 0)
++  {
++    const uint32_t shift = uint32_t(24 - int32_t(fractionBits) - targetExponent);
++    return shift >= 32 ? 0 : (fraction | 0x800000) >> shift;
++  }
++  return (uint32_t(targetExponent) << fractionBits) | (fraction >> (23 - fractionBits));
++}
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilPackedStorePatchVersion() { return 1; }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxilPackedStores() { return floraPackedStores.load(); }
++
+ static ShaderValue TypedUAVLoad(const DXILDebug::ViewFmt &fmt, const byte *base, uint64_t offset)
+ {
+   const byte *data = base + offset;
+@@ -230,7 +259,10 @@
+   }
+   else if(fmt.byteWidth == 11)
+   {
+-    uint32_t u = ConvertToR11G11B10(Vec3f(value.f32v[0], value.f32v[1], value.f32v[2]));
++    uint32_t u = FloraUnsignedFloatRTZ(value.u32v[0], 6) |
++                 (FloraUnsignedFloatRTZ(value.u32v[1], 6) << 11) |
++                 (FloraUnsignedFloatRTZ(value.u32v[2], 5) << 22);
++    ++floraPackedStores;
+     memcpy(data, &u, sizeof(uint32_t));
+   }
+   else if(fmt.byteWidth == 4)

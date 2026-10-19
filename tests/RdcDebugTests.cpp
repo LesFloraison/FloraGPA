@@ -19,6 +19,50 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void dxilPackedTextureStores() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DXIL_PACKED_STORE_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the targeted R11G11B10 GPU/trace evidence directory");
+        const auto read = [](const QString &path) {
+            QFile file(path); if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing packed store evidence");
+            const auto bytes = file.readAll(); return Json::parse(bytes.begin(), bytes.end());
+        };
+        const auto gpu = read(root + "/dxil-uav-packed-gpu2.json");
+        const auto unpatched = read(root + "/dxil-uav-packed-unpatched1/result.json");
+        QVERIFY(unpatched.at("partial").get<bool>());
+        QCOMPARE(unpatched.at("dxil_packed_store").at("patch_version"), Json(0));
+        QVERIFY(QString::fromStdString(unpatched.at("debug_scope").at("warnings").dump()).contains("R11G11B10 store-conversion fix"));
+        const QRegularExpression store(R"(\.Store\((\d+), byteOffset = 0, \{(_\d+)\}\))");
+        for (const QString phase : {"before2", "after1"}) {
+            const auto result = read(root + "/dxil-uav-packed-" + phase + "/result.json");
+            QVERIFY(result.at("ok").get<bool>());
+            QCOMPARE(result.at("compute_input_lifecycle").at("patch_version"), Json(2));
+            QCOMPARE(result.at("step_count"), Json(133));
+            if (phase == "after1") {
+                QCOMPARE(result.at("dxil_packed_store").at("patch_version"), Json(1));
+                QCOMPARE(result.at("dxil_packed_store").at("stores"), Json("8"));
+            }
+            std::map<std::string, uint32_t> values;
+            for (const auto &step : result.at("steps"))
+                for (const auto &change : step.at("changes")) {
+                    const auto &v = change.at("after");
+                    values[v.at("name").get<std::string>()] = v.at("value").at("u32v")[0];
+                }
+            auto stores = store.globalMatch(QString::fromStdString(result.at("disassembly").get<std::string>()));
+            std::set<unsigned> seen; unsigned mismatch{}, nanCount{};
+            while (stores.hasNext()) {
+                const auto match = stores.next(); const auto index = match.captured(1).toUInt();
+                QVERIFY(index < 32); QVERIFY(seen.insert(index).second);
+                const auto expected = gpu.at("bits").at(index).get<uint32_t>();
+                const auto actual = values.at(match.captured(2).toStdString());
+                if (std::isnan(std::bit_cast<float>(expected))) {
+                    QVERIFY(std::isnan(std::bit_cast<float>(actual))); ++nanCount;
+                } else if (actual != expected) ++mismatch;
+            }
+            QCOMPARE(seen.size(), size_t(32)); QCOMPARE(nanCount, 3U);
+            QCOMPARE(mismatch, phase == "before2" ? 9U : 0U);
+        }
+    }
     void textureStoreLoop() {
         using Json = nlohmann::json;
         const auto path = qEnvironmentVariable("FLORA_TEXTURE_STORE_LOOP_REPORT");
