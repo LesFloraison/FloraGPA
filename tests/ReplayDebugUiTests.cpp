@@ -20,6 +20,7 @@
 #include <QTabWidget>
 #include <QTableView>
 #include <QTreeWidget>
+#include <QTextBlock>
 #include <QtTest>
 using namespace flora;
 using Json = nlohmann::json;
@@ -170,6 +171,111 @@ class ReplayDebugUiTests : public QObject {
         QVERIFY(view.finish(view.requestId(), changed));
         auto reference = view.findChild<QLabel *>("debugGpuReference");
         QVERIFY(reference->text().contains("changed; reference cannot validate this trace"));
+    }
+    void dxilInstructionBreakpointPanel() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
+        if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");
+        const auto result = read(root + "/hellblade-indirect-reference1/result.json");
+        ReplayDebugView view("cs"); view.resize(1450, 1000); view.show();
+        view.setContext("hellblade-breakpoints", 36779, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        QVERIFY(view.model()->files().empty());
+        QSignalSpy errors(&view, &ReplayDebugView::error);
+        auto input = view.findChild<QLineEdit *>("debugInstruction");
+        auto rules = view.findChild<QTreeWidget *>("debugRules");
+        auto assembly = view.findChild<QPlainTextEdit *>("debugAssembly");
+        auto step = view.findChild<QSpinBox *>("debugStepIndex");
+        for (const auto id : {612, 614}) {
+            input->setText(QString::number(id)); action(view, "debugToggleInstructionBreakpoint")->trigger();
+        }
+        QCOMPARE(rules->topLevelItemCount(), 2);
+        QCOMPARE(rules->topLevelItem(0)->text(0), QString("Instruction 612"));
+        QCOMPARE(rules->topLevelItem(1)->text(0), QString("Instruction 614"));
+        QCOMPARE(rules->topLevelItem(0)->text(3), QString("0"));
+        const auto config = view.model()->configuration();
+        QTemporaryDir temp;
+        const auto path = temp.path() + "/instructions.json";
+        selectFile(path); action(view, "debugSave")->trigger();
+        QCOMPARE(readNativeDebugConfig(path.toStdWString()), config);
+        view.findChild<QTabWidget *>("debugValueTabs")->setCurrentIndex(3);
+        rules->setCurrentItem(rules->topLevelItem(0));
+        QCOMPARE(input->text(), QString("612"));
+        QCOMPARE(view.model()->position(), int64_t(0));
+        const auto line = view.model()->instructionInfo(612).at("lineInfo").at("disassemblyLine").get<int>();
+        QCOMPARE(assembly->textCursor().blockNumber(), line - 1);
+        QCOMPARE(assembly->extraSelections().size(), 3);
+        QVERIFY(!action(view, "debugApplyRule")->isEnabled());
+        QVERIFY(!view.findChild<QLineEdit *>("debugCondition")->isEnabled());
+        QVERIFY(action(view, "debugRemoveRule")->isEnabled());
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(325));
+        QCOMPARE(rules->currentItem()->text(0), QString("Instruction 612"));
+        QCOMPARE(rules->currentItem()->text(3), QString("1"));
+        view.findChild<QLineEdit *>("debugWatchExpression")->setText("_643");
+        action(view, "debugAddWatch")->trigger();
+        QCOMPARE(view.findChild<QTreeWidget *>("debugWatchValues")->topLevelItem(0)->text(2), QString("832"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/dxil-instruction-breakpoints.png"));
+        action(view, "debugRemoveRule")->trigger();
+        QCOMPARE(view.model()->instructionBreakpoints(), Json::array({614}));
+        QCOMPARE(rules->topLevelItemCount(), 1);
+        QCOMPARE(assembly->extraSelections().size(), 2);
+        step->setValue(0); action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->result().at("steps")[size_t(view.model()->position())].at("nextInstruction"), Json(614));
+        rules->setCurrentItem(rules->topLevelItem(0));
+        view.setWorkerBusy(true); QVERIFY(!action(view, "debugRemoveRule")->isEnabled());
+        view.setWorkerBusy(false); QVERIFY(action(view, "debugRemoveRule")->isEnabled());
+        selectFile(path); action(view, "debugImport")->trigger();
+        QCOMPARE(rules->topLevelItemCount(), 2);
+        QCOMPARE(view.model()->configuration(), config);
+        QCOMPARE(rules->currentItem()->text(0), QString("Instruction 614"));
+        step->setValue(0); action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(325));
+        const auto serial = view.requestId(); view.setContext("new-experiment", 36779, true);
+        QVERIFY(!view.finish(serial, result));
+        QCOMPARE(rules->topLevelItemCount(), 0);
+        QVERIFY(!action(view, "debugRemoveRule")->isEnabled());
+        QVERIFY(errors.empty());
+    }
+    void mixedSourceAndInstructionBreakpoints() {
+        // Small UI fixture for shared DX11 source rules, not GPU/source-debug evidence.
+        Json info = Json::array(), steps = Json::array();
+        for (int id = 0; id < 2; ++id)
+            info.push_back({{"instruction", id}, {"lineInfo", {{"fileIndex", 0}, {"lineStart", id + 1},
+                {"lineEnd", id + 1}, {"disassemblyLine", id + 1}}}});
+        for (const auto id : {0, 1, 0, 1}) steps.push_back({{"nextInstruction", id}, {"changes", Json::array()}});
+        const Json result{{"ok", true}, {"action", "debug-pixel"}, {"steps", steps},
+            {"trace", {{"instInfo", info}}}, {"disassembly", "instruction zero\ninstruction one\n"},
+            {"source_debug", {{"files", Json::array({{{"filename", "fixture.hlsl"}, {"contents", "first\nsecond\n"}}})}}}};
+        ReplayDebugView view("ps"); view.setContext("source-fixture", 1);
+        QVERIFY(view.finish(view.requestId(), result));
+        QSignalSpy errors(&view, &ReplayDebugView::error);
+        view.findChild<QSpinBox *>("debugSourceLine")->setValue(2);
+        view.findChild<QLineEdit *>("debugCondition")->setText("true");
+        action(view, "debugApplyRule")->trigger();
+        view.findChild<QLineEdit *>("debugInstruction")->setText("0");
+        action(view, "debugToggleInstructionBreakpoint")->trigger();
+        auto rules = view.findChild<QTreeWidget *>("debugRules");
+        QCOMPARE(rules->topLevelItemCount(), 2);
+        QCOMPARE(rules->topLevelItem(0)->text(0), QString("fixture.hlsl:2"));
+        QCOMPARE(rules->topLevelItem(0)->text(1), QString("true"));
+        rules->setCurrentItem(rules->topLevelItem(1));
+        QVERIFY(!action(view, "debugApplyRule")->isEnabled());
+        rules->setCurrentItem(rules->topLevelItem(0));
+        QVERIFY(action(view, "debugApplyRule")->isEnabled());
+        QCOMPARE(view.findChild<QTabWidget *>("debugCodeTabs")->currentIndex(), 1);
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1));
+        QCOMPARE(rules->currentItem()->text(0), QString("fixture.hlsl:2"));
+        action(view, "debugRemoveRule")->trigger();
+        QVERIFY(view.model()->breakpoints().empty());
+        QCOMPARE(view.model()->instructionBreakpoints(), Json::array({0}));
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(2));
+        QCOMPARE(rules->topLevelItem(0)->text(3), QString("2"));
+        rules->setCurrentItem(rules->topLevelItem(0)); action(view, "debugRemoveRule")->trigger();
+        QVERIFY(view.model()->instructionBreakpoints().empty());
+        QCOMPARE(rules->topLevelItemCount(), 0);
+        QVERIFY(errors.empty());
     }
     void backendReports() {
         const auto root = qEnvironmentVariable("FLORA_REPLAY_DEBUG_REPORTS");

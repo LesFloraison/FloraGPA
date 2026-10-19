@@ -68,6 +68,8 @@ class ReplayDebugView final : public QWidget {
     void render();
     void showSource(bool follow);
     void refreshRules();
+    void updateRuleActions();
+    void showAssembly(uint64_t instruction, bool follow);
     void readRule();
     void refreshWatches();
     ReplayDebugModel::Point point() const;

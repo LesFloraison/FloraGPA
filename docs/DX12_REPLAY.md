@@ -4069,6 +4069,34 @@ not the still-unfinished three-sample portable replay/analysis acceptance.
 Ignored evidence: `dxil-disassembly1.txt`, `dxil-portable-package1.log`,
 `dxil-portable1`, and `dxil-portable-shader1`.
 
+### Instruction breakpoint management in the shared debugger
+
+The Breakpoints panel now lists instruction breakpoints alongside source rules.
+Previously, DXIL without source metadata could stop on an instruction breakpoint,
+but the panel remained empty and the instruction IDs appeared only in the summary.
+Selecting an instruction row now locates its recorded disassembly line without
+moving the trace. Remove deletes that instruction breakpoint. The panel preserves
+the selected rule while stepping and reports instruction visits, including loop
+revisits; assembly marks all mapped instruction breakpoints and the current step.
+Source conditions and hit-count rules remain source-only and their controls are
+disabled when an instruction row is selected. No source mapping is invented.
+
+Release build **274** passes four focused cases (**6 passed including setup and
+cleanup, 1,036 ms**). The actual Hellblade2 execution **36779** saved CS trace
+sets instructions **612/614**, saves/imports their configuration through the UI,
+stops at instruction 612 / step **325**, and shows Watch `_643 = 832`. Removing
+612 leaves 614 as the next breakpoint. The check also covers busy-state controls,
+experiment invalidation and rejection of the old result. A separate minimal UI
+fixture covers mixed DX11 source conditions/instruction rules, repeated visits
+and removal; it is not evidence of GPU source debugging. Existing compute
+invocation display and selection invalidation cases pass too. The breakpoint
+screenshot was inspected. Ignored evidence is `dxil-breakpoints-ui2.txt` and
+`dxil-breakpoints-ui2/replay-debug/dxil-instruction-breakpoints.png`.
+
+This work consumes saved traces and performs no GPU replay. It does not resolve
+the outstanding DXIL numerical mismatch, changing UAV results, absent source
+data or full stage-coverage requirements.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

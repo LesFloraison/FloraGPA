@@ -409,9 +409,9 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         if (!model_ || !item)
             return;
         const auto &p = points_.at(item->data(0, Qt::UserRole).toULongLong());
-        model_->toggle({p.at("file"), p.at("line")});
-        refreshRules();
-        showSource(false);
+        if (p.contains("instruction")) model_->toggleInstruction(p.at("instruction"));
+        else model_->toggle({p.at("file"), p.at("line")});
+        render();
     });
     auto configBar = new QToolBar;
     ruleLayout->addWidget(configBar);
@@ -435,13 +435,20 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         if (!path.isEmpty())
             writeNativeDebugConfig(path.toStdWString(), model_->configuration());
     });
-    rules_ = table("debugRules", {"Source", "Condition", "Hit count", "Visits"});
+    rules_ = table("debugRules", {"Location", "Condition", "Hit count", "Visits"});
     ruleLayout->addWidget(rules_, 1);
     values_->addTab(rulePage, "Breakpoints");
     connect(rules_, &QTreeWidget::itemSelectionChanged, this, [this] {
+        updateRuleActions();
         if (rendering_ || !model_ || !rules_->currentItem())
             return;
         const auto &p = points_.at(rules_->currentItem()->data(0, Qt::UserRole).toULongLong());
+        if (p.contains("instruction")) {
+            instruction_->setText(text(p.at("instruction")));
+            code_->setCurrentIndex(0);
+            showAssembly(p.at("instruction"), true);
+            return;
+        }
         files_->setCurrentIndex(p.at("file"));
         line_->setValue(p.at("line"));
         condition_->setText(text(p.value("condition", Json(""))));
@@ -661,6 +668,7 @@ void ReplayDebugView::updateActions() {
     for (auto action : findChildren<QAction *>())
         if (action->objectName().startsWith("debug"))
             action->setEnabled(!busy_ && bool(model_));
+    updateRuleActions();
 }
 bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (request != requestId_)
@@ -839,25 +847,38 @@ void ReplayDebugView::render() {
         item->setData(0, Qt::UserRole, qulonglong(i));
         tip(item);
     }
+    showAssembly(step.at("nextInstruction"), true);
+    refreshRules();
+    refreshWatches();
+    showSource(true);
+}
+void ReplayDebugView::showAssembly(uint64_t instruction, bool follow) {
     QList<QTextEdit::ExtraSelection> highlight;
-    const auto info = model_->instructionInfo(step.at("nextInstruction"));
-    if (!info.is_null() && info.at("instruction") == step.at("nextInstruction")) {
+    const auto add = [&](uint64_t id, const QColor &color) {
+        const auto info = model_->instructionInfo(id);
+        if (info.is_null() || info.at("instruction") != id) return;
         const auto line = info.value("lineInfo", Json::object()).value("disassemblyLine", 0);
         const auto block = assembly_->document()->findBlockByNumber(line - 1);
         if (block.isValid()) {
             QTextEdit::ExtraSelection s;
             s.cursor = QTextCursor(block);
-            s.format.setBackground(QColor(27, 87, 109));
+            s.format.setBackground(color);
             s.format.setProperty(QTextFormat::FullWidthSelection, true);
             highlight << s;
-            assembly_->setTextCursor(s.cursor);
+        }
+    };
+    for (const auto &id : model_->instructionBreakpoints()) add(id, QColor(110, 45, 55));
+    add(model_->result().at("steps").at(size_t(model_->position())).at("nextInstruction"), QColor(27, 87, 109));
+    assembly_->setExtraSelections(highlight);
+    const auto info = model_->instructionInfo(instruction);
+    if (follow && !info.is_null() && info.at("instruction") == instruction) {
+        const auto line = info.value("lineInfo", Json::object()).value("disassemblyLine", 0);
+        const auto block = assembly_->document()->findBlockByNumber(line - 1);
+        if (block.isValid()) {
+            assembly_->setTextCursor(QTextCursor(block));
             assembly_->ensureCursorVisible();
         }
     }
-    assembly_->setExtraSelections(highlight);
-    refreshRules();
-    refreshWatches();
-    showSource(true);
 }
 ReplayDebugModel::Point ReplayDebugView::point() const { return {files_->currentIndex(), line_->value()}; }
 void ReplayDebugView::showSource(bool follow) {
@@ -936,10 +957,28 @@ void ReplayDebugView::refreshRules() {
     if (!model_)
         return;
     const QSignalBlocker blocker(rules_);
+    Json selected;
+    if (const auto item = rules_->currentItem()) selected = points_.at(item->data(0, Qt::UserRole).toULongLong());
     rules_->clear();
     points_ = model_->breakpoints();
+    const auto instructionPoints = model_->instructionBreakpoints();
+    for (const auto &id : instructionPoints) points_.push_back({{"instruction", id}});
+    std::map<uint64_t, size_t> visits;
+    if (!instructionPoints.empty())
+        for (int64_t i = 0; i <= model_->position(); ++i)
+            ++visits[model_->result().at("steps").at(size_t(i)).at("nextInstruction").get<uint64_t>()];
     for (size_t i = 0; i < points_.size(); ++i) {
         const auto &p = points_[i];
+        if (p.contains("instruction")) {
+            const auto id = p.at("instruction").get<uint64_t>();
+            auto item = new QTreeWidgetItem(rules_, {"Instruction " + text(p.at("instruction")), "—", "always",
+                QString::number(visits[id])});
+            item->setData(0, Qt::UserRole, qulonglong(i));
+            item->setToolTip(0, "Recorded instruction breakpoint; selecting it locates assembly without moving the trace");
+            item->setToolTip(1, "Conditions and hit-count rules currently apply to source breakpoints only");
+            if (p == selected) rules_->setCurrentItem(item);
+            continue;
+        }
         const auto f = p.at("file").get<size_t>();
         const auto name =
             f < model_->files().size() ? text(model_->files()[f].at("filename")) : text(p.at("file"));
@@ -952,7 +991,19 @@ void ReplayDebugView::refreshRules() {
         item->setData(0, Qt::UserRole, qulonglong(i));
         tip(item);
         item->setToolTip(0, name + ":" + text(p.at("line")));
+        if (p == selected) rules_->setCurrentItem(item);
     }
+    updateRuleActions();
+}
+void ReplayDebugView::updateRuleActions() {
+    const auto item = rules_->currentItem();
+    const bool instruction = item && points_.at(item->data(0, Qt::UserRole).toULongLong()).contains("instruction");
+    const bool source = !busy_ && model_ && !model_->files().empty() && !instruction;
+    condition_->setEnabled(source);
+    hitMode_->setEnabled(source);
+    count_->setEnabled(source);
+    findChild<QAction *>("debugApplyRule")->setEnabled(source);
+    findChild<QAction *>("debugRemoveRule")->setEnabled(!busy_ && model_ && item);
 }
 void ReplayDebugView::refreshWatches() {
     watches_->clear();
