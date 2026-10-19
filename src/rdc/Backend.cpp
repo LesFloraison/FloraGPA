@@ -186,6 +186,10 @@ class Session {
     uint32_t uavTexturePatch{};
     uint32_t textureStoresPatch{};
     uint32_t packedStorePatch{};
+    uint32_t preparedComputePatch{};
+    bool computePrepared{};
+    using PrepareCompute = uint32_t (RENDERDOC_CC *)(IReplayController *, uint32_t);
+    PrepareCompute prepareCompute{};
     using TextureStoreCount = uint32_t (RENDERDOC_CC *)(ShaderDebugger *);
     using TextureStoreRead = bool (RENDERDOC_CC *)(ShaderDebugger *, uint32_t, uint32_t *, uint32_t);
     TextureStoreCount textureStoreCount{};
@@ -199,6 +203,7 @@ class Session {
     DotCounter retainedComputeTraces{};
     DotCounter uavTextureReads{}, uavTextureFailures{};
     DotCounter packedStores{};
+    DotCounter preparedComputeConsumed{};
     explicit Session(const Json &job) {
         failureLog_ = QString::fromStdString(job.at("out").get<std::string>()) + "/backend-diagnostic.log";
         if (used)
@@ -261,6 +266,12 @@ class Session {
             // retention disabled while allowing unrelated analysis and DX11 jobs.
             symbol<Enable>("RENDERDOC_SetFloraRetainedComputeEnabled")(
                 retainedComputePatch == 2 && job.value("action", "") == "debug-thread");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraPreparedComputePatchVersion"))) {
+            preparedComputePatch = patch();
+            if (preparedComputePatch != 1) throw std::runtime_error("Unsupported prepared compute patch version");
+            prepareCompute = symbol<PrepareCompute>("RENDERDOC_PrepareFloraComputeDebug");
+            preparedComputeConsumed = symbol<DotCounter>("RENDERDOC_GetFloraPreparedComputeConsumed");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -507,6 +518,77 @@ const ActionDescription *findAction(const rdcarray<ActionDescription> &nodes, ui
     }
     return nullptr;
 }
+Json indirectDispatchInputs(IReplayController &controller, const Events &events,
+                            const Json &provenance, const ActionDescription &action) {
+    Json result{{"status", "unavailable"}, {"event_id", action.eventId},
+        {"indexed_groups", {action.dispatchDimension[0], action.dispatchDimension[1], action.dispatchDimension[2]}},
+        {"scope", "Argument buffer after selected-event replay, before DebugThread. The debugger may replay the prefix again; this is not its lane-probe snapshot."}};
+    try {
+        const SDObject *call{};
+        for (const auto &eid : provenance.at("api_event_ids")) {
+            const auto found = events.chunks.find(eid.get<uint32_t>());
+            if (found != events.chunks.end() && text(found->second->name).find("ExecuteIndirect") != std::string::npos) {
+                call = found->second; break;
+            }
+        }
+        if (!call) throw std::runtime_error("Original ExecuteIndirect API chunk is unavailable");
+        const auto signature = field(*call, "pCommandSignature");
+        const auto argument = field(*call, "pArgumentBuffer");
+        const auto offset = field(*call, "ArgumentBufferOffset");
+        const auto maximum = field(*call, "MaxCommandCount");
+        const auto counter = field(*call, "pCountBuffer");
+        const auto counterOffset = field(*call, "CountBufferOffset");
+        const auto resources = controller.GetResources();
+        const auto &structured = controller.GetStructuredFile();
+        const SDObject *description{};
+        for (const auto &resource : resources) {
+            if (id(resource.resourceId) != signature) continue;
+            for (const auto chunk : resource.initialisationChunks) {
+                if (chunk >= structured.chunks.size() || !structured.chunks[chunk]) continue;
+                const auto &entry = *structured.chunks[chunk];
+                if (text(entry.name).find("CreateCommandSignature") != std::string::npos)
+                    description = &child(entry, "pDesc");
+            }
+        }
+        if (!description) throw std::runtime_error("Indirect signature description is unavailable");
+        const auto &arguments = child(*description, "pArgumentDescs");
+        // D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH = 2. Other layouts need separate decoding.
+        if (field(*description, "NumArgumentDescs") != 1 || arguments.NumChildren() != 1 || !arguments.GetChild(0) ||
+            field(*arguments.GetChild(0), "Type") != 2)
+            throw std::runtime_error("Argument snapshot supports dispatch-only signatures");
+        const auto stride = field(*description, "ByteStride");
+        if (stride < 12 || stride % 4 || offset % 4 || action.drawIndex >= maximum ||
+            uint64_t(action.drawIndex) > (UINT64_MAX - offset) / stride)
+            throw std::runtime_error("Invalid indirect argument range");
+        const auto buffers = controller.GetBuffers();
+        auto read = [&](uint64_t resourceId, uint64_t start, uint64_t length) {
+            const auto buffer = std::find_if(buffers.begin(), buffers.end(),
+                [&](const auto &b) { return id(b.resourceId) == resourceId; });
+            if (buffer == buffers.end() || start > buffer->length || length > buffer->length - start)
+                throw std::runtime_error("Indirect argument read exceeds buffer");
+            const auto bytes = controller.GetBufferData(buffer->resourceId, start, length);
+            if (bytes.size() != length) throw std::runtime_error("Incomplete indirect argument readback");
+            return bytes;
+        };
+        uint64_t count = maximum;
+        if (counter) {
+            const auto bytes = read(counter, counterOffset, 4);
+            uint32_t value{}; memcpy(&value, bytes.data(), 4);
+            count = (std::min)(count, uint64_t(value));
+            result["count_buffer_value"] = value;
+        }
+        const auto selectedOffset = offset + uint64_t(action.drawIndex) * stride;
+        const auto bytes = read(argument, selectedOffset, 12);
+        uint32_t groups[3]{}; memcpy(groups, bytes.data(), 12);
+        result.update({{"status", "read"}, {"argument_resource", std::to_string(argument)},
+            {"argument_offset", std::to_string(selectedOffset)}, {"signature_resource", std::to_string(signature)},
+            {"stride", std::to_string(stride)}, {"maximum_count", maximum}, {"effective_count", count},
+            {"action_index", action.drawIndex}, {"action_present", uint64_t(action.drawIndex) < count},
+            {"groups", {groups[0], groups[1], groups[2]}},
+            {"matches_index", groups[0] == action.dispatchDimension[0] && groups[1] == action.dispatchDimension[1] && groups[2] == action.dispatchDimension[2]}});
+    } catch (const std::exception &e) { result["reason"] = e.what(); }
+    return result;
+}
 rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     rdcfixedarray<uint32_t, 3> result{};
     if (!job.contains(key))
@@ -642,7 +724,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
                  {"interpretation", cast == CompType::UInt   ? "uint"
                                     : cast == CompType::SInt ? "sint"
                                                              : "float"},
-                 {"value", pixel(controller.PickPixel(resource, x, y, sub, cast))},
+                 {"value", session.computePrepared ? Json() : pixel(controller.PickPixel(resource, x, y, sub, cast))},
                  {"method", "RenderDoc PickPixel with texture component interpretation"},
                  {"note", "Explicit selected texel after the dispatch, before DebugThread replays. This is "
                           "not proof that the selected invocation wrote this location."}});
@@ -818,6 +900,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
         !file.commit())
         throw std::runtime_error("Cannot export shader disassembly");
     result["disassembly"] = text(assembly);
+    if (dx12 && compute && reflection->encoding == ShaderEncoding::DXIL && !session.computePrepared) {
+        result["partial"] = true;
+        auto &warnings = result["debug_scope"]["warnings"];
+        if (warnings.is_null()) warnings = Json::array();
+        warnings.push_back("This analysis uses legacy post-event preparation. DebugThread replays the prefix again, which can change indirect work and inputs. Use the prepared-compute backend patch for a single pre-dispatch preparation.");
+    }
     if (dx12 && compute && text(assembly).find("dcl_tgsm_") != std::string::npos) {
         const auto group = coordinates(job, "group");
         const bool affected = dxbcWorkgroupPatch != 1 && (group[0] || group[1] || group[2]);
@@ -957,23 +1045,30 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
         const auto after = pixel(controller.PickPixel(selection.resource, selection.x, selection.y,
                                                       selection.sub, selection.cast));
         auto &reference = result["gpu_reference"];
-        const auto &before = reference.at("value").at("uintValue");
-        const bool same = before == after.at("uintValue") &&
-                          (retainedCompute || before == reference.at("after_trace_creation_value").at("uintValue"));
-        reference["after_debug_value"] = after;
-        reference["consistency"] = same ? "selected_texel_unchanged" : "selected_texel_changed";
-        reference["consistency_scope"] =
-            retainedCompute ? "Selected post-event texel before debugging and after trace release restores the dispatch. No post-event observation is made while inputs are retained. Unchanged values do not validate the simulated invocation."
-            : "Selected post-event texel before debugging, after trace creation and after stepping, "
-            "compared as PickPixel result bits. "
-            "An unchanged texel does not establish stable inputs or validate the simulated invocation.";
-        if (!same) {
-            result["partial"] = true;
-            auto &warnings = result["debug_scope"]["warnings"];
-            if (warnings.is_null())
-                warnings = Json::array();
-            warnings.push_back("The selected GPU texel changed during shader-debug replays. The earlier "
-                               "GPU reference cannot validate this trace; inspect replay/input stability.");
+        if (session.computePrepared) {
+            reference["value"] = after;
+            reference["scope"] = "post_dispatch_after_trace_release";
+            reference["consistency"] = "single_post_dispatch_observation";
+            reference["note"] = "Read after FreeTrace executes the original dispatch against the prepared inputs. No earlier post-dispatch reference was taken; this does not prove which invocation wrote the texel.";
+        } else {
+            const auto &before = reference.at("value").at("uintValue");
+            const bool same = before == after.at("uintValue") &&
+                              (retainedCompute || before == reference.at("after_trace_creation_value").at("uintValue"));
+            reference["after_debug_value"] = after;
+            reference["consistency"] = same ? "selected_texel_unchanged" : "selected_texel_changed";
+            reference["consistency_scope"] =
+                retainedCompute ? "Selected post-event texel before debugging and after trace release restores the dispatch. No post-event observation is made while inputs are retained. Unchanged values do not validate the simulated invocation."
+                : "Selected post-event texel before debugging, after trace creation and after stepping, "
+                "compared as PickPixel result bits. "
+                "An unchanged texel does not establish stable inputs or validate the simulated invocation.";
+            if (!same) {
+                result["partial"] = true;
+                auto &warnings = result["debug_scope"]["warnings"];
+                if (warnings.is_null())
+                    warnings = Json::array();
+                warnings.push_back("The selected GPU texel changed during shader-debug replays. The earlier "
+                                   "GPU reference cannot validate this trace; inspect replay/input stability.");
+            }
         }
     }
     if (dx12 && vertex) {
@@ -1321,8 +1416,14 @@ Json runRdcJob(const Json &job) {
                                         !job.value("resource", Json()).is_null();
     // Inventory exports loading-time action/resource descriptions and does not
     // inspect replayed state. Do not replay an arbitrary last action to list it.
-    if (!indexedResourceHistory && !(dx12 && action == "inventory") && action != "counters")
-        controller.SetFrameEvent(eid, true);
+    if (!indexedResourceHistory && !(dx12 && action == "inventory") && action != "counters") {
+        uint32_t prepared{};
+        if (dx12 && action == "debug-thread" && session.prepareCompute && session.retainedComputePatch == 2)
+            prepared = session.prepareCompute(&controller, eid);
+        if (prepared > 2) throw std::runtime_error("Invalid compute preparation response");
+        session.computePrepared = prepared == 1;
+        if (!prepared) controller.SetFrameEvent(eid, true);
+    }
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
         if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
@@ -1530,6 +1631,25 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (debugging) {
+        if (dx12 && action == "debug-thread") {
+            const auto selected = events.actionDetails.find(eid);
+            if (selected != events.actionDetails.end() && (selected->second->flags & ActionFlags::Indirect)) {
+                auto inputs = indirectDispatchInputs(controller, events, rdcProvenance(eid, mapping["reverse"]), *selected->second);
+                if (session.computePrepared) inputs["scope"] = "Prepared pre-dispatch argument buffer; a successful DebugThread must consume this state without another prefix replay.";
+                inputs["execution"] = gpa;
+                result["indirect_inputs"] = inputs;
+                QSaveFile evidence(QString::fromStdString(job.at("out").get<std::string>()) + "/debug_indirect_inputs.json");
+                const auto bytes = QByteArray::fromStdString(inputs.dump(2));
+                if (!evidence.open(QIODevice::WriteOnly) || evidence.write(bytes) != bytes.size() || !evidence.commit())
+                    throw std::runtime_error("Cannot save indirect debug input evidence");
+                if (session.computePrepared && inputs.value("status", "") == "read") {
+                    const auto group = coordinates(job, "group");
+                    if (!inputs.at("action_present").get<bool>() || group[0] >= inputs.at("groups")[0].get<uint32_t>() ||
+                        group[1] >= inputs.at("groups")[1].get<uint32_t>() || group[2] >= inputs.at("groups")[2].get<uint32_t>())
+                        throw std::runtime_error("Selected compute group is outside the prepared indirect dispatch; inspect debug_indirect_inputs.json");
+                }
+            }
+        }
         const auto contractStart = session.contractOperations ? session.contractOperations() : 0;
         const auto contractFailureStart = session.contractFailures ? session.contractFailures() : 0;
         const auto dotStart = session.dotOperations ? session.dotOperations() : 0;
@@ -1540,7 +1660,17 @@ Json runRdcJob(const Json &job) {
         const auto uavReadStart = session.uavTextureReads ? session.uavTextureReads() : 0;
         const auto uavFailureStart = session.uavTextureFailures ? session.uavTextureFailures() : 0;
         const auto packedStart = session.packedStores ? session.packedStores() : 0;
+        const auto preparedStart = session.preparedComputeConsumed ? session.preparedComputeConsumed() : 0;
         result.update(debug(controller, eid, job, session));
+        const auto preparedCount = session.preparedComputeConsumed ? session.preparedComputeConsumed() - preparedStart : 0;
+        if (session.computePrepared && preparedCount != 1)
+            throw std::runtime_error("Compute debugger did not consume the prepared event state");
+        if (dx12 && action == "debug-thread")
+            result["compute_preparation"] = {{"patch_version", session.preparedComputePatch},
+                {"status", session.computePrepared ? "single_pre_dispatch_preparation" : "legacy_post_event_preparation"},
+                {"consumed", std::to_string(preparedCount)},
+                {"scope", session.computePrepared ? "A single event-before prefix prepares DXIL compute inputs. Lane probing and retained stepping share that state; this does not prove earlier prefix replay fidelity."
+                    : "Legacy post-event preparation; the debugger may replay the prefix again and regenerate different work or inputs."}};
         result["dxil_packed_store"] = {{"patch_version", session.packedStorePatch},
             {"stores", std::to_string(session.packedStores ? session.packedStores() - packedStart : 0)},
             {"scope", "DX12 DXIL R11G11B10 typed stores: direct float32 round-toward-zero, finite saturation and subnormal preservation. Count includes all simulated lanes, not only the selected lane."}};

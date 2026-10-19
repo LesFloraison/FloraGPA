@@ -1,0 +1,84 @@
+diff --git a/renderdoc/replay/replay_controller.cpp b/renderdoc/replay/replay_controller.cpp
+--- a/renderdoc/replay/replay_controller.cpp
++++ b/renderdoc/replay/replay_controller.cpp
+@@ -68,9 +68,37 @@
+   CHECK_REPLAY_THREAD();
+ }
+ 
++// One explicitly requested local D3D12 DXIL debug preparation. Tokens are
++// consumed only by this driver's exact event, or invalidated on another selection.
++static thread_local bool floraPrepareComputeNext = false;
++static thread_local IReplayDriver *floraPreparedComputeDriver = NULL;
++static thread_local uint32_t floraPreparedComputeEvent = 0;
++static thread_local uint64_t floraPreparedComputeConsumed = 0;
++bool FloraConsumePreparedCompute(IReplayDriver *driver, uint32_t eventId)
++{
++  const bool match = driver == floraPreparedComputeDriver && eventId == floraPreparedComputeEvent;
++  floraPreparedComputeDriver = NULL;
++  floraPreparedComputeEvent = 0;
++  if(match) ++floraPreparedComputeConsumed;
++  return match;
++}
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraPreparedComputePatchVersion() { return 1; }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraPreparedComputeConsumed() { return floraPreparedComputeConsumed; }
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_PrepareFloraComputeDebug(IReplayController *controller, uint32_t eventId)
++{
++  if(!controller) return 0;
++  floraPrepareComputeNext = true;
++  controller->SetFrameEvent(eventId, true);
++  return floraPreparedComputeDriver ? 1 : 2;
++}
++
+ void ReplayController::SetFrameEvent(uint32_t eventId, bool force)
+ {
+   CHECK_REPLAY_THREAD();
++  const bool prepareCompute = floraPrepareComputeNext;
++  floraPrepareComputeNext = false;
++  floraPreparedComputeDriver = NULL;
++  floraPreparedComputeEvent = 0;
+   RENDERDOC_PROFILEFUNCTION();
+ 
+   // use remapped event if there's a match
+@@ -87,6 +115,18 @@
+ 
+     for(size_t i = 0; i < m_Outputs.size(); i++)
+       m_Outputs[i]->SetFrameEvent(eventId);
++
++    if(prepareCompute && m_APIProps.pipelineType == GraphicsAPI::D3D12 && m_Outputs.empty())
++    {
++      FetchPipelineState(eventId);
++      const ShaderReflection *cs = m_D3D12PipelineState.computeShader.reflection;
++      if(cs && cs->encoding == ShaderEncoding::DXIL)
++      {
++        floraPreparedComputeDriver = m_pDevice;
++        floraPreparedComputeEvent = eventId;
++        return;
++      }
++    }
+ 
+     m_pDevice->ReplayLog(eventId, eReplay_OnlyDraw);
+     FatalErrorCheck();
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -25,6 +25,7 @@
+ #include "d3d12_shaderdebug.h"
+ 
+ void FloraRetainComputeTrace(ShaderDebugger *debugger);
++bool FloraConsumePreparedCompute(IReplayDriver *driver, uint32_t eventId);
+ #include <atomic>
+ #include "core/settings.h"
+ #include "driver/dx/official/d3dcompiler.h"
+@@ -3683,8 +3684,10 @@
+   }
+   else
+   {
+-    // get ourselves in pristine state before this dispatch (without any side effects it may have had)
+-    m_pDevice->ReplayLog(0, eventId, eReplay_WithoutDraw);
++    // The isolated worker may already have prepared exactly this pre-dispatch
++    // state. Replaying the prefix again can regenerate different indirect work.
++    if(!FloraConsumePreparedCompute(this, eventId))
++      m_pDevice->ReplayLog(0, eventId, eReplay_WithoutDraw);
+ 
+     uint32_t threadDim[3] = {
+         refl.dispatchThreadsDimension[0],

@@ -5205,7 +5205,7 @@ fresh measurement of every subsequent replay:
 | --- | --- | --- | --- |
 | 36766 / 611527 | 90398 | 4902 × 1 × 1 | Group/thread zero produces a 412-state DXIL trace |
 | 36770 / 611532 | 90412 | 0 × 1 × 1 | Debug request correctly rejects a zero-workgroup action |
-| 36775 / 611539 | 90429 | 44 × 1 × 1 | Group/thread zero fails GPU lane probing; unresolved |
+| 36775 / 611539 | 90429 | 44 × 1 × 1 | Initially failed GPU lane probing; restored by single preparation below |
 | 36779 / 611544 | 90443 | 1174 × 1 × 1 | Previously recorded trace remains the reference |
 
 For 36766, the actual constants again give c2 `(0,0,1920,803)` and c22
@@ -5253,6 +5253,76 @@ The tiny invalid-RDC fixture `diagnostic-invalid1` verifies constructor-failure
 log retention and CLI error-path reporting without opening a GPU capture.
 The real 36775 failure verifies preservation during analysis unwinding.
 All capture queries were serial; no additional native frame replay was run.
+
+### Single preparation restores Hellblade2 execution 36775 debugging
+
+The failure was localized to an extra prefix replay, rather than absent debug
+information. All four indirect calls use captured buffer **2149344466640**,
+creation **514808**, RDC resource **424**, signature **5491**, stride **12**,
+maximum count **1**, no count buffer, at byte offsets **0, 12, 24, 36**.
+The selected-event argument read at offset 24 is **(44,1,1)**, matching the index;
+pipeline inspection also confirms no predication. A separate research DLL
+logged the buffer immediately after DebugThread's `WithoutDraw` replay:
+**(5292,1,1), (0,1,1), (0,1,1), (828,1,1)**. Thus 36775's lane probe really had
+zero groups in that later replay. The research changes and DLL stay outside Git;
+the production source was restored before applying the versioned fix.
+
+The twelfth pinned patch, `dx12-dxil-prepared-compute.patch`, adds an explicit
+local compute-debug preparation. It replays once up to the selected event,
+fetches the pre-dispatch pipeline, and leaves application resources in that
+state. DXIL DebugThread consumes a one-use token tied to the exact driver/event
+instead of replaying the prefix again. Any other event selection invalidates the
+token. The existing version-2 retention patch then preserves those inputs during
+lane probing and stepping; FreeTrace runs the original dispatch to restore the
+corresponding post-event state. Normal event selection and unrelated debug
+paths retain their usual behavior. The worker requires exactly one consumed
+preparation and reports the preparation version and phase. Older libraries use
+the legacy path with a DXIL warning; they are not silently treated as equivalent.
+
+Indirect compute debugging now saves a bounded `debug_indirect_inputs.json`
+snapshot, including current and indexed dimensions, action ordinal, count,
+signature, resource and byte offset. Its current decoder supports dispatch-only
+signatures; other layouts report the gap. It reads 12 argument bytes and, when
+present, four count bytes with checked bounds. Prepared out-of-range groups are
+rejected before probing. Capture/resource/offset identities remain lossless.
+Explicit GPU texel references are deferred until trace release, labeled
+`single_post_dispatch_observation`; they no longer describe pre-dispatch data
+as post-dispatch output or claim an unmeasured unchanged-value comparison.
+
+`hellblade-mip1-writer36775-prepared1` now succeeds with **413 states**, one
+consumed preparation, one retained trace, three UAV view reads and zero view
+failures. Its read-only tile-list bytes match before debug, after trace creation,
+after stepping and after dispatch restoration. The selected lane writes four
+mip-0 texels at `(1408/1409,256/257)` and one mip-1 texel at **(704,128)**,
+creation **570673**, instruction **706**; the disabled mip-2 attempt is out of
+bounds. Mip-0 RGB operands match the sampled GPU values; mip-1 GPU values include
+R11G11B10 storage conversion. Observations remain distinct from general proof
+of every thread's writes. Constants c2 `(0,0,1920,803)`, c22 `(12,1,0,0)` and
+guards `_733/_745` with shifted coordinates `_740/_741` also bound this shader's
+in-bounds mip-1 writes to **[0,960) × [0,402)**. Together with the other two
+examined nonzero writers, this narrows the padded-row investigation; it does
+not establish complete resource history, aliasing behavior or frame fidelity.
+
+Focused validation used the existing captures serially. The small 2D UAV view
+fixture (`dxil-uav-view-prepared2d`, 34 states) matches all eight independently
+recorded GPU words: **21300, 777, 777, 784, 21100, 0, 0, 21228**, retaining the
+original pre-store value rather than a replayed post-store value. Its compact
+comparison is `prepared-compute-fixture1.json`. The real zero-workgroup event
+36770 still fails explicitly; `hellblade-mip1-writer36770-prepared1` saves
+`(0,1,1)` at offset 12 and rejects group zero before GPU probing. The UI test
+checks the 36775 trace, phase labeling and exact resource/pixel navigation:
+**3 passed, 0 failed, 0 skipped**, **312 ms**, including initialization/cleanup,
+in `prepared-compute-ui2.txt`. The screenshot was inspected. Builds **340–344**
+passed, as did the exact twelve-patch RenderDoc source/build check.
+The new runtime SHA-256 is
+`b2fec618661edbcb464e392f6f1efd2d1a552211403a72ee71c76d4ad5f6d1a7`.
+The successful Hellblade2 analysis loads no GPA/Python modules. Package scripts
+now validate and ship the twelfth patch; full portable acceptance is unfinished.
+
+The earlier prefix's changing tile classification is still unresolved. Preparing
+one coherent state fixes this debugging failure without proving that the state
+matches original GPA in every resource. No indirect counts are forced, no draw
+is skipped to manufacture success, and full-frame fidelity remains incomplete.
 
 ### Full feature acceptance
 

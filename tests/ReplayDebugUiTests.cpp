@@ -52,6 +52,42 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void preparedComputeInputs() {
+        const auto path = qEnvironmentVariable("FLORA_PREPARED_COMPUTE_REPORT");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 36775 prepared compute report");
+        const auto result = read(path);
+        QCOMPARE(result.at("execution"), Json("36775"));
+        QCOMPARE(result.at("step_count"), Json(413));
+        QCOMPARE(result.at("compute_preparation").at("consumed"), Json("1"));
+        QCOMPARE(result.at("compute_preparation").at("status"), Json("single_pre_dispatch_preparation"));
+        QCOMPARE(result.at("indirect_inputs").at("groups"), Json::array({44,1,1}));
+        QCOMPARE(result.at("indirect_inputs").at("argument_offset"), Json("24"));
+        const auto &inputs = result.at("compute_buffer_inputs");
+        QCOMPARE(inputs.at("before_debug"), inputs.at("after_trace_creation"));
+        QCOMPARE(inputs.at("after_trace_creation"), inputs.at("after_steps"));
+        QCOMPARE(inputs.at("after_steps"), inputs.at("after_dispatch_restoration"));
+        QCOMPARE(result.at("gpu_reference").at("consistency"), Json("single_post_dispatch_observation"));
+        QVERIFY(!result.at("gpu_reference").contains("after_debug_value"));
+        QCOMPARE(result.at("texture_stores").at("rows").size(), size_t(6));
+        QVERIFY(result.at("gpa_modules_loaded").empty());
+        ReplayDebugView view("cs"); view.resize(1650, 1000); view.show();
+        view.setContext("prepared-36775", 36775, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        const auto reference = view.findChild<QLabel *>("debugGpuReference"); QVERIFY(reference);
+        QVERIFY(reference->text().contains("after trace release"));
+        QVERIFY(!reference->text().contains("Read before debugger replay"));
+        QVERIFY(!reference->text().contains("unchanged"));
+        const auto tree = view.findChild<QTreeWidget *>("debugTextureStores"); QVERIFY(tree);
+        for (auto tabs : view.findChildren<QTabWidget *>())
+            if (tabs->indexOf(tree) >= 0) tabs->setCurrentWidget(tree);
+        QSignalSpy texel(&view, &ReplayDebugView::texturePixelRequested);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, tree->topLevelItem(4)), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1); QCOMPARE(texel[0][1].toULongLong(), 36775ULL);
+        QCOMPARE(texel[0][2].toULongLong(), 570673ULL);
+        QCOMPARE(texel[0][4].toUInt(), 704U); QCOMPARE(texel[0][5].toUInt(), 128U);
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/prepared-compute.png"));
+    }
     void textureStoreNavigation() {
         const auto path = qEnvironmentVariable("FLORA_TEXTURE_STORE_REPORT");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 texture-store observer report");

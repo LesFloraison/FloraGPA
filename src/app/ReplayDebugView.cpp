@@ -777,8 +777,10 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                            : status == "observed_bytes_changed" ? "Read-only buffer observations differ."
                            : status == "no_buffer_views" ? "No read-only buffer views to check."
                            : "Read-only buffer observations are incomplete.";
-        warnings.prepend(QString("DXIL compute inputs retained during stepping; dispatch restored after trace release. %1 Texture inputs are not checked. Earlier GPU references belong to a separate replay.")
-            .arg(buffers));
+        const bool prepared = result.value("compute_preparation", Json::object()).value("status", "") == "single_pre_dispatch_preparation";
+        warnings.prepend(QString("DXIL compute inputs retained during stepping; dispatch restored after trace release. %1 Texture inputs are not checked. %2")
+            .arg(buffers, prepared ? "Inputs prepared once before dispatch; GPU references read after release."
+                                  : "Earlier GPU references belong to a separate replay."));
     }
     if (const auto selection = result.value("indirect_selection", Json()); selection.is_object())
         warnings.prepend(QString("ExecuteIndirect action %1 of %2 (zero-based) · replay event %3")
@@ -793,7 +795,7 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         if (reference.value("status", "") == "read") {
             const auto kind = reference.value("interpretation", "float");
             const auto key = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
-            if (stage_ == "cs")
+            if (stage_ == "cs") {
                 gpuReference_->setText(
                     QString("GPU selected texel after dispatch · (%1, %2) mip %3 layer %4 sample %5 · %6 %7\n"
                             "Read before debugger replay; this does not prove the selected invocation wrote "
@@ -801,7 +803,10 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                         .arg(text(reference.at("x")), text(reference.at("y")), text(reference.at("mip")),
                              text(reference.at("layer")), text(reference.at("sample")),
                              QString::fromStdString(kind), text(reference.at("value").at(key))));
-            else
+                if (reference.value("scope", "") == "post_dispatch_after_trace_release")
+                    gpuReference_->setText(gpuReference_->text().replace("Read before debugger replay;",
+                        "Read after trace release executes the prepared dispatch;"));
+            } else
                 gpuReference_->setText(
                     QString("GPU target after event · RT0 mip %1 layer %2 sample %3 · %4 %5\n"
                             "Read before debugger replay; target conversion, blending and "
