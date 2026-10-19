@@ -900,9 +900,15 @@ Json runRdcJob(const Json &job) {
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (job.value("dxil_fast_contraction", false) && (!debugging || !job.contains("execution")))
         throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
-    if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
+    if (action != "history" && action != "events" && action != "counters" && action != "counter-catalog" && action != "inventory" &&
         action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
+    if (job.contains("counter_ids") && (action != "counters" || job.at("counter_ids").is_null()))
+        throw std::runtime_error("Counter IDs require a counters request");
+    if (action == "counter-catalog")
+        for (const auto key : {"execution", "gpa_event", "eid", "indirect_action"})
+            if (job.contains(key) && !job.at(key).is_null())
+                throw std::runtime_error("Counter catalog is device-wide and does not accept event selectors");
     // Direct worker jobs must not bypass the resource-lifetime check performed
     // by prepareRdcJob. Otherwise the implicit RTV gets the requested creation
     // label even though it belongs to a different captured resource.
@@ -1024,6 +1030,23 @@ Json runRdcJob(const Json &job) {
         result["cpu_writes"] = writes(events);
         return complete();
     }
+    std::map<GPUCounter, CounterDescription> counterDescriptions;
+    Json counterCatalog = Json::array();
+    if (action == "counters" || action == "counter-catalog") {
+        for (const auto counter : controller.EnumerateCounters()) {
+            auto description = controller.DescribeCounter(counter);
+            if (description.counter != counter || !counterDescriptions.emplace(counter, description).second)
+                throw std::runtime_error("Invalid or duplicate counter description");
+            counterCatalog.push_back(rdcCounterDescription(description));
+        }
+        checked(controller.GetFatalErrorStatus());
+        if (action == "counter-catalog") {
+            result.update({{"available", counterCatalog}, {"values", Json::array()}, {"result_count", 0},
+                {"measurement_status", "not_requested"}, {"scope", "replay_device_catalog"},
+                {"note", "Catalog only; capture loading may execute GPU work. No counter sampling or additional event replay requested. Availability is not a successful measurement."}});
+            return complete();
+        }
+    }
     const auto resources = controller.GetResources();
     const auto gpa = job.value(dx12 ? "execution" : "gpa_event", Json(nullptr));
     const auto selectionMap = dx12 ? "execution_map" : "gpa_event_map";
@@ -1059,7 +1082,7 @@ Json runRdcJob(const Json &job) {
                                         !job.value("resource", Json()).is_null();
     // Inventory exports loading-time action/resource descriptions and does not
     // inspect replayed state. Do not replay an arbitrary last action to list it.
-    if (!indexedResourceHistory && !(dx12 && action == "inventory"))
+    if (!indexedResourceHistory && !(dx12 && action == "inventory") && action != "counters")
         controller.SetFrameEvent(eid, true);
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
@@ -1223,40 +1246,48 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (action == "counters") {
-        rdcarray<GPUCounter> selected;
-        Json available = Json::array(), values = Json::array();
-        std::map<GPUCounter, CounterDescription> descriptions;
-        for (const auto counter : controller.EnumerateCounters()) {
-            auto description = controller.DescribeCounter(counter);
-            if (description.counter != counter || !descriptions.emplace(counter, description).second)
-                throw std::runtime_error("Invalid or duplicate counter description");
-            available.push_back(rdcCounterDescription(description));
-            if (uint32_t(counter) < uint32_t(GPUCounter::FirstAMD))
-                selected.push_back(counter);
-        }
+        const auto selected = selectRdcCounters(counterDescriptions, job.value("counter_ids", Json()));
+        Json values = Json::array(), sampledIds = Json::array();
+        std::set<GPUCounter> pending;
+        std::set<std::pair<uint32_t, GPUCounter>> samples;
+        for (const auto counter : selected) { pending.insert(counter); sampledIds.push_back(uint32_t(counter)); }
         const auto measured = controller.FetchCounters(selected);
         checked(controller.GetFatalErrorStatus());
         if (!selected.empty() && measured.empty())
             throw std::runtime_error("RenderDoc returned no measured counters; available descriptions are not measurements");
         for (const auto &counter : measured) {
-            const auto it = descriptions.find(counter.counter);
-            if (it == descriptions.end())
-                throw std::runtime_error("Counter result has no description");
+            const auto it = counterDescriptions.find(counter.counter);
+            if (it == counterDescriptions.end() || !selected.contains(counter.counter) ||
+                !samples.emplace(counter.eventId, counter.counter).second)
+                throw std::runtime_error("Counter result is unrequested, duplicate or has no description");
+            pending.erase(counter.counter);
             const auto &description = it->second;
+            auto value = rdcCounterValue(description, counter);
+            if (dx12 && value.is_number_integer()) value = value.dump();
             Json row{{"eventId", counter.eventId},
                      {"counter", uint32_t(counter.counter)},
                      {"name", text(description.name)},
                      {"unit", rdcCounterUnit(description.unit)},
-                     {"value", rdcCounterValue(description, counter)}};
+                     {"source", rdcCounterDescription(description).at("source")},
+                     {"sampling_scope", "capture_actions"},
+                     {"value", value}};
             row.update(rdcProvenance(counter.eventId, mapping["reverse"]));
             values.push_back(std::move(row));
         }
+        if (!pending.empty())
+            throw std::runtime_error("RenderDoc returned no measurements for one or more requested counters");
+        for (auto &description : counterCatalog)
+            if (selected.contains(GPUCounter(description.at("counter").get<uint32_t>())))
+                description["status"] = "measured";
         result.update({{"eid", eid},
                        {"gpa_event", gpa},
-                       {"available", available},
+                       {"available", counterCatalog},
+                       {"counter_ids", sampledIds},
+                       {"measurement_status", "measured"},
+                       {"sampling_scope", "capture_actions"},
                        {"values", values},
                        {"result_count", values.size()},
-                       {"note", "Measured on the replay GPU; GPA vendor-specific metrics are not implied."}});
+                       {"note", "Measured across capture actions on the replay GPU, not limited to the event selector. Counter collection may require multiple replay passes. GPA vendor-specific metrics are not implied."}});
         return complete();
     }
     if (debugging) {

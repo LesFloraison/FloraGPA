@@ -31,11 +31,12 @@ int rdcAnalyzeCli(QStringList args) {
         p.addHelpOption();
         p.addPositionalArgument("capture", "Independent .rdc capture");
         p.addPositionalArgument("action", "inventory | postmesh | history | debug-pixel | debug-vertex | "
-                                          "debug-thread | counters | texture | resource-history | pipeline");
+                                          "debug-thread | counters | counter-catalog | texture | resource-history | pipeline");
         p.addOption({"out", "New or empty output directory", "path"});
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
                      flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
+        p.addOption({"counter", "Counter ID to sample (repeatable; counters action only). Default: built-in counters. Sampling covers capture actions, not only --execution.", "integer"});
         p.addOption({"api-validation", "Enable replay API validation and include backend diagnostics"});
         p.addOption({"dxil-fast-contraction", "Experimental GPU evaluation of adjacent single-use fast DXIL multiply/add pairs"});
         p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
@@ -82,6 +83,10 @@ int rdcAnalyzeCli(QStringList args) {
                 throw std::runtime_error("Invalid unsigned analysis parameter");
             return value;
         };
+        if (p.isSet("counter")) {
+            options["counter_ids"] = Json::array();
+            for (const auto &id : p.values("counter")) options["counter_ids"].push_back(number(id));
+        }
         for (const auto key : {"gpa-event", "eid", "resource", "x", "y", "mip", "layer", "sample", "instance",
                                "vertex", "index", "primitive", "indirect-action", "attribute"})
             if (p.isSet(key))

@@ -69,6 +69,23 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void counterSelectionPreparation() {
+        QTemporaryDir dir;
+        const Json options{{"counter_ids", Json::array({3000001, 1})}, {"execution", "21895"}};
+        const auto job = prepare(dir.path(), "success", options, "counters");
+        QCOMPARE(job.at("counter_ids"), options.at("counter_ids"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "inventory"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "counter-catalog"));
+        const auto catalog = prepare(dir.path(), "success", Json::object(), "counter-catalog");
+        QCOMPARE(catalog.at("action"), Json("counter-catalog"));
+        QVERIFY(!catalog.contains("counter_ids"));
+        for (const auto &ids : {Json::array(), Json::array({0}), Json::array({1, 1}), Json::array({-1}),
+             Json::array({1.5}), Json::array({uint64_t(UINT32_MAX) + 1}), Json(nullptr)})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                prepare(dir.path(), "success", Json{{"counter_ids", ids}}, "counters"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            prepare(dir.path(), "success", Json{{"execution", "1"}}, "counter-catalog"));
+    }
     void fastContractionPreparation() {
         QTemporaryDir dir;
         const Json options{{"execution", "37003"}, {"dxil_fast_contraction", true}};

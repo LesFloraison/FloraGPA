@@ -65,7 +65,7 @@ struct ProcessJob {
 Json prepareRdcJob(const QString &capture, const std::string &action, const QString &output,
                    const QString &library, const Json &options) {
     static const std::set<std::string> actions{"inventory",    "postmesh",     "history",  "debug-pixel",
-                                               "debug-vertex", "debug-thread", "counters", "texture", "resource-history", "pipeline"};
+                                               "debug-vertex", "debug-thread", "counters", "counter-catalog", "texture", "resource-history", "pipeline"};
     if (!actions.contains(action))
         throw std::runtime_error("Unknown RDC analysis action");
     Json job{{"gpa_event", nullptr},
@@ -89,10 +89,25 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
+    if (job.contains("counter_ids")) {
+        const auto &ids = job.at("counter_ids");
+        if (action != "counters" || !ids.is_array() || ids.empty() || ids.size() > 4096)
+            throw std::runtime_error("Counter IDs require a counters request with 1 to 4096 IDs");
+        std::set<uint32_t> seen;
+        for (const auto &id : ids) {
+            unsignedNumber(id, UINT32_MAX, "counter ID");
+            if (id == 0 || !seen.insert(id.get<uint32_t>()).second)
+                throw std::runtime_error("Counter IDs must be unique and nonzero");
+        }
+    }
+    if (action == "counter-catalog")
+        for (const auto key : {"execution", "gpa_event", "eid", "indirect_action"})
+            if (job.contains(key) && !job.at(key).is_null())
+                throw std::runtime_error("Counter catalog is device-wide and does not accept event selectors");
     if (!job["gpa_event"].is_null() && !job["eid"].is_null())
         throw std::runtime_error("Choose GPA or RDC event, not both");
     if (!job["api_validation"].is_boolean())

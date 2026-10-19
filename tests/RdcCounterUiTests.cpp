@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
+#include <QLabel>
 #include <QPlainTextEdit>
 #include <QSaveFile>
 #include <QSettings>
@@ -71,6 +72,65 @@ class RdcCounterUiTests : public QObject {
             output_ += "/rdc-counters";
             QVERIFY(QDir().mkpath(output_));
         }
+    }
+    void counterCatalogSelection() {
+        const auto path = qEnvironmentVariable("FLORA_COUNTER_CATALOG_REPORT");
+        if (path.isEmpty()) QSKIP("Set FLORA_COUNTER_CATALOG_REPORT to a saved DX12 catalog");
+        const auto report = read(path);
+        RdcCountersView view;
+        view.resize(1100, 700); view.show();
+        view.setContext("dx12:catalog", 21895, true);
+        QVERIFY(view.nativeMode());
+        auto source = view.findChild<QComboBox *>("rdcCountersSource");
+        source->setCurrentIndex(1);
+        QCoreApplication::processEvents();
+        QVERIFY(source->isVisible());
+        QVERIFY(!view.nativeMode());
+        QVERIFY(action(view, "rdcCountersBackend")->isEnabled());
+        QSignalSpy requested(&view, &RdcCountersView::readRequested);
+        action(view, "listRdcCounters")->trigger();
+        QCOMPARE(requested.size(), 1);
+        QCOMPARE(view.request(), Json({{"action", "counter-catalog"}}));
+        const auto catalogToken = view.requestId();
+        QVERIFY(view.finish(catalogToken, report));
+        auto catalog = view.findChild<QTreeWidget *>("rdcCounterCatalog");
+        QCOMPARE(catalog->topLevelItemCount(), int(report.at("available").size()));
+        auto ids = view.findChild<QLineEdit *>("rdcCounterIds");
+        QTreeWidgetItem *valid{}, *diagnostic{};
+        for (int i = 0; i < catalog->topLevelItemCount(); ++i) {
+            const auto item = catalog->topLevelItem(i);
+            if (item->text(3) == "1") valid = item;
+            if (item->text(3) == "3000000") diagnostic = item;
+        }
+        QVERIFY(valid && diagnostic);
+        QCOMPARE(diagnostic->text(6), QString("Diagnostic / unsupported"));
+        catalog->itemDoubleClicked(diagnostic, 0);
+        QVERIFY(ids->text().isEmpty());
+        catalog->itemDoubleClicked(valid, 0);
+        QCOMPARE(ids->text(), QString("1"));
+        QVERIFY(!view.finish(catalogToken, report));
+        QVERIFY(view.findChild<QLabel *>("rdcCountersSummary")->text().contains("not sampled"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/dx12-counter-catalog.png"));
+        action(view, "readRdcCounters")->trigger();
+        QCOMPARE(view.request(), Json({{"action", "counters"}, {"execution", "21895"}, {"counter_ids", Json::array({1})}}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report));
+        auto measured = fixture();
+        measured["backend"] = "dx12"; measured["execution"] = "21895";
+        measured["counter_ids"] = Json::array({2});
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), measured));
+        measured["counter_ids"] = Json::array({1});
+        measured["sampling_scope"] = "capture_actions";
+        measured["values"] = Json::array({{{"eventId", 10}, {"execution", "21895"}, {"selectable", true},
+            {"counter", 1}, {"name", "GPU Duration"}, {"source", "renderdoc_builtin"},
+            {"unit", "CounterUnit.Seconds"}, {"value", 0.000001}}});
+        measured["result_count"] = 1;
+        QVERIFY(view.finish(view.requestId(), measured));
+        QVERIFY(view.findChild<QLabel *>("rdcCountersSummary")->text().contains("capture actions"));
+        source->setCurrentIndex(0);
+        QVERIFY(view.result().is_null());
+        QVERIFY(view.nativeMode());
+        view.setContext("dx11", 100, false);
+        QCOMPARE(view.request(), Json({{"action", "counters"}}));
     }
     void exactValuesAndInvalidation() {
         RdcCountersView view;

@@ -4635,6 +4635,87 @@ sample recapture or broad regression was run. The default MainPS mismatch and
 full shader numerical fidelity remain unfinished; this experiment is not a
 replacement for those acceptance requirements.
 
+### Device keyframe finalization and historical queries
+
+The additional read-only Ghidra audit uses the same GPA **2025.1.3.1269**
+`Streams/layers/capture-x64.dll`, SHA-256
+`a1afd0b41e6bf668381e4898b03460130e0b61432c88d56c8559aef5b1b72c62`.
+RIP-relative diagnostic-string references and PE unwind ranges locate
+`ID3D12DeviceApiCallCache::EnumerateKeyframeCalls` at RVA **0x83480** and
+`PostVisit` at **0x840d0** (image base **0x180000000**). The former includes
+device/interface reconstruction; its callees have not all been audited.
+
+The inspected gated `PostVisit` path retrieves device state, creates an
+`ID3D12Fence` with initial value **0** and flags **0** (call at **0x84198**),
+enumerates queue handles through **0x85a930**, then schedules event waits.
+The loop calls Fence `SetEventOnCompletion` at **0x842b9** and queue `Signal`
+at **0x842d0**; the shared target starts at **0** and increments at **0x84326**.
+Its callback at **0x845c0** waits indefinitely, closes the event and releases
+the retained Fence. The inspected routine/callback contain no query-result
+Map/read/serialization path. This is not evidence that every queue was drained,
+that the path was active when Talos was captured, or that every possible GPA
+query-restoration path has been excluded. In particular it supplies no missing
+query values and does not justify bypassing the existing MissingData guard.
+
+Ignored evidence is `query-device-refs1.json`, `query-device-cache2.txt`,
+`query-device-postvisit1.asm`, `query-device-assembly1.txt` and
+`query-device-wait-callback1.txt`. No Talos replay was repeated for this audit.
+
+### Explicit replay counter catalog and selection
+
+The isolated adapter now exposes `rdc-analyze <capture.rdc> counter-catalog`.
+It enumerates the active replay device's descriptions without `FetchCounters`
+or an additional `SetFrameEvent`; capture loading itself may execute GPU work.
+Reports distinguish **available_not_sampled** metrics from diagnostic entries
+or unsupported value formats, include source and unit, and explicitly report
+`measurement_status: not_requested`. A successful catalog is not a successful
+measurement.
+
+`rdc-analyze <capture.rdc> counters --counter <id>` accepts repeated explicit
+IDs, including enumerated vendor metrics. Omitting IDs preserves built-in-only
+selection. Unknown IDs, duplicates, diagnostic entries and unsupported formats
+are rejected. Fetch results must contain each requested counter and cannot
+contain duplicate event/counter pairs or unrequested counters. Existing fatal
+error/empty-result checks remain. DX12 integer measurements use decimal strings;
+legacy DX11 integer storage is unchanged. Reports disclose that collection covers
+**capture actions**, potentially over multiple passes: an event selector does
+not constrain the backend's sampling range.
+
+Replay Metrics retains native DX12 queries as its default and adds a RenderDoc
+mode with **List counters**, a comma-separated ID field and double-click selection
+from the catalog. The table exposes IDs, source, unit and availability status.
+The mode uses the existing isolated recapture/cache/identity path; a workspace
+recapture covers the selected execution prefix. Catalog-only results cannot be
+accepted as measurements, changed selections reject stale results, and switching
+backends/captures clears the selected counter set. Missing SDK diagnostics cannot
+be selected by double-click. Full hardware counter acceptance remains open.
+
+One actual BF1 catalog query against the existing independent capture
+(`bf1-counter-catalog1`) reports **15** built-in metrics and **one** NVIDIA
+diagnostic: **ERROR: Could not find Nsight Perf SDK library**, ID **3000000**.
+The diagnostic is non-measurable. The current runtime's NVIDIA path looks for
+`plugins/nv/nvperf_grfx_host.dll`; no such library was found in the inspected
+RenderDoc, NVIDIA or local tools directories. NVIDIA's
+[official SDK entry point](https://developer.nvidia.com/nsight-perf-sdk)
+redirected its download/get-started flow to account login during this audit.
+No SDK was downloaded and no system developer-mode setting was changed. These
+are environment/dependency gaps, not established hardware limitations; neither
+vendor measurements nor original Intel-specific metrics are marked restored.
+
+Builds **303, 305–307** pass after fixing a compile-time name shadow and the
+toolbar source-selector visibility found during screenshot inspection. Focused
+counter conversion/selection tests pass (**6 including setup/cleanup, 1 ms**),
+request validation passes (**3, 9 ms**), and catalog selection, stale-result
+rejection, DX11 values and recorded native DX12 metrics pass (**5, 132 ms**).
+The UI uses the actual BF1 catalog; its synthetic measured row tests display and
+identity rejection only. `counter-diagnostic-rejection1` uses the small existing
+DXIL reproduction capture and confirms explicit ID **3000000** fails before
+counter sampling with the SDK diagnostic. BF1 catalog loading and this rejection
+load neither GPA nor Python. No native sample recapture or broad regression was
+run. Ignored evidence includes `counter-catalog-evidence1.json`,
+`counter-selection1.txt`, `counter-options1.txt`, `counter-catalog-ui2.txt`, and
+the inspected `counter-catalog-ui2/rdc-counters/dx12-counter-catalog.png`.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -20,6 +20,7 @@ class RdcCountersView final : public QWidget {
     QString backendPath() const { return backendPath_; }
     uint64_t requestId() const { return requestId_; }
     Json request() const;
+    bool nativeMode() const;
     bool finish(uint64_t request, const Json &result);
     const Json &result() const { return result_; }
     void exportResult(const QString &path) const;
@@ -34,11 +35,11 @@ class RdcCountersView final : public QWidget {
     QString key_, backendPath_;
     qulonglong event_{};
     uint64_t requestId_{};
-    bool busy_{}, dx12_{};
+    bool busy_{}, dx12_{}, catalogRequest_{};
     Json result_;
-    QAction *read_, *cancel_, *export_, *backend_, *locate_;
-    QComboBox *scope_;
-    QLineEdit *filter_;
+    QAction *read_, *cancel_, *export_, *backend_, *locate_, *list_, *sourceAction_;
+    QComboBox *scope_, *source_;
+    QLineEdit *filter_, *counterIds_;
     QLabel *summary_;
     QTreeWidget *values_, *catalog_, *timeline_;
     QPlainTextEdit *details_;

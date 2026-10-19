@@ -24,6 +24,7 @@
 #include <cmath>
 #include <charconv>
 #include <map>
+#include <set>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
@@ -101,6 +102,17 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
     backend_->setObjectName("rdcCountersBackend");
     auto row = new QToolBar;
     layout->addWidget(row);
+    source_ = new QComboBox;
+    source_->setObjectName("rdcCountersSource");
+    source_->addItems({"Native queries", "RenderDoc counters"});
+    sourceAction_ = row->addWidget(source_);
+    list_ = row->addAction("List counters");
+    list_->setObjectName("listRdcCounters");
+    counterIds_ = new QLineEdit;
+    counterIds_->setObjectName("rdcCounterIds");
+    counterIds_->setPlaceholderText("Counter IDs, comma-separated");
+    counterIds_->setToolTip("Double-click available metrics to add IDs. Empty selects built-in counters. RenderDoc samples capture actions, possibly over multiple replay passes; Selection only filters display.");
+    layout->addWidget(counterIds_);
     scope_ = new QComboBox;
     scope_->setObjectName("rdcCountersScope");
     scope_->addItems({"Selection", "Frame"});
@@ -127,10 +139,12 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
     values_ = table("rdcCounterValues", {"Metric", "Value", "Unit"});
     values_->setColumnWidth(1, 95);
     tabs->addTab(values_, "Values");
-    catalog_ = table("rdcCounterCatalog", {"Metric", "Type", "Bytes"});
+    catalog_ = table("rdcCounterCatalog", {"Metric", "Type", "Bytes", "ID", "Source", "Unit", "Status"});
     catalog_->setColumnWidth(1, 55);
+    for (int column = 3; column < 7; ++column)
+        catalog_->header()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
     catalog_->setRootIsDecorated(false);
-    tabs->addTab(catalog_, "Available");
+    tabs->addTab(catalog_, "Catalog");
     timeline_ = table("rdcReplayTimeline", {"Queue / submission / list", "First execution", "Clock", "Begin (ms)", "Duration (µs)", "Interval"});
     timeline_->setItemDelegateForColumn(5, new TimelineBar(timeline_));
     timeline_->setColumnWidth(5, 180);
@@ -153,9 +167,41 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
     connect(read_, &QAction::triggered, this, [this] {
         if (busy_ || key_.isEmpty())
             return;
+        catalogRequest_ = false;
         invalidate();
         summary_->setText("Measuring…");
         emit readRequested();
+    });
+    connect(list_, &QAction::triggered, this, [this] {
+        if (busy_ || key_.isEmpty() || nativeMode()) return;
+        catalogRequest_ = true;
+        invalidate();
+        summary_->setText("Reading counter catalog…");
+        emit readRequested();
+    });
+    connect(source_, &QComboBox::currentIndexChanged, this, [this] {
+        catalogRequest_ = false;
+        invalidate();
+    });
+    connect(counterIds_, &QLineEdit::textEdited, this, [this] {
+        // Editing the requested set invalidates any outstanding measurement.
+        ++requestId_;
+        result_ = nullptr;
+        values_->clear(); catalog_->clear(); details_->clear();
+        summary_->setText("No sample"); updateActions();
+    });
+    connect(catalog_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item) {
+        if (busy_ || nativeMode() || result_.is_null()) return;
+        const auto &description = result_.at("available").at(item->data(0, Qt::UserRole).toULongLong());
+        if (!description.value("measurable", false)) return;
+        const auto id = text(description.at("counter"));
+        auto ids = counterIds_->text().split(',', Qt::SkipEmptyParts);
+        for (auto &value : ids) value = value.trimmed();
+        if (!ids.contains(id)) ids.append(id);
+        counterIds_->setText(ids.join(','));
+        ++requestId_;
+        if (result_.value("action", "") != "counter-catalog") invalidate();
+        updateActions();
     });
     connect(cancel_, &QAction::triggered, this, &RdcCountersView::cancelRequested);
     connect(backend_, &QAction::triggered, this, [this] {
@@ -215,6 +261,10 @@ void RdcCountersView::setBackendPath(const QString &path, bool persist) {
     invalidate();
 }
 void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12) {
+    if (key != key_ || dx12 != dx12_) {
+        const QSignalBlocker block(source_);
+        source_->setCurrentIndex(0); counterIds_->clear(); catalogRequest_ = false;
+    }
     const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_);
     dx12_ = dx12;
     findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, dx12);
@@ -248,22 +298,46 @@ void RdcCountersView::invalidate() {
 void RdcCountersView::updateActions() {
     read_->setEnabled(!busy_ && !key_.isEmpty());
     cancel_->setEnabled(busy_);
-    backend_->setEnabled(!busy_ && !dx12_);
+    sourceAction_->setVisible(dx12_);
+    findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, nativeMode());
+    source_->setEnabled(!busy_);
+    counterIds_->setVisible(!nativeMode());
+    counterIds_->setEnabled(!busy_);
+    list_->setVisible(!nativeMode());
+    list_->setEnabled(!busy_ && !key_.isEmpty());
+    backend_->setEnabled(!busy_ && !nativeMode());
     export_->setEnabled(!busy_ && !result_.is_null());
     locate_->setEnabled(!busy_ && values_->currentItem() &&
                         values_->currentItem()->data(0, Qt::UserRole).toULongLong());
 }
+bool RdcCountersView::nativeMode() const { return dx12_ && source_->currentIndex() == 0; }
 RdcCountersView::Json RdcCountersView::request() const {
     if (key_.isEmpty())
         throw std::runtime_error("Open a frame first");
-    if (dx12_)
+    if (nativeMode())
         return {{"action", "counters"}, {"execution", std::to_string(event_)}};
-    return {{"action", "counters"}};
+    if (catalogRequest_) return {{"action", "counter-catalog"}};
+    Json result{{"action", "counters"}};
+    if (dx12_) result["execution"] = std::to_string(event_);
+    if (!counterIds_->text().trimmed().isEmpty()) {
+        result["counter_ids"] = Json::array();
+        std::set<uint32_t> seen;
+        for (const auto &part : counterIds_->text().split(',')) {
+            bool valid{};
+            const auto value = part.trimmed().toUInt(&valid);
+            if (!valid || !value || !seen.insert(value).second)
+                throw std::runtime_error("Enter unique nonzero counter IDs separated by commas");
+            result["counter_ids"].push_back(value);
+        }
+        if (result["counter_ids"].size() > 4096)
+            throw std::runtime_error("Select at most 4096 counter IDs");
+    }
+    return result;
 }
 bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
     if (request != requestId_)
         return false;
-    if (!dx12_ || !report.value("completed", false) || report.value("backend", "") != "dx12" ||
+    if (!nativeMode() || !report.value("completed", false) || report.value("backend", "") != "dx12" ||
         report.at("execution") != std::to_string(event_))
         throw std::runtime_error("Native metrics do not match the selected DX12 execution");
     const auto &measurement = report.at("performance");
@@ -342,11 +416,18 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
         emit inspectionFinished(false);
         return false;
     }
-    if (result.value("action", "") != "counters" || !result.at("available").is_array() ||
+    const bool catalog = !nativeMode() && catalogRequest_;
+    if (result.value("action", "") != (catalog ? "counter-catalog" : "counters") || !result.at("available").is_array() ||
         !result.at("values").is_array() || result.at("result_count") != result.at("values").size())
         throw std::runtime_error("Invalid counter result");
+    if (catalog && (result.value("measurement_status", "") != "not_requested" || !result.at("values").empty()))
+        throw std::runtime_error("Counter catalog must not contain measurements");
+    if (!catalog && !nativeMode() && this->request().contains("counter_ids") &&
+        result.value("counter_ids", Json()) != this->request().at("counter_ids"))
+        throw std::runtime_error("Counter result does not match requested IDs");
     if (dx12_) {
-        if (result.value("backend", "") != "dx12" || result.at("execution") != std::to_string(event_))
+        if (result.value("backend", "") != "dx12" ||
+            (catalog ? !result.value("execution", Json()).is_null() : result.at("execution") != std::to_string(event_)))
             throw std::runtime_error("Counter result does not match DX12 selection");
         for (const auto &row : result.at("values"))
             if (row.value("selectable", false))
@@ -354,6 +435,7 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
     }
     result_ = result;
     render();
+    if (catalog) findChild<QTabWidget *>("rdcCounterTabs")->setCurrentIndex(1);
     if (!details_->isHidden())
         details_->setPlainText(QString::fromStdString(result_.dump(2)));
     updateActions();
@@ -385,13 +467,13 @@ void RdcCountersView::render() {
                         : dx12_       ? (r.value("selectable", false) ? executionId(gpa) : 0)
                                       : gpa.get<qulonglong>();
         if (scope_->currentIndex()) {
-            auto &group = groups[dx12_ ? gpa.dump() : std::to_string(eid)];
+            auto &group = groups[dx12_ ? gpa.dump() + ':' + std::to_string(eid) : std::to_string(eid)];
             if (!group) {
                 group = new QTreeWidgetItem(values_, {id ? QString(dx12_ ? "Execution %1" : "API %1").arg(id)
                                                          : QString("RDC %1").arg(eid)});
                 group->setData(0, Qt::UserRole, id);
-                group->setToolTip(0, dx12_ ? "Native selected execution on queue " +
-                                                 text(r.value("queue", Json()))
+                group->setToolTip(0, dx12_ ? "Execution on queue " +
+                                                 text(r.value("queue", Json())) + QString(" · RDC %1").arg(eid)
                                            : QString("RDC event %1").arg(eid));
             }
             parent = group;
@@ -402,8 +484,8 @@ void RdcCountersView::render() {
         item->setData(0, Qt::UserRole + 1, qulonglong(i));
         for (int col = 0; col < 3; ++col)
             item->setToolTip(col, item->text(col));
-        item->setToolTip(0, item->text(0) + (dx12_ ? QString("\nExecution %1 · native D3D12 · Counter %2")
-                                                         .arg(text(gpa), text(r.at("counter")))
+        item->setToolTip(0, item->text(0) + (dx12_ ? QString("\nExecution %1 · %2 · Counter %3")
+                                                         .arg(text(gpa), text(r.value("source", Json("RenderDoc"))), text(r.at("counter")))
                                                    : QString("\nAPI %1 · RDC %2 · Counter %3")
                                                          .arg(text(gpa))
                                                          .arg(eid)
@@ -420,7 +502,17 @@ void RdcCountersView::render() {
                                            d.at("resultType") == 1   ? QString("float")
                                            : d.at("resultType") == 4 ? QString("uint")
                                                                      : "CompType " + text(d.at("resultType")),
-                                           text(d.at("resultByteWidth"))});
+                                           text(d.at("resultByteWidth")), text(d.at("counter")),
+                                           d.value("source", "") == "renderdoc_builtin" ? QString("Built-in") :
+                                           d.value("source", "") == "renderdoc_nvidia" ? QString("NVIDIA") :
+                                           d.value("source", "") == "renderdoc_amd" ? QString("AMD") :
+                                           d.value("source", "") == "renderdoc_intel" ? QString("Intel") :
+                                           text(d.value("source", Json(d.value("category", "")))),
+                                           unit(d.value("unit_name", Json())),
+                                           d.value("status", "") == "available_not_sampled" ? QString("Not sampled") :
+                                           d.value("status", "") == "measured" ? QString("Sampled") :
+                                           d.value("status", "") == "diagnostic_or_unsupported_format" ? QString("Diagnostic / unsupported") :
+                                           text(d.value("status", Json()))});
         item->setData(0, Qt::UserRole, qulonglong(i));
         item->setToolTip(0, text(d.at("category")) + "\n" + text(d.at("description")));
     }
@@ -477,9 +569,14 @@ void RdcCountersView::render() {
     }
     if (groups.size() <= 16)
         values_->expandAll();
-    summary_->setText(QString("%1 values · %2 available").arg(shown).arg(result_.at("available").size()));
-    if (dx12_)
+    summary_->setText(QString("%1 values · %2 catalog entries").arg(shown).arg(result_.at("available").size()));
+    if (dx12_ && result_.contains("native_measurement"))
         summary_->setText(summary_->text() + " · native D3D12 · 1 sample · clocks not stabilized");
+    else if (result_.value("action", "") == "counter-catalog")
+        summary_->setText(summary_->text() + " · catalog only · not sampled");
+    else if (result_.value("sampling_scope", "") == "capture_actions")
+        summary_->setText(summary_->text() + " · RenderDoc · capture actions · possibly multiple passes");
+    summary_->setToolTip(result_.contains("note") ? text(result_.at("note")) : summary_->text());
     if (dx12_ && result_.contains("native_measurement") && result_.at("native_measurement").contains("timeline"))
         summary_->setText(summary_->text() + " · serialized replay prefix");
     updateActions();

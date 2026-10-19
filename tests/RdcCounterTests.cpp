@@ -61,10 +61,38 @@ class RdcCounterTests : public QObject {
         auto j = rdcCounterDescription(d);
         QCOMPARE(j.at("uuid").at("words"), nlohmann::json({1, 2, 3, UINT32_MAX}));
         QCOMPARE(j.at("resultType"), nlohmann::json(uint32_t(CompType::UInt)));
-        QCOMPARE(j.size(), size_t(8));
+        QCOMPARE(j.at("measurable"), nlohmann::json(true));
+        QCOMPARE(j.at("status"), nlohmann::json("available_not_sampled"));
+        QCOMPARE(j.at("source"), nlohmann::json("renderdoc_builtin"));
+        QCOMPARE(j.at("unit_name"), nlohmann::json("CounterUnit.Absolute"));
         for (unsigned i = 0; i < 9; ++i)
             QVERIFY(rdcCounterUnit(CounterUnit(i)).starts_with("CounterUnit."));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcCounterUnit(CounterUnit(99)));
+    }
+    void explicitHardwareSelection() {
+        using Json = nlohmann::json;
+        CounterDescription builtin{}, hardware{}, diagnostic{};
+        builtin.counter = GPUCounter::EventGPUDuration;
+        builtin.resultType = CompType::Float; builtin.resultByteWidth = 8;
+        hardware = builtin; hardware.counter = GPUCounter(uint32_t(GPUCounter::FirstNvidia) + 1);
+        hardware.unit = CounterUnit::Percentage;
+        diagnostic.counter = GPUCounter::FirstNvidia;
+        diagnostic.name = "ERROR: Could not find Nsight Perf SDK library";
+        std::map<GPUCounter, CounterDescription> catalog{{builtin.counter, builtin},
+            {hardware.counter, hardware}, {diagnostic.counter, diagnostic}};
+        const auto defaults = selectRdcCounters(catalog, nullptr);
+        QCOMPARE(defaults.size(), size_t(1)); QCOMPARE(defaults[0], builtin.counter);
+        const auto selected = selectRdcCounters(catalog, Json::array({uint32_t(hardware.counter), 1}));
+        QCOMPARE(selected.size(), size_t(2)); QCOMPARE(selected[0], hardware.counter);
+        QCOMPARE(rdcCounterDescription(hardware).at("source"), Json("renderdoc_nvidia"));
+        QCOMPARE(rdcCounterDescription(hardware).at("unit_name"), Json("CounterUnit.Percentage"));
+        QCOMPARE(rdcCounterDescription(diagnostic).at("measurable"), Json(false));
+        for (const auto &ids : {Json::array(), Json::array({3000000}), Json::array({4000001}),
+             Json::array({1, 1}), Json::array({-1}), Json::array({0}), Json::array({1.0}),
+             Json::array({uint64_t(UINT32_MAX) + 1}), Json("1")})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectRdcCounters(catalog, ids));
+        catalog.erase(builtin.counter);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectRdcCounters(catalog, nullptr));
     }
 };
 QTEST_GUILESS_MAIN(RdcCounterTests)

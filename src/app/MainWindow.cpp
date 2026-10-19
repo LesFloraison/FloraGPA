@@ -1800,7 +1800,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
-    if (dx12 && kind == RdcAnalysis::Counters && !view) {
+    if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
         runningAnalysis_ = kind;
         historyRequestId_ = rdcCounters_->requestId();
         try {
@@ -1816,7 +1816,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         return;
     }
     if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History &&
-        kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline)
+        kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline && kind != RdcAnalysis::Counters)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
