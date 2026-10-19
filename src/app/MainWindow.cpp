@@ -1333,6 +1333,11 @@ void MainWindow::buildUi() {
         connect(view, &ReplayDebugView::readRequested, this, [this, view] { readRdcAnalysis(view); });
         connect(view, &ReplayDebugView::cancelRequested, this, &MainWindow::cancel);
         connect(view, &ReplayDebugView::error, this, &MainWindow::showError);
+        connect(view, &ReplayDebugView::resourceRequested, this, [this](qulonglong creation) {
+            if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+            try { inspectResource(creation); }
+            catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
+        });
     }
     const QList<QWidget *> stageOrder{replayDebug_[0], checkpoints_[1], checkpoints_[2],
                                       checkpoints_[0], replayDebug_[1], replayDebug_[2]};

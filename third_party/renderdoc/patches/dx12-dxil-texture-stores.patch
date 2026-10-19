@@ -1,0 +1,106 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+@@ -1551,6 +1551,12 @@
+           return UAVInfo();
+         }
+         uavData.width = RDCMAX(1U, uint32_t(resDesc.Width >> mip));
++        const ResourceId original = uavId;
++        memcpy(&uavData.originalResource, &original, sizeof(original));
++        uavData.viewDimension = uint32_t(uavDesc.ViewDimension);
++        uavData.viewMip = mip;
++        uavData.viewFirstSlice = firstSlice;
++        uavData.viewFormat = uint32_t(uavDesc.Format);
+         const uint32_t mipHeight = RDCMAX(1U, resDesc.Height >> mip);
+         uavData.height = array1D ? slices : mipHeight;
+         uavData.depth = array1D ? 1 : slices;
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.h b/renderdoc/driver/shaders/dxil/dxil_debug.h
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.h
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.h
+@@ -255,6 +255,8 @@
+   uint64_t rowPitch = 0;
+   uint64_t depthPitch = 0;
+   uint32_t width = 0, height = 0, depth = 0;
++  uint64_t originalResource = 0;
++  uint32_t viewDimension = 0, viewMip = 0, viewFirstSlice = 0, viewFormat = 0;
+   bool TexelOffset(const uint32_t coords[3], uint32_t stride, uint64_t &offset) const
+   {
+     if(coords[0] >= width || coords[1] >= height || coords[2] >= depth)
+@@ -937,6 +939,15 @@
+                                const ShaderReflection &reflection, uint32_t activeLaneIndex,
+                                uint32_t threadsInWorkgroup);
+   rdcarray<ShaderDebugState> ContinueDebug();
++  uint32_t FloraActiveDebugStep() const { return m_ActiveDebugState.stepIndex; }
++  // Only the selected lane records these fixed-width, versioned observer records.
++  rdcarray<rdcfixedarray<uint32_t, 32>> floraTextureStores;
++  bool floraTextureStoresOverflow = false;
++  void RecordTextureStore(const rdcfixedarray<uint32_t, 32> &store)
++  {
++    if(floraTextureStores.size() >= 4096) floraTextureStoresOverflow = true;
++    else floraTextureStores.push_back(store);
++  }
+ 
+   const rdcarray<bool> &GetLiveGlobals() const { return m_LiveGlobals; }
+   const DXIL::Program &GetProgram() const { return *m_Program; }
+diff --git a/renderdoc/driver/shaders/dxil/dxil_debug.cpp b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+--- a/renderdoc/driver/shaders/dxil/dxil_debug.cpp
++++ b/renderdoc/driver/shaders/dxil/dxil_debug.cpp
+@@ -2264,6 +2264,38 @@
+             }
+ 
+             const uint64_t dataSize = resInfo.dataSize;
++            if(!load && texData && dxOpCode == DXOp::TextureStore && m_HasDebugState)
++            {
++              rdcfixedarray<uint32_t, 32> store = {};
++              store[0] = m_FunctionInfo->globalInstructionOffset + m_FunctionInstructionIdx - 1;
++              store[1] = uint32_t(uav.originalResource);
++              store[2] = uint32_t(uav.originalResource >> 32);
++              store[3] = uav.viewDimension;
++              store[4] = uav.viewMip;
++              store[5] = uav.viewFirstSlice;
++              store[6] = uav.width; store[7] = uav.height; store[8] = uav.depth;
++              for(uint32_t c = 0; c < 3; ++c) store[9 + c] = texCoords[c];
++              ShaderVariable operand;
++              bool valid = GetShaderVariable(inst.args[9], opCode, dxOpCode, operand);
++              store[12] = operand.value.u32v[0];
++              store[13] = uint32_t(ConvertDXILTypeToVarType(inst.args[5]->type));
++              store[14] = texInBounds ? 1 : 0;
++              store[15] = slot.shaderRegister; store[16] = slot.registerSpace;
++              store[17] = uint32_t(slot.heapType); store[18] = slot.descriptorIndex;
++              for(uint32_t c = 0; c < 4; ++c)
++              {
++                if((store[12] & (1U << c)) == 0) continue;
++                if(isUndef(inst.args[5 + c]) || !GetShaderVariable(inst.args[5 + c], opCode, dxOpCode, operand))
++                  valid = false;
++                else store[19 + c] = operand.value.u32v[0];
++              }
++              store[23] = uav.viewFormat; store[24] = uint32_t(fmt.compType);
++              store[25] = fmt.byteWidth; store[26] = fmt.numComps;
++              store[27] = valid ? 1 : 0;
++              store[28] = uint32_t(dataOffset); store[29] = uint32_t(dataOffset >> 32);
++              store[30] = m_Debugger.FloraActiveDebugStep();
++              m_Debugger.RecordTextureStore(store);
++            }
+             // NULL resource or out of bounds
+             if((!texData && elemIdx >= numElems) || (texData && !texInBounds))
+             {
+@@ -10950,3 +10982,19 @@
+ }
+ 
+ };    // namespace DXILDebug
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilTextureStoresPatchVersion() { return 1; }
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxilTextureStoreCount(ShaderDebugger *trace)
++{
++  if(!trace || !((DXBCContainerDebugger *)trace)->isDXIL) return 0;
++  auto *debugger = (DXILDebug::Debugger *)trace;
++  return debugger->floraTextureStoresOverflow ? ~0U : uint32_t(debugger->floraTextureStores.size());
++}
++extern "C" RENDERDOC_API bool RENDERDOC_CC RENDERDOC_GetFloraDxilTextureStore(ShaderDebugger *trace, uint32_t index, uint32_t *words, uint32_t count)
++{
++  if(!trace || !words || count != 32 || !((DXBCContainerDebugger *)trace)->isDXIL) return false;
++  auto *debugger = (DXILDebug::Debugger *)trace;
++  if(index >= debugger->floraTextureStores.size()) return false;
++  memcpy(words, debugger->floraTextureStores[index].data(), 32 * sizeof(uint32_t));
++  return true;
++}

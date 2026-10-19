@@ -4934,6 +4934,76 @@ That unbound branch was compile-checked, not GPU-validated. Build/package
 manifests verify all nine patches; complete portable-package acceptance remains
 outstanding.
 
+### DXIL texture-store observations and navigation
+
+The tenth pinned RenderDoc patch records executed `TextureStore` attempts for
+the selected compute lane. A versioned, fixed-width export carries the exact
+instruction and debug-step occurrence, resolved resource/view, coordinates,
+mask and raw operand bits. Resource IDs and byte offsets remain decimal strings
+in worker JSON. The worker rejects an inconsistent instruction occurrence or
+more than 4,096 observations. Loop iterations remain distinct even when their
+instruction index is identical. This is debugger observation, not GPU store
+instrumentation; buffer stores, atomics, other lanes and `TextureStoreSample`
+are outside its scope.
+
+After freeing the retained trace and restoring the dispatch, the worker samples
+up to 64 distinct valid texels at their resolved physical mip/layer. These GPU
+values can include later stores, atomics and other threads. The result therefore
+explicitly retains `validation: not_validated`; it does not promote operand
+agreement to per-store or whole-shader correctness. Out-of-bounds attempts
+retain their raw coordinates and receive no GPU texel query.
+
+Hellblade2 execution **36779**, group/thread **(0,0,0)**, returns **332** states
+without manually specifying a target resource or pixel:
+
+| Instruction | Debug step / trace position | Resource creation | View coordinate | Observation |
+| --- | --- | --- | --- | --- |
+| 612 | 326 / 325 | 571530 | (832,592,0) | RGB operands and post-dispatch RGB agree |
+| 614 | 328 / 327 | 570673 | (416,296,0) | RGB operands are (0.043701171875, 0.0369873046875, 0.0390625); GPU RGB is (0.04345703125, 0.03662109375, 0.0390625) |
+| 616 | 330 / 329 | 562718 | Negative coordinates represented as unsigned bits | Out of bounds; no GPU read |
+
+The second row agrees with the previously observed positive R11G11B10 storage
+truncation for this selected value. The first two stores supply alpha zero,
+whereas the RGB texture readback supplies alpha one. Neither observation
+establishes general format conversion fidelity. An initial observer used a
+block-level instruction field and incorrectly labeled all three stores 570;
+the final patch derives the actual executing instruction and verifies it against
+the trace before accepting the report.
+
+The `Texture writes` workspace tab displays these observations and their scope.
+Double-clicking an instruction selects its exact trace occurrence; double-clicking
+a mapped resource selects the capture's creation record. Tooltips retain physical
+subresource coordinates, raw bits and GPU-reference details. This resource link
+does not yet select a native output subresource/pixel or trigger a replay. Busy
+requests cannot navigate, and session/experiment changes clear the table and
+reject stale results.
+
+Focused evidence under `artifacts/dx12-research/`:
+
+- `hellblade-texture-stores2`: final real query; no GPA/Python modules loaded.
+- `dxil-texture-stores2d` and `dxil-texture-stores3d`: mip 1, physical slice 2,
+  x=200 observations; store operand 777 and GPU value 784 correctly remain
+  distinct because a later atomic adds seven. Two out-of-bounds attempts are
+  not sampled.
+- `dxil-texture-stores-loop1`: the fixture compiled with `STORE_REPEAT=1`
+  executes one store instruction twice, with operands 777 and 778. Both rows
+  sample the final 778 but have distinct debug steps. Five total attempts are
+  retained. The standalone fixture checks its eight GPU result words.
+- `texture-store-check2.txt`: coordinate/64-bit ABI and actual loop-occurrence
+  checks, **4 passed including setup/cleanup, 8 ms**.
+- `texture-store-ui2.txt`: actual Hellblade2 instruction/resource navigation,
+  busy-state guard and stale-experiment rejection, **3 passed, 272 ms**.
+  `texture-store-ui2/replay-debug/texture-stores.png` was visually inspected.
+
+Final worker, UI and application builds pass (325–329). Build 324 failed because
+two builds overlapped on `Backend.obj`; the subsequent serialized build completed.
+The final analysis DLL SHA-256 is
+**4d4186475becf40704a3a0d130225a6154c4327f0d78d010a0e510045391c8ae**.
+Build/package manifests now validate all ten patches. GPU queries ran serially
+against existing sample RDCs plus the small loop fixture, without another full
+native sample replay. Whole-frame fidelity, complete store validation and full
+portable-package acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

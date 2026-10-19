@@ -38,6 +38,7 @@ class ReplayDebugView final : public QWidget {
     void cancelRequested();
     void error(const QString &message);
     void inspectionFinished(bool success);
+    void resourceRequested(qulonglong creation);
 
   private:
     QString stage_, key_, backendPath_;
@@ -63,6 +64,7 @@ class ReplayDebugView final : public QWidget {
     QPlainTextEdit *assembly_, *source_, *details_;
     QTabWidget *code_, *values_;
     QTreeWidget *registers_, *locals_, *stack_, *rules_, *watches_;
+    QTreeWidget *textureStores_{};
     Json sourceValues_, points_;
     Json textureReference_;
     void invoke(const std::function<void()> &action);

@@ -14,6 +14,11 @@ RWStructuredBuffer<uint> results : register(u1);
 [numthreads(1, 1, 1)]
 void main()
 {
+#if defined(STORE_REPEAT)
+    // Same source instruction, two executed occurrences and one final GPU texel.
+    [loop] for (uint pass = 0; pass < 2; ++pass)
+        image[POSITION(201, 1, 1)] = 777 + pass;
+#endif
     results[0] = image[POSITION(200, 1, 1)];
     image[POSITION(200, 1, 1)] = 777;
     results[1] = image[POSITION(200, 1, 1)];

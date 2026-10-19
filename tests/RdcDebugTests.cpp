@@ -4,6 +4,7 @@
 #include <QRegularExpression>
 #include <QtTest>
 #include <cmath>
+#include <bit>
 #include <cstdlib>
 #include <limits>
 #include <map>
@@ -18,6 +19,46 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void textureStoreLoop() {
+        using Json = nlohmann::json;
+        const auto path = qEnvironmentVariable("FLORA_TEXTURE_STORE_LOOP_REPORT");
+        if (path.isEmpty()) QSKIP("Set the executed texture-store loop report");
+        QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto bytes = file.readAll(); const auto result = Json::parse(bytes.begin(), bytes.end());
+        const auto &rows = result.at("texture_stores").at("rows");
+        QCOMPARE(rows.size(), size_t(5));
+        QCOMPARE(rows[0].at("instruction"), rows[1].at("instruction"));
+        QVERIFY(rows[0].at("debug_step") != rows[1].at("debug_step"));
+        QCOMPARE(rows[0].at("value")[0], Json(777)); QCOMPARE(rows[1].at("value")[0], Json(778));
+        QCOMPARE(rows[0].at("gpu_reference").at("value").at("uintValue")[0], Json(778));
+        QCOMPARE(rows[1].at("gpu_reference").at("value").at("uintValue")[0], Json(778));
+        for (const auto &row : rows) {
+            const auto position = row.at("trace_position").get<size_t>();
+            QCOMPARE(result.at("steps").at(position).at("nextInstruction"), row.at("instruction"));
+            QCOMPARE(result.at("steps").at(position + 1).at("stepIndex"), row.at("debug_step"));
+        }
+        QVERIFY(!rows[3].contains("location")); QVERIFY(!rows[4].contains("location"));
+    }
+    void textureStoreCoordinates() {
+        using Json = nlohmann::json;
+        std::array<uint32_t, 32> w{};
+        w[1] = 1; w[2] = 1U << 21; // Resource ID above 2^53, without JSON floating point.
+        w[3] = 3; w[4] = 2; w[5] = 7; w[6] = 256; w[7] = 2; w[8] = 1;
+        w[9] = 200; w[10] = 1; w[12] = 1; w[13] = uint32_t(VarType::Float); w[14] = 1;
+        w[19] = std::bit_cast<uint32_t>(0.5f); w[27] = 1; w[28] = 3; w[29] = 1U << 21;
+        auto row = rdcTextureStoreRecord(w);
+        QCOMPARE(row.at("rdc_resource"), Json("9007199254740993"));
+        QCOMPARE(row.at("cache_byte_offset"), Json("9007199254740995"));
+        QCOMPARE(row.at("location"), (Json{{"x", 200}, {"y", 0}, {"mip", 2}, {"layer", 8}, {"sample", 0}}));
+        QCOMPARE(row.at("value")[0], Json(0.5)); QVERIFY(row.at("value")[1].is_null());
+        w[3] = 8; w[7] = 4; w[8] = 2; w[11] = 1;
+        QCOMPARE(rdcTextureStoreRecord(w).at("location").at("layer"), Json(8));
+        w[14] = 0; w[9] = UINT32_MAX;
+        row = rdcTextureStoreRecord(w); QVERIFY(!row.contains("location"));
+        QCOMPARE(row.at("status"), Json("out_of_bounds"));
+        w[14] = 1; QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureStoreRecord(w));
+        w[9] = 0; w[31] = 1; QVERIFY_THROWS_EXCEPTION(std::runtime_error, rdcTextureStoreRecord(w));
+    }
     void dxilUavTextureViews() {
         using Json = nlohmann::json;
         const auto root = qEnvironmentVariable("FLORA_DXIL_UAV_VIEW_REPORTS");

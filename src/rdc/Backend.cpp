@@ -159,6 +159,11 @@ class Session {
     uint32_t dxilContractPatch{};
     uint32_t retainedComputePatch{};
     uint32_t uavTexturePatch{};
+    uint32_t textureStoresPatch{};
+    using TextureStoreCount = uint32_t (RENDERDOC_CC *)(ShaderDebugger *);
+    using TextureStoreRead = bool (RENDERDOC_CC *)(ShaderDebugger *, uint32_t, uint32_t *, uint32_t);
+    TextureStoreCount textureStoreCount{};
+    TextureStoreRead textureStoreRead{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
@@ -243,6 +248,12 @@ class Session {
             uavTextureFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxilUavTextureFailures");
         }
         allocate = symbol<pRENDERDOC_AllocArrayMem>("RENDERDOC_AllocArrayMem");
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxilTextureStoresPatchVersion"))) {
+            textureStoresPatch = patch();
+            if (textureStoresPatch != 1) throw std::runtime_error("Unsupported DXIL texture store observer version");
+            textureStoreCount = symbol<TextureStoreCount>("RENDERDOC_GetFloraDxilTextureStoreCount");
+            textureStoreRead = symbol<TextureStoreRead>("RENDERDOC_GetFloraDxilTextureStore");
+        }
         release = symbol<pRENDERDOC_FreeArrayMem>("RENDERDOC_FreeArrayMem");
         const auto open = symbol<decltype(&RENDERDOC_OpenCaptureFile)>("RENDERDOC_OpenCaptureFile");
         const auto initialize = symbol<decltype(&RENDERDOC_InitialiseReplay)>("RENDERDOC_InitialiseReplay");
@@ -472,8 +483,10 @@ rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     }
     return result;
 }
-Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_t dxbcWorkgroupPatch,
-           uint32_t retainedComputePatch, uint32_t uavTexturePatch) {
+Json debug(IReplayController &controller, uint32_t eid, const Json &job, const Session &session) {
+    const auto dxbcWorkgroupPatch = session.dxbcWorkgroupPatch;
+    const auto retainedComputePatch = session.retainedComputePatch;
+    const auto uavTexturePatch = session.uavTexturePatch;
     const auto kind = job.at("action").get<std::string>();
     const auto *selected = findAction(controller.GetRootActions(), eid);
     const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
@@ -779,6 +792,52 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     result["step_count"] = steps.size();
     result["steps"] = std::move(steps);
     result["debug_batch_sizes"] = std::move(batches);
+    if (retainedCompute && session.textureStoresPatch == 1) {
+        const auto count = session.textureStoreCount(trace->debugger);
+        if (count > 4096) throw std::runtime_error("Selected invocation exceeds 4096 texture store observations");
+        Json rows = Json::array();
+        const auto resources = controller.GetResources();
+        std::map<uint32_t, size_t> positions;
+        const auto &recordedSteps = result.at("steps");
+        for (size_t i = 0; i < recordedSteps.size(); ++i)
+            if (!positions.emplace(recordedSteps[i].at("stepIndex").get<uint32_t>(), i).second)
+                throw std::runtime_error("Duplicate debug step identity in texture store trace");
+        for (uint32_t i = 0; i < count; ++i) {
+            std::array<uint32_t, 32> words{};
+            if (!session.textureStoreRead(trace->debugger, i, words.data(), uint32_t(words.size())))
+                throw std::runtime_error("Incomplete texture store observer response");
+            auto row = flora::rdcTextureStoreRecord(words);
+            const auto position = positions.find(words[30]);
+            if (position == positions.end() || position->second == 0 ||
+                recordedSteps[position->second - 1].at("nextInstruction") != words[0])
+                throw std::runtime_error("Texture store does not match its executed instruction occurrence");
+            row["trace_position"] = position->second - 1;
+            row["ordinal"] = i;
+            const auto rid = number(row.at("rdc_resource"));
+            const auto found = std::find_if(resources.begin(), resources.end(), [&](const auto &r) { return id(r.resourceId) == rid; });
+            row["resource_name"] = found == resources.end() ? "" : text(found->name);
+            row["resource_object"] = row["resource_creation"] = nullptr;
+            const auto name = row.at("resource_name").get<std::string>();
+            constexpr std::string_view prefix = "Flora DX12 resource ";
+            if (name.starts_with(prefix)) {
+                const std::string_view tail(name.data() + prefix.size(), name.size() - prefix.size());
+                const auto split = tail.find(" creation ");
+                if (split != std::string_view::npos) {
+                    uint64_t object{}, creation{};
+                    const auto a = tail.substr(0, split), b = tail.substr(split + 10);
+                    const auto pa = std::from_chars(a.data(), a.data() + a.size(), object);
+                    const auto pb = std::from_chars(b.data(), b.data() + b.size(), creation);
+                    if (pa.ec == std::errc{} && pb.ec == std::errc{} && pa.ptr == a.data() + a.size() && pb.ptr == b.data() + b.size() && object && creation) {
+                        row["resource_object"] = std::to_string(object);
+                        row["resource_creation"] = std::to_string(creation);
+                    }
+                }
+            }
+            rows.push_back(std::move(row));
+        }
+        result["texture_stores"] = {{"patch_version", 1}, {"rows", rows}, {"validation", "not_validated"},
+            {"scope", "Executed DXIL TextureStore attempts by the selected compute lane. Values precede storage conversion. Excludes buffer stores, atomics and other lanes; post-dispatch GPU texels can include later writes."}};
+    }
     if (dx12 && compute) {
         auto &snapshots = result["compute_buffer_inputs"];
         snapshots["after_steps"] = computeInputs();
@@ -806,6 +865,31 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         checked(controller.GetFatalErrorStatus());
         result["compute_input_lifecycle"]["status"] = "released_dispatch_restored";
         result["compute_buffer_inputs"]["after_dispatch_restoration"] = computeInputs();
+        if (result.contains("texture_stores")) {
+            const auto textures = controller.GetTextures();
+            std::map<std::tuple<uint64_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>, Json> samples;
+            for (auto &row : result["texture_stores"]["rows"]) {
+                row["gpu_reference"] = {{"status", "unavailable"}, {"scope", "post_dispatch_after_trace_release"}};
+                if (!row.contains("location")) { row["gpu_reference"]["reason"] = "Out-of-bounds store attempt"; continue; }
+                const auto rid = number(row.at("rdc_resource"));
+                const auto texture = std::find_if(textures.begin(), textures.end(), [&](const auto &t) { return id(t.resourceId) == rid; });
+                const auto &p = row.at("location");
+                const auto x = p.at("x").get<uint32_t>(), y = p.at("y").get<uint32_t>(), mip = p.at("mip").get<uint32_t>(), layer = p.at("layer").get<uint32_t>();
+                const auto cast = CompType(row.at("component_type_enum").get<uint32_t>());
+                if (texture == textures.end() || mip >= texture->mips || x >= extent(texture->width, mip) || y >= extent(texture->height, mip) ||
+                    layer >= (texture->dimension == 3 ? extent(texture->depth, mip) : texture->arraysize) || cast == CompType::Typeless) {
+                    row["gpu_reference"]["reason"] = "Texture metadata or interpretation does not match the store"; continue;
+                }
+                const auto key = std::make_tuple(rid, x, y, mip, layer, uint32_t(cast));
+                if (!samples.contains(key)) {
+                    if (samples.size() >= 64) { row["gpu_reference"]["reason"] = "64 distinct texel observation limit reached"; continue; }
+                    samples.emplace(key, pixel(controller.PickPixel(texture->resourceId, x, y, Subresource(mip, layer, 0), cast)));
+                    checked(controller.GetFatalErrorStatus());
+                }
+                row["gpu_reference"].update({{"status", "read"}, {"value", samples.at(key)},
+                    {"interpretation", cast == CompType::UInt ? "uint" : cast == CompType::SInt ? "sint" : "float"}});
+            }
+        }
     }
     // Debugging can replay the capture again, including when a DXBC UAV is
     // fetched lazily. Do not silently compare a trace against an earlier
@@ -1397,7 +1481,7 @@ Json runRdcJob(const Json &job) {
         const auto retainedStart = session.retainedComputeTraces ? session.retainedComputeTraces() : 0;
         const auto uavReadStart = session.uavTextureReads ? session.uavTextureReads() : 0;
         const auto uavFailureStart = session.uavTextureFailures ? session.uavTextureFailures() : 0;
-        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch, session.retainedComputePatch, session.uavTexturePatch));
+        result.update(debug(controller, eid, job, session));
         const auto uavFailures = session.uavTextureFailures ? session.uavTextureFailures() - uavFailureStart : 0;
         if (uavFailures) throw std::runtime_error("DXIL UAV texture view read failed or is unsupported; incomplete shader trace rejected");
         result["dxil_uav_texture"] = {{"patch_version", session.uavTexturePatch},

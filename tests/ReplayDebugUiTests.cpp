@@ -52,6 +52,40 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void textureStoreNavigation() {
+        const auto path = qEnvironmentVariable("FLORA_TEXTURE_STORE_REPORT");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 texture-store observer report");
+        const auto result = read(path);
+        const auto &rows = result.at("texture_stores").at("rows");
+        QCOMPARE(rows.size(), size_t(3));
+        QCOMPARE(rows[0].at("status"), Json("observed_store"));
+        QCOMPARE(rows[1].at("status"), Json("observed_store"));
+        QCOMPARE(rows[2].at("status"), Json("out_of_bounds"));
+        ReplayDebugView view("cs"); view.resize(1650, 1100); view.show();
+        view.setContext("hellblade-writes", 36779, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        auto tree = view.findChild<QTreeWidget *>("debugTextureStores"); QVERIFY(tree);
+        QCOMPARE(tree->topLevelItemCount(), 3);
+        auto item = tree->topLevelItem(1);
+        for (auto tabs : view.findChildren<QTabWidget *>())
+            if (tabs->indexOf(tree) >= 0) tabs->setCurrentWidget(tree);
+        QSignalSpy selected(&view, &ReplayDebugView::resourceRequested);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 0)));
+        const auto position = view.model()->position(); QVERIFY(position >= 0);
+        QCOMPARE(result.at("steps").at(size_t(position)).at("nextInstruction"), rows[1].at("instruction"));
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 1)));
+        QCOMPARE(selected.size(), 1);
+        QCOMPARE(selected[0][0].toULongLong(), std::stoull(rows[1].at("resource_creation").get<std::string>()));
+        view.setWorkerBusy(true);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 1)));
+        QCOMPARE(selected.size(), 1); view.setWorkerBusy(false);
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/texture-stores.png"));
+        const auto serial = view.requestId(); view.setContext("new-experiment", 36779, true);
+        QVERIFY(!view.finish(serial, result)); QCOMPARE(tree->topLevelItemCount(), 0);
+    }
     void dxilFastContraction() {
         const auto path = qEnvironmentVariable("FLORA_DXIL_CONTRACTION_REPORT");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 experimental contraction report");

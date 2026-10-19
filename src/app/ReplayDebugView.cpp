@@ -386,6 +386,29 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
     stack_ = table("debugCallstack", {"Frame", "Function"});
     stack_->setColumnWidth(0, 55);
     values_->addTab(stack_, "Callstack");
+    if (stage_ == "cs") {
+        textureStores_ = table("debugTextureStores", {"Instruction", "Creation / RDC", "Coordinates", "Store operands", "GPU after dispatch", "Status"});
+        for (int column = 0; column < 6; ++column)
+            textureStores_->setColumnWidth(column, column == 0 ? 80 : column == 3 || column == 4 ? 160 : 120);
+        textureStores_->setToolTip("Selected lane's typed texture stores; buffer stores and atomics are excluded. Double-click an instruction to step there, or a mapped resource to select it. GPU values include all dispatch threads and later writes.");
+        values_->addTab(textureStores_, "Texture writes");
+        connect(textureStores_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int column) {
+            if (busy_ || !model_ || !item) return;
+            invoke([&] {
+                const auto ordinal = item->data(0, Qt::UserRole).toUInt();
+                const auto &row = model_->result().at("texture_stores").at("rows").at(ordinal);
+                if (column == 1 && row.at("resource_creation").is_string()) {
+                    emit resourceRequested(std::stoull(row.at("resource_creation").get<std::string>()));
+                    return;
+                }
+                const auto &steps = model_->result().at("steps");
+                const auto position = row.at("trace_position").get<size_t>();
+                if (position >= steps.size() || steps[position].at("nextInstruction") != row.at("instruction"))
+                    throw std::runtime_error("Texture store instruction occurrence is missing from the trace");
+                go(position);
+            });
+        });
+    }
     auto rulePage = new QWidget;
     auto ruleLayout = new QVBoxLayout(rulePage);
     ruleLayout->setContentsMargins(0, 0, 0, 0);
@@ -662,6 +685,7 @@ void ReplayDebugView::invalidate() {
     backendNotice_->hide();
     for (auto tree : {registers_, locals_, stack_, rules_, watches_})
         tree->clear();
+    if (textureStores_) textureStores_->clear();
     assembly_->clear();
     source_->clear();
     details_->clear();
@@ -733,6 +757,8 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
+    if (result.contains("texture_stores"))
+        warnings.append("Texture writes show this lane's operands before storage conversion. GPU values follow the whole dispatch and may include later writes; they do not validate individual stores.");
     const auto lifecycle = result.value("compute_input_lifecycle", Json());
     if (lifecycle.is_object() && lifecycle.value("patch_version", 0) < 2) {
         warnings.prepend("Obsolete DXIL input-retention report: the controller replayed the dispatch after trace creation. Its input-phase claims are invalid; regenerate this trace with the current analysis library.");
@@ -908,6 +934,27 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     }
     rendering_ = true;
     assembly_->setPlainText(text(result.at("disassembly")));
+    if (textureStores_) {
+        textureStores_->clear();
+        const auto stores = result.value("texture_stores", Json::object());
+        for (const auto &row : stores.value("rows", Json::array())) {
+            const auto ref = row.value("gpu_reference", Json::object());
+            const auto type = ref.value("interpretation", "float");
+            const auto key = type == "uint" ? "uintValue" : type == "sint" ? "intValue" : "floatValue";
+            const auto resource = row.at("resource_creation").is_string()
+                ? text(row.at("resource_creation")) : "RDC " + text(row.at("rdc_resource"));
+            auto item = new QTreeWidgetItem(textureStores_, {text(row.at("instruction")), resource,
+                text(row.at("view_coordinates")), text(row.at("value")),
+                ref.value("status", "") == "read" ? text(ref.at("value").at(key)) : QString("Unavailable"),
+                row.value("status", "") == "observed_store" ? "Store attempt" : row.value("status", "") == "out_of_bounds" ? "Out of bounds" : "Operands unavailable"});
+            item->setData(0, Qt::UserRole, row.at("ordinal").get<uint32_t>());
+            item->setToolTip(1, text(row.at("resource_name")));
+            item->setToolTip(2, QString::fromStdString(row.value("location", Json()).dump()));
+            item->setToolTip(3, text(row.at("value")) + "\nRaw bits: " + text(row.at("value_bits")));
+            item->setToolTip(4, QString::fromStdString(ref.dump(2)));
+            item->setToolTip(5, QString::fromStdString(row.dump(2)));
+        }
+    }
     files_->clear();
     for (const auto &file : model_->files()) {
         const auto path = text(file.at("filename"));

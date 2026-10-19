@@ -67,8 +67,9 @@
   `third_party/renderdoc/patches/dx12-dxbc-gpu-dot.patch`,
   `third_party/renderdoc/patches/dx12-dxbc-gpu-mad.patch`,
   `third_party/renderdoc/patches/dx12-dxil-fast-contraction.patch`,
-  `third_party/renderdoc/patches/dx12-dxil-retained-compute.patch` and
-  `third_party/renderdoc/patches/dx12-dxil-uav-texture.patch`. The first preserves
+  `third_party/renderdoc/patches/dx12-dxil-retained-compute.patch`,
+  `third_party/renderdoc/patches/dx12-dxil-uav-texture.patch` and
+  `third_party/renderdoc/patches/dx12-dxil-texture-stores.patch`. The first preserves
   D16 depth typing and decodes its stored UNORM bits in DX12 Pixel History;
   the second initializes every simulated DXBC compute lane's Group ID in the
   DX12 debugger. The third matches resource-usage bindings to shader visibility,
@@ -81,10 +82,13 @@
   stepping, including the controller boundary, and restores the dispatch when
   the trace is freed. The ninth fixes DXIL UAV texture coordinates, view mip/slices
   and per-axis bounds for typed loads/stores and atomics.
+  The tenth exposes bounded observations of the selected DXIL lane's typed
+  texture stores, including instruction occurrence, view coordinates and raw
+  operands. It does not change store execution or claim GPU equivalence.
   All export patch-version markers for the isolated adapter.
   Build them with `tools/build_renderdoc_d16.ps1` in a clean dedicated upstream
   v1.45 checkout (the script retains its original name).
-  Patched packages include all nine patches, build/source hashes, the original runtime
+  Patched packages include all ten patches, build/source hashes, the original runtime
   manifest and an active manifest containing the replacement DLL hash.
 - RenderDoc 1.45 public replay headers are vendored under
   `third_party/renderdoc/replay/` for the isolated native analysis worker.

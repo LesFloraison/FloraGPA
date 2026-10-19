@@ -3,7 +3,10 @@
 #include <nlohmann/json.hpp>
 #include <functional>
 #include <vector>
+#include <array>
 namespace flora {
+// Version 1 of the fixed-width texture-store observer ABI; IDs/offsets use two words.
+nlohmann::json rdcTextureStoreRecord(const std::array<uint32_t, 32> &words);
 struct RdcBufferInputRange {
     ResourceId resource;
     uint64_t offset{}, size{}, bufferSize{};

@@ -11,6 +11,48 @@ namespace {
 using Json = nlohmann::json;
 Json triple(const rdcfixedarray<uint32_t, 3> &value) { return {value[0], value[1], value[2]}; }
 } // namespace
+Json rdcTextureStoreRecord(const std::array<uint32_t, 32> &w) {
+    if (w[31] || w[14] > 1 || w[27] > 1 || (w[12] & ~15U))
+        throw std::runtime_error("Invalid texture store observer record");
+    const auto resource = uint64_t(w[1]) | (uint64_t(w[2]) << 32);
+    Json bits = Json::array(), values = Json::array();
+    for (unsigned c = 0; c < 4; ++c) {
+        bits.push_back(w[19 + c]);
+        if (!(w[12] & (1U << c))) values.push_back(nullptr);
+        else if (w[13] == uint32_t(VarType::Float)) {
+            const auto f = std::bit_cast<float>(w[19 + c]);
+            values.push_back(std::isfinite(f) ? Json(f) : Json(std::isnan(f) ? "nan" : f < 0 ? "-inf" : "inf"));
+        } else if (w[13] == uint32_t(VarType::UInt)) values.push_back(w[19 + c]);
+        else if (w[13] == uint32_t(VarType::SInt)) values.push_back(std::bit_cast<int32_t>(w[19 + c]));
+        else values.push_back(nullptr); // Raw bits remain available for other scalar widths.
+    }
+    Json result{{"instruction", w[0]}, {"debug_step", w[30]}, {"rdc_resource", std::to_string(resource)},
+        {"view_dimension", w[3]}, {"mip", w[4]}, {"view_first_slice", w[5]},
+        {"view_extent", {w[6], w[7], w[8]}}, {"view_coordinates", {w[9], w[10], w[11]}},
+        {"write_mask", w[12]}, {"value_type_enum", w[13]}, {"in_bounds", bool(w[14])},
+        {"binding", {{"register", w[15]}, {"space", w[16]}, {"heap_type", w[17]}, {"descriptor_index", w[18]}}},
+        {"value_bits", bits}, {"value", values}, {"view_format", w[23]},
+        {"component_type_enum", w[24]}, {"component_byte_width", w[25]}, {"component_count", w[26]},
+        {"operands_available", bool(w[27])},
+        {"cache_byte_offset", std::to_string(uint64_t(w[28]) | (uint64_t(w[29]) << 32))},
+        {"status", !w[27] ? "operands_unavailable" : !w[14] ? "out_of_bounds" : "observed_store"}};
+    if (w[14]) {
+        if (!resource || w[9] >= w[6] || w[10] >= w[7] || w[11] >= w[8])
+            throw std::runtime_error("Texture store bounds disagree with the observer");
+        uint64_t layer = w[5];
+        uint32_t y = w[10];
+        switch (w[3]) {
+        case 2: y = 0; break; // D3D12_TEXTURE1D
+        case 3: layer += w[10]; y = 0; break; // 1D array uses its second coordinate as layer.
+        case 4: break;
+        case 5: case 8: layer += w[11]; break;
+        default: throw std::runtime_error("Unsupported texture store view dimension");
+        }
+        if (layer > UINT32_MAX) throw std::runtime_error("Texture store layer overflow");
+        result["location"] = {{"x", w[9]}, {"y", y}, {"mip", w[4]}, {"layer", uint32_t(layer)}, {"sample", 0}};
+    }
+    return result;
+}
 Json rdcBufferInputSnapshot(const std::vector<RdcBufferInputRange> &ranges,
                              const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read,
                              uint64_t byteBudget) {
