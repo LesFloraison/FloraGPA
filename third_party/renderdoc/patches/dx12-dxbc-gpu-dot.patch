@@ -1,0 +1,209 @@
+diff --git a/renderdoc/data/hlsl/hlsl_cbuffers.h b/renderdoc/data/hlsl/hlsl_cbuffers.h
+index 88d48e6cf..ce3dbde11 100644
+--- a/renderdoc/data/hlsl/hlsl_cbuffers.h
++++ b/renderdoc/data/hlsl/hlsl_cbuffers.h
+@@ -189,6 +189,7 @@ cbuffer HistogramCBufferData REG(b0)
+ cbuffer DebugMathOperation REG(b0)
+ {
+   float4 mathInVal;
++  float4 mathInVal2;
+   int mathOp;
+ };
+ 
+@@ -391,6 +392,9 @@ cbuffer DebugSampleOperation REG(b0)
+ #define DEBUG_SAMPLE_MATH_DXBC_EXP 1002
+ #define DEBUG_SAMPLE_MATH_DXBC_LOG 1003
+ #define DEBUG_SAMPLE_MATH_DXBC_SINCOS 1004
++#define DEBUG_SAMPLE_MATH_DXBC_DP2 1005
++#define DEBUG_SAMPLE_MATH_DXBC_DP3 1006
++#define DEBUG_SAMPLE_MATH_DXBC_DP4 1007
+ 
+ #define DEBUG_SAMPLE_TEX_SAMPLE 100
+ #define DEBUG_SAMPLE_TEX_SAMPLE_LEVEL 101
+diff --git a/renderdoc/data/hlsl/shaderdebug.hlsl b/renderdoc/data/hlsl/shaderdebug.hlsl
+index eae7d173d..c4dc5eeb3 100644
+--- a/renderdoc/data/hlsl/shaderdebug.hlsl
++++ b/renderdoc/data/hlsl/shaderdebug.hlsl
+@@ -36,6 +36,9 @@ RWStructuredBuffer<OutStruct> outBuf : register(u1);
+ [numthreads(1, 1, 1)] void RENDERDOC_DebugMathOp() {
+   switch(mathOp)
+   {
++    case DEBUG_SAMPLE_MATH_DXBC_DP2: outBuf[0].outf[0] = dot(mathInVal.xy, mathInVal2.xy); break;
++    case DEBUG_SAMPLE_MATH_DXBC_DP3: outBuf[0].outf[0] = dot(mathInVal.xyz, mathInVal2.xyz); break;
++    case DEBUG_SAMPLE_MATH_DXBC_DP4: outBuf[0].outf[0] = dot(mathInVal, mathInVal2); break;
+     case DEBUG_SAMPLE_MATH_DXBC_RCP: outBuf[0].outf[0] = rcp(mathInVal); break;
+     case DEBUG_SAMPLE_MATH_DXBC_RSQ: outBuf[0].outf[0] = rsqrt(mathInVal); break;
+     case DEBUG_SAMPLE_MATH_DXBC_EXP: outBuf[0].outf[0] = exp2(mathInVal); break;
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+index 94f5369d3..fea6e92b0 100644
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -23,6 +23,7 @@
+  ******************************************************************************/
+ 
+ #include "d3d12_shaderdebug.h"
++#include <atomic>
+ #include "core/settings.h"
+ #include "driver/dx/official/d3dcompiler.h"
+ #include "driver/dxgi/dxgi_common.h"
+@@ -88,7 +89,8 @@ static D3D12_DESCRIPTOR_RANGE_TYPE ConvertOperandTypeToDescriptorType(DXBCByteco
+ // Helpers used by DXBC and DXIL debuggers to interact with GPU and resources
+ bool D3D12ShaderDebug::QueueMathIntrinsic(bool dxil, WrappedID3D12Device *device,
+                                           ID3D12GraphicsCommandListX *cmdList, int mathOp,
+-                                          const ShaderVariable &input, const uint32_t queueIndex)
++                                          const ShaderVariable &input, const uint32_t queueIndex,
++                                          const ShaderVariable *input2)
+ {
+   D3D12MarkerRegion region(device->GetQueue()->GetReal(), "QueueMathIntrinsic");
+ 
+@@ -97,6 +99,8 @@ bool D3D12ShaderDebug::QueueMathIntrinsic(bool dxil, WrappedID3D12Device *device
+ 
+   DebugMathOperation cbufferData = {};
+   memcpy(&cbufferData.mathInVal, input.value.f32v.data(), sizeof(Vec4f));
++  if(input2)
++    memcpy(&cbufferData.mathInVal2, input2->value.f32v.data(), sizeof(Vec4f));
+   cbufferData.mathOp = mathOp;
+ 
+   // Set root signature & sig params on command list, then execute the shader
+@@ -1033,6 +1037,10 @@ public:
+   void FetchSRV(const DXBCDebug::BindingSlot &slot);
+   void FetchUAV(const DXBCDebug::BindingSlot &slot);
+ 
++  bool UsesGPUDotProducts() const override { return true; }
++  bool CalculateDotProduct(DXBCBytecode::OpcodeType opcode, const ShaderVariable &a,
++                           const ShaderVariable &b, ShaderVariable &output) override;
++
+   bool CalculateMathIntrinsic(DXBCBytecode::OpcodeType opcode, const ShaderVariable &input,
+                               ShaderVariable &output1, ShaderVariable &output2);
+ 
+@@ -1434,6 +1442,74 @@ void D3D12DebugAPIWrapper::FetchUAV(const DXBCDebug::BindingSlot &slot)
+          slot.registerSpace);
+ }
+ 
++static std::atomic<uint64_t> floraDxbcDotOperations(0), floraDxbcDotFailures(0);
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDxbcGpuDotPatchVersion()
++{
++  return 1;
++}
++
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxbcGpuDotOperations()
++{
++  return floraDxbcDotOperations.load();
++}
++
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDxbcGpuDotFailures()
++{
++  return floraDxbcDotFailures.load();
++}
++
++bool D3D12DebugAPIWrapper::CalculateDotProduct(DXBCBytecode::OpcodeType opcode,
++                                              const ShaderVariable &a, const ShaderVariable &b,
++                                              ShaderVariable &output)
++{
++  int mathOp = 0;
++  switch(opcode)
++  {
++    case OPCODE_DP2: mathOp = DEBUG_SAMPLE_MATH_DXBC_DP2; break;
++    case OPCODE_DP3: mathOp = DEBUG_SAMPLE_MATH_DXBC_DP3; break;
++    case OPCODE_DP4: mathOp = DEBUG_SAMPLE_MATH_DXBC_DP4; break;
++    default: ++floraDxbcDotFailures; return false;
++  }
++  // Never read stale output after a missing PSO or removed device.
++  if(!m_pDevice->GetDebugManager()->GetMathIntrinsicsPso() ||
++     FAILED(m_pDevice->GetReal()->GetDeviceRemovedReason()))
++  {
++    ++floraDxbcDotFailures;
++    return false;
++  }
++  RDCASSERT(!m_QueuedOpCmdList);
++  m_QueuedOpCmdList = m_pDevice->GetDebugManager()->ResetDebugList();
++  if(!m_QueuedOpCmdList)
++  {
++    ++floraDxbcDotFailures;
++    return false;
++  }
++  if(!D3D12ShaderDebug::QueueMathIntrinsic(false, m_pDevice, m_QueuedOpCmdList, mathOp, a, 0, &b))
++  {
++    m_QueuedOpCmdList->Close();
++    m_QueuedOpCmdList = NULL;
++    ++floraDxbcDotFailures;
++    return false;
++  }
++  ShaderVariable unused("unused", 0.0f, 0.0f, 0.0f, 0.0f);
++  rdcarray<ShaderVariable *> results;
++  results.push_back(&output);
++  results.push_back(&unused);
++  rdcarray<ShaderVariable *> samples;
++  rdcarray<int> types;
++  rdcarray<const uint8_t *> swizzles;
++  bool ok = D3D12ShaderDebug::GetQueuedResults(m_pDevice, m_QueuedOpCmdList, results, 2,
++                                             samples, types, swizzles);
++  m_QueuedOpCmdList = NULL;
++  ok = ok && SUCCEEDED(m_pDevice->GetReal()->GetDeviceRemovedReason());
++  if(ok)
++    ++floraDxbcDotOperations;
++  else
++    ++floraDxbcDotFailures;
++  return ok;
++}
++
+ // Used by the DXBC Debugger
+ bool D3D12DebugAPIWrapper::CalculateMathIntrinsic(DXBCBytecode::OpcodeType opcode,
+                                                   const ShaderVariable &input,
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.h b/renderdoc/driver/d3d12/d3d12_shaderdebug.h
+index a37002fd9..104869731 100644
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.h
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.h
+@@ -40,7 +40,8 @@ typedef DXBCBytecode::SamplerMode SamplerMode;
+ 
+ // Helpers used by DXBC and DXIL debuggers to interact with GPU and resources
+ bool QueueMathIntrinsic(bool dxil, WrappedID3D12Device *device, ID3D12GraphicsCommandListX *cmdList,
+-                        int mathOp, const ShaderVariable &input, const uint32_t queueIndex);
++                        int mathOp, const ShaderVariable &input, const uint32_t queueIndex,
++                        const ShaderVariable *input2 = NULL);
+ 
+ bool QueueSampleGather(bool dxil, WrappedID3D12Device *device, ID3D12GraphicsCommandListX *cmdList,
+                        int sampleOp, SampleGatherResourceData resourceData,
+diff --git a/renderdoc/driver/shaders/dxbc/dxbc_debug.cpp b/renderdoc/driver/shaders/dxbc/dxbc_debug.cpp
+index b0da7ac4d..66c99eec8 100644
+--- a/renderdoc/driver/shaders/dxbc/dxbc_debug.cpp
++++ b/renderdoc/driver/shaders/dxbc/dxbc_debug.cpp
+@@ -2219,6 +2219,20 @@ void ThreadState::StepNext(ShaderDebugState *state, DebugAPIWrapper *apiWrapper,
+     case OPCODE_DP3:
+     case OPCODE_DP4:
+     {
++      if(!op.preciseValues && apiWrapper->UsesGPUDotProducts())
++      {
++        ShaderVariable result("dot", 0.0f, 0.0f, 0.0f, 0.0f);
++        if(!apiWrapper->CalculateDotProduct(op.operation, srcOpers[0], srcOpers[1], result))
++        {
++          apiWrapper->AddDebugMessage(MessageCategory::Shaders, MessageSeverity::High,
++                                     MessageSource::RuntimeWarning,
++                                     "DXBC GPU dot product failed; shader trace is incomplete.");
++          done = true;
++          return;
++        }
++        SetDst(state, op.operands[0], op, result);
++        break;
++      }
+       ShaderVariable dot = mul(srcOpers[0], srcOpers[1], optype);
+ 
+       float sum = dot.value.f32v[0];
+diff --git a/renderdoc/driver/shaders/dxbc/dxbc_debug.h b/renderdoc/driver/shaders/dxbc/dxbc_debug.h
+index 086240dfd..59ef1bd8f 100644
+--- a/renderdoc/driver/shaders/dxbc/dxbc_debug.h
++++ b/renderdoc/driver/shaders/dxbc/dxbc_debug.h
+@@ -155,5 +155,12 @@ public:
+   virtual void FetchSRV(const BindingSlot &slot) = 0;
+   virtual void FetchUAV(const BindingSlot &slot) = 0;
+ 
++  // DX12 can preserve adapter-specific non-precise dot arithmetic on the GPU.
++  // Other APIs retain their existing CPU implementation.
++  virtual bool UsesGPUDotProducts() const { return false; }
++  virtual bool CalculateDotProduct(DXBCBytecode::OpcodeType opcode,
++                                   const ShaderVariable &a, const ShaderVariable &b,
++                                   ShaderVariable &output) { return false; }
++
+   virtual bool CalculateMathIntrinsic(DXBCBytecode::OpcodeType opcode, const ShaderVariable &input,
+                                       ShaderVariable &output1, ShaderVariable &output2) = 0;
