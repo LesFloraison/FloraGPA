@@ -54,6 +54,56 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void talosCubeCoordinates() {
+        const auto root = qEnvironmentVariable("FLORA_TALOS_CUBE_DEBUG");
+        if (root.isEmpty()) QSKIP("Set the Talos cube debug evidence directory");
+        const auto report = read(root + "/patched/result.json");
+        const auto baseline = read(root + "/../talos-depth-state1/debug-roundtrip/result.json");
+        const auto history = read(root + "/../talos-depth-state1/history-roundtrip/result.json");
+        QCOMPARE(report.at("backend_dx12_cube_coordinates_patch"), Json(1));
+        QCOMPARE(report.at("trace"), baseline.at("trace"));
+        QCOMPARE(report.at("steps").size(), size_t(278));
+        for (size_t i = 0; i < 240; ++i) QCOMPARE(report.at("steps")[i], baseline.at("steps")[i]);
+        QVERIFY(report.at("steps")[240] != baseline.at("steps")[240]);
+        const auto &gpu = report.at("gpu_reference");
+        QCOMPARE(gpu.at("value"), gpu.at("after_trace_creation_value"));
+        QCOMPARE(gpu.at("value"), gpu.at("after_debug_value"));
+        QCOMPARE(gpu.at("value"), baseline.at("gpu_reference").at("value"));
+        ReplayDebugView view("ps"); view.resize(1500, 950); view.show();
+        view.setContext("talos:cube-fixed", 14835, true); view.selectPixel(1776, 380, 0);
+        view.selectPrimitive(172); view.selectDepthRoundtrip(true);
+        QVERIFY(view.finish(view.requestId(), report));
+        view.findChild<QLineEdit *>("debugInstruction")->setText("239");
+        action(view, "debugToggleInstructionBreakpoint")->trigger(); action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(239));
+        auto expression = view.findChild<QLineEdit *>("debugWatchExpression");
+        expression->setText("registers.r2.float"); action(view, "debugAddWatch")->trigger();
+        QCOMPARE(view.model()->watchResults()[0].at("values")[2], Json(1.0));
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(240));
+        QCOMPARE(view.model()->watchResults()[0].at("values"),
+            Json::array({0.5990996956825256, 0.721889078617096, 0.9115129113197327, 0.531212329864502}));
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(277);
+        expression->setText("registers.o0.float"); action(view, "debugAddWatch")->trigger();
+        const auto output = view.model()->watchResults()[1].at("values");
+        const auto observed = history.at("history").back().at("shaderOut").at("col").at("floatValue");
+        const uint32_t nativeHalf[]{7043, 7423, 8142, 15360};
+        for (size_t i = 0; i < 4; ++i) {
+            const auto bits = std::bit_cast<uint32_t>(output[i].get<float>());
+            const auto expected = std::bit_cast<uint32_t>(observed[i].get<float>());
+            QVERIFY(std::abs(int64_t(bits) - int64_t(expected)) <= 1);
+            const auto exponent = int((bits >> 23) & 255) - 127 + 15;
+            QVERIFY((bits & 0x80000000) == 0 && exponent > 0 && exponent < 31);
+            // Observed positive-normal binary16 truncation, not a general rounding guarantee.
+            QCOMPARE((uint32_t(exponent) << 10) | ((bits >> 13) & 1023), nativeHalf[i]);
+        }
+        auto tabs = view.findChild<QTabWidget *>("debugValueTabs");
+        for (int i = 0; i < tabs->count(); ++i)
+            if (tabs->tabText(i) == "Watches") tabs->setCurrentIndex(i);
+        QCoreApplication::processEvents();
+        QCOMPARE(view.exportReport().at("backend_dx12_cube_coordinates_patch"), Json(1));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/talos-cube-fixed.png"));
+    }
     void talosReadOnlyDepthRoundtrip() {
         const auto root = qEnvironmentVariable("FLORA_TALOS_DEPTH_STATE");
         if (root.isEmpty()) QSKIP("Set the Talos D32 depth evidence directory");

@@ -62,6 +62,7 @@ $instructionFlagsPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12
 $discardLayoutPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-discard-layout.patch'
 $discardPatternPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-discard-pattern-control.patch'
 $readOnlyRoundtripPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-readonly-depth-roundtrip.patch'
+$cubeCoordinatesPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-cube-coordinates.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -90,6 +91,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxil_prepared_compute_patch_version -ne 1 -or
         $patchManifest.dx12_placed_heap_restore_patch_version -ne 1 -or
         $patchManifest.dx12_depth_roundtrip_patch_version -ne 2 -or
+        $patchManifest.dx12_cube_coordinates_patch_version -ne 1 -or
+        $patchManifest.dx12_cube_coordinates_patch_sha256 -ne (Get-PackageSha256 $cubeCoordinatesPatchPath) -or
         $patchManifest.readonly_depth_roundtrip_patch_version -ne 1 -or
         $patchManifest.readonly_depth_roundtrip_patch_sha256 -ne (Get-PackageSha256 $readOnlyRoundtripPatchPath) -or
         $patchManifest.dxil_instruction_flags_patch_version -ne 1 -or
@@ -215,6 +218,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $discardLayoutPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $discardPatternPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $readOnlyRoundtripPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $cubeCoordinatesPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

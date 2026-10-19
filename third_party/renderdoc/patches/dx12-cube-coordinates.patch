@@ -1,0 +1,29 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -135,6 +135,11 @@
+   return true;
+ }
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12CubeCoordinatesPatchVersion()
++{
++  return 1;
++}
++
+ bool D3D12ShaderDebug::QueueSampleGather(
+     bool dxil, WrappedID3D12Device *device, ID3D12GraphicsCommandListX *cmdList, int sampleOp,
+     SampleGatherResourceData resourceData, SampleGatherSamplerData samplerData,
+@@ -196,9 +201,11 @@
+   if(resourceData.dim == RESOURCE_DIMENSION_TEXTURE1D)
+     uv.value.f32v[1] = 0.0f;
+   else if(resourceData.dim == RESOURCE_DIMENSION_TEXTURE2D ||
+-          resourceData.dim == RESOURCE_DIMENSION_TEXTURE2DMS ||
+-          resourceData.dim == RESOURCE_DIMENSION_TEXTURECUBE)
++          resourceData.dim == RESOURCE_DIMENSION_TEXTURE2DMS)
+     uv.value.f32v[2] = 0.0f;
++  else if(resourceData.dim == RESOURCE_DIMENSION_TEXTURECUBE)
++    // The debug shader uses TextureCubeArray: xyz is the direction, w the array index.
++    uv.value.f32v[3] = 0.0f;
+ 
+   DebugSampleOperation cbufferData = {};
+ 

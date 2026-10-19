@@ -193,6 +193,7 @@ class Session {
     uint32_t placedHeapRestorePatch{};
     uint32_t discardLayoutPatch{};
     uint32_t discardPatternControlPatch{};
+    uint32_t cubeCoordinatesPatch{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -303,6 +304,10 @@ class Session {
             if (discardPatternControlPatch != 1) throw std::runtime_error("Unsupported discard pattern control version");
             setDiscardPatterns = symbol<SetDiscardPatterns>("RENDERDOC_SetFloraDx12DiscardPatternsEnabled");
             discardPatternsSkipped = symbol<DiscardPatternCount>("RENDERDOC_GetFloraDx12DiscardPatternsSkipped");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12CubeCoordinatesPatchVersion"))) {
+            cubeCoordinatesPatch = patch();
+            if (cubeCoordinatesPatch != 1) throw std::runtime_error("Unsupported DX12 cube-coordinate patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1417,6 +1422,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
         {"backend_dx12_discard_layout_patch", session.discardLayoutPatch},
         {"backend_dx12_discard_pattern_control_patch", session.discardPatternControlPatch},
+        {"backend_dx12_cube_coordinates_patch", session.cubeCoordinatesPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
