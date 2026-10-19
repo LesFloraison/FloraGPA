@@ -207,7 +207,7 @@ class Dx12Session final : public IReplaySession {
         if (!std::binary_search(resources_.begin(), resources_.end(), id))
             throw std::runtime_error("Unknown DX12 resource creation");
         if (const auto it = backBuffers_.buffers().find(id); it != backBuffers_.buffers().end())
-            return {id, it->second.object, "DX12 swapchain buffer " + std::to_string(it->second.index),
+            return {id, it->second.object, "DX12 swapchain buffer " + std::to_string(it->second.index) + " (serialized index)",
                     resourceDescription(id).dump()};
         const auto &p = packet(id);
         const auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
@@ -225,6 +225,7 @@ class Dx12Session final : public IReplaySession {
                                        {"generation", std::to_string(buffer.generation)},
                                        {"queue", std::to_string(buffer.queue)},
                                        {"index", buffer.index},
+                                       {"index_domain", "serialized_getbuffer_index"},
                                        {"description", resourceDescription(id)},
                                        {"source", "captured_swapchain_description_and_GetBuffer"}};
         }
@@ -333,6 +334,14 @@ class Dx12Session final : public IReplaySession {
                 {"status", "packet_indexed"}, {"payload_preview", preview.str()},
                 {"preview_truncated", bytes.size() > 256},
                 {"note", "CPU stream record; not a GPU execution instance"}};
+        if (p.type == 0x1d532a4b90915ULL || p.type == 0x1af998824f46bULL) {
+            result["backbuffer_index_domain"] = p.type == 0x1d532a4b90915ULL
+                ? "serialized_getbuffer_index" : "captured_current_index_observation";
+            result["backbuffer_index_note"] =
+                "GPA can rotate serialized GetBuffer indices when building restoration data. "
+                "A captured GetCurrentBackBufferIndex return does not directly select a serialized buffer. "
+                "Use the resource identity referenced by submitted GPU commands.";
+        }
         if (const auto index = submissions_.recordingForRecord(id)) {
             const auto &recording = submissions_.recordings()[*index];
             result["recording_id"] = std::to_string(*index + 1);

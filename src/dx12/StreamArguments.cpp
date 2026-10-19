@@ -1,4 +1,6 @@
 #include "StreamArguments.h"
+#include <iomanip>
+#include <sstream>
 
 namespace flora::dx12 {
 namespace {
@@ -27,6 +29,16 @@ std::vector<uint64_t> pointers(Reader &r) {
     for (uint64_t i = 0; i < count; ++i) out.push_back(r.read<uint64_t>());
     return out;
 }
+std::string interfaceId(Reader &r) {
+    std::ostringstream out;
+    out << std::hex << std::setfill('0') << std::setw(8) << r.read<uint32_t>() << '-'
+        << std::setw(4) << r.read<uint16_t>() << '-' << std::setw(4) << r.read<uint16_t>() << '-';
+    for (int i = 0; i < 8; ++i) {
+        if (i == 2) out << '-';
+        out << std::setw(2) << unsigned(r.read<uint8_t>());
+    }
+    return out.str();
+}
 }
 DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     DecodedArguments out;
@@ -36,6 +48,20 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     const auto u64 = [&](const char *name) { auto n = r.read<uint64_t>(); v[name] = std::to_string(n); return n; };
     const auto resource = [&](const char *name) { auto n = u64(name); if(n) out.resources.push_back(n); };
     switch (type) {
+    case 0x1d532a4b90915ULL: {
+        u64("SwapChain"); u32("BufferIndex"); v["InterfaceId"] = interfaceId(r);
+        const auto outputs = pointers(r); u32("HRESULT"); r.end();
+        if (outputs.size() > 1) throw std::runtime_error("Invalid swapchain buffer output count");
+        if (!outputs.empty()) {
+            v["Resource"] = std::to_string(outputs[0]);
+            if (outputs[0]) out.resources.push_back(outputs[0]);
+        }
+        break;
+    }
+    case 0x1af998824f46bULL:
+        u64("SwapChain"); u32("ReturnedIndex"); r.end(); break;
+    case 0x1d53218275f72ULL:
+        u64("SwapChain"); u32("SyncInterval"); u32("PresentFlags"); u32("HRESULT"); r.end(); break;
     case 0x1000016b94da9ULL: case 0x11fac3bb041bfULL: {
         if (type == 0x11fac3bb041bfULL) u64("DeviceFactory");
         u64("Adapter"); u32("MinimumFeatureLevel"); r.skip(16);

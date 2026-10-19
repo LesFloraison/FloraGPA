@@ -1451,13 +1451,17 @@ visible. Peak resource allocation is **5,238,685,696 bytes** under a 12 GiB budg
 boundary. The alias checks succeeded for 341 bindings. None of these observations
 alone establishes output fidelity or alias-state correctness.
 
-The last recorded `GetCurrentBackBufferIndex` returns 3, but that captured buffer
-has no frame-thread writes and its native readback is zero (`hellblade-last-color1`).
+The last recorded `GetCurrentBackBufferIndex` returns 3. An initial readback of
+serialized buffer 3 found no frame-thread writes and returned zero
+(`hellblade-last-color1`); treating these two indices as equivalent was incorrect.
 Following actual GPU commands instead identifies CopyResource **613353**, copying
 to object **2149283441408**, creation **506294**, swapchain buffer index 1. Readback
 after execution 37104 produces the visible scene, with the character, rocks and
-letterbox bars, from that resource. The relation between the observed swapchain
-index and copied buffer remains to be reconciled with original GPA behavior.
+letterbox bars, from that resource. Later capture-layer analysis established that
+GPA rotates serialized GetBuffer indices when synthesizing restoration records;
+the live observation and serialized index belong to different domains. See the
+original-presentation comparison below. Resource identity, rather than the live
+index, determines the copied output.
 
 `hellblade-last-color3` reads **1920 x 1200 R10G10B10A2_UNORM**, subresource 0,
 9,216,000 unpadded bytes. Native display now reuses the existing integer UNORM
@@ -3267,6 +3271,91 @@ ordering, arbitrary Win32 event semantics, serialized initialization, and
 selected consumers whose required producer lies beyond the inspected CPU
 prefix. Those cases are not certified by this transition fixture or timeline.
 
+### Hellblade2 original presentation and serialized backbuffer indices
+
+The original GPA player now supplies a real Hellblade2 reference, rather than the
+directory preview. GPA **2025.1.3.1269** ran offscreen through two Presents with
+the synchronous screenshot layer (`frames=1;2`, `async=false`), exiting with code
+0. Its second image is 1920 x 1200 and shows the character, rocks and letterbox
+bars. `gpa-hellblade-reference1/screen-2.png` has SHA-256
+`a726ee679bd5dd3a4126b850873dbb3e8e96042aec7eed9dcdefca378d63e678`.
+The player log includes WinPixEventRuntime and adapter-mismatch warnings; this
+comparison does not independently establish the original rendering adapter or
+attribute pixel differences to those warnings.
+
+A temporary debugger probe at screenshot-layer RVA **0x1e490** reads the
+synchronous image before conversion. The first attempt reached the 120-second
+deadline without saving raw pixels and was terminated. A retry with
+`_NO_DEBUG_HEAP=1` completed with exit code 0 and saved the second Present's
+**1920 x 1200 R10G10B10A2_UNORM** image, row pitch **7680**, **9,216,000** bytes.
+This does not establish why the first attempt timed out. The probe changes no
+capture files or GPA binaries on disk. Raw SHA-256:
+`5d1abb33b97771ba68e91ce29557ad0a3dd187d8310503b233ed4d744cff0426`.
+Compared with the existing native `hellblade-queue-schedule2` readback,
+**6,402 / 2,304,000 pixels differ**; maximum RGB10 channel deltas are **3, 3, 4**,
+with identical alpha. These differences remain unexplained and are not accepted
+as full output fidelity. This investigation reused the saved native output;
+it did not add another full native replay.
+
+Screenshot conversion is a separate, now measured difference. A CPU fixture
+passes all 1024 RGB10 gray levels through the original screenshot conversion,
+with COM initialized. Every output RGB8 value is the high eight bits (`v >> 2`),
+and alpha is 255. The same-run original PNG matches the saved RGB10 image under
+this conversion at every pixel. Flora's normalized UNORM display conversion and
+raw output are unchanged. The screenshot module's SHA-256 is
+`b5a9414064c18a9450e509d5cccfa9c8b2aca25593526bc08753c682923343f3`;
+relevant RVAs are **0x20340** (conversion entry), **0x20580** and **0x208a0**
+(conversion paths), **0x1ee20** (scratch-image access), and **0x1f0c0** (release).
+
+Capture-layer analysis explains why the live current index cannot identify a
+serialized backbuffer directly. `Streams/layers/capture-x64.dll`, version
+**2025.1.3.1269**, has SHA-256
+`a1afd0b41e6bf668381e4898b03460130e0b61432c88d56c8559aef5b1b72c62`.
+Targeted Ghidra analysis at image base `0x180000000` identifies
+`AdjustBackBufferIndex` at RVA **0x64940** and `SynthesizeGetBufferCall` at
+**0x91d60**, supported by function-name strings and disassembly. At **0x91e93**,
+the latter loads swapchain vtable offset **0x120** for the call that reads the live
+current index; at **0x91ec3** it accesses the description method. Instructions
+**0x91efe–0x91f17** compute:
+
+```
+(resourceIndex + modeCorrection + BufferCount - liveCurrentIndex) % BufferCount
+```
+
+`modeCorrection` is 0 or 1; the mode's full policy is not established. Helper
+**0x85a030** reads the resource index at state offset **0xa4**, and **0x85a110**
+reads its owning swapchain at **0xa8**. The initial whole-module analysis hit its
+time limit; these findings come from the subsequent targeted functions and
+instruction inspection, not a claim of complete module analysis.
+
+The real stream independently records swapchain **2130654364640** with four
+buffers. Current-index observations **595596** and **613348** return **2** and
+**3**; CopyResource **595601** and **613353** write resources obtained at
+serialized indices **0** and **1**, respectively. The latter is resource
+**2149283441408**, GetBuffer creation **506294**, preceding Present **613510**.
+This is consistent with rotation, but does not justify imposing a guessed global
+offset on other captures. Native replay continues to follow GPU resource identity.
+
+The API decoder now exposes GetBuffer's swapchain, index, interface GUID and
+output resource; GetCurrentBackBufferIndex's returned index; and Present's
+interval, flags and result. These parameters participate in existing API text
+and resource filtering. Session details and backbuffer names explicitly identify
+serialized GetBuffer indices, distinct from captured current-index observations.
+All object identities remain decimal strings. Focused tests cover high 64-bit
+identities, GUID decoding, truncated/trailing data, and the actual Hellblade2
+GetBuffer/current-index/copy/Present relationship. Release build **249** succeeded;
+the two selected CPU tests report **4 passed, 0 failed, 0 skipped** including
+setup/cleanup in **117 ms**. No broad regression suite was run.
+
+Ignored local evidence: `gpa-hellblade-reference1`, `gpa-hellblade-raw1`,
+`gpa-hellblade-raw2`, `hellblade-original-raw-comparison1.json`,
+`hellblade-original-artifacts1.json`, `screenshot-rgb10-fixture1.json`,
+`hellblade-swapchain-audit1.json`, `hellblade-swapchain-normalization2.txt`,
+`hellblade-swapchain-normalization3.txt`, and
+`hellblade-presentation-arguments2.txt` under `artifacts/dx12-research`.
+The original-output comparison remains partial; intermediate-resource fidelity,
+remaining debug features and portable acceptance are still unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3280,7 +3369,7 @@ prefix. Those cases are not certified by this transition fixture or timeline.
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; byte-preserving MS/PS import creates a PSO; changed shader execution, full performance and experiments unfinished |
-| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Not performed |
+| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known

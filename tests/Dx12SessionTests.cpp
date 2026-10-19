@@ -76,6 +76,62 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void swapchainPacketArguments() {
+        using Json = nlohmann::json;
+        const uint64_t swapchain = UINT64_MAX - 5, resource = UINT64_MAX - 6;
+        const auto decode = [](uint64_t type, const QByteArray &bytes) {
+            return dx12::decodeArguments(type, format::Bytes(
+                reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size())));
+        };
+        QByteArray bytes; qword(bytes, swapchain); dword(bytes, 1);
+        const auto iid = __uuidof(ID3D12Resource);
+        bytes.append(reinterpret_cast<const char *>(&iid), sizeof(iid)); bytes.append(char(1));
+        qword(bytes, 1); qword(bytes, resource); dword(bytes, 0);
+        const auto buffer = decode(0x1d532a4b90915ULL, bytes);
+        QVERIFY(buffer.supported); QCOMPARE(buffer.consumed, size_t(bytes.size()));
+        QCOMPARE(buffer.values.at("SwapChain"), Json(std::to_string(swapchain)));
+        QCOMPARE(buffer.values.at("Resource"), Json(std::to_string(resource)));
+        QCOMPARE(buffer.values.at("BufferIndex"), Json(1));
+        QCOMPARE(buffer.values.at("InterfaceId"), Json("696442be-a72e-4059-bc79-5b5c98040fad"));
+        QCOMPARE(buffer.resources, std::vector<uint64_t>{resource});
+        bytes.chop(1); QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(0x1d532a4b90915ULL, bytes));
+        bytes.clear(); qword(bytes, swapchain); dword(bytes, 3);
+        const auto current = decode(0x1af998824f46bULL, bytes);
+        QCOMPARE(current.values.at("ReturnedIndex"), Json(3));
+        QVERIFY(current.resources.empty());
+        bytes.append(char(0)); QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(0x1af998824f46bULL, bytes));
+        bytes.clear(); qword(bytes, swapchain); dword(bytes, 0); dword(bytes, 512); dword(bytes, 0);
+        const auto present = decode(0x1d53218275f72ULL, bytes);
+        QCOMPARE(present.values.at("SyncInterval"), Json(0));
+        QCOMPARE(present.values.at("PresentFlags"), Json(512));
+        QCOMPARE(present.values.at("HRESULT"), Json(0));
+        bytes.chop(1); QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode(0x1d53218275f72ULL, bytes));
+    }
+    void hellbladePresentIndexDomains() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set captures for the Hellblade2 presentation-index evidence");
+        auto session = openReplaySession(std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        const auto buffer = session->eventDetails(506294).at("arguments");
+        const auto current = session->eventDetails(613348).at("arguments");
+        const auto present = session->eventDetails(613510).at("arguments");
+        const auto copy = session->eventDetails(613353).at("arguments");
+        QCOMPARE(buffer.at("BufferIndex"), Json(1));
+        QCOMPARE(current.at("ReturnedIndex"), Json(3));
+        QCOMPARE(buffer.at("SwapChain"), current.at("SwapChain"));
+        QCOMPARE(buffer.at("SwapChain"), present.at("SwapChain"));
+        QCOMPARE(buffer.at("Resource"), copy.at("Destination"));
+        QCOMPARE(buffer.at("Resource"), Json("2149283441408"));
+        QCOMPARE(session->eventDetails(506294).at("backbuffer_index_domain"), Json("serialized_getbuffer_index"));
+        QCOMPARE(session->eventDetails(613348).at("backbuffer_index_domain"), Json("captured_current_index_observation"));
+        QCOMPARE(session->resourceDetails(506294).at("swapchain_buffer").at("index_domain"), Json("serialized_getbuffer_index"));
+        QVERIFY(QString::fromStdString(session->resource(506294).name).contains("serialized index"));
+        QCOMPARE(present.at("PresentFlags"), Json(512));
+        QCOMPARE(present.at("HRESULT"), Json(0));
+        QVERIFY(QString::fromStdString(session->argumentText(506294)).contains("2149283441408"));
+        QVERIFY(QString::fromStdString(session->argumentText(613348)).contains("ReturnedIndex"));
+    }
     void nativeQueuedSubmissions() {
         using Json = nlohmann::json;
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

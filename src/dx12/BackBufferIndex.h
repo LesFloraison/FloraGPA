@@ -5,6 +5,8 @@
 namespace flora::dx12 {
 struct BackBufferRecipe {
     uint64_t swapchain{}, generation{}, queue{}, object{};
+    // Serialized GetBuffer index: GPA restoration can rotate it relative to
+    // the live application's GetCurrentBackBufferIndex observation domain.
     UINT index{};
     D3D12_RESOURCE_DESC description{};
 };
