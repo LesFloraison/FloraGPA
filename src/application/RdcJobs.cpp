@@ -80,6 +80,13 @@ RdcBufferRange rdcBufferRange(const Json &job) {
         throw std::runtime_error("Buffer readback requires a non-overflowing range of 1 byte to 64 MiB");
     return range;
 }
+uint32_t rdcReplayOptimisation(const Json &job) {
+    const auto mode = job.value("replay_optimisation", Json("balanced"));
+    if (!mode.is_string()) throw std::runtime_error("Replay optimisation must be a string");
+    constexpr const char *names[]{"none", "conservative", "balanced", "fastest"};
+    for (uint32_t i = 0; i < std::size(names); ++i) if (mode == names[i]) return i;
+    throw std::runtime_error("Replay optimisation must be none, conservative, balanced or fastest");
+}
 Json prepareRdcJob(const QString &capture, const std::string &action, const QString &output,
                    const QString &library, const Json &options) {
     static const std::set<std::string> actions{"inventory",    "postmesh",     "history",  "debug-pixel",
@@ -99,6 +106,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"index", nullptr},
              {"stage", "VSOut"},
              {"api_validation", false},
+             {"replay_optimisation", "balanced"},
              {"isolate_missing_queries", false},
              {"readonly_depth_snapshot", false},
              {"depth_roundtrip", false},
@@ -113,6 +121,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
+    rdcReplayOptimisation(job);
     if (action == "buffer") {
         auto request = job; request["action"] = action;
         rdcBufferRange(request);

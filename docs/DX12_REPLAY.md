@@ -6322,6 +6322,77 @@ Talos color fidelity remains unfinished. The matching selected depth workaround,
 constant-buffer bytes and valid initial Alpha region do not validate subsequent
 filters, histories, debugging or the full portable package.
 
+### Discard-layout correction and explicit replay policy
+
+The Talos filter investigation reproduced two different effects. In the first
+filter (**14684**), only **653 Alpha pixels at x=1438** differ inside the
+1440x810 viewport. The combined 1 KiB constant range at offset **32262656** in
+creation **150566**, covering both filters' PS constant locations, matches
+native exactly (SHA-256
+`62c0a0b2a963c3876e2a048a1b222bf1c4be5f2ba21f8e021eaf326d24e819be`).
+Creations **150408/156503/156599/156615** are independent committed resources,
+not overlapping placed allocations. The much larger second-filter interior
+discrepancy therefore needed a separate explanation.
+
+RenderDoc 1.45's balanced replay inserts a diagnostic pattern after
+`DiscardResource`. On enhanced-barrier-capable devices its non-MSAA texture
+copy changes the resource to COPY_DEST, then COMMON when the original call
+provides no enhanced layout. The following captured legacy render pass expects
+its attachment state to be preserved. Direct-list RT/depth discard requirements
+are documented in [Microsoft's DiscardResource reference](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-discardresource).
+
+The sixteenth pinned patch, `dx12-discard-layout.patch`, keeps this diagnostic
+copy on legacy barriers for direct-list `DiscardResource` attachment calls,
+restoring RENDER_TARGET or DEPTH_WRITE. It excludes simultaneous-access
+resources. Enhanced-layout transitions, other queue types, buffer and MSAA
+paths retain their previous behavior. It still issues the captured discard and
+fills the diagnostic pattern; it does not replace discarded data with invented
+historical values. The backend reports `backend_dx12_discard_layout_patch=1`.
+The build verifies the complete 16-patch tree; packaging verifies the new patch
+version/hash and includes its source.
+
+The CLI also exposes RenderDoc's existing `--replay-optimisation` modes:
+`none`, `conservative`, `balanced` (unchanged default), and `fastest`. Jobs
+validate the string before loading the backend; results include `replay_policy`
+with the mode, enum and DX12 discard-pattern status. Fastest omits those pattern
+fills but also changes other optimizations, so it is an explicit diagnostic
+comparison, not a general fidelity guarantee. No GUI default or experiment
+overlay is changed by this option.
+
+Targeted results under ignored `artifacts/dx12-research/talos-filter1`:
+
+| Observation | Before patch, balanced | After patch, balanced | Explicit fastest |
+| --- | --- | --- | --- |
+| Second filter, valid 1440x810 region | 120,432 pixels differ | 1,144 differ, only right/bottom boundary; interior exact | Entire valid region exact |
+| First color, execution 16000 / creation 42877 | 218,373 pixels differ | 5,854 differ; maximum BGRA deltas 31/36/41/32 | Entire 8,294,400 bytes exact |
+| Final isolated query continuation, execution 19410 / creation 35118 | Earlier 204,352-pixel discrepancy | Not remeasured in this policy | Entire 8,294,400 bytes exact |
+
+The final patch reproduces the second-filter 1,144-pixel result, with zero
+differences in the interior region (x < 1437, y < 807). The remaining filter differences lie
+at the border of the written region and disappear when pattern filling is
+omitted; sampling discarded/previously unwritten texels is a supported inference,
+not yet a traced per-sample proof. Default balanced replay is still not an exact
+full-image match.
+
+Fastest first-color SHA-256 is the established native
+`4fcac91107578f2a4a96ec8ffaaaa1d1cf343155205ecf28beb3861c843eb2e8`.
+The final isolated result is
+`e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`,
+preserves both missing-query resolve records and `frame_complete=false`, and
+reports no loaded GPA modules. These are native-versus-analysis comparisons;
+they do not recover historical queries or validate original-GPA full-frame
+semantics. The earlier isolated Draw **14835** still has **12,914** differing
+pixels with the new patch and balanced policy: its explicit depth-snapshot
+workaround remains a separate, partial result.
+
+Builds **395/396** and the pinned RenderDoc build pass. Focused replay-policy
+preparation tests report **3 passed**, including setup/cleanup; both PowerShell
+scripts parse successfully. The final runtime SHA-256 is
+`9c5505cf60b8aeb6b705c36c9e30bc30acbf9153abab0d0e2fd5a0d414fc9105`;
+patch SHA-256 is
+`a471acc0ed7e486ed4bd29844b912286a307002808f9961130f6c11a36628a80`.
+No broad regression, repeated full-sample sweep or portable acceptance was run.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

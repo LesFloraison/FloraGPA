@@ -1,0 +1,33 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_debug.cpp b/renderdoc/driver/d3d12/d3d12_debug.cpp
+index 0faebd77c..8d579d900 100644
+--- a/renderdoc/driver/d3d12/d3d12_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_debug.cpp
+@@ -1352,6 +1352,11 @@ rdcpair<ID3D12Resource *, UINT64> D3D12DebugManager::PatchExecuteIndirect(
+   return ret;
+ }
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12DiscardLayoutPatchVersion()
++{
++  return 1;
++}
++
+ void D3D12DebugManager::FillWithDiscardPattern(ID3D12GraphicsCommandListX *cmd,
+                                                const D3D12RenderState &state, DiscardType type,
+                                                ID3D12Resource *res,
+@@ -1717,7 +1722,15 @@ void D3D12DebugManager::FillWithDiscardPattern(ID3D12GraphicsCommandListX *cmd,
+     D3D12_TEXTURE_BARRIER tex = {};
+     D3D12_BARRIER_GROUP group = {};
+ 
+-    if(m_pDevice->GetOpts12().EnhancedBarriersSupported)
++    // Direct-list attachment discards require RENDER_TARGET/DEPTH_WRITE. Keep
++    // the diagnostic copy in those legacy states; leaving it in COMMON changes
++    // the following render pass. Other discard/layout paths are unchanged.
++    const bool legacyAttachment = type == DiscardType::DiscardCall &&
++        cmd->GetType() == D3D12_COMMAND_LIST_TYPE_DIRECT &&
++        (desc.Flags & (D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
++                       D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)) &&
++        !(desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
++    if(m_pDevice->GetOpts12().EnhancedBarriersSupported && !legacyAttachment)
+     {
+       // with new barriers we can explicitly discard here instead of guessing StateBefore, though we
+       // still need to guess a LayoutAfter once we're done for DiscardResource() calls

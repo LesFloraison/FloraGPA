@@ -191,6 +191,7 @@ class Session {
     uint32_t packedStorePatch{};
     uint32_t preparedComputePatch{};
     uint32_t placedHeapRestorePatch{};
+    uint32_t discardLayoutPatch{};
     bool computePrepared{};
     using PrepareCompute = uint32_t (RENDERDOC_CC *)(IReplayController *, uint32_t);
     PrepareCompute prepareCompute{};
@@ -288,6 +289,10 @@ class Session {
             placedHeapRestorePatch = patch();
             if (placedHeapRestorePatch != 1) throw std::runtime_error("Unsupported placed heap restoration patch version");
         }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12DiscardLayoutPatchVersion"))) {
+            discardLayoutPatch = patch();
+            if (discardLayoutPatch != 1) throw std::runtime_error("Unsupported discard layout patch version");
+        }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
                 throw std::runtime_error("Read-only depth snapshots require the Flora RenderDoc snapshot patch version 1");
@@ -334,6 +339,11 @@ class Session {
             const auto filename = std::filesystem::canonical(path(job.at("capture"))).u8string();
             checked(file->OpenFile(reinterpret_cast<const char *>(filename.c_str()), "", {}));
             ReplayOptions options;
+            static_assert(uint32_t(ReplayOptimisationLevel::NoOptimisation) == 0 &&
+                          uint32_t(ReplayOptimisationLevel::Conservative) == 1 &&
+                          uint32_t(ReplayOptimisationLevel::Balanced) == 2 &&
+                          uint32_t(ReplayOptimisationLevel::Fastest) == 3);
+            options.optimisation = ReplayOptimisationLevel(flora::rdcReplayOptimisation(job));
             options.apiValidation = job.value("api_validation", false);
             auto opened = file->OpenCapture(options, {});
             controller.reset(opened.second);
@@ -1293,6 +1303,7 @@ Json rdcLoadedModules() {
 }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
+    const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture")
         throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
@@ -1375,12 +1386,17 @@ Json runRdcJob(const Json &job) {
         {"action", action},
         {"backend", dx12 ? "dx12" : "dx11"},
         {"query_isolation", queryPolicy},
+        {"replay_policy", {{"optimisation", job.value("replay_optimisation", "balanced")},
+            {"optimisation_enum", optimisation},
+            {"dx12_discard_pattern_fills", dx12 ? Json(optimisation != 3) : Json()},
+            {"scope", "RenderDoc replay policy; includes initial-content restoration and diagnostic work. Changing policy can change observations and does not establish capture fidelity."}}},
         {"backend_version", session.version},
         {"backend_commit", session.commit},
         {"backend_d16_history_patch", session.d16HistoryPatch},
         {"backend_dxbc_workgroup_patch", session.dxbcWorkgroupPatch},
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
         {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
+        {"backend_dx12_discard_layout_patch", session.discardLayoutPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},

@@ -69,6 +69,19 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void replayOptimisationPreparation() {
+        QTemporaryDir dir;
+        QCOMPARE(rdcReplayOptimisation(Json::object()), 2U);
+        uint32_t expected{};
+        for (const auto *mode : {"none", "conservative", "balanced", "fastest"}) {
+            const auto job = prepare(dir.path(), "success", {{"replay_optimisation", mode}});
+            QCOMPARE(rdcReplayOptimisation(job), expected++);
+            QCOMPARE(job.at("replay_optimisation"), Json(mode));
+        }
+        for (const auto &mode : {Json(3), Json(true), Json(nullptr), Json("fast"), Json("")})
+            QVERIFY_THROWS_EXCEPTION(std::exception,
+                prepare(dir.path(), "success", {{"replay_optimisation", mode}}));
+    }
     void bufferRangePreparation() {
         QTemporaryDir dir;
         const Json options{{"execution", "14920"}, {"resource", "109459904"}, {"resource_creation", "150566"},

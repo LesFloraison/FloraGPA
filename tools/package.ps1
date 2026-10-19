@@ -59,6 +59,7 @@ $preparedComputePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-
 $placedHeapPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-placed-heap-restore.patch'
 $depthRoundtripPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-depth-roundtrip.patch'
 $instructionFlagsPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-instruction-flags.patch'
+$discardLayoutPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-discard-layout.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -88,6 +89,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dx12_placed_heap_restore_patch_version -ne 1 -or
         $patchManifest.dx12_depth_roundtrip_patch_version -ne 1 -or
         $patchManifest.dxil_instruction_flags_patch_version -ne 1 -or
+        $patchManifest.dx12_discard_layout_patch_version -ne 1 -or
+        $patchManifest.dx12_discard_layout_patch_sha256 -ne (Get-PackageSha256 $discardLayoutPatchPath) -or
         $patchManifest.dxil_instruction_flags_patch_sha256 -ne (Get-PackageSha256 $instructionFlagsPatchPath) -or
         $patchManifest.dx12_depth_roundtrip_patch_sha256 -ne (Get-PackageSha256 $depthRoundtripPatchPath) -or
         $patchManifest.dx12_placed_heap_restore_patch_sha256 -ne (Get-PackageSha256 $placedHeapPatchPath) -or
@@ -203,6 +206,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $placedHeapPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $depthRoundtripPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $instructionFlagsPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $discardLayoutPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force
