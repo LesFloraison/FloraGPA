@@ -1893,6 +1893,23 @@ Json runRdcJob(const Json &job) {
     const bool stencilPresent = tex.format.type == ResourceFormatType::D24S8 || tex.format.type == ResourceFormatType::D32S8;
     size_t reconstructedDepthValues = 0;
     result["pixel_value_kind"] = depthTarget ? "depth_stencil" : "color";
+    // Observe the selected post-event texel before PixelHistory's internal
+    // replays, and again after the existing selection restoration below. This
+    // does not add another prefix replay or prove stability of other pixels.
+    // Typeless R16 defaults to half-float in RenderDoc's picker; explicitly
+    // select depth interpretation for depth targets (including D16).
+    const auto consistencyCast = depthTarget ? CompType::Depth : CompType::Typeless;
+    Json consistency{{"status", "unavailable"}, {"event_id", eid},
+        {"resource", resourceName(resource)}, {"mip", sub.mip}, {"layer", sub.slice},
+        {"sample", sub.sample}, {"x", x}, {"y", y},
+        {"type_cast", depthTarget ? "depth" : "typeless_default"},
+        {"comparison", "PickPixel component bits at the same post-event boundary"},
+        {"scope", "Two observations of the selected texel only. Equal values do not prove stable intermediate fragments, other texels, or complete history."}};
+    try {
+        consistency["before_history"] = pixel(controller.PickPixel(resource, x, y, sub, consistencyCast));
+    } catch (const std::exception &e) {
+        consistency["before_error"] = e.what();
+    }
     const auto modifications = controller.PixelHistory(resource, x, y, sub, CompType::Typeless);
     for (size_t i = 0; i < modifications.size(); ++i) {
         const auto &v = modifications[i];
@@ -2011,6 +2028,16 @@ Json runRdcJob(const Json &job) {
         throw;
     }
     controller.SetFrameEvent(eid, true);
+    try {
+        consistency["after_restoration"] = pixel(controller.PickPixel(resource, x, y, sub, consistencyCast));
+        if (consistency.contains("before_history")) {
+            const auto &before = consistency.at("before_history").at("uintValue");
+            const auto &after = consistency.at("after_restoration").at("uintValue");
+            consistency["status"] = before == after ? "selected_texel_unchanged" : "selected_texel_changed";
+        }
+    } catch (const std::exception &e) {
+        consistency["after_error"] = e.what();
+    }
     std::stable_sort(records.begin(), records.end(), [](const Json &a, const Json &b) {
         return std::pair(a.at("eventId").get<uint32_t>(),
                          a.at("fragIndex").is_null() ? int64_t(-1) : a.at("fragIndex").get<int64_t>()) <
@@ -2036,6 +2063,7 @@ Json runRdcJob(const Json &job) {
          {"history_events", records.size()},
          {"history_scope",
           {{"backend", "RenderDoc PixelHistory of independent replay"},
+           {"replay_consistency", consistency},
            {"unmapped_records", unmapped},
            {"cpu_write_snapshots", added},
            {"cpu_write_gaps", gaps},
@@ -2053,7 +2081,7 @@ Json runRdcJob(const Json &job) {
                            : d16History ? "D16 event boundaries use the Flora decoding patch. Intermediate fragment depths come from a D32 scratch DSV and may differ in quantization or depth bias; they are not observed D16 storage values. Depth-test reasons include backend comparisons of reconstructed depths, not independent per-fragment hardware queries."
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
-    if (unreliableD16 || reconstructedDepthValues)
+    if (unreliableD16 || reconstructedDepthValues || consistency.at("status") != "selected_texel_unchanged")
         result["partial"] = true;
     for (const auto &r : resources)
         if (r.resourceId == resource)

@@ -53,6 +53,58 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void pixelHistoryReplayConsistency() {
+        const auto root = qEnvironmentVariable("FLORA_HISTORY_CONSISTENCY_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the velocity variation and stable depth history evidence directory");
+        const auto changing = read(root + "/hellblade-scenevelocity-consistency1/result.json");
+        QCOMPARE(changing.at("execution"), Json("36670"));
+        const auto &audit = changing.at("history_scope").at("replay_consistency");
+        QCOMPARE(audit.at("status"), Json("selected_texel_changed"));
+        QVERIFY(audit.at("before_history").at("uintValue") != audit.at("after_restoration").at("uintValue"));
+        QCOMPARE(audit.at("after_restoration").at("uintValue"), Json::array({0,0,0,0}));
+        QVERIFY(changing.at("partial").get<bool>());
+        QCOMPARE(changing.at("history").size(), size_t(4));
+        PixelHistoryView view; view.setContext("velocity", 36670, true);
+        view.setDx12Resource(511789, 2152463529088ULL);
+        view.selectPixel(2152463529088ULL, 456, 206, 0, 0, 0);
+        QVERIFY(view.finish(view.requestId(), changing));
+        auto summary = view.findChild<QLabel *>("historySummary");
+        QVERIFY(summary->text().contains("Selected texel changed"));
+        QVERIFY(summary->text().contains("one consistent replay state"));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords");
+        rows->setCurrentItem(rows->topLevelItem(3));
+        QSignalSpy locate(&view, &PixelHistoryView::eventRequested);
+        action(view, "locateHistoryEvent")->trigger();
+        QCOMPARE(locate.size(), 1); QCOMPARE(locate[0][0].toULongLong(), 26320ULL);
+        if (!output_.isEmpty()) {
+            view.resize(1600, 720); view.show();
+            QVERIFY(view.grab().save(output_ + "/history-consistency.png"));
+            view.exportResult(output_ + "/history-consistency.json");
+            QCOMPARE(read(output_ + "/history-consistency.json").at("history_scope").at("replay_consistency"), audit);
+        }
+        auto legacy = changing; legacy["history_scope"].erase("replay_consistency");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        QVERIFY(summary->text().contains("not measured or unavailable"));
+        QVERIFY(!summary->text().contains("Selected texel changed"));
+        const auto oldRequest = view.requestId();
+        view.setContext("depth", 12675, true);
+        QVERIFY(!view.finish(oldRequest, changing));
+        QVERIFY(!summary->text().contains("Selected texel changed"));
+        const auto stable = read(root + "/talos-depth-consistency2/result.json");
+        const auto &stableAudit = stable.at("history_scope").at("replay_consistency");
+        QCOMPARE(stableAudit.at("status"), Json("selected_texel_unchanged"));
+        QCOMPARE(stableAudit.at("before_history"), stableAudit.at("after_restoration"));
+        QCOMPARE(stableAudit.at("type_cast"), Json("depth"));
+        const auto selectedDepth = stableAudit.at("after_restoration").at("floatValue")[0].get<double>();
+        QVERIFY(std::abs(selectedDepth - 49151.0 / 65535.0) < 1e-7);
+        const auto previous = read(root + "/talos-depth-passing-history2/result.json");
+        QCOMPARE(stable.at("history"), previous.at("history"));
+        view.setDx12Resource(167081, 4980699392ULL);
+        view.selectPixel(4980699392ULL, 1527, 1240, 0, 1, 0);
+        QVERIFY(view.finish(view.requestId(), stable));
+        QVERIFY(summary->text().contains("Selected texel unchanged"));
+        QVERIFY(summary->text().contains("completeness are not validated"));
+    }
     void indexedComputeResourceUses() {
         const auto path = qEnvironmentVariable("FLORA_DX12_INDEXED_HISTORY");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 mip-1 indexed history report");

@@ -475,6 +475,16 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(sample_->value()));
     if (result.value("partial", false))
         summary_->setText("Partial history · " + summary_->text());
+    const auto consistency = scope.value("replay_consistency", Json::object());
+    const auto consistencyStatus = consistency.value("status", "not_measured");
+    if (consistencyStatus == "selected_texel_changed")
+        summary_->setText(summary_->text() +
+            "\nSelected texel changed during history replays. These records do not explain one consistent replay state.");
+    else if (consistencyStatus == "selected_texel_unchanged")
+        summary_->setText(summary_->text() +
+            "\nSelected texel unchanged before/after history; intermediate fragments and history completeness are not validated.");
+    else
+        summary_->setText(summary_->text() + "\nReplay consistency not measured or unavailable.");
     if (scope.value("depth_value_status", "") == "event_boundaries_only")
         summary_->setText(
             summary_->text() +

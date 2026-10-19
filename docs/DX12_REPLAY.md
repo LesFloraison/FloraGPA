@@ -5324,6 +5324,63 @@ one coherent state fixes this debugging failure without proving that the state
 matches original GPA in every resource. No indirect counts are forced, no draw
 is skipped to manufacture success, and full-frame fidelity remains incomplete.
 
+### Pixel-history replay consistency and the upstream velocity variation
+
+The next bounded investigation follows the changing motion-blur tile list back
+through execution **36748** (tile classification) to **36670** (velocity
+flattening, RenderDoc event **90084**). The latter dispatch reads scene depth
+creation **563063** / object **2149346439360** / RDC **55**, scene velocity
+creation **511789** / object **2152463529088** / RDC **383**, and previous
+scattered subpixel depth creation **571700** / RDC **1247**. These identities
+come from the actual pipeline report, not texture names alone.
+
+In `hellblade-velocity-prefix-inputs1`, a temporary worker prepared that exact
+pre-dispatch state twice with the prepared-compute export. It read only those
+three bound SRV textures, with bounded readback, and did not execute the selected
+dispatch or debug a shader between observations. Scene depth changes at **392**
+pixels and scene velocity changes at the **identical 392 coordinates**, bounding
+box **(0,206)–(1605,596)**, all within the active image. Stencil changes at
+**4,289** pixels; packed padding does not change. Previous scattered depth is
+byte-identical. At **(456,206)** the depth changes from
+**0.0021878723055124283** to **0.0015414863592013717**, while velocity changes from
+raw UNORM16 words **34608,30148,46932,9359** to all zero. This locates variation
+before velocity flattening. It does not yet identify the responsible draw,
+aliasing, synchronization, or driver behavior. Constants were not sampled in
+this probe. Its temporary source and worker were restored before production
+changes; the binary dumps and research patch remain outside Git.
+
+The actual Pixel History query at this texel exposes a misleading omission:
+`hellblade-scenevelocity-consistency1` returns only four records, at executions
+**11551,12574,25301,26320**, all with zero velocity. The selected post-event
+texel is nonzero before history, but zero after history and event restoration.
+Thus these records cannot explain one consistent replay state. Resource usage
+still identifies possible bindings; it is not promoted to observed writes.
+
+The worker now records `history_scope.replay_consistency`, comparing the four
+PickPixel component bit patterns before history and after the already-required
+event restoration. It adds two selected-texel reads, no extra prefix replay.
+Changed or unavailable observations mark the report partial; the panel explains
+the mismatch while preserving records, exact event navigation, and export for
+diagnosis. Equal observations say only that this selected texel was unchanged;
+they do not validate intermediate fragments, all pixels, or complete history.
+Old reports explicitly show that consistency was not measured. Depth targets
+use an explicit depth type cast, since RenderDoc's default typeless R16 picker
+otherwise interprets D16 bits as half-float. These converted observations are
+not advertised as raw texture storage or an independent original-GPA match.
+
+Focused validation reused existing captures serially. The Hellblade2 query
+detects the actual nonzero-to-zero change and remains partial.
+`talos-depth-consistency2` reads **49151 / 65535** at mip 0, layer 1,
+**(1527,1240)** before and after the two-layer depth history, and its complete
+history rows exactly match `talos-depth-passing-history2`. Both load no GPA or
+Python modules. The UI check covers both real reports, export, navigation to
+execution **26320**, old-report labeling and stale-session rejection:
+**3 passed, 0 failed, 0 skipped**, **222 ms**, including initialization/cleanup,
+in `history-consistency-ui1.txt`. Its screenshot was inspected. Builds
+**346–348** passed. Full replay fidelity and the upstream missing velocity
+contribution remain unresolved; this check detects the inconsistency rather
+than repairing or concealing it.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
