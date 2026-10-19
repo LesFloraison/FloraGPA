@@ -255,8 +255,13 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
             records[record] = Json::array();
         records[record].push_back(execution);
         if (entries.size() == 1) {
-            for (const auto eid : eids)
-                reverse[std::to_string(eid)] = command;
+            uint32_t ordinal{};
+            for (const auto eid : eids) {
+                auto provenance = command;
+                if (command.at("name") == "ID3D12GraphicsCommandListExecuteIndirect")
+                    provenance.update({{"indirect_action", ordinal++}, {"indirect_action_count", eids.size()}});
+                reverse[std::to_string(eid)] = std::move(provenance);
+            }
             if (eids.size() == 1)
                 selected[execution] = *eids.begin();
         }
@@ -269,6 +274,35 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
             {"reverse", reverse},
             {"gpa_event_map", Json::object()},
             {"gpa_command_map", Json::object()}};
+}
+Json selectDx12RdcExecution(const Json &mapping, const std::string &execution, const Json &indirectAction) {
+    const auto &commands = mapping.at("execution_commands");
+    const auto found = commands.find(execution);
+    if (found == commands.end() || found->value("status", "") == "duplicate_markers")
+        throw std::runtime_error("Selected DX12 execution has no unique provenance marker");
+    const auto &events = found->at("event_ids");
+    const bool indirect = found->at("name") == "ID3D12GraphicsCommandListExecuteIndirect";
+    if (!indirect && !indirectAction.is_null())
+        throw std::runtime_error("Indirect action selection requires ExecuteIndirect");
+    if (events.empty())
+        throw std::runtime_error(indirect ? "Selected indirect call generated no Draw/Dispatch action"
+                                          : "Selected capture event has no mapped replay action");
+    if (!indirect && events.size() != 1)
+        throw std::runtime_error("Selected capture event has no uniquely mapped executed action");
+    if (events.size() > 1 && indirectAction.is_null())
+        throw std::runtime_error("Selected execution has " + std::to_string(events.size()) +
+            " actions; choose an explicit zero-based indirect action");
+    const auto ordinal = indirectAction.is_null() ? 0 : number(indirectAction);
+    if (ordinal >= events.size()) throw std::runtime_error("Indirect action is outside the captured expansion");
+    const auto eid = number(events.at(ordinal));
+    auto result = rdcProvenance(eid, mapping.at("reverse"));
+    if (result.value("execution", "") != execution || result.value("mapping_status", "") != "mapped")
+        throw std::runtime_error("Selected replay action does not belong to the DX12 execution");
+    result["eid"] = eid;
+    result["selection_scope"] = indirect
+        ? "Action ordinal within the indexed ExecuteIndirect expansion; later replay arguments may change"
+        : "Unique indexed replay action for the original execution";
+    return result;
 }
 Json rdcProvenance(uint32_t event, const Json &reverse) {
     const auto found = reverse.find(std::to_string(event));

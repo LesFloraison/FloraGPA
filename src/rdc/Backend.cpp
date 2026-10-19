@@ -1008,27 +1008,21 @@ Json runRdcJob(const Json &job) {
     const auto resources = controller.GetResources();
     const auto gpa = job.value(dx12 ? "execution" : "gpa_event", Json(nullptr));
     const auto selectionMap = dx12 ? "execution_map" : "gpa_event_map";
-    if (!gpa.is_null() && !mapping[selectionMap].contains(std::to_string(number(gpa)))) {
-        const auto key = std::to_string(number(gpa));
-        if (dx12 && mapping["execution_commands"].contains(key)) {
-            const auto &command = mapping["execution_commands"][key];
-            const auto status = command.value("status", std::string());
-            if (command.value("name", std::string()) == "ID3D12GraphicsCommandListExecuteIndirect" &&
-                (status == "mapped" || status == "unrepresented")) {
-                if (command.at("event_ids").empty())
-                    throw std::runtime_error("Selected indirect call generated no Draw/Dispatch action");
-                if (command.at("event_ids").size() > 1)
-                    throw std::runtime_error("Selected indirect call generated multiple actions; individual "
-                                             "invocation selection is not implemented");
-            }
-        }
-        throw std::runtime_error("Selected capture event has no uniquely mapped executed action");
-    }
+    if (job.contains("indirect_action") && (!dx12 || gpa.is_null()))
+        throw std::runtime_error("Indirect action selection requires a DX12 execution");
     uint32_t eid = index(job, "eid");
-    if (!eid) {
-        if (!gpa.is_null())
-            eid = mapping[selectionMap].at(std::to_string(number(gpa))).get<uint32_t>();
-        else if (!mapping["actions"].empty())
+    if (dx12 && !gpa.is_null()) {
+        const auto selected = selectDx12RdcExecution(mapping, std::to_string(number(gpa)),
+                                                     job.value("indirect_action", Json()));
+        eid = selected.at("eid").get<uint32_t>();
+        if (selected.contains("indirect_action")) result["indirect_selection"] = selected;
+    } else if (!eid) {
+        if (!gpa.is_null()) {
+            const auto key = std::to_string(number(gpa));
+            if (!mapping[selectionMap].contains(key))
+                throw std::runtime_error("Selected capture event has no uniquely mapped executed action");
+            eid = mapping[selectionMap].at(key).get<uint32_t>();
+        } else if (!mapping["actions"].empty())
             eid = mapping["actions"].back().at("eid").get<uint32_t>();
         else
             for (const auto &v : mapping[selectionMap].items())
@@ -1044,7 +1038,9 @@ Json runRdcJob(const Json &job) {
     // Keep replay for implicit targets and for all value/state analysis paths.
     const bool indexedResourceHistory = dx12 && action == "resource-history" &&
                                         !job.value("resource", Json()).is_null();
-    if (!indexedResourceHistory)
+    // Inventory exports loading-time action/resource descriptions and does not
+    // inspect replayed state. Do not replay an arbitrary last action to list it.
+    if (!indexedResourceHistory && !(dx12 && action == "inventory"))
         controller.SetFrameEvent(eid, true);
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
@@ -1185,6 +1181,13 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (action == "inventory") {
+        if (dx12) {
+            result["inventory_scope"] = "Capture-loading metadata; no SetFrameEvent replay for inventory";
+            result["indirect_executions"] = Json::object();
+            for (const auto &[execution, command] : mapping.at("execution_commands").items())
+                if (command.value("name", "") == "ID3D12GraphicsCommandListExecuteIndirect")
+                    result["indirect_executions"][execution] = command;
+        }
         Json described = Json::array(), textures = Json::array(), buffers = Json::array();
         for (const auto &r : resources)
             described.push_back(rdcResourceDescription(r));

@@ -187,6 +187,15 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
             invalidate();
         });
     }
+    indirectActionLabel_ = new QLabel(" Indirect action ");
+    inputs_->addWidget(indirectActionLabel_);
+    indirectAction_ = new QLineEdit;
+    indirectAction_->setObjectName("debugIndirectAction");
+    indirectAction_->setPlaceholderText("Automatic");
+    indirectAction_->setMaximumWidth(160);
+    indirectAction_->setToolTip("Optional zero-based Draw/Dispatch within ExecuteIndirect. Empty selects only an unambiguous single action.");
+    inputs_->addWidget(indirectAction_);
+    connect(indirectAction_, &QLineEdit::textChanged, this, &ReplayDebugView::invalidate);
     steps_ = new QToolBar;
     layout->addWidget(steps_);
     navigation_ = new QComboBox;
@@ -528,6 +537,7 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
         key_ = key;
         event_ = event;
         textureReference_ = Json();
+        indirectAction_->clear();
         if (referenceSelection_)
             referenceSelection_->clear();
         if (primitive_)
@@ -604,6 +614,7 @@ Json ReplayDebugView::request() const {
     if (dx12_) {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
+        if (!indirectAction_->text().trimmed().isEmpty()) job["indirect_action"] = invocationIndex(indirectAction_);
     }
     if (stage_ == "ps") {
         job.update({{"x", x_->value()}, {"y", y_->value()}, {"sample", sample_->value()}});
@@ -657,6 +668,8 @@ void ReplayDebugView::updateActions() {
     cancel_->setEnabled(busy_);
     backend_->setEnabled(!busy_);
     inputs_->setEnabled(!busy_);
+    indirectAction_->setVisible(dx12_);
+    indirectActionLabel_->setVisible(dx12_);
     if (pixelHistoryReference_)
         pixelHistoryReference_->setVisible(dx12_);
     if (readOnlyDepthSnapshot_)
@@ -686,6 +699,16 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
                   result.value("execution", Json()) != Json(std::to_string(event_))))
         throw std::runtime_error("Shader trace does not match the DX12 execution selection");
+    if (dx12_ && !indirectAction_->text().trimmed().isEmpty() &&
+        result.value("indirect_selection", Json::object()).value("indirect_action", Json()) != invocationIndex(indirectAction_))
+        throw std::runtime_error("Shader trace does not match the selected indirect action");
+    if (dx12_ && result.contains("indirect_selection")) {
+        const auto &selection = result.at("indirect_selection");
+        if (selection.at("execution") != std::to_string(event_) ||
+            selection.at("indirect_action") >= selection.at("indirect_action_count") ||
+            (indirectAction_->text().trimmed().isEmpty() && selection.at("indirect_action_count") != 1))
+            throw std::runtime_error("Shader trace has ambiguous or mismatched indirect provenance");
+    }
     auto replacement = std::make_unique<ReplayDebugModel>(result);
     if (!replacement->size())
         throw std::runtime_error("Shader debugger returned no steps");
@@ -694,6 +717,9 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
+    if (const auto selection = result.value("indirect_selection", Json()); selection.is_object())
+        warnings.prepend(QString("ExecuteIndirect action %1 of %2 (zero-based) · replay event %3")
+            .arg(text(selection.at("indirect_action")), text(selection.at("indirect_action_count")), text(selection.at("eid"))));
     backendNotice_->setText(warnings.join('\n'));
     backendNotice_->setVisible(!warnings.isEmpty());
     const auto reference = result.value("gpu_reference", Json());

@@ -124,6 +124,30 @@ class ReplayDebugUiTests : public QObject {
         view.setContext("new-session", 1, true);
         QVERIFY(label->isHidden());
     }
+    void indirectActionSelection() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_INDIRECT_SELECTION_REPORT");
+        if (path.isEmpty()) QSKIP("Set the BF1 explicit indirect-action debug report");
+        auto result = read(path);
+        QCOMPARE(result.at("execution"), Json("35808"));
+        QCOMPARE(result.at("indirect_selection").at("indirect_action"), Json(0));
+        QCOMPARE(result.at("indirect_selection").at("indirect_action_count"), Json(1));
+        ReplayDebugView view("cs"); view.resize(1380, 1000); view.show(); view.setContext("bf1-indirect", 35808, true);
+        auto edit = view.findChild<QLineEdit *>("debugIndirectAction");
+        QVERIFY(!edit->isHidden()); QVERIFY(!view.request().contains("indirect_action"));
+        edit->setText("0"); QCOMPARE(view.request().at("indirect_action"), Json(0));
+        QVERIFY(view.finish(view.requestId(), result));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/bf1-indirect-action.png"));
+        const auto previous = view.requestId(); edit->setText("1");
+        QVERIFY(!view.model()); QVERIFY(!view.finish(previous, result));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), result));
+        auto multiple = result; multiple["indirect_selection"]["indirect_action_count"] = 2;
+        multiple["indirect_selection"]["indirect_action"] = 1;
+        QVERIFY(view.finish(view.requestId(), multiple));
+        edit->clear(); QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), multiple));
+        edit->setText("-1"); QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
+        view.setContext("dx11", 42, false); QVERIFY(edit->isHidden()); QVERIFY(edit->text().isEmpty());
+        QVERIFY(!view.request().contains("indirect_action"));
+    }
     void vertexOutputReferences() {
         const auto path = qEnvironmentVariable("FLORA_DX12_VERTEX_OUTPUT_DEBUG_REPORT");
         if (path.isEmpty()) QSKIP("Set the saved DX12 VS output/input comparison report");

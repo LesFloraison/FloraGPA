@@ -4478,6 +4478,63 @@ including setup/cleanup, 452 ms**). The inspected screenshot is
 acceptance run was added. Complete shader instruction fidelity and replay
 stability remain unfinished.
 
+### Explicit ExecuteIndirect action selection
+
+The analysis index now retains a zero-based generated-action ordinal and action
+count in each ExecuteIndirect action's reverse provenance. It keeps the original
+execution, source record, submission, queue and command-list generation; API
+begin/end wrappers remain excluded. A new selector resolves an explicit ordinal
+within that execution. Automatic selection still requires exactly one action;
+empty expansions, out-of-range ordinals, duplicate markers, and an indirect
+selector on a direct call are rejected. Multiple actions no longer have to be
+collapsed into one execution-map entry to become individually selectable.
+
+`rdc-analyze` accepts `--indirect-action N` together with `--execution`. VS/PS/CS
+debugging exposes the same optional **Indirect action** field. Results retain
+the selected ordinal, count and replay EID. Changing the field invalidates the
+trace; the view rejects mismatched ordinals and ambiguous automatic results, and
+clears the field when switching execution/session/backend. Other workspace panels
+do not yet expose a generated-action chooser or propagate it through history
+navigation. Their CLI analysis paths can use the explicit selector.
+
+DX12 inventory now exports `indirect_executions`, including generated EIDs and
+their original provenance. It lists capture-loading metadata without an extra
+SetFrameEvent replay; DX11 inventory retains its previous path. Loading the RDC
+can still perform GPU initialization/work. The inspected BF1 RDC contains **11**
+single-action indirect Dispatches. The inspected Hellblade2 RDC contains **1,270**
+single-action expansions: **374 Dispatch**, **122 MeshDispatch**, and **774 Draw**.
+Neither inspected RDC contains a multi-action expansion, so actual multi-action
+GPU replay is **not verified**. These counts describe the saved RDCs, not every
+possible capture or an unexamined tail beyond their recorded boundaries.
+
+Builds **293–296** pass. Mapping checks cover automatic/specific selection, two
+distinct generated Draws, repeated-source provenance, wrapper exclusion, invalid
+ordinals and duplicate markers (**4 including setup/cleanup, 2 ms**). Job
+preparation preserves a decimal-string execution above 2^53 and rejects invalid
+or missing-parent selectors (**3 including setup/cleanup, 9 ms**).
+
+One actual CLI query selects BF1 execution **35808**, indirect action **0**, and
+CS group/thread **(0,0,0)**. It completes **256** steps at replay EID **42909**,
+source **265648**, submission **364657**, queue **861708976**, list **10653671952**,
+generation **1**. API wrappers **42908/42910** are excluded. The indexed dispatch
+has **1226×1×1** groups with **256×1×1** threads. The query's MAD counter includes
+**6,400** GPU operations across the simulated workgroup, with no failures; this
+is not a performance benchmark or full output-fidelity check. Neither GPA nor
+Python is loaded. Evidence is `bf1-indirect-selection1`,
+`indirect-selection-evidence1.json`, and `indirect-selection-inventory-evidence1.json`
+under ignored `artifacts/dx12-research`.
+
+The UI test uses that actual report and separately injects multi-action metadata
+to check rejection/selection behavior; it does not manufacture multi-action GPU
+evidence. Stale responses, wrong ordinals, automatic ambiguity, malformed input
+and DX11 reset pass (**3 including setup/cleanup, 889 ms**). The inspected
+screenshot is `indirect-selection-ui1/replay-debug/bf1-indirect-action.png`.
+Logs are `indirect-selection-mapping1.txt`, `indirect-selection-options1.txt`
+and `indirect-selection-ui1.txt`. This turn ran two targeted inventory loads
+and one debug query, with no new native recapture or broad regression.
+Changing indirect arguments across replay phases, complete multi-action UI
+navigation and full shader/replay fidelity remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

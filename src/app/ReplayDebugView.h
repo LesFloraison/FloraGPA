@@ -49,11 +49,12 @@ class ReplayDebugView final : public QWidget {
     QAction *read_, *cancel_, *export_, *backend_;
     QAction *clearReference_{};
     QSpinBox *x_{}, *y_{}, *sample_{}, *step_, *line_;
-    QLineEdit *primitive_{}, *vertex_{}, *instance_{}, *group_{}, *thread_{}, *instruction_, *condition_,
+    QLineEdit *indirectAction_{}, *primitive_{}, *vertex_{}, *instance_{}, *group_{}, *thread_{}, *instruction_, *condition_,
         *count_, *watch_;
     QComboBox *navigation_, *interpretation_, *files_, *hitMode_;
     QLabel *summary_, *gpuReference_, *backendNotice_;
     QLabel *referenceSelection_{};
+    QLabel *indirectActionLabel_{};
     QCheckBox *pixelHistoryReference_{};
     QCheckBox *readOnlyDepthSnapshot_{};
     QLabel *invocationReference_;

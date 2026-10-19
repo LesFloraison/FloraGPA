@@ -69,6 +69,16 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void indirectActionPreparation() {
+        QTemporaryDir dir;
+        for (const auto &invalid : {Json{{"indirect_action", 0}},
+                Json{{"execution", "9007199254740993"}, {"indirect_action", -1}},
+                Json{{"execution", "9007199254740993"}, {"indirect_action", 0.5}},
+                Json{{"execution", "9007199254740993"}, {"indirect_action", uint64_t(UINT32_MAX) + 1}}})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", invalid, "debug-thread"));
+        const auto job = prepare(dir.path(), "success", {{"execution", "9007199254740993"}, {"indirect_action", 1}}, "debug-thread");
+        QCOMPARE(job.at("execution"), Json("9007199254740993")); QCOMPARE(job.at("indirect_action"), Json(1));
+    }
     void dx12Preparation() {
         QTemporaryDir dir;
         const auto job = prepare(dir.path(), "success",

@@ -49,6 +49,7 @@ int rdcAnalyzeCli(QStringList args) {
               std::pair{"mip", "Texture mip level"}, std::pair{"layer", "Texture array layer"},
               std::pair{"sample", "MSAA sample index"}, std::pair{"instance", "Zero-based draw instance"},
               std::pair{"primitive", "PS primitive ID (default: automatic fragment selection)"},
+              std::pair{"indirect-action", "Zero-based generated action within --execution ExecuteIndirect"},
               std::pair{"vertex", "Vertex invocation within the draw"},
               std::pair{"index", "Override actual vertex index (default: derive from draw/index buffer)"}})
             p.addOption({key, description, "integer"});
@@ -79,7 +80,7 @@ int rdcAnalyzeCli(QStringList args) {
             return value;
         };
         for (const auto key : {"gpa-event", "eid", "resource", "x", "y", "mip", "layer", "sample", "instance",
-                               "vertex", "index", "primitive"})
+                               "vertex", "index", "primitive", "indirect-action"})
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = number(p.value(key));
         options["stage"] = p.value("stage").toStdString();

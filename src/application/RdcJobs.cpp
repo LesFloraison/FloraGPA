@@ -88,7 +88,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
@@ -109,6 +109,10 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         unsignedNumber(job[key], UINT32_MAX, key);
     if (job.contains("primitive"))
         unsignedNumber(job["primitive"], UINT32_MAX, "primitive");
+    if (job.contains("indirect_action")) {
+        unsignedNumber(job["indirect_action"], UINT32_MAX, "indirect_action");
+        if (!job.contains("execution")) throw std::runtime_error("Indirect action selection requires a DX12 execution");
+    }
     for (const auto key : {"eid", "index"})
         unsignedNumber(job[key], UINT32_MAX, key, true);
     unsignedNumber(job["gpa_event"], UINT64_MAX, "gpa_event", true);

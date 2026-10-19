@@ -94,6 +94,21 @@ class RdcTests : public QObject {
         QCOMPARE(result["execution_commands"]["35814"]["status"], Json("unrepresented"));
         QVERIFY(!result["execution_commands"]["35834"]["selectable"].get<bool>());
         QCOMPARE(rdcProvenance(11, result["reverse"])["execution"], Json("35834"));
+        QCOMPARE(rdcProvenance(10, result["reverse"])["indirect_action"], Json(0));
+        QCOMPARE(rdcProvenance(11, result["reverse"])["indirect_action"], Json(1));
+        QCOMPARE(rdcProvenance(11, result["reverse"])["indirect_action_count"], Json(2));
+        QCOMPARE(selectDx12RdcExecution(result, "35808").at("eid"), Json(3));
+        QCOMPARE(selectDx12RdcExecution(result, "35834", 0).at("eid"), Json(10));
+        QCOMPARE(selectDx12RdcExecution(result, "35834", 1).at("eid"), Json(11));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(result, "35834"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(result, "35834", 2));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(result, "35834", -1));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(result, "35834", 0.0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(result, "35814", 0));
+        auto duplicate = result; duplicate["execution_commands"]["35834"]["status"] = "duplicate_markers";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(duplicate, "35834", 0));
+        auto direct = result; direct["execution_commands"]["35808"]["name"] = "ID3D12GraphicsCommandListDispatch";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, selectDx12RdcExecution(direct, "35808", 0));
         for (const auto id : {2u, 4u, 6u, 7u, 9u, 12u, 14u, 16u})
             QVERIFY(!result["reverse"].contains(std::to_string(id)));
     }
