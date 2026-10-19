@@ -1,4 +1,5 @@
 #include "PipelineState.h"
+#include "dx12/CapturedObjectMarker.h"
 #include <charconv>
 #include <cmath>
 #include <map>
@@ -120,6 +121,12 @@ Json readDx12Pipeline(IReplayController &controller) {
                 result["resource_creation"] = std::string(tail.substr(split + 10));
                 result["mapping_status"] = "capture_resource_marker";
             }
+        }
+        if (const auto marker = dx12::parseCapturedObjectMarker(name)) {
+            result["mapping_status"] = "capture_object_marker";
+            result["object_kind"] = marker->kind == dx12::CapturedObjectKind::Pipeline ? "pipeline" : "root_signature";
+            result["captured_object"] = std::to_string(marker->object);
+            result["object_creation"] = std::to_string(marker->creation);
         }
         return result;
     };
@@ -416,6 +423,7 @@ Json readDx12Pipeline(IReplayController &controller) {
               {"gaps",
                {"Stream-output declarations and PSO sample description not exposed by this adapter",
                 "Unaccessed descriptor table entries",
-                "Original PSO/root-signature/shader creation identity mapping"}}}}};
+                "PSO/root-signature identity requires capture object markers; older RDCs remain unmapped",
+                "Shader-to-original-PSO-stage identity mapping"}}}}};
 }
 } // namespace flora

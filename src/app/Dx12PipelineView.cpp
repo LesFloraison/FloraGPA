@@ -37,6 +37,8 @@ Dx12PipelineView::Dx12PipelineView(QWidget *parent) : QWidget(parent) {
     cancel_ = tools->addAction("Cancel");
     locate_ = tools->addAction("Inspect resource");
     locate_->setObjectName("inspectPipelineResource");
+    creation_ = tools->addAction("Locate creation");
+    creation_->setObjectName("locatePipelineCreation");
     export_ = tools->addAction("Export…");
     auto overview = tools->addAction("Scope");
     layout->addWidget(tools);
@@ -68,7 +70,14 @@ Dx12PipelineView::Dx12PipelineView(QWidget *parent) : QWidget(parent) {
         if (locate_->isEnabled())
             emit resourceRequested(rows_->currentItem()->data(0, Qt::UserRole).toULongLong());
     });
-    connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
+    connect(creation_, &QAction::triggered, this, [this] {
+        if (creation_->isEnabled())
+            emit creationRequested(rows_->currentItem()->data(0, Qt::UserRole + 2).toULongLong());
+    });
+    connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] {
+        if (creation_->isEnabled()) creation_->trigger();
+        else locate_->trigger();
+    });
     connect(rows_, &QTreeWidget::itemSelectionChanged, this, [this] {
         updateActions();
         if (auto item = rows_->currentItem(); item && !result_.is_null())
@@ -135,6 +144,8 @@ void Dx12PipelineView::updateActions() {
     export_->setEnabled(!busy_ && !result_.is_null());
     locate_->setEnabled(!busy_ && rows_->currentItem() &&
                         rows_->currentItem()->data(0, Qt::UserRole).isValid());
+    creation_->setEnabled(!busy_ && rows_->currentItem() &&
+                          rows_->currentItem()->data(0, Qt::UserRole + 2).isValid());
 }
 Dx12PipelineView::Json Dx12PipelineView::request() const {
     if (key_.isEmpty() || !execution_)
@@ -156,6 +167,11 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
         if (ref.value("mapping_status", "") == "capture_resource_marker") {
             (void)identity(ref.at("resource_creation"));
             (void)identity(ref.at("resource_object"));
+        } else if (ref.value("mapping_status", "") == "capture_object_marker") {
+            (void)identity(ref.at("object_creation"));
+            (void)identity(ref.at("captured_object"));
+            if (ref.at("object_kind") != "pipeline" && ref.at("object_kind") != "root_signature")
+                throw std::runtime_error("Unsupported captured pipeline object kind");
         }
     }
     const QSignalBlocker block(rows_);
@@ -167,6 +183,8 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
         const auto name = ref.value("name", "");
         const auto status = ref.value("mapping_status", "");
         const auto mapping = status == "capture_resource_marker" ? "Captured resource"
+                             : status == "capture_object_marker" ?
+                                 (ref.at("object_kind") == "pipeline" ? "Captured pipeline" : "Captured root signature")
                              : status == "unbound"               ? "No resource"
                                                                  : "RenderDoc only";
         const auto displayName = status == "unbound" ? std::string("—")
@@ -178,6 +196,8 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
         item->setData(0, Qt::UserRole + 1, qulonglong(i));
         if (ref.at("mapping_status") == "capture_resource_marker")
             item->setData(0, Qt::UserRole, qulonglong(identity(ref.at("resource_creation"))));
+        else if (ref.at("mapping_status") == "capture_object_marker")
+            item->setData(0, Qt::UserRole + 2, qulonglong(identity(ref.at("object_creation"))));
     }
     details_->setPlainText(QString::fromStdString(result.at("pipeline_scope").dump(2)));
     summary_->setText(

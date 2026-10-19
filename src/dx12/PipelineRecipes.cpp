@@ -1,4 +1,5 @@
 #include "PipelineRecipes.h"
+#include "CapturedObjectMarker.h"
 #include <wrl/client.h>
 #include <QCryptographicHash>
 #include <QByteArrayView>
@@ -283,6 +284,8 @@ struct NativePipelines::Impl {
         const auto &packet = directory.packets().at(size_t(selected - 1)); const auto recipe = decodeRootSignature(directory.payload(packet));
         ComPtr<ID3D12RootSignature> native;
         check(device.device()->CreateRootSignature(recipe.nodeMask, recipe.bytecode.data(), recipe.bytecode.size(), IID_PPV_ARGS(&native)), "Recreate captured root signature");
+        const auto marker = capturedObjectMarker(CapturedObjectKind::RootSignature, object, selected);
+        check(native->SetName(std::wstring(marker.begin(), marker.end()).c_str()), "Name captured root signature");
         auto result = native.Get(); roots.emplace(selected, std::move(native)); return {result, selected};
     }
 };
@@ -390,6 +393,8 @@ ID3D12PipelineState *NativePipelines::create(uint64_t record) {
         check(device2->CreatePipelineState(&desc, IID_PPV_ARGS(&native)), "Recreate captured pipeline stream");
     }
     checkCancellation(s.cancelled);
+    const auto marker = capturedObjectMarker(CapturedObjectKind::Pipeline, recipe.object, record);
+    check(native->SetName(std::wstring(marker.begin(), marker.end()).c_str()), "Name captured pipeline");
     auto report = describePipelineRecipe(recipe);
     report["record"] = std::to_string(record); report["root_creation_record"] = std::to_string(rootRecord);
     report["status"] = "pipeline_created"; report["gpu_commands_executed"] = false;

@@ -1263,6 +1263,12 @@ void MainWindow::buildUi() {
             [this] { readRdcAnalysis(nullptr, RdcAnalysis::Pipeline); });
     connect(dx12Pipeline_, &Dx12PipelineView::cancelRequested, this, &MainWindow::cancel);
     connect(dx12Pipeline_, &Dx12PipelineView::error, this, &MainWindow::showError);
+    connect(dx12Pipeline_, &Dx12PipelineView::creationRequested, this, [this](qulonglong id) {
+        if (!busy()) {
+            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+            locateEvent(id);
+        }
+    });
     connect(dx12Pipeline_, &Dx12PipelineView::resourceRequested, this, [this](qulonglong id) {
         try {
             inspectResource(id);

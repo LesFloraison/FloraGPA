@@ -24,6 +24,7 @@ class Dx12PipelineView final : public QWidget {
     void readRequested();
     void cancelRequested();
     void resourceRequested(qulonglong creation);
+    void creationRequested(qulonglong record);
     void error(const QString &message);
 
   private:
@@ -33,7 +34,7 @@ class Dx12PipelineView final : public QWidget {
     uint64_t execution_{}, serial_{};
     bool busy_{};
     Json result_;
-    QAction *read_, *cancel_, *locate_, *export_, *backend_;
+    QAction *read_, *cancel_, *locate_, *creation_, *export_, *backend_;
     QLabel *summary_;
     QTreeWidget *rows_;
     QPlainTextEdit *details_;

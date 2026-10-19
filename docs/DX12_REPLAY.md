@@ -3500,13 +3500,64 @@ Ignored evidence: `hellblade-prelens-pipeline1`, `hellblade-prelens-input-histor
 Exactly two native GPU replays served the change/undo check, serially; no new RDC
 capture, original-GPA run, all-sample sweep or repeatability loop was added.
 
+### Captured pipeline/root-signature identities and creation navigation
+
+Native PSOs and root signatures now receive names containing their original
+object identity and creation record. The common pipeline creation path applies
+the marker after PSO construction, including shader replacement; the marker
+continues to identify the original pipeline lifetime. Root signatures use their
+resolved creation record, not a neighboring Draw or a raw pointer without lifetime.
+No GPA runtime is involved.
+
+The RenderDoc pipeline adapter parses only exact markers with canonical nonzero
+decimal uint64 values. References expose `captured_object`, `object_creation` and
+`object_kind` with `mapping_status: capture_object_marker`. Texture/buffer
+`resource_creation` remains separate: pipeline objects must not be sent to the
+texture/resource browser. Shader-to-original-PSO-stage mapping remains a gap.
+Existing RDCs without these names retain their unmapped status; the adapter does
+not infer creation identities from generated RenderDoc IDs or shader names.
+
+The DX12 Bindings panel adds **Locate creation** for mapped PSO/root-signature
+rows; double-clicking these rows has the same effect. It switches the API list
+to CPU records, restores visibility when filters hide the creation, and selects
+that exact record. Texture/buffer rows retain **Inspect resource**. Busy state,
+selection/experiment changes and invalidated results disable the new action.
+
+One Talos replay/capture at execution **12675** and one subsequent RenderDoc
+pipeline query verify the complete marker path. The native replay reports zero
+D3D12 errors and zero validation messages. RenderDoc 1.45 event **144** returns
+29 pipeline rows, including:
+
+| Object | Captured identity | Creation record | RDC identity |
+| --- | --- | --- | --- |
+| PSO | 1657098320 | 156847 | ResourceId::7825 |
+| Root signature | 1658516128 | 102742 | ResourceId::7824 |
+
+The workspace check decodes both original creation packets, compares their
+object IDs with the analysis report, then navigates both rows while the API list
+is filtered. Both land on the correct raw record, clear the obstructing filter,
+and invalidate the old pipeline result (**3 passed including setup/cleanup,
+1,656 ms**). CPU checks cover full-width 64-bit marker round trips, malformed
+markers, distinct object/resource actions, busy state, numeric-JSON rejection,
+legacy unmapped rows and stale experiment results. Release build **252** covers
+GUI, CLI, Worker, analysis backend and tests; build **253** adds the focused
+legacy-report assertion (**4 passed including setup/cleanup, 46 ms**). No
+additional GPU replay was needed for that assertion.
+
+Ignored evidence under `artifacts/dx12-research`: `talos-object-markers-native1`,
+`talos-object-markers-pipeline1`, `pipeline-object-cpu2.txt`, and
+`pipeline-object-workspace1.txt`. The analysis report lists no loaded GPA modules.
+BF1/Hellblade2 were not replayed for this change. Their previously saved RDCs do
+not retroactively acquire the new markers. Full pipeline coverage, shader stage
+mapping, original-output fidelity and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
-| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | Workspace shader-constant resource navigation and event/backend invalidation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; PSO/root creation and full state unfinished |
+| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root-signature creation identities and filtered workspace navigation verified; shader-constant resource navigation and event/backend invalidation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |

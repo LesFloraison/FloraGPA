@@ -7,6 +7,7 @@
 #include "dx12/QueueDependencyIndex.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
+#include "dx12/CapturedObjectMarker.h"
 #include "dx12/NativeResources.h"
 #include "dx12/TileRecipes.h"
 #include "dx12/NativeReplay.h"
@@ -76,6 +77,97 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void pipelineObjectMarkers() {
+        for (const auto kind : {dx12::CapturedObjectKind::Pipeline, dx12::CapturedObjectKind::RootSignature}) {
+            const auto name = dx12::capturedObjectMarker(kind, UINT64_MAX, 9007199254740993ULL);
+            const auto parsed = dx12::parseCapturedObjectMarker(name);
+            QVERIFY(parsed); QCOMPARE(parsed->kind, kind);
+            QCOMPARE(parsed->object, UINT64_MAX); QCOMPARE(parsed->creation, 9007199254740993ULL);
+            QVERIFY(!dx12::parseCapturedObjectMarker(name + " extra"));
+        }
+        for (const auto name : {"Flora DX12 pipeline 1 creation 0", "Flora DX12 pipeline 01 creation 2",
+                "Flora DX12 pipeline 18446744073709551616 creation 2", "Flora DX12 root signature 1 creation -2",
+                "Flora DX12 resource 1 creation 2", "Flora DX12 pipeline 1", ""})
+            QVERIFY(!dx12::parseCapturedObjectMarker(name));
+    }
+    void pipelineObjectNavigation() {
+        using Json = nlohmann::json;
+        Dx12PipelineView view; view.setContext("pipeline-session", 12675);
+        Json report{{"ok", true}, {"backend", "dx12"}, {"execution", "12675"},
+            {"pipeline_scope", Json::object()}, {"pipeline_rows", Json::array()}};
+        for (const auto kind : {"pipeline", "root_signature"})
+            report["pipeline_rows"].push_back({{"section", "Pipeline"}, {"binding", kind}, {"details", Json::object()},
+                {"resource", {{"name", kind}, {"rdc_id", "ResourceId::1"}, {"mapping_status", "capture_object_marker"},
+                    {"object_kind", kind}, {"captured_object", "18446744073709551615"},
+                    {"object_creation", "9007199254740993"}, {"resource_creation", nullptr}, {"resource_object", nullptr}}}});
+        QSignalSpy creation(&view, &Dx12PipelineView::creationRequested), resource(&view, &Dx12PipelineView::resourceRequested);
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows");
+        auto locate = view.findChild<QAction *>("locatePipelineCreation");
+        QVERIFY(view.finish(view.requestId(), report));
+        for (int i = 0; i < 2; ++i) {
+            rows->setCurrentItem(rows->topLevelItem(i));
+            QVERIFY(locate->isEnabled()); QVERIFY(!view.findChild<QAction *>("inspectPipelineResource")->isEnabled());
+            locate->trigger(); QCOMPARE(creation.takeFirst()[0].toULongLong(), 9007199254740993ULL);
+        }
+        QVERIFY(resource.empty());
+        view.setWorkerBusy(true); QVERIFY(!locate->isEnabled()); view.setWorkerBusy(false);
+        auto invalid = report; invalid["pipeline_rows"][0]["resource"]["object_creation"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), invalid));
+        QCOMPARE(view.result(), report);
+        auto legacy = report;
+        for (auto &row : legacy["pipeline_rows"]) {
+            auto &ref = row["resource"]; ref["mapping_status"] = "unmapped";
+            ref.erase("object_creation"); ref.erase("captured_object"); ref.erase("object_kind");
+        }
+        QVERIFY(view.finish(view.requestId(), legacy));
+        rows->setCurrentItem(rows->topLevelItem(0)); QVERIFY(!locate->isEnabled());
+        const auto old = view.requestId(); view.setContext("changed-experiment", 12675);
+        QVERIFY(!view.finish(old, report)); QVERIFY(!locate->isEnabled());
+    }
+    void pipelineObjectWorkspace() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto evidence = qEnvironmentVariable("FLORA_DX12_OBJECT_PIPELINE_REPORT");
+        if (root.isEmpty() || evidence.isEmpty()) QSKIP("Set Talos capture and marked pipeline report");
+        QFile file(evidence); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = Json::parse(file.readAll().toStdString());
+        QVERIFY(report.at("ok").get<bool>()); QCOMPARE(report.at("execution"), Json("12675"));
+        const auto path = std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString());
+        dx12::StreamDirectory directory(path);
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(QString::fromStdWString(path.wstring()));
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto view = window.findChild<Dx12PipelineView *>();
+        auto domain = window.findChild<QComboBox *>("apiEventDomain");
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        size_t checked{};
+        for (size_t i = 0; i < report.at("pipeline_rows").size(); ++i) {
+            const auto &row = report.at("pipeline_rows")[i];
+            if (row.at("section") != "Pipeline") continue;
+            const auto &ref = row.at("resource");
+            QCOMPARE(ref.at("mapping_status"), Json("capture_object_marker"));
+            const auto record = std::stoull(ref.at("object_creation").get<std::string>());
+            const auto object = std::stoull(ref.at("captured_object").get<std::string>());
+            const auto &packet = directory.packets().at(size_t(record - 1));
+            if (ref.at("object_kind") == "pipeline")
+                QCOMPARE(dx12::decodePipelineRecipe(packet.type, directory.payload(packet)).object, object);
+            else {
+                QCOMPARE(packet.type, uint64_t(0x127938051b445ULL));
+                QCOMPARE(dx12::decodeRootSignature(directory.payload(packet)).object, object);
+            }
+            domain->setCurrentIndex(1); locate->setText("12675"); QTest::keyClick(locate, Qt::Key_Return);
+            QVERIFY(view->finish(view->requestId(), report));
+            auto rows = view->findChild<QTreeWidget *>("dx12PipelineRows");
+            rows->setCurrentItem(rows->topLevelItem(int(i)));
+            window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+            view->findChild<QAction *>("locatePipelineCreation")->trigger();
+            QCOMPARE(domain->currentIndex(), 0);
+            QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), record);
+            QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+            QVERIFY(view->result().is_null()); ++checked;
+        }
+        QCOMPARE(checked, size_t(2));
+    }
     void swapchainPacketArguments() {
         using Json = nlohmann::json;
         const uint64_t swapchain = UINT64_MAX - 5, resource = UINT64_MAX - 6;
