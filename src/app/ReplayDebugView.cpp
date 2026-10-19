@@ -565,6 +565,11 @@ void ReplayDebugView::selectPrimitive(uint32_t primitive) {
     if (!busy_ && primitive_)
         primitive_->setText(QString::number(primitive));
 }
+void ReplayDebugView::selectVertex(uint32_t ordinal, uint32_t instance) {
+    if (busy_ || stage_ != "vs") return;
+    vertex_->setText(QString::number(ordinal));
+    instance_->setText(QString::number(instance));
+}
 void ReplayDebugView::selectTextureReference(qulonglong object, qulonglong creation, int x, int y, int mip,
                                              int layer, int sample) {
     if (busy_ || !dx12_ || stage_ != "cs" || !object || !creation || x < 0 || y < 0 || mip < 0 || layer < 0 ||

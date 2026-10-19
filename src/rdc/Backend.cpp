@@ -990,6 +990,8 @@ Json runRdcJob(const Json &job) {
                                                 : "Selected analysis requires an executed draw action");
         if (meshOutput && index(job, "instance") != 0)
             throw std::runtime_error("Mesh output returns all meshlets; draw instances do not apply");
+        if (!meshOutput && index(job, "instance") >= selected->numInstances)
+            throw std::runtime_error("Mesh instance is outside the executed Draw");
         if (stage == "VSIn") {
             if (!dx12) throw std::runtime_error("Raw input mesh adapter currently requires DX12");
             const auto data = readDx12InputMesh(controller, *selected, index(job, "instance"), index(job, "attribute"));
@@ -1092,6 +1094,8 @@ Json runRdcJob(const Json &job) {
                        {"vertex_count", decoded.positions.size()},
                        {"index_count", decoded.indexCount},
                        {"face_count", decoded.candidateFaceCount}});
+        if (!meshOutput) result.update({{"instance", index(job, "instance")},
+                                        {"draw_parameters", rdcExecutedAction(*selected)}});
         return complete();
     }
     if (action == "inventory") {

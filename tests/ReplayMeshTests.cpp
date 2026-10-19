@@ -53,6 +53,10 @@ int main(int argc, char **argv) {
         auto mesh = ReplayMesh::decode(m, vertices, std::vector<uint8_t>{1, 2, 3, 0, 1, 2, 1, 1, 1});
         require(mesh.candidateFaceCount == 3 && mesh.faces.size() == 2,
                 "Candidate face count or list degenerates changed");
+        require(mesh.firstReferences == std::vector<uint32_t>{0, 1, 2}, "First indexed references are not Draw ordinals");
+        auto sparse = m; sparse["numIndices"] = 3;
+        const auto unreferenced = ReplayMesh::decode(sparse, vertices, std::vector<uint8_t>{1, 1, 3});
+        require(unreferenced.firstReferences == std::vector<uint32_t>{0, UINT32_MAX, 2}, "Unreferenced row was assigned an invocation");
         require(mesh.obj().find("v 1.0 2.0 3.0\r\n") != std::string::npos, "Perspective divide failed");
         require(mesh.obj().find("v -0.0 1.0 2.0\r\n") != std::string::npos, "Zero w or signed zero lost");
         m["topology"] = 6;
@@ -65,6 +69,7 @@ int main(int argc, char **argv) {
         m["numIndices"] = 3;
         mesh = ReplayMesh::decode(m, vertices, {});
         require(mesh.faces.size() == 1, "Nonindexed draw must ignore base vertex");
+        require(mesh.firstReferences == std::vector<uint32_t>{0, 1, 2}, "Nonindexed ordinals are incorrect");
         auto input = m; input["perspective_divide"] = false; input["input"] = {{"first_vertex", "9007199254740993"}};
         auto inputMesh = ReplayMesh::decode(input, vertices, {});
         require(inputMesh.obj().find("v 2.0 4.0 6.0\r\n") != std::string::npos, "Input attribute must not be perspective divided");

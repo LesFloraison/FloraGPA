@@ -14,6 +14,9 @@ struct ReplayMesh {
     bool perspectiveDivide = true;
     std::vector<std::array<double, 4>> positions;
     std::vector<std::array<uint64_t, 3>> faces;
+    // First index/vertex ordinal referencing each displayed row. Unreferenced
+    // rows have UINT32_MAX and must not be offered as shader invocations.
+    std::vector<uint32_t> firstReferences;
     static ReplayMesh decode(const nlohmann::json &metadata, std::span<const uint8_t> vertices,
                              std::span<const uint8_t> indices);
     std::string csv() const;

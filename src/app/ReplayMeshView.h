@@ -8,6 +8,7 @@ class QComboBox;
 class QLabel;
 class QLineEdit;
 class QPlainTextEdit;
+class QTableView;
 namespace flora {
 class MeshView;
 class ReplayMeshTableModel;
@@ -30,6 +31,7 @@ class ReplayMeshView final : public QWidget {
     void cancelRequested();
     void error(const QString &message);
     void inspectionFinished(bool success);
+    void vertexDebugRequested(qulonglong event, uint32_t vertexOrdinal, uint32_t instance);
 
   private:
     void invalidate();
@@ -42,7 +44,7 @@ class ReplayMeshView final : public QWidget {
     bool meshDispatch_{};
     Json result_;
     QMap<QString, QByteArray> files_;
-    QAction *read_, *cancel_, *export_, *backend_;
+    QAction *read_, *cancel_, *export_, *backend_, *debugVertex_;
     QComboBox *stage_;
     QLineEdit *instance_;
     QLineEdit *attribute_;
@@ -50,5 +52,7 @@ class ReplayMeshView final : public QWidget {
     QPlainTextEdit *details_;
     MeshView *preview_;
     ReplayMeshTableModel *model_;
+    QTableView *table_;
+    bool vertexMapping_{};
 };
 } // namespace flora

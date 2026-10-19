@@ -33,6 +33,56 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void bf1MeshToVertexDebug() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty() || captures.isEmpty()) QSKIP("Set BF1 capture and mesh evidence directories");
+        MainWindow window; window.resize(1600, 1000); window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("36560"); QTest::keyClick(locate, Qt::Key_Return);
+        auto geometry = window.findChild<ReplayMeshView *>();
+        auto stage = geometry->findChild<QComboBox *>("replayMeshStage");
+        auto table = geometry->findChild<QTableView *>("replayMeshPositions");
+        ReplayDebugView *debug{};
+        for (auto candidate : window.findChildren<ReplayDebugView *>())
+            if (candidate->findChild<QLineEdit *>("debugVertex")) debug = candidate;
+        QVERIFY(debug);
+        done.clear();
+        for (const auto input : {true, false}) {
+            const auto directory = root + (input ? "/bf1-input-half1" : "/bf1-particle-vsout2");
+            const auto report = read(directory + "/result.json");
+            stage->setCurrentIndex(stage->findData(input ? "VSIn" : "VSOut"));
+            if (input) geometry->findChild<QLineEdit *>("replayMeshAttribute")->setText("1");
+            QVERIFY(geometry->finish(geometry->requestId(), report, directory));
+            QVERIFY(!action(*geometry, "replayMeshDebugVertex")->isEnabled());
+            table->selectRow(1428);
+            QVERIFY(action(*geometry, "replayMeshDebugVertex")->isEnabled());
+            QSignalSpy selected(geometry, &ReplayMeshView::vertexDebugRequested);
+            action(*geometry, "replayMeshDebugVertex")->trigger();
+            QCOMPARE(selected.size(), 1);
+            QCOMPARE(selected[0][0].toULongLong(), 36560ULL);
+            QCOMPARE(selected[0][1].toUInt(), 3966U); // Vertex 1428 appears at ordinals 3966 and 3969.
+            QCOMPARE(debug->request().at("vertex"), Json(3966));
+            QCOMPARE(debug->request().at("instance"), Json(0));
+            QCOMPARE(debug->request().at("execution"), Json("36560"));
+            QCOMPARE(window.findChild<QTabWidget *>("checkpointStageTabs")->currentWidget(), debug);
+            geometry->setWorkerBusy(true); QVERIFY(!action(*geometry, "replayMeshDebugVertex")->isEnabled());
+            geometry->setWorkerBusy(false); QVERIFY(action(*geometry, "replayMeshDebugVertex")->isEnabled());
+            if (!input) {
+                auto wrong = report; wrong["instance"] = 1;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, geometry->finish(geometry->requestId(), wrong, directory));
+                auto legacy = report; legacy.erase("draw_parameters"); legacy.erase("instance");
+                QVERIFY(geometry->finish(geometry->requestId(), legacy, directory)); table->selectRow(1428);
+                QVERIFY(!action(*geometry, "replayMeshDebugVertex")->isEnabled());
+            }
+        }
+        QVERIFY(done.empty()); QVERIFY(!window.busy()); // Navigation prepares invocation; it does not launch replay.
+        locate->setText("36561"); QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(!action(*geometry, "replayMeshDebugVertex")->isEnabled());
+    }
     void bf1VertexInvocation() {
         const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
         if (root.isEmpty()) QSKIP("Set the BF1 input/vertex invocation evidence directory");

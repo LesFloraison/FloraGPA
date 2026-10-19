@@ -4148,6 +4148,46 @@ This verifies the selected input and invocation mapping; it does not establish
 all transformed geometry, VS instruction numerical fidelity or whole-frame
 replay correctness.
 
+### Mesh selection to VS Debug and BF1 post-VS position evidence
+
+Replay Mesh now offers **Debug first reference** for a selected DX12 input or
+VS-output vertex. The decoder records the first Draw-local index/vertex ordinal
+that references each displayed row; repeated indices keep their first occurrence
+and unreferenced rows remain unavailable. Navigation opens VS Debug with that
+ordinal and the selected instance without starting a worker. It does not assume
+that a displayed vertex row equals the Draw invocation ordinal. GS/DS and mesh
+shader output are excluded because they need a different invocation mapping.
+VS-output reports now include the Draw parameters and instance. The UI requires
+their index/vertex count to agree with the returned mesh before enabling this
+navigation; legacy output reports still display but do not guess the mapping.
+The backend rejects out-of-draw mesh instances, and the UI rejects a mismatched
+returned instance.
+
+For BF1 execution **36560**, displayed vertex **1428** is referenced at Draw
+ordinals **3966** and **3969**. Both input and post-VS navigation select **3966**,
+instance **0**. Main-window verification checks tab selection and invocation
+fields, busy state, stale event invalidation, mismatched instances and old-report
+behavior. Model checks cover negative base vertices, repeated indices,
+unreferenced rows and nonindexed ordinals. Build **280** found a shadowed
+`request` method call in the UI; build **281** fixes it and builds the main
+application. Three focused UI cases pass (**5 including setup/cleanup, 1,397 ms**),
+and the mesh model checks pass. Local evidence is `mesh-reference-model1.txt`,
+`bf1-mesh-navigation1.txt` and `bf1-mesh-navigation1/`.
+
+Two serial post-VS queries (`bf1-particle-vsout1/2`) return **3,316** vertices in
+a **112-byte** output stride and **4,974** indices. All position components agree
+between those GPU reads; **12 other output components differ**, so the complete
+output buffer is not deterministic. Vertex 1428's GPU clip position is
+`[1.4245448112487793, 1.2639257907867432, 0.05993271619081497, 5.648245334625244]`.
+Compared with `bf1-vertex-invocation1`'s final simulated `o0`, X/Y/Z match exactly,
+but W is one ULP higher: GPU bits **1085587053**, trace bits **1085587052**.
+The trace W comes from instruction **55**, `dp4 r2.w, r1.xyzw,
+crViewProjMatrix[3].xyzw`, then moves to `o0` at instruction **265**. The cause
+has not been established; this observation does not justify changing every dot
+product's arithmetic or accepting the trace as exact. `bf1-postvs-evidence1.json`
+retains the comparison and raw output hashes. These selected position and
+navigation checks do not complete full geometry or Shader Debug fidelity.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -1341,6 +1341,16 @@ void MainWindow::buildUi() {
     }
     debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
+    connect(replayMesh_, &ReplayMeshView::vertexDebugRequested, this,
+            [this, debugTabs](qulonglong event, uint32_t ordinal, uint32_t instance) {
+                if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+                findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+                locateEvent(event);
+                if (selectedEvent_ != event) return;
+                replayDebug_[0]->selectVertex(ordinal, instance);
+                debugTabs->setCurrentWidget(replayDebug_[0]);
+                centerTabs_->setCurrentWidget(debugTabs);
+            });
     connect(history_, &PixelHistoryView::pixelDebugRequested, this,
             [this, debugTabs](qulonglong event, int x, int y, int sample, uint32_t primitive) {
                 if (busy())

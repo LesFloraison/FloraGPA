@@ -22,6 +22,7 @@ class ReplayDebugView final : public QWidget {
     void setWorkerBusy(bool busy);
     void selectPixel(int x, int y, int sample);
     void selectPrimitive(uint32_t primitive);
+    void selectVertex(uint32_t ordinal, uint32_t instance);
     void selectTextureReference(qulonglong object, qulonglong creation, int x, int y, int mip, int layer, int sample);
     void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return backendPath_; }

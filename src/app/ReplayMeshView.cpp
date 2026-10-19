@@ -28,6 +28,10 @@ class ReplayMeshTableModel final : public QAbstractTableModel {
 
   public:
     explicit ReplayMeshTableModel(QObject *parent) : QAbstractTableModel(parent) {}
+    uint32_t firstReference(int row) const {
+        return mesh_ && row >= 0 && size_t(row) < mesh_->firstReferences.size()
+            ? mesh_->firstReferences[size_t(row)] : UINT32_MAX;
+    }
     void setMesh(std::shared_ptr<ReplayMesh> mesh) {
         beginResetModel();
         mesh_ = std::move(mesh);
@@ -67,6 +71,9 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     cancel_->setObjectName("replayMeshCancel");
     export_ = bar->addAction("Export…");
     export_->setObjectName("replayMeshExport");
+    debugVertex_ = bar->addAction("Debug first reference");
+    debugVertex_->setObjectName("replayMeshDebugVertex");
+    debugVertex_->setToolTip("Open VS Debug at the first Draw ordinal referencing the selected vertex");
     stage_ = new QComboBox;
     stage_->setObjectName("replayMeshStage");
     stage_->addItem("VS output", "VSOut");
@@ -98,7 +105,7 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     preview_->setToolTip("Post-shader positions · Perspective divide applied · Drag to rotate");
     split->addWidget(preview_);
     model_ = new ReplayMeshTableModel(this);
-    auto table = new QTableView;
+    auto table = table_ = new QTableView;
     table->setObjectName("replayMeshPositions");
     table->setModel(model_);
     table->setAlternatingRowColors(true);
@@ -106,6 +113,12 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     table->setToolTip("Float32 components before perspective divide; input attributes retain their selected semantic");
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->verticalHeader()->hide();
+    connect(table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, [this] { updateActions(); });
+    connect(debugVertex_, &QAction::triggered, this, [this] {
+        if (!debugVertex_->isEnabled()) return;
+        const auto ordinal = model_->firstReference(table_->currentIndex().row());
+        if (ordinal != UINT32_MAX) emit vertexDebugRequested(event_, ordinal, uint32_t(request().at("instance")));
+    });
     split->addWidget(table);
     details_ = new QPlainTextEdit;
     details_->setObjectName("replayMeshDetails");
@@ -151,6 +164,7 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
 void ReplayMeshView::invalidate() {
     ++requestId_;
     result_ = nullptr;
+    vertexMapping_ = false;
     files_.clear();
     model_->setMesh({});
     preview_->setMesh({});
@@ -201,6 +215,8 @@ void ReplayMeshView::updateActions() {
     stage_->setEnabled(!busy_);
     instance_->setEnabled(!busy_ && !meshDispatch_);
     attribute_->setVisible(stage_->currentData() == "VSIn"); attribute_->setEnabled(!busy_);
+    debugVertex_->setEnabled(!busy_ && vertexMapping_ &&
+                            model_->firstReference(table_->currentIndex().row()) != UINT32_MAX);
 }
 ReplayMeshView::Json ReplayMeshView::request() const {
     bool ok = false;
@@ -239,6 +255,8 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         throw std::runtime_error("Invalid mesh result");
     if (result.at("stage") != stage_->currentData().toString().toStdString())
         throw std::runtime_error("Mesh result does not match the selected output stage");
+    if (result.contains("instance") && result.at("instance") != this->request().at("instance"))
+        throw std::runtime_error("Mesh result does not match the selected instance");
     QMap<QString, QByteArray> files;
     QStringList names{"post_vertices.bin", "post_vertices.csv", "post_geometry.obj"};
     if (result.at("mesh").at("indexResourceId") != "ResourceId::0")
@@ -292,6 +310,12 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         }
         for (const auto &f : meshData->faces)
             faces.append(QJsonArray{double(f[0] + 1), double(f[1] + 1), double(f[2] + 1)});
+    }
+    vertexMapping_ = dx12_ && result.at("stage") == "VSIn";
+    if (dx12_ && result.at("stage") == "VSOut" && result.contains("draw_parameters") && result.contains("instance")) {
+        const auto &draw = result.at("draw_parameters");
+        const auto count = draw.value("kind", "") == "indexed_draw" ? draw.at("index_count") : draw.at("vertex_count");
+        vertexMapping_ = count == meshData->indexCount && result.at("instance") < draw.at("instance_count");
     }
     result_ = result;
     preview_->setToolTip(meshData->perspectiveDivide ? "Post-shader positions · Perspective divide applied · Drag to rotate"

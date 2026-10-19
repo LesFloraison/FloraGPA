@@ -90,6 +90,12 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
         std::memcpy(&value, ib.data() + i * width, size_t(width));
         return int64_t(value) + baseVertex;
     };
+    result.firstReferences.assign(size_t(count), UINT32_MAX);
+    for (uint64_t i = 0; i < result.indexCount; ++i) {
+        const auto vertex = index(i);
+        if (vertex >= 0 && uint64_t(vertex) < count && result.firstReferences[size_t(vertex)] == UINT32_MAX)
+            result.firstReferences[size_t(vertex)] = uint32_t(i);
+    }
     auto face = [&](int64_t a, int64_t b, int64_t c) {
         ++result.candidateFaceCount;
         if (a >= 0 && b >= 0 && c >= 0 && uint64_t(a) < count && uint64_t(b) < count && uint64_t(c) < count)
