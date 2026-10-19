@@ -506,6 +506,50 @@ Ghidra; it performed **no GPU replay**. A new saved-value source is needed befor
 retrying restoration. Talos full-frame replay remains unaccepted; work on other
 replay/analysis requirements can proceed independently.
 
+#### Capture-layer READBACK exclusion
+
+A further targeted Ghidra investigation identifies an explicit exclusion in
+the installed GPA **2025.1.3.1269** capture layer, rather than inferring omission
+only from absent CopyOperations. Reference binary:
+`Streams/layers/capture-x64.dll`, SHA-256
+`a1afd0b41e6bf668381e4898b03460130e0b61432c88d56c8559aef5b1b72c62`.
+Addresses below are RVAs from image base `0x180000000`.
+
+- The diagnostic string for
+  `ID3D12ResourceApiCallCache::PostVisit` identifies function **0x8e170**.
+  Its call at **0x8e6de** uses the resource vtable's **0x70** slot,
+  `ID3D12Resource::GetHeapProperties`, with heap-properties and heap-flags outputs.
+- **0x8e726** compares the returned heap type against **3** (`READBACK`).
+  The branch at **0x8e729** goes to **0x8fbaf**, bypassing the ordinary resource
+  content-copy/serialization path. The other condition on this branch excludes
+  multisampled resources; this finding is specifically about READBACK buffers.
+- The excluded branch examines tracked resource states for **0x10**
+  (`DEPTH_WRITE`) and can call **0xa6e80**. That helper builds 32-byte resource
+  transition records; it does not serialize a query-result byte array.
+  This is not a historical query-value restoration path.
+- `ID3D12ResourceApiCallCache::EnumerateKeyframeCalls`, **0x8abf0**, separately
+  reconstructs resource creation. Its ordinary placed-resource branch calls
+  **0x86990**; resource creation alone is not a contents snapshot. Some other
+  creation branches do write saved blobs, so the READBACK finding must not be
+  generalized to every resource or every capture mechanism.
+
+The two original Talos placed-resource packets were reread at metadata packet
+offsets **6917915** (creation **78132**) and **1090253** (creation **12800**), and
+their bytes match the earlier saved audit. Both initial states decode as
+**0x400** (`COPY_DEST`); their heap is the previously verified READBACK heap
+**1646217152**. Thus the absence of ordinary snapshots for these buffers is
+consistent with this explicit capture-layer branch. The local reference DLL's
+behavior does not prove that the capture was produced by this exact binary,
+nor that every possible source of query values has been exhausted. It provides
+no basis for inventing values, discarding resolves or declaring full replay.
+
+Evidence remains outside Git: `query-resource-writer1.txt`,
+`query-resource-readback-branch1.asm`, `query-readback-fallback1.txt`,
+`query-resource-writer-xrefs1.json` and `talos-readback-exclusion1.json` under
+`artifacts/dx12-research`. Ghidra ran read-only with analysis disabled; PE unwind
+ranges and instruction references were used to identify the functions.
+This investigation performed no GPU replay and changes no runtime policy.
+
 The workspace reports the first blocking resolve as `MissingData`, including
 its execution/source and exact missing count. Before execution 16001 remains
 selectable; after 16001 and later prefixes report the gap. Execution 16000 is
