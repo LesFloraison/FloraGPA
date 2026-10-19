@@ -51,6 +51,7 @@ $depthSnapshotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-re
 $gpuDotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-dot.patch'
 $gpuMadPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-mad.patch'
 $dxilContractPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-fast-contraction.patch'
+$retainedComputePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxil-retained-compute.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -72,6 +73,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxbc_gpu_mad_patch_version -ne 1 -or
         $patchManifest.dxbc_gpu_mad_patch_sha256 -ne (Get-PackageSha256 $gpuMadPatchPath) -or
         $patchManifest.dxil_fast_contraction_patch_version -ne 1 -or
+        $patchManifest.dxil_retained_compute_patch_version -ne 1 -or
+        $patchManifest.dxil_retained_compute_patch_sha256 -ne (Get-PackageSha256 $retainedComputePatchPath) -or
         $patchManifest.dxil_fast_contraction_patch_sha256 -ne (Get-PackageSha256 $dxilContractPatchPath) -or
         $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
         throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
@@ -168,6 +171,10 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $workgroupPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $usagePatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $depthSnapshotPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $gpuDotPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $gpuMadPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $dxilContractPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $retainedComputePatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

@@ -733,6 +733,15 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
+    if (const auto lifecycle = result.value("compute_input_lifecycle", Json()); lifecycle.is_object()) {
+        const auto status = result.value("compute_buffer_inputs", Json::object()).value("status", "");
+        const auto buffers = status == "observed_bytes_unchanged" ? "Read-only buffer observations match."
+                           : status == "observed_bytes_changed" ? "Read-only buffer observations differ."
+                           : status == "no_buffer_views" ? "No read-only buffer views to check."
+                           : "Read-only buffer observations are incomplete.";
+        warnings.prepend(QString("DXIL compute inputs retained during stepping; dispatch restored after trace release. %1 Texture inputs are not checked. Earlier GPU references belong to a separate replay.")
+            .arg(buffers));
+    }
     if (const auto selection = result.value("indirect_selection", Json()); selection.is_object())
         warnings.prepend(QString("ExecuteIndirect action %1 of %2 (zero-based) · replay event %3")
             .arg(text(selection.at("indirect_action")), text(selection.at("indirect_action_count")), text(selection.at("eid"))));

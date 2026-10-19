@@ -157,12 +157,14 @@ class Session {
     uint32_t dxbcGpuDotPatch{};
     uint32_t dxbcGpuMadPatch{};
     uint32_t dxilContractPatch{};
+    uint32_t retainedComputePatch{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
     DotCounter dotOperations{}, dotFailures{};
     DotCounter madOperations{}, madFailures{};
     DotCounter contractOperations{}, contractFailures{};
+    DotCounter retainedComputeTraces{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -213,6 +215,13 @@ class Session {
             if (dxilContractPatch != 1) throw std::runtime_error("Fast contraction requires the Flora DXIL contraction patch");
             using Enable = void (RENDERDOC_CC *)(bool);
             symbol<Enable>("RENDERDOC_SetFloraDxilContractEnabled")(true);
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraRetainedComputePatchVersion"))) {
+            retainedComputePatch = patch();
+            if (retainedComputePatch != 1) throw std::runtime_error("Unsupported DXIL retained compute patch version");
+            retainedComputeTraces = symbol<DotCounter>("RENDERDOC_GetFloraRetainedComputeTraces");
+            using Enable = void (RENDERDOC_CC *)(bool);
+            symbol<Enable>("RENDERDOC_SetFloraRetainedComputeEnabled")(job.value("action", "") == "debug-thread");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -451,7 +460,8 @@ rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     }
     return result;
 }
-Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_t dxbcWorkgroupPatch) {
+Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_t dxbcWorkgroupPatch,
+           uint32_t retainedComputePatch) {
     const auto kind = job.at("action").get<std::string>();
     const auto *selected = findAction(controller.GetRootActions(), eid);
     const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
@@ -475,6 +485,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         throw std::runtime_error("Fast contraction requires a DXIL shader at the selected stage");
     if (!reflection->debugInfo.debuggable)
         throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
+    const bool retainedCompute = dx12 && compute && reflection->encoding == ShaderEncoding::DXIL && retainedComputePatch == 1;
     const std::optional<D3D12Pipe::InputAssembly> vertexIA = dx12 && vertex
         ? std::optional<D3D12Pipe::InputAssembly>(pipe12->inputAssembly) : std::nullopt;
     const auto vertexInputs = [&] {
@@ -686,7 +697,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
     if (!trace || !trace->debugger)
         throw std::runtime_error("No debugger trace at the selected invocation");
     if (dx12 && compute) result["compute_buffer_inputs"]["after_trace_creation"] = computeInputs();
-    if (referenceSelection) {
+    if (referenceSelection && !retainedCompute) {
         const auto &selection = *referenceSelection;
         result["gpu_reference"]["after_trace_creation_value"] =
             pixel(controller.PickPixel(selection.resource, selection.x, selection.y, selection.sub,
@@ -702,6 +713,11 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         {"unavailable_global_source_offsets", missingOffsets},
         {"offset_policy", "RenderDoc 1.45 DXBC signature/whole-block mappings have uninitialized offsets; "
                           "these are null, while defined member/instruction offsets are preserved."}};
+    if (retainedCompute) {
+        result["compute_input_lifecycle"] = {
+            {"status", "retained_until_trace_release"}, {"patch_version", retainedComputePatch},
+            {"scope", "DXIL compute pre-dispatch application resources retained after lane probing; no prefix replays between trace creation and stepping. FreeTrace executes the original dispatch to restore post-event state."}};
+    }
     result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
     const auto assembly = controller.DisassembleShader(
         pipe12 ? pipe12->pipelineResourceId : ResourceId::Null(), reflection, "");
@@ -748,11 +764,13 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         auto &snapshots = result["compute_buffer_inputs"];
         snapshots["after_steps"] = computeInputs();
         checked(controller.GetFatalErrorStatus());
-        const auto &before = snapshots.at("before_debug");
+        const auto &before = snapshots.at(retainedCompute ? "after_trace_creation" : "before_debug");
         const bool complete = before.at("status") == "read" && snapshots.at("after_trace_creation").at("status") == "read" && snapshots.at("after_steps").at("status") == "read";
         const bool same = before == snapshots.at("after_trace_creation") && before == snapshots.at("after_steps");
         snapshots["status"] = computeBufferRanges.empty() ? "no_buffer_views" : !complete ? "incomplete" : same ? "observed_bytes_unchanged" : "observed_bytes_changed";
-        snapshots["scope"] = "Potential CS read-only buffer views at three observation points, up to 16 MiB each point. Textures, UAVs and constant buffers are not checked. Unchanged bytes do not prove stable invocation inputs during simulation.";
+        snapshots["scope"] = retainedCompute
+            ? "Potential CS read-only buffer views compared after trace creation and after stepping, up to 16 MiB each point. before_debug belongs to an earlier post-event replay and is excluded from this comparison. Textures, UAVs and constant buffers are not checked; unchanged observations are not continuous validation."
+            : "Potential CS read-only buffer views at three observation points, up to 16 MiB each point. Textures, UAVs and constant buffers are not checked. Unchanged bytes do not prove stable invocation inputs during simulation.";
         if (!computeBufferRanges.empty() && (!complete || !same)) {
             result["partial"] = true;
             auto &warnings = result["debug_scope"]["warnings"];
@@ -761,6 +779,14 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
                 ? "Compute read-only buffer inputs changed during debug replays. The same Group/Thread coordinates may select different work; an earlier GPU texel cannot validate this invocation."
                 : "Compute read-only buffer input snapshots are incomplete; input stability is unverified.");
         }
+    }
+    if (retainedCompute) {
+        // While the trace is alive, the application is intentionally before the dispatch.
+        // Never label a PickPixel read in that interval as a post-event GPU reference.
+        trace.reset();
+        checked(controller.GetFatalErrorStatus());
+        result["compute_input_lifecycle"]["status"] = "released_dispatch_restored";
+        result["compute_buffer_inputs"]["after_dispatch_restoration"] = computeInputs();
     }
     // Debugging can replay the capture again, including when a DXBC UAV is
     // fetched lazily. Do not silently compare a trace against an earlier
@@ -772,11 +798,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, uint32_
         auto &reference = result["gpu_reference"];
         const auto &before = reference.at("value").at("uintValue");
         const bool same = before == after.at("uintValue") &&
-                          before == reference.at("after_trace_creation_value").at("uintValue");
+                          (retainedCompute || before == reference.at("after_trace_creation_value").at("uintValue"));
         reference["after_debug_value"] = after;
         reference["consistency"] = same ? "selected_texel_unchanged" : "selected_texel_changed";
         reference["consistency_scope"] =
-            "Selected post-event texel before debugging, after trace creation and after stepping, "
+            retainedCompute ? "Selected post-event texel before debugging and after trace release restores the dispatch. No post-event observation is made while inputs are retained. Unchanged values do not validate the simulated invocation."
+            : "Selected post-event texel before debugging, after trace creation and after stepping, "
             "compared as PickPixel result bits. "
             "An unchanged texel does not establish stable inputs or validate the simulated invocation.";
         if (!same) {
@@ -1348,7 +1375,13 @@ Json runRdcJob(const Json &job) {
         const auto failureStart = session.dotFailures ? session.dotFailures() : 0;
         const auto madStart = session.madOperations ? session.madOperations() : 0;
         const auto madFailureStart = session.madFailures ? session.madFailures() : 0;
-        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch));
+        const auto retainedStart = session.retainedComputeTraces ? session.retainedComputeTraces() : 0;
+        result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch, session.retainedComputePatch));
+        if (result.contains("compute_input_lifecycle")) {
+            const auto count = session.retainedComputeTraces() - retainedStart;
+            if (count != 1) throw std::runtime_error("DXIL compute input retention was not activated exactly once");
+            result["compute_input_lifecycle"]["retained_traces"] = std::to_string(count);
+        }
         const auto contractFailures = session.contractFailures ? session.contractFailures() - contractFailureStart : 0;
         if (contractFailures) throw std::runtime_error("DXIL contraction GPU operation failed; incomplete trace rejected");
         result["dxil_fast_contraction"] = {{"enabled", job.value("dxil_fast_contraction", false)},

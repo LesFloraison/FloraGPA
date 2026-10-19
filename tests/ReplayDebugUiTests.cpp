@@ -264,6 +264,31 @@ class ReplayDebugUiTests : public QObject {
         for (const auto label : view.findChildren<QLabel *>())
             QVERIFY(label->isHidden() || !label->text().contains("Compute read-only buffer inputs changed"));
     }
+    void retainedComputeInputs() {
+        const auto path = qEnvironmentVariable("FLORA_RETAINED_COMPUTE_REPORT");
+        if (path.isEmpty()) QSKIP("Set the recorded Hellblade2 retained compute input report");
+        const auto result = read(path);
+        QCOMPARE(result.at("compute_input_lifecycle").at("status"), Json("released_dispatch_restored"));
+        QCOMPARE(result.at("compute_input_lifecycle").at("retained_traces"), Json("1"));
+        const auto &inputs = result.at("compute_buffer_inputs");
+        QCOMPARE(inputs.at("status"), Json("observed_bytes_unchanged"));
+        QCOMPARE(inputs.at("after_trace_creation"), inputs.at("after_steps"));
+        QCOMPARE(inputs.at("after_steps"), inputs.at("after_dispatch_restoration"));
+        QVERIFY(inputs.at("before_debug") != inputs.at("after_trace_creation"));
+        QVERIFY(!result.at("gpu_reference").contains("after_trace_creation_value"));
+        QCOMPARE(result.at("gpu_reference").at("consistency"), Json("selected_texel_changed"));
+        QVERIFY(result.at("partial").get<bool>());
+        ReplayDebugView view("cs"); view.resize(1450, 1000); view.show();
+        view.setContext("hellblade-retained", 36779, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        auto notice = view.findChild<QLabel *>("debugBackendNotice");
+        QVERIFY(notice && !notice->isHidden());
+        QVERIFY(notice->text().contains("inputs retained during stepping"));
+        QVERIFY(notice->text().contains("earlier GPU reference cannot validate", Qt::CaseInsensitive));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/retained-compute.png"));
+        const auto serial = view.requestId(); view.setContext("new-experiment", 36779, true);
+        QVERIFY(!view.finish(serial, result)); QVERIFY(notice->isHidden());
+    }
     void indirectComputeInvocation() {
         const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
         if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");

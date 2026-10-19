@@ -4786,6 +4786,63 @@ context changes (**3 passed, 269 ms**). Its inspected screenshot is
 loads neither GPA nor Python. Full compute numerical fidelity and stable
 invocation-to-output correspondence remain unfinished.
 
+### Retain DXIL compute inputs through a debug trace
+
+Resource history locates the Hellblade2 tile-list writer at execution **36748**
+(record **611505**) and the selected consumer at **36779** (record **611544**),
+both in submission **613234**. Starting analysis capture at that submission
+would still replay the writer, so it is not an input-stability fix.
+
+The eighth pinned RenderDoc patch, `dx12-dxil-retained-compute.patch`, adds an
+explicit API enabled only by Flora's isolated `debug-thread` worker. After
+DXIL DebugThread's pre-dispatch replay and scratch-resource lane probe, it
+retains the application resource state through constant-buffer loading and
+all ContinueDebug calls. ResetReplay is deferred until FreeTrace destroys the
+wrapper, which executes only the original dispatch to restore post-event state.
+The worker checks that exactly one retained trace was activated. An unpatched
+1.45 library keeps the previous behavior and input-instability diagnostics;
+DXBC and VS/PS paths do not activate this mode. No native command-list split,
+extra application barrier, shader rewrite or work-list reordering is introduced.
+
+Reports distinguish the earlier post-event `before_debug` observation from
+the retained pre-dispatch observations after trace creation and stepping.
+Only the latter pair is used for retained-buffer stability. The worker does
+not read or label an intermediate texel as post-event while the trace is alive;
+it releases the trace before reading the restored dispatch output. Workspace
+text explains this scope, and earlier-reference mismatch warnings remain.
+The bounded buffer observations still exclude textures, UAVs and CBVs; they
+are not continuous validation or proof of every interpreter load.
+
+One actual Hellblade2 query (`hellblade-retained-compute1`) returns **332**
+steps in one batch. Tile-list buffer **661**, **122,400 bytes**, has identical
+SHA-256 **74e83198c2f0c16f504b8fc9953a791af641f24a16815e46e07342a204567a3f**
+after trace creation, stepping, and dispatch restoration. The earlier replay's
+hash starts **8c8eee41** and is intentionally excluded from that comparison.
+The simulated tile entry is **2424884**, full-resolution coordinate **(832,592)**,
+and mip-output store coordinate **(416,296)**. Store operands
+**(0.043701171875, 0.0369873046875, 0.0390625)**, with positive R11G11B10
+mantissa truncation, match the restored GPU RGB
+**(0.04345703125, 0.03662109375, 0.0390625)**. The earlier green value was
+**0.037109375**, so the report correctly remains partial. This verifies one
+selected store against the restored phase; it does not validate all UAV stores,
+multiple debug batches, cross-query stability or full-frame fidelity.
+
+The existing tiny fast-contraction fixture checks the DXIL CS path without
+wave probing: **24** steps exactly equal its previously GPU-checked trace,
+with one contraction and no failures. Both queries load no GPA/Python modules.
+No new full native capture or whole-sample replay was run. Ignored evidence:
+`hellblade-tilelist-history1`, `hellblade-retained-compute1`,
+`hellblade-retained-compute-evidence1.json`, `retained-compute-simple1`, and
+`retained-compute-ui2/replay-debug/retained-compute.png`.
+
+The rebuilt eight-patch runtime SHA-256 is
+**c18c724b8d794ea7b9a46332b52b37d58afb2e62d6562ff7bbd62b3a7c182d1e**.
+Build/package manifests verify the additional patch and exact source tree.
+Worker/application builds **315–317** pass (314 used an invalid target name).
+The focused UI test consumes the actual new report, checks phase separation,
+visible notices and stale experiment rejection: **3 passed**, including
+setup/cleanup. Complete portable-package acceptance remains outstanding.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -4797,7 +4854,7 @@ invocation-to-output correspondence remain unfinished.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; one indirect CS store's RGB operands match GPU output, downsampled output rejected as changing; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |

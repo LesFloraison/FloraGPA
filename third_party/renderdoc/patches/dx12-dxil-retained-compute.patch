@@ -1,0 +1,70 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.cpp
+@@ -706,13 +706,36 @@
+ D3D12APIWrapper::~D3D12APIWrapper()
+ {
+   CHECK_DEVICE_THREAD();
++  m_RetainComputeInputs = false;
+   ResetReplay();
++}
++
++static std::atomic<bool> floraRetainComputeInputs(false);
++static std::atomic<uint64_t> floraRetainedComputeTraces(0);
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputePatchVersion() { return 1; }
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraRetainedComputeEnabled(bool value) { floraRetainComputeInputs = value; }
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraRetainedComputeTraces() { return floraRetainedComputeTraces.load(); }
++
++void D3D12APIWrapper::RetainComputeInputs()
++{
++  CHECK_DEVICE_THREAD();
++  if(floraRetainComputeInputs.load())
++  {
++    // DebugThread has replayed WithoutDraw and its lane fetcher writes only debug resources.
++    // Keep those application inputs until the wrapper is destroyed. Replaying the prefix
++    // again can regenerate a different indirect work list for the same Group/Thread ID.
++    m_ResourcesDirty = false;
++    m_RetainComputeInputs = true;
++    ++floraRetainedComputeTraces;
++  }
+ }
+ 
+ // Must be called from the replay manager thread (the debugger thread)
+ void D3D12APIWrapper::ResetReplay()
+ {
+   CHECK_DEVICE_THREAD();
++  if(m_RetainComputeInputs)
++    return;
+   if(!m_ResourcesDirty)
+   {
+     // replay the action to get back to 'normal' state for this event
+diff --git a/renderdoc/driver/d3d12/d3d12_dxil_debug.h b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
+--- a/renderdoc/driver/d3d12/d3d12_dxil_debug.h
++++ b/renderdoc/driver/d3d12/d3d12_dxil_debug.h
+@@ -88,6 +88,7 @@
+   bool IsShaderDirectAccessCached(const DXDebug::BindingSlot &slot) override;
+ 
+   void ResetReplay();
++  void RetainComputeInputs();
+ 
+   void SetBuiltins(const BuiltinInputs &builtins) { m_Builtins = builtins; }
+   void SetWorkgroupProperties(const rdcarray<DXILDebug::ThreadProperties> &workgroupProperties)
+@@ -223,6 +224,7 @@
+   const uint64_t m_DeviceThreadID;
+   const uint32_t m_EventId;
+   bool m_ResourcesDirty = true;
++  bool m_RetainComputeInputs = false;
+ };
+ 
+ };
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -4190,6 +4190,7 @@
+     apiWrapper->SetBuiltins(globalBuiltins);
+ 
+     // Fetch constant buffer data from root signature
++    apiWrapper->RetainComputeInputs();
+     apiWrapper->FetchConstantBufferData(rs.compute);
+ 
+     DXILDebug::Debugger *debugger = new DXILDebug::Debugger();
