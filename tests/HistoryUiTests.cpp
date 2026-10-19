@@ -53,6 +53,87 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void depthRoundtripHistory() {
+        const auto root = qEnvironmentVariable("FLORA_DEPTH_ROUNDTRIP_HISTORY_REPORTS");
+        if (root.isEmpty()) QSKIP("Set the selected D32S8 history evidence directory");
+        const auto report = read(root + "/hellblade-depth-roundtrip-history1/result.json");
+        const auto baseline = read(root + "/hellblade-indirect36222-history2/result.json");
+        QCOMPARE(report.at("history"), baseline.at("history"));
+        QCOMPARE(report.at("history").size(), size_t(5));
+        QCOMPARE(report.at("depth_roundtrip").at("copies"), Json("3"));
+        const auto &audit = report.at("history_scope").at("replay_consistency");
+        QCOMPARE(audit.at("before_history"), audit.at("after_restoration"));
+        QCOMPARE(audit.at("history_boundary").at("status"), Json("matches_selected_texel"));
+        QCOMPARE(audit.at("before_history"), report.at("history").back().at("postMod").at("col"));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        PixelHistoryView view; view.resize(1600, 760); view.show();
+        view.setContext("hellblade:depth-history", 36222, true);
+        view.setDx12Resource(511789, 2152463529088ULL);
+        view.selectPixel(2152463529088ULL, 456, 206, 0, 0, 0);
+        auto refresh = view.findChild<QCheckBox *>("historyDepthRoundtrip");
+        QVERIFY(refresh); QVERIFY(!refresh->isChecked());
+        const auto old = view.requestId(); refresh->setChecked(true);
+        QVERIFY(!view.finish(old, baseline));
+        QCOMPARE(view.request().at("depth_roundtrip"), Json(true));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), baseline));
+        view.setWorkerBusy(true); QVERIFY(!refresh->isEnabled());
+        view.setWorkerBusy(false); QVERIFY(refresh->isEnabled());
+        QVERIFY(view.finish(view.requestId(), report));
+        const auto summary = view.findChild<QLabel *>("historySummary");
+        QVERIFY(summary->text().contains("3 completed copies"));
+        QVERIFY(!summary->text().contains("differs from the selected texel"));
+        QVERIFY(summary->text().contains("intermediate fragments are not validated"));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords");
+        QCOMPARE(rows->topLevelItemCount(), 5);
+        rows->setCurrentItem(rows->topLevelItem(4));
+        QSignalSpy locate(&view, &PixelHistoryView::eventRequested), debug(&view, &PixelHistoryView::pixelDebugRequested);
+        action(view, "locateHistoryEvent")->trigger(); action(view, "debugHistoryPixel")->trigger();
+        QCOMPARE(locate.size(), 1); QCOMPARE(locate[0][0].toULongLong(), 36222ULL);
+        QCOMPARE(locate[0][1].toLongLong(), 0LL);
+        QCOMPARE(debug.size(), 1); QCOMPARE(debug[0][4].toUInt(), 0U);
+        QCOMPARE(debug[0][5].toLongLong(), 0LL); QCOMPARE(debug[0][6].toBool(), true);
+        rows->setCurrentItem(rows->topLevelItem(1));
+        action(view, "debugHistoryPixel")->trigger();
+        QCOMPARE(debug.size(), 2); QCOMPARE(debug[1][0].toULongLong(), 12574ULL);
+        QCOMPARE(debug[1][6].toBool(), false);
+        rows->setCurrentItem(rows->topLevelItem(4));
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) {
+            QVERIFY(view.grab().save(output_ + "/depth-roundtrip-history.png"));
+            view.exportResult(output_ + "/depth-roundtrip-history.json");
+            QCOMPARE(read(output_ + "/depth-roundtrip-history.json"), report);
+        }
+        const auto stale = view.requestId(); view.setContext("next-experiment", 36222, true);
+        QVERIFY(!refresh->isChecked()); QVERIFY(!view.finish(stale, report));
+        refresh->setChecked(true); view.setContext("next-experiment", 36223, true);
+        QVERIFY(!refresh->isChecked());
+        view.setContext("dx11", 1, false); QVERIFY(refresh->isHidden());
+    }
+    void depthRoundtripHistoryDebugHandoff() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (captures.isEmpty()) QSKIP("Set the lightweight DX12 capture directory for workspace navigation");
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("36560"); QTest::keyClick(locate, Qt::Key_Return);
+        done.clear();
+        auto history = window.findChild<PixelHistoryView *>();
+        ReplayDebugView *pixel{};
+        for (auto view : window.findChildren<ReplayDebugView *>())
+            if (view->findChild<QCheckBox *>("debugDepthRoundtrip")) pixel = view;
+        QVERIFY(history); QVERIFY(pixel);
+        // Navigation transport only; BF1's D32 attachment is not a D32S8 GPU validation.
+        emit history->pixelDebugRequested(36560, 836, 241, 0, 1322, -1, true);
+        QCOMPARE(pixel->request().at("depth_roundtrip"), Json(true));
+        QCOMPARE(pixel->request().at("primitive"), Json(1322));
+        QCOMPARE(window.findChild<QTabWidget *>("checkpointStageTabs")->currentWidget(), pixel);
+        emit history->pixelDebugRequested(36560, 836, 241, 0, 1322);
+        QVERIFY(!pixel->request().contains("depth_roundtrip"));
+        QVERIFY(done.empty()); QVERIFY(!window.busy());
+    }
     void depthRoundtripPixelDebug() {
         const auto root = qEnvironmentVariable("FLORA_DEPTH_ROUNDTRIP_DEBUG_REPORTS");
         if (root.isEmpty()) QSKIP("Set the selected D32S8 pixel debug evidence directory");

@@ -98,7 +98,7 @@
   so the read-only optimization does not omit restoration of placed-buffer initial contents.
   The fourteenth adds an opt-in selected-event D32S8 depth copy out and back before
   an isolated Draw, retaining the original attachment and its subsequent writes.
-  It is an experimental texture/pixel-debug analysis workaround, disabled by default.
+  It is an experimental texture/history/pixel-debug analysis workaround, disabled by default.
   All export patch-version markers for the isolated adapter.
   Build them with `tools/build_renderdoc_d16.ps1` in a clean dedicated upstream
   v1.45 checkout (the script retains its original name).

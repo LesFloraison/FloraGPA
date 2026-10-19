@@ -2,6 +2,7 @@
 #include "application/RenderDocLibrary.h"
 #include "application/RdcEvents.h"
 #include <QAction>
+#include <QCheckBox>
 #include <QDir>
 #include <QFileDialog>
 #include <QHeaderView>
@@ -144,6 +145,13 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     advanced->setCheckable(true);
     advanced->setObjectName("historyCoordinatesToggle");
     layout->addWidget(tools);
+    depthRoundtrip_ = new QCheckBox("D32S8 depth refresh (experimental)");
+    depthRoundtrip_->setObjectName("historyDepthRoundtrip");
+    depthRoundtrip_->setToolTip("Requires the patched RenderDoc library. Refreshes depth for the selected isolated "
+                                "Draw only; other history events and intermediate fragments remain unverified. "
+                                "Requires depth-writing D32S8, stencil disabled, one mip/layer/sample/node and legacy depth states.");
+    layout->addWidget(depthRoundtrip_);
+    connect(depthRoundtrip_, &QCheckBox::toggled, this, &PixelHistoryView::invalidate);
     auto inputs = new QToolBar;
     tools->removeAction(read_);
     inputs->addAction(read_);
@@ -232,7 +240,9 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
         const auto item = records_->currentItem();
         const auto &row = rows_.at(item->data(0, Qt::UserRole + 1).toULongLong());
         emit pixelDebugRequested(item->data(0, Qt::UserRole).toULongLong(), x_->value(), y_->value(),
-                                 sample_->value(), row.at("primitiveID").get<uint32_t>(), indirectActionOrdinal(row));
+                                 sample_->value(), row.at("primitiveID").get<uint32_t>(), indirectActionOrdinal(row),
+                                 dx12_ && depthRoundtrip_->isChecked() &&
+                                     item->data(0, Qt::UserRole).toULongLong() == event_);
     });
     connect(read_, &QAction::triggered, this, [this] {
         if (busy_ || key_.isEmpty())
@@ -267,6 +277,8 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     updateActions();
 }
 void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12) {
+    if (dx12_ != dx12 || key_ != key || event_ != event)
+        depthRoundtrip_->setChecked(false);
     if (dx12_ != dx12) {
         dx12_ = dx12;
         creation_ = object_ = 0;
@@ -337,6 +349,7 @@ Json PixelHistoryView::request() const {
         job["execution"] = std::to_string(event_);
         job["resource"] = std::to_string(object_);
         job["resource_creation"] = std::to_string(creation_);
+        if (depthRoundtrip_->isChecked()) job["depth_roundtrip"] = true;
     }
     return job;
 }
@@ -371,6 +384,8 @@ void PixelHistoryView::updateActions() {
     cancel_->setEnabled(busy_);
     export_->setEnabled(!busy_ && !result_.is_null());
     backend_->setEnabled(!busy_);
+    depthRoundtrip_->setVisible(dx12_);
+    depthRoundtrip_->setEnabled(!busy_);
     for (auto widget :
          std::initializer_list<QWidget *>{eventInput_, resource_, x_, y_, mip_, layer_, sample_})
         widget->setEnabled(!busy_);
@@ -416,6 +431,8 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
     if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
                   result.value("execution", Json()) != Json(std::to_string(event_))))
         throw std::runtime_error("History result does not match the DX12 execution selection");
+    if (dx12_ && result.value("depth_roundtrip", Json::object()).value("requested", false) != depthRoundtrip_->isChecked())
+        throw std::runtime_error("History result does not match the D32S8 depth refresh mode");
     auto rows = result.at("history");
     if (dx12_)
         for (const auto &boundary : result.value("depth_event_boundaries", Json::array()))
@@ -475,6 +492,10 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(sample_->value()));
     if (result.value("partial", false))
         summary_->setText("Partial history · " + summary_->text());
+    if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
+        summary_->setText(summary_->text() +
+            QString("\nExperimental D32S8 depth refresh: %1 completed copies for the selected event. "
+                    "Other events and intermediate fragments are not validated.").arg(scalar(refresh.value("copies", Json()))));
     const auto consistency = scope.value("replay_consistency", Json::object());
     const auto consistencyStatus = consistency.value("status", "not_measured");
     if (consistencyStatus == "selected_texel_changed")

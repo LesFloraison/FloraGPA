@@ -5696,8 +5696,8 @@ separate options row. Both default off and are mutually exclusive. The option
 is disabled while work runs, clears on event/session/experiment changes and
 is hidden for DX11. Changing it invalidates the request; incoming traces must
 also report the matching refresh mode. Completed-copy counts and the limited
-correctness scope remain visible and survive JSON export. Pixel History has
-not yet been integrated with this option.
+correctness scope remain visible and survive JSON export. Pixel History was
+not integrated at this milestone; its subsequent integration is recorded below.
 
 Real CLI comparison `hellblade-depth-roundtrip-debug1/{disabled,enabled}` uses
 execution **36222**, automatic pixel invocation at **(456,206)**, sample 0.
@@ -5800,6 +5800,49 @@ the tiny RDC and the bound-shader export directory, outside Git. The actual
 original GPU lowering and PS alpha discrepancy remain unresolved; further
 work must retain the original program context rather than infer it from the
 minimal expression.
+
+### Selected depth refresh in Pixel History
+
+The same default-off `--depth-roundtrip` option now supports `history`, and
+the existing Pixel History panel exposes **D32S8 depth refresh (experimental)**.
+The selected-event eligibility checks remain unchanged; this does not refresh
+every Draw in a history. Reports retain that limitation alongside the completed
+roundtrip count. The UI rejects stale or differently configured results, disables
+the option while busy, resets it for context/event changes and hides it for DX11.
+
+The actual Hellblade2 query `hellblade-depth-roundtrip-history1` selects execution
+**36222**, resource object **2152463529088** / creation **511789**, pixel
+**(456,206)**, mip/layer/sample **0**. All **five** history records are exactly
+equal to the earlier report that exposed the boundary contradiction, including
+their values, test flags and execution mapping. The restored selected texel is
+now nonzero both before history and after restoration; both observations exactly
+equal the last record's event-after color and the independently read texture.
+`history_boundary.status` changes from `differs_from_selected_texel` to
+`matches_selected_texel`. The previous boundary-conflict partial flag is no
+longer needed. This is selected-boundary evidence, not validation of every
+intermediate fragment or complete history.
+
+The report records **three** completed roundtrips and loads no GPA/Python
+modules. The fourteen-patch DLL remains
+`02a0cca7fe646be42a716b4c1f1f65d7caf85080675e9eb951203bf34a2815ea`.
+The counter named `copies` counts completed copy-out/copy-back pairs, not
+individual CopyResource commands or performance samples.
+
+Selecting the final row locates **36222 / action 0**. **Debug PS** passes its
+pixel/sample/primitive/indirect-action selection and refresh mode into the
+existing debugger. Selecting the earlier Draw at **12574** does not carry the
+selected-event refresh mode to that different execution. This transfer does
+not infer a fragment index or instance identity. The PS numerical discrepancy
+documented above remains unresolved.
+
+Focused UI checks use the real history report for values, navigation, mode
+transfer, stale/mismatched rejection, reset and JSON export. A separate
+lightweight BF1 workspace check verifies the MainWindow signal connection
+without launching replay; it is transport evidence, not BF1 D32S8 eligibility.
+Together: **4 passed**, **0 failed**, **1,312 ms**, including setup/cleanup.
+Request-scope checks: **3 passed**, **8 ms**. Builds **376–377** pass. Screenshot
+`depth-roundtrip-history-ui1/depth-roundtrip-history.png` was inspected. No
+additional GPU replay was run for the UI checks.
 
 ### Full feature acceptance
 

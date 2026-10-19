@@ -7,6 +7,7 @@ class QLineEdit;
 class QSpinBox;
 class QTreeWidget;
 class QPlainTextEdit;
+class QCheckBox;
 namespace flora {
 bool historyBackendCompatible(const QString &path);
 class PixelHistoryView final : public QWidget {
@@ -29,7 +30,8 @@ class PixelHistoryView final : public QWidget {
     void readRequested();
     void cancelRequested();
     void eventRequested(qulonglong event, qint64 indirectAction = -1);
-    void pixelDebugRequested(qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 indirectAction = -1);
+    void pixelDebugRequested(qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 indirectAction = -1,
+                             bool depthRoundtrip = false);
     void inspectionFinished(bool success);
 
   private:
@@ -48,5 +50,6 @@ class PixelHistoryView final : public QWidget {
     QLabel *summary_;
     QTreeWidget *records_;
     QPlainTextEdit *details_;
+    QCheckBox *depthRoundtrip_;
 };
 } // namespace flora

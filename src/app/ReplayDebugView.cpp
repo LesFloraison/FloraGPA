@@ -608,6 +608,9 @@ void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12
     }
     updateActions();
 }
+void ReplayDebugView::selectDepthRoundtrip(bool enabled) {
+    if (depthRoundtrip_ && !busy_) depthRoundtrip_->setChecked(dx12_ && enabled);
+}
 void ReplayDebugView::setWorkerBusy(bool busy) {
     busy_ = busy;
     updateActions();

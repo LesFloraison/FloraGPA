@@ -1278,8 +1278,8 @@ Json rdcLoadedModules() {
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     if (job.value("depth_roundtrip", false) &&
-        ((action != "texture" && action != "debug-pixel") || job.value("readonly_depth_snapshot", false)))
-        throw std::runtime_error("Depth roundtrip requires texture or debug-pixel analysis without read-only depth snapshots");
+        ((action != "texture" && action != "debug-pixel" && action != "history") || job.value("readonly_depth_snapshot", false)))
+        throw std::runtime_error("Depth roundtrip requires texture, history or debug-pixel analysis without read-only depth snapshots");
     if (job.value("readonly_depth_snapshot", false) && action != "texture" && action != "debug-pixel")
         throw std::runtime_error("Read-only depth snapshots are limited to texture and debug-pixel analysis");
     if (job.value("pixel_history_reference", false) &&
@@ -2174,6 +2174,10 @@ Json runRdcJob(const Json &job) {
                            : d16History ? "D16 event boundaries use the Flora decoding patch. Intermediate fragment depths come from a D32 scratch DSV and may differ in quantization or depth bias; they are not observed D16 storage values. Depth-test reasons include backend comparisons of reconstructed depths, not independent per-fragment hardware queries."
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
+    if (session.depthRoundtripCopies)
+        result["history_scope"]["limitations"].push_back(
+            "Experimental depth refresh applies only to eligible isolated replays of the selected event. "
+            "It does not normalize other history events or validate intermediate fragments.");
     if (unreliableD16 || reconstructedDepthValues || consistency.at("status") != "selected_texel_unchanged" ||
         boundary.at("status") == "differs_from_selected_texel")
         result["partial"] = true;

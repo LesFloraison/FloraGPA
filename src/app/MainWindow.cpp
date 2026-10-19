@@ -1360,10 +1360,11 @@ void MainWindow::buildUi() {
                 centerTabs_->setCurrentWidget(debugTabs);
             });
     connect(history_, &PixelHistoryView::pixelDebugRequested, this,
-            [this, debugTabs, locateAnalysisAction](qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 action) {
+            [this, debugTabs, locateAnalysisAction](qulonglong event, int x, int y, int sample, uint32_t primitive, qint64 action, bool depthRoundtrip) {
                 if (!locateAnalysisAction(event, action)) return;
                 replayDebug_[1]->selectPixel(x, y, sample);
                 replayDebug_[1]->selectPrimitive(primitive);
+                replayDebug_[1]->selectDepthRoundtrip(depthRoundtrip);
                 debugTabs->setCurrentWidget(replayDebug_[1]);
                 centerTabs_->setCurrentWidget(debugTabs);
             });
