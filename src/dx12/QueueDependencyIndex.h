@@ -19,6 +19,9 @@ class QueueDependencyIndex final {
 
   private:
     std::vector<Operation> frameOperations_;
+    // Includes initialization nodes; unresolved/cyclic nodes cannot establish
+    // completion of a producer on a different queue.
+    std::map<uint64_t, Operation> resolvedOperations_;
     nlohmann::json report_;
     struct CompletionSource {
         uint64_t value{}, record{}, queue{}, requiredRecord{};
@@ -40,5 +43,8 @@ class QueueDependencyIndex final {
     // Required CPU submission boundary for an observed completed Fence value.
     // This does not claim the GPU has actually reached that value yet.
     nlohmann::json observationDependency(uint64_t fence, uint64_t value, uint64_t record) const;
+    // Strict queue/Fence dependency, including initialization. False also covers
+    // missing, ambiguous or cyclic nodes; CPU record order alone is no proof.
+    bool precedes(uint64_t producer, uint64_t consumer, const CancelCheck &cancelled = {}) const;
 };
 } // namespace flora::dx12

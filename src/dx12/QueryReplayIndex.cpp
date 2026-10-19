@@ -1,5 +1,6 @@
 #include "QueryReplayIndex.h"
 #include "NativeResources.h"
+#include "QueueDependencyIndex.h"
 #include <d3d12.h>
 #include <set>
 
@@ -11,9 +12,11 @@ constexpr uint64_t create = 0x127937e9603edULL, begin = 0x1ae3c6601dd2cULL,
                    end = 0x1ae3c64a8e138ULL, resolve = 0x1ae3cdc411c2dULL;
 void require(bool valid, const char *message) { if (!valid) throw std::runtime_error(message); }
 struct Heap {
+    struct Completion { uint32_t type{}; uint64_t execution{}, submission{}, queue{}; };
     uint64_t creation{};
     D3D12_QUERY_HEAP_DESC desc{};
-    std::map<uint32_t, uint32_t> active, completed;
+    std::map<uint32_t, uint32_t> active;
+    std::map<uint32_t, Completion> completed;
     std::map<std::pair<uint32_t, uint32_t>, std::set<uint64_t>> recordedEnds;
 };
 // Resource recipes are indexed without creating a device or reading resource
@@ -86,6 +89,18 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                                  const CancelCheck &cancelled) {
     std::map<uint64_t, std::vector<Heap>> heaps;
     const Destinations destinations(directory, cancelled);
+    std::optional<QueueDependencyIndex> dependencies;
+    std::map<std::pair<uint64_t, uint64_t>, bool> orderedSubmissions;
+    const auto ordered = [&](const Heap::Completion &producer, const SubmittedList &consumer) {
+        if (producer.queue == consumer.queue) return true;
+        const auto key = std::pair{producer.submission, consumer.submission};
+        if (const auto found = orderedSubmissions.find(key); found != orderedSubmissions.end()) return found->second;
+        if (!dependencies) dependencies.emplace(directory, 0, cancelled);
+        const bool result = dependencies->precedes(key.first, key.second, cancelled);
+        if (orderedSubmissions.size() >= 4096) orderedSubmissions.clear();
+        orderedSubmissions.emplace(key, result);
+        return result;
+    };
     const auto heapAt = [&](uint64_t object, uint64_t record) -> Heap & {
         const auto found = heaps.find(object);
         require(found != heaps.end(), "Query heap creation is missing or invalid");
@@ -154,7 +169,7 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                     } else {
                         require(type == D3D12_QUERY_TYPE_TIMESTAMP || (heap.active.contains(start) && heap.active.at(start) == type),
                                 "Query end has no matching replayed begin");
-                        heap.active.erase(start); heap.completed[start] = type;
+                        heap.active.erase(start); heap.completed[start] = {type, execution, list.submission, list.queue};
                     }
                     continue;
                 }
@@ -163,8 +178,8 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                 require(start <= heap.desc.Count && count <= heap.desc.Count - start, "Query resolve exceeds heap bounds");
                 require(count <= 1000000, "Query coverage range exceeds one million slots");
                 entry.update({{"count", count}, {"destination", std::to_string(destination)}, {"destination_offset", std::to_string(offset)}});
-                Json ranges = Json::array(), examples = Json::array();
-                uint32_t missing{}, recordedMissing{}, rangeStart{}, rangeCount{};
+                Json ranges = Json::array(), examples = Json::array(), unorderedExamples = Json::array();
+                uint32_t missing{}, recordedMissing{}, rangeStart{}, rangeCount{}, unorderedCount{}, crossQueueCount{};
                 const auto flush = [&] {
                     if (rangeCount) ranges.push_back({{"start", rangeStart}, {"count", rangeCount}});
                     rangeCount = 0;
@@ -172,7 +187,7 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                 for (uint32_t j = 0; j < count; ++j) {
                     if (j % 1024 == 0) checkCancellation(cancelled);
                     const auto slot = start + j;
-                    if (!heap.completed.contains(slot) || heap.completed.at(slot) != type) {
+                    if (!heap.completed.contains(slot) || heap.completed.at(slot).type != type) {
                         if (!rangeCount) rangeStart = slot;
                         ++rangeCount; ++missing;
                         if (const auto ends = heap.recordedEnds.find({type, slot}); ends != heap.recordedEnds.end()) {
@@ -186,16 +201,34 @@ QueryReplayIndex::QueryReplayIndex(const StreamDirectory &directory, const Submi
                                 examples.push_back({{"index", slot}, {"end_record_count", ends->second.size()}, {"first_end_records", std::move(sources)}});
                             }
                         }
-                    } else flush();
+                    } else {
+                        flush();
+                        const auto &producer = heap.completed.at(slot);
+                        if (producer.queue != list.queue) ++crossQueueCount;
+                        if (!ordered(producer, list)) {
+                            ++unorderedCount;
+                            if (unorderedExamples.size() < 32)
+                                unorderedExamples.push_back({{"index", slot}, {"end_execution", std::to_string(producer.execution)},
+                                    {"producer_submission", std::to_string(producer.submission)}, {"producer_queue", std::to_string(producer.queue)}});
+                        }
+                    }
                 }
                 flush();
                 entry.update({{"completed_count", count - missing}, {"missing_count", missing}, {"missing_ranges", std::move(ranges)},
                     {"missing_slots_with_recorded_end", recordedMissing}, {"missing_slots_without_recorded_end", missing - recordedMissing},
-                    {"missing_with_recorded_end_examples", std::move(examples)}});
+                    {"missing_with_recorded_end_examples", std::move(examples)},
+                    {"cross_queue_completed_count", crossQueueCount}, {"unordered_completed_count", unorderedCount},
+                    {"unordered_completed_examples", std::move(unorderedExamples)},
+                    {"completion_order_verified", !missing && !unorderedCount}});
                 if (missing) {
                     entry["status"] = "missing_query_results";
                     entry["reason"] = "ResolveQueryData execution " + std::to_string(execution) + " (record " + std::to_string(record) +
                         ") lacks " + std::to_string(missing) + " of " + std::to_string(count) + " completed query results from heap " + std::to_string(object);
+                }
+                if (unorderedCount) {
+                    entry["status"] = "unresolved_query_dependency";
+                    entry["reason"] = "ResolveQueryData execution " + std::to_string(execution) + " has " +
+                        std::to_string(unorderedCount) + " recorded query completions on another queue without a proven Fence dependency";
                 }
                 entry["destination_resource"] = destinations.describe(destination, record);
                 const auto &resource = entry.at("destination_resource");
@@ -222,6 +255,7 @@ nlohmann::json QueryReplayIndex::firstIssue(uint64_t execution, bool before) con
 nlohmann::json QueryReplayIndex::information() const {
     Json entries = Json::array(); for (const auto &[id, entry] : entries_) entries.push_back(entry);
     return {{"scope", "serialized_submission_order"}, {"historical_values_reconstructed", false},
+        {"completion_order_scope", "Each observed EndQuery must precede its resolve on the same queue or through captured single-writer monotonic Fence dependencies. This does not certify query-slot reuse, concurrent writers, CPU waits or all resource hazards."},
         {"cross_queue_dependencies_verified", false}, {"resolves_and_issues", std::move(entries)}};
 }
 }

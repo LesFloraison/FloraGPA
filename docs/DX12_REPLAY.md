@@ -5844,6 +5844,56 @@ Request-scope checks: **3 passed**, **8 ms**. Builds **376–377** pass. Screens
 `depth-roundtrip-history-ui1/depth-roundtrip-history.png` was inspected. No
 additional GPU replay was run for the UI checks.
 
+### Query completion ordering and Talos resource-data audit
+
+Query coverage now retains the execution, submission and queue of each observed
+`EndQuery`. A resolve on another queue requires a path through captured queue
+order and single-writer monotonic Fence dependencies. CPU record order alone,
+an already-satisfied initial Fence value, a Signal before the query submission,
+and cyclic dependencies cannot establish that path. Missing, ambiguous or
+unresolved graph nodes cannot establish it either. The graph includes
+initialization operations and supports cancellation; repeated submission-pair
+lookups use a bounded cache, built only when a cross-queue completion occurs.
+
+Reports distinguish missing results from `unresolved_query_dependency`, retain
+bounded examples of the latter with decimal-string identities, and expose
+`completion_order_verified`, `cross_queue_completed_count` and
+`unordered_completed_count`. Existing session capability and native preflight
+paths reject the unresolved dependency before replay. The legacy
+`completed_count` remains the number of observed matching EndQuery slots;
+it is not by itself a synchronization guarantee. The report's broader
+`cross_queue_dependencies_verified` remains false: query-slot reuse, concurrent
+writers, CPU waits and all resource hazards are not certified by this check.
+This is consistent with the same-queue ordering requirement described in
+[Microsoft's query-resolution specification](https://microsoft.github.io/DirectX-Specs/d3d/D3D12CpuTimelineQueryResolution.html).
+
+Seven CPU fixtures cover same-queue order, absent synchronization, initial-value
+waits, premature Signals, direct and transitive Fence dependencies, and a cycle.
+They also check the rejecting session capability, 64-bit provenance and
+cancellation. With the existing query-boundary/identity and queue-dependency
+checks: **11 passed**, **0 failed**, **99 ms**, including setup/cleanup;
+`query-completion-order-tests1.txt` records the run. A separate CPU-only pass over
+the actual directories takes **814 ms**: BF1 has **5** resolve entries,
+Hellblade2 **240**, and Talos **2**. Their observed completed results are all
+same-queue. Talos still lacks **140 / 146** results at executions **16001 / 19409**;
+no new unordered completion is reported. Evidence is in
+`query-completion-order-captures1`. No GPU replay was needed for this change.
+Build **379** passes for the workspace, CLI, Worker and focused test target;
+build 378 built the workspace/tests but then stopped at a misspelled CLI target.
+
+The accompanying Talos audit maps `resources` read-only and scans every byte
+offset wholly inside its **3,679** referenced kind-0 CopyOperation data views.
+The views contain **1,590,966,351** bytes within a **1,591,201,807**-byte file;
+scanning uses bounded 4 MiB chunks. No raw 64-bit value falls within either
+query destination GPU-address range: **12696616960 + 65536** or
+**12696485888 + 65536**. This complements the earlier packet-payload audit,
+but excludes unreferenced bytes, encoded/derived addresses and values split
+across views. It does not prove that subsequent GPU work cannot depend on
+query results and does not recover the missing values. Evidence is retained
+in `talos-query-blob-addresses1.json` outside Git. No missing resolve is skipped,
+no substitute query values are generated, and the complete Talos replay
+acceptance item remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

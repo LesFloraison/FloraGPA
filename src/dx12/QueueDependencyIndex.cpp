@@ -216,6 +216,11 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
         return reached;
     };
     const auto acyclic = visit(false), resolved = visit(true);
+    for (size_t n = 0; n < nodes.size(); ++n) {
+        if (n % 1024 == 0) checkCancellation(cancelled);
+        if (resolved[n])
+            resolvedOperations_.emplace(nodes[n].record, Operation{nodes[n].record, nodes[n].predecessors});
+    }
     for (const auto &node : nodes)
         if (node.record > initializationCount_)
             frameOperations_.push_back({node.record, node.predecessors});
@@ -264,6 +269,23 @@ QueueDependencyIndex::QueueDependencyIndex(const StreamDirectory &directory, uin
          "This is a dependency index, not an executed schedule. CPU event/timeout semantics, "
          "object aliases, memory hazards and complete command-list coverage are not certified. "
          "An initial-value wait does not order work on another queue."}};
+}
+bool QueueDependencyIndex::precedes(uint64_t producer, uint64_t consumer, const CancelCheck &cancelled) const {
+    checkCancellation(cancelled);
+    if (producer == consumer || !resolvedOperations_.contains(producer) || !resolvedOperations_.contains(consumer))
+        return false;
+    std::vector<uint64_t> pending{consumer};
+    std::set<uint64_t> visited;
+    while (!pending.empty()) {
+        if (visited.size() % 1024 == 0) checkCancellation(cancelled);
+        const auto current = pending.back(); pending.pop_back();
+        if (!visited.insert(current).second) continue;
+        for (const auto predecessor : resolvedOperations_.at(current).predecessors) {
+            if (predecessor == producer) return true;
+            if (predecessor && resolvedOperations_.contains(predecessor)) pending.push_back(predecessor);
+        }
+    }
+    return false;
 }
 Json QueueDependencyIndex::observationDependency(uint64_t fence, uint64_t value, uint64_t record) const {
     Json out{{"record", std::to_string(record)},

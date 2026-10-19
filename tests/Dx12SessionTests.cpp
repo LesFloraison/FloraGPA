@@ -1477,6 +1477,95 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::MissingData);
         QCOMPARE(session->executionDetails(3).at("query_replay_coverage"), queries.details(3));
     }
+    void queryCompletionOrdering_data() {
+        QTest::addColumn<QString>("mode"); QTest::addColumn<bool>("ordered");
+        QTest::newRow("same queue") << QString("same") << true;
+        QTest::newRow("CPU order only") << QString("unordered") << false;
+        QTest::newRow("initial fence value") << QString("initial") << false;
+        QTest::newRow("signal before query") << QString("early") << false;
+        QTest::newRow("queue fence dependency") << QString("fence") << true;
+        QTest::newRow("transitive fence dependency") << QString("transitive") << true;
+        QTest::newRow("cyclic dependency") << QString("cycle") << false;
+    }
+    void queryCompletionOrdering() {
+        QFETCH(QString, mode); QFETCH(bool, ordered);
+        using Json = nlohmann::json;
+        QTemporaryDir temp; const auto path = fixture(temp);
+        QByteArray packets; uint64_t record{};
+        const uint64_t heap = UINT64_MAX - 20, queue = UINT64_MAX - 30, fence = UINT64_MAX - 40;
+        const auto packet = [&](uint64_t type, const QByteArray &bytes) {
+            qword(packets, type); qword(packets, ++record); qword(packets, 0); qword(packets, bytes.size()); packets += bytes;
+            return record;
+        };
+        QByteArray p; qword(p, 1); p.append(char(1));
+        dword(p, D3D12_QUERY_HEAP_TYPE_TIMESTAMP); dword(p, 1); dword(p, 0);
+        auto iid = __uuidof(ID3D12QueryHeap); p.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+        p.append(char(1)); qword(p, 1); qword(p, heap); dword(p, 0); packet(0x127937e9603edULL, p);
+        p.clear(); qword(p, 1); p.append(char(1));
+        D3D12_HEAP_PROPERTIES properties{}; properties.Type = D3D12_HEAP_TYPE_READBACK;
+        p.append(reinterpret_cast<const char *>(&properties), sizeof(properties)); dword(p, 0); p.append(char(1));
+        D3D12_RESOURCE_DESC desc{}; desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; desc.Width = 8;
+        desc.Height = desc.DepthOrArraySize = desc.MipLevels = desc.SampleDesc.Count = 1; desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        p.append(reinterpret_cast<const char *>(&desc), sizeof(desc)); dword(p, D3D12_RESOURCE_STATE_COPY_DEST); p.append(char(0));
+        iid = __uuidof(ID3D12Resource); p.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+        p.append(char(1)); qword(p, 1); qword(p, 42); dword(p, 0); packet(0x12793f58d8f79ULL, p);
+        const auto createFence = [&](uint64_t object, uint64_t initial) {
+            QByteArray b; qword(b, 1); qword(b, initial); dword(b, 0);
+            const auto id = __uuidof(ID3D12Fence); b.append(reinterpret_cast<const char *>(&id), sizeof(id));
+            b.append(char(1)); qword(b, 1); qword(b, object); dword(b, 0); packet(0x127930cf4f3a0ULL, b);
+        };
+        const auto sync = [&](bool wait, uint64_t q, uint64_t f) {
+            QByteArray b; qword(b, q); qword(b, f); qword(b, 1); dword(b, 0);
+            return packet(wait ? 0x12548db3bfde2ULL : 0x12548dab1bf2dULL, b);
+        };
+        for (uint64_t list : {10, 11}) {
+            p.clear(); qword(p, list); qword(p, 17); qword(p, 0); dword(p, 0); packet(0x1ae3c721c351aULL, p);
+            p.clear(); qword(p, list); qword(p, heap); dword(p, D3D12_QUERY_TYPE_TIMESTAMP); dword(p, 0);
+            if (list == 11) { dword(p, 1); qword(p, 42); qword(p, 0); }
+            packet(list == 10 ? 0x1ae3c64a8e138ULL : 0x1ae3cdc411c2dULL, p);
+            p.clear(); qword(p, list); dword(p, 0); packet(0x1ae3cd6acf667ULL, p);
+        }
+        const auto submit = [&](uint64_t q, uint64_t list) {
+            QByteArray b; qword(b, q); dword(b, 1); b.append(char(1)); qword(b, 1); qword(b, list);
+            return packet(0x125482975df48ULL, b);
+        };
+        createFence(fence, mode == "initial" ? 1 : 0); createFence(fence + 1, 0);
+        if (mode == "early") sync(false, queue, fence);
+        if (mode == "cycle") sync(true, queue, fence + 1);
+        const auto producer = submit(queue, 10);
+        if (mode == "fence" || mode == "transitive" || mode == "cycle") sync(false, queue, fence);
+        if (mode == "transitive") { sync(true, queue + 2, fence); sync(false, queue + 2, fence + 1); }
+        if (mode != "same" && mode != "unordered") sync(true, queue + 1, mode == "transitive" ? fence + 1 : fence);
+        const auto consumer = submit(mode == "same" ? queue : queue + 1, 11);
+        if (mode == "cycle") sync(false, queue + 1, fence + 1);
+        write(path + "/thread-7-0", packets);
+        dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+        const dx12::QueueDependencyIndex dependencies(directory);
+        QCOMPARE(dependencies.precedes(producer, consumer), ordered);
+        QVERIFY(!dependencies.precedes(consumer, producer));
+        QVERIFY(!dependencies.precedes(producer, producer));
+        QVERIFY(!dependencies.precedes(0, consumer));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, dependencies.precedes(producer, consumer, [] { return true; }));
+        const dx12::SubmissionIndex submissions(directory); const dx12::QueryReplayIndex queries(directory, submissions);
+        const auto report = queries.details(2);
+        QCOMPARE(report.at("status"), Json(ordered ? "covered" : "unresolved_query_dependency"));
+        QCOMPARE(report.at("completion_order_verified"), Json(ordered));
+        QCOMPARE(report.at("completed_count"), Json(1)); QCOMPARE(report.at("missing_count"), Json(0));
+        QCOMPARE(report.at("unordered_completed_count"), Json(ordered ? 0 : 1));
+        QCOMPARE(report.at("cross_queue_completed_count"), Json(mode == "same" ? 0 : 1));
+        QVERIFY(queries.firstIssue(2, true).is_null());
+        QCOMPARE(queries.firstIssue(2, false).is_null(), ordered);
+        if (!ordered) {
+            const auto &source = report.at("unordered_completed_examples")[0];
+            QCOMPARE(source.at("producer_queue"), Json(std::to_string(queue)));
+            QCOMPARE(source.at("producer_submission"), Json(std::to_string(producer)));
+            QCOMPARE(source.at("end_execution"), Json("1"));
+            const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+            ReplaySelection selection; selection.execution = 2;
+            const auto capability = session->capability(ReplayFeature::Replay, selection);
+            QVERIFY(!capability.supported()); QVERIFY(capability.reason.find("Fence dependency") != std::string::npos);
+        }
+    }
     void queryResultLayouts() {
         QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_OCCLUSION), 8U);
         QCOMPARE(dx12::queryResultStride(D3D12_QUERY_TYPE_PIPELINE_STATISTICS), 88U);
