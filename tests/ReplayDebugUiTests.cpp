@@ -23,6 +23,7 @@
 #include <QTreeWidget>
 #include <QTextBlock>
 #include <QtTest>
+#include <cmath>
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
@@ -52,6 +53,47 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void talosDiscardSample() {
+        const auto root = qEnvironmentVariable("FLORA_TALOS_FILTER_DEBUG");
+        if (root.isEmpty()) QSKIP("Set the Talos filter debug evidence directory");
+        const auto report = read(root + "/native-debug/result.json");
+        QCOMPARE(report.at("execution"), Json("14684"));
+        QCOMPARE(report.at("step_count"), Json(46));
+        QCOMPARE(report.at("replay_policy").at("optimisation"), Json("balanced"));
+        QCOMPARE(report.at("replay_policy").at("dx12_discard_policy"), Json("native_api"));
+        QCOMPARE(report.at("gpu_reference").at("value").at("floatValue").at(3), Json(1.0));
+        ReplayDebugView view("ps"); view.resize(1450, 950); view.show();
+        view.setContext("talos-filter-native", 14684, true); view.selectPixel(1438, 0, 0);
+        QVERIFY(view.finish(view.requestId(), report));
+        QSignalSpy errors(&view, &ReplayDebugView::error);
+        auto instruction = view.findChild<QLineEdit *>("debugInstruction");
+        instruction->setText("21"); action(view, "debugToggleInstructionBreakpoint")->trigger();
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(21));
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(22));
+        auto watch = view.findChild<QLineEdit *>("debugWatchExpression");
+        watch->setText("TEXCOORD.x"); action(view, "debugAddWatch")->trigger();
+        auto values = view.findChild<QTreeWidget *>("debugWatchValues");
+        QCOMPARE(values->topLevelItemCount(), 1);
+        QVERIFY(std::abs(values->topLevelItem(0)->text(2).toDouble() - 0.7492187023162842) < 0.0000001);
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(43);
+        watch->setText("SV_Target.w"); action(view, "debugAddWatch")->trigger();
+        QCOMPARE(values->topLevelItemCount(), 2);
+        QVERIFY(std::abs(values->topLevelItem(1)->text(2).toDouble() - 1.0000001192092896) < 0.000001);
+        QCOMPARE(view.exportReport().at("replay_policy"), report.at("replay_policy"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/talos-filter-native.png"));
+        const auto diagnostic = read(root + "/diagnostic-debug/result.json");
+        QVERIFY(view.finish(view.requestId(), diagnostic));
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(43);
+        bool notice{};
+        for (auto label : view.findChildren<QLabel *>())
+            notice |= label->isVisible() && label->text().contains("Diagnostic discard patterns are enabled");
+        QVERIFY(notice);
+        QCOMPARE(view.exportReport().at("replay_policy"), diagnostic.at("replay_policy"));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/talos-filter-diagnostic.png"));
+        QVERIFY(errors.isEmpty());
+    }
     void preparedComputeInputs() {
         const auto path = qEnvironmentVariable("FLORA_PREPARED_COMPUTE_REPORT");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 36775 prepared compute report");

@@ -83,6 +83,10 @@ RdcBufferRange rdcBufferRange(const Json &job) {
 uint32_t rdcReplayOptimisation(const Json &job) {
     const auto mode = job.value("replay_optimisation", Json("balanced"));
     if (!mode.is_string()) throw std::runtime_error("Replay optimisation must be a string");
+    const auto patterns = job.value("discard_patterns", Json(false));
+    if (!patterns.is_boolean()) throw std::runtime_error("Discard pattern selection must be a boolean");
+    if (patterns == true && mode == "fastest")
+        throw std::runtime_error("Fastest replay does not support diagnostic discard patterns");
     constexpr const char *names[]{"none", "conservative", "balanced", "fastest"};
     for (uint32_t i = 0; i < std::size(names); ++i) if (mode == names[i]) return i;
     throw std::runtime_error("Replay optimisation must be none, conservative, balanced or fastest");
@@ -107,6 +111,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
              {"stage", "VSOut"},
              {"api_validation", false},
              {"replay_optimisation", "balanced"},
+             {"discard_patterns", false},
              {"isolate_missing_queries", false},
              {"readonly_depth_snapshot", false},
              {"depth_roundtrip", false},

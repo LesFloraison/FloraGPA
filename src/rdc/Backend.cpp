@@ -192,6 +192,11 @@ class Session {
     uint32_t preparedComputePatch{};
     uint32_t placedHeapRestorePatch{};
     uint32_t discardLayoutPatch{};
+    uint32_t discardPatternControlPatch{};
+    using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
+    using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
+    SetDiscardPatterns setDiscardPatterns{};
+    DiscardPatternCount discardPatternsSkipped{};
     bool computePrepared{};
     using PrepareCompute = uint32_t (RENDERDOC_CC *)(IReplayController *, uint32_t);
     PrepareCompute prepareCompute{};
@@ -293,6 +298,12 @@ class Session {
             discardLayoutPatch = patch();
             if (discardLayoutPatch != 1) throw std::runtime_error("Unsupported discard layout patch version");
         }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12DiscardPatternControlVersion"))) {
+            discardPatternControlPatch = patch();
+            if (discardPatternControlPatch != 1) throw std::runtime_error("Unsupported discard pattern control version");
+            setDiscardPatterns = symbol<SetDiscardPatterns>("RENDERDOC_SetFloraDx12DiscardPatternsEnabled");
+            discardPatternsSkipped = symbol<DiscardPatternCount>("RENDERDOC_GetFloraDx12DiscardPatternsSkipped");
+        }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
                 throw std::runtime_error("Read-only depth snapshots require the Flora RenderDoc snapshot patch version 1");
@@ -351,6 +362,13 @@ class Session {
             if (!controller)
                 throw std::runtime_error("RenderDoc did not create a replay controller");
             const auto api = controller->GetAPIProperties().pipelineType;
+            if (api == GraphicsAPI::D3D12) {
+                const bool patterns = job.value("discard_patterns", false);
+                if (setDiscardPatterns) setDiscardPatterns(patterns);
+                else if (!patterns && options.optimisation != ReplayOptimisationLevel::Fastest)
+                    throw std::runtime_error("Native DX12 discard replay requires the Flora discard-pattern control patch version 1; select a current patched library");
+            } else if (job.value("discard_patterns", false))
+                throw std::runtime_error("Diagnostic discard pattern selection requires DX12");
             if (job.value("readonly_depth_snapshot", false) && api != GraphicsAPI::D3D12)
                 throw std::runtime_error("Read-only depth snapshots require a DX12 independent capture");
             if (job.value("depth_roundtrip", false) && api != GraphicsAPI::D3D12)
@@ -1388,7 +1406,8 @@ Json runRdcJob(const Json &job) {
         {"query_isolation", queryPolicy},
         {"replay_policy", {{"optimisation", job.value("replay_optimisation", "balanced")},
             {"optimisation_enum", optimisation},
-            {"dx12_discard_pattern_fills", dx12 ? Json(optimisation != 3) : Json()},
+            {"dx12_discard_pattern_fills", dx12 ? Json(job.value("discard_patterns", false) && optimisation != 3) : Json()},
+            {"dx12_discard_policy", dx12 ? Json(job.value("discard_patterns", false) ? "diagnostic_pattern" : "native_api") : Json()},
             {"scope", "RenderDoc replay policy; includes initial-content restoration and diagnostic work. Changing policy can change observations and does not establish capture fidelity."}}},
         {"backend_version", session.version},
         {"backend_commit", session.commit},
@@ -1397,6 +1416,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
         {"backend_dx12_placed_heap_restore_patch", session.placedHeapRestorePatch},
         {"backend_dx12_discard_layout_patch", session.discardLayoutPatch},
+        {"backend_dx12_discard_pattern_control_patch", session.discardPatternControlPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -1414,6 +1434,10 @@ Json runRdcJob(const Json &job) {
     if (!queryPolicy.is_null()) result["frame_complete"] = false;
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        if (dx12 && session.discardPatternsSkipped) {
+            result["replay_policy"]["discard_pattern_fills_skipped"] = std::to_string(session.discardPatternsSkipped());
+            result["replay_policy"]["discard_scope"] = "Captured discard commands/barriers are preserved. Skipped fills are additional diagnostic writes across this analysis request, not recovered historical contents. Discarded values remain undefined.";
+        }
         if (session.depthRoundtripCopies) {
             result["depth_roundtrip"] = {
                 {"requested", true}, {"copies", std::to_string(session.depthRoundtripCopies())},

@@ -81,6 +81,13 @@ class RdcJobTests : public QObject {
         for (const auto &mode : {Json(3), Json(true), Json(nullptr), Json("fast"), Json("")})
             QVERIFY_THROWS_EXCEPTION(std::exception,
                 prepare(dir.path(), "success", {{"replay_optimisation", mode}}));
+        QCOMPARE(prepare(dir.path(), "success").at("discard_patterns"), Json(false));
+        QCOMPARE(prepare(dir.path(), "success", {{"discard_patterns", true}}).at("discard_patterns"), Json(true));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success",
+            {{"discard_patterns", true}, {"replay_optimisation", "fastest"}}));
+        for (const auto &value : {Json(1), Json("false"), Json(nullptr)})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                prepare(dir.path(), "success", {{"discard_patterns", value}}));
     }
     void bufferRangePreparation() {
         QTemporaryDir dir;

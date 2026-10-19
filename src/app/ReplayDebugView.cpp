@@ -798,6 +798,8 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     QStringList warnings;
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
+    if (dx12_ && result.value("replay_policy", Json::object()).value("dx12_discard_policy", "") == "diagnostic_pattern")
+        warnings.append("Diagnostic discard patterns are enabled. Shader reads of discarded data can differ from native replay.");
     if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
         warnings.prepend(QString("Experimental D32S8 depth refresh: %1 completed copies. "
                                  "Original depth writes preserved; full replay correctness is not established.")

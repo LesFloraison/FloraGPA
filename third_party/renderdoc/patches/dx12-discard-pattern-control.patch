@@ -1,0 +1,47 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_debug.cpp b/renderdoc/driver/d3d12/d3d12_debug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_debug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_debug.cpp
+@@ -23,6 +23,7 @@
+  ******************************************************************************/
+ 
+ #include "d3d12_debug.h"
++#include <atomic>
+ #include "common/shader_cache.h"
+ #include "data/resource.h"
+ #include "driver/dx/official/d3dcompiler.h"
+@@ -1357,6 +1358,23 @@
+   return 1;
+ }
+ 
++// Only controls the additional diagnostic writes. The original discard call
++// or enhanced barrier has already been issued by the replay wrapper.
++static std::atomic<bool> floraDiscardPatternsEnabled(true);
++static std::atomic<uint64_t> floraDiscardPatternsSkipped(0);
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12DiscardPatternControlVersion()
++{
++  return 1;
++}
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraDx12DiscardPatternsEnabled(bool enabled)
++{
++  floraDiscardPatternsEnabled.store(enabled);
++}
++extern "C" RENDERDOC_API uint64_t RENDERDOC_CC RENDERDOC_GetFloraDx12DiscardPatternsSkipped()
++{
++  return floraDiscardPatternsSkipped.load();
++}
++
+ void D3D12DebugManager::FillWithDiscardPattern(ID3D12GraphicsCommandListX *cmd,
+                                                const D3D12RenderState &state, DiscardType type,
+                                                ID3D12Resource *res,
+@@ -1364,6 +1382,11 @@
+                                                D3D12_BARRIER_LAYOUT LayoutAfter)
+ {
+   RDCASSERT(type == DiscardType::DiscardCall || type == DiscardType::UndefinedTransition);
++  if(!floraDiscardPatternsEnabled.load())
++  {
++    floraDiscardPatternsSkipped.fetch_add(1);
++    return;
++  }
+ 
+   D3D12MarkerRegion marker(
+       cmd, StringFormat::Fmt("FillWithDiscardPattern %s", ToStr(GetResID(res)).c_str()));
