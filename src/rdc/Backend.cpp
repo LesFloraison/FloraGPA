@@ -155,10 +155,12 @@ class Session {
     uint32_t dx12UsageVisibilityPatch{};
     uint32_t readOnlyDepthSnapshotPatch{};
     uint32_t dxbcGpuDotPatch{};
+    uint32_t dxbcGpuMadPatch{};
     using DepthSnapshotCopies = uint64_t (RENDERDOC_CC *)();
     DepthSnapshotCopies depthSnapshotCopies{};
     using DotCounter = uint64_t (RENDERDOC_CC *)();
     DotCounter dotOperations{}, dotFailures{};
+    DotCounter madOperations{}, madFailures{};
     explicit Session(const Json &job) {
         if (used)
             throw std::runtime_error("Only one RenderDoc job is allowed per process");
@@ -191,6 +193,13 @@ class Session {
                 throw std::runtime_error("Unsupported Flora DXBC GPU dot patch version");
             dotOperations = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuDotOperations");
             dotFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuDotFailures");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDxbcGpuMadPatchVersion"))) {
+            dxbcGpuMadPatch = patch();
+            if (dxbcGpuMadPatch != 1)
+                throw std::runtime_error("Unsupported Flora DXBC GPU multiply-add patch version");
+            madOperations = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuMadOperations");
+            madFailures = symbol<DotCounter>("RENDERDOC_GetFloraDxbcGpuMadFailures");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -907,6 +916,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_usage_visibility_patch", session.dx12UsageVisibilityPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_dxbc_gpu_dot_patch", session.dxbcGpuDotPatch},
+        {"backend_dxbc_gpu_mad_patch", session.dxbcGpuMadPatch},
         {"replay_environment",
          {{"gpu_vendor_enum", vendor},
           {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
@@ -1200,15 +1210,25 @@ Json runRdcJob(const Json &job) {
     if (debugging) {
         const auto dotStart = session.dotOperations ? session.dotOperations() : 0;
         const auto failureStart = session.dotFailures ? session.dotFailures() : 0;
+        const auto madStart = session.madOperations ? session.madOperations() : 0;
+        const auto madFailureStart = session.madFailures ? session.madFailures() : 0;
         result.update(debug(controller, eid, job, session.dxbcWorkgroupPatch));
         const auto failures = session.dotFailures ? session.dotFailures() - failureStart : 0;
         if (failures)
             throw std::runtime_error("DXBC GPU dot product failed; incomplete shader trace rejected");
+        const auto madFailures = session.madFailures ? session.madFailures() - madFailureStart : 0;
+        if (madFailures)
+            throw std::runtime_error("DXBC GPU multiply-add failed; incomplete shader trace rejected");
+        result["dxbc_gpu_mad"] = {
+            {"patch_version", session.dxbcGpuMadPatch},
+            {"operations", std::to_string(session.madOperations ? session.madOperations() - madStart : 0)},
+            {"failures", std::to_string(madFailures)},
+            {"scope", "DX12 non-precise DXBC MAD; no fusion of separate MUL/ADD instructions"}};
         result["dxbc_gpu_dot"] = {
             {"patch_version", session.dxbcGpuDotPatch},
             {"operations", std::to_string(session.dotOperations ? session.dotOperations() - dotStart : 0)},
             {"failures", std::to_string(failures)},
-            {"scope", "DX12 non-precise DXBC DP2/DP3/DP4; other arithmetic is unchanged"}};
+            {"scope", "DX12 non-precise DXBC DP2/DP3/DP4"}};
         result["eid"] = eid;
         result["gpa_event"] = gpa;
         return complete();

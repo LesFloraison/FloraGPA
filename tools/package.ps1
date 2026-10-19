@@ -49,6 +49,7 @@ $workgroupPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-w
 $usagePatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-usage-visibility.patch'
 $depthSnapshotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-readonly-depth-snapshot.patch'
 $gpuDotPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-dot.patch'
+$gpuMadPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-dxbc-gpu-mad.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -67,6 +68,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.readonly_depth_snapshot_patch_sha256 -ne (Get-PackageSha256 $depthSnapshotPatchPath) -or
         $patchManifest.dxbc_gpu_dot_patch_version -ne 1 -or
         $patchManifest.dxbc_gpu_dot_patch_sha256 -ne (Get-PackageSha256 $gpuDotPatchPath) -or
+        $patchManifest.dxbc_gpu_mad_patch_version -ne 1 -or
+        $patchManifest.dxbc_gpu_mad_patch_sha256 -ne (Get-PackageSha256 $gpuMadPatchPath) -or
         $patchManifest.renderdoc_sha256 -ne (Get-PackageSha256 $patchedLibrary)) {
         throw 'Patched RenderDoc does not match the pinned source patch and build manifest. Use tools/build_renderdoc_d16.ps1.'
     }
