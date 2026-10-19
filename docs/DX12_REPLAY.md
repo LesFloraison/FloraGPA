@@ -6002,6 +6002,65 @@ the new patch SHA-256 is
 Build and packaging manifests now require and include this patch. Full portable
 package acceptance and the remaining feature table below remain unfinished.
 
+### Talos continuation with a deliberately altered query subset
+
+A single isolated experiment checks whether the missing query results conceal
+additional native-command blockers later in Talos. It deliberately changes the
+capture and **does not establish original-frame fidelity**. The production
+reader, replay checks and missing-query capability result are unchanged.
+
+The manual `tests/fixtures/talos-query-subset.py` fixture pins the original thread
+SHA-256 and takes the existing query-coverage report. In a separate directory it
+replaces only original records **188923 / 192515** with the contiguous ranges
+that have observed replayed EndQuery results: **52 / 49** resolve calls preserve
+all **96 / 90** known result writes. The **140 / 146** missing result writes are
+omitted; their values are not reconstructed or substituted. Every other packet
+header and payload is byte-identical. New records retain the original timestamps
+and same-thread order. The **99** extra records move the final execution identity
+from **19410** to **19509**; these are distinct capture identities, not a claim
+that original and altered execution numbers can be interchanged.
+
+Unmodified files are hardlinked to avoid copying the 1.59 GB resource file and
+are used only by the read-only replay tools. The fixture must not be used as an
+editable capture. The modified thread SHA-256 is
+`db76f40a5cb1c3b7899fe6c58ae905b0ce1d5fd164c1d14fdbb53590ed7a1703`;
+the original remains
+`db5bbf6e1ff0cd7483cce327a435c476ed96f18b1a595fab1f1519b180ce6db7`.
+
+The unchanged native backend reaches altered execution **19509**, after the
+last indexed submission, with **1,010 indexed Draws + 36 non-indexed Draws** and
+**101** covered query-resolve calls. SDK **616** is used. The debug layer reports
+**0 errors** and **781 messages**, including existing clear-value and GPU-address
+validation warnings; this is not a warning-free run. The real readback of final
+backbuffer creation **35118**, object **1651480816**, is **1920 x 1080 BGRA8**,
+**8,294,400** bytes, SHA-256
+`e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+The image was inspected. `completed=true` describes this selected boundary of
+the altered capture; `frame_complete=false` and `frame_replayed=false` remain.
+No comparison against a different original Present is treated as fidelity proof.
+
+```powershell
+# Save the query_replay_coverage object from the original command-lists report.
+# Python is used only to construct this research fixture, never by replay.
+python tests/fixtures/talos-query-subset.py <original-capture> <coverage.json> <new-directory>
+FloraGPA.Cli.exe command-lists <new-directory>/capture.gpa_frame --out <new-index-output>
+FloraGPA.Cli.exe replay <new-directory>/capture.gpa_frame --event 19509 --id 35118 --max-bytes 4294967296 --debug-device --out <new-replay-output>
+```
+
+Evidence is retained in `talos-query-subset1`: mutation provenance, the **101**
+covered CPU query entries, native report/readback and offline byte comparisons.
+The committed fixture reproduces the executed modified stream exactly without
+another GPU run. A separate original-directory preflight still rejects execution
+**19410** at **16001**, reports **140 of 236** unavailable results, and confirms
+`device_created=false`. Thus the original query guard is verified intact.
+
+This narrows the next implementation work to handling unavailable query outputs
+and their consumers explicitly; it does not authorize silently omitting them.
+Any production partial-output path must preserve unavailable-range provenance
+and reject dependent reads instead of exposing leftover allocation bytes as
+query results. Original Talos whole-frame replay, histories beyond the verified
+prefix and corresponding analysis acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
