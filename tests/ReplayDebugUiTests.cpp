@@ -123,6 +123,54 @@ class ReplayDebugUiTests : public QObject {
         view.setContext("new-session", 1, true);
         QVERIFY(label->isHidden());
     }
+    void indirectComputeInvocation() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
+        if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");
+        const auto result = read(root + "/hellblade-indirect-reference1/result.json");
+        QCOMPARE(result.at("step_count"), Json(332));
+        QCOMPARE(result.at("gpu_reference").at("consistency"), Json("selected_texel_unchanged"));
+        QCOMPARE(result.at("compute_invocation").at("dispatch_thread"), Json::array({0, 0, 0}));
+        ReplayDebugView view("cs");
+        view.resize(1450, 1000); view.show();
+        view.setContext("hellblade-indirect-cs", 36779, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        auto invocation = view.findChild<QLabel *>("debugGpuInvocationReference");
+        QVERIFY(!invocation->isHidden());
+        QVERIFY(invocation->text().contains("1174"));
+        QVERIFY(invocation->text().contains("shader group size"));
+        QVERIFY(invocation->text().contains("Texture coordinates are computed by the shader"));
+        QCOMPARE(Json::parse(invocation->toolTip().toStdString()), result.at("compute_invocation"));
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QSpinBox *>("debugStepIndex")->setValue(325);
+        QCOMPARE(result.at("steps")[325].at("nextInstruction"), Json(612));
+        auto watch = view.findChild<QLineEdit *>("debugWatchExpression");
+        for (const auto &name : {"_643", "_644", "_542", "_543", "_544"}) {
+            watch->setText(name); action(view, "debugAddWatch")->trigger();
+        }
+        auto watches = view.findChild<QTreeWidget *>("debugWatchValues");
+        QCOMPARE(watches->topLevelItemCount(), 5);
+        QCOMPARE(watches->topLevelItem(0)->text(2), QString("832"));
+        QCOMPARE(watches->topLevelItem(1)->text(2), QString("592"));
+        QCOMPARE(watches->topLevelItem(2)->text(2), QString("0.046875"));
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(326));
+        action(view, "debugPrevious")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(325));
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/indirect-compute.png"));
+        const auto serial = view.requestId();
+        view.setContext("hellblade-indirect-changed-experiment", 36779, true);
+        QVERIFY(invocation->isHidden());
+        QVERIFY(!view.finish(serial, result));
+        auto legacy = result;
+        legacy.erase("compute_invocation");
+        QVERIFY(view.finish(view.requestId(), legacy));
+        QVERIFY(invocation->isHidden());
+        const auto changed = read(root + "/hellblade-indirect-reference2/result.json");
+        QVERIFY(changed.at("partial").get<bool>());
+        QVERIFY(view.finish(view.requestId(), changed));
+        auto reference = view.findChild<QLabel *>("debugGpuReference");
+        QVERIFY(reference->text().contains("changed; reference cannot validate this trace"));
+    }
     void backendReports() {
         const auto root = qEnvironmentVariable("FLORA_REPLAY_DEBUG_REPORTS");
         if (root.isEmpty())

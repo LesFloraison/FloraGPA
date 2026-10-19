@@ -728,8 +728,10 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         }
     }
     const auto invocationReference = result.value("gpu_invocation_reference", Json());
+    invocationReference_->clear();
+    invocationReference_->setToolTip({});
     invocationReference_->setVisible(dx12_ && stage_ == "ps" && invocationReference.is_object());
-    if (invocationReference.is_object()) {
+    if (dx12_ && stage_ == "ps" && invocationReference.is_object()) {
         invocationReference_->setToolTip(QString::fromStdString(invocationReference.dump(2)));
         if (invocationReference.value("status", "") == "read") {
             const auto kind = invocationReference.value("interpretation", "float");
@@ -754,6 +756,21 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
             invocationReference_->setText("GPU fragment reference unavailable: " +
                 text(invocationReference.value("reason", Json("Unknown"))));
         }
+    }
+    if (const auto invocation = result.value("compute_invocation", Json());
+        dx12_ && stage_ == "cs" && invocation.is_object()) {
+        invocationReference_->setToolTip(QString::fromStdString(invocation.dump(2)));
+        invocationReference_->setText(
+            QString("Compute invocation · group %1 · local thread %2\n"
+                    "Dispatch groups %3 · shader group size %4 · dispatch-thread ID %5\n"
+                    "Texture coordinates are computed by the shader; they need not equal the dispatch-thread ID.")
+                .arg(text(invocation.at("group")), text(invocation.at("thread")),
+                     text(invocation.at("group_count")), text(invocation.at("shader_group_size")),
+                     text(invocation.at("dispatch_thread"))));
+        if (invocation.value("indirect", false))
+            invocationReference_->setText(invocationReference_->text() +
+                "\nIndirect arguments may change between replays; bounds use the indexed action.");
+        invocationReference_->show();
     }
     rendering_ = true;
     assembly_->setPlainText(text(result.at("disassembly")));

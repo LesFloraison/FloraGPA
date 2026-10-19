@@ -3859,6 +3859,59 @@ GPA fault evidence is under `gpa-hellblade-main-raw3` and
 `gpa-hellblade-main-post-raw1`. All are ignored research artifacts. Valid UAV
 store validation and the upstream color discrepancy remain unfinished.
 
+### Hellblade2 indirect compute invocation and selected stores
+
+The nonempty indirect Dispatch **36779** / source **611544** / RenderDoc event
+**90443** now has a real **332-step** DXIL SM6.6 `MainCS` trace for Group
+**[0,0,0]**, Thread **[0,0,0]**. The shader hash is
+`f5f587ed3dd543f56c253d8121285e2d`. No source/PDB is present; this evidence uses
+the recorded instructions and SSA values. `TileListOffset` is **18360** and
+the selected tile-list entry is **2424884** (`0x250034`). The shader's coordinate
+calculation maps this invocation to **(832,592)**, despite a dispatch-thread ID
+of **[0,0,0]**.
+
+At trace step **325**, next instruction **612**, the store to
+`SceneColorOutputMip0` uses creation **571530**, view mip **0**, coordinates
+**(832,592)** and RGB **(0.046875,0.0400390625,0.0419921875)**. These operands
+match the selected GPU texel's float32 bits exactly:
+**1027604480,1025769472,1026293760**. The GPU selection is unchanged before
+debugging, after trace creation and after stepping in this request. RGB-only
+R11G11B10 storage synthesizes alpha **1** on readback; the shader's alpha **0**
+is not compared. This verifies these selected operands against GPU output, not
+every instruction, all input stability or every bound UAV modification.
+
+The same invocation also reaches a store to the separate output creation
+**570673**, mip **0**, at **(416,296)**. Its WaveReadLaneAt-derived RGB operands
+are **(0.043701171875,0.0369873046875,0.0390625)**. In the targeted second-output
+request, GPU RGB changes from **(0.04345703125,0.037109375,0.0390625)** to
+**(0.04345703125,0.03662109375,0.0390625)** after trace creation; the latter value
+persists after stepping. The existing consistency gate marks the result partial
+and rejects this reference as validation. Storage conversion and changing
+replay inputs have not been isolated, so this does not establish a Wave operation
+defect. The third output's store coordinates are **(-1,-1)** and are not evidence
+of an in-bounds texture modification.
+
+The CS workspace displays the checked Group, local Thread, group counts,
+reflected group size and dispatch-thread ID with the trace. It explicitly
+distinguishes that ID from shader-computed texture coordinates and preserves
+the indirect-argument stability limitation. Clearing/changing the experiment
+removes the invocation information; old reports without it remain readable.
+The shared PS fragment-reference display retains its mismatch warning.
+
+Build **265** covers the workspace and focused UI test. The saved real reports
+verify SSA Watch values at the first store, forward/backward stepping, invocation
+display, stale-result rejection, legacy-report handling and the second output's
+changing-reference warning. The related PS mismatch-display check also passes:
+**4 passed including setup/cleanup, 963 ms**. The rendered CS panel was inspected.
+Three serial analysis requests were used: one to identify the coordinates and
+one per selected output; there was no new native replay or GPA launch.
+
+Ignored evidence: `hellblade-indirect-valid-group1`,
+`hellblade-indirect-reference1/2`, `hellblade-indirect-trace-values1.json`,
+`hellblade-indirect-store-evidence1.json`, `indirect-compute-ui1.txt` and
+`indirect-compute-ui1/replay-debug/indirect-compute.png`. The downsampled output,
+other invocations and the upstream whole-resource discrepancy remain unverified.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -3870,7 +3923,7 @@ store validation and the upstream color discrepancy remain unfinished.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; one indirect CS store's RGB operands match GPU output, downsampled output rejected as changing; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; undo restores original PSO/scene with unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
