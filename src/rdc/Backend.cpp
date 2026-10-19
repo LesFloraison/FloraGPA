@@ -7,6 +7,7 @@
 #include "InputMesh.h"
 #include "PipelineState.h"
 #include "application/RdcEvents.h"
+#include "application/RdcJobs.h"
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
 #include <QCryptographicHash>
@@ -1292,6 +1293,7 @@ Json rdcLoadedModules() {
 }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
+    if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture")
         throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
     if (job.value("depth_roundtrip", false) &&
@@ -1306,7 +1308,7 @@ Json runRdcJob(const Json &job) {
     if (job.value("dxil_fast_contraction", false) && (!debugging || !job.contains("execution")))
         throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (action != "history" && action != "events" && action != "counters" && action != "counter-catalog" && action != "inventory" &&
-        action != "texture" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
+        action != "texture" && action != "buffer" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
     if (job.contains("counter_ids") && (action != "counters" || job.at("counter_ids").is_null()))
         throw std::runtime_error("Counter IDs require a counters request");
@@ -1823,7 +1825,30 @@ Json runRdcJob(const Json &job) {
         resource = capturedResource(resources, job, dx12);
     }
     if (resource == ResourceId::Null())
-        throw std::runtime_error("Select an explicit texture resource; no matching target");
+        throw std::runtime_error("Select an explicit resource; no matching target");
+    if (action == "buffer") {
+        const auto range = rdcBufferRange(job);
+        const auto buffers = controller.GetBuffers();
+        const auto found = std::find_if(buffers.begin(), buffers.end(),
+                                       [&](const auto &b) { return b.resourceId == resource; });
+        if (found == buffers.end()) throw std::runtime_error("Selected resource is not a buffer");
+        if (range.offset > found->length || range.length > found->length - range.offset)
+            throw std::runtime_error("Selected buffer range exceeds resource length");
+        const auto data = controller.GetBufferData(resource, range.offset, range.length);
+        checked(controller.GetFatalErrorStatus());
+        if (data.size() != range.length) throw std::runtime_error("Buffer readback returned an incomplete range");
+        const auto digest = QCryptographicHash::hash(
+            QByteArrayView(reinterpret_cast<const char *>(data.data()), qsizetype(data.size())), QCryptographicHash::Sha256);
+        QSaveFile file(QString::fromStdWString((path(job.at("out")) / L"buffer.bin").wstring()));
+        if (!file.open(QIODevice::WriteOnly) || file.write(reinterpret_cast<const char *>(data.data()), qint64(data.size())) !=
+            qint64(data.size()) || !file.commit()) throw std::runtime_error("Cannot save raw replay buffer");
+        result.update({{"eid", eid}, {"gpa_event", gpa}, {"resource", resourceName(resource)},
+            {"resource_object", gpaResource}, {"resource_creation", job.value("resource_creation", Json())},
+            {"offset", std::to_string(range.offset)}, {"byte_length", std::to_string(range.length)},
+            {"buffer_length", std::to_string(found->length)}, {"sha256", digest.toHex().toStdString()},
+            {"readback_scope", "Exact requested byte range after the selected replay event; no format conversion. A successful read is not proof of replay fidelity."}});
+        return complete();
+    }
     if (action == "resource-history") {
         static constexpr const char *usageNames[]{"Unused",         "VertexBuffer",
                                                   "IndexBuffer",    "VS_Constants",

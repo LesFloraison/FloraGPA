@@ -6255,6 +6255,73 @@ serial and limited to this capture path and the newly reproduced color fault.
 The analysis processes report no loaded GPA modules. Full Talos fidelity,
 isolated histories/debugging and portable-package acceptance remain unfinished.
 
+### Bounded analysis-buffer reads and Talos alpha-path localization
+
+`rdc-analyze <capture.rdc> buffer --execution <id> --resource <object>
+--resource-creation <record> --offset <bytes> --length <bytes>` now exports
+`buffer.bin` from the selected replay boundary. Offset/length and result sizes
+are canonical decimal uint64 strings. Requests require an explicit resource,
+1 byte to 64 MiB, no arithmetic overflow and a range wholly inside the replay
+buffer. The backend checks the actual resource type/extent, fatal replay status
+and exact returned size before committing output. Texture requests cannot accept
+buffer ranges. Query-isolated analysis continues to reject buffer actions, so
+this does not expose unknown query output. UI buffer inspection still uses the
+existing native path.
+
+The new path was used for the Talos color fault rather than a broad replay test.
+At execution **14920**, buffer creation **150566**, object **109459904**, offset
+**32281344**, all **752 bytes** declared by the PS constant block match native
+replay, SHA-256
+`a29e2d58b377cbed44a3b10d337625f461e970a21cf26090343a2f48462afaf5`.
+The resource is 33,554,432 bytes long; offset 33,554,431 / length 2 fails with an
+extent error and produces no `buffer.bin`. The analysis reports no GPA modules.
+Focused preparation tests report **5 passed**, including setup/cleanup, covering
+offsets above 2^53, overflow, noncanonical/numeric inputs, zero/excessive lengths,
+missing parameters, action restrictions and query isolation. Builds **393/394**
+pass after correcting the backend dispatch whitelist and shared-validator link.
+
+All following evidence is under ignored `artifacts/dx12-research/talos-color-input1`.
+GPU checks were serial, each following the reproduced color fault:
+
+- Draw **15981** input creation **156503** already differs in **220,776 pixels**,
+  RGB only. Its producer **15969** has an exactly matching 1x1 exposure input
+  (creation **156411**), but differing HDR creation **193** and processed input
+  **157183**. This excludes the final color-copy Draw as the first source of
+  the observed discrepancy.
+- HDR Draw **14835** has a separate isolated-draw issue: **12,914** pixels are
+  unwritten in default RenderDoc analysis; all other pixels match native.
+  The D32 depth input (creation **8468**) is byte-identical. Existing explicit
+  `--readonly-depth-snapshot` performs one copy and makes the entire 16,588,800-byte
+  HDR image identical, SHA-256
+  `0204dbbde1a98625838132f7ab0c465445d36f518b4a21d831da602d486b18ba`.
+  Reading after the following non-Draw execution **14836** also matches without
+  that option. This verifies the selected workaround and separates isolated Draw
+  behavior from continuous-prefix replay; it does not fix full-frame fidelity.
+- Bisection of continuous-prefix HDR observations finds a matching boundary
+  **14912** and **149 differing pixels** at **14921**, after Draw **14920**.
+  This is a localized bracket, not an exhaustive proof of monotonicity.
+  Its PS constants match as above. PS input creation **156599** has identical
+  RGB but **219,446 differing Alpha pixels**. At (1917,286), native Alpha is
+  1 and RenderDoc is 0.91650390625. The pipeline binds this texture at PS t8.
+- That Alpha is written by full-screen Draw **14706**, which samples creation
+  **156503** with an Alpha-only output mask. The preceding generation/filter
+  chain is **14672 → 14684 → 14694**. The first generation Draw's output is
+  **exact throughout its actual 1440x810 viewport/scissor**. Differences outside
+  this region follow Discard and are not accepted as evidence of a rendering
+  fault. Its R32 depth-pyramid input creation **150408**, Mips **0 and 5**,
+  is also byte-identical; other mips have not been verified.
+- After **14694**, **120,432 pixels inside that same valid viewport differ**.
+  Draw **14684** reads depth creation **150408** and texture **156503**, writing
+  texture **156615**; Draw **14694** reads **150408/156615** and writes **156503**.
+  Their PS constants are at offsets **32262656 / 32263168** in creation
+  **150566**. These are the next comparisons needed to isolate the filter fault.
+  The observations do not yet identify a bad shader, descriptor, resource value
+  or driver operation.
+
+Talos color fidelity remains unfinished. The matching selected depth workaround,
+constant-buffer bytes and valid initial Alpha region do not validate subsequent
+filters, histories, debugging or the full portable package.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

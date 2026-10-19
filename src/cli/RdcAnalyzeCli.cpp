@@ -31,7 +31,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addHelpOption();
         p.addPositionalArgument("capture", "Independent .rdc capture");
         p.addPositionalArgument("action", "inventory | postmesh | history | debug-pixel | debug-vertex | "
-                                          "debug-thread | counters | counter-catalog | texture | resource-history | pipeline");
+                                          "debug-thread | counters | counter-catalog | texture | buffer | resource-history | pipeline");
         p.addOption({"out", "New or empty output directory", "path"});
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
                      flora::defaultRenderDocLibrary()});
@@ -45,6 +45,8 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"pixel-history-reference", "Read the selected DX12 primitive's GPU shader output using extra pixel-history replays"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
+        p.addOption({"offset", "Buffer byte offset (buffer action only)", "integer"});
+        p.addOption({"length", "Buffer byte count, 1 byte to 64 MiB (buffer action only)", "integer"});
         for (const auto &[key, description] :
              {std::pair{"gpa-event", "Original GPA draw, dispatch or resource-write command ID"},
               std::pair{"eid", "Native RenderDoc event ID (alternative to --gpa-event)"},
@@ -96,7 +98,7 @@ int rdcAnalyzeCli(QStringList args) {
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = number(p.value(key));
         options["stage"] = p.value("stage").toStdString();
-        for (const auto key : {"execution", "resource-creation"})
+        for (const auto key : {"execution", "resource-creation", "offset", "length"})
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = std::to_string(number(p.value(key)));
         if (p.isSet("execution") && p.isSet("resource"))

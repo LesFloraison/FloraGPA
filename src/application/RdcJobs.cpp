@@ -62,10 +62,28 @@ struct ProcessJob {
     }
 };
 } // namespace
+RdcBufferRange rdcBufferRange(const Json &job) {
+    if (job.at("action") != "buffer" || job.value("resource", Json()).is_null())
+        throw std::runtime_error("Buffer readback requires an explicit resource");
+    auto decimal = [&](const char *key) {
+        const auto &value = job.at(key);
+        if (!value.is_string()) throw std::runtime_error("Buffer ranges must be decimal strings");
+        const auto &text = value.get_ref<const std::string &>();
+        uint64_t number{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), number);
+        if (text.empty() || parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
+            text != std::to_string(number)) throw std::runtime_error("Invalid uint64 buffer range");
+        return number;
+    };
+    const RdcBufferRange range{decimal("offset"), decimal("length")};
+    if (!range.length || range.length > 64ULL * 1024 * 1024 || range.offset > UINT64_MAX - range.length)
+        throw std::runtime_error("Buffer readback requires a non-overflowing range of 1 byte to 64 MiB");
+    return range;
+}
 Json prepareRdcJob(const QString &capture, const std::string &action, const QString &output,
                    const QString &library, const Json &options) {
     static const std::set<std::string> actions{"inventory",    "postmesh",     "history",  "debug-pixel",
-                                               "debug-vertex", "debug-thread", "counters", "counter-catalog", "texture", "resource-history", "pipeline"};
+                                               "debug-vertex", "debug-thread", "counters", "counter-catalog", "texture", "buffer", "resource-history", "pipeline"};
     if (!actions.contains(action))
         throw std::runtime_error("Unknown RDC analysis action");
     Json job{{"gpa_event", nullptr},
@@ -91,10 +109,15 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
+    if (action == "buffer") {
+        auto request = job; request["action"] = action;
+        rdcBufferRange(request);
+    } else if (job.contains("offset") || job.contains("length"))
+        throw std::runtime_error("Buffer ranges require a buffer request");
     if (job.contains("counter_ids")) {
         const auto &ids = job.at("counter_ids");
         if (action != "counters" || !ids.is_array() || ids.empty() || ids.size() > 4096)

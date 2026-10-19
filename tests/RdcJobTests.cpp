@@ -69,6 +69,29 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void bufferRangePreparation() {
+        QTemporaryDir dir;
+        const Json options{{"execution", "14920"}, {"resource", "109459904"}, {"resource_creation", "150566"},
+                           {"offset", "9007199254740993"}, {"length", "256"}};
+        const auto job = prepare(dir.path(), "success", options, "buffer");
+        const auto range = rdcBufferRange(job);
+        QCOMPARE(range.offset, (1ULL << 53) + 1);
+        QCOMPARE(range.length, 256ULL);
+        QCOMPARE(job.at("offset"), options.at("offset"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, "texture"));
+        for (const auto &patch : {Json{{"offset", 9007199254740993ULL}}, Json{{"offset", "-1"}},
+             Json{{"offset", "01"}}, Json{{"offset", "18446744073709551616"}},
+             Json{{"offset", "18446744073709551615"}}, Json{{"length", "0"}},
+             Json{{"length", "67108865"}}, Json{{"length", 256}}, Json{{"resource", nullptr}},
+             Json{{"isolate_missing_queries", true}}}) {
+            auto invalid = options; invalid.update(patch);
+            QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", invalid, "buffer"));
+        }
+        auto missing = options; missing.erase("length");
+        QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", missing, "buffer"));
+        auto zero = options; zero["offset"] = "0";
+        QCOMPARE(rdcBufferRange(prepare(dir.path(), "success", zero, "buffer")).offset, 0ULL);
+    }
     void queryIsolationPreparation() {
         QTemporaryDir dir;
         QCOMPARE(prepare(dir.path(), "success").at("isolate_missing_queries"), Json(false));
