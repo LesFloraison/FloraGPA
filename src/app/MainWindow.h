@@ -73,6 +73,15 @@ class MainWindow final : public QMainWindow {
   private:
     void buildUi();
     void invalidateDx12Output();
+    void selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
+                               uint32_t x, uint32_t y, uint32_t mip, uint32_t layer, uint32_t sample);
+    struct Dx12PixelTarget {
+        QString context;
+        Id execution{}, creation{};
+        uint32_t x{}, y{}, mip{}, layer{}, subresource{};
+        bool before{};
+    };
+    std::optional<Dx12PixelTarget> dx12PixelTarget_;
     using Dx12ShaderImport = std::tuple<Id, std::string, QString>;
     struct Dx12ResourceImport {
         Id submission{}, resource{};

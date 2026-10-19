@@ -1,10 +1,12 @@
 #include "MainWindow.h"
+#include "PixelHistoryView.h"
 #include "WorkerImage.h"
 #include <QAction>
 #include <QFutureWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QStatusBar>
+#include <QSignalBlocker>
 #include <QTabWidget>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -20,6 +22,8 @@ struct ArtifactResult {
 void MainWindow::invalidateDx12Output() {
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
+    dx12PixelTarget_.reset();
+    selection_.mip = selection_.layer = selection_.sample = 0;
     selection_.before = boundary_->currentIndex() == 1;
     bufferTimer_.stop();
     bufferModel_->setBytes({}); displayedBuffer_ = 0; bufferLabel_->clear(); clearBufferDetails();
@@ -28,12 +32,36 @@ void MainWindow::invalidateDx12Output() {
     if (process_.state() != QProcess::NotRunning || artifactJob_)
         cancel();
     image_->setImage({});
+    pixelLabel_->clear();
     outputReport_ = nullptr;
     outputDir_.reset();
     exportAction_->setEnabled(false);
     outputStorageAction_->setEnabled(false);
     imageLabel_->setText("Select an execution instance and optional texture creation, then press Replay");
     setBusy(busy());
+}
+void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
+                                       uint32_t x, uint32_t y, uint32_t mip, uint32_t layer, uint32_t sample) {
+    if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 ||
+        context != historyContextKey() || selection_.execution != execution)
+        return;
+    try {
+        const auto resource = session_->resource(creation);
+        if (resource.capturedObject != object)
+            throw std::runtime_error("Debug texture does not match the captured resource lifetime");
+        const auto subresource = dx12TexturePixelSubresource(nlohmann::json::parse(resource.summary), x, y, mip, layer, sample);
+        inspectResource(creation);
+        { const QSignalBlocker block(dx12Subresource_); dx12Subresource_->setValue(int(subresource)); }
+        selection_.mip = mip; selection_.layer = layer; selection_.sample = sample;
+        dx12PixelTarget_ = Dx12PixelTarget{context, execution, creation, x, y, mip, layer, subresource, selection_.before};
+        history_->selectPixel(object, int(x), int(y), int(mip), int(layer), 0);
+        centerTabs_->setCurrentIndex(0);
+        imageLabel_->setText(QString("Creation %1 · Mip %2 layer %3 · Pixel (%4, %5) selected; press Replay")
+                                .arg(creation).arg(mip).arg(layer).arg(x).arg(y));
+        statusBar()->showMessage("Texture pixel selected; Replay reads it at the current execution boundary", 7000);
+    } catch (const std::exception &error) {
+        showError(QString::fromUtf8(error.what()));
+    }
 }
 QString MainWindow::boundaryLabel(const QJsonObject &report) {
     auto when = report["value_time"].toString();
@@ -142,7 +170,23 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
              texture["subresource"].toInteger(-1) != dx12Subresource_->value()))
             throw std::runtime_error(
                 "DX12 readback does not match the selected resource lifetime/subresource");
+        std::optional<QPoint> selectedPixel;
+        if (dx12PixelTarget_) {
+            const auto &target = *dx12PixelTarget_;
+            const auto &display = replayReport.at("output_display");
+            if (target.context != historyContextKey() || target.execution != *selection_.execution ||
+                target.creation != selection_.resource || target.before != selection_.before ||
+                target.subresource != uint32_t(dx12Subresource_->value()) ||
+                display.at("mip") != target.mip || display.at("layer") != target.layer ||
+                display.value("plane", -1) != 0 || display.value("samples", 0) != 1 ||
+                target.x >= display.at("width").get<uint32_t>() || target.y >= display.at("height").get<uint32_t>())
+                throw std::runtime_error("DX12 texture pixel target does not match the replayed subresource");
+            if (outputAvailable) selectedPixel = QPoint(int(target.x), int(target.y));
+        }
         image_->setPreparedImage(std::move(result));
+        image_->setSelectedPixel(selectedPixel);
+        if (selectedPixel)
+            pixelLabel_->setText(QString("Selected pixel %1, %2").arg(selectedPixel->x()).arg(selectedPixel->y()));
         imageLabel_->setText(outputAvailable
                                  ? QString("DX12 creation %1 · Subresource %2 · %3 × %4 · %5 (execution)")
                                        .arg(QString::number(selection_.resource))
@@ -160,6 +204,12 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
                                      .arg(*selection_.execution)
                                      .arg(boundary_->currentIndex() == 1 ? "before" : "after"));
         outputReport_ = std::move(replayReport);
+        if (outputReport_.contains("output_display")) {
+            const auto &display = outputReport_.at("output_display");
+            selection_.mip = display.at("mip").get<uint32_t>();
+            selection_.layer = display.at("layer").get<uint32_t>();
+            selection_.sample = 0;
+        }
         outputDir_ = std::move(jobDir_);
         historyPick_->setEnabled(outputAvailable);
         exportAction_->setEnabled(outputAvailable);

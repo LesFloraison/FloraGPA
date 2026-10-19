@@ -5082,6 +5082,59 @@ The isolated worker reports patch version and store count; package/build
 manifests verify all eleven patches. Full portable-package acceptance remains
 outstanding.
 
+### Texture-write coordinates to native output
+
+Double-clicking the coordinates in the CS `Texture writes` table now selects
+the capture resource and physical mip/array layer for native replay. It retains
+the current execution and Before/After boundary, opens the resource/output
+workspace and prompts for Replay. Resource-name double-click still selects the
+creation record; instruction double-click still selects the exact debug occurrence.
+The source trace remains available while selecting the texture.
+
+The navigation request carries the session/experiment analysis context, execution,
+resource creation and captured object without floating-point identity conversion.
+The workspace rejects stale contexts or a mismatched object/lifetime. It resolves
+the D3D12 subresource from the captured description, including a zero `MipLevels`
+full chain, and rejects invalid mip/layer/sample/coordinates before changing the
+selection. Current display support covers single-sample 1D/2D resources on plane
+zero; 3D slice display remains explicitly unsupported. Out-of-bounds or unmapped
+debug stores cannot generate a pixel navigation request.
+
+The pending pixel is tied to the selected execution/resource/subresource and
+boundary. Native readback still passes the existing request identity, resource
+lifetime and subresource checks; the pixel target additionally requires matching
+mip/layer, plane, samples and dimensions before the marker is drawn. Changing the
+event, resource, subresource, budget, boundary or experiment clears the pending
+target and old output. The Pixel History coordinates are prepared for the selected
+resource; navigation does not automatically run a history query or claim that a
+compute store has a verified Pixel History entry.
+
+Targeted verification, builds **332–333**:
+
+- `texturePixelSubresource`: nonzero mip/layer, implicit full mip chain, 1D
+  coordinates and invalid/unsupported cases; **3 passed including setup/cleanup,
+  1 ms**, `texture-pixel-mapping1.txt`.
+- `textureStoreNavigation`: actual Hellblade2 report emits `(416,296)` with the
+  correct context, execution and resource, while the out-of-bounds row emits an
+  error; existing instruction/resource and stale-result checks also pass;
+  **3 passed, 184 ms**, `texture-pixel-ui1.txt`.
+- `textureStorePixelWorkspace`: actual Hellblade2 capture, execution **36779**,
+  creation **570673**, mip/layer **0/0**, subresource **0**. Before selection is
+  preserved without replay; then one After replay with a **12 GiB** allocation
+  budget produces the **960×600** native image and marker **(416,296)**. The
+  history request retains the correct creation and coordinates. A stale-context
+  navigation is ignored; changing subresource clears image and marker.
+  **3 passed, 46,993 ms**, `texture-pixel-workspace1.txt`.
+
+The inspected screenshot is
+`artifacts/dx12-research/texture-pixel-workspace1.png`. Its lower image area has
+unexplained abnormal colors at this intermediate boundary. This navigation test
+does not establish whether that area was written/defined at the selected event,
+nor whether it matches original GPA; retain it for replay-fidelity investigation.
+The test proves routing and readback provenance, not complete image correctness.
+Only one native GPU replay was used for this workspace change. Full 3D navigation,
+whole-frame fidelity and the remaining acceptance items below are unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

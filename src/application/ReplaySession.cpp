@@ -12,6 +12,8 @@
 #include <iomanip>
 #include <algorithm>
 #include <mutex>
+#include <bit>
+#include <charconv>
 
 namespace flora {
 namespace {
@@ -509,5 +511,30 @@ std::shared_ptr<const IReplaySession> openReplaySession(const std::filesystem::p
     checkCancellation(cancelled);
     if (std::filesystem::is_directory(path)) return std::make_shared<Dx12Session>(path, cancelled);
     return std::make_shared<Dx11Session>(path, cancelled);
+}
+uint32_t dx12TexturePixelSubresource(const nlohmann::json &d, uint32_t x, uint32_t y,
+                                    uint32_t mip, uint32_t layer, uint32_t sample) {
+    const auto dimension = d.at("Dimension").get<uint32_t>();
+    if (dimension != 2 && dimension != 3)
+        throw std::runtime_error("Texture pixel navigation requires a 1D or 2D texture; volume slice display is not implemented");
+    if (sample || d.at("SampleCount") != 1)
+        throw std::runtime_error("Texture pixel navigation requires a single-sample texture");
+    const auto widthText = d.at("Width").get<std::string>();
+    uint64_t width{};
+    const auto parsed = std::from_chars(widthText.data(), widthText.data() + widthText.size(), width);
+    const auto height = d.at("Height").get<uint32_t>(), layers = d.at("DepthOrArraySize").get<uint32_t>();
+    if (parsed.ec != std::errc{} || parsed.ptr != widthText.data() + widthText.size() ||
+        !width || width > UINT32_MAX || !height || !layers || (dimension == 2 && height != 1))
+        throw std::runtime_error("Invalid texture dimensions for pixel navigation");
+    const auto fullMips = uint32_t(std::bit_width(std::max(width, uint64_t(height))));
+    const auto declared = d.at("MipLevels").get<uint32_t>();
+    const auto mips = declared ? declared : fullMips;
+    if (mips > fullMips || mip >= mips || layer >= layers ||
+        x >= std::max(uint64_t(1), width >> mip) || y >= std::max(1U, height >> mip))
+        throw std::runtime_error("Texture pixel navigation is outside the captured resource");
+    const auto subresource = uint64_t(layer) * mips + mip;
+    if (subresource > INT_MAX || x > INT_MAX || y > INT_MAX || layer > INT_MAX)
+        throw std::runtime_error("Texture pixel navigation exceeds the viewer range");
+    return uint32_t(subresource);
 }
 }

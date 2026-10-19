@@ -390,13 +390,22 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         textureStores_ = table("debugTextureStores", {"Instruction", "Creation / RDC", "Coordinates", "Store operands", "GPU after dispatch", "Status"});
         for (int column = 0; column < 6; ++column)
             textureStores_->setColumnWidth(column, column == 0 ? 80 : column == 3 || column == 4 ? 160 : 120);
-        textureStores_->setToolTip("Selected lane's typed texture stores; buffer stores and atomics are excluded. Double-click an instruction to step there, or a mapped resource to select it. GPU values include all dispatch threads and later writes.");
+        textureStores_->setToolTip("Selected lane's typed texture stores; buffer stores and atomics are excluded. Double-click an instruction to step there, a mapped resource to select it, or coordinates to select the texture pixel for Replay. GPU values include all dispatch threads and later writes.");
         values_->addTab(textureStores_, "Texture writes");
         connect(textureStores_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int column) {
             if (busy_ || !model_ || !item) return;
             invoke([&] {
                 const auto ordinal = item->data(0, Qt::UserRole).toUInt();
                 const auto &row = model_->result().at("texture_stores").at("rows").at(ordinal);
+                if (column == 2) {
+                    if (!row.contains("location") || !row.at("resource_creation").is_string() || !row.at("resource_object").is_string())
+                        throw std::runtime_error("This store has no mapped in-bounds texture pixel");
+                    const auto &p = row.at("location");
+                    emit texturePixelRequested(key_, event_, std::stoull(row.at("resource_creation").get<std::string>()),
+                        std::stoull(row.at("resource_object").get<std::string>()), p.at("x").get<uint>(), p.at("y").get<uint>(),
+                        p.at("mip").get<uint>(), p.at("layer").get<uint>(), p.at("sample").get<uint>());
+                    return;
+                }
                 if (column == 1 && row.at("resource_creation").is_string()) {
                     emit resourceRequested(std::stoull(row.at("resource_creation").get<std::string>()));
                     return;

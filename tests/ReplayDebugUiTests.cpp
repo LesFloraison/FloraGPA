@@ -78,6 +78,16 @@ class ReplayDebugUiTests : public QObject {
             Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 1)));
         QCOMPARE(selected.size(), 1);
         QCOMPARE(selected[0][0].toULongLong(), std::stoull(rows[1].at("resource_creation").get<std::string>()));
+        QSignalSpy texel(&view, &ReplayDebugView::texturePixelRequested), errors(&view, &ReplayDebugView::error);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1); QCOMPARE(texel[0][0].toString(), QString("hellblade-writes"));
+        QCOMPARE(texel[0][1].toULongLong(), 36779ULL);
+        QCOMPARE(texel[0][2].toULongLong(), 570673ULL);
+        QCOMPARE(texel[0][4].toUInt(), 416U); QCOMPARE(texel[0][5].toUInt(), 296U);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, tree->topLevelItem(2)), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1); QCOMPARE(errors.size(), 1);
         view.setWorkerBusy(true);
         QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
             Q_ARG(QTreeWidgetItem *, item), Q_ARG(int, 1)));

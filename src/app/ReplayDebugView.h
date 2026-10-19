@@ -39,6 +39,8 @@ class ReplayDebugView final : public QWidget {
     void error(const QString &message);
     void inspectionFinished(bool success);
     void resourceRequested(qulonglong creation);
+    void texturePixelRequested(const QString &context, qulonglong event, qulonglong creation,
+                               qulonglong object, uint x, uint y, uint mip, uint layer, uint sample);
 
   private:
     QString stage_, key_, backendPath_;

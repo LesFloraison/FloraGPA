@@ -179,6 +179,7 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(loaded.error.toStdString());
             session_ = std::move(loaded.session);
             selection_ = {};
+            dx12PixelTarget_.reset();
             selection_.session = session_->identity();
             frame_ = std::move(loaded.frame);
             capturePath_ = pendingPath_;
@@ -1338,6 +1339,7 @@ void MainWindow::buildUi() {
             try { inspectResource(creation); }
             catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
         });
+        connect(view, &ReplayDebugView::texturePixelRequested, this, &MainWindow::selectDx12TexturePixel);
     }
     const QList<QWidget *> stageOrder{replayDebug_[0], checkpoints_[1], checkpoints_[2],
                                       checkpoints_[0], replayDebug_[1], replayDebug_[2]};
@@ -4572,6 +4574,7 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
             if (x < 0 || y < 0 || uint32_t(x) >= display.at("width").get<uint32_t>() ||
                 uint32_t(y) >= display.at("height").get<uint32_t>())
                 return;
+            dx12PixelTarget_.reset();
             if (historyPick_->isChecked() && display.at("boundary") != "after")
                 throw std::runtime_error("DX12 Pixel History currently queries through the selected "
                                          "execution; replay After event before picking");

@@ -20,6 +20,10 @@ struct ReplaySelection {
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
 };
+// Resolves a plane-0, single-sample 1D/2D texel for the native output viewer.
+// Volume slice display is not yet supported by that viewer.
+uint32_t dx12TexturePixelSubresource(const nlohmann::json &description, uint32_t x, uint32_t y,
+                                    uint32_t mip, uint32_t layer, uint32_t sample);
 enum class ReplayWorkKind { None, Draw, Dispatch, MissingIndirect, UnsupportedIndirect, MeshDispatch };
 struct SessionEvent {
     Id id{};

@@ -46,6 +46,7 @@ class ImageView final : public QGraphicsView {
     void clearOverlay();
     void setPixelPicking(bool enabled);
     void setSelectedPixel(std::optional<QPoint> pixel);
+    std::optional<QPoint> selectedPixel() const { return selectedPixel_; }
     bool hasOverlay() const { return !overlay_->pixmap().isNull(); }
   signals:
     void pixelHovered(const QString &value);

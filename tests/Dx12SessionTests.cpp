@@ -2893,6 +2893,66 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(mapped.bytes(uint64_t(offset.QuadPart),1)[0],uint8_t('X'));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,mapped.bytes(mapped.size(),1));
     }
+    void texturePixelSubresource() {
+        nlohmann::json d{{"Dimension", 3}, {"Width", "512"}, {"Height", 4},
+            {"DepthOrArraySize", 3}, {"MipLevels", 2}, {"SampleCount", 1}};
+        QCOMPARE(dx12TexturePixelSubresource(d, 200, 1, 1, 2, 0), 5U);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 256, 1, 1, 2, 0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 1, 2, 2, 0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 1, 1, 3, 0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 1, 1, 2, 1));
+        d["MipLevels"] = 0;
+        QCOMPARE(dx12TexturePixelSubresource(d, 200, 1, 1, 2, 0), 21U);
+        d["Dimension"] = 2; d["Height"] = 1;
+        QCOMPARE(dx12TexturePixelSubresource(d, 200, 0, 1, 2, 0), 21U);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 1, 1, 2, 0));
+        d["Dimension"] = 4;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 0, 1, 2, 0));
+        d["Dimension"] = 3; d["Width"] = "512extra";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12TexturePixelSubresource(d, 200, 0, 1, 2, 0));
+    }
+    void textureStorePixelWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto reportPath = qEnvironmentVariable("FLORA_TEXTURE_STORE_REPORT");
+        if (root.isEmpty() || reportPath.isEmpty()) QSKIP("Set Hellblade2 capture and actual texture-store report");
+        QFile file(reportPath); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = nlohmann::json::parse(file.readAll().toStdString());
+        MainWindow window; window.resize(1550, 950); window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        window.findChild<QSpinBox *>("dx12AllocationMiB")->setValue(12288);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("36779"); QTest::keyClick(locate, Qt::Key_Return);
+        auto view = window.findChild<ReplayDebugView *>("replayDebug-cs"); QVERIFY(view);
+        QVERIFY(view->finish(view->requestId(), report));
+        auto tree = view->findChild<QTreeWidget *>("debugTextureStores"); QVERIFY(tree);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary"); boundary->setCurrentIndex(1);
+        auto subresource = window.findChild<QSpinBox *>("dx12Subresource"); subresource->setValue(7);
+        const auto select = [&] {
+            return QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+                Q_ARG(QTreeWidgetItem *, tree->topLevelItem(1)), Q_ARG(int, 2));
+        };
+        QVERIFY(select()); QCOMPARE(boundary->currentIndex(), 1); QCOMPARE(subresource->value(), 0);
+        QVERIFY(view->model());
+        auto history = window.findChild<PixelHistoryView *>("pixelHistoryView"); QVERIFY(history);
+        QCOMPARE(history->request().at("x"), nlohmann::json(416));
+        QCOMPARE(history->request().at("y"), nlohmann::json(296));
+        QCOMPARE(history->request().at("resource_creation"), nlohmann::json("570673"));
+        boundary->setCurrentIndex(2); QVERIFY(select());
+        auto image = window.findChild<ImageView *>("frameOutput"); QVERIFY(image->image().isNull());
+        window.replay(); QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QVERIFY(!image->image().isNull()); QCOMPARE(image->selectedPixel(), std::optional<QPoint>(QPoint(416, 296)));
+        const auto &extent = report.at("texture_stores").at("rows")[1].at("view_extent");
+        QCOMPARE(image->image().size(), QSize(extent[0].get<int>(), extent[1].get<int>()));
+        const auto previous = image->image();
+        view->texturePixelRequested("stale-context", 36779, 571530, 2149346282688ULL, 832, 592, 0, 0, 0);
+        QCOMPARE(image->image(), previous); QCOMPARE(image->selectedPixel(), std::optional<QPoint>(QPoint(416, 296)));
+        const auto screenshot = qEnvironmentVariable("FLORA_DX12_UI_SCREENSHOT");
+        if (!screenshot.isEmpty()) QVERIFY(window.grab().save(screenshot));
+        subresource->setValue(1); QVERIFY(image->image().isNull()); QVERIFY(!image->selectedPixel());
+    }
     void workspaceAndSearch() {
         QTemporaryDir temp; const auto path=fixture(temp);
         MainWindow window;
