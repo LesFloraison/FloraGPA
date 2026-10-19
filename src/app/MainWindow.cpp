@@ -1770,29 +1770,7 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
         if (historyRequestId_ != resourceHistory_->requestId())
             return false;
         auto enriched = result;
-        if (enriched.value("ok", false)) {
-            enriched["captured_creation"] = session_->resourceDetails(selection_.resource);
-            for (auto &row : enriched.at("resource_history"))
-                if (row.value("selectable", false)) {
-                    const auto execution = std::stoull(row.at("execution").get<std::string>());
-                    row["captured_call"] = session_->executionDetails(execution);
-                    if (row.value("usage_name", "") == "Barrier") {
-                        row["captured_resource_barriers"] = nlohmann::json::array();
-                        const auto &call = row.at("captured_call");
-                        if (call.contains("arguments") && call["arguments"].contains("Barriers"))
-                            for (const auto &barrier : call["arguments"]["Barriers"]) {
-                                const auto object =
-                                    std::to_string(session_->resource(selection_.resource).capturedObject);
-                                if (barrier.value("Resource", "") == object ||
-                                    barrier.value("ResourceBefore", "") == object ||
-                                    barrier.value("ResourceAfter", "") == object)
-                                    row["captured_resource_barriers"].push_back(barrier);
-                            }
-                        if (!row["captured_resource_barriers"].empty())
-                            row["subresource_status"] = "see_captured_resource_barriers";
-                    }
-                }
-        }
+        enrichDx12ResourceHistory(*session_, selection_.resource, enriched);
         return resourceHistory_->finish(historyRequestId_, enriched);
     }
     if (runningAnalysis_ == RdcAnalysis::Mesh)

@@ -125,6 +125,31 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     case 0x1ae3cd301bf84ULL:
         u64("CommandList"); resource("Destination"); u64("DestinationOffset");
         resource("Source"); u64("SourceOffset"); u64("NumBytes"); break;
+    case 0x1ae3ce6df7dc5ULL: {
+        u64("CommandList"); resource("Resource");
+        v["Region"] = nullptr;
+        if (r.flag()) {
+            json region;
+            const auto count = r.read<uint32_t>();
+            region["Rects"] = json::array();
+            if (r.flag()) {
+                const auto entries = r.read<uint64_t>();
+                if (entries != count || entries > r.remaining() / 16)
+                    throw std::runtime_error("Invalid discard rectangle array");
+                for (uint32_t i = 0; i < count; ++i) {
+                    json rect;
+                    for (const auto *name : {"Left", "Top", "Right", "Bottom"}) rect[name] = r.read<int32_t>();
+                    region["Rects"].push_back(std::move(rect));
+                }
+            }
+            if (region["Rects"].size() != count) throw std::runtime_error("Missing discard rectangles");
+            region["FirstSubresource"] = r.read<uint32_t>();
+            region["NumSubresources"] = r.read<uint32_t>();
+            v["Region"] = std::move(region);
+        }
+        r.end();
+        break;
+    }
     case 0x1ae3c24e5dabeULL: {
         u64("CommandList");
         const auto count = r.read<uint32_t>();

@@ -5135,6 +5135,66 @@ The test proves routing and readback provenance, not complete image correctness.
 Only one native GPU replay was used for this workspace change. Full 3D navigation,
 whole-frame fidelity and the remaining acceptance items below are unfinished.
 
+### Discard ranges and the Hellblade2 intermediate image
+
+The coordinate-navigation screenshot's abnormal lower area prompted a targeted
+definition-of-contents investigation. Existing trace evidence distinguishes the
+allocation from the shader's active rectangle: creation **570673** is **960×600**,
+whereas `_RootShaderParameters` register **c2** is `(0,0,1920,803)` and c3 records
+the same active full-resolution dimensions. In the actual DXIL, `_642` checks
+the full-resolution coordinate against that maximum; `_649/_650` require even
+coordinates, and `_645/_646` shift them right by one for mip-1 output instruction
+**614**. Thus this Dispatch can write only within **[0,960) × [0,402)**, despite
+the 600-row allocation. Its out-of-rectangle coordinates become `-1` and the UAV
+store is out of bounds. This is a bound on writes, not proof that every pixel
+inside it was written.
+
+The existing output-producer RDC's resource-usage index identifies a more
+fundamental definition boundary: execution **36710**, source **611455**, is
+`DiscardResource` for captured object **2149346324304**, creation **570673**.
+The original capture payload is **17 bytes** at `thread-34368-0` offset
+**1706788**: command-list pointer, resource pointer and a null region flag.
+An earlier whole-resource discard is execution **23039**, source **593584**,
+at offset **842843**. Both decode fully without extension bytes. After 36710,
+the usage index reports CS read/write bindings at **36766**, **36770**, **36775**
+and **36779**, with source records **611527**, **611532**, **611539**, **611544**.
+Binding evidence alone does not establish their texel coverage.
+
+`DiscardResource` tells the implementation that old contents need not be
+preserved; it is not a clear-to-zero operation. See Microsoft's
+[DiscardResource semantics](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-discardresource)
+and [discard-region definition](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_discard_region).
+The last Dispatch cannot define the padded rows, and earlier contents were
+discarded. The other three Dispatches' coverage has not been proven, so these
+findings narrow the investigation without proving the abnormal colors harmless
+or attributing every difference to undefined data. Raw output remains unchanged;
+no pixels are zeroed, cropped or excluded from fidelity acceptance automatically.
+
+The implementation now decodes null/explicit discard regions, signed rectangles
+and first/count subresource ranges with checked array lengths and complete-record
+consumption. Discard resource references participate in existing API/resource
+search. Resource-history enrichment uses the captured session, checks resource
+lifetime and source-record identities, and attaches the exact discard range.
+The panel displays that range and the discarded-content semantics, while keeping
+`content_change: not_measured` and later bindings as potential uses. Existing
+captured barrier details are retained. It does not yet track later per-texel
+definition or infer a complete validity mask.
+
+Evidence under the ignored research directory: `hellblade-mip1-writers1` is
+the indexed-history query; `hellblade-mip1-discard-enriched1.json` contains the
+captured-call enrichment; `hellblade-mip1-discard-evidence1.json` summarizes the
+constant-buffer/guard bound and discard records. No additional native frame
+replay was performed for this investigation. Builds **334–335** cover parser,
+application and focused tests. The new parser fixture covers whole-resource,
+rectangle and subresource-only regions, a resource identity above 2^53, missing
+arrays and truncated records. The real-capture UI check verifies both discards,
+preserved barrier enrichment, navigation to execution 36710 and rejection of
+wrong resource/source identities. Whole-frame fidelity remains unfinished.
+`discard-history-check2.txt` records **4 passed, 0 failed, 0 skipped** in **271 ms**
+(including initialization and cleanup). The inspected
+`hellblade-mip1-discard-ui2.png` shows the selected whole-resource discard and
+its original command payload in the existing history panel.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

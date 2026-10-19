@@ -18,6 +18,7 @@
 #include "dx12/NativeDescriptors.h"
 #include "dx12/BackBufferIndex.h"
 #include "app/MainWindow.h"
+#include "app/Appearance.h"
 #include "app/Models.h"
 #include "app/Views.h"
 #include "app/OutputStorageExport.h"
@@ -3516,6 +3517,64 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QTest::keyClick(locate, Qt::Key_Return);
         QVERIFY(metrics->result().is_null());
         QVERIFY(!metrics->finish(token, result));
+    }
+    void discardRegionDetails() {
+        QByteArray bytes; qword(bytes, 0x1234); qword(bytes, 9007199254740993ULL); bytes.append(char(0));
+        const auto decode = [&] { return dx12::decodeArguments(0x1ae3ce6df7dc5ULL,
+            format::Bytes(reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size()))); };
+        auto result = decode(); QVERIFY(result.supported); QVERIFY(result.values.at("Region").is_null());
+        QCOMPARE(result.resources, std::vector<uint64_t>{9007199254740993ULL});
+        bytes[16] = char(1); dword(bytes, 1); bytes.append(char(1)); qword(bytes, 1);
+        for (const uint32_t n : {2U, 4U, 30U, 40U, 3U, 2U}) dword(bytes, n);
+        result = decode(); QCOMPARE(result.values.at("Region").at("FirstSubresource"), nlohmann::json(3));
+        QCOMPARE(result.values.at("Region").at("NumSubresources"), nlohmann::json(2));
+        QCOMPARE(result.values.at("Region").at("Rects")[0].at("Bottom"), nlohmann::json(40));
+        bytes.chop(1); QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode());
+        bytes = bytes.left(16); bytes.append(char(1)); dword(bytes, 1); bytes.append(char(0)); dword(bytes, 0); dword(bytes, 1);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, decode());
+        bytes = bytes.left(16); bytes.append(char(1)); dword(bytes, 0); bytes.append(char(0)); dword(bytes, 2); dword(bytes, 1);
+        result = decode(); QVERIFY(result.values.at("Region").at("Rects").empty());
+        QCOMPARE(result.values.at("Region").at("FirstSubresource"), nlohmann::json(2));
+    }
+    void capturedDiscardHistory() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto path = qEnvironmentVariable("FLORA_DX12_DISCARD_HISTORY");
+        if (root.isEmpty() || path.isEmpty()) QSKIP("Set Hellblade2 capture and mip-1 history report");
+        QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
+        auto report = nlohmann::json::parse(file.readAll().toStdString());
+        const auto session = openReplaySession(std::filesystem::path((root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        enrichDx12ResourceHistory(*session, 570673, report);
+        size_t discards{}; int last = -1;
+        for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
+            const auto &row = report.at("resource_history")[i];
+            if (row.at("usage_name") != "Discard") continue;
+            ++discards; last = int(i);
+            QCOMPARE(row.at("content_definition"), nlohmann::json("discarded_until_rewritten"));
+            QCOMPARE(row.at("content_change"), nlohmann::json("not_measured"));
+            QVERIFY(row.at("captured_discard_region").is_null());
+            QCOMPARE(row.at("captured_call").at("arguments").at("UndecodedExtensionBytes"), nlohmann::json(0));
+            qInfo() << "Whole-resource discard" << QString::fromStdString(row.at("execution").get<std::string>());
+        }
+        QCOMPARE(discards, size_t(2)); QVERIFY(last >= 0);
+        QVERIFY(!report.at("resource_history")[0].at("captured_resource_barriers").empty());
+        applyAppearance(*qApp);
+        ResourceHistoryView view; view.resize(1350, 600); view.show();
+        view.setContext("hellblade-discard", 36779, 570673, 2149346324304ULL);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows"); QVERIFY(rows);
+        auto item = rows->topLevelItem(last); QVERIFY(item->text(4).contains("discard", Qt::CaseInsensitive));
+        rows->setCurrentItem(item); rows->scrollToItem(item);
+        QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
+        view.findChild<QAction *>("locateResourceHistoryEvent")->trigger();
+        QCOMPARE(jump.size(), 1); QCOMPARE(jump[0][0].toULongLong(), 36710ULL);
+        const auto screenshot = qEnvironmentVariable("FLORA_DX12_UI_SCREENSHOT");
+        if (!screenshot.isEmpty()) QVERIFY(view.grab().save(screenshot));
+        const auto output = qEnvironmentVariable("FLORA_DX12_DISCARD_EXPORT");
+        if (!output.isEmpty()) view.exportResult(output);
+        auto wrong = report; wrong["resource_object"] = "9007199254740993";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, enrichDx12ResourceHistory(*session, 570673, wrong));
+        wrong = report; wrong["resource_history"][last]["source_record"] = "1";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, enrichDx12ResourceHistory(*session, 570673, wrong));
     }
     void resourceBarrierDetails() {
         QByteArray bytes;

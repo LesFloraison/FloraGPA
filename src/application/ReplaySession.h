@@ -67,4 +67,6 @@ class IReplaySession {
 };
 std::shared_ptr<const IReplaySession> openReplaySession(const std::filesystem::path &path,
                                                        const CancelCheck &cancelled = {});
+// Adds original call ranges to a mapped analysis history; does not infer writes.
+void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohmann::json &result);
 }

@@ -537,4 +537,41 @@ uint32_t dx12TexturePixelSubresource(const nlohmann::json &d, uint32_t x, uint32
         throw std::runtime_error("Texture pixel navigation exceeds the viewer range");
     return uint32_t(subresource);
 }
+void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohmann::json &result) {
+    if (!result.value("ok", false)) return;
+    const auto object = std::to_string(session.resource(creation).capturedObject);
+    if (session.backend() != ReplayBackend::Dx12 || result.value("backend", "") != "dx12" ||
+        result.at("resource_creation") != std::to_string(creation) || result.at("resource_object") != object)
+        throw std::runtime_error("Resource history does not match the captured lifetime");
+    result["captured_creation"] = session.resourceDetails(creation);
+    for (auto &row : result.at("resource_history")) {
+        if (!row.value("selectable", false)) continue;
+        const auto text = row.at("execution").get<std::string>();
+        uint64_t execution{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), execution);
+        if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size())
+            throw std::runtime_error("Invalid resource history execution identity");
+        row["captured_call"] = session.executionDetails(execution);
+        const auto &call = row.at("captured_call");
+        if (row.contains("source_record") && row.at("source_record") != call.at("source_record"))
+            throw std::runtime_error("Resource history execution maps to a different source record");
+        if (row.value("usage_name", "") == "Barrier") {
+            row["captured_resource_barriers"] = nlohmann::json::array();
+            if (call.contains("arguments") && call["arguments"].contains("Barriers"))
+                for (const auto &barrier : call["arguments"]["Barriers"])
+                    if (barrier.value("Resource", "") == object || barrier.value("ResourceBefore", "") == object ||
+                        barrier.value("ResourceAfter", "") == object)
+                        row["captured_resource_barriers"].push_back(barrier);
+            if (!row["captured_resource_barriers"].empty()) row["subresource_status"] = "see_captured_resource_barriers";
+        } else if (row.value("usage_name", "") == "Discard") {
+            const auto &args = call.at("arguments");
+            if (call.at("name") != "ID3D12GraphicsCommandListDiscardResource" || args.at("Resource") != object)
+                throw std::runtime_error("Discard history does not match the captured resource");
+            row["captured_discard_region"] = args.at("Region");
+            row["subresource_status"] = "see_captured_discard_region";
+            row["content_definition"] = "discarded_until_rewritten";
+            row["discard_note"] = "Discard does not clear to zero. Contents need not be preserved in the specified region; later bindings alone do not establish which texels were written.";
+        }
+    }
+}
 }

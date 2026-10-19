@@ -178,6 +178,19 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                                                 field(row, "evidence"), field(row, "queue")});
         if (row.contains("indirect_action")) item->setText(0, item->text(0) + " · action " + field(row, "indirect_action"));
         QStringList ranges;
+        if (row.contains("captured_discard_region")) {
+            const auto &region = row.at("captured_discard_region");
+            if (region.is_null()) ranges << "All subresources discarded; contents undefined";
+            else {
+                ranges << QString("Discard: first subresource %1, count %2; %3")
+                    .arg(field(region, "FirstSubresource")).arg(field(region, "NumSubresources"))
+                    .arg(region.at("Rects").empty() ? QString("entire selected subresources") : QString("%1 rectangles").arg(region.at("Rects").size()));
+                for (const auto &rect : region.at("Rects"))
+                    ranges << QString("[%1, %2) × [%3, %4)").arg(field(rect, "Left")).arg(field(rect, "Right"))
+                        .arg(field(rect, "Top")).arg(field(rect, "Bottom"));
+            }
+            item->setToolTip(4, field(row, "discard_note"));
+        }
         for (const auto &barrier : row.value("captured_resource_barriers", Json::array())) {
             if (barrier.at("Type") == 0)
                 ranges << QString("%1: 0x%2 → 0x%3 (flags %4)")
