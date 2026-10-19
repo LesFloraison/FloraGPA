@@ -54,6 +54,59 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void talosReadOnlyDepthRoundtrip() {
+        const auto root = qEnvironmentVariable("FLORA_TALOS_DEPTH_STATE");
+        if (root.isEmpty()) QSKIP("Set the Talos D32 depth evidence directory");
+        const auto report = read(root + "/history-roundtrip/result.json");
+        const auto baseline = read(root + "/history-default/result.json");
+        QCOMPARE(report.at("backend_depth_roundtrip_patch"), Json(2));
+        QCOMPARE(report.at("history"), baseline.at("history"));
+        QCOMPARE(report.at("history").size(), size_t(2));
+        const auto &audit = report.at("history_scope").at("replay_consistency");
+        QCOMPARE(audit.at("history_boundary").at("status"), Json("matches_selected_texel"));
+        QCOMPARE(baseline.at("history_scope").at("replay_consistency").at("history_boundary").at("status"),
+                 Json("differs_from_selected_texel"));
+        QCOMPARE(audit.at("before_history"), audit.at("after_restoration"));
+        QCOMPARE(audit.at("before_history"), report.at("history").back().at("postMod").at("col"));
+        PixelHistoryView view; view.resize(1600, 800); view.show();
+        view.setContext("talos:d32", 14835, true); view.setDx12Resource(193, 1657122592ULL);
+        view.selectPixel(1657122592ULL, 1776, 380, 0, 0, 0);
+        auto refresh = view.findChild<QCheckBox *>("historyDepthRoundtrip");
+        QVERIFY(!refresh->isChecked()); refresh->setChecked(true);
+        QVERIFY(view.finish(view.requestId(), report));
+        QVERIFY(!view.findChild<QLabel *>("historySummary")->text().contains("differs from the selected texel"));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords");
+        rows->setCurrentItem(rows->topLevelItem(1));
+        QSignalSpy debug(&view, &PixelHistoryView::pixelDebugRequested);
+        action(view, "debugHistoryPixel")->trigger();
+        QCOMPARE(debug.size(), 1); QCOMPARE(debug[0][0].toULongLong(), 14835ULL);
+        QCOMPARE(debug[0][4].toUInt(), 172U); QCOMPARE(debug[0][6].toBool(), true);
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) {
+            QVERIFY(view.grab().save(output_ + "/talos-d32-history.png"));
+            view.exportResult(output_ + "/talos-d32-history.json");
+            QCOMPARE(read(output_ + "/talos-d32-history.json"), report);
+        }
+        const auto trace = read(root + "/debug-roundtrip/result.json");
+        ReplayDebugView pixel("ps"); pixel.resize(1500, 950); pixel.show();
+        pixel.setContext("talos:d32", 14835, true); pixel.selectPixel(1776, 380, 0); pixel.selectPrimitive(172);
+        pixel.selectDepthRoundtrip(true); QVERIFY(pixel.finish(pixel.requestId(), trace));
+        QCOMPARE(trace.at("step_count"), Json(278));
+        QCOMPARE(trace.at("gpu_reference").at("consistency"), Json("selected_texel_unchanged"));
+        pixel.findChild<QSpinBox *>("debugStepIndex")->setValue(277);
+        pixel.findChild<QLineEdit *>("debugWatchExpression")->setText("registers.o0.float");
+        action(pixel, "debugAddWatch")->trigger();
+        const auto output = pixel.model()->watchResults()[0];
+        QCOMPARE(output.at("status"), Json("available"));
+        // A corrected target observation does not validate this simulated PS invocation.
+        QVERIFY(std::abs(output.at("values")[2].get<double>() -
+            trace.at("gpu_reference").at("value").at("floatValue")[2].get<double>()) > 0.0008);
+        auto tabs = pixel.findChild<QTabWidget *>("debugValueTabs");
+        for (int i = 0; i < tabs->count(); ++i)
+            if (tabs->tabText(i) == "Watches") tabs->setCurrentIndex(i);
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) QVERIFY(pixel.grab().save(output_ + "/talos-d32-debug.png"));
+    }
     void depthRoundtripHistory() {
         const auto root = qEnvironmentVariable("FLORA_DEPTH_ROUNDTRIP_HISTORY_REPORTS");
         if (root.isEmpty()) QSKIP("Set the selected D32S8 history evidence directory");
@@ -81,7 +134,7 @@ class HistoryUiTests : public QObject {
         view.setWorkerBusy(false); QVERIFY(refresh->isEnabled());
         QVERIFY(view.finish(view.requestId(), report));
         const auto summary = view.findChild<QLabel *>("historySummary");
-        QVERIFY(summary->text().contains("3 completed copies"));
+        QVERIFY(summary->text().contains("3 completed depth refreshes"));
         QVERIFY(!summary->text().contains("differs from the selected texel"));
         QVERIFY(summary->text().contains("intermediate fragments are not validated"));
         auto rows = view.findChild<QTreeWidget *>("historyRecords");
@@ -210,7 +263,7 @@ class HistoryUiTests : public QObject {
         view.setWorkerBusy(true); QVERIFY(!refresh->isEnabled());
         view.setWorkerBusy(false); QVERIFY(refresh->isEnabled());
         QVERIFY(view.finish(view.requestId(), report));
-        QVERIFY(view.findChild<QLabel *>("debugBackendNotice")->text().contains("3 completed copies"));
+        QVERIFY(view.findChild<QLabel *>("debugBackendNotice")->text().contains("3 completed depth refreshes"));
         QSignalSpy errors(&view, &ReplayDebugView::error);
         view.findChild<QLineEdit *>("debugInstruction")->setText("137");
         action(view, "debugToggleInstructionBreakpoint")->trigger();

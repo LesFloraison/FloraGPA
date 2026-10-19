@@ -314,8 +314,8 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDepthRoundtripPatchVersion")))
             depthRoundtripPatch = patch();
         if (job.value("depth_roundtrip", false)) {
-            if (depthRoundtripPatch != 1)
-                throw std::runtime_error("Depth roundtrip requires the Flora RenderDoc depth roundtrip patch version 1");
+            if (depthRoundtripPatch != 1 && depthRoundtripPatch != 2)
+                throw std::runtime_error("Depth roundtrip requires the Flora RenderDoc depth roundtrip patch version 1 or 2 (read-only D32 requires version 2)");
             setDepthRoundtripEvent = symbol<SetDepthRoundtripEvent>("RENDERDOC_SetFloraDepthRoundtripEvent");
             depthRoundtripCopies = symbol<DepthSnapshotCopies>("RENDERDOC_GetFloraDepthRoundtripCopies");
         }
@@ -1442,9 +1442,13 @@ Json runRdcJob(const Json &job) {
             result["depth_roundtrip"] = {
                 {"requested", true}, {"copies", std::to_string(session.depthRoundtripCopies())},
                 {"experimental", true},
-                {"scope", "Selected isolated DX12 Draw only: D32S8, depth writes enabled, stencil disabled, "
-                          "one mip/layer/sample/node and legacy depth states. Copies both planes out and "
-                          "back before the Draw, preserving the original DSV and subsequent depth writes. "
+                {"supported_depth_modes", session.depthRoundtripPatch >= 2
+                    ? "Read-only D32 direct Draw or depth-writing D32S8 Draw"
+                    : "Depth-writing D32S8 Draw"},
+                {"scope", "Selected isolated DX12 Draw only: stencil disabled, one mip/layer/sample/node "
+                          "and legacy depth states. Copies all planes out and back before the Draw, "
+                          "preserving the original DSV and subsequent depth writes. Count is completed "
+                          "roundtrips (two GPU copies each), not unique captured actions. "
                           "Adds GPU work and a wait; does not validate full replay correctness."}};
         }
         if (session.depthSnapshotCopies) {
@@ -1555,7 +1559,7 @@ Json runRdcJob(const Json &job) {
         session.computePrepared = prepared == 1;
         if (!prepared) controller.SetFrameEvent(eid, true);
         if (session.depthRoundtripCopies && session.depthRoundtripCopies() == 0)
-            throw std::runtime_error("Depth roundtrip was not applied: select a depth-writing D32S8 Draw with "
+            throw std::runtime_error("Depth roundtrip was not applied: select a read-only D32 direct Draw (patch v2) or depth-writing D32S8 Draw with "
                                      "stencil disabled, one mip/layer/sample/node and legacy depth states");
     }
     if (action == "pipeline") {

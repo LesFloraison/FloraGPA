@@ -1,0 +1,43 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_device.cpp b/renderdoc/driver/d3d12/d3d12_device.cpp
+--- a/renderdoc/driver/d3d12/d3d12_device.cpp
++++ b/renderdoc/driver/d3d12/d3d12_device.cpp
+@@ -5701,7 +5701,7 @@
+ 
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDepthRoundtripPatchVersion()
+ {
+-  return 1;
++  return 2;
+ }
+ 
+ extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_SetFloraDepthRoundtripEvent(uint32_t eventId)
+@@ -5737,19 +5737,24 @@
+       return S_FALSE;
+     const auto &depth = pipeline->graphics->DepthStencilState;
+     const auto &view = state.dsv.GetDSV();
+-    if(!depth.DepthEnable || depth.DepthWriteMask != D3D12_DEPTH_WRITE_MASK_ALL ||
++    const bool readOnlyD32 = view.Format == DXGI_FORMAT_D32_FLOAT &&
++                             depth.DepthWriteMask == D3D12_DEPTH_WRITE_MASK_ZERO &&
++                             !(action->flags & ActionFlags::Indirect);
++    const bool writableD32S8 = view.Format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT &&
++                               depth.DepthWriteMask == D3D12_DEPTH_WRITE_MASK_ALL &&
++                               !(view.Flags & D3D12_DSV_FLAG_READ_ONLY_DEPTH);
++    if(!depth.DepthEnable || (!readOnlyD32 && !writableD32S8) ||
+        depth.StencilEnable || depth.DepthFunc == D3D12_COMPARISON_FUNC_ALWAYS ||
+        depth.DepthFunc == D3D12_COMPARISON_FUNC_NEVER ||
+-       view.Format != DXGI_FORMAT_D32_FLOAT_S8X24_UINT ||
+-       view.ViewDimension != D3D12_DSV_DIMENSION_TEXTURE2D || view.Texture2D.MipSlice != 0 ||
+-       (view.Flags & D3D12_DSV_FLAG_READ_ONLY_DEPTH))
++       view.ViewDimension != D3D12_DSV_DIMENSION_TEXTURE2D || view.Texture2D.MipSlice != 0)
+       return S_FALSE;
+     auto *original = manager->GetResAs<ID3D12Resource>(state.dsv.GetResResourceId());
+     const auto desc = original->GetDesc();
+     if(desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.MipLevels != 1 ||
+        desc.DepthOrArraySize != 1 || desc.SampleDesc.Count != 1 ||
+-       (desc.Format != DXGI_FORMAT_R32G8X24_TYPELESS &&
+-        desc.Format != DXGI_FORMAT_D32_FLOAT_S8X24_UINT))
++       (readOnlyD32 ? (desc.Format != DXGI_FORMAT_R32_TYPELESS && desc.Format != DXGI_FORMAT_D32_FLOAT)
++                    : (desc.Format != DXGI_FORMAT_R32G8X24_TYPELESS &&
++                       desc.Format != DXGI_FORMAT_D32_FLOAT_S8X24_UINT)))
+       return S_FALSE;
+     const auto &states = device->GetSubresourceStates(state.dsv.GetResResourceId());
+     if(states.empty())

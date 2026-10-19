@@ -43,7 +43,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"isolate-missing-queries", "Accept a marked incomplete DX12 capture for inventory or texture readback"});
         p.addOption({"dxil-fast-contraction", "Experimental GPU evaluation of adjacent single-use fast DXIL multiply/add pairs"});
         p.addOption({"readonly-depth-snapshot", "Experimental D32 depth snapshots for DX12 texture/debug-pixel analysis"});
-        p.addOption({"depth-roundtrip", "Experimental selected DX12 D32S8 depth refresh for texture/history/debug-pixel analysis; preserves original depth writes"});
+        p.addOption({"depth-roundtrip", "Experimental selected DX12 read-only D32 (patch v2) or depth-writing D32S8 refresh for texture/history/debug-pixel analysis; preserves the original attachment"});
         p.addOption({"pixel-history-reference", "Read the selected DX12 primitive's GPU shader output using extra pixel-history replays"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});

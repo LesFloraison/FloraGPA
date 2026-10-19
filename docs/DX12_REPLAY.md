@@ -6482,6 +6482,69 @@ Builds **400/401** pass. Focused model checks report **5 passed** (4 ms), and
 the final saved-trace UI check reports **3 passed** (369 ms), including
 setup/cleanup. No GPU replay or broad sample regression was added for this change.
 
+### Read-only D32 refresh without replacing the depth attachment
+
+Talos execution **14835** still loses **12,914** pixels under the native-discard
+policy. It uses depth Equal with writes disabled, D32 creation **8468**, and HDR
+creation **193**. Three research controls separate the existing snapshot's effects:
+
+| Isolated Draw intervention | HDR pixels differing from native |
+| --- | --- |
+| None, including with API validation requested | 12,914 |
+| Copy-source transition and restoration only | 12,914 |
+| Copy to temporary storage, but rebind the original depth resource | 12,914 |
+| Copy out and back, retaining the original depth resource | 0 |
+
+This rules out the tested state transition and source-copy/rebinding alone as
+sufficient workarounds. It does not identify a driver/compression root cause.
+The validation report contains loading-stage warnings only and cannot validate
+the subsequent isolated Draw. Probe source variants and output bytes remain in
+ignored `artifacts/dx12-research/talos-depth-state1`; none of those instrumented
+snapshot variants is part of the shipped patch set.
+
+The eighteenth patch, `dx12-readonly-depth-roundtrip.patch`, extends the existing
+explicit `--depth-roundtrip` path and reports patch version **2**. Alongside the
+existing depth-writing D32S8 path, it accepts read-only D32 direct Draws with
+stencil disabled, one mip/layer/sample/node and legacy depth states. It excludes
+Always/Never tests and indirect/mesh Draws for this new D32 path. It copies all
+planes out and back, restores resource states and retains the original resource,
+DSV and PSO. It remains experimental and **off by default**. Reports distinguish
+supported modes; the count is completed roundtrips, each involving two GPU copies.
+Version 1 remains usable for D32S8; the selected D32 request on that version fails
+without a texture export. Packaging verifies both the original and extension
+patch hashes and the version-2 runtime export contract.
+
+The final version-2 implementation reproduces exact native HDR equality across
+**16,588,800 bytes**, SHA-256
+`0204dbbde1a98625838132f7ab0c465445d36f518b4a21d831da602d486b18ba`.
+All **8,294,400** original D32 bytes remain exact, SHA-256
+`9978bcc8ffd3c43563a528115aec9d38f4a8d34dc9de1f7e39cfdb3dc4397224`.
+At **(1776,380)**, history retains the same two records (Clear **14824**, Draw
+**14835**, primitive **172**), but its final modification now agrees with both
+selected-event readbacks. The default path reports this disagreement explicitly.
+The verified stored color is
+`(0.0036678314208984375, 0.004878997802734375, 0.00762176513671875, 1)`.
+Other history events/intermediate fragments remain outside this acceptance.
+
+The selected PS invocation provides **278** states and three stable GPU target
+observations with refresh enabled. Its simulated return is approximately
+`(0.0035753467, 0.0049502933, 0.0084888386, 1)`, which still differs from the
+stored target and the history shader-output observation. This is an unresolved
+shader-debug discrepancy, not a successful invocation-fidelity comparison.
+Saved-report UI checks verify the history-to-debug event/primitive/refresh
+handoff, export, and preservation of this difference; older D32S8 reports remain
+accepted. No full portable-package or broad sample acceptance was performed.
+
+The complete 18-patch runtime build passes; runtime SHA-256
+`dc9f875ba2327a732673b331570cbba0a46b6e19d1e4623a1809102030d478f8`,
+extension SHA-256
+`053cb92ef9beed0cf0c43f77c2e94fffa06fbb979e1250ea2c3970f119bb8720`.
+Final application/history UI build **405** passes. The three focused saved-report
+UI checks report **5 passed** including setup/cleanup (**1,602 ms**), covering
+the new Talos path and existing Hellblade2 D32S8 history/debug reports. Screenshots
+are in `talos-depth-state-ui1`. Both PowerShell build/package scripts parse
+successfully. GPU comparisons were serial and limited to this depth fault.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -6492,7 +6555,7 @@ setup/cleanup. No GPU replay or broad sample regression was added for this chang
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; explicit workspace query-output isolation reaches original last execution 19410, exports marked incomplete storage and rejects unknown readbacks; historical values and full frame fidelity unfinished | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
-| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; selected D32 Equal Draw refresh preserves original depth bytes and aligns its mapped color-history boundary with native readback; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |

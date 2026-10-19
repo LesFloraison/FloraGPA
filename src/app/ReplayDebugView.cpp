@@ -157,11 +157,11 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
                                             "D32 depth for isolated draws; preserves depth comparison and adds GPU work.");
         depthOptions_->addWidget(readOnlyDepthSnapshot_);
         connect(readOnlyDepthSnapshot_, &QCheckBox::toggled, this, &ReplayDebugView::invalidate);
-        depthRoundtrip_ = new QCheckBox("D32S8 depth refresh (experimental)");
+        depthRoundtrip_ = new QCheckBox("D32/D32S8 depth refresh (experimental)");
         depthRoundtrip_->setObjectName("debugDepthRoundtrip");
         depthRoundtrip_->setToolTip("Requires the patched RenderDoc library. Copies depth out and back before "
                                    "the selected isolated Draw, preserving the original attachment and depth writes. "
-                                   "D32S8 only, stencil disabled, one mip/layer/sample/node and legacy depth states. "
+                                   "Read-only D32 direct Draw (patch v2) or depth-writing D32S8; stencil disabled, one mip/layer/sample/node and legacy depth states. "
                                    "Adds GPU work; does not establish full replay correctness.");
         depthOptions_->addWidget(depthRoundtrip_);
         connect(depthRoundtrip_, &QCheckBox::toggled, this, [this](bool enabled) {
@@ -798,7 +798,7 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("Shader trace does not match the DXIL contraction mode");
     if (dx12_ && depthRoundtrip_ &&
         result.value("depth_roundtrip", Json::object()).value("requested", false) != depthRoundtrip_->isChecked())
-        throw std::runtime_error("Shader trace does not match the D32S8 depth refresh mode");
+        throw std::runtime_error("Shader trace does not match the D32/D32S8 depth refresh mode");
     if (dx12_ && !indirectAction_->text().trimmed().isEmpty() &&
         result.value("indirect_selection", Json::object()).value("indirect_action", Json()) != invocationIndex(indirectAction_))
         throw std::runtime_error("Shader trace does not match the selected indirect action");
@@ -819,7 +819,7 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (dx12_ && result.value("replay_policy", Json::object()).value("dx12_discard_policy", "") == "diagnostic_pattern")
         warnings.append("Diagnostic discard patterns are enabled. Shader reads of discarded data can differ from native replay.");
     if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
-        warnings.prepend(QString("Experimental D32S8 depth refresh: %1 completed copies. "
+        warnings.prepend(QString("Experimental D32/D32S8 depth refresh: %1 completed depth refreshes. "
                                  "Original depth writes preserved; full replay correctness is not established.")
                              .arg(text(refresh.value("copies", Json("unknown")))));
     if (result.contains("texture_stores"))
