@@ -10,6 +10,7 @@
 namespace flora {
 // Null project means no experiment was sent with this DX12 replay request.
 void requireDx12ExperimentReport(const nlohmann::json &report, const nlohmann::json &project);
+void requireDx12QueryPolicyReport(const nlohmann::json &report, bool isolateMissingQueries);
 struct WorkerReport {
     QJsonObject report;
     nlohmann::json replayReport;

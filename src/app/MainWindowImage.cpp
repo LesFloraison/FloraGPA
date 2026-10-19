@@ -38,6 +38,8 @@ void MainWindow::invalidateDx12Output() {
     exportAction_->setEnabled(false);
     outputStorageAction_->setEnabled(false);
     imageLabel_->setText("Select an execution instance and optional texture creation, then press Replay");
+    if (selection_.isolateMissingQueries)
+        imageLabel_->setText("Incomplete replay · Missing query outputs stay unavailable; select an execution and press Replay");
     setBusy(busy());
 }
 void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
@@ -117,6 +119,7 @@ void MainWindow::validateWorkerArtifact(nlohmann::json replayReport) {
                                           .arg(displayedBuffer_)
                                           .arg(job->buffer.length)
                                           .arg(boundaryLabel(report_)));
+                if (selection_.isolateMissingQueries) bufferLabel_->setText(bufferLabel_->text() + " · Incomplete replay; known bytes only");
                 statusBar()->showMessage("Buffer ready", 3000);
                 emit taskFinished(true);
                 return;
@@ -195,6 +198,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
                                        .arg(report_["height"].toInt())
                                        .arg(boundaryLabel(report_))
                                  : report_["image_status"].toString());
+        if (selection_.isolateMissingQueries) imageLabel_->setText("Incomplete: missing query outputs · " + imageLabel_->text());
         const auto device = report_["device"].toObject();
         imageLabel_->setToolTip(report_["image_status"].toString() +
                                 QString("\n%1 · Agility SDK %2")
@@ -211,7 +215,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
             selection_.sample = 0;
         }
         outputDir_ = std::move(jobDir_);
-        historyPick_->setEnabled(outputAvailable);
+        historyPick_->setEnabled(outputAvailable && !selection_.isolateMissingQueries);
         exportAction_->setEnabled(outputAvailable);
         outputStorageAction_->setEnabled(report_["output_display"].isObject());
         resourceImages_->setCurrentIndex(0);
@@ -220,7 +224,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         resourceStatus_->setText(QString("DX12 execution %1 · %2")
                                     .arg(*selection_.execution)
                                     .arg(report_["image_status"].toString()));
-        statusBar()->showMessage("Selected DX12 execution replay complete", 7000);
+        statusBar()->showMessage(selection_.isolateMissingQueries ? "Execution boundary reached; query outputs remain incomplete" : "Selected DX12 execution replay complete", 7000);
         log_->appendPlainText(QString("DX12 execution %1 · %2")
                                   .arg(*selection_.execution)
                                   .arg(report_["image_status"].toString()));

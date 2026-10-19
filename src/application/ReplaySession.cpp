@@ -381,6 +381,8 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
+        if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection)
+            return {CapabilityStatus::NotImplemented, "Query-output isolation supports native replay and known-byte readback; analysis and experiments are not yet supported"};
         if (feature == ReplayFeature::Experiments) {
             if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};
             try {
@@ -487,7 +489,9 @@ class Dx12Session final : public IReplaySession {
                 const auto execution = submissions_.execution(*selection.execution);
                 if (!execution.recordingComplete || execution.submission<=directory_.initializationCount())
                     return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
-                if (const auto issue = queries_.firstIssue(*selection.execution, selection.before); !issue.is_null())
+                if (selection.isolateMissingQueries)
+                    (void)queries_.isolatedReadbacks(*selection.execution, selection.before);
+                else if (const auto issue = queries_.firstIssue(*selection.execution, selection.before); !issue.is_null())
                     return {issue.at("status") == "missing_query_results" ? CapabilityStatus::MissingData : CapabilityStatus::Failed,
                             issue.at("reason").get<std::string>()};
                 if (selection.resource) {
@@ -497,7 +501,9 @@ class Dx12Session final : public IReplaySession {
                     if (descriptor.at("Dimension")==1) return {CapabilityStatus::NotImplemented,"Use Buffer > Read for a selected-event byte range; output Replay displays textures"};
                     if (descriptor.at("SampleCount")!=1) return {CapabilityStatus::NotImplemented,"DX12 multisample texture readback is not implemented"};
                 }
-                return {CapabilityStatus::Supported,"Selected execution replay; unsupported commands and missing captured state fail explicitly"};
+                return {CapabilityStatus::Supported, selection.isolateMissingQueries
+                    ? "Incomplete replay with isolated query outputs; unavailable reads fail. Native allocation and consumer checks are required; historical values are not restored"
+                    : "Selected execution replay; unsupported commands and missing captured state fail explicitly"};
             } catch (const std::exception &error) {
                 return {CapabilityStatus::MissingData, error.what()};
             }

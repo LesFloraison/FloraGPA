@@ -6,6 +6,7 @@
 #include "WorkerReport.h"
 #include "application/Experiment.h"
 #include <QComboBox>
+#include <QCheckBox>
 #include <QDockWidget>
 #include <QFutureWatcher>
 #include <QJsonObject>
@@ -95,6 +96,7 @@ class MainWindow final : public QMainWindow {
     void importDx12Shader();
     void importDx12Resource();
     QSpinBox *dx12Subresource_ = nullptr, *dx12Budget_ = nullptr;
+    QCheckBox *dx12QueryIsolation_ = nullptr;
     QAction *dx12Controls_ = nullptr;
     CompatibilityButton *compatibility_ = nullptr;
     void buildResourceWorkspace(QWidget *output);

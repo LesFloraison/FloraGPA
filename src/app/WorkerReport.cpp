@@ -10,6 +10,18 @@
 #include <set>
 
 namespace flora {
+void requireDx12QueryPolicyReport(const nlohmann::json &report, bool isolated) {
+    const auto expected = isolated ? "isolate_readback_outputs" : "fail";
+    if (report.at("backend") != "dx12" || report.value("missing_query_policy", "fail") != expected ||
+        report.at("native_replay").value("missing_query_policy", "fail") != expected)
+        throw std::runtime_error("Worker result belongs to a different query replay policy");
+    if (isolated && (report.at("frame_complete") != false ||
+                    report.at("native_replay").at("frame_replayed") != false ||
+                    report.at("native_replay").at("query_readback_availability_valid") != true))
+        throw std::runtime_error("Isolated query replay has no valid incomplete-result boundary");
+    if (report.contains("output_display") && report.at("output_display").value("missing_query_policy", "fail") != expected)
+        throw std::runtime_error("Output storage query policy does not match the replay");
+}
 void requireDx12ExperimentReport(const nlohmann::json &report, const nlohmann::json &project) {
     if (report.at("backend") != "dx12") throw std::runtime_error("Worker experiment backend mismatch");
     if (project.is_null()) {

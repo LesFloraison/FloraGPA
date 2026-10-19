@@ -10,15 +10,19 @@ struct ReplayRequestIdentity {
     std::string session;
     ReplayBackend backend = ReplayBackend::Dx11;
     uint64_t request{}, experimentRevision{};
+    bool isolateMissingQueries = false;
     bool operator==(const ReplayRequestIdentity &) const = default;
 };
 inline nlohmann::json replayIdentityJson(const ReplayRequestIdentity &id) {
-    return {{"schema", 1}, {"backend", id.backend == ReplayBackend::Dx12 ? "dx12" : "dx11"},
+    nlohmann::json result{{"schema", id.isolateMissingQueries ? 2 : 1}, {"backend", id.backend == ReplayBackend::Dx12 ? "dx12" : "dx11"},
         {"session", id.session}, {"request", std::to_string(id.request)},
         {"experiment_revision", std::to_string(id.experimentRevision)}};
+    if (id.isolateMissingQueries) result["missing_query_policy"] = "isolate_readback_outputs";
+    return result;
 }
 inline ReplayRequestIdentity parseReplayIdentity(const nlohmann::json &json) {
-    if (!json.is_object() || json.size() != 5 || json.at("schema") != 1)
+    if (!json.is_object() || !((json.size() == 5 && json.at("schema") == 1) ||
+                              (json.size() == 6 && json.at("schema") == 2)))
         throw std::runtime_error("Unsupported replay request identity schema");
     ReplayRequestIdentity id;
     id.session = json.at("session").get<std::string>();
@@ -26,6 +30,11 @@ inline ReplayRequestIdentity parseReplayIdentity(const nlohmann::json &json) {
     const auto backend = json.at("backend").get<std::string>();
     if (backend != "dx11" && backend != "dx12") throw std::runtime_error("Unknown replay backend identity");
     id.backend = backend == "dx12" ? ReplayBackend::Dx12 : ReplayBackend::Dx11;
+    if (json.at("schema") == 2) {
+        if (id.backend != ReplayBackend::Dx12 || json.at("missing_query_policy") != "isolate_readback_outputs")
+            throw std::runtime_error("Invalid isolated-query replay identity");
+        id.isolateMissingQueries = true;
+    }
     const auto number = [&](const char *key) {
         // Numeric JSON is deliberately rejected even if currently small enough:
         // this boundary must never rely on floating-point identity conversion.

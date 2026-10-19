@@ -133,21 +133,13 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     selection.execution = execution;
     selection.before = options.isSet("before");
     selection.resource = buffer ? 0 : creation;
+    selection.isolateMissingQueries = options.isSet("isolate-missing-queries");
     const auto capability = session.capability(ReplayFeature::Replay, selection);
     const bool isolateQueries = options.isSet("isolate-missing-queries");
     if (isolateQueries)
         for (const auto flag : {"renderdoc", "measure-event", "experiment", "disable", "uav-barrier-before"})
             if (options.isSet(flag)) throw std::runtime_error(std::string("Query isolation cannot be combined with --") + flag);
-    bool isolatedIssue = false;
-    if (isolateQueries && capability.status == CapabilityStatus::MissingData) {
-        const auto submissions = session.submissionDetails();
-        for (const auto &entry : submissions.at("query_replay_coverage").at("resolves_and_issues")) {
-            if (entry.at("status") == "missing_query_results" && entry.at("reason") == capability.reason) {
-                isolatedIssue = true; break;
-            }
-        }
-    }
-    if (!capability.supported() && !isolatedIssue) {
+    if (!capability.supported()) {
         const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
                             capability.status == CapabilityStatus::NotImplemented ? "not_implemented" :
                             capability.status == CapabilityStatus::UnsupportedDevice ? "unsupported_device" : "failed";
@@ -258,6 +250,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             report["native_texture"] = texture;
             auto storage = texture;
             storage["backend"] = "dx12";
+            storage["missing_query_policy"] = isolateQueries ? "isolate_readback_outputs" : "fail";
+            storage["frame_complete"] = false;
             storage["storage_bytes"] = std::stoull(texture.at("bytes").get<std::string>());
             storage["storage_sha256"] = texture.at("sha256");
             report["output_display"] = storage;

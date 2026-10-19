@@ -1727,6 +1727,76 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         boundary->setCurrentIndex(2); QVERIFY(!replay->isEnabled());
         locate->setText("16000"); QTest::keyClick(locate, Qt::Key_Return); QVERIFY(replay->isEnabled());
         QVERIFY(done.empty()); QVERIFY(!window.busy()); // Navigation does not launch GPU work.
+        auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation"); QVERIFY(isolation);
+        locate->setText("19410"); QTest::keyClick(locate, Qt::Key_Return); QVERIFY(!replay->isEnabled());
+        isolation->setChecked(true); QVERIFY(replay->isEnabled());
+        QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("Incomplete"));
+        QVERIFY(!window.findChild<QAction *>("openExperiment")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("replaceDx12Shader")->isEnabled());
+        isolation->setChecked(false); QVERIFY(!replay->isEnabled());
+        QVERIFY(done.empty());
+        const auto session = openReplaySession(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        ReplaySelection selection; selection.execution = 19410; selection.isolateMissingQueries = true;
+        QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
+        for (const auto feature : {ReplayFeature::PixelHistory, ReplayFeature::ResourceHistory, ReplayFeature::ShaderDebug,
+                                   ReplayFeature::Geometry, ReplayFeature::PipelineInspection, ReplayFeature::Performance, ReplayFeature::Experiments})
+            QCOMPARE(session->capability(feature, selection).status, CapabilityStatus::NotImplemented);
+        selection.resource = 78132;
+        QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::NotImplemented);
+    }
+    void isolatedQueryWorkspaceReplay() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_ISOLATED_QUERY_UI");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set Talos capture directory and a new query-isolation workspace evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window; window.resize(1700, 1000); window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        const auto capture = root + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        window.openCapture(capture); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate"); locate->setText("19410"); QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources"); QModelIndex selected;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 35118) { selected = index; break; }
+        }
+        QVERIFY(selected.isValid()); resources->setCurrentIndex(selected);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+        auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation");
+        QVERIFY(!window.findChild<QAction *>("replayFrame")->isEnabled());
+        isolation->setChecked(true); done.clear(); window.replay();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QVERIFY(!window.busy());
+        auto image = window.findChild<ImageView *>("frameOutput"); QCOMPARE(image->image().size(), QSize(1920, 1080));
+        QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("Incomplete: missing query outputs"));
+        QVERIFY(window.grab().save(output + "/workspace.png"));
+        QSignalSpy exported(&window, &MainWindow::exportFinished); QTimer chooser, watchdog; watchdog.setSingleShot(true);
+        bool chosen = false;
+        connect(&chooser, &QTimer::timeout, &window, [&] {
+            if (auto dialog = window.findChild<QFileDialog *>()) {
+                chooser.stop(); chosen = true;
+                dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + "/storage.bin");
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            }
+        });
+        connect(&watchdog, &QTimer::timeout, &window, [&] { if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject(); });
+        chooser.start(10); watchdog.start(5000); window.findChild<QAction *>("exportOutputStorage")->trigger(); QVERIFY(chosen);
+        QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000); QVERIFY(exported.takeLast()[0].toBool());
+        QFile binary(output + "/storage.bin"); QVERIFY(binary.open(QIODevice::ReadOnly));
+        QCOMPARE(QCryptographicHash::hash(binary.readAll(), QCryptographicHash::Sha256).toHex(),
+                 QByteArray("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
+        QFile sidecar(output + "/storage.bin.json"); QVERIFY(sidecar.open(QIODevice::ReadOnly));
+        const auto metadata = nlohmann::json::parse(sidecar.readAll().toStdString());
+        QCOMPARE(metadata.at("missing_query_policy"), nlohmann::json("isolate_readback_outputs"));
+        QCOMPARE(metadata.at("frame_complete"), nlohmann::json(false));
+        isolation->setChecked(false); QVERIFY(image->image().isNull());
+        QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("replayFrame")->isEnabled());
+        isolation->setChecked(true); window.openCapture(capture);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 2, 30000); QVERIFY(!isolation->isChecked());
+        QVERIFY(image->image().isNull());
     }
     void dx12CapturedQueryCoverage() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -3028,6 +3098,48 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Rdc.exe",{"--job",temp.filePath("analysis-job.json")});
         QVERIFY(worker.waitForFinished(15000));QCOMPARE(worker.exitCode(),1);
         requireReplayIdentity(temp.filePath("analysis/response-identity.json"),stale);
+        auto isolated = expected; isolated.isolateMissingQueries = true;
+        QCOMPARE(replayIdentityJson(expected).at("schema"), nlohmann::json(1));
+        QCOMPARE(replayIdentityJson(isolated).at("schema"), nlohmann::json(2));
+        QVERIFY(parseReplayIdentity(replayIdentityJson(isolated)) == isolated);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireReplayIdentity(response, isolated));
+        malformed = replayIdentityJson(isolated); malformed["backend"] = "dx11";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, parseReplayIdentity(malformed));
+        malformed = replayIdentityJson(isolated); malformed["missing_query_policy"] = "unknown";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, parseReplayIdentity(malformed));
+        writeReplayIdentity(identityPath, isolated);
+        worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Worker.exe",
+            {"replay", path, "--event", "1", "--out", temp.filePath("wrong-policy"), "--replay-identity", identityPath});
+        QVERIFY(worker.waitForFinished(15000)); QCOMPARE(worker.exitCode(), 1);
+        QVERIFY(worker.readAllStandardError().contains("query policy does not match"));
+        QVERIFY(!QFile::exists(temp.filePath("wrong-policy/response-identity.json")));
+        auto isolatedAnalysis = analysis;
+        isolatedAnalysis["out"] = temp.filePath("isolated-analysis").toStdString();
+        isolatedAnalysis["request_identity"] = replayIdentityJson(isolated);
+        write(temp.filePath("isolated-analysis-job.json"), QByteArray::fromStdString(isolatedAnalysis.dump()));
+        worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Rdc.exe", {"--job",temp.filePath("isolated-analysis-job.json")});
+        QVERIFY(worker.waitForFinished(15000)); QCOMPARE(worker.exitCode(), 1);
+        QVERIFY(worker.readAllStandardError().contains("Analysis of isolated query replay"));
+        requireReplayIdentity(temp.filePath("isolated-analysis/response-identity.json"), isolated);
+    }
+    void isolatedQueryReportPolicy() {
+        nlohmann::json strict{{"backend", "dx12"}, {"frame_complete", false},
+            {"native_replay", {{"frame_replayed", false}}}};
+        requireDx12QueryPolicyReport(strict, false); // Legacy strict reports remain readable.
+        QVERIFY_THROWS_EXCEPTION(std::exception, requireDx12QueryPolicyReport(strict, true));
+        auto isolated = strict;
+        isolated["missing_query_policy"] = "isolate_readback_outputs";
+        isolated["native_replay"]["missing_query_policy"] = "isolate_readback_outputs";
+        isolated["native_replay"]["query_readback_availability_valid"] = true;
+        isolated["output_display"] = {{"missing_query_policy", "isolate_readback_outputs"}};
+        requireDx12QueryPolicyReport(isolated, true);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12QueryPolicyReport(isolated, false));
+        auto invalid = isolated; invalid["native_replay"]["query_readback_availability_valid"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12QueryPolicyReport(invalid, true));
+        invalid = isolated; invalid["frame_complete"] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12QueryPolicyReport(invalid, true));
+        invalid = isolated; invalid["output_display"]["missing_query_policy"] = "fail";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12QueryPolicyReport(invalid, true));
     }
     void packetIdentityAndCapabilities() {
         QTemporaryDir temp; const auto path=fixture(temp);

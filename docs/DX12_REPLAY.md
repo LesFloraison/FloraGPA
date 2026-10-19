@@ -6142,8 +6142,61 @@ FloraGPA.Cli.exe replay D:\CDXrepo\captures\Talos_2026_10_18__00_55_08.gpa_frame
 ```
 
 Both `frame_complete` and `frame_replayed` remain false. Historical values,
-workspace opt-in/result propagation, analysis beyond the strict prefix and full
-Talos acceptance remain unfinished.
+analysis beyond the strict prefix and full Talos acceptance remain unfinished.
+
+### Workspace query-isolation mode and result identity
+
+The existing DX12 output controls now include **Isolate missing queries**.
+It is off by default and resets when a capture is opened. The shared selection
+and capability interface carries the mode, so the workspace and CLI use the
+same query preflight. A buffer selected as an image, an invalid execution or an
+unsupported texture descriptor remains rejected; enabling isolation does not
+bypass the rest of the replay capability checks.
+
+Native replay and Buffer Read pass the explicit option through the isolated
+Worker. Changing mode invalidates the image, buffer bytes, export availability
+and analysis context. The output caption identifies incomplete query outputs;
+the resource status and tooltip explain the missing historical values. Raw
+texture exports preserve `missing_query_policy` and `frame_complete=false` in
+their JSON sidecar. Pixel History picking is cleared on entry. Histories,
+Shader Debug, geometry, pipeline inspection, performance and experiments remain
+unavailable in this mode; their implementation is still required, not accepted
+as complete because controls are disabled. The UI, native Worker and analysis
+process reject unsupported combinations independently.
+
+Request identity schema **2** adds the exact `isolate_readback_outputs` policy
+for these DX12 requests. Strict DX12 and DX11 continue to write/read schema **1**.
+Both retain decimal strings for 64-bit request/revision values. Identity
+equality includes the mode even when all other fields match. Worker replay and
+buffer commands reject envelope/argument mismatches before replay. Accepted
+reports must agree with the expected top-level, native and storage policy and
+must contain a valid completed GPU boundary for isolated query availability.
+This prevents a strict result from being accepted as an isolated one or vice
+versa. Legacy strict reports remain readable.
+
+Targeted evidence:
+
+- `workerIdentityEnvelope`, `isolatedQueryReportPolicy` and
+  `queryWorkspaceBoundary`: **5 passed**, including setup/cleanup, in 1,766 ms.
+  These cover schema compatibility, UINT64 identities, mode-only stale-result
+  rejection, Worker command mismatch, analysis-process rejection, report-policy
+  mismatch and actual Talos capability/control state without GPU replay.
+- `isolatedQueryWorkspaceReplay`: **3 passed** in 5,080 ms. One actual Talos
+  GPU run through the workspace reaches **19410**, displays creation **35118**,
+  and exports all 8,294,400 BGRA8 bytes with SHA-256
+  `e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+  The exported sidecar identifies the incomplete policy. The test also checks
+  that switching back clears the image/export and restores the strict replay
+  rejection, and reopening the capture resets the option.
+- Screenshot and exported storage are retained in ignored
+  `artifacts/dx12-research/talos-isolated-query-ui1`. The screenshot was inspected;
+  its long caption motivated moving the incomplete marker to the beginning.
+  That caption-only adjustment did not trigger another GPU run. The final UI
+  build and focused CPU mode-switch check pass (builds **387/388**).
+
+This connects the previously verified partial native path to the shared
+workspace. It does not recover query values, validate original-GPA full-frame
+fidelity or enable analysis of the incomplete continuation.
 
 ### Full feature acceptance
 
@@ -6154,7 +6207,7 @@ Talos acceptance remain unfinished.
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; explicit query-output isolation reaches original last execution 19410 and rejects unknown readbacks; historical values and full frame fidelity unfinished | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; explicit workspace query-output isolation reaches original last execution 19410, exports marked incomplete storage and rejects unknown readbacks; historical values and full frame fidelity unfinished | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |

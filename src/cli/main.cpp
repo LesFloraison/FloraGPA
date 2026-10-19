@@ -201,6 +201,10 @@ int main(int argc, char **argv) {
         std::optional<ReplayRequestIdentity> identity;
         if (p.isSet(replayIdentity)) {
             identity = readReplayIdentity(p.value(replayIdentity));
+            const auto command = p.positionalArguments().value(0);
+            if ((command == "replay" || command == "buffer") &&
+                identity->isolateMissingQueries != p.isSet("isolate-missing-queries"))
+                throw std::runtime_error("Replay request query policy does not match the command");
             if (p.value("out").isEmpty()) throw std::runtime_error("Replay identity requires an output directory");
             const auto positional = p.positionalArguments();
             if (positional.size() > 1) {

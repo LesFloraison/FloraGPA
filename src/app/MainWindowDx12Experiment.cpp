@@ -48,6 +48,7 @@ struct ExperimentResult {
 void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit,
                                       std::optional<Dx12ShaderImport> shader, std::optional<Dx12ResourceImport> resource) {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+    if (selection_.isolateMissingQueries) { showError("Turn off query isolation before opening or editing an experiment"); return; }
     const auto session = session_;
     const auto revision = revision_;
     const auto current = (shader || resource) && experiment_ ? std::make_shared<Experiment>(*experiment_) : nullptr;

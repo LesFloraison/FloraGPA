@@ -19,6 +19,7 @@ struct ReplaySelection {
     std::optional<Id> execution;
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
+    bool isolateMissingQueries = false;
 };
 // Resolves a plane-0, single-sample 1D/2D texel for the native output viewer.
 // Volume slice display is not yet supported by that viewer.

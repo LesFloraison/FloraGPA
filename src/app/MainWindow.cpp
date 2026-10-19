@@ -179,6 +179,7 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(loaded.error.toStdString());
             session_ = std::move(loaded.session);
             selection_ = {};
+            { const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false); }
             dx12PixelTarget_.reset();
             selection_.session = session_->identity();
             frame_ = std::move(loaded.frame);
@@ -760,6 +761,10 @@ void MainWindow::buildUi() {
     dx12Budget_->setValue(4096); dx12Budget_->setPrefix("Budget "); dx12Budget_->setSuffix(" MiB");
     dx12Budget_->setToolTip("Maximum native resource and readback allocation; requests exceeding this budget fail explicitly");
     dx12Layout->addWidget(dx12Budget_);
+    dx12QueryIsolation_ = new QCheckBox("Isolate missing queries");
+    dx12QueryIsolation_->setObjectName("dx12QueryIsolation");
+    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Historical values, analysis and experiments are not restored. Applies only to this open capture.");
+    dx12Layout->addWidget(dx12QueryIsolation_);
     dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
     imageBar->addSeparator();
     channels_ = new QComboBox;
@@ -1514,6 +1519,16 @@ void MainWindow::buildUi() {
     });
     connect(dx12Subresource_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
     connect(dx12Budget_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
+    connect(dx12QueryIsolation_, &QCheckBox::toggled, this, [this](bool enabled) {
+        if (!session_ || session_->backend() != ReplayBackend::Dx12) return;
+        if (enabled && experiment_ && !experiment_->document().at("history").empty()) {
+            const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false);
+            statusBar()->showMessage("Query isolation cannot be combined with an experiment", 7000); return;
+        }
+        selection_.isolateMissingQueries = enabled;
+        if (enabled) historyPick_->setChecked(false);
+        invalidateDx12Output();
+    });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
         updateCheckpointContext();
         updateProfileContext();
@@ -1640,9 +1655,10 @@ void MainWindow::setBusy(bool busy) {
     for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
         findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
     historyPick_->setEnabled(
-        !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull())));
+        !busy && (bool(frame_) || (dx12 && !selection_.isolateMissingQueries && !outputReport_.is_null() && !image_->image().isNull())));
     dx12Subresource_->setEnabled(dx12 && !busy);
     dx12Budget_->setEnabled(dx12 && !busy);
+    dx12QueryIsolation_->setEnabled(dx12 && !busy && (!experiment_ || experiment_->document().at("history").empty()));
     for (QWidget *control : std::initializer_list<QWidget *>{
              adapter_, outputTarget_, outputLayer_, outputSample_, channels_, outputLow_, outputHigh_})
         control->setEnabled(!busy && !dx12);
@@ -1725,7 +1741,7 @@ void MainWindow::updateCheckpointContext() {
 }
 QString MainWindow::historyContextKey() const {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
-        if (!selection_.execution)
+        if (!selection_.execution || selection_.isolateMissingQueries)
             return {};
         auto selection = selection_;
         selection.resource = 0;
@@ -1785,6 +1801,7 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
+    if (selection_.isolateMissingQueries) { showError("Analysis of isolated query replay is not yet supported"); return; }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
         runningAnalysis_ = kind;
@@ -2023,7 +2040,7 @@ ReplayRequestIdentity MainWindow::currentWorkerIdentity() const {
     // revision_ also changes for selection/cancellation, so it is deliberately
     // stricter than the experiment cursor (undo may revisit an old cursor).
     return {session_ ? session_->identity() : "no-capture",
-        session_ ? session_->backend() : ReplayBackend::Dx11, workerRequestSerial_, revision_};
+        session_ ? session_->backend() : ReplayBackend::Dx11, workerRequestSerial_, revision_, selection_.isolateMissingQueries};
 }
 void MainWindow::beginWorkerIdentity() {
     if (workerRequestSerial_ == UINT64_MAX) throw std::runtime_error("Replay request identity exhausted");
@@ -2033,6 +2050,14 @@ void MainWindow::beginWorkerIdentity() {
 void MainWindow::startWorker(QStringList args, bool timings) {
     if (process_.state() != QProcess::NotRunning || artifactJob_)
         return;
+    if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
+        (args.first() == "replay" || args.first() == "buffer")) {
+        if (args.contains("--renderdoc") || args.contains("--measure-event") ||
+            (experiment_ && !experiment_->document().at("history").empty())) {
+            showError("Query isolation cannot be combined with analysis or experiments"); return;
+        }
+        args << "--isolate-missing-queries";
+    }
     runningRecover_ = args.first() == "shader" && args.contains("--recover");
     if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project" || args.first() == "assemble")
         runningShaderContext_ = frame_->sha256() + experiment_->document().dump();
@@ -2280,6 +2305,8 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             jobDir_.reset(); resourceTimer_.start(); return;
         }
         report_ = std::move(result.report);
+        if (session_ && session_->backend() == ReplayBackend::Dx12 && (runningKind_ == "replay" || runningKind_ == "buffer"))
+            requireDx12QueryPolicyReport(result.replayReport, selection_.isolateMissingQueries);
         if (session_ && session_->backend() == ReplayBackend::Dx12)
             requireDx12ExperimentReport(result.replayReport,
                 experiment_ && !experiment_->document().at("history").empty() ? experiment_->document() : nlohmann::json());
@@ -3371,12 +3398,12 @@ void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
-    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy());
-    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && selection_.execution && selection_.resource);
+    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy() && !selection_.isolateMissingQueries);
+    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && !selection_.isolateMissingQueries && selection_.execution && selection_.resource);
     undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
     if (dx12) {
-        findChild<QAction *>("openExperiment")->setEnabled(!busy());
-        findChild<QAction *>("saveExperiment")->setEnabled(!busy() && bool(experiment_));
+        findChild<QAction *>("openExperiment")->setEnabled(!busy() && !selection_.isolateMissingQueries);
+        findChild<QAction *>("saveExperiment")->setEnabled(!busy() && !selection_.isolateMissingQueries && bool(experiment_));
     } else {
         findChild<QAction *>("openExperiment")->setEnabled(bool(frame_));
         findChild<QAction *>("saveExperiment")->setEnabled(bool(experiment_));
