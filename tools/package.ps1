@@ -5,6 +5,7 @@ param(
     [string]$VisualStudioRoot = '',
     [string]$RenderDocRoot = '',
     [string]$PatchedRenderDocRoot = '',
+    [string]$DxcRoot = '',
     [string]$BuildDirectory = "$PSScriptRoot\..\build\vs2022"
 )
 $ErrorActionPreference = 'Stop'
@@ -18,6 +19,8 @@ if ((Test-Path -LiteralPath $destination) -and
     throw 'Package output must be an empty directory. Choose a new -OutputDirectory.'
 }
 $cache = @{}
+if (-not $DxcRoot) { $DxcRoot = Join-Path $repo 'artifacts\dxc-1.8.2505.1' }
+& (Join-Path $PSScriptRoot 'deploy_dxc.ps1') -DxcRoot $DxcRoot -ValidateOnly
 function Get-PackageSha256([string]$Path) {
     # Avoid module auto-loading differences between Windows PowerShell and pwsh.
     $stream = [System.IO.File]::OpenRead($Path)
@@ -132,6 +135,7 @@ try {
     $env:VCINSTALLDIR = $previousVc
 }
 Copy-Item -Path (Join-Path $crt '*.dll') -Destination $destination -Force
+& (Join-Path $PSScriptRoot 'deploy_dxc.ps1') -DxcRoot $DxcRoot -OutputDirectory (Join-Path $destination 'DXCompiler')
 $rdcDestination = Join-Path $destination 'RenderDoc'
 New-Item -ItemType Directory -Path $rdcDestination | Out-Null
 foreach ($file in $rdcManifest.files.PSObject.Properties) {

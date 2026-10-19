@@ -3974,9 +3974,9 @@ explicit `--pipeline-stage VS/PS/CS/HS/DS/GS/AS/MS` (case-insensitive). It expor
 preserve the capture identity, PSO/root objects, selected stage, format, byte
 count and SHA-256 as checked metadata; 64-bit identities and sizes use strings.
 DXBC also gets system-compiler disassembly when available. DXIL bytecode is
-validated as executable DXIL, not passed to the DX11 signature-only inspector;
-this export explicitly reports its missing DXIL disassembly. Replay debugging
-remains a separate operation.
+validated as executable DXIL, not passed to the DX11 signature-only inspector.
+The initial export reported missing DXIL disassembly; the native adapter below
+now fills that gap. Replay debugging remains a separate operation.
 
 `--experiment <project>` exports the selected stage's current replacement or
 original bytes after undo, retaining the original digest, revision and project
@@ -4000,6 +4000,39 @@ research reference **887** correctly failed because it is not a shader in this
 capture; inventory supplied the current **102** identity. No GPU tests ran.
 Ignored evidence is in `shader-cli-export1`, `shader-cli-export1.txt`, and
 `shader-cli-dx11-compat2`.
+
+### Native DXIL disassembly and deployment
+
+DX12 `shader` export now fills the preceding DXIL disassembly gap using
+`IDxcCompiler3::Disassemble` in-process. It loads only the explicit `--dxcompiler`
+path or `DXCompiler/dxcompiler.dll` beside the executable, checks the pinned
+SHA-256 before loading, and reports the runtime release, path, digest and method.
+Missing/mismatched runtimes and DXC errors leave the checked bytecode export
+available with a specific disassembly failure reason. The output is DXC's LLVM
+instruction text, not recovered HLSL or RenderDoc debug instruction numbering.
+
+The official **v1.8.2505.1** x64 release ZIP has SHA-256
+`9ad895a6b039e3a8f8c22a1009f866800b840a74b50db9218d13319e215ea8a4`;
+the compiler DLL is
+`5888d3e590f5bfd8743484e7f31313996734adec5741506271a5c6368cbe8ba9`.
+`third_party/dxc/runtime-manifest.json` pins both DLLs and the original release
+notices. `tools/deploy_dxc.ps1` validates and deploys an extracted release;
+`tools/package.ps1 -DxcRoot <root>` includes it in the portable package.
+Runtime binaries remain outside Git and license bytes retain upstream CRLF.
+
+Build **269** and the focused test check the actual original/replacement
+Hellblade2 CS exports (entry points, texture stores, original WaveReadLaneAt),
+malformed bytecode, missing DLL and wrong DLL digest: **3 passed including
+setup/cleanup, 491 ms**. Build **270** also compiles the updated CLI integration
+test; the full capture export suite was not repeated. A fresh portable package
+with the patched RenderDoc backend successfully exports original CS **512699**
+with PATH restricted to Windows and System32. Its report selects the package's
+DXCompiler DLL and its **52,521-byte** `shader.asm` hashes to
+`334096b209f5004c4e58ffe5f274605089eab1fc60ab388877ffb872df71de12`.
+No GPU query or replay was run. This verifies portable offline DXIL inspection,
+not the still-unfinished three-sample portable replay/analysis acceptance.
+Ignored evidence: `dxil-disassembly1.txt`, `dxil-portable-package1.log`,
+`dxil-portable1`, and `dxil-portable-shader1`.
 
 ### Full feature acceptance
 

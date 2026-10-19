@@ -1,5 +1,17 @@
 # Third-party components
 
+- Microsoft DirectX Shader Compiler v1.8.2505.1 (x64): pinned official release
+  https://github.com/microsoft/DirectXShaderCompiler/releases/tag/v1.8.2505.1.
+  Native DXIL disassembly uses `IDxcCompiler3::Disassemble` from the bundled
+  `DXCompiler/dxcompiler.dll`; no compiler executable or Python is invoked.
+  `third_party/dxc/runtime-manifest.json` records the upstream ZIP, DLL and
+  notice hashes. Original LLVM, MIT and Microsoft license notices are preserved
+  byte-for-byte in `third_party/dxc/` and copied into the portable runtime.
+  `tools/deploy_dxc.ps1` deploys an extracted official ZIP after checksum checks;
+  `tools/package.ps1 -DxcRoot <extracted-release>` includes that runtime. Binaries
+  stay outside Git. The adapter builds against the Windows SDK's public
+  `dxcapi.h` and dynamically loads the explicitly located, hash-checked DLL.
+
 - Microsoft Detours v4.0.1: MIT, pinned commit
   `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`. Capture-only native injection;
   source and license are in `third_party/detours/`. Its source hashes and the

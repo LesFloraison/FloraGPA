@@ -2671,7 +2671,9 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QCOMPARE(report.at("format"), nlohmann::json("DXIL"));
             QCOMPARE(report.at("stage"), nlohmann::json("CS"));
             QCOMPARE(report.at("gpu_commands_executed"), nlohmann::json(false));
-            QVERIFY(!report.at("disassembly").at("available").get<bool>());
+            QVERIFY(report.at("disassembly").at("available").get<bool>());
+            QCOMPARE(report.at("disassembly").at("backend").at("release"), nlohmann::json("v1.8.2505.1"));
+            QVERIFY(!read(name, "shader.asm").isEmpty());
             QCOMPARE(report.at("replaced"), nlohmann::json(name == "modified"));
             const auto original = QByteArray("ff26fc08d0880e1ef3dbac56bad4111a6b74853fa6561aeba882c17cb2906e93");
             const auto expected = name == "modified" ? QByteArray("886d2f0680d3ef3783f814fca40fe7a1385a76448f0d85169122bb96af526378") : original;

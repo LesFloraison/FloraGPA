@@ -16,3 +16,5 @@ third_party/metrics-discovery/* -text whitespace=-blank-at-eol
 third_party/renderdoc/runtime-licenses/** -text whitespace=-blank-at-eol
 # Capture dependency hashes cover the original upstream bytes, including CRLF.
 third_party/detours/** -text whitespace=-blank-at-eol
+# Keep DXC release notices identical to the pinned manifest.
+third_party/dxc/LICENSE-*.txt -text whitespace=-blank-at-eol

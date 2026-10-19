@@ -2,6 +2,7 @@
 #include "application/ReplaySession.h"
 #include "application/Experiment.h"
 #include "application/SystemDisassembly.h"
+#include "application/DxilDisassembly.h"
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
@@ -12,6 +13,7 @@
 #include <QTextStream>
 #include <QImage>
 #include <QCryptographicHash>
+#include <QCoreApplication>
 #include <set>
 #include <memory>
 
@@ -62,20 +64,26 @@ int exportDx12Shader(const IReplaySession &session, const QCommandLineParser &op
         {"original", original}, {"experiment", experimentInfo}, {"replaced", replaced}, {"file", filename},
         {"gpu_commands_executed", false},
         {"scope", "Selected captured PSO stage; export does not validate root-signature compatibility or GPU execution"},
-        {"disassembly", {{"available", false}, {"reason", "DXIL disassembly is available through the isolated replay debugger; this export preserves bytecode only"}}}});
+        {"disassembly", {{"available", false}}}});
     const auto save = [&](const QString &name, const QByteArray &bytes) {
         QSaveFile file(output.filePath(name));
         if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
             throw std::runtime_error("Cannot save DX12 shader export");
     };
-    if (report.at("format") == "DXBC") {
-        try {
+    try {
+        if (report.at("format") == "DXBC") {
             const auto assembly = systemDisassembly(bytecode, 0x80);
             save("shader.asm", QByteArray::fromStdString(assembly));
             report["disassembly"] = {{"available", true}, {"file", "shader.asm"}};
-        } catch (const std::exception &error) {
-            report["disassembly"] = {{"available", false}, {"reason", error.what()}};
+        } else {
+            const auto library = options.isSet("dxcompiler") ? options.value("dxcompiler") :
+                QDir(QCoreApplication::applicationDirPath()).filePath("DXCompiler/dxcompiler.dll");
+            const auto assembly = disassembleDxil(bytecode, std::filesystem::path(library.toStdWString()));
+            save("shader.asm", QByteArray::fromStdString(assembly.text));
+            report["disassembly"] = {{"available", true}, {"file", "shader.asm"}, {"backend", assembly.backend}};
         }
+    } catch (const std::exception &error) {
+        report["disassembly"] = {{"available", false}, {"reason", error.what()}};
     }
     save(filename, QByteArray(reinterpret_cast<const char *>(bytecode.data()), qsizetype(bytecode.size())));
     const auto json = QByteArray::fromStdString(report.dump(2) + "\n");
@@ -309,7 +317,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     std::set<QString> allowed{"out", "replay-identity"};
     if (command == "commands")
         allowed.insert("filter");
-    if (command == "shader") allowed.insert({"id", "pipeline-stage", "experiment"});
+    if (command == "shader") allowed.insert({"id", "pipeline-stage", "experiment", "dxcompiler"});
     if (command == "replay")
         allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "experiment", "disable"});
     if (command == "buffer")

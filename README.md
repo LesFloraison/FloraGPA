@@ -93,7 +93,7 @@ the ignored `CMakeUserPresets.json`.
 For the default GUI build, use the same Qt installation for deployment:
 
 ```powershell
-./tools/package.ps1 -QtRoot $QtRoot -RenderDocRoot C:/deps/RenderDoc_1.45_64 -OutputDirectory ./out/FloraGPA
+./tools/package.ps1 -QtRoot $QtRoot -RenderDocRoot C:/deps/RenderDoc_1.45_64 -DxcRoot C:/deps/dxc-1.8.2505.1 -OutputDirectory ./out/FloraGPA
 ./out/FloraGPA/FloraGPA.exe
 ```
 
@@ -102,6 +102,16 @@ and pass its directory as `-RenderDocRoot`. The helper checks the pinned SHA-256
 before copying the runtime. If omitted, it checks the RenderDoc installation
 under Program Files; another version or build is rejected. Building from source
 does not require this DLL.
+
+DXIL shader export uses the pinned [DXC v1.8.2505.1 x64 release](https://github.com/microsoft/DirectXShaderCompiler/releases/tag/v1.8.2505.1).
+Extract `dxc_2025_07_14.zip` and pass the extracted root as `-DxcRoot`; packaging
+checks its DLL hashes and copies its licenses. The default root is
+`artifacts/dxc-1.8.2505.1`. For a development build, deploy only this dependency with
+`./tools/deploy_dxc.ps1 -DxcRoot C:/deps/dxc-1.8.2505.1 -OutputDirectory ./build/vs2022/Release/DXCompiler`.
+`shader --pipeline-stage CS --id <PSO creation record>` uses the bundled native
+compiler for DXIL disassembly; `--dxcompiler <DLL>` explicitly selects another
+copy of the same pinned runtime. No installed SDK or compiler executable is
+needed at runtime.
 
 The packaging helper reads the Qt kit and Visual Studio instance from
 `build/vs2022/CMakeCache.txt`, so it uses the toolchain selected by your build.
