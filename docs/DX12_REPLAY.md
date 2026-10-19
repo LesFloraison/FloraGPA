@@ -3606,6 +3606,63 @@ verification of this stage-mapping change covers VS; other stages still need
 their own evidence. Full shader debugging, original-output stability and portable
 acceptance remain unfinished.
 
+### Indexed resource history and the Hellblade2 postprocessing chain
+
+An explicit DX12 Resource History query now reads RenderDoc's capture usage
+index without calling `SetFrameEvent` again. The query still filters entries
+through the selected execution event and retains resource lifetime resolution,
+original execution provenance and separate replay initialization records.
+Implicit target selection still replays the selected event to resolve its RTV;
+value/state analysis and the DX11 path retain their existing behavior.
+
+This follows the pinned RenderDoc 1.45 source: `ReplayController::GetUsage`
+delegates to `D3D12Replay::GetUsage`, which reads the command queue's
+`m_Cmd.m_ResourceUses` index. No selected pipeline state is consulted for an
+explicit resource. Reports expose `selected_event_replayed`, `query_source` and
+`capture_loading_may_execute_gpu_work`; skipping the additional event replay
+does **not** mean that opening an RDC performs no GPU work.
+
+Release build **256** rebuilds the analysis service. One targeted query reuses
+the saved Hellblade2 output-producer RDC, selecting execution **37029**, resource
+object **2149346346336**, creation **538909**. Compared with the preceding result
+that replayed the selection, all **14 usage entries**, **3 initialization
+records**, identities, event mappings and existing scope fields are identical.
+All uses retain mapped original executions; no GPA module is loaded. Only the
+new scope fields and the process's loaded-module inventory differ. This verifies
+index equivalence for this resource, not measured pixel changes or complete
+resource-history semantics.
+
+That input's latest recorded ColorTarget use is execution **37017**, source
+record **611799**. Pipeline inspection identifies `MappedDistortionPS`, reading
+`InputTexture` object **2149346343888**, creation **553172**, plus distortion maps
+created at **511198** and **511208**. The established output chain is now
+`MappedDistortionPS` (37017), `ChromaticAberrationPS` (37029), then two
+`LensSoftnessPS` draws (37041 and 37053). These are binding/usage observations;
+they do not yet locate where output variation first arises.
+
+A follow-up explicit history query for creation **553172** returns **22** mapped
+usage entries without replaying the selected event. Its latest ColorTarget use
+is execution **37003**, source **611784**. That Draw's PS entry is `MainPS`, with
+bindings for `ColorTexture` (creation **571530**), `BloomTexture` (**570329**),
+`EyeAdaptationBuffer` (**512823**), `SceneColorApplyParamaters` (**551586**),
+`BloomDirtMaskTexture` (**506117**) and `ColorGradingLUT` (**530084**). This provides
+a concrete upstream output/input boundary for subsequent fidelity comparison;
+the binding names alone do not establish its complete shader behavior.
+
+A CPU comparison of two previously saved original GPA second-Present PNGs
+finds **1,762 differing RGB pixels**, maximum per-channel RGB8 delta **1**,
+within bounds `(0,199)` through `(1917,1001)`. One original run used the raw-image
+debugger probe with `_NO_DEBUG_HEAP=1`, so this is an observation across those
+existing runs, not a controlled repeatability experiment. It establishes neither
+a cause nor an acceptable tolerance for Flora's raw RGB10 differences.
+
+Ignored evidence: `hellblade-chromatic-input-history1`,
+`hellblade-chromatic-input-history2`, `hellblade-prechromatic-pipeline1`,
+`hellblade-distortion-input-history1`, `hellblade-predistortion-pipeline1`,
+`hellblade-indexed-history-evidence1.json`, and `hellblade-original-variation1.json`
+under `artifacts/dx12-research`. Full output fidelity and all unfinished feature
+acceptance items remain open.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

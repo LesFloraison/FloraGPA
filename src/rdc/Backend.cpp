@@ -942,7 +942,13 @@ Json runRdcJob(const Json &job) {
     if ((!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid))) &&
         !(eid == 0 && action == "inventory"))
         throw std::runtime_error("No selectable replay action");
-    controller.SetFrameEvent(eid, true);
+    // GetUsage is an index built while loading the capture. An explicit DX12
+    // resource identity does not require a replayed pipeline/RTV to resolve it.
+    // Keep replay for implicit targets and for all value/state analysis paths.
+    const bool indexedResourceHistory = dx12 && action == "resource-history" &&
+                                        !job.value("resource", Json()).is_null();
+    if (!indexedResourceHistory)
+        controller.SetFrameEvent(eid, true);
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);
         if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
@@ -1215,6 +1221,10 @@ Json runRdcJob(const Json &job) {
               {{"through_event", eid},
                {"unmapped_uses", unmapped},
                {"content_changes_measured", false},
+               {"selected_event_replayed", !indexedResourceHistory},
+               {"query_source", indexedResourceHistory ? "capture_usage_index_with_explicit_resource"
+                                                        : "capture_usage_index_with_replayed_selection"},
+               {"capture_loading_may_execute_gpu_work", true},
                {"limitations",
                 {"Bindings indicate possible use, not observed reads or writes.",
                  "Usage records do not supply subresource ranges or fence dependencies.",
