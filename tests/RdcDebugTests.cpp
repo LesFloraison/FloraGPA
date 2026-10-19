@@ -15,6 +15,30 @@ using namespace flora;
 class RdcDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void vertexOutputLayout() {
+        using Json = nlohmann::json;
+        ShaderReflection shader; shader.stage = ShaderStage::Vertex;
+        SigParameter uv; uv.semanticName = "TEXCOORD"; uv.semanticIndex = 2;
+        uv.compCount = 2; uv.varType = VarType::Float; uv.regIndex = 0;
+        SigParameter position; position.semanticName = "SV_Position"; position.systemValue = ShaderBuiltin::Position;
+        position.compCount = 4; position.regIndex = 1;
+        SigParameter id; id.semanticName = "ID"; id.compCount = 1; id.varType = VarType::UInt; id.regIndex = 2;
+        shader.outputSignature = {uv, position, id};
+        auto result = rdcVertexOutputLayout(shader, 28);
+        QCOMPARE(result.at("status"), Json("mapped"));
+        const auto &attrs = result.at("attributes");
+        QCOMPARE(attrs[0].at("signature_index"), Json(1)); QCOMPARE(attrs[0].at("byte_offset"), Json(0));
+        QCOMPARE(attrs[1].at("signature_index"), Json(0)); QCOMPARE(attrs[1].at("byte_offset"), Json(16));
+        QCOMPARE(attrs[2].at("byte_offset"), Json(24));
+        QCOMPARE(attrs[2].at("format").at("compType"), Json(uint32_t(CompType::UInt)));
+        QCOMPARE(rdcVertexOutputLayout(shader, 32).at("status"), Json("unavailable"));
+        shader.outputSignature[2].varType = VarType::Double;
+        QVERIFY(!rdcVertexOutputLayout(shader, 28).at("attributes")[2].at("supported").get<bool>());
+        shader.outputSignature[2].stream = 1;
+        QCOMPARE(rdcVertexOutputLayout(shader, 28).at("status"), Json("unavailable"));
+        shader.stage = ShaderStage::Geometry;
+        QCOMPARE(rdcVertexOutputLayout(shader, 28).at("status"), Json("unavailable"));
+    }
     void vertexPositionAddressing() {
         using Json = nlohmann::json;
         ActionDescription draw; draw.flags = ActionFlags::Drawcall | ActionFlags::Indexed | ActionFlags::Instanced;

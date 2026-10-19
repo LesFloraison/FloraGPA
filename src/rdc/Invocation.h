@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <functional>
 namespace flora {
+nlohmann::json rdcVertexOutputLayout(const ShaderReflection &, uint32_t stride);
 nlohmann::json rdcExecutedAction(const ActionDescription &action);
 nlohmann::json rdcVertexInvocation(const ActionDescription &, const D3D12Pipe::InputAssembly &,
                                   uint32_t vertex, uint32_t instance,

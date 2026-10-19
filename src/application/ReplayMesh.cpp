@@ -50,25 +50,30 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
             throw std::runtime_error("Invalid input mesh first vertex identity");
     }
     const auto &format = m.at("format");
-    if (format.at("compType") != 1 || format.at("compByteWidth") != 4)
-        throw std::runtime_error("Post-shader position is not float32; binary export is available");
+    const auto componentType = number(format.at("compType"), 3);
+    if (!componentType || format.at("compByteWidth") != 4)
+        throw std::runtime_error("Mesh component is not float32/uint32/sint32");
     result.components = uint32_t(number(format.at("compCount"), 4));
     const auto stride = number(m.at("vertexByteStride"), UINT32_MAX);
     if (!stride)
         throw std::runtime_error("Post-shader vertex stride is zero");
+    const auto attributeOffset = number(m.value("attribute_byte_offset", nlohmann::json(0)), UINT32_MAX);
+    if (!result.components || attributeOffset > stride || result.components * 4 > stride - attributeOffset || raw.size() % stride)
+        throw std::runtime_error("Mesh attribute exceeds its stride or vertex storage is truncated");
     const auto count = raw.size() / stride;
     if (count && result.firstVertex > UINT64_MAX - (count - 1))
         throw std::runtime_error("Input mesh vertex identity range overflows");
     result.positions.reserve(size_t(count));
     for (uint64_t i = 0; i < count; ++i) {
-        const auto offset = i * stride;
+        const auto offset = i * stride + attributeOffset;
         if (result.components * sizeof(float) > raw.size() - offset)
             throw std::runtime_error("Post-shader position exceeds vertex storage");
         std::array<double, 4> position{};
         for (uint32_t c = 0; c < result.components; ++c) {
-            float value{};
-            std::memcpy(&value, raw.data() + offset + c * sizeof(float), sizeof(float));
-            position[c] = value;
+            const auto *data = raw.data() + offset + c * 4;
+            if (componentType == 1) { float value{}; std::memcpy(&value, data, 4); position[c] = value; }
+            else if (componentType == 2) { uint32_t value{}; std::memcpy(&value, data, 4); position[c] = value; }
+            else { int32_t value{}; std::memcpy(&value, data, 4); position[c] = value; }
         }
         result.positions.push_back(position);
     }

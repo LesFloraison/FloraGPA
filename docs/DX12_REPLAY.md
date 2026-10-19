@@ -4326,6 +4326,53 @@ and `vs-position-ps-ui1.txt` under `artifacts/dx12-research`.
 No additional full-capture replay or multi-instance GPU validation was performed.
 Other VS outputs and complete geometry/debugging acceptance remain unfinished.
 
+### VS output attribute inspection
+
+Replay Mesh can now select individual DX12 VS output attributes for its table
+and CSV export. The selector uses the pinned RenderDoc 1.45 D3D12 stream-output
+layout: reflected signature order, position moved first and expanded to four
+components, and four bytes per component. The backend records semantic,
+register, type and byte offset, and requires the packed size to match the GPU
+stride. Unsupported types retain a reason in Details. This mapping does not
+claim support for GS/DS/MeshOut layouts. Float32, uint32 and sint32 values are
+decoded without rounding integers through float32.
+
+Attribute changes use the already-read vertex buffer without another GPU job.
+The preview and OBJ keep vertex positions; CSV follows the selected attribute.
+First-reference VS invocation navigation remains available, and a new session
+or request clears the selector and exports. DX12 VSOut readback now bounds the
+requested bytes to the selected instance block instead of requesting the entire
+multi-instance buffer from an instance offset. The block size and offset must
+agree with the executed Draw; multi-instance GPU validation remains pending.
+
+Builds **286/287** pass for the application, backend and focused tests. One GPU
+query, `bf1-output-attributes1`, reuses the existing BF1 RDC at execution
+**36560**, instance **0**, returning **3,316** vertices and **4,974** indices.
+Its seven float4 outputs are SV_Position and TEXCOORD0–5, at byte offsets
+**0/16/32/48/64/80/96** in a **112-byte** stride. The **371,392-byte** raw vertex
+buffer SHA-256 is
+`09853694ebd511f0d963a261a9baa11262b2a351406e97ea4be8b630a2b28893`.
+The UI check compares all six non-position attributes of vertex **1428** with
+the raw bytes, verifies unchanged OBJ and attribute-dependent CSV, restores
+the original position CSV, and navigates to Draw ordinal **3966** without a new
+worker request. It also checks stale-session rejection (**4 tests including
+setup/cleanup, 177 ms**). The inspected offscreen screenshot demonstrates the
+selector/table, not rendered preview geometry. CPU checks cover output packing,
+integer extrema, stride boundaries and truncated vertices. Evidence is
+`vs-attribute-layout1.txt`, `vs-attribute-model1.txt`, `vs-attribute-ui1.txt` and
+`vs-attribute-ui1/replay-mesh/bf1-output-attribute.png`.
+
+Comparison with the saved `bf1-vertex-position1` debug trace confirms exact
+position and TEXCOORD0/1/3/5 values for that vertex. **Five other components
+differ**: TEXCOORD2.xyz and TEXCOORD4.xy. Their GPU/trace raw bits are respectively
+`[1138534039,1136693506,1134585707]` /
+`[1139849511,1137649475,1135208482]`, and `[949519973,1058042225]` /
+`[949518336,1058042226]`. `bf1-output-attributes-evidence1.json` preserves this
+comparison. These are separate geometry/debug jobs; the differences have not
+yet been attributed to replay variation or interpreter arithmetic. They remain
+open fidelity issues, without tolerance-based acceptance. No additional full
+capture replay or portable-package acceptance was performed.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

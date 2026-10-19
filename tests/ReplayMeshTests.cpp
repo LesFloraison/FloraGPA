@@ -86,6 +86,21 @@ int main(int argc, char **argv) {
         job["mesh"] = m;
         job["mesh"]["indexResourceId"] = "ResourceId::7";
         require(!evaluate(job)["ok"].get<bool>(), "Missing indices accepted");
+        auto typed = m; typed["attribute_byte_offset"] = 4; typed["format"]["compCount"] = 3;
+        typed["format"]["compType"] = 2; typed["perspective_divide"] = false;
+        uint32_t words[]{0, UINT32_MAX, 0x80000000, 16777217};
+        std::vector<uint8_t> typedBytes(sizeof words); memcpy(typedBytes.data(), words, sizeof words);
+        const auto unsignedOutput = ReplayMesh::decode(typed, typedBytes, {});
+        require(unsignedOutput.positions[0] == std::array<double,4>{4294967295.,2147483648.,16777217.,0},
+                "Integer output attribute lost bits through float32 conversion");
+        typed["format"]["compType"] = 3;
+        const auto signedOutput = ReplayMesh::decode(typed, typedBytes, {});
+        require(signedOutput.positions[0] == std::array<double,4>{-1.,-2147483648.,16777217.,0}, "Signed output interpretation failed");
+        job = {{"mesh", typed}, {"vertices", typedBytes}, {"indices", Json::array()}};
+        job["mesh"]["attribute_byte_offset"] = 8;
+        require(!evaluate(job)["ok"].get<bool>(), "Attribute crossed vertex stride");
+        job["mesh"] = typed; typedBytes.pop_back(); job["vertices"] = typedBytes;
+        require(!evaluate(job)["ok"].get<bool>(), "Partial output vertex silently accepted");
         require(flora::replayMeshFloat(1e-5) == "1e-05" && flora::replayMeshFloat(1e-4) == "0.0001" &&
                     flora::replayMeshFloat(1e16) == "1e+16",
                 "Python float thresholds changed");

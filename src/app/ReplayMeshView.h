@@ -36,6 +36,7 @@ class ReplayMeshView final : public QWidget {
   private:
     void invalidate();
     void updateActions();
+    void selectOutputAttribute();
     QString key_, backendPath_;
     qulonglong event_{};
     uint64_t requestId_{};
@@ -46,6 +47,8 @@ class ReplayMeshView final : public QWidget {
     QMap<QString, QByteArray> files_;
     QAction *read_, *cancel_, *export_, *backend_, *debugVertex_;
     QComboBox *stage_;
+    QComboBox *outputAttribute_;
+    QByteArray selectedCsv_;
     QLineEdit *instance_;
     QLineEdit *attribute_;
     QLabel *summary_;

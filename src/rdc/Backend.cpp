@@ -1058,6 +1058,13 @@ Json runRdcJob(const Json &job) {
                 throw std::runtime_error("Cannot save post-shader mesh artifact");
         };
         uint64_t vertexBytes = mesh.vertexByteSize;
+        if (dx12 && stage == "VSOut") {
+            if (vertexBytes % selected->numInstances)
+                throw std::runtime_error("Post-VS instance blocks have inconsistent sizes");
+            vertexBytes /= selected->numInstances;
+            if (mesh.vertexByteOffset != vertexBytes * index(job, "instance"))
+                throw std::runtime_error("Post-VS instance offset differs from the selected Draw");
+        }
         Json meshlets = Json::array();
         if (meshOutput) {
             uint64_t vertices{}, indices{};
@@ -1085,7 +1092,7 @@ Json runRdcJob(const Json &job) {
                 throw std::runtime_error("Mesh vertex/primitive data overlaps index storage");
         }
         const auto raw = controller.GetBufferData(mesh.vertexResourceId, mesh.vertexByteOffset, vertexBytes);
-        if (meshOutput && raw.size() != vertexBytes)
+        if ((meshOutput || (dx12 && stage == "VSOut")) && raw.size() != vertexBytes)
             throw std::runtime_error("Truncated mesh vertex readback");
         save(L"post_vertices.bin", raw.data(), raw.size());
         bytebuf ib;
@@ -1108,6 +1115,11 @@ Json runRdcJob(const Json &job) {
                       {"nearPlane", real(mesh.nearPlane)},
                       {"farPlane", real(mesh.farPlane)},
                       {"status", text(mesh.status)}};
+        if (dx12 && stage == "VSOut") {
+            const auto *pipeline = controller.GetD3D12PipelineState();
+            if (pipeline && pipeline->vertexShader.reflection)
+                metadata["output_layout"] = rdcVertexOutputLayout(*pipeline->vertexShader.reflection, mesh.vertexByteStride);
+        }
         if (meshOutput)
             metadata.update({{"meshlets", meshlets},
                              {"position_bytes", std::to_string(vertexBytes)},

@@ -88,6 +88,13 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     attribute_ = new QLineEdit("0"); attribute_->setObjectName("replayMeshAttribute");
     attribute_->setMaximumWidth(65); attribute_->setToolTip("Zero-based input layout attribute; see Details for semantic and slot");
     bar->addWidget(attribute_); attribute_->hide();
+    outputAttribute_ = new QComboBox;
+    outputAttribute_->setObjectName("replayMeshOutputAttribute");
+    outputAttribute_->setToolTip("Table and CSV output attribute. Preview and OBJ retain vertex positions.");
+    bar->addWidget(outputAttribute_); outputAttribute_->hide();
+    connect(outputAttribute_, &QComboBox::currentIndexChanged, this, [this] {
+        try { selectOutputAttribute(); } catch (const std::exception &e) { emit error(QString::fromUtf8(e.what())); }
+    });
     auto detail = bar->addAction("Details");
     detail->setObjectName("replayMeshDetailsToggle");
     detail->setCheckable(true);
@@ -166,6 +173,8 @@ void ReplayMeshView::invalidate() {
     result_ = nullptr;
     vertexMapping_ = false;
     files_.clear();
+    selectedCsv_.clear();
+    { const QSignalBlocker blocker(outputAttribute_); outputAttribute_->clear(); }
     model_->setMesh({});
     preview_->setMesh({});
     details_->clear();
@@ -215,6 +224,8 @@ void ReplayMeshView::updateActions() {
     stage_->setEnabled(!busy_);
     instance_->setEnabled(!busy_ && !meshDispatch_);
     attribute_->setVisible(stage_->currentData() == "VSIn"); attribute_->setEnabled(!busy_);
+    outputAttribute_->setVisible(outputAttribute_->count() > 0);
+    outputAttribute_->setEnabled(!busy_ && outputAttribute_->count() > 0);
     debugVertex_->setEnabled(!busy_ && vertexMapping_ &&
                             model_->firstReference(table_->currentIndex().row()) != UINT32_MAX);
 }
@@ -321,6 +332,25 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
     preview_->setToolTip(meshData->perspectiveDivide ? "Post-shader positions · Perspective divide applied · Drag to rotate"
         : "Selected input attribute · No perspective divide · Semantic is not assumed to be position");
     files_ = std::move(files);
+    selectedCsv_ = files_.value("post_vertices.csv");
+    {
+        const QSignalBlocker blocker(outputAttribute_); outputAttribute_->clear();
+        outputAttribute_->addItem("Position", -1);
+        const auto layout = result.at("mesh").value("output_layout", Json::object());
+        if (dx12_ && result.at("stage") == "VSOut" && layout.value("status", "") == "mapped") {
+            for (size_t i = 0; i < layout.at("attributes").size(); ++i) {
+                const auto &attr = layout.at("attributes")[i];
+                if (attr.value("position", false) || !attr.value("supported", false)) continue;
+                const auto type = attr.at("format").at("compType").get<unsigned>();
+                outputAttribute_->addItem(QString("%1%2 · %3%4")
+                    .arg(QString::fromStdString(attr.at("semantic").get<std::string>()))
+                    .arg(attr.at("semantic_index").get<unsigned>())
+                    .arg(type == 1 ? "float" : type == 2 ? "uint" : "int")
+                    .arg(attr.at("format").at("compCount").get<unsigned>()), int(i));
+            }
+        }
+        if (outputAttribute_->count() == 1) outputAttribute_->clear();
+    }
     model_->setMesh(meshData);
     preview_->setMesh(finite ? QJsonObject{{"positions", positions}, {"faces", faces}} : QJsonObject{});
     summary_->setText(QString(dx12_ ? "DX12 execution %1 · %2 · %3 vertices · %4 faces"
@@ -338,6 +368,28 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
     emit inspectionFinished(true);
     return true;
 }
+void ReplayMeshView::selectOutputAttribute() {
+    if (result_.is_null() || outputAttribute_->currentIndex() < 0) return;
+    auto metadata = result_.at("mesh");
+    const auto index = outputAttribute_->currentData().toInt();
+    if (index >= 0) {
+        const auto &attribute = metadata.at("output_layout").at("attributes").at(size_t(index));
+        if (!attribute.at("supported").get<bool>()) throw std::runtime_error("Unsupported output attribute");
+        metadata["attribute_byte_offset"] = attribute.at("byte_offset");
+        metadata["format"] = attribute.at("format");
+        metadata["perspective_divide"] = false;
+    }
+    const auto bytes = [](const QByteArray &b) {
+        return std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(b.constData()), size_t(b.size()));
+    };
+    const auto &vertices = files_["post_vertices.bin"], &indices = files_["post_indices.bin"];
+    auto meshData = std::make_shared<ReplayMesh>(ReplayMesh::decode(metadata, bytes(vertices), bytes(indices)));
+    selectedCsv_ = QByteArray::fromStdString(meshData->csv());
+    model_->setMesh(std::move(meshData));
+    result_["table_attribute"] = index >= 0 ? metadata.at("output_layout").at("attributes").at(size_t(index)) : Json("position");
+    if (!details_->isHidden()) details_->setPlainText(QString::fromStdString(result_.dump(2)));
+    updateActions();
+}
 void ReplayMeshView::exportResult(const QString &path) const {
     if (result_.is_null())
         throw std::runtime_error("No mesh to export");
@@ -345,7 +397,7 @@ void ReplayMeshView::exportResult(const QString &path) const {
     if ((suffix == "vbin" || suffix == "ibin") && result_.at("stage") != "VSIn")
         throw std::runtime_error("Raw input export requires Input attribute stage");
     const auto bytes = suffix == "obj"   ? files_.value("post_geometry.obj")
-                       : suffix == "csv" ? files_.value("post_vertices.csv")
+                       : suffix == "csv" ? selectedCsv_
                        : suffix == "vbin" ? files_.value("input_vertices.bin")
                        : suffix == "ibin" ? files_.value("input_indices.bin")
                                          : QByteArray::fromStdString(result_.dump(2));

@@ -33,6 +33,44 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void vertexOutputAttributes() {
+        const auto directory = qEnvironmentVariable("FLORA_DX12_VS_ATTRIBUTES_ROOT");
+        if (directory.isEmpty()) QSKIP("Set the BF1 post-VS attribute report directory");
+        const auto result = read(directory + "/result.json");
+        const auto &attributes = result.at("mesh").at("output_layout").at("attributes");
+        QCOMPARE(attributes.size(), size_t(7));
+        const auto raw = readBytes(directory + "/post_vertices.bin");
+        ReplayMeshView view; view.resize(1300, 900); view.show(); view.setContext("bf1-attributes", 36560, true);
+        QVERIFY(view.finish(view.requestId(), result, directory));
+        auto combo = view.findChild<QComboBox *>("replayMeshOutputAttribute");
+        auto table = view.findChild<QTableView *>("replayMeshPositions");
+        QVERIFY(!combo->isHidden()); QCOMPARE(combo->count(), 7);
+        QSignalSpy readSignal(&view, &ReplayMeshView::readRequested);
+        QSignalSpy debugSignal(&view, &ReplayMeshView::vertexDebugRequested);
+        const auto serial = view.requestId(); QTemporaryDir temp;
+        for (int a = 1; a < 7; ++a) {
+            combo->setCurrentIndex(a);
+            const auto offset = attributes[size_t(a)].at("byte_offset").get<unsigned>();
+            for (int c = 0; c < 4; ++c) {
+                float value{}; memcpy(&value, raw.constData() + 1428 * 112 + offset + c * 4, 4);
+                QCOMPARE(table->model()->index(1428, c + 1).data().toString().toDouble(), double(value));
+            }
+            view.exportResult(temp.filePath("selected.obj"));
+            QCOMPARE(readBytes(temp.filePath("selected.obj")), readBytes(directory + "/post_geometry.obj"));
+        }
+        combo->setCurrentIndex(2); table->selectRow(1428); table->scrollTo(table->model()->index(1428, 0));
+        view.exportResult(temp.filePath("attribute.csv"));
+        QVERIFY(readBytes(temp.filePath("attribute.csv")) != readBytes(directory + "/post_vertices.csv"));
+        QVERIFY(readBytes(temp.filePath("attribute.csv")).contains("1428,"));
+        action(view, "replayMeshDebugVertex")->trigger(); QCOMPARE(debugSignal.size(), 1);
+        QCOMPARE(debugSignal[0][1].toUInt(), 3966u);
+        QCOMPARE(view.requestId(), serial); QVERIFY(readSignal.empty());
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/bf1-output-attribute.png"));
+        combo->setCurrentIndex(0); view.exportResult(temp.filePath("position.csv"));
+        QCOMPARE(readBytes(temp.filePath("position.csv")), readBytes(directory + "/post_vertices.csv"));
+        view.setContext("new-session", 36560, true); QVERIFY(combo->isHidden()); QCOMPARE(combo->count(), 0);
+        QVERIFY(!view.finish(serial, result, directory));
+    }
     void bf1MeshToVertexDebug() {
         const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

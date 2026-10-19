@@ -8,6 +8,40 @@ namespace {
 using Json = nlohmann::json;
 Json triple(const rdcfixedarray<uint32_t, 3> &value) { return {value[0], value[1], value[2]}; }
 } // namespace
+Json rdcVertexOutputLayout(const ShaderReflection &shader, uint32_t stride) {
+    Json result{{"status", "unavailable"}, {"scope", "RenderDoc 1.45 D3D12 VSOut stream-output layout"}};
+    if (shader.stage != ShaderStage::Vertex || shader.outputSignature.empty() || shader.outputSignature.size() > 1024) {
+        result["reason"] = "No bounded vertex output signature"; return result;
+    }
+    std::vector<size_t> order;
+    for (size_t i = 0; i < shader.outputSignature.size(); ++i)
+        if (shader.outputSignature[i].systemValue == ShaderBuiltin::Position) order.insert(order.begin(), i);
+        else order.push_back(i);
+    uint64_t offset{}; unsigned positions{}; Json attributes = Json::array();
+    for (const auto i : order) {
+        const auto &s = shader.outputSignature[i];
+        const bool position = s.systemValue == ShaderBuiltin::Position;
+        positions += position;
+        const auto count = position ? 4u : s.compCount;
+        if (!count || count > 4 || s.stream || s.perPrimitiveRate || positions > 1) {
+            result["reason"] = "Unsupported vertex output signature layout"; return result;
+        }
+        const auto type = s.varType == VarType::Float ? CompType::Float
+                          : s.varType == VarType::UInt ? CompType::UInt
+                          : s.varType == VarType::SInt ? CompType::SInt : CompType::Typeless;
+        const bool supported = type != CompType::Typeless && (!position || s.compCount == 4);
+        attributes.push_back({{"signature_index", i}, {"semantic", std::string(s.semanticName.c_str())},
+            {"semantic_index", s.semanticIndex}, {"register", s.regIndex}, {"position", position},
+            {"byte_offset", offset}, {"supported", supported},
+            {"format", {{"compType", uint32_t(type)}, {"compByteWidth", 4}, {"compCount", count}}},
+            {"reason", supported ? "" : "Only float32, uint32 and sint32 output components are decoded"}});
+        offset += count * 4;
+    }
+    if (positions != 1) { result["reason"] = "No unique VS position output"; return result; }
+    if (offset != stride) { result["reason"] = "Reflected output packing differs from the GPU vertex stride"; return result; }
+    result.update({{"status", "mapped"}, {"stride", stride}, {"attributes", attributes}});
+    return result;
+}
 Json rdcExecutedAction(const ActionDescription &action) {
     Json result{{"event_id", action.eventId},
                 {"indirect", bool(action.flags & ActionFlags::Indirect)},
