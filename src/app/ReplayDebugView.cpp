@@ -1013,7 +1013,11 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
                 .arg(text(invocation.at("group")), text(invocation.at("thread")),
                      text(invocation.at("group_count")), text(invocation.at("shader_group_size")),
                      text(invocation.at("dispatch_thread"))));
-        if (invocation.value("indirect", false))
+        if (invocation.value("indirect", false) && invocation.contains("indexed_group_count"))
+            invocationReference_->setText(invocationReference_->text() +
+                QString("\nBounds use the prepared indirect arguments. Loading-time groups: %1. Arguments may change on another replay.")
+                    .arg(text(invocation.at("indexed_group_count"))));
+        else if (invocation.value("indirect", false))
             invocationReference_->setText(invocationReference_->text() +
                 "\nIndirect arguments may change between replays; bounds use the indexed action.");
         invocationReference_->show();

@@ -429,6 +429,38 @@ class RdcDebugTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,
             rdcComputeInvocation(action, shader, {0,0,0}, {0,0,0}));
     }
+    void preparedIndirectInvocationBounds() {
+        using Json = nlohmann::json;
+        ActionDescription action;
+        action.eventId = 25784; action.flags = ActionFlags::Dispatch | ActionFlags::Indirect;
+        action.dispatchDimension = {2, 2, 90};
+        ShaderReflection shader; shader.dispatchThreadsDimension = {8, 8, 1};
+        // Hellblade2's same selected execution indexed 90 groups but prepared 108.
+        const rdcfixedarray<uint32_t, 3> prepared{2, 2, 108};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {1, 1, 100}, {7, 7, 0}));
+        auto result = rdcComputeInvocation(action, shader, {1, 1, 100}, {7, 7, 0}, prepared);
+        QCOMPARE(result.at("group_count"), Json::array({2, 2, 108}));
+        QCOMPARE(result.at("indexed_group_count"), Json::array({2, 2, 90}));
+        QCOMPARE(result.at("dispatch_thread"), Json::array({15, 15, 100}));
+        QCOMPARE(result.at("source"), Json("Prepared pre-dispatch indirect argument buffer"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0, 0, 108}, {0, 0, 0}, prepared));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0, 0, 0}, {8, 0, 0}, prepared));
+        // A shrink must reject a group that was valid in the loading-time index.
+        const rdcfixedarray<uint32_t, 3> smaller{2, 2, 12}, empty{2, 2, 0};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0, 0, 12}, {0, 0, 0}, smaller));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0, 0, 0}, {0, 0, 0}, empty));
+        action.dispatchDimension = {0, 0, 0};
+        result = rdcComputeInvocation(action, shader, {0, 0, 0}, {0, 0, 0}, prepared);
+        QCOMPARE(result.at("has_workgroups"), Json(true));
+        action.flags = ActionFlags::Dispatch;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+            rdcComputeInvocation(action, shader, {0, 0, 0}, {0, 0, 0}, prepared));
+    }
     void pixelOutputComparison() {
         using Json = nlohmann::json;
         ShaderReflection reflection;

@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <array>
+#include <optional>
 namespace flora {
 // Version 1 of the fixed-width texture-store observer ABI; IDs/offsets use two words.
 nlohmann::json rdcTextureStoreRecord(const std::array<uint32_t, 32> &words);
@@ -32,5 +33,6 @@ nlohmann::json rdcVertexOutputReference(const ActionDescription &, const MeshFor
                                        const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read);
 nlohmann::json rdcComputeInvocation(const ActionDescription &action, const ShaderReflection &shader,
                                     const rdcfixedarray<uint32_t, 3> &group,
-                                    const rdcfixedarray<uint32_t, 3> &thread);
+                                    const rdcfixedarray<uint32_t, 3> &thread,
+                                    const std::optional<rdcfixedarray<uint32_t, 3>> &preparedGroups = std::nullopt);
 } // namespace flora

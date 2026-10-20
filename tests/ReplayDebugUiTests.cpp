@@ -53,6 +53,28 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void preparedIndirectInvocationDisplay() {
+        const auto path = qEnvironmentVariable("FLORA_PREPARED_INDIRECT_DEBUG");
+        if (path.isEmpty()) QSKIP("Set the prepared indirect compute debug report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("17063"));
+        const auto &invocation = report.at("compute_invocation");
+        QVERIFY(invocation.at("group_count") != invocation.at("indexed_group_count"));
+        QCOMPARE(invocation.at("group_count"), report.at("indirect_inputs").at("groups"));
+        QCOMPARE(report.at("compute_preparation").at("consumed"), Json("1"));
+        ReplayDebugView view("cs"); view.resize(1500, 1000); view.show();
+        view.setContext("hellblade-prepared-filter", 17063, true);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto label = view.findChild<QLabel *>("debugGpuInvocationReference"); QVERIFY(label);
+        QVERIFY(label->isVisible());
+        QVERIFY(label->text().contains("Bounds use the prepared indirect arguments"));
+        QVERIFY(!label->text().contains("bounds use the indexed action"));
+        QCOMPARE(view.exportReport().at("compute_invocation"), invocation);
+        const auto request = view.requestId();
+        view.setContext("other-session", 17063, true);
+        QVERIFY(!view.finish(request, report));
+        QVERIFY(!label->isVisible());
+    }
     void talosRegisterWatch() {
         const auto root = qEnvironmentVariable("FLORA_TALOS_FILTER_DEBUG");
         if (root.isEmpty()) QSKIP("Set the Talos filter debug evidence directory");

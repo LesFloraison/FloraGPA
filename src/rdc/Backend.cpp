@@ -803,7 +803,8 @@ rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
     }
     return result;
 }
-Json debug(IReplayController &controller, uint32_t eid, const Json &job, const Session &session) {
+Json debug(IReplayController &controller, uint32_t eid, const Json &job, const Session &session,
+           const std::optional<rdcfixedarray<uint32_t, 3>> &preparedGroups) {
     const auto dxbcWorkgroupPatch = session.dxbcWorkgroupPatch;
     const auto retainedComputePatch = session.retainedComputePatch;
     const auto uavTexturePatch = session.uavTexturePatch;
@@ -855,7 +856,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
     }
     if (dx12 && compute)
         result["compute_invocation"] = flora::rdcComputeInvocation(
-            *selected, *reflection, coordinates(job, "group"), coordinates(job, "thread"));
+            *selected, *reflection, coordinates(job, "group"), coordinates(job, "thread"), preparedGroups);
     std::vector<flora::RdcBufferInputRange> computeBufferRanges;
     if (dx12 && compute) {
         const auto buffers = controller.GetBuffers();
@@ -2024,6 +2025,7 @@ Json runRdcJob(const Json &job) {
         return complete();
     }
     if (debugging) {
+        std::optional<rdcfixedarray<uint32_t, 3>> preparedGroups;
         if (dx12 && action == "debug-thread") {
             const auto selected = events.actionDetails.find(eid);
             if (selected != events.actionDetails.end() && (selected->second->flags & ActionFlags::Indirect)) {
@@ -2036,6 +2038,7 @@ Json runRdcJob(const Json &job) {
                 if (!evidence.open(QIODevice::WriteOnly) || evidence.write(bytes) != bytes.size() || !evidence.commit())
                     throw std::runtime_error("Cannot save indirect debug input evidence");
                 if (session.computePrepared && inputs.value("status", "") == "read") {
+                    preparedGroups = coordinates(inputs, "groups");
                     const auto group = coordinates(job, "group");
                     if (!inputs.at("action_present").get<bool>() || group[0] >= inputs.at("groups")[0].get<uint32_t>() ||
                         group[1] >= inputs.at("groups")[1].get<uint32_t>() || group[2] >= inputs.at("groups")[2].get<uint32_t>())
@@ -2054,7 +2057,7 @@ Json runRdcJob(const Json &job) {
         const auto uavFailureStart = session.uavTextureFailures ? session.uavTextureFailures() : 0;
         const auto packedStart = session.packedStores ? session.packedStores() : 0;
         const auto preparedStart = session.preparedComputeConsumed ? session.preparedComputeConsumed() : 0;
-        result.update(debug(controller, eid, job, session));
+        result.update(debug(controller, eid, job, session, preparedGroups));
         const auto preparedCount = session.preparedComputeConsumed ? session.preparedComputeConsumed() - preparedStart : 0;
         if (session.computePrepared && preparedCount != 1)
             throw std::runtime_error("Compute debugger did not consume the prepared event state");

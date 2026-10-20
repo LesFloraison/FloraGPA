@@ -9902,6 +9902,91 @@ and `cache-border-rejections1/result.json`. The final backend build and the
 focused mapped/unmapped requests succeed; all GPU work was serial and no
 new original-player capture was made.
 
+### Prepared indirect compute bounds and cache-filter inputs
+
+The next source-atlas writer is native execution **17063**, RDC **25784**;
+the original captured player uses RDC **543298**. Both bind
+`FilterProbeRadianceWithGatherCS`, **9,424 bytes**, SHA-256
+`b340c449503f87526146dda8434eb0f27c8f3ee8ef6f859c22994ccec0cdaf9e`.
+An independent CPU export from original PSO creation **515332** has the
+same digest. This original reference is still the instrumented,
+relay-repaired GPA capture described above, not an uninstrumented run.
+
+| Binding | Native creation | Original capture-local RDC ID |
+|---|---:|---:|
+| Root parameters, offset 1,145,600 | 510820 | 463 |
+| Cache grid | 503760 | 12566 |
+| Probe world offsets | 513380 | 12535 |
+| Trace tasks | 534983 | 14321 |
+| Input radiance atlas | 559864 | 12537 |
+| Input depth atlas | 507326 | 12536 |
+| Filtered radiance atlas | 543244 | 13851 |
+| Indirect arguments | 562627 | 12981 |
+
+This investigation exposed a debugger bug: the prepared argument buffer
+contained **(2,2,108)** groups while loading-time metadata contained
+**(2,2,90)**. The entry path checked the prepared bounds, but the invocation
+helper subsequently checked the stale index again, incorrectly rejecting
+groups 90 through 107. The helper now uses the same prepared dimensions
+when available, retaining `indexed_group_count` separately. The UI identifies
+which bounds were used. Direct dispatches and paths without a prepared
+argument snapshot retain their existing behavior.
+
+Focused unit checks cover growth, shrinkage, zero dimensions, local-thread
+bounds and rejection of an indirect override for a direct dispatch. A real
+follow-up trace at group **(1,1,90)** / thread **(7,7,0)** uses prepared
+**(2,2,99)** against indexed **(2,2,114)** and completes **1,367 steps**.
+Exactly one prepared state is consumed, retained input-buffer observations
+remain unchanged, and dispatch restoration succeeds. Instruction **340**
+attempts a store to creation **543244**, texel **(719,143)**; its zero RGB
+agrees with the post-restoration GPU value. This black texel has limited
+discriminating power: general texture-store validation remains
+`not_validated`, and this does not validate the filter's nonzero arithmetic.
+The real-report UI check covers prepared/indexed presentation, export
+provenance and rejection after a session switch, without another GPU replay.
+
+Two forced observations at this boundary per capture read eight bounded
+resources each. All **32** resource observations have verified full-storage
+sizes and SHA-256 digests. Task selection uses each observation's argument
+buffer, not its earlier pipeline/index count. Native group counts are
+**111 / 114**; original counts are **119 / 100**. All four cache grids have
+the same **1,310** active cells. After alignment by grid cell, root parameter
+bytes, all active probe offsets and common tasks' position/clipmap fields
+agree across the observations.
+
+| Comparison | Input radiance differing blocks / texels | Input depth differing blocks / texels | Common selected output blocks | Output differing blocks / texels |
+|---|---:|---:|---:|---:|
+| Native first / second | 98 / 1,341 | 53 / 115 | 62 | 13 / 54 |
+| Original first / second | 82 / 1,156 | 42 / 91 | 70 | 17 / 124 |
+| Native first / original first | 93 / 1,108 | 46 / 96 | 71 | 17 / 41 |
+
+Input comparisons cover all active cells; output comparisons cover only
+the intersection of the observed task prefixes. Both upstream input
+atlases already vary within the original capture's own replays. These are
+post-dispatch observations, not GPU argument-consumption telemetry or a
+complete numerical model of filtering. They locate additional changing
+inputs without proving that every output difference is explained. Full
+original/native fidelity remains unfinished.
+
+Resource History reports a common upstream CS read/write binding for both
+input atlases at native execution **17049**, source record **586426**, RDC
+**25738**, submission **594766**, queue **2131165364544**. This is indexed
+bound-use evidence (`content_change: not_measured`), identifying the next
+producer to inspect without claiming an observed write or inventing an
+original-capture event mapping.
+
+Evidence under `artifacts/dx12-research`: `native-cache-filter-pipeline1`,
+`gpa-cache-filter-pipeline1`, `hellblade-cache-filter-shader1`,
+`hellblade-cache-source-history2`, `hellblade-cache-filter-debug{1,2}`,
+`{native,gpa}-cache-filter-repeat1.json`,
+`gpa-native-cache-filter-inputs1.json`, `compare-cache-filter-inputs1.py`,
+`prepared-indirect-bounds-unit1.txt` and `prepared-indirect-ui1.txt`.
+The two upstream histories are
+`hellblade-cache-{radiance,depth}-input-history1`.
+The comparison script and large readbacks remain research artifacts outside
+Git; Python is used only for offline comparison. No new GPA capture, broad
+regression suite or repeated whole-frame native replay was required.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

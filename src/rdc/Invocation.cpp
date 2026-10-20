@@ -158,16 +158,20 @@ Json rdcExecutedAction(const ActionDescription &action) {
     return result;
 }
 Json rdcComputeInvocation(const ActionDescription &action, const ShaderReflection &shader,
-                          const rdcfixedarray<uint32_t, 3> &group, const rdcfixedarray<uint32_t, 3> &thread) {
+                          const rdcfixedarray<uint32_t, 3> &group, const rdcfixedarray<uint32_t, 3> &thread,
+                          const std::optional<rdcfixedarray<uint32_t, 3>> &preparedGroups) {
     if (!(action.flags & ActionFlags::Dispatch))
         throw std::runtime_error("Compute invocation requires a Dispatch action");
+    if (preparedGroups && !(action.flags & ActionFlags::Indirect))
+        throw std::runtime_error("Prepared indirect dimensions require an indirect Dispatch");
+    const auto &groups = preparedGroups ? *preparedGroups : action.dispatchDimension;
     Json global = Json::array();
     for (size_t axis = 0; axis < 3; ++axis) {
-        if (!action.dispatchDimension[axis])
+        if (!groups[axis])
             throw std::runtime_error("Selected Dispatch has zero workgroups; no compute invocation executed");
         if (!shader.dispatchThreadsDimension[axis])
             throw std::runtime_error("Compute shader thread-group size is unavailable");
-        if (group[axis] >= action.dispatchDimension[axis])
+        if (group[axis] >= groups[axis])
             throw std::runtime_error("Selected compute group is outside the executed Dispatch dimensions");
         if (thread[axis] >= shader.dispatchThreadsDimension[axis])
             throw std::runtime_error("Selected compute thread is outside the shader thread-group dimensions");
@@ -178,6 +182,14 @@ Json rdcComputeInvocation(const ActionDescription &action, const ShaderReflectio
         global.push_back(uint32_t(coordinate));
     }
     auto result = rdcExecutedAction(action);
+    if (preparedGroups) {
+        result["indexed_group_count"] = result.at("group_count");
+        result["group_count"] = triple(groups);
+        result["has_workgroups"] = true; // Zero dimensions were rejected above.
+        result["source"] = "Prepared pre-dispatch indirect argument buffer";
+        result["scope"] = "Bounds use the argument snapshot from the single prepared compute state consumed by DebugThread. "
+                          "This is not GPU argument-consumption telemetry; indexed_group_count retains loading-time metadata.";
+    }
     result["group"] = triple(group);
     result["thread"] = triple(thread);
     result["shader_group_size"] = triple(shader.dispatchThreadsDimension);
