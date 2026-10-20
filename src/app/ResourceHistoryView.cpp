@@ -56,6 +56,21 @@ uint64_t transferSourceCreation(const nlohmann::json &row) {
     }
     return sources == 1 ? creation : 0;
 }
+uint64_t aliasSourceCreation(const nlohmann::json &row) {
+    const auto details = row.value("replay_resource_barriers", nlohmann::json::object());
+    if (details.value("status", "") != "captured") return 0;
+    uint64_t creation{}; size_t aliases{};
+    for (const auto &barrier : details.at("barriers")) {
+        if (barrier.at("Type") != 1) continue;
+        ++aliases;
+        const auto &before = barrier.at("resource_before");
+        if (before.value("mapping_status", "") == "capture_resource_marker") {
+            (void)identity(before.at("resource_object"));
+            creation = identity(before.at("resource_creation"));
+        }
+    }
+    return aliases == 1 ? creation : 0;
+}
 } // namespace
 ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     setObjectName("resourceHistoryView");
@@ -74,6 +89,9 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     transferSource_ = tools->addAction("Locate transfer source");
     transferSource_->setObjectName("locateResourceHistoryTransferSource");
     transferSource_->setToolTip("Locate the source resource's creation record for this Copy or Resolve; this is not its last writer");
+    aliasSource_ = tools->addAction("Locate alias predecessor");
+    aliasSource_->setObjectName("locateResourceHistoryAliasSource");
+    aliasSource_->setToolTip("Locate the creation record of the alias barrier's explicit preceding resource; overlapping heap ranges are not inferred");
     export_ = tools->addAction("Export…");
     auto overview = tools->addAction("Creation / scope");
     connect(overview, &QAction::triggered, this, &ResourceHistoryView::showOverview);
@@ -121,6 +139,11 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     connect(transferSource_, &QAction::triggered, this, [this] {
         if (transferSource_->isEnabled())
             emit recordRequested(transferSourceCreation(result_.at("resource_history")
+                .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())));
+    });
+    connect(aliasSource_, &QAction::triggered, this, [this] {
+        if (aliasSource_->isEnabled())
+            emit recordRequested(aliasSourceCreation(result_.at("resource_history")
                 .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())));
     });
     connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
@@ -221,6 +244,9 @@ void ResourceHistoryView::updateActions() {
     transferSource_->setEnabled(!busy_ && rows_->currentItem() && !result_.is_null() &&
         transferSourceCreation(result_.at("resource_history")
             .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())) != 0);
+    aliasSource_->setEnabled(!busy_ && rows_->currentItem() && !result_.is_null() &&
+        aliasSourceCreation(result_.at("resource_history")
+            .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())) != 0);
 }
 ResourceHistoryView::Json ResourceHistoryView::request() const {
     if (key_.isEmpty() || !execution_ || !creation_ || !object_)
@@ -262,6 +288,7 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
             (void)identity(row.at("after_execution"));
         }
         (void)transferSourceCreation(row);
+        (void)aliasSourceCreation(row);
         if (row.contains("query_resolve_part") || row.contains("query_resolve_part_count")) {
             if (!isolateMissingQueries_ || row.value("name","") != "ID3D12GraphicsCommandListResolveQueryData" ||
                 !row.at("query_resolve_part").is_number_integer() || !row.at("query_resolve_part_count").is_number_integer() ||
@@ -389,6 +416,36 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                               .arg(field(barrier, "Flags"));
             else
                 ranges << (barrier.at("Type") == 1 ? "Aliasing barrier" : "UAV barrier");
+        }
+        if (row.contains("replay_resource_barriers")) {
+            const auto &details = row.at("replay_resource_barriers");
+            if (details.at("status") != "captured") {
+                ranges << "Replay barrier details unavailable";
+                item->setToolTip(4, field(details, "reason"));
+            } else {
+                const auto endpoint = [&](const Json &ref) {
+                    if (ref.at("rdc_id") == "ResourceId::0") return QString("any resource");
+                    return ref.value("mapping_status", "") == "capture_resource_marker"
+                        ? "creation " + field(ref, "resource_creation") : field(ref, "rdc_id");
+                };
+                for (const auto &barrier : details.at("barriers")) {
+                    if (barrier.at("Type") == 0)
+                        ranges << QString("Replay %1: 0x%2 → 0x%3 (%4; flags %5)")
+                            .arg(barrier.at("Subresource") == UINT32_MAX ? "all subresources" : "subresource " + field(barrier, "Subresource"))
+                            .arg(barrier.at("StateBefore").get<uint32_t>(), 0, 16)
+                            .arg(barrier.at("StateAfter").get<uint32_t>(), 0, 16)
+                            .arg(field(barrier, "transition_phase"), field(barrier, "Flags"));
+                    else if (barrier.at("Type") == 1)
+                        ranges << QString("Replay alias: %1 → %2 (flags %3)")
+                            .arg(endpoint(barrier.at("resource_before")), endpoint(barrier.at("resource_after")),
+                                 field(barrier, "Flags"));
+                    else
+                        ranges << QString("Replay UAV: %1 (flags %2)")
+                            .arg(barrier.at("resource_relation") == "all_uav_resources"
+                                ? "all UAV resources" : endpoint(barrier.at("resource")), field(barrier, "Flags"));
+                }
+                item->setToolTip(4, field(details, "scope"));
+            }
         }
         item->setText(4, ranges.isEmpty() ? "Unknown" : ranges.join("; "));
         if (row.contains("indexed_action")) {

@@ -10372,10 +10372,60 @@ module snapshots are verified; no GPA/Python dependency is loaded by the
 native replay/analysis processes. Upstream task-selection variation,
 full-frame fidelity and complete Shader Debug coverage remain unfinished.
 
+### Replay barrier arguments and alias-resource navigation
+
+Resource History now reads legacy `ResourceBarrier` arguments from the
+analysis capture's structured API records, independently of Draw/Dispatch
+actions. It retains transition subresources, states and split flags,
+aliasing endpoints, resource-specific UAV barriers and global UAV scope.
+Original CPU-record details and replay-capture details remain separate.
+Resource identities and creation records stay decimal strings, including
+identities above 2^53. Truncated arrays, invalid endpoint types and
+out-of-range fields produce an explicit unavailable result without keeping
+partially decoded barriers.
+
+One indexed Resource History query reuses the zero-counter experiment
+capture; no new native capture or full-frame comparison is required.
+For resource creation **570577**, all four indexed barrier uses have
+decoded arguments, with no barrier-detail gaps:
+
+| RDC event | Provenance | Recorded replay arguments |
+| --- | --- | --- |
+| 23645 | Original execution 16403 | Global UAV barrier and explicit alias from creation 567419 to 570577 |
+| 25544 | Experiment after execution 16988 | All subresources, UAV (8) → COPY_DEST (1024), full transition |
+| 25546 | Experiment after execution 16988 | All subresources, COPY_DEST (1024) → UAV (8), full transition |
+| 25579 | Original execution 16999 | All subresources, UAV (8) → NON_PIXEL_SHADER_RESOURCE (64), full transition |
+
+All recorded flags in these rows are zero. The helper copy at **25545**
+still identifies destination bytes **[0,4)**. Its surrounding transitions
+remain auxiliary operations without an invented original execution ID.
+The history query uses the capture index rather than replaying the selected
+event, although loading the capture can execute GPU work.
+
+The workspace shows these arguments and can navigate the alias predecessor
+to its exact creation record **567419**. Navigation requires a unique
+explicit mapped predecessor; unmapped or ambiguous endpoints disable it.
+The real-report UI check verifies alias navigation, busy-state handling,
+helper-transition display, export, invalid original attribution and stale
+experiment-result rejection. The focused decoder check covers 64-bit
+identities, split flags, wildcard endpoints and malformed records.
+
+Evidence: `hellblade-counter-barrier-history1/result.json`,
+`hellblade-counter-barrier-history1/loaded_modules.json`,
+`replay-barrier-arguments2.txt`, `replay-barrier-history-ui1.txt`,
+`build-replay-barrier-history2.log` and
+`build-replay-barrier-history-ui3.log`. The implementation follows the
+pinned RenderDoc 1.45 `d3d12_serialise.cpp` barrier structures and
+`d3d12_command_list_wrap.cpp` ResourceBarrier chunk. These API arguments
+do not establish split-barrier completion, overlapping heap ranges,
+observed content changes, or complete resource lifetimes/history.
+Enhanced barriers remain explicitly unavailable in this decoder.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; completion, heap overlap and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |

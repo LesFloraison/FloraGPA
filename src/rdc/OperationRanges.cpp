@@ -47,6 +47,79 @@ Json region(const SDObject &object,bool rect) {
     return result;
 }
 }
+Json rdcResourceBarriers(const SDObject &chunk, ResourceId resource,
+                         std::span<const ResourceDescription> resources) {
+    const std::string name(chunk.name.c_str(), chunk.name.size());
+    Json result{{"status", "unavailable"}, {"source", "replay_capture_api_arguments"}, {"api", name},
+        {"scope", "Recorded replay barriers for the queried resource, including wildcard barriers. "
+                  "States and split flags are API arguments; completion, alias overlap and content changes are not inferred."},
+        {"barriers", Json::array()}};
+    try {
+        if (!name.ends_with("::ResourceBarrier"))
+            throw std::runtime_error("Only legacy ResourceBarrier arguments are supported");
+        const auto count = number(chunk, "NumBarriers");
+        const auto &array = child(chunk, "pBarriers");
+        if (count > 65536 || array.type.basetype != SDBasic::Array || array.NumChildren() != count)
+            throw std::runtime_error("Truncated or excessive ResourceBarrier array");
+        const auto u32 = [&](const SDObject &object, const char *field) {
+            const auto value = number(object, field);
+            if (value > UINT32_MAX) throw std::runtime_error("ResourceBarrier field exceeds uint32");
+            return uint32_t(value);
+        };
+        const auto id = [&](const SDObject &object, const char *field) {
+            const auto &value = child(object, field);
+            if (value.type.basetype == SDBasic::Null) return uint64_t(0);
+            if (value.type.basetype != SDBasic::Resource)
+                throw std::runtime_error("ResourceBarrier endpoint is not a resource identity");
+            return value.data.basic.u;
+        };
+        const auto reference = [&](uint64_t raw) {
+            const auto resourceId = std::bit_cast<ResourceId>(raw);
+            const auto found = std::find_if(resources.begin(), resources.end(),
+                [&](const auto &entry) { return entry.resourceId == resourceId; });
+            return rdcDx12ResourceReference(resourceId, found == resources.end() ? std::string_view{} :
+                std::string_view(found->name.c_str(), found->name.size()));
+        };
+        const auto wanted = std::bit_cast<uint64_t>(resource);
+        if (!wanted) throw std::runtime_error("ResourceBarrier query requires a resource");
+        for (size_t i = 0; i < count; ++i) {
+            const auto *entry = array.GetChild(i);
+            if (!entry) throw std::runtime_error("Missing ResourceBarrier entry");
+            const auto type = u32(*entry, "Type"), flags = u32(*entry, "Flags");
+            Json barrier{{"barrier_index", i}, {"Type", type}, {"Flags", flags}};
+            bool matches{};
+            if (type == D3D12_RESOURCE_BARRIER_TYPE_TRANSITION) {
+                const auto &transition = child(*entry, "Transition");
+                const auto target = id(transition, "pResource");
+                if (!target) throw std::runtime_error("Transition barrier has a null resource");
+                barrier.update({{"resource", reference(target)}, {"Subresource", u32(transition, "Subresource")},
+                    {"StateBefore", u32(transition, "StateBefore")}, {"StateAfter", u32(transition, "StateAfter")},
+                    {"transition_phase", flags == 0 ? "full" : flags == 1 ? "begin_only" :
+                                         flags == 2 ? "end_only" : "unknown_flags"},
+                    {"resource_relation", "explicit"}});
+                matches = target == wanted;
+            } else if (type == D3D12_RESOURCE_BARRIER_TYPE_ALIASING) {
+                const auto &alias = child(*entry, "Aliasing");
+                const auto before = id(alias, "pResourceBefore"), after = id(alias, "pResourceAfter");
+                matches = before == wanted || after == wanted || !before || !after;
+                barrier.update({{"resource_before", reference(before)}, {"resource_after", reference(after)},
+                    {"resource_relation", !before || !after ? "wildcard_endpoint" : "explicit"}});
+            } else if (type == D3D12_RESOURCE_BARRIER_TYPE_UAV) {
+                const auto target = id(child(*entry, "UAV"), "pResource");
+                matches = target == wanted || !target;
+                barrier.update({{"resource", reference(target)},
+                    {"resource_relation", target ? "explicit" : "all_uav_resources"}});
+            } else throw std::runtime_error("Unknown legacy ResourceBarrier type");
+            if (matches) result["barriers"].push_back(std::move(barrier));
+        }
+        if (result["barriers"].empty()) throw std::runtime_error("No barrier refers to the queried resource");
+        result["status"] = "captured";
+    } catch (const std::exception &error) {
+        result["barriers"] = Json::array();
+        result["reason"] = error.what();
+    }
+    return result;
+}
 Json rdcUavClearRange(const SDObject &chunk, ResourceId resource, std::span<const TextureDescription> textures) {
     const auto wanted=std::bit_cast<uint64_t>(resource);
     const auto &target=child(chunk,"ViewCPUHandle"), &view=child(target,"Descriptor");

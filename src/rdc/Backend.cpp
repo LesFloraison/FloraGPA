@@ -2181,7 +2181,7 @@ Json runRdcJob(const Json &job) {
         static_assert(std::size(usageNames) == size_t(ResourceUsage::CPUWrite) + 1);
         Json rows = Json::array(), initialization = Json::array();
         const auto historyTextures = controller.GetTextures();
-        size_t capturedRanges{}, rangeGaps{};
+        size_t capturedRanges{}, rangeGaps{}, capturedBarriers{}, barrierGaps{};
         size_t unmapped = 0, auxiliaryUses = 0;
         for (const auto &usage : controller.GetUsage(resource)) {
             if (usage.eventId > eid)
@@ -2200,6 +2200,15 @@ Json runRdcJob(const Json &job) {
                      {"subresource", nullptr},
                      {"subresource_status", "not_provided_by_usage_index"}};
             row.update(rdcProvenance(usage.eventId, mapping["reverse"]));
+            if (dx12 && usage.usage == ResourceUsage::Barrier) {
+                const auto chunk = events.chunks.find(usage.eventId);
+                row["replay_resource_barriers"] = chunk == events.chunks.end()
+                    ? Json{{"status", "unavailable"}, {"reason", "Replay barrier API arguments are unavailable"}}
+                    : rdcResourceBarriers(*chunk->second, resource, {resources.data(), resources.size()});
+                if (row["replay_resource_barriers"].at("status") == "captured") {
+                    row["subresource_status"] = "see_replay_resource_barriers"; ++capturedBarriers;
+                } else ++barrierGaps;
+            }
             const auto actionDetail = events.actionDetails.find(usage.eventId);
             if (dx12 && actionDetail != events.actionDetails.end() &&
                 (actionDetail->second->flags & (ActionFlags::Clear | ActionFlags::Copy | ActionFlags::Resolve))) {
@@ -2253,6 +2262,8 @@ Json runRdcJob(const Json &job) {
                {"content_changes_measured", false},
                {"captured_operation_ranges", capturedRanges},
                {"operation_range_gaps", rangeGaps},
+               {"captured_replay_barrier_uses", capturedBarriers},
+               {"replay_barrier_detail_gaps", barrierGaps},
                {"selected_event_replayed", !indexedResourceHistory},
                {"query_source", indexedResourceHistory ? "capture_usage_index_with_explicit_resource"
                                                         : "capture_usage_index_with_replayed_selection"},

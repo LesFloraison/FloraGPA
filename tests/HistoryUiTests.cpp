@@ -1554,10 +1554,23 @@ class HistoryUiTests : public QObject {
         ResourceHistoryView view; view.setContext("counter-override", 17074, 570577, 2149342527328ULL);
         QVERIFY(view.finish(view.requestId(), report));
         auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
-        size_t helpers{}, copies{};
+        size_t helpers{}, copies{}, aliases{};
         QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
         for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
             const auto &row = report.at("resource_history")[i];
+            if (row.at("eventId") == 23645) {
+                auto item = rows->topLevelItem(int(i));
+                QVERIFY(item->text(4).contains("Replay UAV: all UAV resources"));
+                QVERIFY(item->text(4).contains("Replay alias: creation 567419 → creation 570577"));
+                rows->setCurrentItem(item);
+                auto alias = action(view, "locateResourceHistoryAliasSource");
+                QVERIFY(alias->isEnabled());
+                QSignalSpy record(&view, &ResourceHistoryView::recordRequested);
+                alias->trigger(); QCOMPARE(record.size(), 1);
+                QCOMPARE(record[0][0].toULongLong(), 567419ULL);
+                view.setWorkerBusy(true); QVERIFY(!alias->isEnabled()); view.setWorkerBusy(false);
+                ++aliases;
+            }
             if (row.value("mapping_status", "") != "replay_auxiliary") continue;
             ++helpers;
             QVERIFY(row.at("execution").is_null());
@@ -1567,18 +1580,45 @@ class HistoryUiTests : public QObject {
             QCOMPARE(item->text(0), QString("Experiment after 16988"));
             rows->setCurrentItem(item);
             QVERIFY(!action(view, "locateResourceHistoryEvent")->isEnabled());
+            QVERIFY(!action(view, "locateResourceHistoryAliasSource")->isEnabled());
             QVERIFY(jump.empty());
             if (row.at("usage_name") == "CopyDst") {
                 ++copies;
                 QVERIFY(item->text(4).contains("destination: bytes [0, 4)"));
                 QCOMPARE(row.at("content_change"), Json("not_measured"));
+            } else {
+                const auto &details = row.at("replay_resource_barriers");
+                QCOMPARE(details.at("status"), Json("captured"));
+                QCOMPARE(details.at("barriers").size(), size_t(1));
+                const auto &barrier = details.at("barriers")[0];
+                QCOMPARE(barrier.at("resource").at("resource_creation"), Json("570577"));
+                QCOMPARE(barrier.at("Subresource"), Json(UINT32_MAX));
+                QCOMPARE(barrier.at("Flags"), Json(0));
+                QCOMPARE(barrier.at("transition_phase"), Json("full"));
+                const bool intoCopy = row.at("eventId") == 25544;
+                QCOMPARE(barrier.at("StateBefore"), Json(intoCopy ? 8 : 1024));
+                QCOMPARE(barrier.at("StateAfter"), Json(intoCopy ? 1024 : 8));
+                QVERIFY(item->text(4).contains(intoCopy ? "0x8 → 0x400" : "0x400 → 0x8"));
+                QVERIFY(item->toolTip(4).contains("completion"));
             }
         }
         QCOMPARE(helpers, size_t(3)); QCOMPARE(copies, size_t(1));
+        QCOMPARE(aliases, size_t(1));
         QCOMPARE(report.at("history_scope").at("unmapped_uses"), Json(0));
         QCOMPARE(report.at("history_scope").at("replay_auxiliary_uses"), Json(3));
         QTemporaryDir temp; const auto exported = temp.path() + "/history.json";
         view.exportResult(exported); QCOMPARE(read(exported), report);
+        auto anonymous = report;
+        for (auto &row : anonymous["resource_history"])
+            if (row.at("eventId") == 23645)
+                for (auto &barrier : row["replay_resource_barriers"]["barriers"])
+                    if (barrier.at("Type") == 1) barrier["resource_before"]["mapping_status"] = "unmapped";
+        QVERIFY(view.finish(view.requestId(), anonymous));
+        for (size_t i = 0; i < anonymous.at("resource_history").size(); ++i)
+            if (anonymous.at("resource_history")[i].at("eventId") == 23645) {
+                rows->setCurrentItem(rows->topLevelItem(int(i)));
+                QVERIFY(!action(view, "locateResourceHistoryAliasSource")->isEnabled());
+            }
         auto invalid = report;
         for (auto &row : invalid["resource_history"])
             if (row.value("mapping_status", "") == "replay_auxiliary") row["execution"] = "16988";

@@ -36,7 +36,7 @@ class ResourceHistoryView final : public QWidget {
     uint64_t execution_{}, creation_{}, object_{}, serial_{}, frameEndRecord_{};
     bool busy_{}, isolateMissingQueries_{};
     Json result_;
-    QAction *read_, *cancel_, *locate_, *producer_, *transferSource_, *export_, *backend_;
+    QAction *read_, *cancel_, *locate_, *producer_, *transferSource_, *aliasSource_, *export_, *backend_;
     QLabel *summary_;
     QTreeWidget *rows_, *synchronization_;
     QPlainTextEdit *details_;

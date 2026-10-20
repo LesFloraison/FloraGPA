@@ -9,4 +9,8 @@ nlohmann::json rdcUavClearRange(const SDObject &chunk, ResourceId resource,
 nlohmann::json rdcOperationRanges(const SDObject &chunk, ResourceId resource,
                                  std::span<const TextureDescription> textures,
                                  std::span<const ResourceDescription> resources = {});
+// Legacy ResourceBarrier arguments from the replay capture, not the original
+// CPU stream or proof that a split transition/alias dependency completed.
+nlohmann::json rdcResourceBarriers(const SDObject &chunk, ResourceId resource,
+                                  std::span<const ResourceDescription> resources);
 }

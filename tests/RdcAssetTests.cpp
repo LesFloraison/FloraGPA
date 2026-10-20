@@ -34,6 +34,76 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void resourceBarrierArguments() {
+        constexpr uint64_t first = 9007199254740993ULL, second = UINT64_MAX;
+        SDObject chunk("ID3D12GraphicsCommandList::ResourceBarrier"_lit, "chunk"_lit);
+        const auto node = [](SDObject &parent, const char *name, SDBasic type = SDBasic::Struct) {
+            auto value = parent.AddAndOwnChild(new SDObject(rdcstr(name), "field"_lit));
+            value->type.basetype = type; return value;
+        };
+        const auto integer = [&](SDObject &parent, const char *name, uint64_t value,
+                                 SDBasic type = SDBasic::UnsignedInteger) {
+            auto field = node(parent, name, type); field->data.basic.u = value; return field;
+        };
+        auto count = integer(chunk, "NumBarriers", 4);
+        auto array = node(chunk, "pBarriers", SDBasic::Array);
+        auto transition = [&](uint64_t target) {
+            auto barrier = node(*array, "[]");
+            integer(*barrier, "Type", 0, SDBasic::Enum);
+            integer(*barrier, "Flags", 0, SDBasic::Enum);
+            auto detail = node(*barrier, "Transition");
+            integer(*detail, "pResource", target, SDBasic::Resource);
+            integer(*detail, "Subresource", UINT32_MAX, SDBasic::Enum);
+            integer(*detail, "StateBefore", 8, SDBasic::Enum);
+            integer(*detail, "StateAfter", 1024, SDBasic::Enum);
+            return detail;
+        };
+        auto detail = transition(first); transition(second);
+        auto alias = node(*array, "[]");
+        integer(*alias, "Type", 1); integer(*alias, "Flags", 0);
+        alias = node(*alias, "Aliasing");
+        integer(*alias, "pResourceBefore", first, SDBasic::Resource);
+        integer(*alias, "pResourceAfter", second, SDBasic::Resource);
+        auto uav = node(*array, "[]");
+        integer(*uav, "Type", 2); integer(*uav, "Flags", 0);
+        integer(*node(*uav, "UAV"), "pResource", 0, SDBasic::Null);
+        std::array<ResourceDescription, 2> resources{};
+        resources[0].resourceId = resource(first);
+        resources[0].name = "Flora DX12 resource 18446744073709551615 creation 9007199254740993";
+        resources[1].resourceId = resource(second);
+        resources[1].name = "Flora DX12 resource 18446744073709551615 creation 9007199254740994";
+        auto result = rdcResourceBarriers(chunk, resource(first), resources);
+        QCOMPARE(result.at("status"), Json("captured"));
+        const auto &barriers = result.at("barriers");
+        QCOMPARE(barriers.size(), size_t(3)); // Other resource's transition is excluded.
+        QCOMPARE(barriers[0].at("StateBefore"), Json(8));
+        QCOMPARE(barriers[0].at("StateAfter"), Json(1024));
+        QCOMPARE(barriers[0].at("Subresource"), Json(UINT32_MAX));
+        QCOMPARE(barriers[0].at("resource").at("resource_creation"), Json("9007199254740993"));
+        QCOMPARE(barriers[1].at("resource_after").at("rdc_id"), Json("ResourceId::18446744073709551615"));
+        QCOMPARE(barriers[1].at("resource_after").at("resource_creation"), Json("9007199254740994"));
+        QCOMPARE(barriers[2].at("resource_relation"), Json("all_uav_resources"));
+        auto flags = array->GetChild(0)->FindChild("Flags");
+        QVERIFY(flags); flags->data.basic.u = 1;
+        QCOMPARE(rdcResourceBarriers(chunk, resource(first), resources).at("barriers")[0].at("transition_phase"), Json("begin_only"));
+        flags->data.basic.u = 2;
+        QCOMPARE(rdcResourceBarriers(chunk, resource(first), resources).at("barriers")[0].at("transition_phase"), Json("end_only"));
+        auto aliasBefore = alias->FindChild("pResourceBefore"); QVERIFY(aliasBefore); aliasBefore->data.basic.u = 0;
+        result = rdcResourceBarriers(chunk, resource(first), resources);
+        QCOMPARE(result.at("barriers")[1].at("resource_relation"), Json("wildcard_endpoint"));
+        QCOMPARE(result.at("barriers")[1].at("resource_before").at("mapping_status"), Json("unbound"));
+        aliasBefore->data.basic.u = first;
+        count->data.basic.u = 5;
+        result = rdcResourceBarriers(chunk, resource(first), resources);
+        QCOMPARE(result.at("status"), Json("unavailable")); QVERIFY(result.at("barriers").empty());
+        count->data.basic.u = 4;
+        auto state = detail->FindChild("StateAfter"); QVERIFY(state); state->data.basic.u = 1ULL << 32;
+        result = rdcResourceBarriers(chunk, resource(first), resources);
+        QCOMPARE(result.at("status"), Json("unavailable")); QVERIFY(result.at("barriers").empty());
+        state->data.basic.u = 1024;
+        auto endpoint = detail->FindChild("pResource"); QVERIFY(endpoint); endpoint->type.basetype = SDBasic::Float;
+        QCOMPARE(rdcResourceBarriers(chunk, resource(first), resources).at("status"), Json("unavailable"));
+    }
     void transferEndpointIdentities() {
         constexpr uint64_t src = 9007199254740993ULL, dst = src + 1;
         SDObject chunk("ID3D12GraphicsCommandList::CopyResource"_lit, "chunk"_lit);
