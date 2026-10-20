@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|uav|default|routed|split0|split1|cull|discard|depth. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|uav|default|routed|split0|split1|cull|discard|depth|bgra. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -18,14 +18,15 @@ void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + s
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "uav" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1" && mode != "cull" && mode != "discard" && mode != "depth")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "uav" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1" && mode != "cull" && mode != "discard" && mode != "depth" && mode != "bgra")
         throw std::runtime_error("Invalid subresource mode");
     const bool split = mode == "split0" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth";
     const bool routed = mode == "routed" || split;
     const bool transfer = mode == "copy" || mode == "resolve";
     const bool uav = mode == "uav", operationReadback = transfer || uav;
     const bool defaultView = mode == "default" || routed;
-    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth" || operationReadback ? 1 : 0;
+    const bool bgra = mode == "bgra";
+    const UINT mip = mode == "base" || bgra || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth" || operationReadback ? 1 : 0;
     const bool nativeOnly=GetEnvironmentVariableA("FLORA_FIXTURE_NATIVE",nullptr,0) != 0;
     const auto library = nativeOnly ? nullptr : LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
@@ -71,7 +72,11 @@ void gs(triangle float4 vertices[3] : SV_Position, uint id : SV_PrimitiveID, ino
 }
 float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     if (id == 1) return 0;
+#if FLORA_BGRA
+    return float4(0.25,0.125,0.5,0.375);
+#else
     return float4(0.019068362191319466,0.01583746448159218,0.012434612028300762,0.427259236574173);
+#endif
 }
 float4 psgs(GSOut input) : SV_Target {
 #if FLORA_DISCARD
@@ -80,7 +85,7 @@ float4 psgs(GSOut input) : SV_Target {
     return ps(input.primitive);
 }
 )";
-    const D3D_SHADER_MACRO defines[] = {{"FLORA_SPLIT", split ? "1" : "0"}, {"FLORA_CULL", mode == "cull" ? "1" : "0"}, {"FLORA_DISCARD", mode == "discard" ? "1" : "0"}, {"FLORA_DEPTH", mode == "depth" ? "1" : "0"}, {nullptr, nullptr}};
+    const D3D_SHADER_MACRO defines[] = {{"FLORA_BGRA", bgra ? "1" : "0"}, {"FLORA_SPLIT", split ? "1" : "0"}, {"FLORA_CULL", mode == "cull" ? "1" : "0"}, {"FLORA_DISCARD", mode == "discard" ? "1" : "0"}, {"FLORA_DEPTH", mode == "depth" ? "1" : "0"}, {nullptr, nullptr}};
     const auto compile = [&](const char *entry, const char *profile) {
         ComPtr<ID3DBlob> blob; const auto hr = D3DCompile(source, sizeof source, "half-blend-history", defines, nullptr,
             entry, profile, D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &blob, &errors);
@@ -92,11 +97,11 @@ float4 psgs(GSOut input) : SV_Target {
     p.VS = {vs->GetBufferPointer(), vs->GetBufferSize()}; p.PS = {ps->GetBufferPointer(), ps->GetBufferSize()};
     ComPtr<ID3DBlob> gs;
     if (routed) { gs=compile("gs","gs_5_1"); p.GS={gs->GetBufferPointer(),gs->GetBufferSize()}; }
-    p.SampleMask = UINT_MAX; p.SampleDesc.Count = 1; p.NumRenderTargets = 1; p.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    p.SampleMask = UINT_MAX; p.SampleDesc.Count = 1; p.NumRenderTargets = 1; p.RTVFormats[0] = bgra ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R16G16B16A16_FLOAT;
     p.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     p.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; p.RasterizerState.CullMode = mode == "cull" ? D3D12_CULL_MODE_BACK : D3D12_CULL_MODE_NONE; p.RasterizerState.DepthClipEnable = TRUE;
     auto &blend = p.BlendState.RenderTarget[0]; blend.BlendEnable = TRUE; blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-    blend.SrcBlend = blend.SrcBlendAlpha = D3D12_BLEND_ONE;
+    blend.SrcBlend = blend.SrcBlendAlpha = bgra ? D3D12_BLEND_SRC_ALPHA : D3D12_BLEND_ONE;
     blend.DestBlend = blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
     blend.BlendOp = blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     if (mode == "depth") {
@@ -121,7 +126,7 @@ float4 psgs(GSOut input) : SV_Target {
     texture.DepthOrArraySize = UINT16(layer + 1); texture.MipLevels = UINT16(mip + 1); texture.SampleDesc.Count = 1;
     if (defaultView) { texture.Width=texture.Height=32; texture.MipLevels=2; texture.DepthOrArraySize=2; }
     const UINT subresource = mip + layer * texture.MipLevels;
-    texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+    texture.Format = p.RTVFormats[0]; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     if (uav) texture.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
         D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&target)));
@@ -191,7 +196,8 @@ float4 psgs(GSOut input) : SV_Target {
             mode == "copy" ? D3D12_RESOURCE_STATE_COPY_SOURCE : D3D12_RESOURCE_STATE_RESOLVE_SOURCE};
         list->ResourceBarrier(1,&barrier);
     }
-    const float initial[]{0.027862548828125f,0.0273284912109375f,0.024871826171875f,0.3974609375f};
+    const float initial[]{bgra ? 0.125f : 0.027862548828125f, bgra ? 0.25f : 0.0273284912109375f,
+        bgra ? 0.625f : 0.024871826171875f, bgra ? 0.5f : 0.3974609375f};
     const auto readTarget = [&](UINT slot) {
         D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Transition = {target.Get(),subresource,D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_COPY_SOURCE};
@@ -265,10 +271,14 @@ float4 psgs(GSOut input) : SV_Target {
     if (waited!=WAIT_OBJECT_0) throw std::runtime_error("GPU fixture timed out");
     if (api && !api->EndFrameCapture(device.Get(),nullptr)) throw std::runtime_error("Capture failed");
     void *mapped{}; D3D12_RANGE range{0,SIZE_T(buffer.Width)},none{}; check(readback->Map(0,&range,&mapped));
-    std::cout << "{\"x\":5,\"y\":5,\"mip\":" << mip << ",\"layer\":" << layer << ",\"subresource\":" << subresource << ",\"prefix_half_words\":[";
+    std::cout << "{\"x\":5,\"y\":5,\"mip\":" << mip << ",\"layer\":" << layer << ",\"subresource\":" << subresource
+        << (bgra ? ",\"prefix_bgra_bytes\":[" : ",\"prefix_half_words\":[");
     for (UINT n=0;n<3;++n) {
-        const auto words=reinterpret_cast<const uint16_t *>(static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+8*5);
-        std::cout << (n ? ",[" : "["); for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << words[c]; std::cout << ']';
+        const auto bytes=static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+(bgra ? 4 : 8)*5;
+        const auto words=reinterpret_cast<const uint16_t *>(bytes);
+        std::cout << (n ? ",[" : "[");
+        for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << (bgra ? unsigned(bytes[c]) : unsigned(words[c]));
+        std::cout << ']';
     }
     std::cout << ']';
     if (operationReadback) {

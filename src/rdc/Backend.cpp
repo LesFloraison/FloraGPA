@@ -203,6 +203,7 @@ class Session {
     uint32_t defaultViewHistoryPatch{};
     uint32_t routedLayerHistoryPatch{};
     uint32_t layerTestHistoryPatch{};
+    uint32_t bgraHistoryPatch{};
     using LayerTestStats = void (RENDERDOC_CC *)(uint32_t *, uint32_t *, uint32_t *);
     LayerTestStats layerTestStats{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
@@ -348,6 +349,10 @@ class Session {
             if (layerTestHistoryPatch != 1)
                 throw std::runtime_error("Unsupported DX12 layer-test history patch version");
             layerTestStats = symbol<LayerTestStats>("RENDERDOC_GetFloraDx12LayerTestHistoryStats");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12BgraHistoryPatchVersion"))) {
+            bgraHistoryPatch = patch();
+            if (bgraHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 BGRA history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1456,6 +1461,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_default_view_history_patch", session.defaultViewHistoryPatch},
         {"backend_dx12_routed_layer_history_patch", session.routedLayerHistoryPatch},
         {"backend_dx12_layer_test_history_patch", session.layerTestHistoryPatch},
+        {"backend_dx12_bgra_history_patch", session.bgraHistoryPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},

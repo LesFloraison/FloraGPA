@@ -1,0 +1,31 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+index b7019c613..7a76c19e6 100644
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -93,6 +93,11 @@ const uint32_t D3D12_PIXEL_HISTORY_MIN_EVENTS_TO_STORE = 128;
+ const uint32_t D3D12_PIXEL_HISTORY_AVG_FRAGMENTS_PER_EVENT = 8;
+ 
+ static uint32_t floraLayerColorProbes = 0, floraLayerDiscardProbes = 0, floraLayerProbeFailures = 0;
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12BgraHistoryPatchVersion()
++{
++  return 1;
++}
++
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12LayerTestHistoryPatchVersion()
+ {
+   return 1;
+diff --git a/renderdoc/maths/formatpacking.cpp b/renderdoc/maths/formatpacking.cpp
+index 4200dcbd7..ffd6093d1 100644
+--- a/renderdoc/maths/formatpacking.cpp
++++ b/renderdoc/maths/formatpacking.cpp
+@@ -415,6 +415,10 @@ void EncodeFormattedComponents(const ResourceFormat &fmt, FloatVector v, byte *d
+   else if(fmt.type == ResourceFormatType::Regular || fmt.type == ResourceFormatType::A8 ||
+           fmt.type == ResourceFormatType::S8)
+   {
++    // The input vector is RGBA, while regular BGRA formats store blue first.
++    // Keep this inverse to DecodePixelData, including sRGB conversion.
++    if(fmt.BGRAOrder())
++      std::swap(v.x, v.z);
+     const float *comp = &v.x;
+ 
+     CompType compType = fmt.compType;
