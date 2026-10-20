@@ -70,6 +70,31 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void frameEndHistoryPreparation() {
+        QTemporaryDir dir;
+        const Json options{{"frame_end", true}, {"frame_end_record", "18446744073709551615"},
+            {"execution", "9007199254740993"}, {"resource", "9007199254740995"},
+            {"resource_creation", "9007199254740997"}};
+        for (const auto *action : {"history", "resource-history"}) {
+            const auto job = prepare(dir.path(), "success", options, action);
+            for (const auto *key : {"frame_end", "frame_end_record", "execution", "resource", "resource_creation"})
+                QCOMPARE(job.at(key), options.at(key));
+            for (const auto *key : {"frame_end_record", "execution", "resource", "resource_creation"}) {
+                auto invalid = options; invalid.erase(key);
+                QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", invalid, action));
+            }
+            for (const auto &bad : {Json(9007199254740993ULL), Json("0"), Json("18446744073709551616")}) {
+                auto invalid = options; invalid["frame_end_record"] = bad;
+                QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", invalid, action));
+            }
+            for (const auto &patch : {Json{{"depth_roundtrip", true}}, Json{{"indirect_action", 0}},
+                                     Json{{"frame_end", false}}, Json{{"eid", 42}}}) {
+                auto invalid = options; invalid.update(patch);
+                QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", invalid, action));
+            }
+        }
+        QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", options, "debug-pixel"));
+    }
     void isolatedPipelinePreparation() {
         QTemporaryDir dir;
         Json options{{"isolate_missing_queries",true},{"execution","9007199254740993"}};
@@ -397,6 +422,29 @@ class RdcJobTests : public QObject {
         QVERIFY(QFileInfo::exists(out + "/worker.log"));
         QCOMPARE(Json::parse(read(out + "/job.json").toStdString()), job);
     }
+    void publicCliFrameEndArguments() {
+        QTemporaryDir dir;
+        const auto capture = dir.filePath("capture.rdc");
+        write(capture, "unused: the non-RenderDoc library fails before opening this file");
+        const auto library = qEnvironmentVariable("WINDIR") + "/System32/version.dll";
+        for (const auto *action : {"history", "resource-history"}) {
+            const auto out = dir.filePath(action);
+            QProcess process;
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe",
+                {"rdc-analyze", capture, action, "--out", out, "--renderdoc", library,
+                 "--frame-end-record", "18446744073709551615", "--execution", "9007199254740993",
+                 "--resource", "9007199254740995", "--resource-creation", "9007199254740997"});
+            QVERIFY(process.waitForFinished(10000));
+            QCOMPARE(process.exitCode(), 1);
+            QVERIFY(process.readAllStandardError().contains("Missing RenderDoc entry point"));
+            const auto job = Json::parse(read(out + "/job.json").toStdString());
+            QCOMPARE(job.at("frame_end"), Json(true));
+            QCOMPARE(job.at("frame_end_record"), Json("18446744073709551615"));
+            QCOMPARE(job.at("execution"), Json("9007199254740993"));
+            QCOMPARE(job.at("resource"), Json("9007199254740995"));
+            QCOMPARE(job.at("resource_creation"), Json("9007199254740997"));
+        }
+    }
     void publicCliArguments() {
         QTemporaryDir dir;
         const auto capture = dir.path() + "/capture & 测试.rdc";
@@ -461,6 +509,8 @@ class RdcJobTests : public QObject {
         QTest::newRow("option") << QStringList{"--invented", "1"};
         QTest::newRow("timeout-zero") << QStringList{"--timeout", "0"};
         QTest::newRow("timeout-infinite") << QStringList{"--timeout", "inf"};
+        QTest::newRow("frame-end-unsupported-action") << QStringList{"--frame-end-record", "42",
+            "--execution", "1", "--resource", "2", "--resource-creation", "3"};
     }
     void publicCliRejectsInvalidOptions() {
         QFETCH(QStringList, options);

@@ -8769,13 +8769,75 @@ and `build488.log` / `build489.log`.
 Full portable feature acceptance and the original-frame fidelity gaps remain
 unfinished; the two package versions above are recorded explicitly.
 
+### CLI frame-end history and Hellblade2 replay variation
+
+The CLI now exposes the same verified full-stream history boundary used by the
+workspace. `rdc-analyze ... history|resource-history --frame-end-record <record>`
+requires the terminal `--execution` and explicit resource object/creation.
+The record and execution must match the capture's frame-end marker. A selected
+last Draw alone is not accepted as proof that the stream tail ran.
+The new identity stays a decimal string through the worker job, including
+values above 2^53. Unsupported actions, missing resource identities, indirect
+selection, and Draw-specific depth experiments are rejected.
+
+For the retained Hellblade2 full-stream capture:
+
+```powershell
+FloraGPA.Cli.exe rdc-analyze native-dx12_capture.rdc resource-history `
+  --execution 37104 --frame-end-record 613510 `
+  --resource 2149283441408 --resource-creation 506294 --out frame-resource-history
+FloraGPA.Cli.exe rdc-analyze native-dx12_capture.rdc history `
+  --execution 37104 --frame-end-record 613510 `
+  --resource 2149283441408 --resource-creation 506294 `
+  --x 541 --y 451 --out frame-pixel-history
+```
+
+Both real queries select terminal marker **91485**. Resource History contains
+exactly the mapped final-backbuffer Barrier/CopyResource/Barrier uses at
+executions **37102–37104**, source records **613352–613354**, with zero unmapped
+uses and one captured whole-resource copy range. These are indexed uses, not
+measured changes or a complete resource-access history. CLI analysis of an RDC
+does not add the workspace's original-directory queue-context enrichment.
+
+Pixel History at **(541,451)**, mip/layer/sample **0**, returns one mapped
+**CopyResource**, execution **37103**, source **613353**, RDC event **91476**,
+queue **2130357605824**, submission **613374**. It retains resource-operation
+semantics: no fabricated primitive or shader output. The captured copy covers
+the chosen texel. However, the before/after replay observations disagree:
+
+| Observation | Stored RGB10/A2 values |
+| --- | --- |
+| Native readback from the retained capture run | 85, 120, 156, 3 |
+| RDC frame-end PickPixel before Pixel History | 85, 120, 156, 3 |
+| CopyResource history post-value | 86, 121, 160, 3 |
+| RDC frame-end PickPixel after history/restoration | 86, 121, 160, 3 |
+
+The first PickPixel exactly matches the float32 decoding of the native raw
+texel. The report's existing consistency guard returns
+`selected_texel_changed` and `partial=true`. The copying event's reported value
+agrees with the later observation, not the initial frame state. This localizes
+the discrepancy to replay phases within this analysis query, but does not
+identify the upstream resource or synchronization cause. The separate
+`history_boundary` remains `not_compared` because the selected terminal marker
+has no modification. No complete Pixel History or original-frame fidelity
+acceptance is claimed.
+
+Build **490** passes. Targeted job/CLI checks pass **6** including setup/cleanup
+(**2,352 ms**), covering both history actions, UINT64_MAX/above-2^53 transport,
+missing and conflicting selections, unsupported actions, and the existing
+CLI arguments. GPU checks consist of these two serial analysis queries on the
+already captured RDC; no new native replay or other-sample regression was run.
+Evidence: ignored `frame-end-cli-tests1.txt`, `build490.log`,
+`hellblade-frame-cli1/{resource,pixel,evidence.json}` and the two analysis logs.
+The changed texel remains an explicit unresolved replay fault.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
-| Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
+| Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | CLI terminal marker and final CopyResource mapping verified; initial selected texel matches native raw storage but changes after history replay, correctly reported partial; pixel fidelity and full history unfinished |
 | Frame-end Resource History | Not verified | Six mapped backbuffer uses, captured state transitions, separate creation/initialization, six queue-context Signals, terminal-marker checks and CPU-record navigation verified under query isolation; complete accesses/modifications unfinished | Strict full-stream capture, three mapped final-backbuffer Copy/barrier uses, two cross-queue Wait links and producer navigation verified; complete accesses/modifications unfinished |
 | Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
 | Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | Not verified |

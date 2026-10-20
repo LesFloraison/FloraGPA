@@ -46,6 +46,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addOption({"depth-roundtrip", "Experimental selected DX12 read-only D32 (patch v2) or depth-writing D32S8 refresh for texture/history/debug-pixel analysis; preserves the original attachment"});
         p.addOption({"pixel-history-reference", "Read the selected DX12 primitive's GPU shader output using extra pixel-history replays"});
         p.addOption({"execution", "Original DX12 execution instance (decimal 64-bit identity)", "integer"});
+        p.addOption({"frame-end-record", "Full-stream DX12 history boundary; requires the terminal --execution and explicit --resource/--resource-creation, verified against the capture's frame-end marker", "integer"});
         p.addOption({"resource-creation", "Original DX12 resource creation record", "integer"});
         p.addOption({"offset", "Buffer byte offset (buffer action only)", "integer"});
         p.addOption({"length", "Buffer byte count, 1 byte to 64 MiB (buffer action only)", "integer"});
@@ -102,9 +103,11 @@ int rdcAnalyzeCli(QStringList args) {
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = number(p.value(key));
         options["stage"] = p.value("stage").toStdString();
-        for (const auto key : {"execution", "resource-creation", "offset", "length"})
+        for (const auto key : {"execution", "resource-creation", "offset", "length", "frame-end-record"})
             if (p.isSet(key))
                 options[QString(key).replace('-', '_').toStdString()] = std::to_string(number(p.value(key)));
+        if (p.isSet("frame-end-record"))
+            options["frame_end"] = true;
         if (p.isSet("execution") && p.isSet("resource"))
             options["resource"] = std::to_string(number(p.value("resource")));
         for (const auto key : {"group", "thread"})
