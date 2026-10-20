@@ -441,6 +441,14 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
                  {"execution", frameEndRecord_ ? owner.at("first_execution") : Json(std::to_string(event_))},
                  {"selectable", !frameEndRecord_ || !owner.at("first_execution").is_null()},
                  {"source", "native_d3d12_queries"}};
+        if (name == "ASInvocations" || name == "MSInvocations" || name == "MSPrimitives") {
+            const auto &mesh = owner.at("mesh_pipeline_statistics");
+            if (mesh.at("status") != "measured" || mesh.at("supported") != true ||
+                owner.at("pipeline_statistics_query_type") != "D3D12_QUERY_TYPE_PIPELINE_STATISTICS1")
+                throw std::runtime_error("Mesh pipeline values lack supported native statistics provenance");
+            row["mesh_pipeline_statistics"] = mesh;
+            row["pipeline_statistics_query_type"] = owner.at("pipeline_statistics_query_type");
+        }
         for (const auto key : {"queue", "submission", "command_list", "generation", "list_ordinal"})
             row[key] = owner.at(key);
         if (frameEndRecord_) {
@@ -583,6 +591,13 @@ void RdcCountersView::render() {
         if (r.value("sampling_scope", "") == "submitted_list")
             item->setToolTip(0, item->text(0) + "\nSubmitted-list measurement; navigate to its first execution " +
                 text(r.at("first_execution")) + " · " + text(r.at("execution_count")) + " executions; not one Draw.");
+        if (r.contains("mesh_pipeline_statistics")) {
+            const auto &mesh = r.at("mesh_pipeline_statistics");
+            const auto culled = mesh.value("includes_culled_primitives", Json());
+            item->setToolTip(0, item->toolTip(0) + "\nD3D12 pipeline statistics 1\n" +
+                text(mesh.at("scope")) + "\nMSPrimitives includes culled primitives: " +
+                (culled.is_boolean() ? (culled.get<bool>() ? QString("yes") : QString("no")) : QString("unknown")));
+        }
         ++shown;
     }
     for (size_t i = 0; i < result_.at("available").size(); ++i) {

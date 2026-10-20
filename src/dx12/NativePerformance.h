@@ -8,6 +8,9 @@ class NativePerformance final {
     Microsoft::WRL::ComPtr<ID3D12QueryHeap> timestamps_, statistics_;
     Microsoft::WRL::ComPtr<ID3D12Resource> readback_;
     D3D12_COMMAND_LIST_TYPE type_;
+    D3D12_QUERY_TYPE statisticsType_ = D3D12_QUERY_TYPE_PIPELINE_STATISTICS;
+    uint64_t readbackSize_ = 16;
+    nlohmann::json meshStatistics_;
     bool begun_{}, ended_{};
 
   public:

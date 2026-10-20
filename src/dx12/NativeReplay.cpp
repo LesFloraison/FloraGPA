@@ -1628,10 +1628,14 @@ json NativeReplay::performanceResult() const {
             const auto &recording = s.frame->recordings.at(s.frame->instances.at({submission, ordinal}));
             row["pipeline_statistics"] = nullptr;
             row["pipeline_statistics_status"] = "not_sampled_on_compute_or_copy_list";
+            row["pipeline_statistics_query_type"] = nullptr;
+            row["mesh_pipeline_statistics"] = {{"status", "not_sampled_on_compute_or_copy_list"}};
             if (recording.statistics) {
                 const auto statistics = recording.statistics->result(s.queue(value(entry, "queue")));
                 row["pipeline_statistics"] = statistics.at("pipeline_statistics");
                 row["pipeline_statistics_status"] = statistics.at("pipeline_statistics_status");
+                row["pipeline_statistics_query_type"] = statistics.at("pipeline_statistics_query_type");
+                row["mesh_pipeline_statistics"] = statistics.at("mesh_pipeline_statistics");
             }
             lists.push_back(std::move(row));
         }

@@ -459,11 +459,11 @@ class Dx12Session final : public IReplaySession {
             if (selection.frameEnd)
                 return {CapabilityStatus::Supported, "One full-stream replay sample: submitted-list timestamps, direct-list pipeline statistics and calibrated queue timeline; initialization/helpers excluded, no original timing or vendor counters"};
             const auto kind = executionEvent(*selection.execution).workKind;
-            if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch)
-                return {CapabilityStatus::NotImplemented, "Select a supported Draw or Dispatch for native GPU queries"};
+            if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch && kind != ReplayWorkKind::MeshDispatch)
+                return {CapabilityStatus::NotImplemented, "Select a supported Draw, Dispatch or mesh dispatch for native GPU queries"};
             if (selection.isolateMissingQueries)
                 return {CapabilityStatus::Supported, "Native timestamps, pipeline statistics and prefix timeline of the incomplete query-isolated replay; historical query values and vendor counter analysis remain unavailable"};
-            return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample and serialized replay-prefix list timeline with calibration when available; pipeline statistics on direct lists; no stabilized clocks or vendor counters"};
+            return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample and replay-prefix list timeline with calibration when available; direct-list pipeline statistics, including AS/MS counts when supported; no stabilized clocks or vendor counters"};
         }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;

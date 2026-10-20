@@ -219,6 +219,76 @@ class RdcCounterUiTests : public QObject {
         report["values"][1]["execution"] = 9007199254740993ULL;
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report));
     }
+    void nativeMeshStatisticsWorkspace() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_MESH_METRICS");
+        const auto geometry = qEnvironmentVariable("FLORA_DX12_MESH_GEOMETRY");
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (path.isEmpty() || geometry.isEmpty() || root.isEmpty())
+            QSKIP("Set Hellblade2 capture, native mesh metrics and existing MeshOut evidence");
+        const auto raw = read(path), mesh = read(geometry);
+        const auto &measurement = raw.at("performance");
+        QCOMPARE(raw.at("device").at("validation_error_count"), Json("0"));
+        QCOMPARE(measurement.at("execution"), Json("10267"));
+        QCOMPARE(measurement.at("source_record"), Json("578355"));
+        QCOMPARE(measurement.at("pipeline_statistics_query_type"), Json("D3D12_QUERY_TYPE_PIPELINE_STATISTICS1"));
+        QCOMPARE(measurement.at("mesh_pipeline_statistics").at("status"), Json("measured"));
+        QCOMPARE(measurement.at("mesh_pipeline_statistics").at("includes_culled_primitives"), Json(true));
+        const auto &statistics = measurement.at("pipeline_statistics");
+        QCOMPARE(statistics.at("ASInvocations"), Json("0"));
+        QCOMPARE(statistics.at("MSInvocations"), Json("101760"));
+        QCOMPARE(mesh.at("execution"), Json("10267"));
+        QCOMPARE(statistics.at("MSPrimitives"),
+                 Json(std::to_string(mesh.at("mesh").at("numIndices").get<uint64_t>() / 3)));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("10267"); QTest::keyClick(locate, Qt::Key_Return);
+        auto view = window.findChild<RdcCountersView *>();
+        QVERIFY(action(*view, "readRdcCounters")->isEnabled());
+        QVERIFY(view->finishNative(view->requestId(), raw));
+        auto rows = view->findChild<QTreeWidget *>("rdcCounterValues");
+        QCOMPARE(rows->topLevelItemCount(), 15);
+        size_t meshCounters{};
+        for (const auto &row : view->result().at("values"))
+            if (row.value("name", "") == "ASInvocations" || row.value("name", "") == "MSInvocations" ||
+                row.value("name", "") == "MSPrimitives") {
+                ++meshCounters;
+                QCOMPARE(row.at("source"), Json("native_d3d12_queries"));
+                QCOMPARE(row.at("unit"), Json("CounterUnit.Absolute"));
+                QCOMPARE(row.at("mesh_pipeline_statistics"), measurement.at("mesh_pipeline_statistics"));
+            }
+        QCOMPARE(meshCounters, size_t(3));
+        QTemporaryDir temp; view->exportResult(temp.filePath("mesh-metrics.json"));
+        QCOMPARE(read(temp.filePath("mesh-metrics.json")).at("native_measurement"), measurement);
+        int located{};
+        for (int i = 0; i < rows->topLevelItemCount(); ++i)
+            if (rows->topLevelItem(i)->text(0) == "MSPrimitives") {
+                ++located;
+                QVERIFY(rows->topLevelItem(i)->toolTip(0).contains("MSPrimitives includes culled primitives: yes"));
+                rows->setCurrentItem(rows->topLevelItem(i));
+                window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+                action(*view, "locateRdcCounter")->trigger();
+                QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), 10267ULL);
+                QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+            }
+        QCOMPARE(located, 1);
+        auto unsupported = raw;
+        unsupported["performance"]["mesh_pipeline_statistics"]["supported"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finishNative(view->requestId(), unsupported));
+        auto legacy = raw;
+        for (const auto key : {"ASInvocations", "MSInvocations", "MSPrimitives"})
+            legacy["performance"]["pipeline_statistics"].erase(key);
+        legacy["performance"]["pipeline_statistics_query_type"] = "D3D12_QUERY_TYPE_PIPELINE_STATISTICS";
+        legacy["performance"]["mesh_pipeline_statistics"] = {{"status", "unsupported_by_device"}, {"supported", false}};
+        QVERIFY(view->finishNative(view->requestId(), legacy));
+        QCOMPARE(rows->topLevelItemCount(), 12);
+        const auto token = view->requestId();
+        view->setContext("mesh-experiment-changed", 10267, true);
+        QVERIFY(!view->finishNative(token, raw));
+    }
     void nativeTimelineFallback() {
         const auto path = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
         if (path.isEmpty()) QSKIP("Set a recorded native timeline report");

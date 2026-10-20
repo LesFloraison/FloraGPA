@@ -1772,7 +1772,7 @@ void MainWindow::updateCheckpointContext() {
                                     ? (session_->capability(ReplayFeature::Performance, metricsSelection).supported()
                                            ? historyContextKey(true, metricsSelection.frameEnd) : QString{})
                                     : analysisKey;
-        rdcCounters_->setContext((frame_ || (dx12 && (metricsSelection.frameEnd || draw || dispatch))) ? metricsKey : QString{},
+        rdcCounters_->setContext((frame_ || dx12) ? metricsKey : QString{},
                                  metricsSelection.frameEnd ? session_->executionCount() : selectedEvent_, dx12,
                                  dx12 && selection_.isolateMissingQueries,
                                  metricsSelection.frameEnd && !session_->events().empty() ? session_->events().back() : 0);
