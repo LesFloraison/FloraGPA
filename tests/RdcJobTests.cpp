@@ -69,6 +69,21 @@ int mockWorker(const Json &job) {
 class RdcJobTests : public QObject {
     Q_OBJECT
   private slots:
+    void isolatedPipelinePreparation() {
+        QTemporaryDir dir;
+        Json options{{"isolate_missing_queries",true},{"execution","9007199254740993"}};
+        const auto job=prepare(dir.path(),"success",options,"pipeline");
+        QCOMPARE(job.at("execution"),options.at("execution"));
+        QCOMPARE(job.at("isolate_missing_queries"),Json(true));
+        for (const auto &bad : {Json(nullptr),Json(1),Json("0")}) {
+            auto invalid=options; invalid["execution"]=bad;
+            QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",invalid,"pipeline"));
+        }
+        auto missing=options; missing.erase("execution");
+        QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",missing,"pipeline"));
+        for (const auto *action : {"debug-pixel","postmesh","counters"})
+            QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",options,action));
+    }
     void replayOptimisationPreparation() {
         QTemporaryDir dir;
         QCOMPARE(rdcReplayOptimisation(Json::object()), 2U);

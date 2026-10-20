@@ -1744,6 +1744,10 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         selection.resource = 78132;
         QVERIFY(session->capability(ReplayFeature::ResourceHistory,selection).supported());
         QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::NotImplemented);
+        selection.execution = 19408;
+        QVERIFY(session->capability(ReplayFeature::PipelineInspection,selection).supported());
+        selection.isolateMissingQueries = false;
+        QVERIFY(!session->capability(ReplayFeature::PipelineInspection,selection).supported());
     }
     void isolatedQueryWorkspaceReplay() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

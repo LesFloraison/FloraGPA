@@ -772,7 +772,7 @@ void MainWindow::buildUi() {
     dx12Layout->addWidget(dx12Budget_);
     dx12QueryIsolation_ = new QCheckBox("Isolate missing queries");
     dx12QueryIsolation_->setObjectName("dx12QueryIsolation");
-    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Historical values, analysis and experiments are not restored. Applies only to this open capture.");
+    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Resource history and pipeline inspection are available; other analysis and experiments remain unsupported. Applies only to this open capture.");
     dx12Layout->addWidget(dx12QueryIsolation_);
     dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
     imageBar->addSeparator();
@@ -1741,7 +1741,8 @@ void MainWindow::updateCheckpointContext() {
     if (dx12Pipeline_) {
         const bool supported =
             dx12 && session_->capability(ReplayFeature::PipelineInspection, selection_).supported();
-        dx12Pipeline_->setContext(supported ? analysisKey : QString{}, selection_.execution.value_or(0));
+        dx12Pipeline_->setContext(supported ? historyContextKey(true) : QString{}, selection_.execution.value_or(0),
+                                  dx12 && selection_.isolateMissingQueries);
     }
     if (replayMesh_)
         replayMesh_->setContext((draw || meshDispatch) ? analysisKey : QString{}, selectedEvent_, dx12, meshDispatch);
@@ -1812,8 +1813,8 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
-    if (selection_.isolateMissingQueries && (view || kind != RdcAnalysis::ResourceHistory)) {
-        showError("Query-isolated analysis currently supports resource usage history in this workspace"); return;
+    if (selection_.isolateMissingQueries && (view || (kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline))) {
+        showError("Query-isolated analysis currently supports resource usage history and pipeline inspection in this workspace"); return;
     }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
@@ -1872,7 +1873,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
         historyKey_ =
-            historyContextKey(resourceHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory || pipeline) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2065,12 +2066,14 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
         (args.first() == "replay" || args.first() == "buffer")) {
-        const bool isolatedHistory = runningAnalysis_ == RdcAnalysis::ResourceHistory &&
+        const bool isolatedAnalysis =
+            ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
+             (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline")) &&
             historyRequest_.value("isolate_missing_queries", false) &&
-            historyRequest_.value("action", "") == "resource-history";
-        if ((args.contains("--renderdoc") && !isolatedHistory) || args.contains("--measure-event") ||
+            historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
+        if ((args.contains("--renderdoc") && !isolatedAnalysis) || args.contains("--measure-event") ||
             (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation cannot be combined with analysis or experiments"); return;
+            showError("Query isolation permits resource history and pipeline inspection; other analysis and experiments remain unsupported"); return;
         }
         args << "--isolate-missing-queries";
     }

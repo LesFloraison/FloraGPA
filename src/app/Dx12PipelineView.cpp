@@ -1,4 +1,5 @@
 #include "Dx12PipelineView.h"
+#include "application/RdcEvents.h"
 #include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QFileDialog>
@@ -122,10 +123,11 @@ Dx12PipelineView::Dx12PipelineView(QWidget *parent) : QWidget(parent) {
     setBackendPath(configuredRenderDocLibrary(), false);
     invalidate();
 }
-void Dx12PipelineView::setContext(const QString &key, uint64_t execution) {
-    if (key != key_ || execution != execution_) {
+void Dx12PipelineView::setContext(const QString &key, uint64_t execution, bool isolateMissingQueries) {
+    if (key != key_ || execution != execution_ || isolateMissingQueries != isolateMissingQueries_) {
         key_ = key;
         execution_ = execution;
+        isolateMissingQueries_ = isolateMissingQueries;
         invalidate();
     }
     updateActions();
@@ -149,7 +151,9 @@ void Dx12PipelineView::invalidate() {
     result_ = nullptr;
     rows_->clear();
     details_->clear();
-    summary_->setText("Select a supported DX12 Draw / Dispatch; Read inspects its replayed bindings");
+    summary_->setText(isolateMissingQueries_
+        ? "Incomplete replay: historical query values remain unavailable. Read inspects replayed pipeline bindings."
+        : "Select a supported DX12 Draw / Dispatch; Read inspects its replayed bindings");
     updateActions();
 }
 void Dx12PipelineView::updateActions() {
@@ -161,13 +165,14 @@ void Dx12PipelineView::updateActions() {
                         rows_->currentItem()->data(0, Qt::UserRole).isValid());
     creation_->setEnabled(!busy_ && rows_->currentItem() &&
                           rows_->currentItem()->data(0, Qt::UserRole + 2).isValid());
-    replaceShader_->setEnabled(creation_->isEnabled() &&
+    replaceShader_->setEnabled(!isolateMissingQueries_ && creation_->isEnabled() &&
                               rows_->currentItem()->data(0, Qt::UserRole + 3).isValid());
 }
 Dx12PipelineView::Json Dx12PipelineView::request() const {
     if (key_.isEmpty() || !execution_)
         throw std::runtime_error("Select a supported DX12 Draw / Dispatch");
-    return {{"action", "pipeline"}, {"execution", std::to_string(execution_)}};
+    return {{"action", "pipeline"}, {"execution", std::to_string(execution_)},
+            {"isolate_missing_queries", isolateMissingQueries_}};
 }
 bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
     if (serial != serial_)
@@ -178,6 +183,10 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
     }
     if (result.value("backend", "") != "dx12" || result.at("execution") != std::to_string(execution_))
         throw std::runtime_error("Pipeline identity does not match selection");
+    requireRdcQueryIsolation(result.value("query_isolation", Json()), request());
+    if (isolateMissingQueries_ && (result.value("frame_complete", Json()) != false ||
+        result.at("pipeline_scope").value("query_outputs_incomplete", Json()) != true))
+        throw std::runtime_error("Isolated pipeline inspection must retain incomplete query/frame status");
     const auto &rows = result.at("pipeline_rows");
     for (const auto &row : rows) {
         const auto &ref = row.at("resource");
@@ -236,6 +245,8 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
                 "accesses, not measured GPU reads or writes. Scope lists remaining gaps.")
             .arg(execution_)
             .arg(rows.size()));
+    if (isolateMissingQueries_)
+        summary_->setText(summary_->text() + "\nIncomplete replay: historical query values are unavailable; shader replacement is disabled.");
     updateActions();
     return true;
 }

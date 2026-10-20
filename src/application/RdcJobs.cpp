@@ -153,9 +153,10 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
         throw std::runtime_error("API validation must be a boolean");
     if (!job.at("isolate_missing_queries").is_boolean() ||
         (job.at("isolate_missing_queries").get<bool>() && action != "inventory" && action != "texture" &&
+         !(action == "pipeline" && job.contains("execution") && !job.at("execution").is_null()) &&
          !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
            !job.value("resource", Json()).is_null())))
-        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback or explicit DX12 resource history");
+        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback, explicit DX12 pipeline inspection or resource history");
     if (!job["dxil_fast_contraction"].is_boolean() ||
         (job["dxil_fast_contraction"].get<bool>() && (!job.contains("execution") ||
          (action != "debug-pixel" && action != "debug-vertex" && action != "debug-thread"))))

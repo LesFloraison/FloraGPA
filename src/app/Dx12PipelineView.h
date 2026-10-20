@@ -11,7 +11,7 @@ class Dx12PipelineView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit Dx12PipelineView(QWidget *parent = nullptr);
-    void setContext(const QString &key, uint64_t execution);
+    void setContext(const QString &key, uint64_t execution, bool isolateMissingQueries = false);
     void setWorkerBusy(bool busy);
     void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return library_; }
@@ -33,7 +33,7 @@ class Dx12PipelineView final : public QWidget {
     void updateActions();
     QString key_, library_;
     uint64_t execution_{}, serial_{};
-    bool busy_{};
+    bool busy_{}, isolateMissingQueries_{};
     Json result_;
     QAction *read_, *cancel_, *locate_, *creation_, *replaceShader_, *export_, *backend_;
     QLabel *summary_;

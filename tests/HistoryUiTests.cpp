@@ -270,6 +270,68 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/query-resolve-history.json"),through);
         }
     }
+    void isolatedQueryPipelineWorkspace() {
+        const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output=qEnvironmentVariable("FLORA_QUERY_PIPELINE_UI");
+        const auto library=qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+        if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+            QSKIP("Set Talos captures, a new pipeline output directory and the pinned RenderDoc library");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window,&MainWindow::captureLoaded),done(&window,&MainWindow::taskFinished);
+        window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate=window.findChild<QLineEdit *>("apiLocate"); locate->setText("19408"); QTest::keyClick(locate,Qt::Key_Return);
+        auto view=window.findChild<Dx12PipelineView *>(); QVERIFY(view);
+        QVERIFY(!action(*view,"readDx12Pipeline")->isEnabled());
+        auto isolation=window.findChild<QCheckBox *>("dx12QueryIsolation"); isolation->setChecked(true);
+        view->setBackendPath(library,false);
+        QVERIFY(action(*view,"readDx12Pipeline")->isEnabled());
+        QCOMPARE(view->request().at("isolate_missing_queries"),Json(true));
+        done.clear(); action(*view,"readDx12Pipeline")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),180000);
+        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(view->findChild<QLabel *>("dx12PipelineSummary")->text()));
+        QVERIFY(!window.busy());
+        const auto result=view->result();
+        QCOMPARE(result.at("execution"),Json("19408"));
+        QCOMPARE(result.at("captured_call").at("source_record"),Json("192508"));
+        QCOMPARE(result.at("frame_complete"),Json(false));
+        QCOMPARE(result.at("query_isolation").at("resolves").size(),size_t(1));
+        QCOMPARE(result.at("pipeline_scope").at("query_outputs_incomplete"),Json(true));
+        QVERIFY(view->findChild<QLabel *>("dx12PipelineSummary")->text().contains("Incomplete replay"));
+        auto rows=view->findChild<QTreeWidget *>("dx12PipelineRows");
+        bool target{},shader{};
+        for (size_t i=0;i<result.at("pipeline_rows").size();++i) {
+            const auto &row=result.at("pipeline_rows")[i];
+            rows->setCurrentItem(rows->topLevelItem(int(i)));
+            QVERIFY(!action(*view,"replaceBoundPipelineShader")->isEnabled());
+            if (row.at("section") == "PS" && row.at("binding") == "Shader") {
+                QCOMPARE(row.at("resource").at("mapping_status"),Json("capture_pipeline_stage"));
+                QVERIFY(action(*view,"locatePipelineCreation")->isEnabled()); shader=true;
+            }
+            if (row.at("section") == "OM" && row.at("binding") == "RTV 0") {
+                QCOMPARE(row.at("resource").at("resource_creation"),Json("35118"));
+                QSignalSpy jump(view,&Dx12PipelineView::resourceRequested);
+                action(*view,"inspectPipelineResource")->trigger();
+                QCOMPARE(jump.count(),1); QCOMPARE(jump[0][0].toULongLong(),35118ULL); target=true;
+            }
+        }
+        QVERIFY(target); QVERIFY(shader);
+        view->exportResult(output + "/result.json"); QCOMPARE(read(output + "/result.json"),result);
+        const auto capture=QString::fromStdString(result.at("capture").get<std::string>());
+        QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"),output + "/recapture.json"));
+        auto invalid=result; invalid["query_isolation"]=nullptr;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        invalid=result; invalid["frame_complete"]=true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        invalid=result; invalid["pipeline_scope"]["query_outputs_incomplete"]=false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        const auto old=view->requestId(); isolation->setChecked(false);
+        QVERIFY(!view->finish(old,result));
+        QVERIFY(!action(*view,"readDx12Pipeline")->isEnabled());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),result));
+    }
     void isolatedQueryResourceHistoryWorkspace() {
         const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output=qEnvironmentVariable("FLORA_QUERY_HISTORY_UI");

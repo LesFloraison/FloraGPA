@@ -7767,13 +7767,61 @@ These establish the selected native/analysis dependency paths. Full portable
 three-sample replay, debugger, geometry, performance and experiment acceptance
 remain unfinished, as do the underlying fidelity gaps.
 
+### Pipeline inspection after an isolated query boundary
+
+The query-isolated workspace now permits **Pipeline** inspection at a supported
+Draw/Dispatch execution. Native recapture still rejects ordinary consumers of
+isolated query READBACK resources; pipeline inspection reports bound state and
+resource metadata without reading query-result bytes. The analyzer requires an
+explicit nonzero execution identity and matching embedded query policy. The
+result retains `frame_complete=false`, marks
+`pipeline_scope.query_outputs_incomplete=true` and describes the missing query
+values in its scope. Shader debugging, geometry, performance and modification
+experiments remain disabled in this mode.
+
+Pipeline requests, worker envelopes and capture-cache keys carry the isolation
+mode. Mode changes invalidate pending/results state. The view rejects absent or
+mismatched policies and reports that claim a complete isolated frame. Resource
+and PSO creation navigation remain available; **Replace shader** remains
+disabled. These are incomplete-replay bindings, not restored historical query
+results or an assertion of full original-frame fidelity.
+
+One end-to-end workspace test opens Talos, selects execution **19408**, enables
+isolation and invokes Pipeline **Read**. It performs native recapture followed by
+the real isolated analyzer. The result has **51** binding/state rows and maps the
+selected Draw to source **192508**, RDC event **20484**. VS and PS both belong to
+captured PSO **156511**, object **1657076288**. RTV 0 maps to texture creation
+**35118**, object **1651480816**, and resource navigation selects that lifetime.
+The embedded policy contains the earlier incomplete Resolve **16001**; the
+later Resolve **19409** is outside this selected prefix. No GPA module is loaded.
+
+Build **453** passes. Focused policy and job-preparation checks pass
+(**3 + 3** including setup/cleanup), covering missing/zero/non-string execution
+identities, mode mismatch, query-output resource rejection and still-disallowed
+analysis actions. The workspace test passes (**3**, **11,672 ms**) with JSON
+export, missing/tampered policy rejection, replacement-action gating and stale
+result rejection after switching back to strict mode. The existing CPU-only
+query-boundary test also passes (**3**, **331 ms**), including the newly supported
+Draw and still-unsupported strict/query-dependent selection. Build **454**
+updates the explanatory tooltip/error text afterward; GPU work is not repeated
+for that wording-only change.
+
+Evidence: ignored `talos-query-pipeline-ui1/{result,recapture}.json`,
+`query-pipeline-policy1.txt`, `query-pipeline-job1.txt`,
+`query-pipeline-ui1.txt` and `query-pipeline-capability1.txt`. This is one targeted
+Talos GPU chain, with no new BF1/Hellblade2 replay or RenderDoc patch. The
+Hellblade2 MainPS arithmetic discrepancy was rechecked against its existing
+counterexample: fast flags do not uniquely determine driver contraction.
+Its experimental model remains opt-in and no unproven arithmetic change is
+introduced by this milestone.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
-| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
+| Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; explicit workspace query-output isolation reaches original last execution 19410, exports marked incomplete storage and rejects unknown readbacks; historical values and full frame fidelity unfinished | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |

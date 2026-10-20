@@ -1353,9 +1353,10 @@ Json runRdcJob(const Json &job) {
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
+        !(action == "pipeline" && job.contains("execution") && !job.at("execution").is_null()) &&
         !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
           !job.value("resource", Json()).is_null()))
-        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback or explicit DX12 resource history");
+        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback, explicit DX12 pipeline inspection or resource history");
     if (job.value("depth_roundtrip", false) &&
         ((action != "texture" && action != "debug-pixel" && action != "history") || job.value("readonly_depth_snapshot", false)))
         throw std::runtime_error("Depth roundtrip requires texture, history or debug-pixel analysis without read-only depth snapshots");
@@ -1657,6 +1658,12 @@ Json runRdcJob(const Json &job) {
         if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
             throw std::runtime_error("Pipeline inspection requires an executed DX12 Draw or Dispatch");
         result.update(readDx12Pipeline(controller, *selected));
+        if (!queryPolicy.is_null()) {
+            result["pipeline_scope"]["query_outputs_incomplete"] = true;
+            result["pipeline_scope"]["gaps"].push_back(
+                "Query-isolated replay: historical query results remain unavailable. Pipeline inspection reports "
+                "bound state and resource metadata, not query bytes or complete original-frame fidelity.");
+        }
         result["eid"] = eid;
         return complete();
     }
