@@ -1,4 +1,5 @@
 #include "RdcCountersView.h"
+#include "WorkerReport.h"
 #include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QComboBox>
@@ -260,12 +261,15 @@ void RdcCountersView::setBackendPath(const QString &path, bool persist) {
         QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
-void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12) {
-    if (key != key_ || dx12 != dx12_) {
+void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries) {
+    isolateMissingQueries = dx12 && isolateMissingQueries;
+    if (key != key_ || dx12 != dx12_ || isolateMissingQueries_ != isolateMissingQueries) {
         const QSignalBlocker block(source_);
         source_->setCurrentIndex(0); counterIds_->clear(); catalogRequest_ = false;
     }
-    const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_);
+    const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_) ||
+                         isolateMissingQueries_ != isolateMissingQueries;
+    isolateMissingQueries_ = isolateMissingQueries;
     dx12_ = dx12;
     findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, dx12);
     scope_->setItemText(1, dx12 ? "Measured events" : "Frame");
@@ -296,16 +300,17 @@ void RdcCountersView::invalidate() {
     updateActions();
 }
 void RdcCountersView::updateActions() {
-    read_->setEnabled(!busy_ && !key_.isEmpty());
+    read_->setEnabled(!busy_ && !key_.isEmpty() && (!isolateMissingQueries_ || nativeMode()));
     cancel_->setEnabled(busy_);
     sourceAction_->setVisible(dx12_);
     findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, nativeMode());
-    source_->setEnabled(!busy_);
+    source_->setEnabled(!busy_ && !isolateMissingQueries_);
+    source_->setToolTip(isolateMissingQueries_ ? "Incomplete query-isolated replay supports native instrumentation only" : QString());
     counterIds_->setVisible(!nativeMode());
     counterIds_->setEnabled(!busy_);
     list_->setVisible(!nativeMode());
-    list_->setEnabled(!busy_ && !key_.isEmpty());
-    backend_->setEnabled(!busy_ && !nativeMode());
+    list_->setEnabled(!busy_ && !key_.isEmpty() && !isolateMissingQueries_);
+    backend_->setEnabled(!busy_ && !nativeMode() && !isolateMissingQueries_);
     export_->setEnabled(!busy_ && !result_.is_null());
     locate_->setEnabled(!busy_ && values_->currentItem() &&
                         values_->currentItem()->data(0, Qt::UserRole).toULongLong());
@@ -314,8 +319,11 @@ bool RdcCountersView::nativeMode() const { return dx12_ && source_->currentIndex
 RdcCountersView::Json RdcCountersView::request() const {
     if (key_.isEmpty())
         throw std::runtime_error("Open a frame first");
+    if (isolateMissingQueries_ && !nativeMode())
+        throw std::runtime_error("Query-isolated performance analysis requires native instrumentation");
     if (nativeMode())
-        return {{"action", "counters"}, {"execution", std::to_string(event_)}};
+        return {{"action", "counters"}, {"execution", std::to_string(event_)},
+                {"isolate_missing_queries", isolateMissingQueries_}};
     if (catalogRequest_) return {{"action", "counter-catalog"}};
     Json result{{"action", "counters"}};
     if (dx12_) result["execution"] = std::to_string(event_);
@@ -344,6 +352,11 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
     if (measurement.at("execution") != std::to_string(event_) ||
         measurement.at("source") != "native_d3d12_queries")
         throw std::runtime_error("Native performance identity mismatch");
+    if (report.value("missing_query_policy", "fail") !=
+        (isolateMissingQueries_ ? "isolate_readback_outputs" : "fail"))
+        throw std::runtime_error("Native metrics belong to a different query replay policy");
+    if (isolateMissingQueries_)
+        requireDx12QueryPolicyReport(report, true);
     if (measurement.contains("timeline")) {
         const auto &timeline = measurement.at("timeline");
         if (timeline.at("source") != "native_d3d12_queries" || timeline.at("scope") != "frame_prefix_submitted_lists" ||
@@ -380,6 +393,12 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
     for (const auto key : {"request_identity", "capture_identity"})
         if (report.contains(key))
             result[key] = report.at(key);
+    if (isolateMissingQueries_) {
+        result["frame_complete"] = false;
+        result["partial"] = true;
+        result["missing_query_policy"] = "isolate_readback_outputs";
+        result["query_replay_coverage"] = report.at("native_replay").at("query_replay_coverage");
+    }
     auto add = [&](unsigned counter, const std::string &name, const Json &value, bool seconds) {
         result["available"].push_back({{"counter", counter},
                                        {"name", name},
@@ -426,6 +445,19 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
         result.value("counter_ids", Json()) != this->request().at("counter_ids"))
         throw std::runtime_error("Counter result does not match requested IDs");
     if (dx12_) {
+        if (result.value("missing_query_policy", "fail") !=
+            (isolateMissingQueries_ ? "isolate_readback_outputs" : "fail"))
+            throw std::runtime_error("Counter result belongs to a different query replay policy");
+        if (nativeMode() && result.value("native_measurement", Json::object()).value("missing_query_policy", "fail") !=
+            (isolateMissingQueries_ ? "isolate_readback_outputs" : "fail"))
+            throw std::runtime_error("Native measurement belongs to a different query replay policy");
+        if (isolateMissingQueries_ && (!nativeMode() || result.value("frame_complete", Json()) != false ||
+            result.value("partial", Json()) != true ||
+            !result.value("query_replay_coverage", Json()).is_object() ||
+            result.value("native_measurement", Json::object()).value("query_outputs_incomplete", Json()) != true ||
+            result.at("native_measurement").value("frame_complete", Json()) != false ||
+            result.at("native_measurement").value("missing_query_policy", "") != "isolate_readback_outputs"))
+            throw std::runtime_error("Isolated metrics must retain incomplete query/frame status");
         if (result.value("backend", "") != "dx12" ||
             (catalog ? !result.value("execution", Json()).is_null() : result.at("execution") != std::to_string(event_)))
             throw std::runtime_error("Counter result does not match DX12 selection");
@@ -576,6 +608,8 @@ void RdcCountersView::render() {
         summary_->setText(summary_->text() + " · catalog only · not sampled");
     else if (result_.value("sampling_scope", "") == "capture_actions")
         summary_->setText(summary_->text() + " · RenderDoc · capture actions · possibly multiple passes");
+    if (isolateMissingQueries_)
+        summary_->setText(summary_->text() + "\nIncomplete query-isolated replay; measurements do not restore historical query values.");
     summary_->setToolTip(result_.contains("note") ? text(result_.at("note")) : summary_->text());
     if (dx12_ && result_.contains("native_measurement") && result_.at("native_measurement").contains("timeline"))
         summary_->setText(summary_->text() + " · serialized replay prefix");

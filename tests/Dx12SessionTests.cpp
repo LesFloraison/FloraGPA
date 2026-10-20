@@ -1749,6 +1749,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(session->capability(ReplayFeature::ShaderDebug,selection).supported());
         QVERIFY(session->capability(ReplayFeature::Geometry,selection).supported());
+        QVERIFY(session->capability(ReplayFeature::Performance,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported()); // Query buffer is not a texture.
         selection.resource = 35118;
         QVERIFY(session->capability(ReplayFeature::PixelHistory,selection).supported());
@@ -1756,7 +1757,116 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::ShaderDebug,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::Geometry,selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::Performance,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
+    }
+    void isolatedQueryPerformanceWorkspace() {
+        using Json = nlohmann::json;
+        try {
+            const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto output = qEnvironmentVariable("FLORA_QUERY_PERFORMANCE_UI");
+            if (root.isEmpty() || output.isEmpty())
+                QSKIP("Set Talos captures and a new native performance output directory");
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("19408");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto metrics = window.findChild<RdcCountersView *>();
+            auto measure = metrics->findChild<QAction *>("readRdcCounters");
+            QVERIFY(!measure->isEnabled());
+            auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation");
+            isolation->setChecked(true);
+            QVERIFY(measure->isEnabled());
+            QVERIFY(metrics->nativeMode());
+            QVERIFY(!metrics->findChild<QComboBox *>("rdcCountersSource")->isEnabled());
+            QVERIFY(!metrics->findChild<QAction *>("listRdcCounters")->isEnabled());
+            QCOMPARE(metrics->request().at("isolate_missing_queries"), Json(true));
+            done.clear();
+            measure->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QVERIFY(!window.busy());
+            const auto result = metrics->result();
+            const auto &measurement = result.at("native_measurement");
+            QCOMPARE(result.at("execution"), Json("19408"));
+            QCOMPARE(result.at("partial"), Json(true));
+            QCOMPARE(result.at("frame_complete"), Json(false));
+            QCOMPARE(result.at("missing_query_policy"), Json("isolate_readback_outputs"));
+            QCOMPARE(result.at("request_identity").at("missing_query_policy"),
+                     Json("isolate_readback_outputs"));
+            QCOMPARE(measurement.at("query_outputs_incomplete"), Json(true));
+            QCOMPARE(measurement.at("source"), Json("native_d3d12_queries"));
+            QCOMPARE(measurement.at("source_record"), Json("192508"));
+            QCOMPARE(measurement.at("pipeline_statistics_status"), Json("measured"));
+            QCOMPARE(measurement.at("pipeline_statistics").at("IAVertices"), Json("828"));
+            QCOMPARE(measurement.at("pipeline_statistics").at("IAPrimitives"), Json("276"));
+            const auto begin = std::stoull(measurement.at("timestamp_begin").get<std::string>());
+            const auto end = std::stoull(measurement.at("timestamp_end").get<std::string>());
+            const auto frequency = std::stoull(measurement.at("timestamp_frequency_hz").get<std::string>());
+            QVERIFY(end > begin);
+            QVERIFY(frequency > 0);
+            QCOMPARE(measurement.at("duration_seconds").get<double>(),
+                     double(end - begin) / double(frequency));
+            const auto &timeline = measurement.at("timeline");
+            QCOMPARE(timeline.at("scope"), Json("frame_prefix_submitted_lists"));
+            bool selected = false;
+            for (const auto &entry : timeline.at("entries")) {
+                const auto count = std::stoull(entry.at("execution_count").get<std::string>());
+                if (!count)
+                    continue;
+                const auto first = std::stoull(entry.at("first_execution").get<std::string>());
+                if (first <= 19408 && 19408 - first < count) {
+                    selected = true;
+                    QCOMPARE(entry.at("queue"), measurement.at("queue"));
+                    QVERIFY(std::stoull(entry.at("timestamp_begin").get<std::string>()) <= begin);
+                    QVERIFY(std::stoull(entry.at("timestamp_end").get<std::string>()) >= end);
+                }
+            }
+            QVERIFY(selected);
+            auto rows = metrics->findChild<QTreeWidget *>("rdcCounterValues");
+            QCOMPARE(rows->topLevelItemCount(), 12);
+            auto filter = metrics->findChild<QLineEdit *>("rdcCountersFilter");
+            filter->setText("Duration");
+            QVERIFY(metrics->findChild<QLabel *>("rdcCountersSummary")->text().contains("Incomplete"));
+            filter->clear();
+            metrics->exportResult(output + "/result.json");
+            for (const auto *key : {"frame_complete", "partial"}) {
+                auto invalid = result;
+                invalid[key] = !result.at(key).get<bool>();
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), invalid));
+            }
+            auto invalid = result;
+            invalid["missing_query_policy"] = "fail";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), invalid));
+            invalid = result;
+            invalid["native_measurement"]["query_outputs_incomplete"] = false;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), invalid));
+            invalid = result; invalid.erase("query_replay_coverage");
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), invalid));
+            rows->setCurrentItem(rows->topLevelItem(0));
+            window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+            metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+            QCOMPARE(
+                window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                19408ULL);
+            QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+            const auto old = metrics->requestId();
+            isolation->setChecked(false);
+            QVERIFY(metrics->result().is_null());
+            QVERIFY(!metrics->finish(old, result));
+            QVERIFY(!measure->isEnabled());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), result));
+            invalid = result; invalid.erase("missing_query_policy");
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), invalid));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void isolatedQueryWorkspaceReplay() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

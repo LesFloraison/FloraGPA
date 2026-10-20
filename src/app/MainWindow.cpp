@@ -1736,8 +1736,14 @@ void MainWindow::updateCheckpointContext() {
                 selection_.resource,
                 selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
     }
-    if (rdcCounters_)
-        rdcCounters_->setContext((frame_ || (dx12 && (draw || dispatch))) ? analysisKey : QString{}, selectedEvent_, dx12);
+    if (rdcCounters_) {
+        const auto metricsKey = dx12 && selection_.isolateMissingQueries
+                                    ? (session_->capability(ReplayFeature::Performance, selection_).supported()
+                                           ? historyContextKey(true) : QString{})
+                                    : analysisKey;
+        rdcCounters_->setContext((frame_ || (dx12 && (draw || dispatch))) ? metricsKey : QString{},
+                                 selectedEvent_, dx12, dx12 && selection_.isolateMissingQueries);
+    }
     if (resourceHistory_) {
         const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
         resourceHistory_->setContext(supported ? historyContextKey(true) : QString{}, selection_.execution.value_or(0),
@@ -1830,8 +1836,9 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline &&
-        kind != RdcAnalysis::History && kind != RdcAnalysis::Mesh) {
-        showError("Query-isolated analysis supports resource/pixel history, pipeline inspection, shader debugging and geometry in this workspace"); return;
+        kind != RdcAnalysis::History && kind != RdcAnalysis::Mesh &&
+        !(kind == RdcAnalysis::Counters && rdcCounters_->nativeMode())) {
+        showError("Query-isolated analysis requires native instrumentation for performance measurements"); return;
     }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
@@ -2093,9 +2100,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
               rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
             historyRequest_.value("isolate_missing_queries", false) &&
             historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
-        if ((args.contains("--renderdoc") && !isolatedAnalysis) || args.contains("--measure-event") ||
+        const bool isolatedMetrics = runningAnalysis_ == RdcAnalysis::Counters && rdcCounters_->nativeMode() &&
+                                     args.contains("--measure-event") && !args.contains("--renderdoc");
+        if ((args.contains("--renderdoc") && !isolatedAnalysis) || (args.contains("--measure-event") && !isolatedMetrics) ||
             (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation permits resource/pixel history, pipeline inspection, shader debugging and geometry; performance and experiments remain unsupported"); return;
+            showError("Query isolation requires supported analysis/native instrumentation and no modification experiments"); return;
         }
         args << "--isolate-missing-queries";
     }
@@ -2347,7 +2356,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
         }
         report_ = std::move(result.report);
         if (session_ && session_->backend() == ReplayBackend::Dx12 &&
-            (runningKind_ == "replay" || runningKind_ == "buffer" || runningKind_ == "history-capture"))
+            (runningKind_ == "replay" || runningKind_ == "buffer" || runningKind_ == "history-capture" || runningKind_ == "native-counters"))
             requireDx12QueryPolicyReport(result.replayReport, selection_.isolateMissingQueries);
         if (session_ && session_->backend() == ReplayBackend::Dx12)
             requireDx12ExperimentReport(result.replayReport,

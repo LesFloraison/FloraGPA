@@ -383,8 +383,9 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
         if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection &&
             feature != ReplayFeature::ResourceHistory && feature != ReplayFeature::PixelHistory &&
-            feature != ReplayFeature::PipelineInspection && feature != ReplayFeature::ShaderDebug && feature != ReplayFeature::Geometry)
-            return {CapabilityStatus::NotImplemented, "Query-output isolation supports native replay, known-byte readback, resource/pixel history, pipeline inspection, shader debugging and geometry; performance and experiments are not yet supported"};
+            feature != ReplayFeature::PipelineInspection && feature != ReplayFeature::ShaderDebug &&
+            feature != ReplayFeature::Geometry && feature != ReplayFeature::Performance)
+            return {CapabilityStatus::NotImplemented, "Query-output isolation supports replay and analysis; modification experiments are not yet supported"};
         if (feature == ReplayFeature::Experiments) {
             if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};
             try {
@@ -445,6 +446,8 @@ class Dx12Session final : public IReplaySession {
             const auto kind = executionEvent(*selection.execution).workKind;
             if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch)
                 return {CapabilityStatus::NotImplemented, "Select a supported Draw or Dispatch for native GPU queries"};
+            if (selection.isolateMissingQueries)
+                return {CapabilityStatus::Supported, "Native timestamps, pipeline statistics and prefix timeline of the incomplete query-isolated replay; historical query values and vendor counter analysis remain unavailable"};
             return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample and serialized replay-prefix list timeline with calibration when available; pipeline statistics on direct lists; no stabilized clocks or vendor counters"};
         }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {

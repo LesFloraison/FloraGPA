@@ -488,7 +488,8 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
     if (s.isolateMissingQueries) {
-        require(!performance, "Isolated query replay does not support performance measurement");
+        // NativePerformance/NativeTimeline own their query heaps and readbacks.
+        // Captured query outputs remain isolated and unavailable to consumers.
         require(s.disabledExecutions.empty() && s.uavBarriersBefore.empty() && s.shaderReplacements.empty() && s.resourcePatches.empty(),
                 "Isolated query replay cannot be combined with modification experiments");
         for (const auto creation : s.queries.isolatedReadbacks(execution, !after)) s.resources.isolateQueryReadback(creation);
@@ -1454,6 +1455,14 @@ json NativeReplay::performanceResult() const {
     const auto execution = s.index.execution(s.selectedExecution);
     auto result = s.frame->performance->result(s.queue(execution.queue));
     if (s.frame->timeline) result["timeline"] = s.frame->timeline->result();
+    if (s.isolateMissingQueries) {
+        result["missing_query_policy"] = "isolate_readback_outputs";
+        result["frame_complete"] = false;
+        result["query_outputs_incomplete"] = true;
+        result["limitations"].push_back(
+            "Measures this incomplete query-isolated replay using independent instrumentation queries. "
+            "Historical query values remain unavailable; these timings and statistics are not captured original-frame results.");
+    }
     result.update({{"execution", std::to_string(execution.id)}, {"source_record", std::to_string(execution.record)},
                    {"queue", std::to_string(execution.queue)}, {"submission", std::to_string(execution.submission)},
                    {"command_list", std::to_string(execution.list)}, {"generation", std::to_string(execution.generation)},

@@ -138,7 +138,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     const auto capability = session.capability(ReplayFeature::Replay, selection);
     const bool isolateQueries = options.isSet("isolate-missing-queries");
     if (isolateQueries)
-        for (const auto flag : {"measure-event", "experiment", "disable", "uav-barrier-before"})
+        for (const auto flag : {"experiment", "disable", "uav-barrier-before"})
             if (options.isSet(flag)) throw std::runtime_error(std::string("Query isolation cannot be combined with --") + flag);
     if (!capability.supported()) {
         const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
