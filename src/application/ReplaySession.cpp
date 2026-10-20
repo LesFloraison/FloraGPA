@@ -401,12 +401,16 @@ class Dx12Session final : public IReplaySession {
                 const auto execution = submissions_.execution(*selection.execution);
                 if (execution.submission <= directory_.initializationCount() || !execution.recordingComplete)
                     return {CapabilityStatus::MissingData, "Select a complete frame execution instance"};
-                if (dx12::streamPacketCanDisable(packet(execution.record).type))
+                const auto kind = workKind(execution.record);
+                if (kind == ReplayWorkKind::MissingIndirect)
+                    return {CapabilityStatus::MissingData, "Indirect command signature is missing or malformed"};
+                if (dx12::streamPacketCanDisable(packet(execution.record).type) &&
+                    (kind == ReplayWorkKind::Draw || kind == ReplayWorkKind::Dispatch || kind == ReplayWorkKind::MeshDispatch))
                     return {CapabilityStatus::Supported, selection.isolateMissingQueries
-                        ? "Disable/enable one direct Draw/Dispatch in incomplete query-isolated replay; missing historical query values remain unavailable"
-                        : "Disable/enable one direct Draw/Dispatch execution"};
+                        ? "Disable/enable one Draw/Dispatch or entire work-only ExecuteIndirect in incomplete query-isolated replay; missing historical query values remain unavailable"
+                        : "Disable/enable one Draw/Dispatch or entire work-only ExecuteIndirect execution; individual indirect actions and state-bearing signatures are not supported"};
             } catch (const std::exception &e) { return {CapabilityStatus::MissingData, e.what()}; }
-            return {CapabilityStatus::NotImplemented, "Only direct Draw/Dispatch enable overrides are implemented"};
+            return {CapabilityStatus::NotImplemented, "Only Draw/Dispatch and work-only ExecuteIndirect enable overrides are implemented"};
         }
         if (feature == ReplayFeature::PixelHistory) {
             if (!selection.resource)

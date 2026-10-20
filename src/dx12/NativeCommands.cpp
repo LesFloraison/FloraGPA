@@ -164,8 +164,9 @@ NativeCommands::NativeCommands(NativeDevice &d, const StreamDirectory &s, Native
 NativeCommands::~NativeCommands() = default;
 NativePipelines &NativeCommands::pipelines() { return impl_->pipelines; }
 void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks,
-                            const nlohmann::json &queryCoverage) {
+                            const nlohmann::json &queryCoverage, bool suppressIndirectWork) {
     auto &s = *impl_; const auto &packet = s.directory.packets().at(size_t(id - 1)); Reader r(s.directory.payload(packet));
+    require(!suppressIndirectWork || packet.type == 0x1ae3ccddf9f8cULL, "Indirect suppression requires ExecuteIndirect");
     require(r.read<uint64_t>() == capturedList, "Graphics command belongs to another list");
     switch (packet.type) {
     case 0x1ae3ccddf9f8cULL: {
@@ -175,6 +176,14 @@ void NativeCommands::record(ID3D12GraphicsCommandList *list, uint64_t id, uint64
                    counterOffset = r.read<uint64_t>();
         r.end();
         auto &signature = s.signature(object, id);
+        if (suppressIndirectWork) {
+            // signature() validates the supported work opcode and stride. Do not
+            // skip signatures with binding/root changes: ExecuteIndirect also
+            // resets those bindings, which must survive disabling GPU work.
+            require(signature.recipe.arguments.size() == 1 && !signature.recipe.rootSignature,
+                    "Disabling indirect state changes is not implemented");
+            break;
+        }
         auto buffer = s.resources.resource(arguments, id);
         const auto desc = buffer->GetDesc();
         require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && offset % 4 == 0 &&

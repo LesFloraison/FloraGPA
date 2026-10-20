@@ -20,8 +20,8 @@ class NativeReplay final {
     // Isolated readbacks reject ordinary consumers and unknown CPU reads.
     void setIsolateMissingQueries(bool enabled);
     void setDisabledExecutions(std::set<uint64_t> executions);
-    // Explicit experiment: insert a global UAV barrier before selected direct
-    // Draw/Dispatch instances. Does not repair or modify the original capture.
+    // Explicit experiment: insert a global UAV barrier before selected
+    // Draw/Dispatch or ExecuteIndirect instances. Does not modify the capture.
     void setUavBarriersBefore(std::set<uint64_t> executions);
     void setShaderReplacements(std::vector<ShaderReplacement>);
     void setResourcePatches(std::vector<ResourcePatch>);

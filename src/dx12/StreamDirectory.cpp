@@ -8,7 +8,8 @@
 
 namespace flora::dx12 {
 bool streamPacketCanDisable(uint64_t type) {
-    return type == 0x1ae3c190d8b1eULL || type == 0x1ae3c86b1c3b9ULL || type == 0x1ae3cef0e6c17ULL;
+    return type == 0x1ae3c190d8b1eULL || type == 0x1ae3c86b1c3b9ULL || type == 0x1ae3cef0e6c17ULL ||
+           type == 0x1ae3ccddf9f8cULL; // ExecuteIndirect additionally requires a supported work-only signature.
 }
 std::string StreamDirectory::contentHash(const CancelCheck &cancelled) const {
     std::map<std::string, const MappedFile *> storage;

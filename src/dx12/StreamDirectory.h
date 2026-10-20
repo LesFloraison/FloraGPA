@@ -46,5 +46,7 @@ class StreamDirectory final {
 };
 std::string streamPacketName(uint64_t type);
 bool streamPacketWork(uint64_t type);
+// Opcode eligibility only; ExecuteIndirect also requires validating its
+// signature as work-only (no root arguments or binding changes).
 bool streamPacketCanDisable(uint64_t type);
 }

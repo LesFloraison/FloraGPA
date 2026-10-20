@@ -84,6 +84,10 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
         u32("StartIndexLocation"); v["BaseVertexLocation"] = r.read<int32_t>(); u32("StartInstanceLocation"); break;
     case 0x1ae3cef0e6c17ULL:
         u64("CommandList"); u32("ThreadGroupCountX"); u32("ThreadGroupCountY"); u32("ThreadGroupCountZ"); break;
+    case 0x1ae3ccddf9f8cULL:
+        u64("CommandList"); u64("CommandSignature"); u32("MaxCommandCount");
+        resource("ArgumentBuffer"); u64("ArgumentBufferOffset");
+        resource("CountBuffer"); u64("CountBufferOffset"); r.end(); break;
     case 0x10144f9457a81ULL:
         u64("CommandList"); v["MinDepthBounds"] = r.read<float>(); v["MaxDepthBounds"] = r.read<float>();
         r.end(); break;

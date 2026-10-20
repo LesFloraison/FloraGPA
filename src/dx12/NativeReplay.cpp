@@ -482,7 +482,7 @@ void NativeReplay::setDisabledExecutions(std::set<uint64_t> executions) {
         require(execution.submission > s.directory.initializationCount() && execution.recordingComplete,
                 "Disable requires a complete frame execution instance");
         const auto &packet = s.directory.packets().at(size_t(execution.record - 1));
-        require(streamPacketCanDisable(packet.type), "Only direct Draw/Dispatch suppression is implemented");
+        require(streamPacketCanDisable(packet.type), "Only Draw/Dispatch or work-only ExecuteIndirect suppression is implemented");
         const auto decoded = decodeArguments(packet.type, s.directory.payload(packet));
         require(decoded.supported && decoded.consumed == packet.size, "Invalid disabled command arguments");
     }
@@ -496,7 +496,7 @@ void NativeReplay::setUavBarriersBefore(std::set<uint64_t> executions) {
         require(execution.submission > s.directory.initializationCount() && execution.recordingComplete,
                 "UAV barrier experiment requires a complete frame execution instance");
         const auto &packet = s.directory.packets().at(size_t(execution.record - 1));
-        require(streamPacketCanDisable(packet.type), "UAV barrier experiments currently require direct Draw/Dispatch");
+        require(streamPacketCanDisable(packet.type), "UAV barrier experiments require Draw/Dispatch or ExecuteIndirect");
         const auto decoded = decodeArguments(packet.type, s.directory.payload(packet));
         require(decoded.supported && decoded.consumed == packet.size, "Invalid UAV barrier target arguments");
     }
@@ -768,7 +768,12 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             const bool measured = frame->measure && !frame->streamEnd &&
                                   native.instance.firstExecution + native.recorded == frame->execution;
             if (measured) frame->performance->begin(native.list.Get());
-            if (disabled) {} // Suppress only this submitted instance, retaining all surrounding state commands.
+            if (disabled) {
+                // Validate the signature even when suppressing indirect work.
+                // Unsupported state-bearing signatures must not silently pass.
+                if (p.type == 0x1ae3ccddf9f8cULL)
+                    commands->record(native.list.Get(), id, original.list, native.states, nullptr, true);
+            }
             else if (transfer(p.type))
                 s.record(native.list.Get(), id, original.list, &native.states);
             else {

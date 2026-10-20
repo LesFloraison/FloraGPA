@@ -77,6 +77,42 @@ QString fixture(QTemporaryDir &directory) {
 }
 class Dx12SessionTests : public QObject {
     Q_OBJECT
+    void verifyMeshDisableEvidence(const QString &output) {
+        using Json = nlohmann::json;
+        const auto read = [&](const QString &path) {
+            QFile file(output + '/' + path);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing mesh disable evidence");
+            return file.readAll();
+        };
+        std::map<QString, Json> reports;
+        std::map<QString, QByteArray> bytes;
+        for (const auto &name : {QString("before"), QString("baseline"), QString("disabled"), QString("restored")}) {
+            auto &report = reports[name];
+            report = Json::parse(read(name + "/report.json").toStdString());
+            QCOMPARE(report.at("completed"), Json(true));
+            QCOMPARE(report.at("device").at("validation_error_count"), Json("0"));
+            requireDx12ExperimentReport(report, Json::parse(read(name == "disabled" ? "disabled.json" : "restored.json").toStdString()));
+            const auto &texture = report.at("native_texture");
+            QCOMPARE(texture.at("creation_record"), Json("574650"));
+            QCOMPARE(texture.at("execution"), Json("10267"));
+            QCOMPARE(texture.at("boundary"), Json(name == "before" ? "before" : "after"));
+            bytes[name] = read(name + '/' + QString::fromStdString(texture.at("file").get<std::string>()));
+            QCOMPARE(bytes[name].size(), qsizetype(524288));
+            QCOMPARE(QCryptographicHash::hash(bytes[name], QCryptographicHash::Sha256).toHex().toStdString(),
+                     texture.at("sha256").get<std::string>());
+        }
+        QCOMPARE(bytes["disabled"], bytes["before"]);
+        QVERIFY(bytes["baseline"] != bytes["before"]);
+        QCOMPARE(reports["disabled"].at("native_replay").at("suppressed_executions"), Json::array({"10267"}));
+        QCOMPARE(reports["restored"].at("native_replay").at("suppressed_executions"), Json::array());
+        QVERIFY(reports["disabled"].at("experiment").at("document_sha256") !=
+                reports["restored"].at("experiment").at("document_sha256"));
+        // Deliberately retains the full-fidelity gate. The recorded Hellblade
+        // pair currently fails here: all 19,702 written low words vary while
+        // high words and the zero mask agree. Do not weaken this to a preview
+        // or coverage-only comparison.
+        QCOMPARE(bytes["restored"], bytes["baseline"]);
+    }
   private slots:
     void pipelineShaderNavigation() {
         using Json = nlohmann::json;
@@ -3766,6 +3802,73 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!reopened.findChild<QAction *>("undoExperiment")->isEnabled());
         QVERIFY(!reopened.findChild<QAction *>("saveExperiment")->isEnabled());
     }
+    void hellbladeMeshDisableExperiment() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_MESH_DISABLE_OUTPUT");
+        if (captures.isEmpty() || output.isEmpty()) QSKIP("Set captures and a new output directory for the mesh disable GPU check");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto capture = captures + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame";
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), prepared(&window, &MainWindow::experimentFinished);
+        QSignalSpy replayed(&window, &MainWindow::taskFinished);
+        window.openCapture(capture);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("10267"); QTest::keyClick(locate, Qt::Key_Return);
+        auto enable = window.findChild<QAction *>("enableExperimentEvent");
+        QVERIFY(enable->isEnabled());
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        const auto previous = mesh->requestId();
+        enable->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        QVERIFY(!mesh->finish(previous, {}, {}));
+        QVERIFY(window.saveDx12Experiment(output + "/disabled.json"));
+        window.findChild<QAction *>("undoExperiment")->trigger();
+        QCOMPARE(enable->text(), QString("Disable Event"));
+        QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
+        window.findChild<QAction *>("redoExperiment")->trigger();
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        window.openDx12Experiment(output + "/disabled.json");
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        QVERIFY(replayed.empty());
+        const auto read = [&](const QString &path) {
+            QFile file(output + '/' + path);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing mesh disable evidence");
+            return file.readAll();
+        };
+        const auto disabledProject = nlohmann::json::parse(read("disabled.json").toStdString());
+        QCOMPARE(disabledProject.at("history")[0]["operations"][0],
+                 nlohmann::json({{"kind", "enabled"}, {"event", "10267"}, {"value", false}}));
+        const auto run = [&](const QString &name, const QString &project, bool before, nlohmann::json &report) {
+            QStringList arguments{"replay", capture, "--event", "10267", "--id", "574650",
+                "--max-bytes", "12884901888", "--debug-device", "--experiment", output + '/' + project,
+                "--out", output + '/' + name};
+            if (before) arguments.push_back("--before");
+            QProcess process; process.setProcessChannelMode(QProcess::MergedChannels);
+            process.setStandardOutputFile(output + '/' + name + ".log");
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", arguments);
+            if (!process.waitForStarted(5000) || !process.waitForFinished(180000)) {
+                process.kill(); process.waitForFinished(5000); return false;
+            }
+            if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) return false;
+            report = nlohmann::json::parse(read(name + "/report.json").toStdString());
+            return report.at("completed").get<bool>() && report.at("device").at("validation_error_count") == "0";
+        };
+        nlohmann::json before, baseline, disabled, restored;
+        QVERIFY2(run("before", "restored.json", true, before), "Before replay failed");
+        QVERIFY2(run("baseline", "restored.json", false, baseline), "Baseline replay failed");
+        QVERIFY2(run("disabled", "disabled.json", false, disabled), "Disabled replay failed");
+        QVERIFY2(run("restored", "restored.json", false, restored), "Restored replay failed");
+        verifyMeshDisableEvidence(output);
+    }
+    void hellbladeMeshDisableRecordedEvidence() {
+        const auto output = qEnvironmentVariable("FLORA_DX12_MESH_DISABLE_OUTPUT");
+        if (output.isEmpty()) QSKIP("Set the recorded mesh disable experiment directory");
+        verifyMeshDisableEvidence(output);
+    }
     void talosDisableExperiment() {
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_EXPERIMENT_OUTPUT");
@@ -3855,6 +3958,19 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
                  CapabilityStatus::NotImplemented);
         QVERIFY(session->capability(ReplayFeature::Geometry, selection).supported());
+        QVERIFY(session->capability(ReplayFeature::Experiments, selection).supported());
+        const auto &packet = directory.packets().at(578354);
+        const auto payload = directory.payload(packet);
+        const auto arguments = dx12::decodeArguments(packet.type, payload);
+        QVERIFY(arguments.supported);
+        QCOMPARE(arguments.consumed, payload.size());
+        QCOMPARE(arguments.values.at("CommandSignature"), nlohmann::json(std::to_string(recipe.object)));
+        QCOMPARE(arguments.values.at("ArgumentBuffer"), nlohmann::json("2144426640464"));
+        QCOMPARE(arguments.values.at("ArgumentBufferOffset"), nlohmann::json("16"));
+        QCOMPARE(arguments.values.at("MaxCommandCount"), nlohmann::json(1));
+        QCOMPARE(arguments.values.at("CountBuffer"), nlohmann::json("0"));
+        QCOMPARE(arguments.resources, (std::vector<uint64_t>{2144426640464ULL}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeArguments(packet.type, payload.first(payload.size() - 1)));
     }
     void hellbladeMeshOutputWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -4903,6 +5019,10 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             selection.execution = 1;
             QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
                      missing ? CapabilityStatus::MissingData : CapabilityStatus::NotImplemented);
+            QCOMPARE(session->capability(ReplayFeature::Experiments, selection).status,
+                     missing ? CapabilityStatus::MissingData : CapabilityStatus::NotImplemented);
+            Experiment experiment(*session);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, experiment.setEnabled(*session, 1, false));
         }
     }
     void nativePerformanceWorkspace() {

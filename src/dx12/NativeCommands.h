@@ -21,6 +21,6 @@ class NativeCommands final {
     ~NativeCommands();
     NativePipelines &pipelines();
     void record(ID3D12GraphicsCommandList *, uint64_t record, uint64_t capturedList, std::vector<std::function<void()>> &executionChecks,
-                const nlohmann::json &queryCoverage = nullptr);
+                const nlohmann::json &queryCoverage = nullptr, bool suppressIndirectWork = false);
 };
 }

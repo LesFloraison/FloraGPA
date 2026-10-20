@@ -10570,10 +10570,79 @@ DXIL dot2/dot3 operations; all result bits agree (`main-dot-evidence1.json`).
 This does not identify the remaining original-shader discrepancy or justify
 a dot-product change. General MainPS numerical fidelity remains unfinished.
 
+### Disable a work-only indirect execution
+
+The experiment overlay now accepts an entire submitted `ExecuteIndirect`
+instance whose signature contains one Draw, DrawIndexed, Dispatch or
+DispatchMesh operation and no root signature or binding changes. Both
+session capability checks and native recording validate this restriction;
+disabling an unsupported signature cannot bypass its replay error.
+Other submissions of the recording retain their own execution identities.
+The current operation disables the entire call, not one expanded indirect
+action. Argument/count buffers and captured files remain unchanged.
+
+Skipping state-bearing signatures would also remove required binding
+resets, as specified by Microsoft's
+[Indirect Drawing documentation](https://learn.microsoft.com/en-us/windows/win32/direct3d12/indirect-drawing).
+Such signatures remain explicitly unsupported until their state changes,
+GPU addresses and reset behavior are implemented. A UAV barrier experiment
+can also precede a supported indirect execution, including one disabled
+by the overlay; it retains its separate auxiliary marker.
+
+The existing first-mesh capture identifies Hellblade2 execution **10267**
+as `DispatchMesh(795,1,1)` and its PS UAV `OutVisBuffer64` as resource creation
+**574650**, object **2152470441440**. The native raw output is a **256 × 256
+R32G32_UINT** texture, **524,288 bytes**, with no supported image preview.
+The focused experiment checks native before/after storage rather than
+screenshots. Four serial native prefix measurements use SDK 616, the RTX
+5090 Laptop GPU and the debug layer; all complete with zero validation
+errors and 77 loaded modules without GPA/Python runtimes:
+
+| Boundary / overlay | Observed result |
+| --- | --- |
+| Before execution, cursor 0 | All 524,288 bytes zero |
+| After execution, cursor 0 | 19,702 nonzero texels, 157,391 nonzero bytes |
+| After execution, disabled | Exact byte equality with before; only execution 10267 reported suppressed |
+| After execution, undo to cursor 0 | Work resumes with no suppressed executions; 19,702 low words differ from the enabled baseline, all high words and the zero/nonzero mask agree |
+
+Both enabled runs have exactly the same experiment document SHA-256
+`895f36d06d50c102fc396c88a704d67e6c83aa10ae084bc7409df253c4225429`.
+Their output hashes differ:
+`f7138f29b601c6171906db0d1019de92a7cdf9c832ba9897048804378c4ab0ea`
+versus
+`1976a37b13945b92d5e24ea5aec855420dd61755a49e76fc06553d27bf36d0eb`.
+The changing low words have not been traced to their producer. Raw undo
+equivalence therefore **fails**; equal high words/coverage do not establish
+complete output restoration. The opt-in recorded-evidence test retains
+this failing exact-byte assertion. Full-frame fidelity, per-action indirect
+edits and state-bearing signature replay remain unfinished.
+
+Workspace checks reach disable, save, undo, redo, reload and stale MeshOut
+rejection without automatic GPU work. The initial GPU attempt exposed a
+missing shared ExecuteIndirect argument decoder before any submission.
+The new decoder exposes signature, maximum count, argument/count resource
+references and exact 64-bit offset strings. Real-record and truncated-input
+checks pass; missing and state-bearing signatures have distinct capability
+statuses. The valid before/baseline outputs were reused after this fix;
+only disabled/undo GPU runs were then executed.
+
+Evidence: `hellblade-mesh-disable-pipeline1/result.json`,
+`hellblade-mesh-disable1/{before,baseline,disabled,restored}/report.json`
+and their `output_storage.bin` files, `hellblade-mesh-disable1/summary.json`,
+`hellblade-mesh-disable1/undo-comparison.json`,
+`indirect-disable-capabilities2.txt`, and
+`hellblade-mesh-disable-evidence3.txt` (known raw-undo failure).
+The earlier decoder failure remains at
+`hellblade-mesh-disable1/disabled-decoder-failure/report.json`;
+`hellblade-mesh-disable1.txt` records its end-to-end test interruption.
+Build logs: `build-indirect-disable3.log` and
+`build-indirect-disable-evidence5.log`.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; undo resumes work but all 19,702 written low words vary across identically configured enabled replays; raw undo equivalence fails and remains unresolved |
 | Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
