@@ -10079,6 +10079,58 @@ Only this producer and its relevant inputs were inspected; no new capture
 or broad GPU regression was run. Complete original/native fidelity remains
 unfinished.
 
+### Co-observed radiance-trace inputs and outputs
+
+To avoid comparing input evidence from a different replay, the bounded
+repeat-selection probe now accepts up to **16** resources in one observation.
+Each resource remains limited to **32 MiB**; a **256 MiB** aggregate budget
+is enforced both against selected allocation descriptions before observation
+and against actual returned bytes. Readbacks are processed one resource at
+a time. This changes the manual diagnostic probe, not production replay.
+
+One original-capture pair at RDC **543280** observes **12** resources:
+the eight tile-mapping/output resources above, plus final lighting **12559**,
+scene depth **12551**, shared constant buffer **14393** and probe offsets
+**12535**. Each phase reads exactly **44,302,336 bytes**, with all **24**
+resource observations checked against their full-storage sizes and hashes.
+There is no intervening event or Pixel History query.
+
+The observed tile counts are **404 / 408**, representing **101 / 102**
+complete resolution-16 tasks. Their **55** common selected grid cells have
+identical task position/clipmap/resolution metadata and identical radiance
+and depth output storage. The six additional reflected bindings represented
+by these four extra resources also compare equal:
+
+- `FinalLightingAtlas` and `DepthAtlas`;
+- `UniformBufferConstants_View`, `UniformBufferConstants_LumenCardScene`
+  and `UniformBufferConstants_ReflectionStruct`;
+- `ProbeWorldOffset`.
+
+Constant-buffer comparison hashes the complete buffer and preserves the
+binding offset; it is stronger than checking only the used block when equal,
+but a difference could involve unbound bytes. Other scene buffers, sky and
+distance-field textures are not observed by this check. The report therefore
+explicitly retains `all_shader_inputs_observed: false`.
+
+This pair did **not** reproduce the earlier original radiance difference.
+It establishes co-observed agreement for these selected probes without
+explaining or dismissing the earlier differing pair. No extra pair was
+run merely to obtain a preferred differing or matching result.
+
+The tile checker now distinguishes equal, different and unobserved inputs.
+A changed lighting texel with a recomputed valid storage digest reports
+that input as different while retaining the unchanged output comparison;
+legacy eight-resource reports explicitly return `not_observed_in_both`,
+never equality from missing data. The probe build and these focused offline
+checks pass.
+
+Evidence: `gpa-cache-trace-inputs-repeat1.json`, `cache-trace-inputs1.json`,
+`cache-trace-input-rejections1/result.json`,
+`check-cache-trace-input-evidence1.py` and
+`build-repeat-selection-aggregate1.log`. Original-player and sample files
+remain unchanged; analysis still uses the standalone native RenderDoc
+backend. Full radiance/frame fidelity remains unverified.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

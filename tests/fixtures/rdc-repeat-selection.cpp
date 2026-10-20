@@ -11,6 +11,8 @@
 // --rdc-ids selects decimal capture-local RenderDoc IDs instead of Flora
 // creation markers. It requires --readback --repeat-only and keeps the two
 // identity namespaces distinct in the report and filenames.
+// Up to 16 resources can share one observation, with a 256 MiB aggregate
+// readback budget per phase and the existing 32 MiB per-resource limit.
 #define NOMINMAX
 #include <Windows.h>
 #include <bcrypt.h>
@@ -129,14 +131,16 @@ int wmain(int argc, wchar_t **argv) try {
             firstCreation += 2;
         } else break;
     }
-    if (argc <= firstCreation || argc - firstCreation > 8)
-        throw std::runtime_error("Select one to eight resources");
+    if (argc <= firstCreation || argc - firstCreation > 16)
+        throw std::runtime_error("Select one to sixteen resources");
     if (rdcIds && (!readback || !repeatOnly))
         throw std::runtime_error("RenderDoc-ID observations require --readback --repeat-only");
     const char *identityKey = rdcIds ? "rdc_id" : "creation";
     std::vector<ResourceId> selected;
     std::vector<std::string> fileLabels;
     std::vector<uint64_t> bufferLengths;
+    constexpr uint64_t aggregateBudget = 256ULL * 1024 * 1024;
+    uint64_t requestedReadbackBytes{};
     Json descriptions = Json::array();
     for (int i = firstCreation; i < argc; ++i) {
         const auto creation = utf8(argv[i]);
@@ -158,9 +162,10 @@ int wmain(int argc, wchar_t **argv) try {
             throw std::runtime_error("Duplicate resource selection");
         fileLabels.push_back(rdcIds ? "rdc-" + std::to_string(resourceNumber(argv[i])) : creation);
         bool valid = false;
-        uint64_t bufferLength{};
+        uint64_t bufferLength{}, allocationBytes{};
         for (const auto &texture : textures)
             if (texture.resourceId == found) {
+                allocationBytes = texture.byteSize;
                 valid = (texture.dimension == 2 || (texture.dimension == 3 && readback && repeatOnly)) &&
                     x < texture.width && y < texture.height && texture.msSamp <= 1 &&
                     (!readback || (texture.byteSize && texture.byteSize <= 32ULL * 1024 * 1024));
@@ -175,18 +180,25 @@ int wmain(int argc, wchar_t **argv) try {
         for (const auto &buffer : buffers)
             if (buffer.resourceId == found) {
                 bufferLength = buffer.length;
+                allocationBytes = bufferLength;
                 valid = readback && bufferLength && bufferLength <= 32ULL * 1024 * 1024;
                 descriptions.back().update({{"kind", "buffer"}, {"byte_offset", "0"},
                     {"byte_length", std::to_string(bufferLength)}});
             }
         if (!valid) throw std::runtime_error("Unsupported bounded observation for selection " + creation +
             ": " + descriptions.back().dump());
+        if (readback) {
+            if (allocationBytes > aggregateBudget - requestedReadbackBytes)
+                throw std::runtime_error("Selected resources exceed the 256 MiB aggregate readback budget");
+            requestedReadbackBytes += allocationBytes;
+        }
         selected.push_back(found);
         bufferLengths.push_back(bufferLength);
     }
     Json readbackFiles = Json::array();
     auto observe = [&](const char *phase) {
         Json values = Json::array();
+        uint64_t observedBytes{};
         for (size_t i = 0; i < selected.size(); ++i) {
             const auto resource = selected[i];
             values.push_back(Json::object());
@@ -200,6 +212,9 @@ int wmain(int argc, wchar_t **argv) try {
                     : controller->GetTextureData(resource, Subresource(0, 0, 0));
                 if (bytes.empty() || bytes.size() > 32ULL * 1024 * 1024)
                     throw std::runtime_error("Unexpected bounded resource readback");
+                if (bytes.size() > aggregateBudget - observedBytes)
+                    throw std::runtime_error("Resource readbacks exceed the 256 MiB aggregate budget");
+                observedBytes += bytes.size();
                 if (bufferLengths[i] && bytes.size() != bufferLengths[i])
                     throw std::runtime_error("Incomplete bounded buffer readback");
                 unsigned char hash[32]{};
@@ -224,6 +239,8 @@ int wmain(int argc, wchar_t **argv) try {
         return values;
     };
     Json report{{"scope", "Two forced selections in one controller; conditional PixelHistory. No native/original-frame fidelity claim."},
+        {"readback_budget_bytes_per_phase", std::to_string(aggregateBudget)},
+        {"selected_allocation_bytes", std::to_string(requestedReadbackBytes)},
         {"capture", utf8(fs::canonical(argv[3]))}, {"event", event}, {"x", x}, {"y", y},
         {"resources", descriptions}, {"history_requested", false},
         {"repeat_only", repeatOnly},

@@ -157,9 +157,31 @@ def load(report_path, pipeline_path):
         by_cell = {int(cell): selected[int(probe)] for cell, probe in zip(cells, ids) if int(probe) in selected}
         if any((cell % 192) // 48 != task["clipmap"] for cell, task in by_cell.items()):
             raise ValueError("Selected task clipmap differs from its cache-grid cell")
+        inputs = {}
+        for name in ("FinalLightingAtlas", "DepthAtlas", "UniformBufferConstants_View",
+                     "UniformBufferConstants_LumenCardScene", "UniformBufferConstants_ReflectionStruct",
+                     "ProbeWorldOffset"):
+            descriptor = binding(name)
+            identity = descriptor["resource"][pkey]
+            if not any(d.get(key) == identity for d in report["resources"]):
+                inputs[name] = {"status": "not_observed"}
+                continue
+            desc, raw = read(identity)
+            if desc["kind"] == "texture":
+                width = 4 if desc["format_type"] == 13 else desc["component_bytes"] * desc["component_count"]
+                if (desc["dimension"] != 2 or desc["depth"] != 1 or width <= 0 or
+                        len(raw) != desc["width"] * desc["height"] * width):
+                    raise ValueError("Expected a complete uncompressed input atlas")
+                layout = {k: desc[k] for k in ("width", "height", "format_type", "component_count", "component_bytes")}
+            else:
+                layout = {"buffer_bytes": len(raw)}
+            inputs[name] = {"status": "read", "sha256": hashlib.sha256(raw).hexdigest(),
+                            "bytes": len(raw), "layout": layout,
+                            "binding_byte_offset": descriptor["byte_offset"],
+                            "scope": "Complete selected resource storage; constant-buffer hashes include bytes outside the bound block"}
         observations.append({"phase": phase, "namespace": namespace, "groups": list(groups),
                              "tile_count": count, "tasks_by_cell": by_cell, "cells": cells, "ids": ids,
-                             "atlases": atlases, "constants": constants,
+                             "atlases": atlases, "constants": constants, "inputs": inputs,
                              "verified_resource_observations": len(verified)})
     return observations
 
@@ -191,7 +213,12 @@ def compare(observations):
         comparisons.append({"a": an, "b": bn, "common_selected_cells": len(common),
                             "selected_task_metadata_differences": len(task_differences),
                             "common_selected_probe_id_differences": int(np.count_nonzero(a["ids"][positions] != b["ids"][positions])),
-                            "root_parameters_equal": a["constants"] == b["constants"], "output_differences": differences})
+                            "root_parameters_equal": a["constants"] == b["constants"], "output_differences": differences,
+                            "input_comparisons": {name: "not_observed_in_both" if
+                                a["inputs"][name]["status"] != "read" or b["inputs"][name]["status"] != "read" else
+                                "equal" if a["inputs"][name] == b["inputs"][name] else "different"
+                                for name in a["inputs"]},
+                            "all_shader_inputs_observed": False})
     return comparisons
 
 
@@ -214,6 +241,7 @@ if __name__ == "__main__":
             "selected_tasks": len(row["tasks_by_cell"]),
             "tasks_by_resolution": {str(8 << level): sum(t["level"] == level for t in row["tasks_by_cell"].values())
                                     for level in range(3)},
+            "input_observations": row["inputs"],
             "verified_resource_observations": row["verified_resource_observations"]})
     with args.out.open("x", encoding="utf-8") as stream:
         json.dump(result, stream, indent=2)
