@@ -9749,6 +9749,81 @@ Evidence: `upload-watch-native1_capture.rdc` (4,505,212 bytes),
 `gpa-cache-capture-inventory-fixed1`, `gpa-cache-allocator-pipeline1`,
 and the source/runtime manifests in the research workspace.
 
+### Compare original/native radiance-cache allocation inputs
+
+The original-capture allocator identified above is now observed at both
+boundaries. `rdc-repeat-selection` has an explicit `--rdc-ids` mode for
+unmarked captures. It requires repeat-only bounded readbacks, records
+`resource_namespace: rdc_id`, and stores string `ResourceId::...` identities
+without inventing Flora resource creation IDs. Existing creation-marker
+selection remains the default. The report records the selected API chunk
+and its containing action.
+
+The original pre-boundary is **RDC 543198**,
+`ID3D12GraphicsCommandList::ResourceBarrier`, belonging to action **543199**.
+The post-boundary is the verified **543199 Dispatch**. Before dispatch,
+both observations have task allocator **0**, trace costs **[0,0]**, priority
+bucket **11** and boundary budget **960**. The two post-boundary selections
+produce:
+
+| Observation | Tasks | Total accepted cost | Accepted boundary cost | Cost-4 / cost-16 tasks |
+|---|---:|---:|---:|---:|
+| Original-capture replay, first | 117 | 1200 | 960 | 56 / 61 |
+| Original-capture replay, second | 99 | 1188 | 948 | 33 / 66 |
+| Prior native-capture replay, first | 114 | 1188 | 948 | 53 / 61 |
+| Prior native-capture replay, second | 114 | 1200 | 960 | 52 / 62 |
+
+All four have **30 mandatory tasks / cost 240**, **427 boundary candidates**
+and total boundary cost **4492**. Each task set satisfies the original
+shader's weighted atomic-prefix budget, including the case where a
+cost-16 arrival exceeds the remaining cost 12. Rejected arrivals still
+advance the counter. Neither equal task count nor different task count
+alone establishes equal selected work.
+
+The checker now emits the exact allocator-input signature. Across the
+original and native captures, **1,310 active grid cells**, their aligned
+LastUsed/LastTraced frame records, frame number **22295**, maximum probe
+count **16384**, four 48-cubed clipmaps, distance thresholds, clip spacing
+and bias, View tile/camera words, and budget values all match. The active
+cell-index SHA-256 is
+`5a8a8d6ec8c2a70df816ec8683fc04ac705a65f65b8a25096729766136326049`;
+the aligned frame-pair SHA-256 is
+`a8a7435b8d0728bcc58db992bfa5bd35547b99a02b42b111ab581637fcb73dd9`.
+This compares shader-used inputs, not unrelated constant-buffer allocation
+tails, and excludes physical probe-ID permutations.
+
+Task coordinates provide an additional exact check. The pinned shader's
+fast multiply/add pairs **%39..%49** generate world positions. Separate
+float32 multiply then add mismatches **142** position words in the first
+original observation and **148** in the first native observation. Computing
+these bounded grid/float32 operands with one final float32 rounding matches
+every stored coordinate: **1,332 words** across all four observations.
+The checker requires that exact match, along with task IDs, clipmaps and
+costs. This is a selected GPU observation of contraction, not a general
+change to the application's Shader Debug arithmetic or a tolerance rule.
+
+Validation used **64 digest-checked bounded resource observations**, with
+independent before/after replay pairs and no Pixel History. Wrong identity
+namespace, wrong API boundary, and a changed task coordinate with an updated
+valid digest are each rejected. A single small upload-copy fixture verifies
+that default native creation selection still reads exactly the independent
+**1,048,832-byte** GPU result on both forced selections.
+
+This establishes that the allocation-count variation also occurs when
+replaying the instrumented original GPA capture, from the same checked
+allocator inputs. It does not prove identical scheduling, uninstrumented
+GPA task values, downstream resource contents, or final-frame equivalence.
+Those remaining comparisons are not marked complete. No new game capture
+was taken; GPU work consisted of the two original allocator boundary probes
+and the small compatibility fixture.
+
+Evidence: `gpa-cache-allocation-{before1,after1}.json` and their raw files,
+`gpa-cache-budget-check2.json`, `native-cache-budget-check3.json`,
+`gpa-native-cache-budget-comparison1.json`,
+`cache-budget-identity-rejections1/result.json`, and
+`upload-watch-native-repeat1.json`. Python/numpy remains research-only;
+the new probe module inventories contain neither GPA nor Python.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

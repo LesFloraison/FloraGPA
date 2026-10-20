@@ -8,9 +8,13 @@
 // bounded to 32 MiB; a first buffer never triggers PixelHistory.
 // A 3D texture requires --readback --repeat-only and reads the entire bounded
 // mip-0 volume, without a PickPixel or PixelHistory observation.
+// --rdc-ids selects decimal capture-local RenderDoc IDs instead of Flora
+// creation markers. It requires --readback --repeat-only and keeps the two
+// identity namespaces distinct in the report and filenames.
 #define NOMINMAX
 #include <Windows.h>
 #include <bcrypt.h>
+#include <algorithm>
 #include "rdc/Api.h"
 #include "../../tools/native/process_modules.h"
 #include <nlohmann/json.hpp>
@@ -53,6 +57,20 @@ uint32_t number(const wchar_t *text) {
     if (parsed > UINT32_MAX) throw std::runtime_error("Index exceeds uint32");
     return uint32_t(parsed);
 }
+uint64_t resourceNumber(const wchar_t *text) {
+    const std::wstring value(text);
+    if (value.empty() || value.find_first_not_of(L"0123456789") != std::wstring::npos)
+        throw std::runtime_error("Expected decimal uint64 resource ID");
+    const auto result = std::stoull(value);
+    if (!result) throw std::runtime_error("Resource ID must be nonzero");
+    return result;
+}
+std::string resourceName(ResourceId value) {
+    static_assert(sizeof(value) == sizeof(uint64_t));
+    uint64_t result{};
+    memcpy(&result, &value, sizeof(result));
+    return "ResourceId::" + std::to_string(result);
+}
 }
 extern "C" void __cdecl RENDERDOC_FreeArrayMem(void *mem) { if (mem) release(mem); }
 extern "C" void *__cdecl RENDERDOC_AllocArrayMem(uint64_t size) { return allocate(size); }
@@ -91,7 +109,7 @@ int wmain(int argc, wchar_t **argv) try {
     const auto resources = controller->GetResources();
     const auto textures = controller->GetTextures();
     const auto buffers = controller->GetBuffers();
-    bool readback = false, repeatOnly = false;
+    bool readback = false, repeatOnly = false, rdcIds = false;
     uint32_t betweenEvent{};
     int firstCreation = 8;
     while (firstCreation < argc) {
@@ -100,6 +118,9 @@ int wmain(int argc, wchar_t **argv) try {
             ++firstCreation;
         } else if (std::wstring(argv[firstCreation]) == L"--repeat-only" && !repeatOnly) {
             repeatOnly = true;
+            ++firstCreation;
+        } else if (std::wstring(argv[firstCreation]) == L"--rdc-ids" && !rdcIds) {
+            rdcIds = true;
             ++firstCreation;
         } else if (std::wstring(argv[firstCreation]) == L"--between-event" && !betweenEvent &&
                    firstCreation + 1 < argc) {
@@ -110,22 +131,32 @@ int wmain(int argc, wchar_t **argv) try {
     }
     if (argc <= firstCreation || argc - firstCreation > 8)
         throw std::runtime_error("Select one to eight resources");
+    if (rdcIds && (!readback || !repeatOnly))
+        throw std::runtime_error("RenderDoc-ID observations require --readback --repeat-only");
+    const char *identityKey = rdcIds ? "rdc_id" : "creation";
     std::vector<ResourceId> selected;
+    std::vector<std::string> fileLabels;
     std::vector<uint64_t> bufferLengths;
     Json descriptions = Json::array();
     for (int i = firstCreation; i < argc; ++i) {
         const auto creation = utf8(argv[i]);
         const auto suffix = " creation " + creation;
+        const auto requested = rdcIds ? "ResourceId::" + std::to_string(resourceNumber(argv[i])) : "";
         ResourceId found;
         for (const auto &resource : resources) {
             const std::string name(resource.name.c_str());
-            if (name.starts_with("Flora DX12 resource ") && name.ends_with(suffix)) {
+            if (rdcIds ? resourceName(resource.resourceId) == requested :
+                        name.starts_with("Flora DX12 resource ") && name.ends_with(suffix)) {
                 if (found != ResourceId::Null()) throw std::runtime_error("Ambiguous resource lifetime");
                 found = resource.resourceId;
-                descriptions.push_back({{"creation", creation}, {"name", name}});
+                descriptions.push_back({{"name", name}, {"rdc_id", resourceName(found)}});
+                if (!rdcIds) descriptions.back()["creation"] = creation;
             }
         }
-        if (found == ResourceId::Null()) throw std::runtime_error("Missing resource lifetime");
+        if (found == ResourceId::Null()) throw std::runtime_error("Missing selected resource");
+        if (std::find(selected.begin(), selected.end(), found) != selected.end())
+            throw std::runtime_error("Duplicate resource selection");
+        fileLabels.push_back(rdcIds ? "rdc-" + std::to_string(resourceNumber(argv[i])) : creation);
         bool valid = false;
         uint64_t bufferLength{};
         for (const auto &texture : textures)
@@ -148,7 +179,7 @@ int wmain(int argc, wchar_t **argv) try {
                 descriptions.back().update({{"kind", "buffer"}, {"byte_offset", "0"},
                     {"byte_length", std::to_string(bufferLength)}});
             }
-        if (!valid) throw std::runtime_error("Unsupported bounded observation for creation " + creation +
+        if (!valid) throw std::runtime_error("Unsupported bounded observation for selection " + creation +
             ": " + descriptions.back().dump());
         selected.push_back(found);
         bufferLengths.push_back(bufferLength);
@@ -179,14 +210,14 @@ int wmain(int argc, wchar_t **argv) try {
                 for (const auto byte : hash) digest << std::hex << std::setfill('0') << std::setw(2) << unsigned(byte);
                 values.back().update({{"storage_sha256", digest.str()}, {"bytes", std::to_string(bytes.size())}});
                 const auto name = reportPath.stem().string() + "-" + phase + "-" +
-                    descriptions[i].at("creation").get<std::string>() + ".bin";
+                    fileLabels[i] + ".bin";
                 const auto destination = reportPath.parent_path() / name;
                 if (fs::exists(destination)) throw std::runtime_error("Readback output must be new");
                 std::ofstream raw(destination, std::ios::binary);
                 raw.exceptions(std::ios::badbit | std::ios::failbit);
                 raw.write(reinterpret_cast<const char *>(bytes.data()), std::streamsize(bytes.size()));
                 raw.close();
-                readbackFiles.push_back({{"phase", phase}, {"creation", descriptions[i].at("creation")},
+                readbackFiles.push_back({{"phase", phase}, {identityKey, descriptions[i].at(identityKey)},
                     {"file", utf8(destination)}});
             }
         }
@@ -196,12 +227,21 @@ int wmain(int argc, wchar_t **argv) try {
         {"capture", utf8(fs::canonical(argv[3]))}, {"event", event}, {"x", x}, {"y", y},
         {"resources", descriptions}, {"history_requested", false},
         {"repeat_only", repeatOnly},
+        {"resource_namespace", rdcIds ? "rdc_id" : "native_creation"},
         {"between_event", betweenEvent ? Json(betweenEvent) : Json()}};
+    const auto &structured = controller->GetStructuredFile();
     std::function<void(const rdcarray<ActionDescription> &)> inspectActions;
     inspectActions = [&](const auto &actions) {
         for (const auto &action : actions) {
             const std::string name(action.customName.c_str());
             if (action.eventId == event) report["selection_action_name"] = name;
+            for (const auto &api : action.events) {
+                if (api.eventId == event && api.chunkIndex < structured.chunks.size()) {
+                    report["selection_api"] = {
+                        {"name", structured.chunks[api.chunkIndex]->name.c_str()},
+                        {"event", api.eventId}, {"action_event", action.eventId}};
+                }
+            }
             if (name.starts_with("Flora DX12 execution ") &&
                 (!report.contains("first_execution_marker") ||
                  action.eventId < report["first_execution_marker"]["event"].get<uint32_t>()))

@@ -3,6 +3,8 @@
 The before/after reports are independent replay pairs, not a paired execution.
 This checks compatibility with the exported shader's order-dependent budget
 rule; it does not validate original-GPA fidelity or reproduce GPU scheduling.
+Explicit --rdc-ids mode checks unmarked captures using their API boundaries
+and capture-local identities; it never assigns Flora execution/creation IDs.
 Python/numpy is a research dependency only.
 """
 import argparse
@@ -17,7 +19,7 @@ import numpy as np
 SHADER = "7894a72075225484a9559207da1c8644081135bf028b707b2458c7413793acc0"
 
 
-def analyze(before_path, after_path, pipeline_path):
+def analyze(before_path, after_path, pipeline_path, rdc_ids=False):
     pipeline = json.loads(pipeline_path.read_text(encoding="utf-8"))
     shader = next(row for row in pipeline["pipeline_rows"]
                   if row["section"] == "CS" and row["binding"] == "Shader")
@@ -31,15 +33,41 @@ def analyze(before_path, after_path, pipeline_path):
             raise ValueError(f"Expected exactly one reflected binding: {name}")
         return matches[0]
 
-    def creation(name):
-        return binding(name)["resource"]["resource_creation"]
+    identity_key = "rdc_id" if rdc_ids else "creation"
+    namespace = "rdc_id" if rdc_ids else "native_creation"
+
+    def identity(name):
+        resource = binding(name)["resource"]
+        value = resource["rdc_id" if rdc_ids else "resource_creation"]
+        if not isinstance(value, str) or not value:
+            raise ValueError("Missing string resource identity in the selected namespace")
+        return value
 
     reports = [json.loads(path.read_text(encoding="utf-8")) for path in (before_path, after_path)]
-    if (reports[0]["event"] + 1 != pipeline["eid"] or reports[1]["event"] != pipeline["eid"] or
-            not reports[0].get("selection_action_name", "").startswith(
-                f"Flora DX12 execution {pipeline['execution']} record ")):
+    if reports[0]["event"] + 1 != pipeline["eid"] or reports[1]["event"] != pipeline["eid"]:
+        raise ValueError("Expected adjacent boundaries around the selected dispatch")
+    if rdc_ids:
+        # A GPA-produced RDC has no Flora markers. Use the actual API event
+        # and the containing action, without manufacturing an execution ID.
+        api = reports[1].get("selection_api", {})
+        preceding = reports[0].get("selection_api", {})
+        if (pipeline.get("execution") is not None or
+                api.get("name") != "ID3D12GraphicsCommandList::Dispatch" or
+                api.get("event") != pipeline["eid"] or api.get("action_event") != pipeline["eid"] or
+                preceding.get("event") != reports[0]["event"] or
+                preceding.get("action_event") != pipeline["eid"] or
+                not preceding.get("name") or preceding["name"] == api["name"]):
+            raise ValueError("Expected an unmapped direct dispatch and its preceding API event")
+        job = json.loads((pipeline_path.parent / "job.json").read_text(encoding="utf-8"))
+        capture = Path(job["capture"]).resolve()
+        if any(Path(report["capture"]).resolve() != capture for report in reports):
+            raise ValueError("Boundary and pipeline capture paths differ")
+    elif not reports[0].get("selection_action_name", "").startswith(
+            f"Flora DX12 execution {pipeline['execution']} record "):
         raise ValueError("Expected the selected dispatch marker and its API event")
     for report in reports:
+        if report.get("resource_namespace", "native_creation") != namespace:
+            raise ValueError("Resource identity namespace mismatch")
         if not report["repeat_only"] or report["history_requested"] or report["between_event"] is not None:
             raise ValueError("Expected repeat-only observations without an intervening event")
     verified = {}
@@ -49,9 +77,9 @@ def analyze(before_path, after_path, pipeline_path):
         if key in verified:
             return verified[key]
         report = reports[which]
-        resource = creation(name)
-        matches = [(i, d) for i, d in enumerate(report["resources"]) if d["creation"] == resource]
-        files = [f for f in report["readback_files"] if f["phase"] == phase and f["creation"] == resource]
+        resource = identity(name)
+        matches = [(i, d) for i, d in enumerate(report["resources"]) if d[identity_key] == resource]
+        files = [f for f in report["readback_files"] if f["phase"] == phase and f[identity_key] == resource]
         if len(matches) != 1 or len(files) != 1:
             raise ValueError(f"Missing unique observation: {key}")
         index, description = matches[0]
@@ -159,7 +187,12 @@ def analyze(before_path, after_path, pipeline_path):
                 continue
             clip = (cells % 192) // 48
             coordinates = np.column_stack((cells % 48, (cells // 192) % 48, cells // (192*48))).astype(np.float32)
-            world = np.float32(coordinates * scale[clip, None] + bias[clip])
+            # The pinned shader's fast multiply/add pair contracts on the
+            # observed GPU. Evaluate these bounded integer-grid/float32 inputs
+            # in float64, then round once; every selected task position below
+            # must still match the GPU's stored words exactly.
+            world = (coordinates.astype(np.float64) * scale[clip, None].astype(np.float64) +
+                     bias[clip].astype(np.float64)).astype(np.float32)
             weight = costs(world)
             used, traced = frames["ProbeLastUsedFrame"][ids], frames["RWProbeLastTracedFrame"][ids]
             age = np.where(used > traced, used.astype(np.int64) - traced.astype(np.int64), 1).astype(np.float32)
@@ -180,8 +213,9 @@ def analyze(before_path, after_path, pipeline_path):
             index_by_id[ids] = np.arange(len(ids))
             task_cells = index_by_id[task_ids]
             if (not np.array_equal(tasks[:, 3] >> 24, clip[task_cells]) or
-                    not np.array_equal(task_cost, weight[task_cells])):
-                raise ValueError("Task clipmap/cost disagrees with its active grid cell")
+                    not np.array_equal(task_cost, weight[task_cells]) or
+                    not np.array_equal(tasks[:, :3], world[task_cells].view("<u4"))):
+                raise ValueError("Task position/clipmap/cost disagrees with its active grid cell")
             observed_cost = words(1, phase, "RWProbesToUpdateTraceCost")
             total = int(weight[selected].sum())
             marginal = int(weight[selected & (priority == bucket)].sum())
@@ -195,8 +229,24 @@ def analyze(before_path, after_path, pipeline_path):
                          "boundary_budget": budget, "boundary_candidates": int((priority == bucket).sum()),
                          "all_boundary_cost": all_marginal, "accepted_boundary_cost": marginal,
                          "accepted_total_cost": total,
+                         "task_position_words_verified": count * 3,
                          "selected_cost_histogram": {str(c): int((task_cost == c).sum()) for c in (1, 4, 16)}})
     return {"status": "compatible_with_order_dependent_budget", "shader_sha256": SHADER,
+            "resource_namespace": namespace,
+            "allocation_inputs": {
+                "scope": "Shader-used budget/distance inputs and frame references aligned by active grid cell; physical probe IDs excluded",
+                "active_cells": len(reference_cells),
+                "active_cells_sha256": hashlib.sha256(reference_cells.astype("<u4").tobytes()).hexdigest(),
+                "aligned_frame_reference_sha256": hashlib.sha256(reference_frames.astype("<u4").tobytes()).hexdigest(),
+                "frame_number": struct.unpack_from("<I", root, root_offset + 108)[0],
+                "maximum_probes": maximum, "grid_resolution": 48, "clipmaps": 4,
+                "distance_threshold_words": thresholds.view("<u4").tolist(),
+                "clip_spacing_words": scale.view("<u4").tolist(),
+                "clip_bias_words": bias.view("<u4").tolist(),
+                "view_tile_words": tile.view("<u4").tolist(),
+                "view_camera_words": camera.view("<u4").tolist(),
+                "boundary_bucket": scalar(0, "first", "MaxUpdateBucket"),
+                "boundary_budget": scalar(0, "first", "MaxTracesFromMaxUpdateBucket")},
             "scope": __doc__, "before_report": str(before_path.resolve()), "after_report": str(after_path.resolve()),
             "pipeline_report": str(pipeline_path.resolve()), "observations": rows,
             "frame_reference_scope": "Stable frame arrays from the independent pre-boundary pair; not a same-dispatch snapshot",
@@ -207,8 +257,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("before", "after", "pipeline", "out"):
         parser.add_argument(name, type=Path)
+    parser.add_argument("--rdc-ids", action="store_true",
+                        help="Use capture-local RenderDoc IDs and API boundaries; do not infer Flora identities")
     args = parser.parse_args()
-    result = analyze(args.before, args.after, args.pipeline)
+    result = analyze(args.before, args.after, args.pipeline, args.rdc_ids)
     with args.out.open("x", encoding="utf-8") as output:
         json.dump(result, output, indent=2)
         output.write("\n")
