@@ -7446,6 +7446,80 @@ or failed probes), one bounded RDC buffer query and three native modification/
 undo replays. The analysis query reports no loaded GPA modules. No all-sample
 regression or portable acceptance is claimed.
 
+### BF1 shadow-prefix readback state and original-player variation
+
+The apparent third-shadow-Draw mismatch was an original-exporter artifact.
+Initial per-Draw probes of dump helper **0xb1a0** returned the same 256,000-byte
+buffer after work ordinals **13** and **15**, with SHA-256
+`b76404e012aa2caec2fda62c5b0d385c19fdedb24e60643c74353f1bff7ad01b`.
+Those bytes must not be used as valid intermediate reference contents. An earlier
+one-barrier probe using the same unchecked readback state is likewise excluded.
+A native DrawInstanced breakpoint independently confirms the actual Draw precedes
+each selected dump callback and uses the captured **3/1/0/0** arguments; this
+was not an off-by-one Draw selection.
+
+Ghidra identifies the dump helper's state lookup at **0xb444**, calling **0x9dc0**,
+and its returned state at **0xb449**. That state becomes the readback transition's
+StateBefore at **0xb492**; **0xb4b1** records the transition, and **0xb4f6** records
+the copy. At ordinal **15**, a bounded probe verifies the native source pointer
+matches the ClearUAV resource whose original identity is **0x20664cf30**, then
+observes returned state **0x400 (COPY_DEST)**. The first diagnostic child rejects
+that unexpected state before completing a dump. Captured source record
+**364523**, execution **35614**, in preceding list **0x27b2bcc30**, transitions
+this resource from **0xc0** to **0x8 (UNORDERED_ACCESS)**. The shadow list contains
+no intervening resource barrier until **265611 / 35771**, which transitions it
+from UAV to COPY_SOURCE. The dump layer's recording-time lookup is therefore
+stale relative to the actual submitted sequence. Its local-list/global fallback
+in **0x9dc0** cannot be assumed to provide a valid execution-boundary state.
+
+A corrected diagnostic child accepts only the verified source and observed
+COPY_DEST state, substitutes **UAV** as the export helper's StateBefore, and
+restores the one-shot breakpoint immediately. The helper now records UAV to
+COPY_SOURCE, the copy, and the reverse transition. No extra ordering operation is
+added between the preceding shadow Draws. The child exits **0**. Its ordinal-15
+readback matches both the saved direct native prefix and the existing four-barrier
+RDC prefix at execution **35751**, across all **256,000 bytes**: SHA-256
+`bb4e98be94f0da8cf8817fb2b586b4144e47669c478207212fbf5806cd3f405d`.
+The previous invalid reference differs in **144 float words**; indices
+1428/1432/1436 are **0** in the valid readback, rather than the invalid **1**.
+This resolves this specific apparent pipeline/input discrepancy. The diagnostic
+readback itself adds synchronization after the selected Draw, so it does not
+establish uninstrumented whole-frame determinism.
+
+The final CopyResource boundary from the previous milestone is separately
+checked, without changing the export state. At **265612 / 35772**, **0xb449**
+returns **0x800 (COPY_SOURCE)** for the identity-checked source, agreeing with the
+captured immediately preceding transition. This child exits **0** and its full
+buffer has SHA-256
+`749ae336379772522d09b2e4f51bc4a3c747c715a29eb5ed82424faa07cc1286`, exactly the
+saved native four-barrier result. It differs from the previous original-player
+readback only at the same **12 words, 1428–1439**. Thus those two observed values
+are both obtainable from original-player runs with no inter-Draw barrier
+experiment. The earlier shader experiment still proves the cause of its saved
+particle-image discrepancy and exact undo; its supplied factors are not a unique
+correct result to hardcode into replay.
+
+A final focused control records one explicit global UAV barrier after ordinal
+**15**, before the fourth shadow Draw, and uses the checked UAV state for the
+ordinal-17 readback. It exits **0** and also matches the entire native four-barrier
+buffer, SHA-256 `749ae336...1286`. The third/fourth shaders read and write the same
+UAV, and the captured interval has no UAV barrier. These observations support an
+ordering sensitivity, but one controlled run does not establish that this one
+barrier eliminates every variation. Default replay remains unchanged. No
+additional repeated runs or all-sample regression were used to claim stability.
+
+Evidence remains under ignored `artifacts/dx12-research`:
+`dump-buffer-barriers-code1.txt`, `dump-list-state-callers1.txt`,
+`gpa-bf1-shadow-trace15-1`, `gpa-bf1-shadow-state15-{1,2}`,
+`gpa-bf1-shadow-copy-state1`, `gpa-bf1-shadow-ordered-state17-1`,
+`bf1-shadow-native-prefix15-1`, and the corresponding bounded
+`gpa_bf1_{shadow_state,copy_state,shadow_order_state}_probe.cpp` helpers.
+The successful state-correct prefix and ordering-control folders include exact
+byte/float comparisons. The GPA DLL/player hashes remain those recorded above.
+All breakpoint changes are confined to each probe's own child; installed files,
+captures and shipping code remain unchanged. This evidence milestone does not
+complete BF1 full-frame fidelity or the remaining cross-sample feature acceptance.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -7459,7 +7533,7 @@ regression or portable acceptance is claimed.
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; selected D32 Equal Draw refresh preserves original depth bytes and aligns its mapped color-history boundary with native readback; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; targeted VS shadow-factor experiment restores the full particle attachment to original GPA bytes and undo restores the native/barrier output; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
-| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; recovered original shadow buffer and a 12-vertex diagnostic shader correction account for all bytes at that boundary, while upstream ordering and default replay fidelity remain unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
+| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; recovered original shadow buffer and a 12-vertex diagnostic shader correction account for all bytes at that boundary, while state-correct third-Draw and final-copy readbacks match the selected native results; original final-copy runs also vary at those 12 factors, and default full-frame fidelity remains unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
