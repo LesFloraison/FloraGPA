@@ -7280,6 +7280,73 @@ portable acceptance was promoted. Early depth/stencil semantics, mixed
 per-fragment failures, MSAA, full depth reconstruction, mesh/view instancing and
 GS primitive-ID recovery remain unfinished.
 
+### Original BF1 particle-storage boundary and remaining input gap
+
+A new original-player raw readback narrows the main-color mismatch to an earlier
+particle attachment. The selected submitted Draw is execution **36560**, source
+record **255931**, list **0x2af247e70**, zero-based Draw/Dispatch ordinal **13**.
+The source ordering was checked against the saved submitted-command index; the
+submission's list ordinal **75** is not a Draw ordinal and was not used as one.
+The target is object **0x26ddacb60**, creation **325012**, RTV 0, mip/layer 0.
+
+Using the previously identified dump-layer conversion wrapper (RVA **0x15ad0**),
+a bounded debugger launched its own GPA child and copied the selected
+`DirectX::Image` before PNG conversion. It restored the original instruction and
+continued; GPA exited **0**. No installed binary or capture was edited. The same
+run produced `f_0_cl_2af247e70_dc_13_rtv_0_r_26ddacb60_i_0.png`. The checked source
+was **960 x 504**, DXGI **10** (RGBA16_FLOAT), row pitch **7680**, and **3,870,720**
+bytes. This is the RTV interpretation of the typeless native resource, not a
+preview image used as a GPU oracle. Raw SHA-256:
+`efd68b29828a47ced97da6d5bef5d9986af7e663f9da68071029891a08d1a16d`.
+
+Comparison against the saved native particle boundary and the explicit
+four-barrier experiment (both `a1cec82b979735c74db4dd23e7b41bcd189128ae376bbcd6fae0abfc029b7138`)
+finds **26,473** differing packed pixels, bounded by **(668,197)–(959,432)**.
+Per-component differing-pixel counts are **26,242 / 26,185 / 26,048 / 0** for
+RGBA. All Alpha storage words and nonzero-Alpha coverage are identical; only RGB
+differs. Maximum absolute RGB differences are **0.00433349609375 /
+0.00311279296875 / 0.001983642578125**. At (836,241):
+
+| Source | R | G | B | A |
+| --- | --- | --- | --- | --- |
+| Original GPA | 0.037872314453125 | 0.03363037109375 | 0.0281219482421875 | 0.65478515625 |
+| Saved native/barrier output | 0.035003662109375 | 0.031463623046875 | 0.02667236328125 | 0.65478515625 |
+
+These values are exactly the two previously observed debug references. The new
+original raw output therefore confirms a real intermediate RGB discrepancy; it
+is not an Alpha display conversion or solely a later tone-map mismatch. Its
+right-side location is consistent with the earlier main-color difference, but
+this is not proof that it accounts for every downstream differing pixel. Equal
+Alpha alone does not prove all geometry/depth behavior is identical. Separate
+original replay runs can vary, as already documented; neither output is declared
+the unique deterministic result of the capture.
+
+An attempted earlier input boundary remains unavailable. The original dump layer
+was asked for shadow UAV object **0x20664cf30**, creation **300425**, after source
+**265610** / execution **35770**, list **0x27b022210**, work ordinal **17**. It
+exited 0 without a buffer file. Removing the resource/view filter at that exact
+Draw, then checking all buffer bindings at the known particle Draw, also produced
+no buffer files. These are failed extraction attempts, not zero contents or
+successful comparisons. Logs contain invalid-binding messages. A read-only
+Ghidra cross-reference resolves that message to dump-layer RVA **0x8200**, which
+logs it for a zero tracked binding type; buffer dispatch goes through **0xb640**.
+The log is not tied to one resource, so it does not prove which target binding is
+missing or explain the native/original shader-input difference. No barrier or
+capture bytes were changed to force agreement.
+
+Evidence: `gpa-bf1-particle-raw1/{probe.json,original-storage.bin,comparison.json,
+player.log}`, `gpa-bf1-shadow-raw1`, `gpa-bf1-shadow-bindings1`,
+`gpa-bf1-particle-buffers1`, `dump-invalid-binding2.txt`, and the bounded
+`gpa_bf1_particle_probe.cpp` helper under ignored research artifacts. GPA player
+and dump layer report **2025.1.3.1269** (product 2025.1.3). Dump-layer SHA-256
+remains `853913de932f235341655d7f55f1d38d68e56d60df45402acff87825eaf78b72`;
+player SHA-256 is
+`aa605ff70e677f7d71cb841ee8b3573475c228d4b7d871d35c3d4e1cea11c7db`.
+The research used four serial, specifically filtered original-player runs and one
+read-only Ghidra query. No new native/RDC replay or unrelated regression was run.
+The next unresolved boundary is the original particle shadow/lighting input and
+its ordering. BF1 fidelity and full feature/portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -7293,7 +7360,7 @@ GS primitive-ID recovery remain unfinished.
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; selected D32 Equal Draw refresh preserves original depth bytes and aligns its mapped color-history boundary with native readback; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
-| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
+| Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; full fidelity unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
