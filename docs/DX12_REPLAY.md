@@ -9095,6 +9095,96 @@ Ignored evidence: `hellblade-color36656-pipeline1`,
 raw readbacks/difference report, `transfer-endpoints491-assets.txt`,
 `transfer-endpoints492-ui.txt`, and `build491.log` / `build492.log`.
 
+### Bound the changing scene color to indirect-light integration
+
+The manual repeat-selection fixture now accepts **`--repeat-only`**. This
+explicitly suppresses its conditional PixelHistory query even when both
+selections agree. The fixture compiles (`build-repeat-selection7.log`); five
+stable boundaries below exercise the new mode without starting history work.
+The application and pinned RenderDoc binary are unchanged (application build
+492). All probes use the existing full-stream `portable-hellblade487` RDC.
+
+At **35915 / 611126 / 87715**, PS `Merge` reads scene color **570473** and
+translucent color/alpha **549756**, with **505987** as transmittance and
+**563063** as depth. A two-selection comparison changes **14,357** output
+pixels in **550849**. Both color inputs vary; transmittance/depth are bit-exact.
+The scene-color input's last ColorTarget use is **35903 / 611113 / 87679**,
+whose PS `Main` reads **550849** plus distortion texture **506845**. This
+leads back to the same scene-color lifetime before those two composites.
+
+A bounded split of that resource's candidate write sequence gives the
+following two-selection full-storage comparisons. Each readback is mip 0,
+layer 0, sample 0, **9,216,000 bytes**; no PixelHistory is called:
+
+| Execution | RDC event | Changed pixels |
+| --- | --- | --- |
+| 29468 | 67347 | 0 |
+| 29993 | 69044 | 0 |
+| 32495 | 77162 | 0 |
+| 32684 | 77729 | 0 |
+| 32731 | 77870 | 0 |
+| 33029 | 78840 | 37,420 |
+| 33146 | 79202 | 38,596 |
+| 33468 | 80183 | 36,049 |
+| 33673 | 80807 | 11,576 |
+
+All changes in this table lie in rows 0–802. These are observed stable/changing
+boundaries, not proof that no earlier transient differences were overwritten.
+An additional check at **78839**, the execution **33029** marker before its
+Draw, confirms that **550849** is still completely stable there.
+That Draw is record **607251**, submission **613006**, direct queue
+**2131165365824**, list **2152464470896**, generation **4**, ordinal **1**.
+PSO creation **506320**, object **2144277861904**, binds `MainPS` with SHA-256
+`22408ff0276611d717ef996aa1719af40441b7e5703661531c6d379b3a243ca2`.
+Its indirect-light inputs already vary **before** the Draw:
+
+| Creation | Binding | Changed full-storage pixels |
+| --- | --- | --- |
+| 562659 | DiffuseIndirect_Textures_0 | 241,237 |
+| 563055 | DiffuseIndirect_Textures_1 | 0 |
+| 562651 | DiffuseIndirect_Textures_2 | 50,142 |
+| 571708 | DiffuseIndirect_Textures_3 | 538 |
+| 515850 | ScreenBentNormal | 0 |
+| 567411 | SceneDepth | 0 |
+| 571426 | GBufferA | 0 |
+
+Usage histories identify a shared UAV-use candidate for **562659/562651**:
+**32951 / 604914 / 78579**, compute queue **2131165364544**.
+Its `ScreenProbeTemporalReprojectionCS` has direct groups **240×101×1**,
+threads **8×8×1**, PSO creation **513029**, bytecode **36,852 bytes**, SHA-256
+`c6872cd56be20eb3e24958f41f7f1a2537c1340e1f8acb5f66576568108cc734`.
+A two-selection comparison at this Dispatch shows variations in both current
+light inputs (**553220/539660**) and prior light inputs (**556121/560152**).
+Velocity **511789** and prior depth **561445** are bit-exact. This does not
+isolate the temporal shader itself as the cause.
+
+To check restoration of these newly implicated resources, select the first
+original marker **327**, then **78579**, then **327** again in one controller.
+All six checked mip-0 resources (**562659, 562651, 553220, 539660, 556121,
+560152**) return to identical complete raw storage. This rules out directly
+retaining changed bytes in these six subresources at the initial boundary;
+it does not establish correctness of all their earlier shader dependencies.
+
+The next concrete candidates are current-light UAV uses **32915 / 604864 /
+78465**, **32933 / 604886 / 78520**, **32939 / 604894 / 78540** and
+**32943 / 604899 / 78554**. Prior light **556121** is itself written within
+the stream at **19294 / 586847 / 32962**; it is not an immutable input.
+Input **571708** follows a separate ColorTarget branch at **32538 / 606994 /
+77291**. No restoration, synchronization or arithmetic fix is claimed.
+
+Ignored evidence includes `hellblade-{color35915,color35903,color33029,
+diffuse32951}-pipeline1`, `hellblade-merge-{color,translucency}-history1`,
+`hellblade-diffuse{0,2,3}-history1`, `hellblade-screenprobe-{current,prior}-history1`,
+`hellblade-color-write-frontier1.json`, `hellblade-merge-repeat1.json`,
+the nine `hellblade-color<execution>-repeat1.json` reports,
+`hellblade-diffuse-before-repeat1.json`, `hellblade-screenprobe-temporal-repeat1.json`,
+`hellblade-screenprobe-initial-roundtrip1.json`, and their bounded raw readbacks
+and difference summaries. `hellblade-screenprobe-evidence-verification1.json`
+records a CPU check of all 13 probes' raw lengths/SHA-256, absent GPA/Python
+modules, and `history_requested: false`. Python/numpy was used only for
+offline evidence comparison. Original-frame fidelity and full feature
+acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -1,7 +1,7 @@
 // Manual diagnosis of a selected texel changing during Hellblade2 history.
 // MSVC C++20, include src and third_party; link bcrypt.lib. No RenderDoc import library.
 // Arguments: renderdoc.dll, dxcompiler.dll, capture.rdc, terminal RDC event,
-// x, y, new report.json, [--readback] [--between-event event] resource creation records...
+// x, y, new report.json, [--readback] [--repeat-only] [--between-event event] resource creation records...
 // Two forced selections in one controller; only if both agree, query history
 // on the first resource. This is bounded fault diagnosis, not a soak test.
 #define NOMINMAX
@@ -86,12 +86,15 @@ int wmain(int argc, wchar_t **argv) try {
     const auto event = number(argv[4]), x = number(argv[5]), y = number(argv[6]);
     const auto resources = controller->GetResources();
     const auto textures = controller->GetTextures();
-    bool readback = false;
+    bool readback = false, repeatOnly = false;
     uint32_t betweenEvent{};
     int firstCreation = 8;
     while (firstCreation < argc) {
         if (std::wstring(argv[firstCreation]) == L"--readback" && !readback) {
             readback = true;
+            ++firstCreation;
+        } else if (std::wstring(argv[firstCreation]) == L"--repeat-only" && !repeatOnly) {
+            repeatOnly = true;
             ++firstCreation;
         } else if (std::wstring(argv[firstCreation]) == L"--between-event" && !betweenEvent &&
                    firstCreation + 1 < argc) {
@@ -165,6 +168,7 @@ int wmain(int argc, wchar_t **argv) try {
     Json report{{"scope", "Two forced selections in one controller; conditional PixelHistory. No native/original-frame fidelity claim."},
         {"capture", utf8(fs::canonical(argv[3]))}, {"event", event}, {"x", x}, {"y", y},
         {"resources", descriptions}, {"history_requested", false},
+        {"repeat_only", repeatOnly},
         {"between_event", betweenEvent ? Json(betweenEvent) : Json()}};
     std::function<void(const rdcarray<ActionDescription> &)> inspectActions;
     inspectActions = [&](const auto &actions) {
@@ -194,7 +198,7 @@ int wmain(int argc, wchar_t **argv) try {
     report["repeat_equal"] = report["first"] == report["second"];
     // An explicit round trip tests restoration only; do not add unrelated
     // PixelHistory work at an initialization boundary.
-    if (report["repeat_equal"] == true && !betweenEvent) {
+    if (report["repeat_equal"] == true && !betweenEvent && !repeatOnly) {
         report["history_requested"] = true;
         const auto modifications = controller->PixelHistory(selected.front(), x, y, Subresource(0, 0, 0), CompType::Typeless);
         report["history_events"] = modifications.size();
