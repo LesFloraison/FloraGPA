@@ -22,38 +22,88 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <cmath>
+#include <algorithm>
 #include <memory>
 namespace flora {
 class ReplayMeshTableModel final : public QAbstractTableModel {
     std::shared_ptr<ReplayMesh> mesh_;
+    bool primitives_{};
+    std::vector<uint64_t> meshletEnds_;
+    std::pair<size_t, uint64_t> primitiveLocation(uint64_t row) const {
+        const auto it = std::upper_bound(meshletEnds_.begin(), meshletEnds_.end(), row);
+        const auto meshlet = size_t(it - meshletEnds_.begin());
+        return {meshlet, row - (meshlet ? meshletEnds_[meshlet - 1] : 0)};
+    }
 
   public:
     explicit ReplayMeshTableModel(QObject *parent) : QAbstractTableModel(parent) {}
     uint32_t firstReference(int row) const {
-        return mesh_ && row >= 0 && size_t(row) < mesh_->firstReferences.size()
+        return !primitives_ && mesh_ && row >= 0 && size_t(row) < mesh_->firstReferences.size()
             ? mesh_->firstReferences[size_t(row)] : UINT32_MAX;
     }
-    void setMesh(std::shared_ptr<ReplayMesh> mesh) {
+    void setMesh(std::shared_ptr<ReplayMesh> mesh, bool primitives = false,
+                 const nlohmann::json &meshlets = nlohmann::json::array()) {
+        std::vector<uint64_t> ends;
+        if (primitives) {
+            uint64_t count{};
+            if (!mesh || !meshlets.is_array()) throw std::runtime_error("Missing primitive meshlet mapping");
+            for (const auto &group : meshlets) {
+                const auto &indices = group.at("indices");
+                if (!indices.is_number_integer() || indices < 0 || indices > UINT32_MAX ||
+                    indices.get<uint64_t>() % 3)
+                    throw std::runtime_error("Invalid triangle meshlet index count");
+                count += indices.get<uint64_t>() / 3;
+                if (count > mesh->positions.size()) throw std::runtime_error("Meshlet primitives exceed attribute rows");
+                ends.push_back(count);
+            }
+            if (count != mesh->positions.size()) throw std::runtime_error("Meshlet primitives do not cover attribute rows");
+        }
         beginResetModel();
         mesh_ = std::move(mesh);
+        primitives_ = primitives; meshletEnds_ = std::move(ends);
         endResetModel();
+    }
+    std::string csv() const {
+        if (!mesh_) return {};
+        if (!primitives_) return mesh_->csv();
+        std::string result = "primitive,meshlet,local_primitive";
+        for (uint32_t c = 0; c < mesh_->components; ++c) result += std::string(",") + "xyzw"[c];
+        result += "\r\n";
+        for (size_t i = 0; i < mesh_->positions.size(); ++i) {
+            const auto [group, local] = primitiveLocation(i);
+            result += std::to_string(i) + ',' + std::to_string(group) + ',' + std::to_string(local);
+            for (uint32_t c = 0; c < mesh_->components; ++c) result += ',' + replayMeshFloat(mesh_->positions[i][c]);
+            result += "\r\n";
+        }
+        return result;
     }
     int rowCount(const QModelIndex &parent = {}) const override {
         return parent.isValid() || !mesh_ ? 0 : int((std::min)(mesh_->positions.size(), size_t(INT_MAX)));
     }
     int columnCount(const QModelIndex &parent = {}) const override {
-        return parent.isValid() ? 0 : mesh_ ? int(mesh_->components + 1) : 5;
+        return parent.isValid() ? 0 : mesh_ ? int(mesh_->components + (primitives_ ? 3 : 1)) : 5;
     }
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
         if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section < 0 ||
             section >= columnCount())
             return {};
+        if (primitives_) {
+            if (section < 3) return QStringList{"Primitive", "Meshlet", "Local primitive"}[section];
+            return QString(QChar("xyzw"[section - 3]));
+        }
         return section ? QString(QChar("xyzw"[section - 1])) : QString("Vertex");
     }
     QVariant data(const QModelIndex &index, int role) const override {
         if (!index.isValid() || !mesh_ || index.row() >= rowCount() || index.column() >= columnCount() ||
             (role != Qt::DisplayRole && role != Qt::ToolTipRole))
             return {};
+        if (primitives_) {
+            const auto [group, local] = primitiveLocation(uint64_t(index.row()));
+            if (index.column() == 0) return QString::number(index.row());
+            if (index.column() == 1) return QString::number(group);
+            if (index.column() == 2) return QString::number(local);
+            return QString::fromStdString(replayMeshFloat(mesh_->positions[index.row()][index.column() - 3]));
+        }
         return index.column() ? QString::fromStdString(
                                     replayMeshFloat(mesh_->positions[index.row()][index.column() - 1]))
                               : QString::number(mesh_->firstVertex + uint64_t(index.row()));
@@ -123,7 +173,7 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     table->setModel(model_);
     table->setAlternatingRowColors(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table->setToolTip("Float32 components before perspective divide; input attributes retain their selected semantic");
+    table->setToolTip("Typed components before perspective divide; primitive rows retain meshlet and local primitive identities");
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->verticalHeader()->hide();
     connect(table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, [this] { updateActions(); });
@@ -389,6 +439,10 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         vertexMapping_ = count == meshData->indexCount && result.at("instance") < draw.at("instance_count");
     }
     result_ = result;
+    if (result.at("stage") == "MeshOut") {
+        result_["table_attribute"] = "position";
+        result_["table_rate"] = "vertex";
+    }
     preview_->setToolTip(meshData->perspectiveDivide ? "Post-shader positions · Perspective divide applied · Drag to rotate"
         : "Selected input attribute · No perspective divide · Semantic is not assumed to be position");
     files_ = std::move(files);
@@ -397,7 +451,7 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         const QSignalBlocker blocker(outputAttribute_); outputAttribute_->clear();
         outputAttribute_->addItem("Position", -1);
         const auto layout = result.at("mesh").value("output_layout", Json::object());
-        if (dx12_ && result.at("stage") == "VSOut" && layout.value("status", "") == "mapped") {
+        if (dx12_ && (result.at("stage") == "VSOut" || result.at("stage") == "MeshOut") && layout.value("status", "") == "mapped") {
             for (size_t i = 0; i < layout.at("attributes").size(); ++i) {
                 const auto &attr = layout.at("attributes")[i];
                 if (attr.value("position", false) || !attr.value("supported", false)) continue;
@@ -407,6 +461,20 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                     .arg(attr.at("semantic_index").get<unsigned>())
                     .arg(type == 1 ? "float" : type == 4 ? "uint" : "int")
                     .arg(attr.at("format").at("compCount").get<unsigned>()), int(i));
+            }
+        }
+        const auto primitiveLayout = primitiveData.value("output_layout", Json::object());
+        if (files_.contains("post_primitives.bin") && primitiveLayout.value("status", "") == "mapped") {
+            for (size_t i = 0; i < primitiveLayout.at("attributes").size(); ++i) {
+                const auto &attr = primitiveLayout.at("attributes")[i];
+                if (!attr.value("supported", false)) continue;
+                const auto type = attr.at("format").at("compType").get<unsigned>();
+                outputAttribute_->addItem(QString("Primitive %1%2 · %3%4")
+                    .arg(QString::fromStdString(attr.at("semantic").get<std::string>()))
+                    .arg(attr.at("semantic_index").get<unsigned>())
+                    .arg(type == 1 ? "float" : type == 4 ? "uint" : "int")
+                    .arg(attr.at("format").at("compCount").get<unsigned>()), int(i));
+                outputAttribute_->setItemData(outputAttribute_->count() - 1, "primitive", Qt::UserRole + 1);
             }
         }
         if (outputAttribute_->count() == 1) outputAttribute_->clear();
@@ -421,8 +489,12 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                           .arg(meshData->faces.size()));
     if (dx12_ && result.contains("indirect_selection"))
         summary_->setText(summary_->text() + QString(" · indirect action %1").arg(indirectActionOrdinal(result.at("indirect_selection"))));
-    if (files_.contains("post_primitives.bin"))
-        summary_->setText(summary_->text() + "\nRaw per-primitive attributes are available in Export (.pbin); semantic decoding is not provided.");
+    if (files_.contains("post_primitives.bin")) {
+        const auto layout = primitiveData.value("output_layout", Json::object());
+        summary_->setText(summary_->text() + (layout.value("status", "") == "mapped"
+            ? "\nSelect a primitive attribute for the table and CSV; raw data is available in Export (.pbin)."
+            : "\nRaw primitive data is available in Export (.pbin). " + QString::fromStdString(layout.value("reason", "Semantic decoding is unavailable."))));
+    }
     else if (primitiveData.value("status", "") == "unavailable")
         summary_->setText(summary_->text() + "\n" + QString::fromStdString(primitiveData.value("reason", "Primitive attributes are unavailable")));
     if (isolateMissingQueries_)
@@ -440,21 +512,34 @@ void ReplayMeshView::selectOutputAttribute() {
     if (result_.is_null() || outputAttribute_->currentIndex() < 0) return;
     auto metadata = result_.at("mesh");
     const auto index = outputAttribute_->currentData().toInt();
+    const bool primitive = outputAttribute_->currentData(Qt::UserRole + 1).toString() == "primitive";
+    Json selected = "position";
     if (index >= 0) {
-        const auto &attribute = metadata.at("output_layout").at("attributes").at(size_t(index));
+        const auto &layout = primitive ? metadata.at("per_primitive_data").at("output_layout") : metadata.at("output_layout");
+        const auto &attribute = layout.at("attributes").at(size_t(index));
         if (!attribute.at("supported").get<bool>()) throw std::runtime_error("Unsupported output attribute");
+        selected = attribute;
         metadata["attribute_byte_offset"] = attribute.at("byte_offset");
         metadata["format"] = attribute.at("format");
         metadata["perspective_divide"] = false;
     }
+    if (primitive) {
+        metadata["vertexByteStride"] = metadata.at("per_primitive_stride");
+        metadata["numIndices"] = metadata.at("per_primitive_data").at("primitive_count");
+        metadata["indexResourceId"] = "ResourceId::0";
+        metadata["indexByteStride"] = 0; metadata["baseVertex"] = 0;
+        metadata["topology"] = 1;
+    }
     const auto bytes = [](const QByteArray &b) {
         return std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(b.constData()), size_t(b.size()));
     };
-    const auto &vertices = files_["post_vertices.bin"], &indices = files_["post_indices.bin"];
+    const auto &vertices = files_[primitive ? "post_primitives.bin" : "post_vertices.bin"];
+    const auto indices = primitive ? QByteArray{} : files_.value("post_indices.bin");
     auto meshData = std::make_shared<ReplayMesh>(ReplayMesh::decode(metadata, bytes(vertices), bytes(indices)));
-    selectedCsv_ = QByteArray::fromStdString(meshData->csv());
-    model_->setMesh(std::move(meshData));
-    result_["table_attribute"] = index >= 0 ? metadata.at("output_layout").at("attributes").at(size_t(index)) : Json("position");
+    model_->setMesh(std::move(meshData), primitive, metadata.value("meshlets", Json::array()));
+    selectedCsv_ = QByteArray::fromStdString(model_->csv());
+    result_["table_attribute"] = std::move(selected);
+    result_["table_rate"] = primitive ? "primitive" : "vertex";
     if (!details_->isHidden()) details_->setPlainText(QString::fromStdString(result_.dump(2)));
     updateActions();
 }
@@ -472,7 +557,8 @@ void ReplayMeshView::exportResult(const QString &path) const {
                        : suffix == "ibin" ? files_.value("input_indices.bin")
                        : suffix == "pbin" ? files_.value("post_primitives.bin")
                                          : QByteArray::fromStdString(result_.dump(2));
-    if (suffix == "pbin" || (isolateMissingQueries_ && (suffix == "obj" || suffix == "csv" || suffix == "vbin" || suffix == "ibin"))) {
+    if (suffix == "pbin" || (suffix == "csv" && result_.at("stage") == "MeshOut") ||
+        (isolateMissingQueries_ && (suffix == "obj" || suffix == "csv" || suffix == "vbin" || suffix == "ibin"))) {
         auto metadata = result_;
         metadata["exported_artifact"] = {
             {"file", QFileInfo(path).fileName().toStdString()}, {"bytes", std::to_string(bytes.size())},

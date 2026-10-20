@@ -3509,6 +3509,34 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         view.setContext("mesh-shader-experiment", 10267, true, true);
         const auto request = view.requestId();
         QVERIFY(view.finish(request, mesh, geometry));
+        view.exportResult(output + "/initial-positions.csv");
+        const auto initial = Json::parse(read(output + "/initial-positions.csv.json").toStdString());
+        QCOMPARE(initial.at("table_attribute"), Json("position"));
+        QCOMPARE(initial.at("table_rate"), Json("vertex"));
+        const auto attrs = view.findChild<QComboBox *>("replayMeshOutputAttribute");
+        const auto table = view.findChild<QTableView *>("replayMeshPositions");
+        int primitiveAttribute = -1, projectedAttribute = -1;
+        for (int i = 0; i < attrs->count(); ++i) {
+            if (attrs->itemData(i, Qt::UserRole + 1) == "primitive") primitiveAttribute = i;
+            else if (attrs->itemText(i).startsWith("TEXCOORD0")) projectedAttribute = i;
+        }
+        QVERIFY(primitiveAttribute >= 0); QVERIFY(projectedAttribute >= 0);
+        attrs->setCurrentIndex(primitiveAttribute);
+        QCOMPARE(table->model()->rowCount(), 1); QCOMPARE(table->model()->columnCount(), 7);
+        QCOMPARE(table->model()->headerData(0, Qt::Horizontal).toString(), QString("Primitive"));
+        QCOMPARE(table->model()->index(0, 4).data().toString().toDouble(), 7.0);
+        QVERIFY(!view.findChild<QAction *>("replayMeshDebugVertex")->isEnabled());
+        view.exportResult(output + "/primitive.csv");
+        QCOMPARE(read(output + "/primitive.csv"), QByteArray("primitive,meshlet,local_primitive,x,y,z,w\r\n0,0,0,0.0,7.0,0.0,0.0\r\n"));
+        const auto csvMetadata = Json::parse(read(output + "/primitive.csv.json").toStdString());
+        QCOMPARE(csvMetadata.at("table_attribute").at("semantic_index"), Json(7));
+        QCOMPARE(csvMetadata.at("table_rate"), Json("primitive"));
+        attrs->setCurrentIndex(projectedAttribute);
+        QCOMPARE(table->model()->rowCount(), 3);
+        QCOMPARE(table->model()->index(1, 1).data().toString().toDouble(), 512.0);
+        view.exportResult(output + "/positions.obj");
+        QCOMPARE(read(output + "/positions.obj"), read(geometry + "/post_geometry.obj"));
+        attrs->setCurrentIndex(0);
         view.exportResult(output + "/primitive.pbin");
         QCOMPARE(read(output + "/primitive.pbin"), primitive);
         const auto sidecar = Json::parse(read(output + "/primitive.pbin.json").toStdString());
@@ -4184,6 +4212,28 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QCOMPARE(primitive.size(), qint64(96731 * 16));
             QCOMPARE(primitive.readAll(), reference.readAll());
             QVERIFY(QFileInfo::exists(exported.filePath("mesh.pbin.json")));
+            const auto attrs = mesh->findChild<QComboBox *>("replayMeshOutputAttribute");
+            int selection = -1;
+            for (int i = 0; i < attrs->count(); ++i)
+                if (attrs->itemData(i, Qt::UserRole + 1) == "primitive") selection = i;
+            QVERIFY(selection >= 0); attrs->setCurrentIndex(selection);
+            auto table = mesh->findChild<QTableView *>("replayMeshPositions")->model();
+            QCOMPARE(table->rowCount(), 96731);
+            reference.seek(0); const auto raw = reference.readAll();
+            uint32_t first{};
+            const auto &groups = result.at("mesh").at("meshlets");
+            for (size_t group = 0; group < groups.size(); ++group) {
+                const auto count = groups[group].at("indices").get<uint32_t>() / 3;
+                if (count) for (const auto row : {first, first + count - 1}) {
+                    QCOMPARE(table->index(int(row), 1).data().toString().toULongLong(), qulonglong(group));
+                    QCOMPARE(table->index(int(row), 2).data().toString().toULongLong(), qulonglong(row - first));
+                    uint32_t words[4]{}; memcpy(words, raw.constData() + size_t(row) * 16, 16);
+                    for (int c = 0; c < 4; ++c)
+                        QCOMPARE(table->index(int(row), c + 3).data().toString().toDouble(), double(words[c]));
+                }
+                first += count;
+            }
+            QCOMPARE(first, 96731U);
         }
         const auto serial = mesh->requestId();
         locate->setText("10135");

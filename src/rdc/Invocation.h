@@ -16,6 +16,7 @@ nlohmann::json rdcBufferInputSnapshot(const std::vector<RdcBufferInputRange> &,
                                       const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read,
                                       uint64_t byteBudget = 16 * 1024 * 1024);
 nlohmann::json rdcVertexOutputLayout(const ShaderReflection &, uint32_t stride);
+nlohmann::json rdcMeshOutputLayout(const ShaderReflection &, uint32_t stride, bool perPrimitive);
 nlohmann::json rdcVertexInputSnapshot(const ActionDescription &, const D3D12Pipe::InputAssembly &,
                                      uint32_t vertex, uint32_t instance,
                                      const std::function<bytebuf(ResourceId, uint64_t, uint64_t)> &read);

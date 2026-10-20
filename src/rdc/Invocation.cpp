@@ -124,6 +124,47 @@ Json rdcVertexOutputLayout(const ShaderReflection &shader, uint32_t stride) {
     result.update({{"status", "mapped"}, {"stride", stride}, {"attributes", attributes}});
     return result;
 }
+Json rdcMeshOutputLayout(const ShaderReflection &shader, uint32_t stride, bool perPrimitive) {
+    Json result{{"status", "unavailable"}, {"rate", perPrimitive ? "primitive" : "vertex"},
+        {"scope", "RenderDoc 1.45 D3D12 compacted mesh output signature packing"}};
+    if (shader.stage != ShaderStage::Mesh || shader.outputSignature.empty() || shader.outputSignature.size() > 1024) {
+        result["reason"] = "No bounded mesh output signature"; return result;
+    }
+    std::vector<size_t> order;
+    for (size_t i = 0; i < shader.outputSignature.size(); ++i) {
+        const auto &s = shader.outputSignature[i];
+        if (s.perPrimitiveRate != perPrimitive) continue;
+        if (s.systemValue == ShaderBuiltin::Position) order.insert(order.begin(), i);
+        else order.push_back(i);
+    }
+    uint64_t offset{}; unsigned positions{}; Json attributes = Json::array();
+    for (const auto i : order) {
+        const auto &s = shader.outputSignature[i];
+        const bool position = s.systemValue == ShaderBuiltin::Position;
+        positions += position;
+        const auto type = s.varType == VarType::Float ? CompType::Float
+            : s.varType == VarType::UInt ? CompType::UInt
+            : s.varType == VarType::SInt ? CompType::SInt : CompType::Typeless;
+        // Unlike VS stream-output packing, mesh instrumentation uses actual
+        // scalar widths. Never assume four bytes for an unsupported type.
+        if (type == CompType::Typeless || !s.compCount || s.compCount > 4 || s.stream ||
+            (position && (perPrimitive || s.compCount != 4)) || positions > 1) {
+            result["reason"] = "Mesh attribute decoding requires float32, uint32 or sint32 components and a supported signature";
+            return result;
+        }
+        attributes.push_back({{"signature_index", i}, {"semantic", std::string(s.semanticName.c_str())},
+            {"semantic_index", s.semanticIndex}, {"register", s.regIndex}, {"position", position},
+            {"rate", perPrimitive ? "primitive" : "vertex"}, {"byte_offset", offset}, {"supported", true},
+            {"format", {{"compType", uint32_t(type)}, {"compByteWidth", 4}, {"compCount", s.compCount}}}});
+        offset += uint64_t(s.compCount) * 4;
+    }
+    if (attributes.empty() || (!perPrimitive && positions != 1) || offset != stride) {
+        result["reason"] = "Reflected mesh packing differs from the GPU stride or has no unique vertex position";
+        return result;
+    }
+    result.update({{"status", "mapped"}, {"stride", stride}, {"attributes", attributes}});
+    return result;
+}
 Json rdcExecutedAction(const ActionDescription &action) {
     Json result{{"event_id", action.eventId},
                 {"indirect", bool(action.flags & ActionFlags::Indirect)},

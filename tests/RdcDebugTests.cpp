@@ -233,6 +233,31 @@ class RdcDebugTests : public QObject {
         for (unsigned i = 0; i < 3; ++i) QCOMPARE(snapshot.at("attributes")[i].at("status"), Json("unavailable"));
         QCOMPARE(snapshot.at("attributes")[3].at("status"), Json("read"));
     }
+    void meshOutputLayout() {
+        using Json = nlohmann::json;
+        ShaderReflection shader; shader.stage = ShaderStage::Mesh;
+        SigParameter projected; projected.semanticName = "TEXCOORD"; projected.compCount = 4; projected.varType = VarType::Float;
+        SigParameter unused = projected; unused.semanticIndex = 1; unused.compCount = 3; unused.varType = VarType::UInt;
+        SigParameter rectangle = projected; rectangle.semanticIndex = 2; rectangle.varType = VarType::SInt;
+        SigParameter position = projected; position.semanticName = "SV_Position"; position.systemValue = ShaderBuiltin::Position;
+        SigParameter primitive = projected; primitive.semanticIndex = 7; primitive.varType = VarType::UInt; primitive.perPrimitiveRate = true;
+        shader.outputSignature = {projected, unused, rectangle, position, primitive};
+        const auto vertex = rdcMeshOutputLayout(shader, 60, false);
+        const auto prim = rdcMeshOutputLayout(shader, 16, true);
+        QCOMPARE(vertex.at("status"), Json("mapped")); QCOMPARE(prim.at("status"), Json("mapped"));
+        QCOMPARE(vertex.at("attributes").size(), size_t(4));
+        QCOMPARE(vertex["attributes"][0]["signature_index"], Json(3));
+        QCOMPARE(vertex["attributes"][1]["byte_offset"], Json(16));
+        QCOMPARE(vertex["attributes"][2]["byte_offset"], Json(32));
+        QCOMPARE(vertex["attributes"][3]["byte_offset"], Json(44));
+        QCOMPARE(prim["attributes"][0]["semantic_index"], Json(7));
+        QCOMPARE(prim["attributes"][0]["byte_offset"], Json(0));
+        QCOMPARE(prim["attributes"][0]["format"]["compType"], Json(uint32_t(CompType::UInt)));
+        QCOMPARE(rdcMeshOutputLayout(shader, 20, true).at("status"), Json("unavailable"));
+        shader.outputSignature[4].varType = VarType::UShort;
+        QCOMPARE(rdcMeshOutputLayout(shader, 8, true).at("status"), Json("unavailable"));
+        QCOMPARE(rdcMeshOutputLayout(shader, 60, false).at("status"), Json("mapped"));
+    }
     void vertexOutputLayout() {
         using Json = nlohmann::json;
         ShaderReflection shader; shader.stage = ShaderStage::Vertex;

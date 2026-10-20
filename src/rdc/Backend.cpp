@@ -1953,6 +1953,9 @@ Json runRdcJob(const Json &job) {
                              {"per_primitive_attributes_exported", false},
                              {"scope", "all_meshlets_positions_and_triangle_indices"}});
         if (meshOutput && dx12) {
+            const auto *pipeline = controller.GetD3D12PipelineState();
+            const auto *shader = pipeline ? pipeline->meshShader.reflection : nullptr;
+            if (shader) metadata["output_layout"] = rdcMeshOutputLayout(*shader, mesh.vertexByteStride, false);
             Json primitiveData{{"status", mesh.perPrimitiveStride ? "unavailable" : "not_present"}};
             if (mesh.perPrimitiveStride && session.meshPrimitiveOffsetPatch == 1) {
                 const uint64_t offset = mesh.perPrimitiveOffset;
@@ -1971,7 +1974,9 @@ Json runRdcJob(const Json &job) {
                     {"byte_offset", std::to_string(offset)}, {"bytes", std::to_string(length)},
                     {"stride", mesh.perPrimitiveStride}, {"primitive_count", mesh.numIndices / 3},
                     {"sha256", QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toStdString()},
-                    {"layout", "Raw per-primitive attributes in compacted meshlet/triangle order; semantic decoding is not provided"}};
+                    {"layout", "Per-primitive attributes in compacted meshlet/triangle order"},
+                    {"output_layout", shader ? rdcMeshOutputLayout(*shader, mesh.perPrimitiveStride, true)
+                        : Json{{"status", "unavailable"}, {"reason", "Mesh shader reflection is unavailable"}}}};
                 metadata["per_primitive_attributes_exported"] = true;
             } else if (mesh.perPrimitiveStride) {
                 primitiveData["reason"] = "The selected RenderDoc runtime lacks the DX12 mesh primitive-offset correction";

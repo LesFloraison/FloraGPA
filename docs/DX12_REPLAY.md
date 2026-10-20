@@ -10856,11 +10856,58 @@ Evidence: `hellblade-mesh-shader-project1/{modified,restored,redone,pipeline}.js
 analysis reports no GPA modules. Research compilation/byte comparison does
 not introduce a Python runtime dependency.
 
+### Reflected MeshOut vertex and primitive tables
+
+The geometry workspace now decodes the actual MS output reflection for both
+vertex and per-primitive attributes. The layout follows RenderDoc 1.45's
+mesh instrumentation: move the unique position output to the start of the
+vertex record, retain the remaining signature order, and pack primitive
+attributes separately. Only float32, uint32 and sint32 layouts whose computed
+size matches the returned GPU stride are enabled. Other scalar widths or
+inconsistent signatures retain raw export with an unavailable reason.
+
+The MeshOut attribute selector exposes vertex `TEXCOORD0/1/2` and primitive
+`TEXCOORD7` for the two Hellblade captures examined here. Primitive tables
+contain **Primitive**, **Meshlet**, **Local primitive** and component columns;
+meshlet ordinals retain empty entries. They do not reconstruct amplification
+shader invocations or assume that every meshlet is a direct workgroup.
+The table and CSV use the selected attribute; the geometry preview and OBJ
+retain the original position/index data. MeshOut CSV exports include a JSON
+sidecar identifying the selected semantic, rate and execution.
+
+The controlled replacement's reflected strides are **60** vertex bytes and
+**16** primitive bytes. Its four vertex attributes start at **0, 16, 32, 44**;
+the primitive attribute starts at **0** in its own record. The workspace shows
+the exact `uint4(0, 7, 0, 0)` and exports:
+
+```
+primitive,meshlet,local_primitive,x,y,z,w
+0,0,0,0.0,7.0,0.0,0.0
+```
+
+Switching to vertex TEXCOORD0 reads the known projected coordinate 512;
+exported OBJ bytes remain unchanged. The original game capture exposes
+**96,731 primitive rows**. For every nonempty meshlet, the first and last
+rows' meshlet/local identities and all four uint32 components match the saved
+primitive bytes. Empty meshlet counts are included in ordinal mapping.
+Existing corruption and stale-result rejection checks also pass.
+
+Evidence: `hellblade-mesh-shader-attributes1/result.json`,
+`hellblade-mesh-original-attributes1/result.json`,
+`hellblade-mesh-attribute-ui1/{primitive.csv,primitive.csv.json,positions.obj}`,
+`mesh-output-layout1.txt` (mesh packing, unsupported widths and existing VS
+layout checks), `mesh-attribute-workspace1.txt`,
+`mesh-original-attribute-workspace1.txt` and
+`mesh-attribute-workspace2.txt` (including initial-position CSV provenance),
+`build-mesh-attribute-table{1,2}.log`. Both analysis runs reuse existing RDC
+captures. This adds typed geometry inspection; it does not establish complete
+original-frame fidelity or add AS/MS instruction debugging.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
-| Mesh shader replacement and primitive attribute export | Not exercised | Not exercised | MS-only replacement in PSO 515336 preserves original PS/root, produces 65,536 exact controlled texels and one triangle; undo restores original mask/depth with known raw-index variation; corrected RenderDoc offset exposes original 96,731-primitive raw data; workspace export/hash/stale-result checks verified; semantic attribute table and AS/MS debugging unfinished |
+| Mesh shader replacement and primitive attribute export | Not exercised | Not exercised | MS-only replacement in PSO 515336 preserves original PS/root, produces 65,536 exact controlled texels and one triangle; undo restores original mask/depth with known raw-index variation; corrected offsets and reflection expose 96,731 primitive rows, typed vertex/primitive selection, meshlet-local identities, raw/CSV export and provenance; unsupported scalar layouts and AS/MS debugging remain unavailable |
 | PS debugging after Mesh Dispatch | Not verified on this sample | Not verified on this sample | Execution 10267 yields 38 PS steps; stage-specific workspace entry, breakpoint, exact 64-bit Watch and stale-result rejection verified; packed operand matches one GPU texel observation but the texel changes during debug replays, correctly reported partial; AS/MS and complete fidelity unfinished |
 | Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; coherent same-context readbacks show all 19,702 written pixels preserve visible-entry words, local primitive and depth despite a one-to-one remapping of 486 indices; raw undo equivalence still fails, and full referenced scene data/fidelity remain unverified |
 | Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |
