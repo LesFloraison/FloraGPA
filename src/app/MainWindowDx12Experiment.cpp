@@ -1,8 +1,10 @@
 #include "MainWindow.h"
 #include <QAction>
+#include <QCheckBox>
 #include <QFile>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QSignalBlocker>
 #include <QStatusBar>
 #include <QtConcurrent/QtConcurrentRun>
 #include <charconv>
@@ -14,6 +16,7 @@ struct ExperimentUi {
     Id event{}, resource{};
     bool execution{};
     int boundary{}, subresource{}, budget{};
+    bool isolateMissingQueries{};
 };
 ExperimentUi readUi(const nlohmann::json &ui, const IReplaySession &session) {
     const auto number = [&](const char *key, uint64_t limit) {
@@ -30,6 +33,10 @@ ExperimentUi readUi(const nlohmann::json &ui, const IReplaySession &session) {
     ExperimentUi result{number("event", UINT64_MAX), number("resource_creation", UINT64_MAX),
                         domain == "execution_instance", int(number("boundary", 2)),
                         int(number("subresource", INT_MAX)), int(number("allocation_mib", 131072))};
+    const auto policy = ui.value("missing_query_policy", "fail");
+    if (policy != "fail" && policy != "isolate_readback_outputs")
+        throw std::runtime_error("Invalid DX12 project query replay policy");
+    result.isolateMissingQueries = policy == "isolate_readback_outputs";
     if (result.budget < 64) throw std::runtime_error("DX12 project allocation budget is too small");
     if (result.event) {
         if (result.execution) (void)session.executionEvent(result.event);
@@ -49,7 +56,6 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
                                       std::optional<Dx12ShaderImport> shader, std::optional<Dx12ResourceImport> resource,
                                       std::optional<std::pair<Id, bool>> barrier) {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
-    if (selection_.isolateMissingQueries) { showError("Turn off query isolation before opening or editing an experiment"); return; }
     const auto session = session_;
     const auto revision = revision_;
     const auto current = (shader || resource || barrier) && experiment_ ? std::make_shared<Experiment>(*experiment_) : nullptr;
@@ -76,6 +82,9 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
         experiment_ = std::make_unique<Experiment>(*result.experiment);
         if (result.ui) {
             const auto &ui = *result.ui;
+            selection_.isolateMissingQueries = ui.isolateMissingQueries;
+            const QSignalBlocker block(dx12QueryIsolation_);
+            dx12QueryIsolation_->setChecked(ui.isolateMissingQueries);
             findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(ui.execution ? 1 : 0);
             selectedEvent_ = 0; selection_.event = 0; selection_.execution.reset();
             apiView_->setCurrentIndex({}); properties_->clear();
@@ -202,7 +211,8 @@ bool MainWindow::saveDx12Experiment(const QString &path) {
                       {"event", std::to_string(selectedEvent_)}, {"resource_creation", std::to_string(selection_.resource)},
                       {"boundary", std::to_string(boundary_->currentIndex())},
                       {"subresource", std::to_string(dx12Subresource_->value())},
-                      {"allocation_mib", std::to_string(dx12Budget_->value())}};
+                      {"allocation_mib", std::to_string(dx12Budget_->value())},
+                      {"missing_query_policy", selection_.isolateMissingQueries ? "isolate_readback_outputs" : "fail"}};
         (void)readUi(ui.at("dx12"), *session_);
         experiment_->save(path, ui);
         projectPath_ = path; projectDirty_ = false; setWindowModified(false);

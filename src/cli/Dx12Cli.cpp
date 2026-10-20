@@ -137,9 +137,6 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     selection.isolateMissingQueries = options.isSet("isolate-missing-queries");
     const auto capability = session.capability(ReplayFeature::Replay, selection);
     const bool isolateQueries = options.isSet("isolate-missing-queries");
-    if (isolateQueries)
-        for (const auto flag : {"experiment", "disable", "uav-barrier-before"})
-            if (options.isSet(flag)) throw std::runtime_error(std::string("Query isolation cannot be combined with --") + flag);
     if (!capability.supported()) {
         const auto status = capability.status == CapabilityStatus::MissingData ? "missing_data" :
                             capability.status == CapabilityStatus::NotImplemented ? "not_implemented" :
@@ -253,6 +250,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             storage["backend"] = "dx12";
             storage["missing_query_policy"] = isolateQueries ? "isolate_readback_outputs" : "fail";
             storage["frame_complete"] = false;
+            if (report.contains("experiment")) storage["experiment"] = report.at("experiment");
             storage["storage_bytes"] = std::stoull(texture.at("bytes").get<std::string>());
             storage["storage_sha256"] = texture.at("sha256");
             report["output_display"] = storage;

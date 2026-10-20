@@ -490,8 +490,9 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     if (s.isolateMissingQueries) {
         // NativePerformance/NativeTimeline own their query heaps and readbacks.
         // Captured query outputs remain isolated and unavailable to consumers.
-        require(s.disabledExecutions.empty() && s.uavBarriersBefore.empty() && s.shaderReplacements.empty() && s.resourcePatches.empty(),
-                "Isolated query replay cannot be combined with modification experiments");
+        // Overlay edits preserve Begin/End/Resolve query commands. Resource and
+        // descriptor access still reject isolated READBACK allocations, including
+        // experiment patches; an edit cannot turn absent query bytes into data.
         for (const auto creation : s.queries.isolatedReadbacks(execution, !after)) s.resources.isolateQueryReadback(creation);
     } else if (const auto issue = s.queries.firstIssue(execution, !after); !issue.is_null())
         throw std::runtime_error(issue.at("reason").get<std::string>());

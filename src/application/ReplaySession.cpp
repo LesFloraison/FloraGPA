@@ -381,11 +381,6 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
-        if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection &&
-            feature != ReplayFeature::ResourceHistory && feature != ReplayFeature::PixelHistory &&
-            feature != ReplayFeature::PipelineInspection && feature != ReplayFeature::ShaderDebug &&
-            feature != ReplayFeature::Geometry && feature != ReplayFeature::Performance)
-            return {CapabilityStatus::NotImplemented, "Query-output isolation supports replay and analysis; modification experiments are not yet supported"};
         if (feature == ReplayFeature::Experiments) {
             if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};
             try {
@@ -393,7 +388,9 @@ class Dx12Session final : public IReplaySession {
                 if (execution.submission <= directory_.initializationCount() || !execution.recordingComplete)
                     return {CapabilityStatus::MissingData, "Select a complete frame execution instance"};
                 if (dx12::streamPacketCanDisable(packet(execution.record).type))
-                    return {CapabilityStatus::Supported, "Disable/enable one direct Draw/Dispatch execution"};
+                    return {CapabilityStatus::Supported, selection.isolateMissingQueries
+                        ? "Disable/enable one direct Draw/Dispatch in incomplete query-isolated replay; missing historical query values remain unavailable"
+                        : "Disable/enable one direct Draw/Dispatch execution"};
             } catch (const std::exception &e) { return {CapabilityStatus::MissingData, e.what()}; }
             return {CapabilityStatus::NotImplemented, "Only direct Draw/Dispatch enable overrides are implemented"};
         }

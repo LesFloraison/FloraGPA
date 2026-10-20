@@ -481,7 +481,7 @@ void MainWindow::buildUi() {
     enableAction_->setObjectName("enableExperimentEvent");
     auto uavBarrier = edit->addAction("Insert DX12 UAV Barrier Before Event", this, [this] {
         if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.execution ||
-            selection_.isolateMissingQueries || !session_->capability(ReplayFeature::Experiments, selection_).supported()) return;
+            !session_->capability(ReplayFeature::Experiments, selection_).supported()) return;
         const auto execution = *selection_.execution;
         prepareDx12Experiment({}, {}, {}, {}, {{execution, !experiment_ || !experiment_->uavBarrierBefore(execution)}});
     });
@@ -1531,11 +1531,11 @@ void MainWindow::buildUi() {
     connect(dx12Budget_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
     connect(dx12QueryIsolation_, &QCheckBox::toggled, this, [this](bool enabled) {
         if (!session_ || session_->backend() != ReplayBackend::Dx12) return;
-        if (enabled && experiment_ && !experiment_->document().at("history").empty()) {
-            const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false);
-            statusBar()->showMessage("Query isolation cannot be combined with an experiment", 7000); return;
-        }
         selection_.isolateMissingQueries = enabled;
+        if (experiment_) {
+            projectDirty_ = true;
+            setWindowModified(true);
+        }
         if (enabled) historyPick_->setChecked(false);
         invalidateDx12Output();
     });
@@ -2102,9 +2102,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
         const bool isolatedMetrics = runningAnalysis_ == RdcAnalysis::Counters && rdcCounters_->nativeMode() &&
                                      args.contains("--measure-event") && !args.contains("--renderdoc");
-        if ((args.contains("--renderdoc") && !isolatedAnalysis) || (args.contains("--measure-event") && !isolatedMetrics) ||
-            (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation requires supported analysis/native instrumentation and no modification experiments"); return;
+        if ((args.contains("--renderdoc") && !isolatedAnalysis) || (args.contains("--measure-event") && !isolatedMetrics)) {
+            showError("Query isolation requires supported analysis or native instrumentation"); return;
         }
         args << "--isolate-missing-queries";
     }
@@ -3449,12 +3448,12 @@ void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
-    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy() && !selection_.isolateMissingQueries);
-    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && !selection_.isolateMissingQueries && selection_.execution && selection_.resource);
+    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy());
+    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && selection_.execution && selection_.resource);
     undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
     if (dx12) {
-        findChild<QAction *>("openExperiment")->setEnabled(!busy() && !selection_.isolateMissingQueries);
-        findChild<QAction *>("saveExperiment")->setEnabled(!busy() && !selection_.isolateMissingQueries && bool(experiment_));
+        findChild<QAction *>("openExperiment")->setEnabled(!busy());
+        findChild<QAction *>("saveExperiment")->setEnabled(!busy() && bool(experiment_));
     } else {
         findChild<QAction *>("openExperiment")->setEnabled(bool(frame_));
         findChild<QAction *>("saveExperiment")->setEnabled(bool(experiment_));
@@ -3464,7 +3463,7 @@ void MainWindow::updateExperimentActions() {
     bool editable = isDraw(uint16_t(type)) || isWritableCommand(uint16_t(type));
     if (dx12) editable = !busy() && session_->capability(ReplayFeature::Experiments, selection_).supported();
     auto uavBarrier = findChild<QAction *>("insertDx12UavBarrier");
-    uavBarrier->setEnabled(dx12 && editable && !selection_.isolateMissingQueries);
+    uavBarrier->setEnabled(dx12 && editable);
     uavBarrier->setText(dx12 && selection_.execution && experiment_ && experiment_->uavBarrierBefore(*selection_.execution)
         ? "Remove Inserted DX12 UAV Barrier" : "Insert DX12 UAV Barrier Before Event");
     enableAction_->setEnabled(editable);

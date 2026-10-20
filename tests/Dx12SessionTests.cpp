@@ -1731,8 +1731,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         locate->setText("19410"); QTest::keyClick(locate, Qt::Key_Return); QVERIFY(!replay->isEnabled());
         isolation->setChecked(true); QVERIFY(replay->isEnabled());
         QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("Incomplete"));
-        QVERIFY(!window.findChild<QAction *>("openExperiment")->isEnabled());
-        QVERIFY(!window.findChild<QAction *>("replaceDx12Shader")->isEnabled());
+        QVERIFY(window.findChild<QAction *>("openExperiment")->isEnabled());
+        QVERIFY(window.findChild<QAction *>("replaceDx12Shader")->isEnabled());
         isolation->setChecked(false); QVERIFY(!replay->isEnabled());
         QVERIFY(done.empty());
         const auto session = openReplaySession(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
@@ -1750,6 +1750,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(session->capability(ReplayFeature::ShaderDebug,selection).supported());
         QVERIFY(session->capability(ReplayFeature::Geometry,selection).supported());
         QVERIFY(session->capability(ReplayFeature::Performance,selection).supported());
+        QVERIFY(session->capability(ReplayFeature::Experiments,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported()); // Query buffer is not a texture.
         selection.resource = 35118;
         QVERIFY(session->capability(ReplayFeature::PixelHistory,selection).supported());
@@ -1759,6 +1760,171 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!session->capability(ReplayFeature::Geometry,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::Performance,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
+    }
+    void isolatedQueryExperimentWorkspace() {
+        using Json = nlohmann::json;
+        try {
+            const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto output = qEnvironmentVariable("FLORA_QUERY_EXPERIMENT_UI");
+            if (root.isEmpty() || output.isEmpty())
+                QSKIP("Set Talos captures and a new experiment evidence directory");
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+            QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            QSignalSpy prepared(&window, &MainWindow::experimentFinished),
+                exported(&window, &MainWindow::exportFinished);
+            window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("19408");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto resources = window.findChild<QTableView *>("resources");
+            for (int row = 0; row < resources->model()->rowCount(); ++row) {
+                const auto index = resources->model()->index(row, 0);
+                if (index.data(Qt::UserRole).toULongLong() == 35118) {
+                    resources->setCurrentIndex(index);
+                    break;
+                }
+            }
+            QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 35118ULL);
+            auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation");
+            isolation->setChecked(true);
+            auto boundary = window.findChild<QComboBox *>("outputBoundary");
+            boundary->setCurrentIndex(2);
+            auto enable = window.findChild<QAction *>("enableExperimentEvent");
+            auto undo = window.findChild<QAction *>("undoExperiment");
+            auto redo = window.findChild<QAction *>("redoExperiment");
+            auto image = window.findChild<ImageView *>("frameOutput");
+            auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+            auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+            auto history = window.findChild<PixelHistoryView *>();
+            auto metrics = window.findChild<RdcCountersView *>();
+            const auto exportRaw = [&](const QString &name) {
+                QTimer chooser, watchdog;
+                watchdog.setSingleShot(true);
+                bool chosen = false;
+                connect(&chooser, &QTimer::timeout, &window, [&] {
+                    if (auto dialog = window.findChild<QFileDialog *>()) {
+                        chooser.stop();
+                        chosen = true;
+                        dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                        QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                    }
+                });
+                connect(&watchdog, &QTimer::timeout, &window, [&] {
+                    if (auto dialog = window.findChild<QFileDialog *>())
+                        dialog->reject();
+                });
+                chooser.start(10);
+                watchdog.start(5000);
+                window.findChild<QAction *>("exportOutputStorage")->trigger();
+                QVERIFY(chosen);
+                QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000);
+                QVERIFY(exported.takeLast()[0].toBool());
+            };
+            const auto read = [&](const QString &name) {
+                QFile file(output + '/' + name);
+                if (!file.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Cannot read experiment evidence");
+                return file.readAll();
+            };
+            window.replay();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            exportRaw("baseline");
+            const auto baseline = read("baseline.bin");
+            QCOMPARE(QCryptographicHash::hash(baseline, QCryptographicHash::Sha256).toHex(),
+                     QByteArray("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
+            const auto oldDebug = debug->requestId(), oldMesh = mesh->requestId();
+            const auto oldHistory = history->requestId(), oldMetrics = metrics->requestId();
+            done.clear();
+            QVERIFY(enable->isEnabled());
+            enable->trigger();
+            QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+            QVERIFY(prepared.takeLast()[0].toBool());
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QCOMPARE(enable->text(), QString("Enable Event"));
+            QVERIFY(!debug->finish(oldDebug, {}));
+            QVERIFY(!mesh->finish(oldMesh, {}, {}));
+            QVERIFY(!history->finish(oldHistory, {}));
+            QVERIFY(!metrics->finish(oldMetrics, {}));
+            QVERIFY(!metrics->findChild<QAction *>("readRdcCounters")->isEnabled());
+            exportRaw("disabled");
+            const auto disabled = read("disabled.bin");
+            QCOMPARE(disabled.size(), baseline.size());
+            QVERIFY(disabled != baseline);
+            // BGRA8 pixel (65,172): without the final Draw, the preceding
+            // mapped fragment remains. This is raw storage, not display alpha.
+            const auto offset = (172 * 1920 + 65) * 4;
+            QCOMPARE(disabled.mid(offset, 4).toHex(), QByteArray("020606d9"));
+            QCOMPARE(baseline.mid(offset, 4).toHex(), QByteArray("5dbc5eb8"));
+            const auto disabledMetadata = Json::parse(read("disabled.bin.json").toStdString());
+            QCOMPARE(disabledMetadata.at("missing_query_policy"), Json("isolate_readback_outputs"));
+            QCOMPARE(disabledMetadata.at("frame_complete"), Json(false));
+            QCOMPARE(disabledMetadata.at("experiment").at("cursor"), Json("1"));
+            QVERIFY(window.saveDx12Experiment(output + "/disabled.json"));
+            QCOMPARE(Json::parse(read("disabled.json").toStdString())
+                         .at("ui")
+                         .at("dx12")
+                         .at("missing_query_policy"),
+                     Json("isolate_readback_outputs"));
+            done.clear();
+            QVERIFY(undo->isEnabled());
+            undo->trigger();
+            QVERIFY(image->image().isNull());
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            exportRaw("restored");
+            QCOMPARE(read("restored.bin"), baseline);
+            const auto restoredMetadata = Json::parse(read("restored.bin.json").toStdString());
+            QCOMPARE(restoredMetadata.at("experiment").at("cursor"), Json("0"));
+            QVERIFY(restoredMetadata.at("experiment").at("document_sha256") !=
+                    disabledMetadata.at("experiment").at("document_sha256"));
+            QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("Incomplete"));
+            // Redo/project checks do not launch additional GPU work.
+            boundary->setCurrentIndex(0);
+            done.clear();
+            QVERIFY(redo->isEnabled());
+            redo->trigger();
+            QCOMPARE(enable->text(), QString("Enable Event"));
+            QVERIFY(window.saveDx12Experiment(output + "/reopen.json"));
+            isolation->setChecked(false);
+            QVERIFY(!isolation->isChecked());
+            window.openDx12Experiment(output + "/reopen.json");
+            QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+            QVERIFY(prepared.takeLast()[0].toBool());
+            QVERIFY(isolation->isChecked());
+            QCOMPARE(boundary->currentIndex(), 0);
+            QCOMPARE(enable->text(), QString("Enable Event"));
+            auto legacy = Json::parse(read("reopen.json").toStdString());
+            auto invalid = legacy;
+            invalid["ui"]["dx12"]["missing_query_policy"] = "unknown";
+            QFile invalidFile(output + "/invalid.json");
+            QVERIFY(invalidFile.open(QIODevice::WriteOnly));
+            invalidFile.write(QByteArray::fromStdString(invalid.dump()));
+            invalidFile.close();
+            window.openDx12Experiment(output + "/invalid.json");
+            QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+            QVERIFY(!prepared.takeLast()[0].toBool());
+            QVERIFY(isolation->isChecked());
+            QCOMPARE(enable->text(), QString("Enable Event"));
+            legacy["ui"]["dx12"].erase("missing_query_policy");
+            QFile legacyFile(output + "/legacy.json");
+            QVERIFY(legacyFile.open(QIODevice::WriteOnly));
+            legacyFile.write(QByteArray::fromStdString(legacy.dump()));
+            legacyFile.close();
+            window.openDx12Experiment(output + "/legacy.json");
+            QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+            QVERIFY(prepared.takeLast()[0].toBool());
+            QVERIFY(!isolation->isChecked());
+            QVERIFY(done.empty());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void isolatedQueryPerformanceWorkspace() {
         using Json = nlohmann::json;
