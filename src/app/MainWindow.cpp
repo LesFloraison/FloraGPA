@@ -1669,10 +1669,10 @@ void MainWindow::setBusy(bool busy) {
     for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
         findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
     historyPick_->setEnabled(
-        !busy && (bool(frame_) || (dx12 && !outputSelection.frameEnd && !outputReport_.is_null() && !image_->image().isNull() &&
-                                  session_->capability(ReplayFeature::PixelHistory, selection_).supported())));
+        !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull() &&
+                                  session_->capability(ReplayFeature::PixelHistory, outputSelection).supported())));
     historyPick_->setToolTip(dx12 && outputSelection.frameEnd
-                                ? "Frame-end pixel history is not connected; select an execution and replay After event"
+                                ? "Query this pixel through a verified frame-stream-end analysis capture"
                                 : "Enable, then click an RT pixel to query its history");
     dx12Subresource_->setEnabled(dx12 && !busy);
     dx12Budget_->setEnabled(dx12 && !busy);
@@ -1730,12 +1730,15 @@ void MainWindow::updateCheckpointContext() {
         }
     }
     if (history_) {
-        const auto pixelKey = dx12 && selection_.isolateMissingQueries
-                                  ? (session_->capability(ReplayFeature::PixelHistory, selection_).supported()
-                                         ? historyContextKey(true) : QString{})
+        const auto pixelSelection = outputReplaySelection();
+        const auto pixelKey = dx12
+                                  ? (session_->capability(ReplayFeature::PixelHistory, pixelSelection).supported()
+                                         ? historyContextKey(true, pixelSelection.frameEnd) : QString{})
                                   : analysisKey;
         history_->setContext(dx12 ? (selection_.resource && !pixelKey.isEmpty() ? pixelKey+':'+QString::number(selection_.resource) : QString{}) : pixelKey,
-                             selectedEvent_, dx12, dx12 && selection_.isolateMissingQueries);
+                             pixelSelection.frameEnd ? session_->executionCount() : selectedEvent_, dx12,
+                             dx12 && selection_.isolateMissingQueries,
+                             pixelSelection.frameEnd && !session_->events().empty() ? session_->events().back() : 0);
         if (dx12)
             history_->setDx12Resource(
                 selection_.resource,
@@ -1777,21 +1780,24 @@ void MainWindow::updateCheckpointContext() {
             view->setContext((i == 2 ? dispatch : draw) ? debugKey : QString{}, selectedEvent_, dx12,
                              dx12 && selection_.isolateMissingQueries);
 }
-QString MainWindow::historyContextKey(bool allowQueryIsolation) const {
+QString MainWindow::historyContextKey(bool allowQueryIsolation, bool frameEnd) const {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
-        if (!selection_.execution || (selection_.isolateMissingQueries && !allowQueryIsolation))
+        if ((!selection_.execution && !frameEnd) || (selection_.isolateMissingQueries && !allowQueryIsolation))
             return {};
+        const auto execution = frameEnd ? session_->executionCount() : *selection_.execution;
         auto selection = selection_;
+        selection.frameEnd = frameEnd;
         selection.resource = 0;
         selection.before = false; // Analysis captures include the selected execution.
         if (!session_->capability(ReplayFeature::Replay, selection).supported())
             return {};
-        if (experiment_ && !experiment_->enabled(*selection_.execution)) return {};
+        if (!frameEnd && experiment_ && !experiment_->enabled(execution)) return {};
         const auto document = QByteArray::fromStdString(experiment_ ? experiment_->document().dump() : std::string());
         return "dx12:" + QString::fromStdString(session_->identity()) + ':' +
-               QString::number(*selection_.execution) + ':' + QString::number(dx12Budget_->value()) + ':' +
+               QString::number(execution) + ':' + QString::number(dx12Budget_->value()) + ':' +
                QString::fromLatin1(QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex()) +
-               (selection_.isolateMissingQueries ? ":query-isolated" : ":strict");
+               (selection_.isolateMissingQueries ? ":query-isolated" : ":strict") +
+               (frameEnd ? ":frame-end:" + QString::number(session_->events().back()) : QString{});
     }
     if (!frame_)
         return {};
@@ -1901,8 +1907,10 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         if (!digest.addData(&file))
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
+        const bool frameEndHistory = kind == RdcAnalysis::History && historyRequest_.value("frame_end", false);
         historyKey_ =
-            historyContextKey(resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
+                              frameEndHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -1916,9 +1924,10 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             startHistoryWorker();
         } else {
             QStringList args{"replay", capturePath_, "--renderdoc", library};
-            if (dx12)
-                args << "--event" << QString::number(*selection_.execution) << "--max-bytes"
-                     << QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024);
+            if (dx12) {
+                if (!frameEndHistory) args << "--event" << QString::number(*selection_.execution);
+                args << "--max-bytes" << QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024);
+            }
             startWorker(args, false);
             if (process_.state() == QProcess::NotRunning)
                 throw std::runtime_error("Cannot start independent recapture");
@@ -2097,6 +2106,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
         (args.first() == "replay" || args.first() == "buffer")) {
+        const bool frameEndHistory = runningAnalysis_ == RdcAnalysis::History &&
+                                     historyRequest_.is_object() && historyRequest_.value("frame_end", false);
         const bool isolatedAnalysis =
             historyRequest_.is_object() &&
             ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
@@ -2106,7 +2117,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
              (runningAnalysis_ == RdcAnalysis::Debug && runningDebug_ &&
               rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
             historyRequest_.value("isolate_missing_queries", false) &&
-            historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
+            historyRequest_.value("execution", "") ==
+                std::to_string(frameEndHistory ? session_->executionCount() : selection_.execution.value_or(0));
         const bool isolatedMetrics = runningAnalysis_ == RdcAnalysis::Counters && rdcCounters_->nativeMode() &&
                                      args.contains("--measure-event") && !args.contains("--renderdoc");
         if ((args.contains("--renderdoc") && !isolatedAnalysis) || (args.contains("--measure-event") && !isolatedMetrics)) {
@@ -2391,12 +2403,12 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                                       .arg(experiment["pending_events"].toArray().size()));
         }
         if (runningKind_ == "history-capture") {
-            if (session_ && session_->backend() == ReplayBackend::Dx12 &&
-                (report_["backend"] != "dx12" ||
-                 report_["execution"].toString() != QString::number(*selection_.execution) ||
-                 report_["value_time"] != "after_event" || report_["frame_complete"] != false))
-                throw std::runtime_error(
-                    "Analysis capture does not match the selected DX12 execution prefix");
+            if (session_ && session_->backend() == ReplayBackend::Dx12) {
+                const bool frameEndHistory = historyRequest_.value("frame_end", false);
+                requireDx12ReplayBoundary(result.replayReport,
+                    frameEndHistory ? session_->executionCount() : selection_.execution.value_or(0),
+                    false, frameEndHistory, session_->events().back());
+            }
             historyRdc_ = report_["rdc_capture"].toString();
             if (historyRdc_.isEmpty() || !QFileInfo::exists(historyRdc_))
                 throw std::runtime_error("Independent RenderDoc capture is missing");
@@ -4638,6 +4650,16 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
                 if (x < 0 || y < 0 || uint32_t(x) >= display.at("width").get<uint32_t>() ||
                     uint32_t(y) >= display.at("height").get<uint32_t>()) return;
                 image_->setSelectedPixel(QPoint(x, y));
+                if (historyPick_->isChecked()) {
+                    if (display.value("dimension", 0) != 3 || display.value("plane", -1) != 0 ||
+                        display.value("samples", 0) != 1)
+                        throw std::runtime_error("Pixel History requires a single-sample 2D texture, plane 0");
+                    leftTabs_->setCurrentWidget(history_);
+                    history_->queryPixel(session_->executionCount(),
+                        session_->resource(selection_.resource).capturedObject, x, y,
+                        display.at("mip").get<int>(), display.at("layer").get<int>(), 0);
+                    return;
+                }
                 properties("DX12 Frame End Pixel", {{"Resource creation", QString::number(selection_.resource)},
                     {"Pixel", QString("%1, %2").arg(x).arg(y)},
                     {"Display RGBA", QString("%1, %2, %3, %4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha())}});

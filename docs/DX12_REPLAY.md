@@ -8371,11 +8371,10 @@ boundary. Decimal-string identities remain mandatory. Existing request/session/
 experiment checks and cancellation still precede publication.
 
 Frame-end pixel inspection displays resource coordinates and display RGBA
-without assigning them to the previously selected Draw. **Pixel History** is
-explicitly unavailable for this output boundary and directs the user to replay
-an execution **After event**; the event analysis panels retain their own
-selection. Connecting history to a full-stream analysis capture remains work
-to do, rather than treating a last-execution prefix as equivalent to stream end.
+without assigning them to the previously selected Draw. In this initial
+workspace milestone **Pixel History** was unavailable for this output boundary;
+the subsequent milestone below connects it to a verified full-stream capture.
+The other event analysis panels retain their own selection.
 
 The targeted Talos workspace check opens the directory with no execution
 selected, chooses creation **35118**, enables query isolation and replays
@@ -8400,8 +8399,57 @@ No BF1/Hellblade2 replay was repeated for this UI integration.
 Builds **476–478** pass. Evidence: ignored `talos-frame-stream-ui1/`,
 `frame-stream-ui-tests1.txt`, the previous `talos-frame-stream1/isolated/`
 report, and `build476.log`–`build478.log`. Automatic final-backbuffer selection,
-frame-end analysis, original-frame fidelity and full portable acceptance remain
+remaining frame-end analysis, original-frame fidelity and full portable acceptance remain
 unfinished.
+
+### Pixel History at the frame-stream boundary
+
+Frame-end output now supports Pixel History through a fresh full-stream
+RenderDoc capture. After replay drains the stream through its final record and
+passes D3D12 validation, the native backend emits a versioned terminal marker
+containing the final record, final execution and missing-query policy. Record
+and execution identities remain canonical decimal strings. The analysis
+backend requires that marker, checks its identities against the request and
+rejects mapped execution commands at or after it. History queries select the
+terminal marker itself, including operations after the last submitted
+execution, rather than selecting the last Draw.
+
+Frame-end and selected-execution analysis captures have separate cache keys.
+The workspace requests full-stream recapture without `--event`, verifies its
+native boundary report, and rejects history returned for a different boundary
+or final record. Frame-end history disables the per-Draw depth-roundtrip
+experiment. Switching to an event invalidates old frame-end requests and
+output. The result records `output_boundary=frame_end`, `through_record` and
+`through_event`; it still declares `frame_complete=false`. Explicit Talos
+query isolation retains its incomplete-query provenance.
+
+The focused Talos workspace check queries output creation **35118**, pixel
+**(65,172)**, at frame end under query isolation. The fresh capture reaches
+record **192535**, execution **19410**; its terminal marker is RenderDoc event
+**20544**, after the last mapped execution event **20538**. Three history rows
+map to execution **19389** / source record **192489** and the two fragments of
+execution **19408** / source record **192508**. PickPixel before history and
+after restoration both yield RGBA8 **[94,188,93,184]**, matching native output.
+These observations validate that selected texel, not every intermediate
+fragment or complete history. The existing final-modification-versus-selected-
+event comparison correctly reports `not_compared`: the selected event is the
+terminal marker, which does not modify the texture.
+
+The test rejects forged boundary mode/final-record results and rejects the old
+request after navigation to execution **19408**. Frame-end and selected-event
+raw exports both match the prior **8,294,400**-byte Talos baseline, while their
+boundary identities differ. This first GPU run passes **3** checks including
+setup/cleanup in **22,029 ms**. A CPU-only marker check passes **3** checks
+including setup/cleanup, covering identities above 2^53/at UINT64_MAX, numeric
+identity rejection, absent/duplicate markers and mismatched scope/policy.
+No BF1/Hellblade2 replay or additional DX11 replay was needed for this change.
+
+Build **479** passes. Evidence remains outside Git:
+`talos-frame-history-ui1/{history.json,recapture.json,boundary-evidence.json,frame-end.rdc}`,
+the raw exports and their sidecars, `frame-history-ui-tests1.txt`,
+`frame-end-marker-tests1.txt`, and `build479.log`. Frame-end history on the other
+samples, automatic final-backbuffer selection, original-image fidelity and full
+portable acceptance remain unverified or unfinished.
 
 ### Full feature acceptance
 
@@ -8409,6 +8457,7 @@ unfinished.
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
+| Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |

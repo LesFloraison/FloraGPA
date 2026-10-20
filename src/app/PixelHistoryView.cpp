@@ -284,7 +284,14 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
-void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries) {
+void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries,
+                                 uint64_t frameEndRecord) {
+    frameEndRecord = dx12 ? frameEndRecord : 0;
+    if (frameEndRecord_ != frameEndRecord) {
+        frameEndRecord_ = frameEndRecord;
+        depthRoundtrip_->setChecked(false);
+        invalidate();
+    }
     isolateMissingQueries = dx12 && isolateMissingQueries;
     if (dx12_ != dx12 || key_ != key || event_ != event || isolateMissingQueries_ != isolateMissingQueries)
         depthRoundtrip_->setChecked(false);
@@ -363,6 +370,10 @@ Json PixelHistoryView::request() const {
         job["resource"] = std::to_string(object_);
         job["resource_creation"] = std::to_string(creation_);
         job["isolate_missing_queries"] = isolateMissingQueries_;
+        if (frameEndRecord_) {
+            job["frame_end"] = true;
+            job["frame_end_record"] = std::to_string(frameEndRecord_);
+        }
         if (depthRoundtrip_->isChecked()) job["depth_roundtrip"] = true;
     }
     return job;
@@ -399,7 +410,7 @@ void PixelHistoryView::updateActions() {
     export_->setEnabled(!busy_ && !result_.is_null());
     backend_->setEnabled(!busy_);
     depthRoundtrip_->setVisible(dx12_);
-    depthRoundtrip_->setEnabled(!busy_);
+    depthRoundtrip_->setEnabled(!busy_ && !frameEndRecord_);
     for (auto widget :
          std::initializer_list<QWidget *>{eventInput_, resource_, x_, y_, mip_, layer_, sample_})
         widget->setEnabled(!busy_);
@@ -448,6 +459,9 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
     if (dx12_ && result.value("depth_roundtrip", Json::object()).value("requested", false) != depthRoundtrip_->isChecked())
         throw std::runtime_error("History result does not match the D32/D32S8 depth refresh mode");
     if (dx12_) {
+        if (result.value("frame_end", false) != bool(frameEndRecord_))
+            throw std::runtime_error("History result belongs to a different output boundary");
+        requireRdcFrameEnd(result.value("frame_stream_boundary", Json()), this->request());
         requireRdcQueryIsolation(result.value("query_isolation", Json()), this->request());
         if (isolateMissingQueries_ && (result.value("frame_complete", Json()) != false ||
             result.value("partial", Json()) != true ||
@@ -555,6 +569,8 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
     else if (scope.value("depth_value_status", "") == "patched_backend_values")
         summary_->setText(summary_->text() +
                           "\nD16: patched RenderDoc 1.45 decoding; backend test-reason limitations apply.");
+    if (frameEndRecord_)
+        summary_->setText("Frame stream end · " + summary_->text());
     summary_->setToolTip(QString::fromStdString(scope.dump(2)));
     details_->setPlainText(QString::fromStdString(scope.dump(2)));
     updateActions();

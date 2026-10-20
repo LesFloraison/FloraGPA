@@ -1439,13 +1439,26 @@ Json runRdcJob(const Json &job) {
     const auto roots = events.walk(controller.GetRootActions(), controller.GetStructuredFile());
     const auto queryPolicy = readRdcQueryIsolation(roots);
     requireRdcQueryIsolation(queryPolicy, job);
+    const auto frameEnd = readRdcFrameEnd(roots);
+    requireRdcFrameEnd(frameEnd, job);
+    const bool frameEndHistory = job.value("frame_end", false);
+    if (frameEndHistory && !dx12) throw std::runtime_error("Frame-end history requires a native DX12 capture");
     if (!queryPolicy.is_null() && !dx12) throw std::runtime_error("Query isolation requires a DX12 capture");
     auto mapping = dx12 ? indexDx12RdcEvents(roots, events.native) : indexRdcEvents(roots, events.native);
+    if (frameEndHistory) {
+        const auto endEvent = frameEnd.at("event_id").get<uint32_t>();
+        for (const auto &[execution, command] : mapping.at("execution_commands").items())
+            for (const auto &event : command.at("event_ids"))
+                if (event.get<uint32_t>() >= endEvent)
+                    throw std::runtime_error("Frame-end marker precedes an executed capture command");
+    }
     Json result{
         {"ok", true},
         {"action", action},
         {"backend", dx12 ? "dx12" : "dx11"},
         {"query_isolation", queryPolicy},
+        {"frame_end", frameEndHistory},
+        {"frame_stream_boundary", frameEnd},
         {"replay_policy", {{"optimisation", job.value("replay_optimisation", "balanced")},
             {"optimisation_enum", optimisation},
             {"dx12_discard_pattern_fills", dx12 ? Json(job.value("discard_patterns", false) && optimisation != 3) : Json()},
@@ -1536,6 +1549,12 @@ Json runRdcJob(const Json &job) {
                       "correctness or that the validation layer was available."}};
         }
         if (dx12) {
+            if (frameEndHistory) {
+                result["frame_complete"] = false;
+                result["history_scope"]["output_boundary"] = "frame_end";
+                result["history_scope"]["through_record"] = frameEnd.at("boundary").at("last_record");
+                result["history_scope"]["through_event"] = frameEnd.at("event_id");
+            }
             if (!queryPolicy.is_null() && action == "postmesh") {
                 result["partial"] = true;
                 result["mesh_scope"] = {
@@ -1642,7 +1661,9 @@ Json runRdcJob(const Json &job) {
     if (job.contains("indirect_action") && (!dx12 || gpa.is_null()))
         throw std::runtime_error("Indirect action selection requires a DX12 execution");
     uint32_t eid = index(job, "eid");
-    if (dx12 && !gpa.is_null()) {
+    if (frameEndHistory) {
+        eid = frameEnd.at("event_id").get<uint32_t>();
+    } else if (dx12 && !gpa.is_null()) {
         const auto execution=std::to_string(number(gpa));
         if (queryResolveEnds.contains(execution) && job.value("indirect_action",Json()).is_null()) {
             eid=queryResolveEnds.at(execution);

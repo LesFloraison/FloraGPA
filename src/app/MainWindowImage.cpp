@@ -228,8 +228,8 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
             selection_.sample = 0;
         }
         outputDir_ = std::move(jobDir_);
-        historyPick_->setEnabled(!outputSelection.frameEnd && outputAvailable &&
-                                 session_->capability(ReplayFeature::PixelHistory, selection_).supported());
+        historyPick_->setEnabled(outputAvailable &&
+                                 session_->capability(ReplayFeature::PixelHistory, outputSelection).supported());
         exportAction_->setEnabled(outputAvailable);
         outputStorageAction_->setEnabled(report_["output_display"].isObject());
         resourceImages_->setCurrentIndex(0);

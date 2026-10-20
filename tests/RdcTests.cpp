@@ -24,6 +24,34 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void frameEndCaptureBoundary() {
+        const Json boundary{{"schema", 1}, {"scope", "frame_stream"},
+            {"last_record", "18446744073709551615"}, {"last_execution", "9007199254740993"},
+            {"missing_query_policy", "isolate_readback_outputs"}};
+        const auto marker = node(42, rdcFrameEndMarker(boundary), 0x20);
+        const auto parsed = readRdcFrameEnd(Json::array({marker}));
+        QCOMPARE(parsed.at("boundary"), boundary);
+        QCOMPARE(parsed.at("event_id"), Json(42));
+        const Json job{{"action", "history"}, {"frame_end", true},
+            {"frame_end_record", boundary.at("last_record")}, {"execution", boundary.at("last_execution")},
+            {"isolate_missing_queries", true}};
+        requireRdcFrameEnd(parsed, job);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(nullptr, job));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readRdcFrameEnd(Json::array({marker, marker})));
+        QVERIFY(readRdcFrameEnd(Json::array()).is_null());
+        for (const auto &key : {"last_record", "last_execution"}) {
+            auto invalid = boundary; invalid[key] = 9007199254740993ULL;
+            QVERIFY_THROWS_EXCEPTION(std::exception, rdcFrameEndMarker(invalid));
+        }
+        auto wrong = job; wrong["frame_end_record"] = "9007199254740993";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(parsed, wrong));
+        wrong = job; wrong["execution"] = "9007199254740992";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(parsed, wrong));
+        wrong = job; wrong["isolate_missing_queries"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(parsed, wrong));
+        wrong = job; wrong["action"] = "debug-pixel";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(parsed, wrong));
+    }
     void isolatedQueryResolveExpansion() {
         Json command{{"status","mapped"},{"name","ID3D12GraphicsCommandListResolveQueryData"},
             {"execution","9007199254740993"},{"source_record","8"},{"submission","9"},{"queue","10"},

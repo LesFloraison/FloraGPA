@@ -1239,6 +1239,12 @@ void NativeReplay::replay(uint64_t execution, bool after, bool analysisMarkers, 
     const auto validation = s.device.information();
     require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
     s.boundaryReached = true;
+    if (streamEnd && analysisMarkers) {
+        const auto marker = rdcFrameEndMarker({{"schema", 1}, {"scope", "frame_stream"},
+            {"last_record", std::to_string(s.frame->lastRecord)}, {"last_execution", std::to_string(execution)},
+            {"missing_query_policy", s.isolateMissingQueries ? "isolate_readback_outputs" : "fail"}});
+        s.queue(target.queue)->SetMarker(1, marker.c_str(), UINT(marker.size() + 1));
+    }
 }
 json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t length, const std::filesystem::path &output) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");

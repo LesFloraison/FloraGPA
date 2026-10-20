@@ -123,11 +123,20 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length" && key != "frame_end" && key != "frame_end_record")
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
     rdcReplayOptimisation(job);
+    if (job.contains("frame_end") && !job.at("frame_end").is_boolean())
+        throw std::runtime_error("Frame-end selection must be a boolean");
+    if (job.value("frame_end", false)) {
+        if (action != "history" || !job.contains("execution") || !job.contains("resource_creation") ||
+            job.contains("indirect_action") || job.value("depth_roundtrip", false))
+            throw std::runtime_error("Frame end requires explicit DX12 pixel-history identities without a Draw depth experiment");
+        decimalIdentity(job.at("frame_end_record"), "frame_end_record");
+    } else if (job.contains("frame_end_record"))
+        throw std::runtime_error("A frame-end record requires frame-end history");
     if (action == "buffer") {
         auto request = job; request["action"] = action;
         rdcBufferRange(request);

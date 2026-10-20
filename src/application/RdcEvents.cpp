@@ -377,6 +377,60 @@ std::string rdcQueryIsolationMarker(const Json &policy) {
     if (marker.size() > 1048576) throw std::runtime_error("Query-isolation marker exceeds one MiB");
     return marker;
 }
+namespace {
+constexpr const char *frameEndPrefix = "Flora DX12 frame end v1 ";
+void validateFrameEnd(const Json &boundary) {
+    if (boundary.size() != 5 || boundary.at("schema") != 1 || boundary.at("scope") != "frame_stream" ||
+        !policyNumber(boundary.at("last_record")) || !policyNumber(boundary.at("last_execution")) ||
+        (boundary.at("missing_query_policy") != "fail" &&
+         boundary.at("missing_query_policy") != "isolate_readback_outputs"))
+        throw std::runtime_error("Invalid frame-end capture boundary");
+}
+}
+std::string rdcFrameEndMarker(const Json &boundary) {
+    validateFrameEnd(boundary);
+    return std::string(frameEndPrefix) + boundary.dump();
+}
+Json readRdcFrameEnd(const Json &roots) {
+    Json result;
+    size_t visited{};
+    std::function<void(const Json &, unsigned)> walk = [&](const Json &nodes, unsigned depth) {
+        if (!nodes.is_array() || depth > 128) throw std::runtime_error("Invalid frame-end action tree");
+        for (const auto &node : nodes) {
+            if (++visited > 1000000) throw std::runtime_error("Frame-end action limit exceeded");
+            const auto name = node.at("customName").get<std::string>();
+            if (name.starts_with("Flora DX12 frame end")) {
+                if (!result.is_null() || !name.starts_with(frameEndPrefix) || name.size() > 4096)
+                    throw std::runtime_error("Ambiguous or unsupported frame-end capture marker");
+                auto boundary = Json::parse(name.substr(std::char_traits<char>::length(frameEndPrefix)),
+                    [](int nesting, Json::parse_event_t, Json &) {
+                        if (nesting > 8) throw std::runtime_error("Frame-end marker nesting limit exceeded");
+                        return true;
+                    });
+                validateFrameEnd(boundary);
+                if (!node.at("eventId").is_number_unsigned() || !node.at("eventId").get<uint64_t>() ||
+                    node.at("eventId").get<uint64_t>() > UINT32_MAX)
+                    throw std::runtime_error("Invalid frame-end marker event");
+                result = {{"boundary", std::move(boundary)}, {"event_id", node.at("eventId")}};
+            }
+            walk(node.at("children"), depth + 1);
+        }
+    };
+    walk(roots, 0);
+    return result;
+}
+void requireRdcFrameEnd(const Json &marker, const Json &job) {
+    if (!job.value("frame_end", false)) return;
+    if (job.at("action") != "history" || marker.is_null())
+        throw std::runtime_error("Frame-end history requires a completed stream capture marker");
+    const auto &boundary = marker.at("boundary");
+    validateFrameEnd(boundary);
+    if (boundary.at("last_execution") != job.at("execution") ||
+        boundary.at("last_record") != job.at("frame_end_record") ||
+        boundary.at("missing_query_policy") !=
+            (job.value("isolate_missing_queries", false) ? "isolate_readback_outputs" : "fail"))
+        throw std::runtime_error("History request does not match the captured frame-end boundary");
+}
 Json readRdcQueryIsolation(const Json &roots) {
     Json result; size_t visited{};
     std::function<void(const Json &, unsigned)> walk = [&](const Json &nodes, unsigned depth) {

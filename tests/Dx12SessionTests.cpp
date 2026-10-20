@@ -2457,13 +2457,52 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
         QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         QCOMPARE(image->image().size(), QSize(1920, 1080));
-        QVERIFY(!window.findChild<QAction *>("pickPixelHistory")->isEnabled());
+        QVERIFY(window.findChild<QAction *>("pickPixelHistory")->isEnabled());
         exportRaw("frame-end");
+        auto history = window.findChild<PixelHistoryView *>();
+        Json frameHistory;
+        uint64_t historyRequest{};
+        const auto library = qEnvironmentVariable("FLORA_DX12_FRAME_STREAM_HISTORY_LIBRARY");
+        if (!library.isEmpty()) {
+            history->setBackendPath(library, false);
+            QCOMPARE(history->request().at("frame_end"), Json(true));
+            QCOMPARE(history->request().at("frame_end_record"), Json("192535"));
+            window.findChild<QAction *>("pickPixelHistory")->setChecked(true);
+            done.clear();
+            image->pixelSelected(65, 172, image->image().pixelColor(65, 172));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 180000);
+            QVERIFY2(done.takeLast()[0].toBool(),
+                     qPrintable(window.findChild<QPlainTextEdit *>("taskLog")->toPlainText()));
+            history->exportResult(output + "/history.json");
+            QFile file(output + "/history.json");
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            frameHistory = Json::parse(file.readAll().toStdString());
+            QCOMPARE(frameHistory.at("frame_end"), Json(true));
+            QCOMPARE(frameHistory.at("execution"), Json("19410"));
+            QCOMPARE(frameHistory.at("frame_stream_boundary").at("boundary").at("last_record"), Json("192535"));
+            QCOMPARE(frameHistory.at("history").size(), size_t(3));
+            QCOMPARE(frameHistory.at("history").back().at("execution"), Json("19408"));
+            QCOMPARE(frameHistory.at("frame_complete"), Json(false));
+            const auto &consistency = frameHistory.at("history_scope").at("replay_consistency");
+            for (const auto &name : {"before_history", "after_restoration"})
+                for (size_t component = 0; component < 4; ++component)
+                    QCOMPARE(int(consistency.at(name).at("floatValue")[component].get<double>() * 255.0 + 0.5),
+                             (std::array<int, 4>{94, 188, 93, 184})[component]);
+            const auto capture = QString::fromStdString(frameHistory.at("capture").get<std::string>());
+            QVERIFY(QFile::copy(capture, output + "/frame-end.rdc"));
+            QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+            historyRequest = history->requestId();
+            auto wrong = frameHistory; wrong["frame_end"] = false;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, history->finish(historyRequest, wrong));
+            wrong = frameHistory; wrong["frame_stream_boundary"]["boundary"]["last_record"] = "192532";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, history->finish(historyRequest, wrong));
+        }
         window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
         auto locate = window.findChild<QLineEdit *>("apiLocate");
         locate->setText("19408");
         QTest::keyClick(locate, Qt::Key_Return);
         QCOMPARE(boundary->currentIndex(), 2);
+        if (!frameHistory.is_null()) QVERIFY(!history->finish(historyRequest, frameHistory));
         QVERIFY(image->image().isNull());
         QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
         replay->trigger();
