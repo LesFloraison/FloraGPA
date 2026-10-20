@@ -11,7 +11,8 @@ class ResourceHistoryView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit ResourceHistoryView(QWidget *parent = nullptr);
-    void setContext(const QString &key, uint64_t execution, uint64_t creation, uint64_t object);
+    void setContext(const QString &key, uint64_t execution, uint64_t creation, uint64_t object,
+                    bool isolateMissingQueries = false);
     void setWorkerBusy(bool busy);
     void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return library_; }
@@ -32,7 +33,7 @@ class ResourceHistoryView final : public QWidget {
     void showOverview();
     QString key_, library_;
     uint64_t execution_{}, creation_{}, object_{}, serial_{};
-    bool busy_{};
+    bool busy_{}, isolateMissingQueries_{};
     Json result_;
     QAction *read_, *cancel_, *locate_, *export_, *backend_;
     QLabel *summary_;

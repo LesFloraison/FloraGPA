@@ -1733,9 +1733,10 @@ void MainWindow::updateCheckpointContext() {
         rdcCounters_->setContext((frame_ || (dx12 && (draw || dispatch))) ? analysisKey : QString{}, selectedEvent_, dx12);
     if (resourceHistory_) {
         const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
-        resourceHistory_->setContext(supported ? analysisKey : QString{}, selection_.execution.value_or(0),
+        resourceHistory_->setContext(supported ? historyContextKey(true) : QString{}, selection_.execution.value_or(0),
                                     dx12 ? selection_.resource : 0,
-                                    dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
+                                    dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0,
+                                    dx12 && selection_.isolateMissingQueries);
     }
     if (dx12Pipeline_) {
         const bool supported =
@@ -1748,9 +1749,9 @@ void MainWindow::updateCheckpointContext() {
         if (auto view = replayDebug_[i])
             view->setContext((i == 2 ? dispatch : draw) ? analysisKey : QString{}, selectedEvent_, dx12);
 }
-QString MainWindow::historyContextKey() const {
+QString MainWindow::historyContextKey(bool allowQueryIsolation) const {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
-        if (!selection_.execution || selection_.isolateMissingQueries)
+        if (!selection_.execution || (selection_.isolateMissingQueries && !allowQueryIsolation))
             return {};
         auto selection = selection_;
         selection.resource = 0;
@@ -1761,7 +1762,8 @@ QString MainWindow::historyContextKey() const {
         const auto document = QByteArray::fromStdString(experiment_ ? experiment_->document().dump() : std::string());
         return "dx12:" + QString::fromStdString(session_->identity()) + ':' +
                QString::number(*selection_.execution) + ':' + QString::number(dx12Budget_->value()) + ':' +
-               QString::fromLatin1(QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex());
+               QString::fromLatin1(QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex()) +
+               (selection_.isolateMissingQueries ? ":query-isolated" : ":strict");
     }
     if (!frame_)
         return {};
@@ -1810,7 +1812,9 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
-    if (selection_.isolateMissingQueries) { showError("Analysis of isolated query replay is not yet supported"); return; }
+    if (selection_.isolateMissingQueries && (view || kind != RdcAnalysis::ResourceHistory)) {
+        showError("Query-isolated analysis currently supports resource usage history in this workspace"); return;
+    }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
         runningAnalysis_ = kind;
@@ -1868,7 +1872,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
         historyKey_ =
-            historyContextKey() + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2061,7 +2065,10 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
         (args.first() == "replay" || args.first() == "buffer")) {
-        if (args.contains("--renderdoc") || args.contains("--measure-event") ||
+        const bool isolatedHistory = runningAnalysis_ == RdcAnalysis::ResourceHistory &&
+            historyRequest_.value("isolate_missing_queries", false) &&
+            historyRequest_.value("action", "") == "resource-history";
+        if ((args.contains("--renderdoc") && !isolatedHistory) || args.contains("--measure-event") ||
             (experiment_ && !experiment_->document().at("history").empty())) {
             showError("Query isolation cannot be combined with analysis or experiments"); return;
         }
@@ -2314,7 +2321,8 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             jobDir_.reset(); resourceTimer_.start(); return;
         }
         report_ = std::move(result.report);
-        if (session_ && session_->backend() == ReplayBackend::Dx12 && (runningKind_ == "replay" || runningKind_ == "buffer"))
+        if (session_ && session_->backend() == ReplayBackend::Dx12 &&
+            (runningKind_ == "replay" || runningKind_ == "buffer" || runningKind_ == "history-capture"))
             requireDx12QueryPolicyReport(result.replayReport, selection_.isolateMissingQueries);
         if (session_ && session_->backend() == ReplayBackend::Dx12)
             requireDx12ExperimentReport(result.replayReport,

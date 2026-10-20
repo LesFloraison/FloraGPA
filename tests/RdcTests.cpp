@@ -55,6 +55,11 @@ class RdcTests : public QObject {
         job["action"] = "texture"; job["resource"] = "123"; job["resource_creation"] = high;
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
         job["resource"] = "124"; requireRdcQueryIsolation(policy, job);
+        job["action"]="resource-history"; job["resource"]="123";
+        job["execution"]="18446744073709551615";
+        requireRdcQueryIsolation(policy,job); // Index-only history also permits isolated query resources.
+        auto missing=job; missing.erase("resource_creation");
+        QVERIFY_THROWS_EXCEPTION(std::exception,requireRdcQueryIsolation(policy,missing));
         const ReplayRequestIdentity identity{"isolated", ReplayBackend::Dx12, UINT64_MAX, UINT64_MAX, false};
         job["request_identity"] = replayIdentityJson(identity);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));

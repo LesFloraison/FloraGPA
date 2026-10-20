@@ -407,6 +407,12 @@ void requireRdcQueryIsolation(const Json &policy, const Json &job) {
     if (!requested) return;
     validateQueryPolicy(policy);
     const auto action = job.at("action").get<std::string>();
+    if (action == "resource-history") {
+        if (!policyNumber(job.at("execution")) || !policyNumber(job.at("resource")) ||
+            !policyNumber(job.at("resource_creation")))
+            throw std::runtime_error("Isolated resource history requires explicit nonzero DX12 identities");
+        return; // GetUsage inspects recorded operations; it never reads query-result bytes.
+    }
     if (action != "inventory" && action != "texture")
         throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
     // Query readbacks remain excluded as a whole: later completed writes must

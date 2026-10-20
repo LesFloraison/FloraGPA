@@ -111,12 +111,14 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     updateActions();
 }
 void ResourceHistoryView::setContext(const QString &key, uint64_t execution, uint64_t creation,
-                                     uint64_t object) {
-    if (key != key_ || execution != execution_ || creation != creation_ || object != object_) {
+                                     uint64_t object, bool isolateMissingQueries) {
+    if (key != key_ || execution != execution_ || creation != creation_ || object != object_ ||
+        isolateMissingQueries != isolateMissingQueries_) {
         key_ = key;
         execution_ = execution;
         creation_ = creation;
         object_ = object;
+        isolateMissingQueries_ = isolateMissingQueries;
         invalidate();
     }
     updateActions();
@@ -155,6 +157,7 @@ ResourceHistoryView::Json ResourceHistoryView::request() const {
     if (key_.isEmpty() || !execution_ || !creation_ || !object_)
         throw std::runtime_error("Select a DX12 resource and executed event");
     return {{"action", "resource-history"},
+            {"isolate_missing_queries", isolateMissingQueries_},
             {"execution", std::to_string(execution_)},
             {"resource", std::to_string(object_)},
             {"resource_creation", std::to_string(creation_)}};
@@ -170,6 +173,9 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         result.at("resource_object") != std::to_string(object_) ||
         result.at("resource_creation") != std::to_string(creation_))
         throw std::runtime_error("Resource history identity does not match selection");
+    requireRdcQueryIsolation(result.value("query_isolation", Json()), request());
+    if (isolateMissingQueries_ && result.value("frame_complete", Json()) != false)
+        throw std::runtime_error("Isolated resource history must retain incomplete frame status");
     const auto &uses = result.at("resource_history");
     for (const auto &row : uses)
         if (row.value("selectable", false)) {
@@ -280,6 +286,8 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                               "creation and replay initialization.")
                           .arg(uses.size())
                           .arg(execution_));
+    if (isolateMissingQueries_)
+        summary_->setText(summary_->text() + "\nIncomplete replay: missing query outputs. Usage is indexed; query-result bytes are not read.");
     for (const auto &warning : result.value("history_scope", Json::object()).value("warnings", Json::array()))
         summary_->setText(summary_->text() + '\n' + QString::fromStdString(warning.get<std::string>()));
     updateActions();
@@ -290,7 +298,7 @@ void ResourceHistoryView::showOverview() {
         return;
     Json overview;
     for (const auto key : {"resource_name", "resource_object", "resource_creation", "execution",
-                           "captured_creation", "replay_initialization", "history_scope"})
+                           "captured_creation", "replay_initialization", "history_scope", "query_isolation", "frame_complete"})
         overview[key] = result_.value(key, Json());
     details_->setPlainText(QString::fromStdString(overview.dump(2)));
 }

@@ -193,7 +193,7 @@ class MainWindow final : public QMainWindow {
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
     void updateStatistics();
     void updateCheckpointContext();
-    QString historyContextKey() const;
+    QString historyContextKey(bool allowQueryIsolation = false) const;
     enum class RdcAnalysis { History, Debug, Counters, Mesh, ResourceHistory, Pipeline };
     void readRdcAnalysis(ReplayDebugView *view = nullptr, RdcAnalysis kind = RdcAnalysis::History);
     bool finishRdcAnalysis(const nlohmann::json &result);

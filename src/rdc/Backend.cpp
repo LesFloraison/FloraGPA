@@ -1368,8 +1368,10 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
-    if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture")
-        throw std::runtime_error("Analysis of isolated query replay currently supports inventory and texture readback only");
+    if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
+        !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
+          !job.value("resource", Json()).is_null()))
+        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback or explicit DX12 resource history");
     if (job.value("depth_roundtrip", false) &&
         ((action != "texture" && action != "debug-pixel" && action != "history") || job.value("readonly_depth_snapshot", false)))
         throw std::runtime_error("Depth roundtrip requires texture, history or debug-pixel analysis without read-only depth snapshots");
@@ -1537,6 +1539,12 @@ Json runRdcJob(const Json &job) {
                       "correctness or that the validation layer was available."}};
         }
         if (dx12) {
+            if (!queryPolicy.is_null() && action == "resource-history") {
+                result["history_scope"]["query_outputs_incomplete"]=true;
+                result["history_scope"]["limitations"].push_back(
+                    "Isolated query resolves include only available results. Omitted writes remain in query_isolation; "
+                    "usage records do not establish query-result byte availability.");
+            }
             result["execution_map"] = mapping["execution_map"];
             result["record_executions"] = mapping["record_executions"];
             result["execution"] = job.value("execution", Json(nullptr));

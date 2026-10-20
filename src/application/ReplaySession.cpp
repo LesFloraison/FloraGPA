@@ -381,7 +381,8 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Failed, "Selection belongs to another session"};
         if (feature == ReplayFeature::ApiInspection)
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
-        if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection)
+        if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection &&
+            feature != ReplayFeature::ResourceHistory)
             return {CapabilityStatus::NotImplemented, "Query-output isolation supports native replay and known-byte readback; analysis and experiments are not yet supported"};
         if (feature == ReplayFeature::Experiments) {
             if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};

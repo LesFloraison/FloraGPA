@@ -224,6 +224,50 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/default-resource-history.json"),resource);
         }
     }
+    void isolatedQueryResourceHistoryWorkspace() {
+        const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output=qEnvironmentVariable("FLORA_QUERY_HISTORY_UI");
+        const auto library=qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+        if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+            QSKIP("Set Talos captures, a new output directory and the pinned RenderDoc library");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window,&MainWindow::captureLoaded),done(&window,&MainWindow::taskFinished);
+        window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate=window.findChild<QLineEdit *>("apiLocate"); locate->setText("19410"); QTest::keyClick(locate,Qt::Key_Return);
+        auto resources=window.findChild<QTableView *>("resources"); QModelIndex selected;
+        for (int row=0;row<resources->model()->rowCount();++row)
+            if (resources->model()->index(row,0).data(Qt::UserRole).toULongLong() == 35118)
+                selected=resources->model()->index(row,0);
+        QVERIFY(selected.isValid()); resources->setCurrentIndex(selected);
+        auto isolation=window.findChild<QCheckBox *>("dx12QueryIsolation"); isolation->setChecked(true);
+        auto view=window.findChild<ResourceHistoryView *>(); QVERIFY(view);
+        view->setBackendPath(library,false);
+        QVERIFY(action(*view,"readResourceHistory")->isEnabled());
+        QCOMPARE(view->request().at("isolate_missing_queries"),Json(true));
+        QVERIFY(!action(*window.findChild<PixelHistoryView *>(),"readPixelHistory")->isEnabled());
+        done.clear(); action(*view,"readResourceHistory")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),180000);
+        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(view->findChild<QLabel *>("resourceHistorySummary")->text()));
+        QVERIFY(!window.busy());
+        const auto result=view->result();
+        QCOMPARE(result.at("frame_complete"),Json(false));
+        QCOMPARE(result.at("query_isolation").at("resolves").size(),size_t(2));
+        QCOMPARE(result.at("history_scope").at("selected_event_replayed"),Json(false));
+        QCOMPARE(result.at("history_scope").at("query_outputs_incomplete"),Json(true));
+        QVERIFY(!result.at("resource_history").empty());
+        QVERIFY(view->findChild<QLabel *>("resourceHistorySummary")->text().contains("Incomplete replay"));
+        view->exportResult(output + "/result.json"); QCOMPARE(read(output + "/result.json"),result);
+        auto invalid=result; invalid["query_isolation"]=nullptr;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        invalid=result; invalid["frame_complete"]=true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        const auto old=view->requestId(); isolation->setChecked(false);
+        QVERIFY(!view->finish(old,result));
+        QVERIFY(!action(*view,"readResourceHistory")->isEnabled());
+    }
     void uavClearResourceHistory() {
         const auto path=qEnvironmentVariable("FLORA_UAV_CLEAR_HISTORY");
         if (path.isEmpty()) QSKIP("Set the BF1 shadow UAV resource history report");

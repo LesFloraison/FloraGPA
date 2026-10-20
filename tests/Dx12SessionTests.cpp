@@ -1738,10 +1738,11 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto session = openReplaySession(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
         ReplaySelection selection; selection.execution = 19410; selection.isolateMissingQueries = true;
         QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
-        for (const auto feature : {ReplayFeature::PixelHistory, ReplayFeature::ResourceHistory, ReplayFeature::ShaderDebug,
+        for (const auto feature : {ReplayFeature::PixelHistory, ReplayFeature::ShaderDebug,
                                    ReplayFeature::Geometry, ReplayFeature::PipelineInspection, ReplayFeature::Performance, ReplayFeature::Experiments})
             QCOMPARE(session->capability(feature, selection).status, CapabilityStatus::NotImplemented);
         selection.resource = 78132;
+        QVERIFY(session->capability(ReplayFeature::ResourceHistory,selection).supported());
         QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::NotImplemented);
     }
     void isolatedQueryWorkspaceReplay() {
