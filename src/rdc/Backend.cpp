@@ -202,6 +202,9 @@ class Session {
     uint32_t resolveHistoryPatch{};
     uint32_t defaultViewHistoryPatch{};
     uint32_t routedLayerHistoryPatch{};
+    uint32_t layerTestHistoryPatch{};
+    using LayerTestStats = void (RENDERDOC_CC *)(uint32_t *, uint32_t *, uint32_t *);
+    LayerTestStats layerTestStats{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -339,6 +342,12 @@ class Session {
             routedLayerHistoryPatch = patch();
             if (routedLayerHistoryPatch != 1)
                 throw std::runtime_error("Unsupported DX12 routed-layer history patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12LayerTestHistoryPatchVersion"))) {
+            layerTestHistoryPatch = patch();
+            if (layerTestHistoryPatch != 1)
+                throw std::runtime_error("Unsupported DX12 layer-test history patch version");
+            layerTestStats = symbol<LayerTestStats>("RENDERDOC_GetFloraDx12LayerTestHistoryStats");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1459,6 +1468,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_resolve_history_patch", session.resolveHistoryPatch},
         {"backend_dx12_default_view_history_patch", session.defaultViewHistoryPatch},
         {"backend_dx12_routed_layer_history_patch", session.routedLayerHistoryPatch},
+        {"backend_dx12_layer_test_history_patch", session.layerTestHistoryPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -2388,17 +2398,23 @@ Json runRdcJob(const Json &job) {
             ? "Default typed 2D attachments select mip zero and all array layers; other mip draws are excluded. See array_layer_filter for Draw routing support."
             : "Default attachment ranges are not filtered by this runtime; history at other mips can contain unrelated Draw fragments.";
         result["history_scope"]["array_layer_filter"] = session.routedLayerHistoryPatch
-            ? "Known 2D array attachment ranges are preserved in GPU scratch views. A selected-layer stencil mask filters Draw coverage; fragment counts and colors use the selected physical layer. Mesh/view-instancing and cross-layer test-failure reasons remain unverified."
+            ? "Known 2D array attachment ranges are preserved in GPU scratch views. A selected-layer stencil mask filters Draw coverage; fragment counts and colors use the selected physical layer. Mesh/view-instancing remains unverified; array_layer_test_reason_status describes test-query support."
             : session.defaultViewHistoryPatch >= 2
             ? "Without a render-target array index output in the last VS/DS/GS stage, Draws only affect the view's first layer. Dynamic layer outputs, mesh shaders and view instancing remain unverified."
             : "This runtime does not exclude other array layers when the last vertex-processing stage has no layer-index output.";
     }
     if (dx12 && tex.arraysize > 1) {
         result["partial"] = true;
-        result["history_scope"]["array_layer_test_reason_status"] = "unverified";
-        result["history_scope"]["limitations"].push_back(
-            "Array-layer coverage and color reconstruction do not validate failure reasons: "
-            "backend test queries can aggregate primitives from other layers. Those reasons remain unverified.");
+        uint32_t color{}, discard{}, failures{};
+        if (session.layerTestStats) session.layerTestStats(&color, &discard, &failures);
+        const bool probed = session.layerTestHistoryPatch && tex.dimension == 2 && tex.msSamp <= 1 && !failures && (color || discard);
+        result["history_scope"]["array_layer_test_reason_status"] = failures ? "probe_failed"
+            : probed ? "backend_selected_layer_probes" : "unverified";
+        result["history_scope"]["array_layer_test_probes"] = {
+            {"fixed_shader_queries", color}, {"original_shader_discard_queries", discard}, {"failures", failures}};
+        result["history_scope"]["limitations"].push_back(probed
+            ? "Single-sample 2D arrays use selected-layer GPU markers for fixed-shader tests and a stencil mask for original-PS discard queries. Per-fragment failure attribution, early depth/stencil semantics and general depth reconstruction remain backend limitations."
+            : "Array-layer coverage and color reconstruction do not validate failure reasons: backend test queries can aggregate primitives from other layers. Those reasons remain unverified.");
     }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(

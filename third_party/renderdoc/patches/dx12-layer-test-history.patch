@@ -1,0 +1,232 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -92,6 +92,19 @@
+ const uint32_t D3D12_PIXEL_HISTORY_MIN_EVENTS_TO_STORE = 128;
+ const uint32_t D3D12_PIXEL_HISTORY_AVG_FRAGMENTS_PER_EVENT = 8;
+ 
++static uint32_t floraLayerColorProbes = 0, floraLayerDiscardProbes = 0, floraLayerProbeFailures = 0;
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12LayerTestHistoryPatchVersion()
++{
++  return 1;
++}
++extern "C" RENDERDOC_API void RENDERDOC_CC RENDERDOC_GetFloraDx12LayerTestHistoryStats(
++    uint32_t *color, uint32_t *discard, uint32_t *failures)
++{
++  *color = floraLayerColorProbes;
++  *discard = floraLayerDiscardProbes;
++  *failures = floraLayerProbeFailures;
++}
++
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12RoutedLayerHistoryPatchVersion()
+ {
+   return 1;
+@@ -1664,10 +1677,32 @@
+       : D3D12PixelHistoryCallback(device, shaderCache, callbackInfo, occlusionQueryHeap),
+         m_Events(events)
+   {
++    // Separate readback storage: the event-value buffer still holds the
++    // pre/post colors collected by the preceding callback.
++    if(callbackInfo.targetDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
++       callbackInfo.targetDesc.DepthOrArraySize > 1 && callbackInfo.targetDesc.SampleDesc.Count == 1)
++    {
++      D3D12_HEAP_PROPERTIES heap = {};
++      heap.Type = D3D12_HEAP_TYPE_READBACK;
++      heap.CreationNodeMask = heap.VisibleNodeMask = 1;
++      D3D12_RESOURCE_DESC buffer = {};
++      buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
++      buffer.Width = RDCMAX(uint64_t(1), uint64_t(events.size())) * 8 * 512;
++      buffer.Height = buffer.DepthOrArraySize = buffer.MipLevels = 1;
++      buffer.SampleDesc.Count = 1;
++      buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
++      HRESULT hr = device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &buffer,
++                        D3D12_RESOURCE_STATE_COPY_DEST, NULL, __uuidof(ID3D12Resource),
++                        (void **)&m_LayerReadback);
++      CHECK_HR(device, hr);
++      if(FAILED(hr))
++        ++floraLayerProbeFailures;
++    }
+   }
+ 
+   ~D3D12TestsFailedCallback()
+   {
++    SAFE_RELEASE(m_LayerReadback);
+     for(auto it = m_PipeCache.begin(); it != m_PipeCache.end(); ++it)
+     {
+       SAFE_RELEASE(it->second);
+@@ -1681,6 +1716,8 @@
+ 
+     D3D12RenderState pipeState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
+ 
++    if(m_LayerReadback)
++      ConfigureScratchViews(pipeState);
+     uint32_t eventFlags = CalculateEventFlags(pipeState);
+     m_EventFlags[eid] = eventFlags;
+ 
+@@ -1805,6 +1842,27 @@
+ 
+     readbackBuf->Unmap(0, NULL);
+     SAFE_RELEASE(readbackBuf);
++    if(m_LayerReadback && !m_LayerColorQueries.empty())
++    {
++      D3D12_RANGE layerRange = {0, SIZE_T(m_LayerReadback->GetDesc().Width)};
++      byte *layerData = NULL;
++      hr = m_LayerReadback->Map(0, &layerRange, (void **)&layerData);
++      CHECK_HR(m_pDevice, hr);
++      if(SUCCEEDED(hr))
++      {
++        for(uint32_t index : m_LayerColorQueries)
++        {
++          // The fixed shader emits a nonzero float4 only for passing fragments.
++          uint32_t value = 0;
++          memcpy(&value, layerData + size_t(index) * 512, sizeof(value));
++          m_OcclusionResults[index] = value != 0 ? 1 : 0;
++        }
++        D3D12_RANGE noWrites = {0, 0};
++        m_LayerReadback->Unmap(0, &noWrites);
++      }
++      else
++        ++floraLayerProbeFailures;
++    }
+   }
+ 
+   uint64_t GetOcclusionResult(uint32_t eventId, uint32_t test) const
+@@ -2134,7 +2192,7 @@
+   ID3D12PipelineState *CreatePipeline(D3D12RenderState baseState, uint32_t pipeCreateFlags,
+                                       uint32_t outputIndex)
+   {
+-    rdcpair<ResourceId, uint32_t> pipeKey(baseState.pipe, pipeCreateFlags);
++    rdcpair<ResourceId, uint32_t> pipeKey(baseState.pipe, pipeCreateFlags | (outputIndex << 16));
+     auto it = m_PipeCache.find(pipeKey);
+     // Check if we processed this pipeline before.
+     if(it != m_PipeCache.end())
+@@ -2178,6 +2236,39 @@
+       pipeDesc.PS.BytecodeLength = FixedColorPS->GetBufferSize();
+     }
+ 
++    if(m_LayerReadback)
++    {
++      // Probe draws must not change captured attachments or stencil state.
++      pipeDesc.BlendState.IndependentBlendEnable = TRUE;
++      pipeDesc.BlendState.AlphaToCoverageEnable = FALSE;
++      for(uint32_t i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
++        pipeDesc.BlendState.RenderTarget[i].RenderTargetWriteMask = 0;
++      pipeDesc.DepthStencilState.FrontFace.StencilWriteMask = 0;
++      pipeDesc.DepthStencilState.BackFace.StencilWriteMask = 0;
++      if(pipeCreateFlags & PipelineCreationFlags_FixedColorShader)
++      {
++        pipeDesc.RTVFormats.NumRenderTargets = RDCMAX(pipeDesc.RTVFormats.NumRenderTargets, outputIndex + 1);
++        pipeDesc.RTVFormats.RTFormats[outputIndex] = DXGI_FORMAT_R32G32B32A32_FLOAT;
++        pipeDesc.BlendState.RenderTarget[outputIndex].BlendEnable = FALSE;
++        pipeDesc.BlendState.RenderTarget[outputIndex].LogicOpEnable = FALSE;
++        pipeDesc.BlendState.RenderTarget[outputIndex].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
++      }
++      else
++      {
++        // Discard tests retain the original PS, including zero-color outputs.
++        // Depth/stencil tests are disabled for this pass, so a scratch stencil
++        // mask can exclude other layers without changing the tested shader.
++        pipeDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
++        pipeDesc.DepthStencilState.StencilEnable = TRUE;
++        pipeDesc.DepthStencilState.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
++        pipeDesc.DepthStencilState.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
++        pipeDesc.DepthStencilState.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
++        pipeDesc.DepthStencilState.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
++        pipeDesc.DepthStencilState.FrontFace.StencilReadMask = 0xff;
++        pipeDesc.DepthStencilState.BackFace = pipeDesc.DepthStencilState.FrontFace;
++      }
++    }
++
+     ID3D12PipelineState *pso = NULL;
+     HRESULT hr = m_pDevice->CreatePipeState(pipeDesc, &pso);
+     if(FAILED(hr))
+@@ -2193,6 +2284,28 @@
+   void ReplayDraw(ID3D12GraphicsCommandListX *cmd, D3D12RenderState pipeState,
+                   ID3D12PipelineState *pso, int eventId, uint32_t test)
+   {
++    if(m_LayerReadback)
++    {
++      if(test == TestEnabled_FragmentDiscard)
++      {
++        ++floraLayerDiscardProbes;
++        PrepareSelectedLayerMask(cmd);
++        pipeState.dsv = *m_CallbackInfo.dsDescriptor;
++        pipeState.stencilRefFront = pipeState.stencilRefBack = 1;
++      }
++      else
++      {
++        const uint32_t outputIndex = GetPixelHistoryRenderTargetIndex(pipeState);
++        const float zero[4] = {};
++        const D3D12_RECT pixel = {(LONG)m_CallbackInfo.x, (LONG)m_CallbackInfo.y,
++                                 (LONG)m_CallbackInfo.x + 1, (LONG)m_CallbackInfo.y + 1};
++        cmd->ClearRenderTargetView(m_pDevice->GetDebugManager()->GetCPUHandle(PIXEL_HISTORY_FLOAT_RTV),
++                                  zero, 1, &pixel);
++        if(pipeState.rts.size() <= outputIndex)
++          pipeState.rts.resize(outputIndex + 1);
++        pipeState.rts[outputIndex] = *m_CallbackInfo.floatColorDescriptor;
++      }
++    }
+     pipeState.pipe = GetResID(pso);
+     pipeState.ApplyState(m_pDevice, cmd);
+ 
+@@ -2205,6 +2318,34 @@
+     m_pDevice->ReplayDraw(cmd, *m_pDevice->GetAction(eventId));
+ 
+     cmd->EndQuery(m_OcclusionQueryHeap, D3D12_QUERY_TYPE_OCCLUSION, index);
++    if(m_LayerReadback && test != TestEnabled_FragmentDiscard)
++    {
++      const Subresource &sub = m_CallbackInfo.targetSubresource;
++      D3D12_RESOURCE_BARRIER barrier = {};
++      barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
++      barrier.Transition.pResource = m_CallbackInfo.colorImage;
++      barrier.Transition.Subresource = sub.mip + sub.slice * m_CallbackInfo.targetDesc.MipLevels;
++      barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
++      barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
++      cmd->ResourceBarrier(1, &barrier);
++      D3D12_TEXTURE_COPY_LOCATION src = {}, dst = {};
++      src.pResource = m_CallbackInfo.colorImage;
++      src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
++      src.SubresourceIndex = barrier.Transition.Subresource;
++      dst.pResource = m_LayerReadback;
++      dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
++      dst.PlacedFootprint.Offset = uint64_t(index) * 512;
++      dst.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
++      dst.PlacedFootprint.Footprint.Width = dst.PlacedFootprint.Footprint.Height = dst.PlacedFootprint.Footprint.Depth = 1;
++      dst.PlacedFootprint.Footprint.RowPitch = 256;
++      D3D12_BOX box = {m_CallbackInfo.x, m_CallbackInfo.y, 0,
++                       m_CallbackInfo.x + 1, m_CallbackInfo.y + 1, 1};
++      cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, &box);
++      std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
++      cmd->ResourceBarrier(1, &barrier);
++      m_LayerColorQueries.push_back(index);
++      ++floraLayerColorProbes;
++    }
+   }
+ 
+   rdcarray<uint32_t> m_Events;
+@@ -2218,6 +2359,8 @@
+   std::map<rdcpair<uint32_t, uint32_t>, uint32_t> m_OcclusionQueries;
+   std::map<uint32_t, bool> m_HasEarlyFragments;
+   rdcarray<uint64_t> m_OcclusionResults;
++  ID3D12Resource *m_LayerReadback = NULL;
++  rdcarray<uint32_t> m_LayerColorQueries;
+ };
+ 
+ static void D3D12UpdateTestsFailed(const D3D12TestsFailedCallback *tfCb, uint32_t eventId,
+@@ -3288,6 +3431,7 @@
+                                                       ResourceId target, uint32_t x, uint32_t y,
+                                                       const Subresource &sub, CompType typeCast)
+ {
++  floraLayerColorProbes = floraLayerDiscardProbes = floraLayerProbeFailures = 0;
+   rdcarray<PixelModification> history;
+ 
+   RDCCOMPILE_ASSERT(sizeof(D3D12EventInfo) % 16 == 0, "D3D12EventInfo not multiple of 16-bytes");
+@@ -3486,7 +3630,7 @@
+     D3D12MarkerRegion testsRegion(m_pDevice->GetQueue()->GetReal(), "D3D12TestsFailedCallback");
+ 
+     ID3D12QueryHeap *pTfOcclusionQueryHeap = NULL;
+-    if(!CreateOcclusionPool(m_pDevice, (uint32_t)drawEvents.size() * 6, &pTfOcclusionQueryHeap))
++    if(!CreateOcclusionPool(m_pDevice, (uint32_t)drawEvents.size() * 8, &pTfOcclusionQueryHeap))
+     {
+       GetDebugManager()->PixelHistoryDestroyResources(resources);
+       SAFE_DELETE(shaderCache);

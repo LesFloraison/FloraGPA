@@ -7219,6 +7219,67 @@ unverified. No original-sample/full portable acceptance item is promoted by
 these fixtures. GPU work for this repair was one new tiny capture, one native
 prefix run, six focused fixture queries and one existing BF1 query, serialized.
 
+### Selected-layer failure queries: culling, discard and depth controls
+
+The twenty-seventh runtime patch, `dx12-layer-test-history.patch`, addresses a
+concrete cross-layer false pass in the remaining test-reason path. The fixture's
+`cull` mode routes primitives 0/1 to Layer 1 with reversed winding and primitive 2
+to Layer 0 with front-facing winding. Layer 1's three native prefix readbacks all
+retain the Clear value. Before this patch, executions 1/2 reported backface
+culling, but execution 3 reported no culling because the occlusion query counted
+the passing primitive in Layer 0. Evidence:
+`half-blend-layer-cull1/{gpu.json,before}`.
+
+For single-sample 2D array targets, fixed-shader test passes now write a nonzero
+marker to a scratch FLOAT4 RTV with the original array range, with blending
+disabled. Each test copies only the selected physical layer's pixel to a separate
+readback buffer; zero/nonzero replaces the whole-Draw occlusion result. Original
+DSV tests remain active when applicable, with depth/stencil writes suppressed.
+Other captured color attachments are write-masked. Original-PS discard queries
+use the preceding patch's selected-layer stencil mask, so zero-color output is
+not mistaken for discard. The query pool accounts for all eight possible tests,
+and PSO cache keys include the tested output slot. Probe storage is separate from
+the pre/post-event buffer and scales to at most eight 512-byte slots per Draw.
+
+`half-blend-layer-cull1/{after,final}` now reports culling for all three relevant
+Draws and preserves native Clear colors. `passing-layer` returns the three Clears
+and the actual execution-3 fragment with culling false. The `discard` fixture
+makes only Layer 1 discard; its five backend fragment records remain discarded
+and match unchanged native colors (`half-blend-layer-discard1/{gpu.json,before,
+after}`). This is a discard-path control, not a claim that the pre-patch final
+records were wrong: the existing fragment reconstruction already identified
+these discards. The new depth mode binds a two-layer D32 DSV, clears depth to
+0.25, and outputs depth 0.75 on Layer 1 versus 0.125 on Layer 0.
+`half-blend-layer-depth1/rejected` reports depth failure for all five Layer 1
+fragments with native unchanged colors and depth 0.25. `passing-layer` preserves
+the actual Layer 0 Draw, passing depth 0.125 and the exact native single-fragment
+color from the matching split-layer oracle. This verifies that scratch markers
+do not replace the original depth test.
+
+Reports expose `backend_dx12_layer_test_history_patch=1` and actual probe counts.
+The final culling query performs nine fixed-shader and three original-PS discard
+queries with zero probe failures; the passing-depth query performs three and one
+respectively. Successful eligible queries report `backend_selected_layer_probes`;
+allocation/readback failures are counted and reported as `probe_failed`, and
+unsupported/unexecuted paths remain `unverified`. Array histories remain partial.
+The UI shows the test source and remaining limits next to the result summary.
+The saved-report UI test verifies the formerly false culling result, all three
+failure controls against native colors, passing-layer behavior, execution
+navigation and export: **3 passed**, **51 ms** (`layer-test-ui1.txt`).
+
+Complete 27-patch source verification/build, application/worker/CLI/UI-test build
+**442**, and build/package PowerShell syntax checks pass. Runtime SHA-256:
+`147bb78f64656ec9be4c9f5932c4ae830d9e77f8e4a36c136695b5a0d97c65a6`;
+patch SHA-256:
+`e644526694c22ab9ed26bf54f4afd1281966368b443e2662b3a297045e210ad7`.
+The fixtures before the final stats export used the same probe implementation;
+the final culling and passing-depth queries verify the versioned/reporting path.
+Testing was limited to three tiny captures and eight serial queries serving the
+reproduced fault, depth/discard controls and report contract. No full-sample or
+portable acceptance was promoted. Early depth/stencil semantics, mixed
+per-fragment failures, MSAA, full depth reconstruction, mesh/view instancing and
+GS primitive-ID recovery remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

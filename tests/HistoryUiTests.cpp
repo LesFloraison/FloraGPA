@@ -54,6 +54,49 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void layerTestHistory() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the array-layer test evidence directory");
+        const auto before=read(root + "/half-blend-layer-cull1/before/result.json");
+        QCOMPARE(before.at("history").back().at("backfaceCulled"),Json(false));
+        const auto cull=read(root + "/half-blend-layer-cull1/final/result.json");
+        QCOMPARE(cull.at("backend_dx12_layer_test_history_patch"),Json(1));
+        QCOMPARE(cull.at("history_scope").at("array_layer_test_reason_status"),Json("backend_selected_layer_probes"));
+        QVERIFY(cull.at("history_scope").at("array_layer_test_probes").at("fixed_shader_queries").get<uint32_t>() > 0);
+        QCOMPARE(cull.at("history_scope").at("array_layer_test_probes").at("failures"),Json(0));
+        for (const auto &kind : {QString("cull"),QString("discard"),QString("depth")}) {
+            const auto folder=root + "/half-blend-layer-" + kind + "1/";
+            const auto report=kind == "cull" ? cull : read(folder + (kind == "depth" ? "rejected" : "after") + "/result.json");
+            const auto native=read(folder + "gpu.json");
+            const auto flag=kind == "cull" ? "backfaceCulled" : kind == "depth" ? "depthTestFailed" : "shaderDiscarded";
+            size_t draws{};
+            for (const auto &row : report.at("history")) {
+                if (row.value("record_kind","") != "backend_modification") continue;
+                QCOMPARE(row.at(flag),Json(true)); ++draws;
+                for (size_t c=0;c<4;++c) {
+                    const auto bits=native.at("prefix_half_words")[0][c].get<uint16_t>();
+                    QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                        std::ldexp(1.0 + double(bits & 1023) / 1024.0,int(bits >> 10)-15));
+                }
+            }
+            QCOMPARE(draws,kind == "cull" ? size_t(3) : size_t(5));
+            PixelHistoryView view; view.setContext("array-test:" + kind,3,true); view.setDx12Resource(1,1001);
+            view.selectPixel(1001,5,5,0,1,0); QVERIFY(view.finish(view.requestId(),report));
+            auto rows=view.findChild<QTreeWidget *>("historyRecords");
+            const auto last=rows->topLevelItem(rows->topLevelItemCount()-1);
+            QVERIFY(last->text(3).contains(kind == "cull" ? "Backface" : kind == "depth" ? "Depth test" : "Discard"));
+            rows->setCurrentItem(last); QSignalSpy jump(&view,&PixelHistoryView::eventRequested);
+            action(view,"locateHistoryEvent")->trigger(); QCOMPARE(jump.count(),1); QCOMPARE(jump[0][0].toULongLong(),3ULL);
+            if (kind == "cull") QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("selected-layer GPU queries"));
+            if (!output_.isEmpty()) {
+                const auto file=output_ + "/layer-test-" + kind + ".json";
+                view.exportResult(file); QCOMPARE(read(file),report);
+            }
+        }
+        const auto passed=read(root + "/half-blend-layer-cull1/passing-layer/result.json");
+        QCOMPARE(passed.at("history").size(),size_t(4));
+        QCOMPARE(passed.at("history").back().at("backfaceCulled"),Json(false));
+    }
     void routedLayerHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the routed-layer history evidence directory");

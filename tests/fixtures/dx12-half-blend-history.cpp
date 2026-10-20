@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed|split0|split1. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed|split0|split1|cull|discard|depth. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -18,13 +18,13 @@ void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + s
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1" && mode != "cull" && mode != "discard" && mode != "depth")
         throw std::runtime_error("Invalid subresource mode");
-    const bool split = mode == "split0" || mode == "split1";
+    const bool split = mode == "split0" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth";
     const bool routed = mode == "routed" || split;
     const bool transfer = mode == "copy" || mode == "resolve";
     const bool defaultView = mode == "default" || routed;
-    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || transfer ? 1 : 0;
+    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth" || transfer ? 1 : 0;
     const bool nativeOnly=GetEnvironmentVariableA("FLORA_FIXTURE_NATIVE",nullptr,0) != 0;
     const auto library = nativeOnly ? nullptr : LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
@@ -57,15 +57,29 @@ void gs(triangle float4 vertices[3] : SV_Position, uint id : SV_PrimitiveID, ino
     output.layer=1;
 #endif
     output.primitive=id;
-    for (uint i=0;i<3;++i) { output.pos=vertices[i]; stream.Append(output); }
+    for (uint i=0;i<3;++i) {
+#if FLORA_CULL
+        output.pos=vertices[output.layer == 1 ? 2-i : i];
+#else
+        output.pos=vertices[i];
+#endif
+#if FLORA_DEPTH
+        output.pos.z=output.layer == 1 ? 0.75 : 0.125;
+#endif
+        stream.Append(output); }
 }
 float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     if (id == 1) return 0;
     return float4(0.019068362191319466,0.01583746448159218,0.012434612028300762,0.427259236574173);
 }
-float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
+float4 psgs(GSOut input) : SV_Target {
+#if FLORA_DISCARD
+    if (input.layer == 1) discard;
+#endif
+    return ps(input.primitive);
+}
 )";
-    const D3D_SHADER_MACRO defines[] = {{"FLORA_SPLIT", split ? "1" : "0"}, {nullptr, nullptr}};
+    const D3D_SHADER_MACRO defines[] = {{"FLORA_SPLIT", split ? "1" : "0"}, {"FLORA_CULL", mode == "cull" ? "1" : "0"}, {"FLORA_DISCARD", mode == "discard" ? "1" : "0"}, {"FLORA_DEPTH", mode == "depth" ? "1" : "0"}, {nullptr, nullptr}};
     const auto compile = [&](const char *entry, const char *profile) {
         ComPtr<ID3DBlob> blob; const auto hr = D3DCompile(source, sizeof source, "half-blend-history", defines, nullptr,
             entry, profile, D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &blob, &errors);
@@ -79,11 +93,16 @@ float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
     if (routed) { gs=compile("gs","gs_5_1"); p.GS={gs->GetBufferPointer(),gs->GetBufferSize()}; }
     p.SampleMask = UINT_MAX; p.SampleDesc.Count = 1; p.NumRenderTargets = 1; p.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
     p.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    p.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; p.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; p.RasterizerState.DepthClipEnable = TRUE;
+    p.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; p.RasterizerState.CullMode = mode == "cull" ? D3D12_CULL_MODE_BACK : D3D12_CULL_MODE_NONE; p.RasterizerState.DepthClipEnable = TRUE;
     auto &blend = p.BlendState.RenderTarget[0]; blend.BlendEnable = TRUE; blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
     blend.SrcBlend = blend.SrcBlendAlpha = D3D12_BLEND_ONE;
     blend.DestBlend = blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
     blend.BlendOp = blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    if (mode == "depth") {
+        p.DSVFormat=DXGI_FORMAT_D32_FLOAT; p.DepthStencilState.DepthEnable=TRUE;
+        p.DepthStencilState.DepthFunc=D3D12_COMPARISON_FUNC_LESS;
+        p.DepthStencilState.DepthWriteMask=D3D12_DEPTH_WRITE_MASK_ALL;
+    }
     ComPtr<ID3D12PipelineState> pipeline;
     const auto pipelineResult=device->CreateGraphicsPipelineState(&p, IID_PPV_ARGS(&pipeline));
     if (FAILED(pipelineResult)) {
@@ -125,6 +144,19 @@ float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
         check(transferSource->SetName(L"Flora DX12 resource 1002 creation 2"));
         device->CreateRenderTargetView(transferSource.Get(), nullptr, sourceRtv);
     }
+    ComPtr<ID3D12Resource> depth;
+    ComPtr<ID3D12DescriptorHeap> dsvs;
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv{};
+    if (mode == "depth") {
+        auto description=texture; description.Format=DXGI_FORMAT_D32_FLOAT;
+        description.Flags=D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+        check(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&description,
+            D3D12_RESOURCE_STATE_DEPTH_WRITE,nullptr,IID_PPV_ARGS(&depth)));
+        check(depth->SetName(L"Flora DX12 resource 1004 creation 4"));
+        D3D12_DESCRIPTOR_HEAP_DESC desc{}; desc.Type=D3D12_DESCRIPTOR_HEAP_TYPE_DSV; desc.NumDescriptors=1;
+        check(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&dsvs)));
+        dsv=dsvs->GetCPUDescriptorHandleForHeapStart(); device->CreateDepthStencilView(depth.Get(),nullptr,dsv);
+    }
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,subresource,1,0,&fp,nullptr,nullptr,&size);
     const UINT64 stride = (size + 511) & ~UINT64(511);
     heap.Type = D3D12_HEAP_TYPE_READBACK;
@@ -137,7 +169,7 @@ float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
     ComPtr<ID3D12GraphicsCommandList> list; check(device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,allocator.Get(),pipeline.Get(),IID_PPV_ARGS(&list)));
     list->SetGraphicsRootSignature(root.Get()); list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     D3D12_VIEWPORT vp{0,0,16,16,0,1}; D3D12_RECT rect{0,0,16,16}; list->RSSetViewports(1,&vp); list->RSSetScissorRects(1,&rect);
-    list->OMSetRenderTargets(1,&rtv,FALSE,nullptr);
+    list->OMSetRenderTargets(1,&rtv,FALSE,depth ? &dsv : nullptr);
     if (transfer) {
         const float red[]{1,0,0,1}; list->ClearRenderTargetView(sourceRtv,red,0,nullptr);
         D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -157,6 +189,7 @@ float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
         std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
     };
     for (UINT n=1;n<=3;++n) {
+        if (depth) list->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,0.25f,0,0,nullptr);
         if (defaultView) {
             const auto marker="Flora DX12 execution " + std::to_string(20+n) + " record " + std::to_string(20+n) +
                 " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(20+n) + ": ID3D12GraphicsCommandListClearRenderTargetView";

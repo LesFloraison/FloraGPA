@@ -500,6 +500,13 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(sample_->value()));
     if (result.value("partial", false))
         summary_->setText("Partial history · " + summary_->text());
+    const auto layerTests=scope.value("array_layer_test_reason_status", "");
+    if (layerTests == "backend_selected_layer_probes")
+        summary_->setText(summary_->text() + "\nArray-layer tests use selected-layer GPU queries; per-fragment and early-test limitations apply.");
+    else if (layerTests == "probe_failed")
+        summary_->setText(summary_->text() + "\nArray-layer test query failed. Test reasons are unavailable.");
+    else if (layerTests == "unverified")
+        summary_->setText(summary_->text() + "\nArray-layer test reasons are unverified; backend queries may include other layers.");
     const auto excluded = scope.value("excluded_resource_operations", Json::array()).size();
     const auto coverageGaps = scope.value("resource_operation_coverage_gaps", Json::array()).size();
     const auto valueGaps = scope.value("resource_operation_value_gaps", Json::array()).size();
