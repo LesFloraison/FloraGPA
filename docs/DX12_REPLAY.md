@@ -7116,6 +7116,49 @@ capture and five serial targeted queries. Interruptions were resumed from
 completed output files without repeating GPU queries. Full sample/portable
 acceptance and general per-primitive array routing remain unfinished.
 
+### Fixed-layer Draw attribution and remaining GS routing fault
+
+The twenty-fifth runtime patch, `dx12-fixed-layer-history.patch`, inspects the
+last active VS/DS/GS output signature. Without `SV_RenderTargetArrayIndex`, a
+Draw targets the attachment view's first layer. The attachment-overlap filter
+now rejects other layers for default, explicit 2D-array and MS-array views.
+Missing reflection, mesh shaders and view instancing remain candidates. Runtime
+reports expose `backend_dx12_default_view_history_patch=2` and state this limited
+routing guarantee. The build/package manifest pins the additional patch.
+
+Evidence under `half-blend-default1/{other-layer-before,other-layer-after}`:
+querying Mip 0/Layer 1 previously returned three Clears and six unrelated Draw
+fragments; it now returns only the three Clears. The former selected-texel
+boundary check passed despite incorrect fragment attribution, demonstrating why
+that check alone cannot validate a history. The explicit view starting at Layer 1
+in `half-blend-array1/fixed-layer-positive` retains all nine records and all 12
+selected-Draw color components match native prefix readbacks. The saved-report
+UI test checks Clear-only display, disabled PS debugging and the positive native
+comparison: **3 passed**, including setup/cleanup, **241 ms**
+(`fixed-layer-ui1.txt`). App/CLI/test builds **437–438** pass.
+
+The new `routed` fixture mode uses a GS that writes array index 1. Its separate
+native-only run (`FLORA_FIXTURE_NATIVE`) and captured run have identical three
+prefix readbacks. The fixture passes its primitive color selector through a
+custom semantic; it does not emit a GS primitive-ID system output. Optional
+`FLORA_FIXTURE_DEBUG` enables D3D12 diagnostics. A prior fixture linkage error was
+resolved from native debug messages, not classified as a hardware limitation.
+`half-blend-routed1/selected-layer` returns the expected nine records and matches
+all 12 native selected-Draw components, but primitive IDs remain unavailable.
+`half-blend-routed1/other-layer` still falsely attributes six Draw fragments to
+Layer 0. This reproduces an **unfinished dynamic-routing fault** in analysis
+scratch attachments/counters. Neither successful values at Layer 1 nor an
+unchanged Layer 0 boundary validates those other-layer fragments. General array
+routing and the original-sample/full portable acceptance remain unfinished.
+
+Complete 25-patch source verification/build passes. Runtime SHA-256:
+`bee99c3d2ce3c5ed8995f26d193ca2bad5507e4e52bd8d5afa0e31ce9217b6e8`;
+patch SHA-256:
+`23166f91105c30841e35849a506602b3f10f50f806543838cc6a70d4b41223b2`.
+The local runtime checkout required a process-scoped Git safe-directory setting
+after an ownership change; its pinned upstream commit was rechecked, and no
+global Git trust setting was changed.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

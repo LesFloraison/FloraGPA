@@ -331,7 +331,8 @@ class Session {
         }
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12DefaultViewHistoryPatchVersion"))) {
             defaultViewHistoryPatch = patch();
-            if (defaultViewHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 default-view history patch version");
+            if (defaultViewHistoryPatch != 1 && defaultViewHistoryPatch != 2)
+                throw std::runtime_error("Unsupported DX12 default-view history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -2379,6 +2380,9 @@ Json runRdcJob(const Json &job) {
         result["history_scope"]["default_view_filter"] = session.defaultViewHistoryPatch
             ? "Default typed 2D attachments select mip zero and all array layers; other mip draws are excluded. Per-primitive array routing remains unverified."
             : "Default attachment ranges are not filtered by this runtime; history at other mips can contain unrelated Draw fragments.";
+        result["history_scope"]["array_layer_filter"] = session.defaultViewHistoryPatch >= 2
+            ? "Without a render-target array index output in the last VS/DS/GS stage, Draws only affect the view's first layer. Dynamic layer outputs, mesh shaders and view instancing remain unverified."
+            : "This runtime does not exclude other array layers when the last vertex-processing stage has no layer-index output.";
     }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(

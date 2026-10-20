@@ -54,6 +54,41 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void fixedLayerHistory() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the fixed-layer history evidence directory");
+        const auto before=read(root + "/half-blend-default1/other-layer-before/result.json");
+        const auto after=read(root + "/half-blend-default1/other-layer-after/result.json");
+        QCOMPARE(before.at("history").size(),size_t(9));
+        QCOMPARE(after.at("backend_dx12_default_view_history_patch"),Json(2));
+        QCOMPARE(after.at("history").size(),size_t(3));
+        for (const auto &row : after.at("history"))
+            QCOMPARE(row.at("record_kind"),Json("resource_operation"));
+        PixelHistoryView pixel; pixel.setContext("default:layer",3,true); pixel.setDx12Resource(1,1001);
+        pixel.selectPixel(1001,5,5,0,1,0); QVERIFY(pixel.finish(pixel.requestId(),after));
+        auto rows=pixel.findChild<QTreeWidget *>("historyRecords");
+        QCOMPARE(rows->topLevelItemCount(),3);
+        rows->setCurrentItem(rows->topLevelItem(0));
+        QVERIFY(!action(pixel,"debugHistoryPixel")->isEnabled());
+        const auto positive=read(root + "/half-blend-array1/fixed-layer-positive/result.json");
+        const auto native=read(root + "/half-blend-array1/gpu.json");
+        size_t fragment{};
+        for (const auto &row : positive.at("history")) {
+            if (row.value("execution",Json()) != "3") continue;
+            QVERIFY(fragment < 3);
+            for (size_t c=0;c<4;++c) {
+                const auto bits=native.at("prefix_half_words")[fragment][c].get<uint16_t>();
+                QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                    std::ldexp(1.0 + double(bits & 1023) / 1024.0,int(bits >> 10)-15));
+            }
+            ++fragment;
+        }
+        QCOMPARE(fragment,size_t(3));
+        if (!output_.isEmpty()) {
+            pixel.exportResult(output_ + "/fixed-layer-history.json");
+            QCOMPARE(read(output_ + "/fixed-layer-history.json"),after);
+        }
+    }
     void defaultViewHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the default-view history evidence directory");

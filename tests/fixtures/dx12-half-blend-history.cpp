@@ -1,9 +1,10 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
 #include <d3d12.h>
+#include <d3d12sdklayers.h>
 #include <d3dcompiler.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h>
@@ -11,24 +12,31 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr))); }
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed")
         throw std::runtime_error("Invalid subresource mode");
     const bool transfer = mode == "copy" || mode == "resolve";
-    const UINT mip = mode == "base" || mode == "default" ? 0 : 1, layer = mode == "array" || mode == "rect" || transfer ? 1 : 0;
-    const auto library = LoadLibraryA(argv[1]);
+    const bool defaultView = mode == "default" || mode == "routed";
+    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || transfer ? 1 : 0;
+    const bool nativeOnly=GetEnvironmentVariableA("FLORA_FIXTURE_NATIVE",nullptr,0) != 0;
+    const auto library = nativeOnly ? nullptr : LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
-    if (!getAPI || !getAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&api))) throw std::runtime_error("Capture API unavailable");
-    api->SetCaptureFilePathTemplate(argv[2]);
+    if (!nativeOnly && (!getAPI || !getAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&api)))) throw std::runtime_error("Capture API unavailable");
+    if (api) api->SetCaptureFilePathTemplate(argv[2]);
+    if (api && GetEnvironmentVariableA("FLORA_FIXTURE_DEBUG",nullptr,0)) api->SetCaptureOptionU32(eRENDERDOC_Option_APIValidation,1);
     ComPtr<IDXGIFactory6> factory; check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
     ComPtr<IDXGIAdapter1> adapter; check(factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)));
+    if (GetEnvironmentVariableA("FLORA_FIXTURE_DEBUG",nullptr,0)) {
+        ComPtr<ID3D12Debug> debug; check(D3D12GetDebugInterface(IID_PPV_ARGS(&debug))); debug->EnableDebugLayer();
+    }
     ComPtr<ID3D12Device> device; check(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&device)));
-    api->StartFrameCapture(device.Get(), nullptr);
+    if (api) api->StartFrameCapture(device.Get(), nullptr);
     D3D12_ROOT_SIGNATURE_DESC rootDesc{};
     ComPtr<ID3DBlob> rootBytes, errors; check(D3D12SerializeRootSignature(&rootDesc, D3D_ROOT_SIGNATURE_VERSION_1, &rootBytes, &errors));
     ComPtr<ID3D12RootSignature> root; check(device->CreateRootSignature(0, rootBytes->GetBufferPointer(), rootBytes->GetBufferSize(), IID_PPV_ARGS(&root)));
@@ -37,19 +45,29 @@ float4 vs(uint id : SV_VertexID) : SV_Position {
     const float2 p[3] = {float2(-1,-1),float2(-1,3),float2(3,-1)};
     return float4(p[id % 3],0,1);
 }
+struct GSOut { float4 pos : SV_Position; uint layer : SV_RenderTargetArrayIndex; nointerpolation uint primitive : TEXCOORD0; };
+[maxvertexcount(3)]
+void gs(triangle float4 vertices[3] : SV_Position, uint id : SV_PrimitiveID, inout TriangleStream<GSOut> stream) {
+    GSOut output; output.layer=1; output.primitive=id;
+    for (uint i=0;i<3;++i) { output.pos=vertices[i]; stream.Append(output); }
+}
 float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     if (id == 1) return 0;
     return float4(0.019068362191319466,0.01583746448159218,0.012434612028300762,0.427259236574173);
-})";
+}
+float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
+)";
     const auto compile = [&](const char *entry, const char *profile) {
         ComPtr<ID3DBlob> blob; const auto hr = D3DCompile(source, sizeof source, "half-blend-history", nullptr, nullptr,
             entry, profile, D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &blob, &errors);
         if (FAILED(hr) && errors) std::cerr << static_cast<const char *>(errors->GetBufferPointer());
         check(hr); return blob;
     };
-    const auto vs = compile("vs", "vs_5_1"), ps = compile("ps", "ps_5_1");
+    const auto vs = compile("vs", "vs_5_1"), ps = compile(mode == "routed" ? "psgs" : "ps", "ps_5_1");
     D3D12_GRAPHICS_PIPELINE_STATE_DESC p{}; p.pRootSignature = root.Get();
     p.VS = {vs->GetBufferPointer(), vs->GetBufferSize()}; p.PS = {ps->GetBufferPointer(), ps->GetBufferSize()};
+    ComPtr<ID3DBlob> gs;
+    if (mode == "routed") { gs=compile("gs","gs_5_1"); p.GS={gs->GetBufferPointer(),gs->GetBufferSize()}; }
     p.SampleMask = UINT_MAX; p.SampleDesc.Count = 1; p.NumRenderTargets = 1; p.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
     p.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     p.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; p.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; p.RasterizerState.DepthClipEnable = TRUE;
@@ -57,11 +75,22 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     blend.SrcBlend = blend.SrcBlendAlpha = D3D12_BLEND_ONE;
     blend.DestBlend = blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
     blend.BlendOp = blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-    ComPtr<ID3D12PipelineState> pipeline; check(device->CreateGraphicsPipelineState(&p, IID_PPV_ARGS(&pipeline)));
+    ComPtr<ID3D12PipelineState> pipeline;
+    const auto pipelineResult=device->CreateGraphicsPipelineState(&p, IID_PPV_ARGS(&pipeline));
+    if (FAILED(pipelineResult)) {
+        ComPtr<ID3D12InfoQueue> messages;
+        if (SUCCEEDED(device.As(&messages)))
+            for (UINT64 i=0;i<messages->GetNumStoredMessagesAllowedByRetrievalFilter();++i) {
+                SIZE_T size{}; messages->GetMessage(i,nullptr,&size); std::vector<uint8_t> storage(size);
+                auto message=reinterpret_cast<D3D12_MESSAGE *>(storage.data());
+                if (SUCCEEDED(messages->GetMessage(i,message,&size))) std::cerr << message->pDescription << '\n';
+            }
+        throw std::runtime_error("CreateGraphicsPipelineState HRESULT " + std::to_string(uint32_t(pipelineResult)));
+    }
     D3D12_HEAP_PROPERTIES heap{}; heap.Type = D3D12_HEAP_TYPE_DEFAULT;
     D3D12_RESOURCE_DESC texture{}; texture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; texture.Width = texture.Height = 16 << mip;
     texture.DepthOrArraySize = UINT16(layer + 1); texture.MipLevels = UINT16(mip + 1); texture.SampleDesc.Count = 1;
-    if (mode == "default") { texture.Width=texture.Height=32; texture.MipLevels=2; texture.DepthOrArraySize=2; }
+    if (defaultView) { texture.Width=texture.Height=32; texture.MipLevels=2; texture.DepthOrArraySize=2; }
     const UINT subresource = mip + layer * texture.MipLevels;
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
@@ -75,7 +104,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY; view.Texture2DArray.MipSlice = mip;
         view.Texture2DArray.FirstArraySlice = layer; view.Texture2DArray.ArraySize = 1;
     } else { view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; view.Texture2D.MipSlice = mip; }
-    device->CreateRenderTargetView(target.Get(), mode == "default" ? nullptr : &view, rtv);
+    device->CreateRenderTargetView(target.Get(), defaultView ? nullptr : &view, rtv);
     ComPtr<ID3D12Resource> transferSource;
     auto sourceRtv = rtv; sourceRtv.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     if (transfer) {
@@ -119,13 +148,13 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
     };
     for (UINT n=1;n<=3;++n) {
-        if (mode == "default") {
+        if (defaultView) {
             const auto marker="Flora DX12 execution " + std::to_string(20+n) + " record " + std::to_string(20+n) +
                 " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(20+n) + ": ID3D12GraphicsCommandListClearRenderTargetView";
             list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1));
         }
         list->ClearRenderTargetView(rtv,initial,0,nullptr);
-        if (mode == "default") list->EndEvent();
+        if (defaultView) list->EndEvent();
         if (mode == "rect") {
             const float red[]{1,0,0,1}; const D3D12_RECT clearRect{0,0,4,4};
             list->ClearRenderTargetView(rtv,red,1,&clearRect);
@@ -163,7 +192,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     HANDLE event = CreateEventW(nullptr,FALSE,FALSE,nullptr); if (!event) throw std::runtime_error("Fence event failed");
     check(fence->SetEventOnCompletion(1,event)); const auto waited=WaitForSingleObject(event,30000); CloseHandle(event);
     if (waited!=WAIT_OBJECT_0) throw std::runtime_error("GPU fixture timed out");
-    if (!api->EndFrameCapture(device.Get(),nullptr)) throw std::runtime_error("Capture failed");
+    if (api && !api->EndFrameCapture(device.Get(),nullptr)) throw std::runtime_error("Capture failed");
     void *mapped{}; D3D12_RANGE range{0,SIZE_T(buffer.Width)},none{}; check(readback->Map(0,&range,&mapped));
     std::cout << "{\"x\":5,\"y\":5,\"mip\":" << mip << ",\"layer\":" << layer << ",\"subresource\":" << subresource << ",\"prefix_half_words\":[";
     for (UINT n=0;n<3;++n) {
