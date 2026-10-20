@@ -4,6 +4,7 @@
 #include "app/ReplayMeshView.h"
 #include "app/PixelHistoryView.h"
 #include "app/ResourceHistoryView.h"
+#include "application/ReplayMesh.h"
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
@@ -36,6 +37,59 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void stripRestartGeometry() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_STRIP_RESTART");
+        if (root.isEmpty()) QSKIP("Set the native strip-restart fixture reports directory");
+        const auto canonical = [](std::array<uint64_t, 3> face) {
+            while (face[0] > face[1] || face[0] > face[2]) std::rotate(face.begin(), face.begin() + 1, face.end());
+            return face;
+        };
+        const auto span = [](const QByteArray &bytes) { return std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size())); };
+        for (const auto mode : {QString("16"), QString("32"), QString("empty"), QString("out16")}) {
+            const bool post = mode == "out16", empty = mode == "empty";
+            const auto directory = root + (post ? "/vsout16-fixed" : "/input" + mode);
+            const auto result = read(directory + "/result.json");
+            const auto vertices = readBytes(directory + "/post_vertices.bin"), indices = readBytes(directory + "/post_indices.bin");
+            const auto mesh = ReplayMesh::decode(result.at("mesh"), span(vertices), span(indices));
+            QCOMPARE(mesh.positions.size(), empty ? size_t(0) : size_t(7));
+            QCOMPARE(mesh.candidateFaceCount, empty ? uint64_t(0) : uint64_t(3));
+            QCOMPARE(mesh.indexCount, empty ? uint64_t(3) : uint64_t(12));
+            QVERIFY(result.at("gpa_modules_loaded").empty());
+            const auto gpu = read(root + "/gpu" + (post ? "16" : mode) + ".json").at("words").get<std::vector<uint32_t>>();
+            std::vector<std::array<uint64_t, 3>> native;
+            for (size_t i = 0; i < gpu.size(); i += 4) {
+                if (!gpu[i + 3]) continue;
+                QCOMPARE(gpu[i + 3], 0xaabbccddU);
+                // Native SV_VertexID is the raw index; buffer fetch adds BaseVertex=-5.
+                native.push_back(canonical({gpu[i] - 5U, gpu[i + 1] - 5U, gpu[i + 2] - 5U}));
+            }
+            QCOMPARE(mesh.faces.size(), native.size());
+            for (size_t i = 0; i < native.size(); ++i) QCOMPARE(canonical(mesh.faces[i]), native[i]);
+            if (!empty) QCOMPARE(mesh.firstReferences, (std::vector<uint32_t>{1, 2, 3, 4, 7, 8, 9}));
+            else {
+                QCOMPARE(result.at("mesh").at("input").at("raw_vertex_bytes"), Json("0"));
+                QVERIFY(readBytes(directory + "/input_vertices.bin").isEmpty());
+                QCOMPARE(readBytes(directory + "/input_indices.bin").size(), qsizetype(6));
+            }
+            ReplayMeshView view; view.resize(1200, 800); view.show(); view.setContext("strip", 1, true);
+            auto stage = view.findChild<QComboBox *>("replayMeshStage"); stage->setCurrentIndex(stage->findData(post ? "VSOut" : "VSIn"));
+            QVERIFY(view.finish(view.requestId(), result, directory));
+            auto table = view.findChild<QTableView *>("replayMeshPositions"); QCOMPARE(table->model()->rowCount(), empty ? 0 : 7);
+            if (!empty) {
+                table->selectRow(4); QSignalSpy invocation(&view, &ReplayMeshView::vertexDebugRequested);
+                action(view, "replayMeshDebugVertex")->trigger(); QCOMPARE(invocation.size(), 1);
+                QCOMPARE(invocation[0][1].toUInt(), 7U);
+            } else QVERIFY(!action(view, "replayMeshDebugVertex")->isEnabled());
+            QTemporaryDir exports; view.exportResult(exports.filePath("mesh.obj"));
+            QCOMPARE(readBytes(exports.filePath("mesh.obj")), readBytes(directory + "/post_geometry.obj"));
+            if (!output_.isEmpty() && post) QVERIFY(view.grab().save(output_ + "/strip-restart.png"));
+        }
+        const auto debug = read(root + "/debug-second-strip/result.json");
+        QCOMPARE(debug.at("vertex_invocation").at("vertex_ordinal"), Json(7));
+        QCOMPARE(debug.at("vertex_invocation").at("raw_index"), Json(9));
+        QCOMPARE(debug.at("vertex_invocation").at("actual_vertex_index"), Json(4));
+        QCOMPARE(debug.at("vertex_input_snapshots").at("before_debug").at("attributes")[0].at("byte_offset"), Json("64"));
+    }
     void typedVertexDebugInputs() {
         const auto root = qEnvironmentVariable("FLORA_DX12_VERTEX_INPUT_DEBUG");
         if (root.isEmpty()) QSKIP("Set the DXBC/DXIL vertex-input debug evidence root");

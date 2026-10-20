@@ -6687,6 +6687,50 @@ patch SHA-256:
 Primitive restart, broader geometry/debug fidelity, historical query recovery
 and full portable acceptance remain unfinished.
 
+### Preserve Triangle Strip restart boundaries in geometry and VS navigation
+
+DX12 VSIn now retains strip-cut entries as explicit sentinels while remapping
+vertex indices. Cuts are identified **before** adding BaseVertex and only for
+strip topologies; they do not expand the vertex range or acquire a VS invocation.
+Original index ordinals remain intact. The geometry model resets Triangle Strip
+winding at each cut and excludes cross-boundary/incomplete triangles. An all-cut
+Draw has zero vertex bytes and never calls RenderDoc's zero-length buffer read
+(which would request the whole buffer). Original index bytes remain exportable.
+This follows the captured
+[DX12 strip-cut setting](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_index_buffer_strip_cut_value).
+
+VSOut required an additional correction: RenderDoc 1.45 preserves the original
+cut values in its rebased indices, while its returned MeshFormat has a generic
+`0xffffffff` restart default. On the selected 16-bit fixture that caused **7**
+candidate faces and reversed winding for the three in-range faces. The adapter
+now takes VSOut's restart enable/value from the selected Draw's input-assembly
+state. The fixed output has **3** correctly wound triangles and no extra faces.
+
+Native evidence (`strip-restart1`, source `tests/fixtures/dx12-strip-restart.cpp`):
+one 16-bit and one 32-bit indexed Draw use StartIndex **1**, BaseVertex **-5**,
+leading/consecutive/trailing cut markers, and two nonempty strips. A native GS
+writes each assembled triangle's SV_VertexID values to a UAV. Both VSIn exports
+and the fixed 16-bit VSOut match all three native triangles, comparing cyclic
+vertex rotations while preserving winding. They contain **7** vertex rows,
+**12** original index references and **5** cuts. A third Draw with three cuts
+only produces no GPU triangles, no vertex rows and an empty vertex export,
+while retaining its six original index bytes. No GPA module is loaded.
+
+The first references are **(1,2,3,4,7,8,9)**. Selecting row **4** in both VSIn
+and VSOut emits original ordinal **7**. One actual VS debug request confirms
+raw index **9**, buffer row **4**, input byte offset **64** and SV_VertexID **9**;
+the raw system value is distinct from the BaseVertex-adjusted buffer index.
+The saved-report UI check validates native triangle membership/winding, counts,
+OBJ export, invocation navigation and disabled debugging for the empty result:
+**3 passed** including setup/cleanup (**272 ms**). Screenshot:
+`strip-restart-ui1/replay-mesh/strip-restart.png`. The mesh-model executable also
+passes focused 16/32-bit, disabled-restart, list-topology and all-cut checks.
+Builds **413–416** pass. GPU work was serial and confined to these cases.
+
+This closes the demonstrated Triangle Strip restart path; it does not establish
+full geometry/GS analysis, adjacency topology rendering or complete sample
+fidelity. Historical query recovery and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

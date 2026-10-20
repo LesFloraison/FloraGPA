@@ -90,12 +90,19 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
         throw std::runtime_error("Unsupported replay mesh index width");
     if (indexed && ib.size() != result.indexCount * width)
         throw std::runtime_error("Post-shader index storage is truncated or oversized");
+    const auto topology = number(m.at("topology"), UINT32_MAX);
+    const bool strip = topology == 3 || topology == 6 || topology == 9 || topology == 11;
+    const bool restart = indexed && strip && m.value("allowRestart", false);
+    const auto restartIndex = number(m.value("restartIndex", nlohmann::json(UINT32_MAX)), UINT32_MAX);
+    auto rawIndex = [&](uint64_t i) -> uint32_t {
+        uint32_t value{}; std::memcpy(&value, ib.data() + i * width, size_t(width)); return value;
+    };
+    const auto cut = [&](uint64_t i) { return restart && rawIndex(i) == restartIndex; };
     auto index = [&](uint64_t i) -> int64_t {
         if (!indexed)
             return int64_t(i);
-        uint32_t value{};
-        std::memcpy(&value, ib.data() + i * width, size_t(width));
-        return int64_t(value) + baseVertex;
+        if (cut(i)) return -1;
+        return int64_t(rawIndex(i)) + baseVertex;
     };
     result.firstReferences.assign(size_t(count), UINT32_MAX);
     for (uint64_t i = 0; i < result.indexCount; ++i) {
@@ -108,14 +115,16 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
         if (a >= 0 && b >= 0 && c >= 0 && uint64_t(a) < count && uint64_t(b) < count && uint64_t(c) < count)
             result.faces.push_back({uint64_t(a), uint64_t(b), uint64_t(c)});
     };
-    const auto topology = number(m.at("topology"), UINT32_MAX);
     if (topology == 5) {
         for (uint64_t i = 0; i + 2 < result.indexCount; i += 3)
             face(index(i), index(i + 1), index(i + 2));
     } else if (topology == 6) {
-        for (uint64_t i = 0; i + 2 < result.indexCount; ++i) {
-            auto a = index(i), b = index(i + 1), c = index(i + 2);
-            if (i % 2)
+        uint64_t segmentStart{};
+        for (uint64_t i = 0; i < result.indexCount; ++i) {
+            if (cut(i)) { segmentStart = i + 1; continue; }
+            if (i - segmentStart < 2) continue;
+            auto a = index(i - 2), b = index(i - 1), c = index(i);
+            if ((i - segmentStart) % 2)
                 std::swap(a, b);
             if (a != b && a != c && b != c)
                 face(a, b, c);

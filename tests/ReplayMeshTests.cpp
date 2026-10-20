@@ -64,6 +64,31 @@ int main(int argc, char **argv) {
         mesh = ReplayMesh::decode(m, vertices, std::vector<uint8_t>{1, 2, 3, 1, 1});
         require(mesh.candidateFaceCount == 2 && mesh.faces.size() == 2, "Strip degenerates changed");
         require(mesh.faces[1] == std::array<uint64_t, 3>{2, 1, 0}, "Strip winding changed");
+        {
+            auto strip = m; strip["baseVertex"] = -5; strip["allowRestart"] = true;
+            strip["numIndices"] = 12; strip["indexByteStride"] = 2; strip["restartIndex"] = 65535;
+            const uint16_t cutIndices[]{65535, 5, 6, 7, 5, 65535, 65535, 5, 6, 7, 65535, 65535};
+            std::vector<uint8_t> raw(sizeof cutIndices); memcpy(raw.data(), cutIndices, sizeof cutIndices);
+            const auto restarted = ReplayMesh::decode(strip, vertices, raw);
+            require(restarted.faces == std::vector<std::array<uint64_t,3>>{{0,1,2},{2,1,0},{0,1,2}},
+                    "Strip cut did not reset winding or created a cross-segment triangle");
+            require(restarted.firstReferences == std::vector<uint32_t>{1,2,3}, "Cut index shifted original invocation ordinals");
+            strip["numIndices"] = 2;
+            require(ReplayMesh::decode(strip, vertices, std::vector<uint8_t>{255,255,255,255}).faces.empty(),
+                    "All-cut strip created geometry");
+            strip["allowRestart"] = false; strip["numIndices"] = 3; strip["baseVertex"] = 0;
+            strip["restartIndex"] = 0;
+            const auto ordinary = ReplayMesh::decode(strip, vertices, std::vector<uint8_t>{0,0,1,0,2,0});
+            require(ordinary.faces.size() == 1 && ordinary.firstReferences[0] == 0, "Disabled restart consumed an index");
+            strip["allowRestart"] = true; strip["topology"] = 5;
+            require(ReplayMesh::decode(strip, vertices, std::vector<uint8_t>{0,0,1,0,2,0}).faces.size() == 1,
+                    "Triangle-list index was interpreted as a cut");
+            strip["topology"] = 6; strip["indexByteStride"] = 4; strip["restartIndex"] = UINT32_MAX;
+            const uint32_t wide[]{0,1,2,UINT32_MAX,0,1,2}; raw.resize(sizeof wide); memcpy(raw.data(), wide, sizeof wide);
+            strip["numIndices"] = 7;
+            require(ReplayMesh::decode(strip, vertices, raw).faces == std::vector<std::array<uint64_t,3>>{{0,1,2},{0,1,2}},
+                    "32-bit strip cut failed");
+        }
         m["indexResourceId"] = "ResourceId::0";
         m["baseVertex"] = 100;
         m["numIndices"] = 3;

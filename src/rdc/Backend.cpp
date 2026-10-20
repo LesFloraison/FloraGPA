@@ -1683,8 +1683,18 @@ Json runRdcJob(const Json &job) {
                       {"nearPlane", real(mesh.nearPlane)},
                       {"farPlane", real(mesh.farPlane)},
                       {"status", text(mesh.status)}};
+        if (dx12) {
+            const auto mask = mesh.indexByteStride == 1 ? 0xffU : mesh.indexByteStride == 2 ? 0xffffU : UINT32_MAX;
+            metadata.update({{"allowRestart", mesh.allowRestart}, {"restartIndex", mesh.restartIndex & mask}});
+        }
         if (dx12 && stage == "VSOut") {
             const auto *pipeline = controller.GetD3D12PipelineState();
+            if (!pipeline) throw std::runtime_error("DX12 VSOut input-assembly state is unavailable");
+            // RenderDoc 1.45 preserves the original cut values while rebasing
+            // VSOut indices, but MeshFormat retains its generic restart default.
+            const auto cut = pipeline->inputAssembly.indexStripCutValue;
+            metadata.update({{"allowRestart", bool(selected->flags & ActionFlags::Indexed) && IsStrip(mesh.topology) && cut != 0},
+                             {"restartIndex", cut}});
             if (pipeline && pipeline->vertexShader.reflection)
                 metadata["output_layout"] = rdcVertexOutputLayout(*pipeline->vertexShader.reflection, mesh.vertexByteStride);
         }

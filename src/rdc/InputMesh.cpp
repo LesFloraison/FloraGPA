@@ -53,6 +53,9 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
     }
     const bool indexed = bool(draw.flags & ActionFlags::Indexed);
     InputMeshData result; std::vector<uint32_t> references(draw.numIndices);
+    std::vector<bool> cuts(draw.numIndices);
+    const bool restart = indexed && IsStrip(ia.topology) && ia.indexStripCutValue != 0;
+    uint32_t cutCount{}; bool hasVertex{};
     uint32_t minimum = UINT32_MAX, maximum{};
     uint64_t indexOffset{};
     if (indexed) {
@@ -65,26 +68,30 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
         require(bytes.size() == length, "Truncated input index data"); result.rawIndices.assign(bytes.begin(), bytes.end());
         for (uint32_t i = 0; i < draw.numIndices; ++i) {
             uint32_t index{}; memcpy(&index, bytes.data() + uint64_t(i) * ib.byteStride, ib.byteStride);
-            require(!ia.indexStripCutValue || index != ia.indexStripCutValue, "Input mesh primitive restart is not implemented");
+            if (restart && index == ia.indexStripCutValue) { cuts[i] = true; ++cutCount; continue; }
             const int64_t vertex = int64_t(index) + draw.baseVertex;
             require(vertex >= 0 && vertex <= UINT32_MAX, "Input index plus base vertex is out of range");
             references[i] = uint32_t(vertex); minimum = std::min(minimum, references[i]); maximum = std::max(maximum, references[i]);
+            hasVertex = true;
         }
     } else {
         require(uint64_t(draw.vertexOffset) + draw.numIndices <= uint64_t(UINT32_MAX) + 1, "Input vertex range overflows");
         for (uint32_t i = 0; i < draw.numIndices; ++i) references[i] = draw.vertexOffset + i;
         minimum = references.front(); maximum = references.back();
+        hasVertex = true;
     }
-    const uint64_t vertexCount = uint64_t(maximum) - minimum + 1;
+    if (!hasVertex) minimum = maximum = 0;
+    const uint64_t vertexCount = hasVertex ? uint64_t(maximum) - minimum + 1 : 0;
     require(vertexCount <= 4000000, "Input vertex span exceeds four million vertices");
     const uint64_t element = layout.perInstance ? uint64_t(draw.instanceOffset) + (layout.instanceDataStepRate ? instance / layout.instanceDataStepRate : 0) : minimum;
-    const uint64_t count = layout.perInstance ? 1 : vertexCount;
+    const uint64_t count = hasVertex && layout.perInstance ? 1 : vertexCount;
     require(!vb.byteStride || element <= (UINT64_MAX - attributeOffset) / vb.byteStride, "Input vertex offset overflow");
-    const uint64_t relative = element * vb.byteStride + attributeOffset;
-    const uint64_t length = (count - 1) * vb.byteStride + bytesPerElement;
+    const uint64_t relative = count ? element * vb.byteStride + attributeOffset : 0;
+    const uint64_t length = count ? (count - 1) * vb.byteStride + bytesPerElement : 0;
     require(relative <= vb.byteSize && length <= vb.byteSize - relative && length <= 256ULL * 1024 * 1024 && vb.byteOffset <= UINT64_MAX - relative,
             "Input vertex span exceeds binding or 256 MiB readback limit");
-    const auto raw = controller.GetBufferData(vb.resourceId, vb.byteOffset + relative, length);
+    // GetBufferData(length=0) means the whole buffer, not an empty range.
+    const auto raw = length ? controller.GetBufferData(vb.resourceId, vb.byteOffset + relative, length) : bytebuf();
     require(raw.size() == length, "Truncated input vertex data"); result.rawVertices.assign(raw.begin(), raw.end());
     result.vertices.resize(size_t(vertexCount) * 16); result.indices.resize(size_t(draw.numIndices) * 4);
     for (uint64_t i = 0; i < vertexCount; ++i) {
@@ -92,13 +99,19 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
         const auto value = inputAttributeValue({source, bytesPerElement}, layout.format);
         memcpy(result.vertices.data() + i * 16, value.data(), 16);
     }
-    for (size_t i = 0; i < references.size(); ++i) { const auto index = references[i] - minimum; memcpy(result.indices.data() + i * 4, &index, 4); }
+    for (size_t i = 0; i < references.size(); ++i) {
+        // The bounded remapped span cannot collide with this sentinel. Keep the
+        // original ordinal, including cuts, for geometry-to-VS navigation.
+        const auto index = cuts[i] ? UINT32_MAX : references[i] - minimum;
+        memcpy(result.indices.data() + i * 4, &index, 4);
+    }
     const auto digest = [](const auto &bytes) {
         return QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())), QCryptographicHash::Sha256).toHex().toStdString();
     };
     result.metadata = {{"vertexResourceId", name(vb.resourceId)}, {"vertexByteOffset", 0}, {"vertexByteStride", 16},
         {"indexResourceId", "input-remapped-indices"}, {"indexByteOffset", 0}, {"indexByteStride", 4}, {"baseVertex", 0},
         {"numIndices", draw.numIndices}, {"topology", uint32_t(ia.topology)},
+        {"allowRestart", restart}, {"restartIndex", UINT32_MAX},
         {"format", {{"compType", uint32_t(format.outputType)}, {"compCount", 4}, {"compByteWidth", 4}}}, {"perspective_divide", false},
         {"input", {{"attribute", attribute}, {"layouts", layouts}, {"vertex_buffers", bindings},
             {"first_vertex", std::to_string(minimum)}, {"vertex_span", std::to_string(vertexCount)},
@@ -107,6 +120,7 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
             {"raw_index_bytes", std::to_string(result.rawIndices.size())},
             {"raw_vertex_sha256", digest(result.rawVertices)}, {"raw_index_sha256", digest(result.rawIndices)},
             {"index_width", indexed ? ia.indexBuffer.byteStride : 0}, {"indexed", indexed},
+            {"captured_strip_cut_value", ia.indexStripCutValue}, {"strip_cut_count", cutCount},
             {"instance", instance}, {"instance_count", draw.numInstances}, {"start_instance", draw.instanceOffset},
             {"start_index", draw.indexOffset}, {"start_vertex", draw.vertexOffset}, {"base_vertex", draw.baseVertex},
             {"interpretation", "Selected input attribute expanded to typed 32-bit components; integers retain all bits and exact original bytes are retained separately"}}}};
