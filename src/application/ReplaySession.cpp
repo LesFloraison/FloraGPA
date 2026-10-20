@@ -486,16 +486,19 @@ class Dx12Session final : public IReplaySession {
                           "supported shader invocation"};
         }
         if (feature == ReplayFeature::Replay) {
-            if (!selection.execution)
+            if (!selection.execution && !selection.frameEnd)
                 return {CapabilityStatus::MissingData,
-                        "Select a submitted execution instance; full-frame replay is unfinished"};
+                        "Select a submitted execution instance or Frame end"};
             try {
-                const auto execution = submissions_.execution(*selection.execution);
+                if (selection.frameEnd && selection.before)
+                    return {CapabilityStatus::Failed, "Frame end cannot use a before-event boundary"};
+                const auto executionId = selection.frameEnd ? submissions_.executionCount() : *selection.execution;
+                const auto execution = submissions_.execution(executionId);
                 if (!execution.recordingComplete || execution.submission<=directory_.initializationCount())
                     return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
                 if (selection.isolateMissingQueries)
-                    (void)queries_.isolatedReadbacks(*selection.execution, selection.before);
-                else if (const auto issue = queries_.firstIssue(*selection.execution, selection.before); !issue.is_null())
+                    (void)queries_.isolatedReadbacks(executionId, selection.before);
+                else if (const auto issue = queries_.firstIssue(executionId, selection.before); !issue.is_null())
                     return {issue.at("status") == "missing_query_results" ? CapabilityStatus::MissingData : CapabilityStatus::Failed,
                             issue.at("reason").get<std::string>()};
                 if (selection.resource) {
@@ -507,7 +510,9 @@ class Dx12Session final : public IReplaySession {
                 }
                 return {CapabilityStatus::Supported, selection.isolateMissingQueries
                     ? "Incomplete replay with isolated query outputs; unavailable reads fail. Native allocation and consumer checks are required; historical values are not restored"
-                    : "Selected execution replay; unsupported commands and missing captured state fail explicitly"};
+                    : selection.frameEnd
+                        ? "Replay all captured stream records; original-frame fidelity remains unverified"
+                        : "Selected execution replay; unsupported commands and missing captured state fail explicitly"};
             } catch (const std::exception &error) {
                 return {CapabilityStatus::MissingData, error.what()};
             }

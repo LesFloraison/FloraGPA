@@ -18,8 +18,9 @@ reports `blocked` while complete frame replay and feature acceptance remain unfi
 the selected native execution and isolated analysis paths below are available for investigation.
 DX12 CLI `replay` without `--event` now processes the entire captured frame
 stream, including its trailing CPU/Fence records. This reports
-`frame_stream_end_reached` separately from unverified original-frame fidelity;
-the workspace still uses selected execution boundaries.
+`frame_stream_end_reached` separately from unverified original-frame fidelity.
+The workspace offers **Frame end** as well as selected execution boundaries;
+choose a texture creation explicitly for image readback.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
 arguments are decoded on demand. Committed, placed and reserved resource
 creation descriptors appear in the resource table with their originating record
@@ -8334,7 +8335,8 @@ raw sidecars carry that scope and texture boundary `frame_end`. Both retain
 capture's original output, historical values or full analysis suite passed
 acceptance. The native report records the planned/final record and offscreen
 Presents. Workspace end-of-stream selection and automatic final-backbuffer
-selection remain to be connected; CLI callers explicitly choose `--id`.
+selection were still outstanding at this milestone; the next section records
+the workspace connection. CLI callers explicitly choose `--id`.
 
 Builds **472–475** pass. The Talos test initially assumed one Present; its GPU
 run succeeded and saved both. After correcting that assumption, the retained
@@ -8348,11 +8350,65 @@ Evidence: ignored `frame-tail-audit1.json`, `frame-stream-evidence1.json`,
 `build472.log`–`build475.log`. No GPA replay, RenderDoc recapture, package run,
 or broad regression suite was added for this change.
 
+### Frame-end output in the shared workspace
+
+The DX12 output boundary selector now offers **Frame end**, with no submitted
+event selection required. `ReplaySelection::frameEnd` describes this output
+request independently of the event retained by analysis panels. Capability
+queries check the complete submitted range and the explicit missing-query
+policy; Talos remains unavailable in strict mode. The Worker receives a replay
+request without `--event`, using the same stream-tail path verified above.
+Texture creation/subresource selection remains explicit. Selecting an API
+execution switches output back to **After event**, invalidating the old image
+and exports. Bound debugger texture navigation also returns to the event
+boundary before reading its pixel.
+
+Result acceptance checks both reported and native execution identities, replay
+scope, before/after/end boundary and stream-end status. A frame-end result must
+name the directory's exact final record as both planned and reached, with no
+pending queue operations. Raw storage must carry the same scope, execution and
+boundary. Decimal-string identities remain mandatory. Existing request/session/
+experiment checks and cancellation still precede publication.
+
+Frame-end pixel inspection displays resource coordinates and display RGBA
+without assigning them to the previously selected Draw. **Pixel History** is
+explicitly unavailable for this output boundary and directs the user to replay
+an execution **After event**; the event analysis panels retain their own
+selection. Connecting history to a full-stream analysis capture remains work
+to do, rather than treating a last-execution prefix as equivalent to stream end.
+
+The targeted Talos workspace check opens the directory with no execution
+selected, chooses creation **35118**, enables query isolation and replays
+Frame end. It then locates execution **19408**, verifies immediate image/export
+invalidation, and replays After event. Both native raw exports contain
+**8,294,400** bytes with SHA-256
+`e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+Their sidecars correctly differ: `frame_stream` / execution **19410** /
+`frame_end` versus `selected_execution` / **19408** / `after`. Neither claims
+`frame_complete=true`. Returning to Frame end clears the event image again.
+
+CPU checks reuse the previous real full-stream report to reject incorrect
+scope/execution, false stream-end flags, numeric record IDs, a pending queue
+operation and an event-boundary storage sidecar. One existing DX11 GF2 workspace
+replay still matches its **2560×1440** baseline hash
+`2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`;
+its boundary label remains **Final** and experiment controls retain their
+existing behavior. The focused run passes **5** checks including setup/cleanup
+in **12,652 ms**, with two Talos GPU replays and one DX11 replay run serially.
+No BF1/Hellblade2 replay was repeated for this UI integration.
+
+Builds **476–478** pass. Evidence: ignored `talos-frame-stream-ui1/`,
+`frame-stream-ui-tests1.txt`, the previous `talos-frame-stream1/isolated/`
+report, and `build476.log`–`build478.log`. Automatic final-backbuffer selection,
+frame-end analysis, original-frame fidelity and full portable acceptance remain
+unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
+| Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |

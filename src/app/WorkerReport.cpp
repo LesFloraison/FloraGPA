@@ -10,6 +10,35 @@
 #include <set>
 
 namespace flora {
+void requireDx12ReplayBoundary(const nlohmann::json &report, uint64_t execution, bool before,
+                              bool frameEnd, uint64_t finalRecord) {
+    const auto scope = frameEnd ? "frame_stream" : "selected_execution";
+    const auto time = frameEnd ? "frame_end" : before ? "before_event" : "after_event";
+    if (!execution || (frameEnd && (!finalRecord || before)) ||
+        report.at("backend") != "dx12" || report.at("completed") != true ||
+        report.at("frame_complete") != false || report.at("replay_scope") != scope ||
+        report.at("execution") != std::to_string(execution) || report.at("value_time") != time ||
+        report.value("frame_stream_end_reached", false) != frameEnd)
+        throw std::runtime_error("DX12 replay result does not match the requested output boundary");
+    const auto &native = report.at("native_replay");
+    if (native.at("execution_boundary_reached") != true ||
+        native.at("selected_execution") != std::to_string(execution) ||
+        native.at("boundary") != (before ? "before" : "after") ||
+        native.value("frame_stream_end_reached", false) != frameEnd)
+        throw std::runtime_error("DX12 native replay did not reach the requested output boundary");
+    if (frameEnd && (native.at("last_record") != std::to_string(finalRecord) ||
+                     native.at("planned_last_record") != std::to_string(finalRecord) ||
+                     native.at("frame_queue_schedule").at("pending_queue_operations") != "0"))
+        throw std::runtime_error("DX12 frame stream has unfinished records or queue operations");
+    if (report.contains("output_display")) {
+        const auto &storage = report.at("output_display");
+        if (storage.at("execution") != std::to_string(execution) ||
+            storage.at("boundary") != (frameEnd ? "frame_end" : before ? "before" : "after") ||
+            storage.value("replay_scope", "selected_execution") != scope ||
+            storage.value("frame_stream_end_reached", false) != frameEnd)
+            throw std::runtime_error("DX12 output storage belongs to a different replay boundary");
+    }
+}
 void requireDx12QueryPolicyReport(const nlohmann::json &report, bool isolated) {
     const auto expected = isolated ? "isolate_readback_outputs" : "fail";
     if (report.at("backend") != "dx12" || report.value("missing_query_policy", "fail") != expected ||

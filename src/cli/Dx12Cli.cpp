@@ -137,6 +137,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     ReplaySelection selection;
     selection.session = session.identity();
     selection.execution = execution;
+    selection.frameEnd = streamEnd;
     selection.before = options.isSet("before");
     selection.resource = buffer ? 0 : creation;
     selection.isolateMissingQueries = options.isSet("isolate-missing-queries");

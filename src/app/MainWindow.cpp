@@ -276,7 +276,7 @@ MainWindow::MainWindow() : loader_(this) {
                 outputHigh_->setText("1");
             }
             image_->setImage({});
-            imageLabel_->setText(frame_ ? "" : "Select a submitted execution instance and optional texture creation, then press Replay");
+            imageLabel_->setText(frame_ ? "" : "Frame end · Select a texture creation for output, then press Replay");
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
             selectionLabel_->setText(QString("%1 API calls").arg(commands_->rowCount()));
@@ -1659,7 +1659,9 @@ void MainWindow::setBusy(bool busy) {
     findChild<QAction *>("openDx12Directory")->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     const bool dx12 = session_ && session_->backend()==ReplayBackend::Dx12;
-    replayAction_->setEnabled(!busy && (bool(frame_) || (dx12 && boundary_->currentIndex()!=0 && session_->capability(ReplayFeature::Replay,selection_).supported())));
+    const auto outputSelection = outputReplaySelection();
+    replayAction_->setEnabled(!busy && (bool(frame_) || (dx12 && session_->capability(ReplayFeature::Replay,outputSelection).supported())));
+    boundary_->setItemText(0, dx12 ? "Frame end" : "Final");
     dx12Controls_->setVisible(dx12);
     resourceBrowser_->setVisible(!dx12);
     for (const auto name : {"dx11OutputTarget", "dx11OutputLayer", "dx11OutputSample"})
@@ -1667,8 +1669,11 @@ void MainWindow::setBusy(bool busy) {
     for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
         findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
     historyPick_->setEnabled(
-        !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull() &&
+        !busy && (bool(frame_) || (dx12 && !outputSelection.frameEnd && !outputReport_.is_null() && !image_->image().isNull() &&
                                   session_->capability(ReplayFeature::PixelHistory, selection_).supported())));
+    historyPick_->setToolTip(dx12 && outputSelection.frameEnd
+                                ? "Frame-end pixel history is not connected; select an execution and replay After event"
+                                : "Enable, then click an RT pixel to query its history");
     dx12Subresource_->setEnabled(dx12 && !busy);
     dx12Budget_->setEnabled(dx12 && !busy);
     dx12QueryIsolation_->setEnabled(dx12 && !busy);
@@ -1677,9 +1682,7 @@ void MainWindow::setBusy(bool busy) {
         control->setEnabled(!busy && !dx12);
     replayAction_->setToolTip(
         session_ && session_->backend() == ReplayBackend::Dx12
-            ? (boundary_->currentIndex() == 0
-                   ? QString("Full-frame DX12 replay is unfinished; choose Before event or After event")
-                   : QString::fromStdString(session_->capability(ReplayFeature::Replay, selection_).reason))
+            ? QString::fromStdString(session_->capability(ReplayFeature::Replay, outputSelection).reason)
             : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
@@ -2030,12 +2033,14 @@ void MainWindow::replay(bool timings) {
     }
     if (session_->backend()==ReplayBackend::Dx12) {
         if(timings) { showError("DX12 workspace performance analysis is not yet available"); return; }
-        const auto capability=session_->capability(ReplayFeature::Replay,selection_);
-        if(!capability.supported() || boundary_->currentIndex()==0) {
-            showError(boundary_->currentIndex()==0 ? "Select Before event or After event for a DX12 execution instance" : QString::fromStdString(capability.reason)); return;
+        const auto outputSelection = outputReplaySelection();
+        const auto capability=session_->capability(ReplayFeature::Replay,outputSelection);
+        if(!capability.supported()) {
+            showError(QString::fromStdString(capability.reason)); return;
         }
-        QStringList args{"replay",capturePath_,"--event",QString::number(*selection_.execution),
+        QStringList args{"replay",capturePath_,
             "--max-bytes",QString::number(uint64_t(dx12Budget_->value())*1024*1024)};
+        if (!outputSelection.frameEnd) args << "--event" << QString::number(*selection_.execution);
         if(selection_.resource) args << "--id" << QString::number(selection_.resource) << "--subresource" << QString::number(dx12Subresource_->value());
         if(boundary_->currentIndex()==1) args << "--before";
         startWorker(args,false); return;
@@ -2920,7 +2925,7 @@ void MainWindow::inspectResource(Id id) {
             bufferLabel_->setText("DX12 buffer · Select an execution and byte range, then Read (up to 256 MiB)");
             centerTabs_->setCurrentWidget(bufferPane_);
         }
-        resourceStatus_->setText(QString("DX12 resource creation %1 · %2").arg(id).arg(QString::fromStdString(session_->capability(ReplayFeature::Replay,selection_).reason)));
+        resourceStatus_->setText(QString("DX12 resource creation %1 · %2").arg(id).arg(QString::fromStdString(session_->capability(ReplayFeature::Replay,outputReplaySelection()).reason)));
         properties("DX12 resource creation", values);
         return;
     }
@@ -3528,8 +3533,7 @@ void MainWindow::experimentChanged() {
         historyCaptures_.clear(); historyCacheOrder_.clear(); historyKey_.clear(); historyRdc_.clear();
         historyRequest_ = nullptr; pendingPixel_ = nullptr;
         updateCheckpointContext(); updateExperimentActions();
-        if (selection_.execution && boundary_->currentIndex() != 0 &&
-            session_->capability(ReplayFeature::Replay, selection_).supported()) replayTimer_.start();
+        if (session_->capability(ReplayFeature::Replay, outputReplaySelection()).supported()) replayTimer_.start();
         return;
     }
     stashShaderDrafts();
@@ -4626,6 +4630,19 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
         if(busy() || outputReport_.is_null() || outputGeneration_!=displayedOutputGeneration_) return;
         try {
             const auto &display = outputReport_.at("output_display");
+            if (outputReplaySelection().frameEnd) {
+                requireDx12ReplayBoundary(outputReport_, session_->executionCount(), false, true,
+                                         session_->events().back());
+                if (display.at("creation_record") != std::to_string(selection_.resource))
+                    throw std::runtime_error("Frame-end output resource changed; replay to refresh");
+                if (x < 0 || y < 0 || uint32_t(x) >= display.at("width").get<uint32_t>() ||
+                    uint32_t(y) >= display.at("height").get<uint32_t>()) return;
+                image_->setSelectedPixel(QPoint(x, y));
+                properties("DX12 Frame End Pixel", {{"Resource creation", QString::number(selection_.resource)},
+                    {"Pixel", QString("%1, %2").arg(x).arg(y)},
+                    {"Display RGBA", QString("%1, %2, %3, %4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha())}});
+                return;
+            }
             if (!selection_.execution || display.at("execution") != std::to_string(*selection_.execution) ||
                 display.at("creation_record") != std::to_string(selection_.resource))
                 throw std::runtime_error("Replay the selected execution/resource before picking a pixel");

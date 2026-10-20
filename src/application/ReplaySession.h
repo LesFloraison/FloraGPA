@@ -20,6 +20,9 @@ struct ReplaySelection {
     uint32_t mip{}, layer{}, sample{};
     bool before = false;
     bool isolateMissingQueries = false;
+    // Output boundary only; the selected execution remains available to event
+    // inspection and analysis panels while the output replays the whole stream.
+    bool frameEnd = false;
 };
 // Resolves a plane-0, single-sample 1D/2D texel for the native output viewer.
 // Volume slice display is not yet supported by that viewer.

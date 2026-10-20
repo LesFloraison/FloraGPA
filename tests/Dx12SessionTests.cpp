@@ -2376,6 +2376,120 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 2, 30000); QVERIFY(!isolation->isChecked());
         QVERIFY(image->image().isNull());
     }
+    void dx12FrameStreamBoundaryValidation() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_FRAME_STREAM_OUTPUT");
+        if (root.isEmpty()) QSKIP("Set an existing Talos frame-stream evidence directory");
+        QFile file(root + "/isolated/report.json");
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = Json::parse(file.readAll().toStdString());
+        requireDx12ReplayBoundary(report, 19410, false, true, 192535);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(report, 19410, false, false, 192535));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(report, 19408, false, true, 192535));
+        for (const auto &pointer : {"/frame_stream_end_reached", "/native_replay/frame_stream_end_reached"}) {
+            auto wrong = report;
+            wrong[Json::json_pointer(pointer)] = false;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(wrong, 19410, false, true, 192535));
+        }
+        for (const auto &pointer : {"/native_replay/last_record", "/native_replay/planned_last_record"}) {
+            auto wrong = report;
+            wrong[Json::json_pointer(pointer)] = 192535; // Numeric identities are not accepted.
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(wrong, 19410, false, true, 192535));
+        }
+        auto wrong = report;
+        wrong["native_replay"]["frame_queue_schedule"]["pending_queue_operations"] = "1";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(wrong, 19410, false, true, 192535));
+        wrong = report;
+        wrong["output_display"]["boundary"] = "after";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDx12ReplayBoundary(wrong, 19410, false, true, 192535));
+    }
+    void dx12FrameStreamWorkspace() {
+        using Json = nlohmann::json;
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_FRAME_STREAM_UI");
+        if (captures.isEmpty() || output.isEmpty())
+            QSKIP("Set captures and a new frame-end workspace output directory");
+        QVERIFY(!QFileInfo::exists(output));
+        QVERIFY(QDir().mkpath(output));
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        QSignalSpy exported(&window, &MainWindow::exportFinished);
+        window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary");
+        QCOMPARE(boundary->itemText(0), QString("Frame end"));
+        auto replay = window.findChild<QAction *>("replayFrame");
+        QVERIFY(!replay->isEnabled()); // Strict full stream has missing historical queries.
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 35118) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 35118ULL);
+        window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        QVERIFY(replay->isEnabled()); // No execution selection is needed for Frame end.
+        auto image = window.findChild<ImageView *>("frameOutput");
+        const auto exportRaw = [&](const QString &name) {
+            QTimer chooser, watchdog;
+            watchdog.setSingleShot(true);
+            bool chosen = false;
+            connect(&chooser, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) {
+                    chooser.stop(); chosen = true;
+                    dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                    QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                }
+            });
+            connect(&watchdog, &QTimer::timeout, &window, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject();
+            });
+            chooser.start(10); watchdog.start(5000);
+            window.findChild<QAction *>("exportOutputStorage")->trigger();
+            QVERIFY(chosen);
+            QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000);
+            QVERIFY(exported.takeLast()[0].toBool());
+        };
+        replay->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QCOMPARE(image->image().size(), QSize(1920, 1080));
+        QVERIFY(!window.findChild<QAction *>("pickPixelHistory")->isEnabled());
+        exportRaw("frame-end");
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("19408");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QCOMPARE(boundary->currentIndex(), 2);
+        QVERIFY(image->image().isNull());
+        QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+        replay->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QCOMPARE(image->image().size(), QSize(1920, 1080));
+        QVERIFY(window.findChild<QAction *>("pickPixelHistory")->isEnabled());
+        exportRaw("selected");
+        for (const auto &name : {QString("frame-end"), QString("selected")}) {
+            QFile storage(output + '/' + name + ".bin"), sidecar(output + '/' + name + ".bin.json");
+            QVERIFY(storage.open(QIODevice::ReadOnly));
+            QVERIFY(sidecar.open(QIODevice::ReadOnly));
+            QCOMPARE(QCryptographicHash::hash(storage.readAll(), QCryptographicHash::Sha256).toHex(),
+                     QByteArray("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
+            const auto metadata = Json::parse(sidecar.readAll().toStdString());
+            const bool end = name == "frame-end";
+            QCOMPARE(metadata.at("boundary"), Json(end ? "frame_end" : "after"));
+            QCOMPARE(metadata.at("execution"), Json(end ? "19410" : "19408"));
+            QCOMPARE(metadata.at("replay_scope"), Json(end ? "frame_stream" : "selected_execution"));
+            QCOMPARE(metadata.at("frame_stream_end_reached"), Json(end));
+            QCOMPARE(metadata.at("frame_complete"), Json(false));
+        }
+        boundary->setCurrentIndex(0);
+        QVERIFY(image->image().isNull());
+        QVERIFY(!window.findChild<QAction *>("pickPixelHistory")->isEnabled());
+    }
     void dx12FrameStreamReplay() {
         using Json = nlohmann::json;
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -3159,6 +3273,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         MainWindow window; QSignalSpy done(&window, &MainWindow::taskFinished);
         window.openCapture(root + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000); QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->itemText(0), QString("Final"));
         const auto pixels = window.findChild<ImageView *>("frameOutput")->image().convertToFormat(QImage::Format_RGBA8888);
         QCOMPARE(pixels.size(), QSize(2560, 1440));
         QCOMPARE(QCryptographicHash::hash(QByteArray(reinterpret_cast<const char *>(pixels.constBits()), pixels.sizeInBytes()), QCryptographicHash::Sha256).toHex(),

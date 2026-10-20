@@ -19,10 +19,18 @@ struct ArtifactResult {
     bool cancelled = false;
 };
 } // namespace
+ReplaySelection MainWindow::outputReplaySelection() const {
+    auto output = selection_;
+    output.frameEnd = session_ && session_->backend() == ReplayBackend::Dx12 &&
+                      boundary_->currentIndex() == 0;
+    if (output.frameEnd) output.before = false;
+    return output;
+}
 void MainWindow::invalidateDx12Output() {
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
     dx12PixelTarget_.reset();
+    if (boundary_->currentIndex() == 0) historyPick_->setChecked(false);
     selection_.mip = selection_.layer = selection_.sample = 0;
     selection_.before = boundary_->currentIndex() == 1;
     bufferTimer_.stop();
@@ -37,9 +45,11 @@ void MainWindow::invalidateDx12Output() {
     outputDir_.reset();
     exportAction_->setEnabled(false);
     outputStorageAction_->setEnabled(false);
-    imageLabel_->setText("Select an execution instance and optional texture creation, then press Replay");
+    imageLabel_->setText(boundary_->currentIndex() == 0
+                            ? "Frame end · Select a texture creation for output, then press Replay"
+                            : "Select an execution instance and optional texture creation, then press Replay");
     if (selection_.isolateMissingQueries)
-        imageLabel_->setText("Incomplete replay · Missing query outputs stay unavailable; select an execution and press Replay");
+        imageLabel_->setText("Incomplete query outputs · " + imageLabel_->text());
     setBusy(busy());
 }
 void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
@@ -53,6 +63,7 @@ void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id
         if (resource.capturedObject != object)
             throw std::runtime_error("Debug texture does not match the captured resource lifetime");
         const auto subresource = dx12TexturePixelSubresource(nlohmann::json::parse(resource.summary), x, y, mip, layer, sample);
+        if (boundary_->currentIndex() == 0) boundary_->setCurrentIndex(2);
         inspectResource(creation);
         { const QSignalBlocker block(dx12Subresource_); dx12Subresource_->setValue(int(subresource)); }
         selection_.mip = mip; selection_.layer = layer; selection_.sample = sample;
@@ -68,6 +79,7 @@ void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id
 }
 QString MainWindow::boundaryLabel(const QJsonObject &report) {
     auto when = report["value_time"].toString();
+    if (when == "frame_end") return "Frame end";
     if (when == "capture_initial")
         return "Initial";
     auto event = report["event"].toString();
@@ -159,13 +171,12 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
     if (result.original.isNull() && outputAvailable)
         throw std::runtime_error("Worker output image is missing");
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
-        if (runningKind_ != "replay" || report_["backend"] != "dx12" ||
-            report_["replay_scope"] != "selected_execution" || report_["frame_complete"] != false ||
-            !selection_.execution ||
-            report_["execution"].toString() != QString::number(*selection_.execution) ||
-            report_["value_time"].toString() !=
-                (boundary_->currentIndex() == 1 ? "before_event" : "after_event"))
-            throw std::runtime_error("DX12 replay result does not match the selected execution boundary");
+        const auto outputSelection = outputReplaySelection();
+        const auto execution = outputSelection.frameEnd ? session_->executionCount() : selection_.execution.value_or(0);
+        if (runningKind_ != "replay")
+            throw std::runtime_error("Unexpected DX12 output operation");
+        requireDx12ReplayBoundary(replayReport, execution, outputSelection.before, outputSelection.frameEnd,
+                                 session_->events().empty() ? 0 : session_->events().back());
         const auto texture = report_["native_texture"].toObject();
         if (selection_.resource &&
             (texture["creation_record"].toString() != QString::number(selection_.resource) ||
@@ -178,7 +189,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         if (dx12PixelTarget_) {
             const auto &target = *dx12PixelTarget_;
             const auto &display = replayReport.at("output_display");
-            if (target.context != historyContextKey(true) || target.execution != *selection_.execution ||
+            if (outputSelection.frameEnd || target.context != historyContextKey(true) || target.execution != execution ||
                 target.creation != selection_.resource || target.before != selection_.before ||
                 target.subresource != uint32_t(dx12Subresource_->value()) ||
                 display.at("mip") != target.mip || display.at("layer") != target.layer ||
@@ -192,7 +203,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         if (selectedPixel)
             pixelLabel_->setText(QString("Selected pixel %1, %2").arg(selectedPixel->x()).arg(selectedPixel->y()));
         imageLabel_->setText(outputAvailable
-                                 ? QString("DX12 creation %1 · Subresource %2 · %3 × %4 · %5 (execution)")
+                                 ? QString("DX12 creation %1 · Subresource %2 · %3 × %4 · %5")
                                        .arg(QString::number(selection_.resource))
                                        .arg(dx12Subresource_->value())
                                        .arg(report_["width"].toInt())
@@ -205,9 +216,10 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
                                 QString("\n%1 · Agility SDK %2")
                                     .arg(device["adapter"].toObject()["description"].toString())
                                     .arg(device["actual_sdk_version"].toInt()));
-        selectionLabel_->setText(QString("Execution %1 · %2 replayed; full frame unfinished")
-                                     .arg(*selection_.execution)
-                                     .arg(boundary_->currentIndex() == 1 ? "before" : "after"));
+        selectionLabel_->setText(outputSelection.frameEnd
+                                    ? "Frame stream end reached; original-frame fidelity remains unverified"
+                                    : QString("Execution %1 · %2 replayed; full frame unfinished")
+                                          .arg(execution).arg(boundary_->currentIndex() == 1 ? "before" : "after"));
         outputReport_ = std::move(replayReport);
         if (outputReport_.contains("output_display")) {
             const auto &display = outputReport_.at("output_display");
@@ -216,19 +228,19 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
             selection_.sample = 0;
         }
         outputDir_ = std::move(jobDir_);
-        historyPick_->setEnabled(outputAvailable && session_->capability(ReplayFeature::PixelHistory, selection_).supported());
+        historyPick_->setEnabled(!outputSelection.frameEnd && outputAvailable &&
+                                 session_->capability(ReplayFeature::PixelHistory, selection_).supported());
         exportAction_->setEnabled(outputAvailable);
         outputStorageAction_->setEnabled(report_["output_display"].isObject());
         resourceImages_->setCurrentIndex(0);
         resourceImagePending_ = false;
         displayedOutputGeneration_ = outputGeneration_;
-        resourceStatus_->setText(QString("DX12 execution %1 · %2")
-                                    .arg(*selection_.execution)
-                                    .arg(report_["image_status"].toString()));
-        statusBar()->showMessage(selection_.isolateMissingQueries ? "Execution boundary reached; query outputs remain incomplete" : "Selected DX12 execution replay complete", 7000);
-        log_->appendPlainText(QString("DX12 execution %1 · %2")
-                                  .arg(*selection_.execution)
-                                  .arg(report_["image_status"].toString()));
+        resourceStatus_->setText(QString("DX12 %1 · %2")
+                                    .arg(outputSelection.frameEnd ? QString("frame end") : QString::number(execution),
+                                         report_["image_status"].toString()));
+        statusBar()->showMessage(outputSelection.frameEnd ? "Frame stream end reached; original-frame fidelity remains unverified" :
+                                selection_.isolateMissingQueries ? "Execution boundary reached; query outputs remain incomplete" : "Selected DX12 execution replay complete", 7000);
+        log_->appendPlainText(resourceStatus_->text());
         emit taskFinished(true);
         return;
     }

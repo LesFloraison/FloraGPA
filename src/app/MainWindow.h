@@ -74,6 +74,7 @@ class MainWindow final : public QMainWindow {
   private:
     void buildUi();
     void invalidateDx12Output();
+    ReplaySelection outputReplaySelection() const;
     void selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
                                uint32_t x, uint32_t y, uint32_t mip, uint32_t layer, uint32_t sample);
     struct Dx12PixelTarget {
