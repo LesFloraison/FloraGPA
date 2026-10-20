@@ -54,6 +54,61 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void halfColorFragmentHistory() {
+        const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the half-color fixture and BF1 history evidence directory");
+        const auto native = read(root + "/half-blend-history1/gpu.json");
+        const auto fixture = read(root + "/half-blend-history1/after/result.json");
+        const auto oldFixture = read(root + "/half-blend-history1/before/result.json");
+        size_t fragment{}, oldDifferences{};
+        for (size_t i = 0; i < fixture.at("history").size(); ++i) {
+            const auto &row = fixture.at("history")[i];
+            if (row.value("execution", Json()) != "3") continue;
+            QVERIFY(fragment < 3);
+            QCOMPARE(row.at("primitiveID").get<size_t>(), fragment);
+            for (size_t c = 0; c < 4; ++c) {
+                const auto bits = native.at("prefix_half_words")[fragment][c].get<uint16_t>();
+                // The oracle is native stored half words; these fixture values are positive normal numbers.
+                QVERIFY(bits > 0x400 && bits < 0x7c00);
+                const auto expected = std::ldexp(1.0 + double(bits & 1023) / 1024.0, int(bits >> 10) - 15);
+                QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(), expected);
+                oldDifferences += oldFixture.at("history")[i].at("postMod").at("col").at("floatValue")[c].get<double>() != expected;
+            }
+            ++fragment;
+        }
+        QCOMPARE(fragment, size_t(3)); QCOMPARE(oldDifferences, size_t(4));
+        const auto report = read(root + "/bf1-particle-half-history1/result.json");
+        const auto old = read(root + "/bf1-particle-roundtrip-history1/result.json");
+        QCOMPARE(report.at("backend_dx12_half_color_history_patch"), Json(1));
+        QCOMPARE(report.at("history").size(), size_t(23));
+        for (size_t i=0; i<23; ++i) {
+            QCOMPARE(report.at("history")[i].at("shaderOut"), old.at("history")[i].at("shaderOut"));
+            QCOMPARE(report.at("history")[i].at("primitiveID"), old.at("history")[i].at("primitiveID"));
+        }
+        const auto &last = report.at("history").back();
+        QCOMPARE(last.at("primitiveID"), Json(1334));
+        QCOMPARE(last.at("preMod").at("col"), last.at("postMod").at("col"));
+        QVERIFY(old.at("history").back().at("preMod").at("col") != last.at("preMod").at("col"));
+        QCOMPARE(report.at("history_scope").at("replay_consistency").at("history_boundary").at("status"), Json("matches_selected_texel"));
+        PixelHistoryView view; view.resize(1650, 900); view.show();
+        view.setContext("bf1:half-color", 36560, true); view.setDx12Resource(325012, 10432990048ULL);
+        view.selectPixel(10432990048ULL, 836, 241, 0, 0, 0);
+        view.findChild<QCheckBox *>("historyDepthRoundtrip")->setChecked(true);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("historyRecords"); QCOMPARE(rows->topLevelItemCount(), 23);
+        rows->setCurrentItem(rows->topLevelItem(22));
+        QCOMPARE(rows->topLevelItem(22)->text(4), rows->topLevelItem(22)->text(5));
+        QSignalSpy debug(&view, &PixelHistoryView::pixelDebugRequested);
+        action(view, "debugHistoryPixel")->trigger(); QCOMPARE(debug.count(), 1);
+        QCOMPARE(debug[0][0].toULongLong(), 36560ULL); QCOMPARE(debug[0][4].toUInt(), 1334U);
+        QVERIFY(debug[0][6].toBool());
+        QCoreApplication::processEvents();
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/half-color-history.json");
+            QCOMPARE(read(output_ + "/half-color-history.json"), report);
+            QVERIFY(view.grab().save(output_ + "/half-color-history.png"));
+        }
+    }
     void talosCubeCoordinates() {
         const auto root = qEnvironmentVariable("FLORA_TALOS_CUBE_DEBUG");
         if (root.isEmpty()) QSKIP("Set the Talos cube debug evidence directory");

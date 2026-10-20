@@ -1,0 +1,165 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -92,6 +92,11 @@
+ const uint32_t D3D12_PIXEL_HISTORY_MIN_EVENTS_TO_STORE = 128;
+ const uint32_t D3D12_PIXEL_HISTORY_AVG_FRAGMENTS_PER_EVENT = 8;
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12HalfColorHistoryPatchVersion()
++{
++  return 1;
++}
++
+ struct D3D12CopyPixelParams
+ {
+   // The image being copied from
+@@ -121,6 +126,9 @@
+ struct D3D12PixelHistoryResources
+ {
+   ID3D12Resource *dstBuffer;
++  ID3D12Resource *postModImage;
++  ID3D12DescriptorHeap *postModHeap;
++  D3D12Descriptor *postModDescriptor;
+ 
+   // Used for offscreen color/depth/stencil rendering for draw call events.
+   ID3D12Resource *colorImage;
+@@ -145,6 +153,9 @@
+ 
+   // the RGBA 32 format with the correct type (float/uint/int)
+   DXGI_FORMAT shadOutFormat;
++  ID3D12Resource *postModImage;
++  D3D12Descriptor *postModDescriptor;
++  D3D12_CPU_DESCRIPTOR_HANDLE postModRtv;
+ 
+   // Image used to get per fragment data.
+   ID3D12Resource *colorImage;
+@@ -2263,7 +2274,16 @@
+ 
+     if(renderTargetIndex != D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT)
+     {
+-      state.rts[renderTargetIndex] = *m_CallbackInfo.typedColorDescriptor;
++      state.rts[renderTargetIndex] = m_CallbackInfo.postModImage
++                                        ? *m_CallbackInfo.postModDescriptor
++                                        : *m_CallbackInfo.typedColorDescriptor;
++    }
++
++    if(m_CallbackInfo.postModImage)
++    {
++      colorCopyParams.srcImage = m_CallbackInfo.postModImage;
++      colorCopyParams.srcImageFormat = m_CallbackInfo.targetDesc.Format;
++      colorCopyParams.copyFormat = m_CallbackInfo.targetDesc.Format;
+     }
+ 
+     // Get post-modification value, use the original framebuffer attachment.
+@@ -2294,7 +2314,12 @@
+         // Before starting the draw, initialize the pixel to the premodification value
+         // for this event, for both color and depth. Depth was handled above already.
+         // this is only needed for correctly blended postmods, so we only worry about the float case
+-        if(m_CallbackInfo.shadOutFormat == DXGI_FORMAT_R32G32B32A32_FLOAT ||
++        if(m_CallbackInfo.postModImage)
++        {
++          cmd->ClearRenderTargetView(m_CallbackInfo.postModRtv,
++                                    premod.col.floatValue.data(), 1, &pixelScissor);
++        }
++        else if(m_CallbackInfo.shadOutFormat == DXGI_FORMAT_R32G32B32A32_FLOAT ||
+            m_CallbackInfo.targetDesc.SampleDesc.Count > 1)
+         {
+           cmd->ClearRenderTargetView(
+@@ -2440,6 +2465,11 @@
+     // TODO: The original pixel shader may have side effects such as UAV writes. The Vulkan impl
+     // removes side effects with shader patching but D3D12 does not support that yet.
+ 
++    // Per-fragment blending must store back into the original precision after
++    // every fragment. Accumulating in RGBA32 and rounding once on the CPU loses
++    // GPU render-target conversion and changes subsequent blend inputs.
++    if(m_CallbackInfo.postModImage && colorOutputIndex != D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT)
++      pipeDesc.RTVFormats.RTFormats[colorOutputIndex] = m_CallbackInfo.targetDesc.Format;
+     HRESULT hr = m_pDevice->CreatePipeState(pipeDesc, &pipes.postModPipe);
+     if(FAILED(hr))
+     {
+@@ -2448,6 +2478,9 @@
+     }
+ 
+     m_PSOsToDestroy.push_back(pipes.postModPipe);
++
++    if(colorOutputIndex != D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT)
++      pipeDesc.RTVFormats.RTFormats[colorOutputIndex] = m_CallbackInfo.shadOutFormat;
+ 
+     // Other targets were already disabled for the post mod pass, now force enable the
+     //  pixel history color target
+@@ -2960,11 +2993,50 @@
+ 
+   resources.dstBuffer = dstBuffer;
+ 
++  // Keep full-precision shader output separate from half-float blend storage.
++  // Other formats, arrays/mips and MSAA retain the upstream path for now.
++  if(desc.Format == DXGI_FORMAT_R16G16B16A16_FLOAT &&
++     desc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && desc.SampleDesc.Count == 1 &&
++     desc.DepthOrArraySize == 1 && desc.MipLevels == 1)
++  {
++    imageDesc = desc;
++    imageDesc.Alignment = 0;
++    imageDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
++    imageDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
++    hr = m_pDevice->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &imageDesc,
++                                          D3D12_RESOURCE_STATE_RENDER_TARGET, NULL,
++                                          __uuidof(ID3D12Resource), (void **)&resources.postModImage);
++    CHECK_HR(m_pDevice, hr);
++    if(FAILED(hr))
++    {
++      PixelHistoryDestroyResources(resources);
++      return false;
++    }
++    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
++    heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
++    heapDesc.NumDescriptors = 1;
++    hr = m_pDevice->CreateDescriptorHeap(&heapDesc, __uuidof(ID3D12DescriptorHeap),
++                                       (void **)&resources.postModHeap);
++    CHECK_HR(m_pDevice, hr);
++    if(FAILED(hr))
++    {
++      PixelHistoryDestroyResources(resources);
++      return false;
++    }
++    D3D12_CPU_DESCRIPTOR_HANDLE postRtv = resources.postModHeap->GetCPUDescriptorHandleForHeapStart();
++    m_pDevice->CreateRenderTargetView(resources.postModImage, NULL, postRtv);
++    resources.postModDescriptor = GetWrapped(postRtv);
++    resources.postModImage->SetName(L"Pixel History Half Color Postmod");
++  }
++
+   return true;
+ }
+ 
+ bool D3D12DebugManager::PixelHistoryDestroyResources(D3D12PixelHistoryResources &r)
+ {
++  SAFE_RELEASE(r.postModImage);
++  SAFE_RELEASE(r.postModHeap);
++  r.postModDescriptor = NULL;
+   SAFE_RELEASE(r.colorImage);
+   r.typedColorDescriptor = NULL;
+   r.floatColorDescriptor = NULL;
+@@ -3069,6 +3141,10 @@
+   callbackInfo.y = y;
+   callbackInfo.sampleMask = sampleMask;
+   callbackInfo.colorImage = resources.colorImage;
++  callbackInfo.postModImage = resources.postModImage;
++  callbackInfo.postModDescriptor = resources.postModDescriptor;
++  if(resources.postModHeap)
++    callbackInfo.postModRtv = resources.postModHeap->GetCPUDescriptorHandleForHeapStart();
+   callbackInfo.typedColorDescriptor = resources.typedColorDescriptor;
+   callbackInfo.floatColorDescriptor = resources.floatColorDescriptor;
+   if(IsUIntFormat(resDesc.Format))
+@@ -3472,8 +3548,11 @@
+             // Get post-modification value if this is not the last fragment for the event.
+             if(!targetImageIsDepth)
+             {
+-              ConvertAndFillInColor(shaderOutFormat, fragInfo[offset].postMod, fmt,
+-                                    history[h].postMod);
++              if(resources.postModImage)
++                FillInColor(fmt, fragInfo[offset].postMod, history[h].postMod);
++              else
++                ConvertAndFillInColor(shaderOutFormat, fragInfo[offset].postMod, fmt,
++                                      history[h].postMod);
+             }
+ 
+             // MSAA depth is expanded out to floats in the compute shader

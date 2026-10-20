@@ -195,6 +195,7 @@ class Session {
     uint32_t discardPatternControlPatch{};
     uint32_t cubeCoordinatesPatch{};
     uint32_t vertexInputsPatch{};
+    uint32_t halfColorHistoryPatch{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -313,6 +314,10 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12VertexInputsPatchVersion"))) {
             vertexInputsPatch = patch();
             if (vertexInputsPatch != 1) throw std::runtime_error("Unsupported DX12 vertex-input patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12HalfColorHistoryPatchVersion"))) {
+            halfColorHistoryPatch = patch();
+            if (halfColorHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 half-color history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1429,6 +1434,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_discard_pattern_control_patch", session.discardPatternControlPatch},
         {"backend_dx12_cube_coordinates_patch", session.cubeCoordinatesPatch},
         {"backend_dx12_vertex_inputs_patch", session.vertexInputsPatch},
+        {"backend_dx12_half_color_history_patch", session.halfColorHistoryPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -2288,6 +2294,11 @@ Json runRdcJob(const Json &job) {
                            : d16History ? "D16 event boundaries use the Flora decoding patch. Intermediate fragment depths come from a D32 scratch DSV and may differ in quantization or depth bias; they are not observed D16 storage values. Depth-test reasons include backend comparisons of reconstructed depths, not independent per-fragment hardware queries."
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
+    if (dx12) {
+        result["history_scope"]["intermediate_color_storage"] = session.halfColorHistoryPatch
+            ? "RGBA16_FLOAT single-mip/single-layer/single-sample 2D targets use original-format GPU scratch storage after each fragment; shader output remains float32. Other formats retain backend reconstruction."
+            : "Backend reconstruction: intermediate colors can be blended at a different precision from the original target, then converted on the CPU. Final event values do not validate intermediate fragments.";
+    }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(
             "Experimental depth refresh applies only to eligible isolated replays of the selected event. "

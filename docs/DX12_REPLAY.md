@@ -6775,6 +6775,69 @@ debug/mesh results. Automatic replay stays off and no GPU worker runs during thi
 UI check: **3 passed** including setup/cleanup, **17,277 ms**
 (`uav-barrier-workspace1.txt`).
 
+### Preserve half-float storage between Pixel History fragments
+
+The BF1 four-barrier experiment at execution **36560**, RGBA16F creation
+**325012**, pixel **(836,241)** now has a matching selected-event boundary with
+the existing opt-in D32 depth roundtrip. However, its 23-row history exposed a
+separate color problem: primitive **1334** outputs zero with One/InvSrcAlpha
+blending, yet the previous history showed its RGB falling by one half-float step.
+The final value came from the real event readback; intermediate fragments were
+blended into RenderDoc's RGBA32 scratch image and then converted on the CPU.
+This does not preserve the original target's per-fragment storage conversion or
+the stored destination consumed by subsequent blends.
+
+The native reproduction is `tests/fixtures/dx12-half-blend-history.cpp`.
+It draws one, two and three overlapping triangles in separate prefix draws,
+clearing to the same exactly representable initial color each time. The middle
+triangle outputs zero. Each prefix has an independent native RGBA16F readback;
+execution **3** supplies the three-fragment history under test. Native half words:
+
+| Fragment/prefix | R | G | B | A |
+| --- | --- | --- | --- | --- |
+| 0 / one triangle | 10363 | 10247 | 9940 | 14653 |
+| 1 / two triangles | 10363 | 10247 | 9940 | 14653 |
+| 2 / three triangles | 10497 | 10325 | 10008 | 14955 |
+
+The old history returned **10364,10248** for R/G of both first fragments;
+its last fragment already matched. The new twenty-first patch,
+`dx12-half-color-history.patch`, uses a separate RGBA16F GPU scratch attachment
+for per-fragment blending and reads its raw stored values. Shader output still
+uses the full-precision scratch target. All **12** history components now match
+the independent native prefixes, including exact preservation across the zero
+fragment. This establishes the demonstrated blend/storage path on this device;
+it does not assume a universal CPU rounding mode.
+
+In BF1, **14** intermediate post-modification records change. All 23 Shader
+outputs and primitive identities remain identical. Primitive **1322** now stores
+`(0.035003662109375,0.031463623046875,0.02667236328125,0.65478515625)`;
+primitive **1334** preserves those values exactly. The selected texel before and
+after history and the final event modification agree. The earlier native
+readback has the same selected value. This does not independently validate every
+BF1 intermediate fragment, test-failure reason, or original-frame fidelity.
+
+The patch currently covers RGBA16_FLOAT 2D targets with one mip, layer and sample,
+including typeless backing requested through that float interpretation. Other
+formats and layouts retain backend reconstruction and are not included in this
+acceptance. Reports identify `backend_dx12_half_color_history_patch=1` and explain
+the scope under `history_scope.intermediate_color_storage`; unpatched libraries
+explicitly report the reconstruction limitation. Build/package scripts verify
+the new patch version/hash and include its source. Runtime SHA-256:
+`7ca41e0e903269444ade4126faf9a5e19672cfe36299b501ae84cb6392a92344`;
+patch SHA-256:
+`93042733bd75dd655ccd8ece2d0b47a59f7e81807346f2559f7a76f2cd66a4ec`.
+
+Evidence: `half-blend-history1/{gpu.json,before,after,comparison.json}` and
+`bf1-particle-{roundtrip-history1,half-history1}`. One small native fixture capture
+and four analysis queries were run serially for this fault. The successful
+analysis module inventories contain no GPA/Python modules. Exact 21-patch source
+verification/runtime build and PowerShell parsing pass. Worker/CLI build **419**
+and UI-test build **420** pass; build 418's incorrect Session member reference
+was corrected. The saved-report UI check verifies native prefix values, BF1
+before/after display, event/primitive/depth-option handoff and exported evidence:
+**3 passed** including setup/cleanup, **322 ms** (`half-color-history-ui1.txt`).
+Its screenshot was inspected. Full portable acceptance remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
