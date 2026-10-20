@@ -4,6 +4,9 @@ Consumes rdc-repeat-selection reports and decoded, shader-verified constants.
 Only use --texture for a verified square per-probe block layout (for example
 8x8 radiance or 1x1 depth). It does not infer shader layouts or validate GPA
 fidelity. Resource identities remain strings; unused allocation tails are excluded.
+--probe-buffer requires a verified fixed byte stride. --positive-f32-depth is only
+for shaders whose disassembly establishes asfloat(depth) > 0; the aligned depth
+words must match before this mask can exclude inactive shader invocations.
 """
 import argparse
 import hashlib
@@ -13,7 +16,8 @@ from pathlib import Path
 import numpy as np
 
 
-def compare(report_path, constants_path, positions, counter, textures):
+def compare(report_path, constants_path, positions, counter, textures,
+            positive_f32_depth=None, probe_buffers=()):
     report = json.loads(report_path.read_text(encoding="utf-8"))
     constants = json.loads(constants_path.read_text(encoding="utf-8"))
     if not report.get("repeat_only") or report.get("history_requested"):
@@ -79,6 +83,26 @@ def compare(report_path, constants_path, positions, counter, textures):
     order = np.concatenate((np.arange(uniform, dtype=np.int64),
                             np.array([uniform + second_index[int(p)] for p in packed[0]],
                                      dtype=np.int64)))
+    eligible = np.ones(uniform + count, dtype=bool)
+    if positive_f32_depth is not None:
+        depths = []
+        for phase in phases:
+            description, raw = read(phase, positive_f32_depth)
+            if (description["kind"] != "texture" or
+                    description["width"] != atlas_width or description["height"] != atlas_height or
+                    description["array_size"] != 1 or description["mips"] != 1 or
+                    description["samples"] > 1 or description["format_type"] != 0 or
+                    description["component_count"] != 1 or description["component_bytes"] != 4 or
+                    description["selected_subresource"] != {"mip": 0, "layer": 0, "sample": 0} or
+                    len(raw) != atlas_width * atlas_height * 4):
+                raise ValueError("Expected one 32-bit depth word per probe")
+            depths.append(np.frombuffer(raw, dtype="<u4"))
+        if not np.array_equal(depths[0][:uniform + count], depths[1][order]):
+            raise ValueError("Aligned active depth words differ; cannot apply a shared validity mask")
+        depth = depths[0][:uniform + count].view("<f4")
+        if not np.isfinite(depth).all():
+            raise ValueError("Non-finite probe depth cannot establish this shader's validity predicate")
+        eligible = depth > 0
     rows = []
     for creation in textures:
         blocks = []
@@ -103,6 +127,7 @@ def compare(report_path, constants_path, positions, counter, textures):
                           .reshape(atlas_width * atlas_height, block * block, stride))
             raw_equal.append(hashlib.sha256(raw).hexdigest())
         different = (blocks[0][:uniform + count] != blocks[1][order]).any(axis=2)
+        different &= eligible[:, None]
         probes = different.any(axis=1)
 
         def example(start, stop):
@@ -133,6 +158,35 @@ def compare(report_path, constants_path, positions, counter, textures):
             "first_changed_uniform_texel": example(0, uniform),
             "first_changed_adaptive_texel": example(uniform, uniform + count),
         })
+    buffer_rows = []
+    for creation, stride in probe_buffers:
+        if not 0 < stride <= 256:
+            raise ValueError("Probe buffer stride must be between 1 and 256 bytes")
+        records = []
+        for phase in phases:
+            description, raw = read(phase, creation)
+            if (description["kind"] != "buffer" or description["byte_offset"] != "0" or
+                    int(description["byte_length"]) != len(raw) or
+                    len(raw) != atlas_width * atlas_height * stride):
+                raise ValueError("Expected a full buffer with the verified fixed per-probe stride")
+            records.append(np.frombuffer(raw, np.uint8).reshape(-1, stride))
+        different = records[0][:uniform + count] != records[1][order]
+        different &= eligible[:, None]
+        changed = different.any(axis=1)
+        first = int(np.argmax(changed)) if changed.any() else None
+        buffer_rows.append({
+            "creation": creation, "bytes_per_probe": stride,
+            "changed_uniform_probe_blocks": int(changed[:uniform].sum()),
+            "changed_adaptive_probe_blocks": int(changed[uniform:].sum()),
+            "changed_bytes": int(different.sum()),
+            "first_changed_probe": None if first is None else {
+                "first_probe_index": first, "second_probe_index": int(order[first]),
+                "first_byte_offset": str(first * stride),
+                "second_byte_offset": str(int(order[first]) * stride),
+                "before_bytes": records[0][first].tolist(),
+                "after_bytes": records[1][order[first]].tolist(),
+            },
+        })
     return {
         "status": "compared",
         "scope": "Position-aligned active probe storage only; layout supplied from shader evidence. "
@@ -140,7 +194,16 @@ def compare(report_path, constants_path, positions, counter, textures):
         "report": str(report_path.resolve()), "constants": str(constants_path.resolve()),
         "event": report["event"], "positions_creation": positions, "counter_creation": counter,
         "adaptive_count": count, "uniform_count": uniform,
-        "active_screen_positions_equal": True, "textures": rows,
+        "active_screen_positions_equal": True,
+        "validity": {
+            "positive_f32_depth_creation": positive_f32_depth,
+            "scope": "Caller-verified shader predicate: asfloat(depth) > 0" if positive_f32_depth
+                     else "All active probe slots; no shader validity predicate applied",
+            "compared_uniform_probes": int(eligible[:uniform].sum()),
+            "compared_adaptive_probes": int(eligible[uniform:].sum()),
+            "excluded_probes": int((~eligible).sum()),
+        },
+        "textures": rows, "probe_buffers": buffer_rows,
     }
 
 
@@ -151,9 +214,20 @@ def main():
     parser.add_argument("--positions", required=True)
     parser.add_argument("--counter", required=True)
     parser.add_argument("--texture", action="append", required=True)
+    parser.add_argument("--positive-f32-depth",
+                        help="Verified shader depth bitcast/predicate; requires exact aligned depth words")
+    parser.add_argument("--probe-buffer", action="append", default=[], metavar="CREATION:STRIDE",
+                        help="Buffer with a shader-verified fixed byte stride per probe")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    result = compare(args.report, args.constants, args.positions, args.counter, args.texture)
+    buffers = []
+    for specification in args.probe_buffer:
+        creation, separator, stride = specification.partition(":")
+        if not separator or not creation.isdecimal() or not stride.isdecimal():
+            parser.error("--probe-buffer requires CREATION:STRIDE with unsigned decimal values")
+        buffers.append((creation, int(stride)))
+    result = compare(args.report, args.constants, args.positions, args.counter, args.texture,
+                     args.positive_f32_depth, buffers)
     # Never replace earlier evidence.
     with args.out.open("x", encoding="utf-8") as output:
         json.dump(result, output, indent=2)

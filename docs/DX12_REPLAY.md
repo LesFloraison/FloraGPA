@@ -9362,6 +9362,84 @@ files' lengths/hashes, no PixelHistory calls in those probes, and no GPA/Python
 modules in either probe or the shader-debug analyzer. Full replay/debug
 acceptance remains unfinished.
 
+### Separate inactive probe storage from probability-input variation
+
+At ray execution **30752 / RDC 71516**, paired bounded readbacks show the same
+**732** adaptive positions and exact aligned depth words. The disassembly guards
+computation with `asfloat(ScreenProbeSceneDepth) > 0`; **39** of the **1,560**
+uniform slots have negative depth, including **-100,000,000**, and do not execute. Comparing their
+unwritten coefficient storage as live shader input would give a misleading
+result. The ray shader loads nine R16_FLOAT BRDF coefficients at `probeIndex * 9`
+and lighting probability at `groupID * 8 + threadID`.
+
+The offline comparator now accepts `--positive-f32-depth CREATION` and
+`--probe-buffer CREATION:BYTES_PER_PROBE`. These require caller-verified shader
+layouts. The validity mask is applied only after checking exact aligned depth
+words, finite depth, complete 32-bit depth storage and equal active-position
+sets; fixed-stride buffers must cover the complete atlas allocation. A modified
+depth word with a correct updated digest and an incorrect buffer stride are
+both rejected. No application dependency or replay behavior changes.
+
+For the **2,253 valid probes** (**1,521 uniform + 732 adaptive**) in this pair:
+
+| Creation / role | Changed uniform blocks | Changed adaptive blocks |
+| --- | --- | --- |
+| 550915 / generated rays | 34 | 19 |
+| 539075 / lighting probability | 553 | 273 |
+| 569005 / nine BRDF coefficients, 18 bytes per probe | 1 | 0 |
+| 510833 / depth | 0 | 0 |
+
+The single valid BRDF difference is coefficient **4** of probe **410**,
+binary16 word **0x1b1f -> 0x1b20**. The other **39** changed BRDF blocks are
+excluded by the shader guard. No changed ray block has both probability inputs
+unchanged. Sorting each block's packed ray values leaves only **three** changed
+multisets (first-phase probe indices **778, 1546, 1738**); the other ray-block
+differences are permutations. This does not prove equivalent downstream
+sampling or an acceptable final-image difference.
+
+Lighting probability is written by **30745 / source 604539 / RDC 71493**,
+`ScreenProbeComputeLightingProbabilityDensityFunctionCS`, PSO **512457**,
+**47,480 bytes**, SHA-256
+`4fe93031d9a6e8398005ac3bbfe91a91c26cc2d819e67d02add50e55ff504eb3`;
+the original directory export matches. Its root buffer **537415** at
+**3,220,224** confirms the same atlas dimensions; the complete buffer is stable.
+In this separate pair, **1,232 uniform / 588 adaptive** probability blocks differ,
+while aligned current depth **510833** and normals **568981** are exact.
+History radiance **506577** differs in **525 fixed uniform** blocks; history
+world-position **560190** is exact in the uniform region. Current adaptive
+positions are **not** used to remap previous-history atlases.
+
+Resource History maps **506577** to the earlier
+**19231 / source 586768 / RDC 32762** filter, which reads **570138** and writes
+the history used later. The shader matches the already-exported filter PSO
+**510847**. Thus this history includes earlier captured execution, not just
+initial contents. The earlier lighting-probability execution
+**17088 / source 586477 / RDC 25867** uses the same probability shader but reads
+history radiance **551682**, history world-position **516603**, depth **542475**
+and root buffer **510820** at **1,148,160**.
+
+At **25867**, both complete history textures and the complete root buffer are
+exact between the two selections. Fixed uniform depth and normal blocks are
+also exact, yet **537** fixed uniform probability blocks differ. Adaptive
+counts are **743 -> 744**, with unique position sets differing by the added
+screen position **(376,664)**. The alignment tool correctly refuses this pair;
+no adaptive intersection is silently compared. The remaining frontier includes
+the earlier adaptive-selection inputs and probability bindings
+`RadianceProbeIndirectionTexture` **503760**, `RadianceCacheFinalRadianceAtlas`
+**537892**, `ProbeWorldOffset` **513380**, velocity and view/noise constants.
+Their stability and causal contribution are not yet established.
+
+Ignored evidence: `hellblade-{ray-input-repeat2,lightpdf-input-repeat1,early-lightpdf-repeat1}.json`
+and raw files, their constants and valid-remap reports,
+`hellblade-ray-input-correlation1.json`, `hellblade-{lighting-pdf,brdf-pdf,pdf-history-radiance}-history1`,
+`hellblade-{lightpdf30745,brdf30574,history19231,lightpdf17088}-pipeline1`,
+`hellblade-lightpdf-shader1`, and `probe-validity-rejections1`.
+`hellblade-probability-evidence1.json` and
+`hellblade-early-probability-evidence1.json` verify **46** raw files'
+sizes/SHA-256, repeat-only operation without PixelHistory, and absence of
+GPA/Python modules in all three native probes. The rejected early alignment
+produces no valid-remap result. Full-frame fidelity remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
