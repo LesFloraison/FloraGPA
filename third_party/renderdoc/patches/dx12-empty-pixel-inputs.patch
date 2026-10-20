@@ -1,0 +1,73 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -133,6 +133,11 @@
+   cmdList->ResourceBarrier(1, &barrier);
+ 
+   return true;
++}
++
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12EmptyPixelInputsPatchVersion()
++{
++  return 1;
+ }
+ 
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12CubeCoordinatesPatchVersion()
+diff --git a/renderdoc/driver/shaders/dxbc/dx_debug.cpp b/renderdoc/driver/shaders/dxbc/dx_debug.cpp
+--- a/renderdoc/driver/shaders/dxbc/dx_debug.cpp
++++ b/renderdoc/driver/shaders/dxbc/dx_debug.cpp
+@@ -39,12 +39,31 @@
+ {
+   rdcarray<DXBC::InterpolationMode> interpModes;
+ 
+-  const rdcarray<SigParameter> &stageInputSig = dxbc->GetReflection()->InputSig;
+   rdcarray<SigParameter> emptySig;
+   const rdcarray<SigParameter> &prevStageOutputSig =
+       prevdxbc ? prevdxbc->GetReflection()->OutputSig : emptySig;
+-
+-  if(dxbc->GetDXBCByteCode())
++  rdcarray<SigParameter> fetchOnlySig;
++  if(dxbc->GetReflection()->InputSig.empty() && dxbc->m_Type == DXBC::ShaderType::Pixel)
++  {
++    // The fetch shader needs position even when the original PS has no inputs.
++    // Preserve the producer's register, letting the ordinary gap filler retain
++    // preceding outputs. Putting position in v0 cannot link to a VS with o2.
++    for(const SigParameter &sig : prevStageOutputSig)
++    {
++      if(sig.systemValue == ShaderBuiltin::Position)
++      {
++        fetchOnlySig.push_back(sig);
++        fetchOnlySig.back().channelUsedMask = sig.regChannelMask;
++        break;
++      }
++    }
++  }
++  const rdcarray<SigParameter> &stageInputSig =
++      fetchOnlySig.empty() ? dxbc->GetReflection()->InputSig : fetchOnlySig;
++
++  if(!fetchOnlySig.empty())
++    interpModes.push_back(DXBC::InterpolationMode::INTERPOLATION_UNDEFINED);
++  else if(dxbc->GetDXBCByteCode())
+     DXBCDebug::GetInterpolationModeForInputParams(stageInputSig, dxbc->GetDXBCByteCode(),
+                                                   interpModes);
+   else
+@@ -80,7 +99,8 @@
+ 
+     fetcher.inputs.push_back(InputElement(-1, 0, 4, ShaderBuiltin::Undefined, true));
+ 
+-    fetcher.laneDataBufferStride += 4;
++    copyFunc += "  OUT.input_dummy = IN.input_dummy;\n";
++    fetcher.laneDataBufferStride += 4 * sizeof(float);
+   }
+ 
+   // name, pair<start semantic index, end semantic index>
+@@ -362,7 +382,8 @@
+       if(arrayLength == 0)
+       {
+         fetcher.inputs.push_back(
+-            InputElement(sig.regIndex, firstElem, byteSize / 4, sig.systemValue, included));
++            InputElement(fetchOnlySig.empty() ? sig.regIndex : -1, firstElem, byteSize / 4,
++                         sig.systemValue, included));
+       }
+       else
+       {

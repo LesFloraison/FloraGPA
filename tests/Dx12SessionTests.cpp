@@ -1761,6 +1761,191 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!session->capability(ReplayFeature::Performance,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
     }
+    void isolatedQueryOverlayWorkspace_data() {
+        QTest::addColumn<bool>("shader");
+        QTest::newRow("shader") << true;
+        QTest::newRow("buffer") << false;
+    }
+    void isolatedQueryOverlayWorkspace() {
+        QFETCH(bool, shader);
+        using Json = nlohmann::json;
+        try {
+            const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto evidence = qEnvironmentVariable("FLORA_QUERY_OVERLAY_UI");
+            const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+            if (captures.isEmpty() || evidence.isEmpty() || library.isEmpty())
+                QSKIP("Set Talos captures, a new overlay output directory and the pinned RenderDoc library");
+            const auto output = evidence + (shader ? "/shader" : "/buffer");
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+            QByteArray replacement;
+            if (shader) {
+                const QByteArray source = "float4 main() : SV_Target { return float4(1,0,1,1); }";
+                Microsoft::WRL::ComPtr<ID3DBlob> blob, errors;
+                const auto hr =
+                    D3DCompile(source.data(), size_t(source.size()), "isolated-replacement.hlsl", nullptr,
+                               nullptr, "main", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &blob, &errors);
+                QVERIFY2(SUCCEEDED(hr),
+                         errors ? static_cast<const char *>(errors->GetBufferPointer()) : "Compile failed");
+                replacement = QByteArray(static_cast<const char *>(blob->GetBufferPointer()),
+                                         qsizetype(blob->GetBufferSize()));
+                write(output + "/replacement.hlsl", source);
+            } else {
+                // PS cb0[0].zw are the alpha scale/bias. Zero both before
+                // submission 192532; keep all other bytes and the shader intact.
+                replacement = QByteArray(8, '\0');
+            }
+            const auto asset = output + (shader ? "/replacement.dxbc" : "/alpha.bin");
+            write(asset, replacement);
+            QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            QSignalSpy prepared(&window, &MainWindow::experimentFinished),
+                exported(&window, &MainWindow::exportFinished);
+            window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("19408");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto resources = window.findChild<QTableView *>("resources");
+            for (int row = 0; row < resources->model()->rowCount(); ++row) {
+                const auto index = resources->model()->index(row, 0);
+                if (index.data(Qt::UserRole).toULongLong() == 35118) {
+                    resources->setCurrentIndex(index);
+                    break;
+                }
+            }
+            QCOMPARE(resources->currentIndex().data(Qt::UserRole).toULongLong(), 35118ULL);
+            window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+            window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+            const auto exportRaw = [&](const QString &name) {
+                QTimer chooser, watchdog;
+                watchdog.setSingleShot(true);
+                bool chosen = false;
+                connect(&chooser, &QTimer::timeout, &window, [&] {
+                    if (auto dialog = window.findChild<QFileDialog *>()) {
+                        chooser.stop();
+                        chosen = true;
+                        dialog->findChild<QLineEdit *>("fileNameEdit")->setText(output + '/' + name + ".bin");
+                        QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+                    }
+                });
+                connect(&watchdog, &QTimer::timeout, &window, [&] {
+                    if (auto dialog = window.findChild<QFileDialog *>())
+                        dialog->reject();
+                });
+                chooser.start(10);
+                watchdog.start(5000);
+                window.findChild<QAction *>("exportOutputStorage")->trigger();
+                QVERIFY(chosen);
+                QTRY_COMPARE_WITH_TIMEOUT(exported.count(), 1, 10000);
+                QVERIFY(exported.takeLast()[0].toBool());
+            };
+            const auto read = [&](const QString &name) {
+                QFile file(output + '/' + name);
+                if (!file.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Missing overlay evidence");
+                return file.readAll();
+            };
+            if (shader)
+                window.replaceDx12Shader(156511, "PS", asset);
+            else
+                window.patchDx12Resource(192532, 150566, 32866312, 0, false, asset);
+            QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
+            QVERIFY(prepared.takeLast()[0].toBool());
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QVERIFY(window.findChild<QCheckBox *>("dx12QueryIsolation")->isEnabled());
+            exportRaw("modified");
+            QVERIFY(window.saveDx12Experiment(output + "/modified.json"));
+            const auto modified = read("modified.bin");
+            QCOMPARE(modified.size(), 8294400);
+            QCOMPARE(modified.mid((172 * 1920 + 65) * 4, 4).toHex(),
+                     shader ? QByteArray("ff00ffff") : QByteArray("020606d9"));
+            if (!shader)
+                QCOMPARE(QCryptographicHash::hash(modified, QCryptographicHash::Sha256).toHex(),
+                         QByteArray("5e3aae068d6743e52729350ec8e958861a21e5c800bad41b33946dddc4450f82"));
+            const auto metadata = Json::parse(read("modified.bin.json").toStdString());
+            QCOMPARE(metadata.at("frame_complete"), Json(false));
+            QCOMPARE(metadata.at("missing_query_policy"), Json("isolate_readback_outputs"));
+            auto debug = window.findChild<ReplayDebugView *>("replayDebug-ps");
+            debug->setBackendPath(library, false);
+            debug->selectPixel(65, 172, 0);
+            debug->selectPrimitive(0);
+            auto debugRead = debug->findChild<QAction *>("replayDebugRead");
+            QVERIFY(debugRead->isEnabled());
+            done.clear();
+            debugRead->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 180000);
+            QVERIFY2(done.takeLast()[0].toBool(),
+                     qPrintable(debug->findChild<QLabel *>("replayDebugSummary")->text()));
+            QVERIFY(debug->model());
+            const auto result = debug->model()->result();
+            write(output + "/debug.json", QByteArray::fromStdString(result.dump(2)));
+            const auto capture = QString::fromStdString(result.at("capture").get<std::string>());
+            QVERIFY(
+                QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+            const auto expectedShader =
+                shader
+                    ? QCryptographicHash::hash(replacement, QCryptographicHash::Sha256).toHex().toStdString()
+                    : std::string("9ac2a66820c99072d1ee0bd792e6164206669e67a55fa30461d0a32cb3b42c2f");
+            QCOMPARE(result.at("shader_bytecode").at("sha256"), Json(expectedShader));
+            QCOMPARE(result.at("frame_complete"), Json(false));
+            QCOMPARE(result.at("partial"), Json(true));
+            QCOMPARE(result.at("execution"), Json("19408"));
+            debug->findChild<QSpinBox *>("debugStepIndex")->setValue(int(debug->model()->size() - 1));
+            debug->findChild<QLineEdit *>("debugWatchExpression")->setText("SV_Target.w");
+            debug->findChild<QAction *>("debugAddWatch")->trigger();
+            const auto watches = debug->model()->watchResults();
+            QCOMPARE(watches.at(0).at("status"), Json("available"));
+            QCOMPARE(watches.at(0).at("values"), Json::array({shader ? 1.0 : 0.0}));
+            debug->exportResult(output + "/debug-export.json");
+            // Inspect the same recapture, proving the bound stage is the active
+            // replacement rather than the original cached shader.
+            auto pipeline = window.findChild<Dx12PipelineView *>();
+            pipeline->setBackendPath(library, false);
+            done.clear();
+            pipeline->findChild<QAction *>("readDx12Pipeline")->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            pipeline->exportResult(output + "/pipeline.json");
+            QCOMPARE(pipeline->result().at("capture"), result.at("capture"));
+            bool found = false;
+            const auto rows = pipeline->findChild<QTreeWidget *>("dx12PipelineRows");
+            for (int row = 0; row < rows->topLevelItemCount(); ++row) {
+                auto item = rows->topLevelItem(row);
+                if (item->data(0, Qt::UserRole + 3).toString() != "PS")
+                    continue;
+                rows->setCurrentItem(item);
+                found = true;
+                const auto &entry =
+                    pipeline->result().at("pipeline_rows").at(item->data(0, Qt::UserRole + 1).toULongLong());
+                QCOMPARE(entry.at("details").at("bytecode_sha256"), Json(expectedShader));
+                QVERIFY(pipeline->findChild<QAction *>("replaceBoundPipelineShader")->isEnabled());
+            }
+            QVERIFY(found);
+            const auto oldDebug = debug->requestId(), oldPipeline = pipeline->requestId();
+            done.clear();
+            window.findChild<QAction *>("undoExperiment")->trigger();
+            QVERIFY(!debug->model());
+            QVERIFY(pipeline->result().is_null());
+            QVERIFY(!debug->finish(oldDebug, result));
+            QVERIFY(!pipeline->finish(oldPipeline, {}));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            exportRaw("restored");
+            QVERIFY(window.saveDx12Experiment(output + "/restored.json"));
+            QCOMPARE(QCryptographicHash::hash(read("restored.bin"), QCryptographicHash::Sha256).toHex(),
+                     QByteArray("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
+            const auto restored = Json::parse(read("restored.bin.json").toStdString());
+            QCOMPARE(restored.at("experiment").at("cursor"), Json("0"));
+            QVERIFY(restored.at("experiment").at("document_sha256") !=
+                    metadata.at("experiment").at("document_sha256"));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void isolatedQueryExperimentWorkspace() {
         using Json = nlohmann::json;
         try {

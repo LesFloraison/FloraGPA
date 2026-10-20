@@ -165,7 +165,7 @@ void Dx12PipelineView::updateActions() {
                         rows_->currentItem()->data(0, Qt::UserRole).isValid());
     creation_->setEnabled(!busy_ && rows_->currentItem() &&
                           rows_->currentItem()->data(0, Qt::UserRole + 2).isValid());
-    replaceShader_->setEnabled(!isolateMissingQueries_ && creation_->isEnabled() &&
+    replaceShader_->setEnabled(creation_->isEnabled() &&
                               rows_->currentItem()->data(0, Qt::UserRole + 3).isValid());
 }
 Dx12PipelineView::Json Dx12PipelineView::request() const {

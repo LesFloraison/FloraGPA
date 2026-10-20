@@ -480,7 +480,8 @@ class HistoryUiTests : public QObject {
         for (size_t i=0;i<result.at("pipeline_rows").size();++i) {
             const auto &row=result.at("pipeline_rows")[i];
             rows->setCurrentItem(rows->topLevelItem(int(i)));
-            QVERIFY(!action(*view,"replaceBoundPipelineShader")->isEnabled());
+            QCOMPARE(action(*view,"replaceBoundPipelineShader")->isEnabled(),
+                     row.at("binding") == "Shader" && row.at("resource").value("mapping_status", "") == "capture_pipeline_stage");
             if (row.at("section") == "PS" && row.at("binding") == "Shader") {
                 QCOMPARE(row.at("resource").at("mapping_status"),Json("capture_pipeline_stage"));
                 QVERIFY(action(*view,"locatePipelineCreation")->isEnabled()); shader=true;

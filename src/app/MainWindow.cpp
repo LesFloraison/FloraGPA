@@ -773,7 +773,9 @@ void MainWindow::buildUi() {
     dx12Layout->addWidget(dx12Budget_);
     dx12QueryIsolation_ = new QCheckBox("Isolate missing queries");
     dx12QueryIsolation_->setObjectName("dx12QueryIsolation");
-    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Resource history, pipeline inspection and shader debugging are available; other analysis and experiments remain unsupported. Applies only to this open capture.");
+    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. "
+        "Supported analysis and modification overlays retain this limitation; performance uses native instrumentation. "
+        "The selected mode is saved in DX12 experiment projects.");
     dx12Layout->addWidget(dx12QueryIsolation_);
     dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
     imageBar->addSeparator();
@@ -1669,7 +1671,7 @@ void MainWindow::setBusy(bool busy) {
                                   session_->capability(ReplayFeature::PixelHistory, selection_).supported())));
     dx12Subresource_->setEnabled(dx12 && !busy);
     dx12Budget_->setEnabled(dx12 && !busy);
-    dx12QueryIsolation_->setEnabled(dx12 && !busy && (!experiment_ || experiment_->document().at("history").empty()));
+    dx12QueryIsolation_->setEnabled(dx12 && !busy);
     for (QWidget *control : std::initializer_list<QWidget *>{
              adapter_, outputTarget_, outputLayer_, outputSample_, channels_, outputLow_, outputHigh_})
         control->setEnabled(!busy && !dx12);
