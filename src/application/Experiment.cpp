@@ -97,7 +97,8 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
                 continue;
             }
             if (op.at("kind") == "resource_patch") {
-                if (op.at("scope") != "before_submission" || !op.at("submission").is_string() ||
+                const bool afterExecution = op.at("scope") == "after_execution";
+                if ((!afterExecution && op.at("scope") != "before_submission") || !op.at("submission").is_string() ||
                     !op.at("resource_creation").is_string() || !op.at("offset").is_string() || !op.at("subresource").is_string())
                     throw std::runtime_error("Invalid DX12 resource patch boundary or identifiers");
                 const auto submission = identifier(op.at("submission")), creation = identifier(op.at("resource_creation"));
@@ -109,6 +110,15 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
                 const auto desc = Json::parse(resource.summary);
                 const auto layout = op.at("layout").get<std::string>();
                 const bool texture = layout == "tight_subresource_rows";
+                Id execution{};
+                if (afterExecution) {
+                    if (texture || !op.at("execution").is_string())
+                        throw std::runtime_error("After-execution patches require a buffer and an execution identity");
+                    execution = identifier(op.at("execution"));
+                    const auto selected = session.executionEvent(execution);
+                    if (!execution || selected.submission != submission || !selected.sourceRecord || creation > *selected.sourceRecord)
+                        throw std::runtime_error("Resource patch execution does not belong to its submission or resource lifetime");
+                }
                 if ((!texture && layout != "buffer_bytes") || texture == (desc.at("Dimension") == 1) || subresource > UINT32_MAX)
                     throw std::runtime_error("Resource patch layout does not match the resource");
                 auto bytes = asset(op.at("asset"));
@@ -118,7 +128,7 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
                     if (subresource || offset > width || bytes.size() > width - offset) throw std::runtime_error("Buffer patch exceeds resource bounds");
                 } else if (offset || desc.at("SampleCount") != 1)
                     throw std::runtime_error("Texture patches require a single-sample full subresource");
-                if (i < revision()) edits.resources.push_back({submission, creation, resource.capturedObject, offset, uint32_t(subresource), texture, std::move(bytes)});
+                if (i < revision()) edits.resources.push_back({submission, creation, resource.capturedObject, offset, uint32_t(subresource), texture, std::move(bytes), execution});
                 continue;
             }
             if (op.at("kind") == "pipeline_shader") {
@@ -159,13 +169,15 @@ Experiment::Dx12Edits Experiment::dx12Edits(const IReplaySession &session) const
     return edits;
 }
 void Experiment::setResourcePatch(const IReplaySession &session, Id submission, Id resource, uint64_t offset,
-                                  uint32_t subresource, bool texture, Bytes bytes) {
+                                  uint32_t subresource, bool texture, Bytes bytes, Id afterExecution) {
     (void)dx12Edits(session);
     auto candidate = project_; auto &history = candidate["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     const auto data = QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())).toBase64().toStdString();
-    history.push_back({{"label", "Patch resource " + std::to_string(resource) + " before submission " + std::to_string(submission)},
-        {"operations", Json::array({{{"kind", "resource_patch"}, {"scope", "before_submission"},
+    history.push_back({{"label", "Patch resource " + std::to_string(resource) +
+        (afterExecution ? " after execution " + std::to_string(afterExecution) : " before submission " + std::to_string(submission))},
+        {"operations", Json::array({{{"kind", "resource_patch"}, {"scope", afterExecution ? "after_execution" : "before_submission"},
+            {"execution", afterExecution ? Json(std::to_string(afterExecution)) : Json(nullptr)},
             {"submission", std::to_string(submission)}, {"resource_creation", std::to_string(resource)},
             {"offset", std::to_string(offset)}, {"subresource", std::to_string(subresource)},
             {"layout", texture ? "tight_subresource_rows" : "buffer_bytes"},

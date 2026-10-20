@@ -136,7 +136,8 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
                 const auto bytes = file.readAll();
                 if (bytes.size() != file.size()) throw std::runtime_error("Incomplete resource data read");
                 result.experiment->setResourcePatch(*session, resource->submission, resource->resource, resource->offset,
-                    resource->subresource, resource->texture, {reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())});
+                    resource->subresource, resource->texture, {reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())},
+                    resource->afterExecution);
             }
             const auto &document = result.experiment->document();
             if (document.contains("ui") && !document.at("ui").is_object())
@@ -153,8 +154,8 @@ void MainWindow::replaceDx12Shader(Id pipeline, const std::string &stage, const 
     if (!bytecodePath.isEmpty()) prepareDx12Experiment({}, {}, Dx12ShaderImport{pipeline, stage, bytecodePath});
 }
 void MainWindow::patchDx12Resource(Id submission, Id resource, uint64_t offset, uint32_t subresource,
-                                  bool texture, const QString &dataPath) {
-    if (!dataPath.isEmpty()) prepareDx12Experiment({}, {}, {}, Dx12ResourceImport{submission, resource, offset, subresource, texture, dataPath});
+                                  bool texture, const QString &dataPath, Id afterExecution) {
+    if (!dataPath.isEmpty()) prepareDx12Experiment({}, {}, {}, Dx12ResourceImport{submission, resource, offset, subresource, texture, dataPath, afterExecution});
 }
 void MainWindow::importDx12Resource() {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.execution || !selection_.resource) return;
@@ -164,10 +165,21 @@ void MainWindow::importDx12Resource() {
         const auto desc = nlohmann::json::parse(session_->resource(selection_.resource).summary);
         const bool texture = desc.at("Dimension") != 1;
         bool accepted{};
-        const auto title = QString("Patch Resource %1 before Submission %2").arg(selection_.resource).arg(*event.submission);
+        Id afterExecution{};
+        if (!texture) {
+            const auto boundary = QInputDialog::getItem(this, "Buffer Patch Boundary", "Apply the imported bytes:",
+                {"Before the selected submission", "After the selected execution"}, 0, false, &accepted);
+            if (!accepted) return;
+            if (boundary == "After the selected execution") afterExecution = *selection_.execution;
+        }
+        const auto title = afterExecution
+            ? QString("Patch Resource %1 after Execution %2").arg(selection_.resource).arg(afterExecution)
+            : QString("Patch Resource %1 before Submission %2").arg(selection_.resource).arg(*event.submission);
         const auto text = QInputDialog::getText(this, title,
             (texture ? "Subresource index (import complete, tightly packed rows):" : "Destination byte offset:") +
-            QString("\nApplies before all commands in this submission. Later copies, clears and draws may overwrite the data."),
+            (afterExecution
+                ? QString("\nApplies after this call, before later calls in the same submission. Requires a default-heap buffer with resource state established by a transition in this command list.")
+                : QString("\nApplies before all commands in this submission. Later copies, clears and draws may overwrite the data.")),
             QLineEdit::Normal, texture ? QString::number(dx12Subresource_->value()) : "0", &accepted);
         if (!accepted) return;
         bool valid{}; const auto value = text.toULongLong(&valid);
@@ -175,7 +187,7 @@ void MainWindow::importDx12Resource() {
             throw std::runtime_error("Enter a valid decimal offset or subresource index");
         const auto path = QFileDialog::getOpenFileName(this, title, {}, "Raw resource data (*.bin);;All files (*)");
         if (!path.isEmpty()) patchDx12Resource(*event.submission, selection_.resource, texture ? 0 : value,
-                                              texture ? uint32_t(value) : 0, texture, path);
+                                              texture ? uint32_t(value) : 0, texture, path, afterExecution);
     } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
 }
 void MainWindow::importDx12Shader() {

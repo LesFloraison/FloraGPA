@@ -50,6 +50,9 @@ class NativeResources final {
     void requireState(uint64_t object, uint64_t atRecord, UINT subresource, D3D12_RESOURCE_STATES required);
     void completeSubmission(D3D12_COMMAND_LIST_TYPE queueType);
     uint64_t remainingAllocationBudget() const;
+    // Retained auxiliary resources count against the same replay allocation
+    // limit. The caller keeps them alive until this replay context is destroyed.
+    void reserveRetainedAllocation(uint64_t bytes, uint64_t sourceRecord);
     nlohmann::json information() const;
 };
 }

@@ -2798,6 +2798,206 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto saved = reopened.document();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, reopened.load(bad.fileName(), *session)); QCOMPARE(reopened.document(), saved);
     }
+    void executionBufferPatch() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_EXECUTION_PATCH_OUTPUT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set the SDK capture directory and a new execution-patch evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        dx12::StreamDirectory sdk(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        QTemporaryDir temp; const auto path = fixture(temp);
+        QByteArray packets; uint64_t record{};
+        auto packet = [&](uint64_t type, const QByteArray &b) {
+            qword(packets, type); qword(packets, ++record); qword(packets, 0); qword(packets, b.size()); packets += b;
+        };
+        auto result = [&](QByteArray &b, const GUID &iid, uint64_t object) {
+            b.append(reinterpret_cast<const char *>(&iid), sizeof iid); b.append(char(1));
+            qword(b, 1); qword(b, object); dword(b, 0);
+        };
+        constexpr uint64_t queue = 40, allocator = 43, list = 50, source = 61, middle = 62, target = 63;
+        QByteArray b; qword(b, 1); b.append(char(1));
+        D3D12_COMMAND_QUEUE_DESC queueDesc{};
+        b.append(reinterpret_cast<const char *>(&queueDesc), sizeof queueDesc);
+        result(b, __uuidof(ID3D12CommandQueue), queue); packet(0x127932607a959ULL, b);
+        b.clear(); qword(b, 1); dword(b, D3D12_COMMAND_LIST_TYPE_DIRECT);
+        result(b, __uuidof(ID3D12CommandAllocator), allocator); packet(0x12793beef5413ULL, b);
+        std::map<uint64_t, uint64_t> creations;
+        for (const auto object : {source, middle, target}) {
+            b.clear(); qword(b, 1); b.append(char(1));
+            D3D12_HEAP_PROPERTIES heap{}; heap.Type = object == source ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
+            heap.CreationNodeMask = heap.VisibleNodeMask = 1;
+            b.append(reinterpret_cast<const char *>(&heap), sizeof heap); dword(b, 0); b.append(char(1));
+            D3D12_RESOURCE_DESC desc{}; desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            desc.Width = 4; desc.Height = 1; desc.DepthOrArraySize = desc.MipLevels = 1;
+            desc.SampleDesc.Count = 1; desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            b.append(reinterpret_cast<const char *>(&desc), sizeof desc);
+            dword(b, object == source ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON);
+            b.append(char(0)); result(b, __uuidof(ID3D12Resource), object);
+            packet(0x12793f58d8f79ULL, b); creations[object] = record;
+        }
+        b.clear(); qword(b, 1); dword(b, 0); dword(b, D3D12_COMMAND_LIST_TYPE_DIRECT);
+        qword(b, allocator); qword(b, 0); result(b, __uuidof(ID3D12GraphicsCommandList), list);
+        packet(0x127938b682074ULL, b);
+        auto close = [&] { QByteArray v; qword(v, list); dword(v, 0); packet(0x1ae3cd6acf667ULL, v); };
+        auto submit = [&] {
+            QByteArray v; qword(v, queue); dword(v, 1); v.append(char(1)); qword(v, 1); qword(v, list);
+            packet(0x125482975df48ULL, v); return record;
+        };
+        close(); submit();
+        QFile header(path + "/metadata"); QVERIFY(header.open(QIODevice::ReadOnly));
+        auto metadata = header.readAll(); header.close();
+        QByteArray section; qword(section, 3); qword(section, 0); qword(section, 0);
+        qword(section, uint64_t(metadata.size() + 40 + packets.size())); dword(section, 0); dword(section, 0);
+        write(path + "/metadata", metadata + section + packets);
+        packets.clear();
+        b.clear(); qword(b, list); qword(b, allocator); qword(b, 0); dword(b, 0);
+        packet(0x1ae3c721c351aULL, b);
+        auto barrier = [&](uint64_t object, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
+            QByteArray v; qword(v, list); dword(v, 1); v.append(char(1)); qword(v, 1);
+            dword(v, D3D12_RESOURCE_BARRIER_TYPE_TRANSITION); dword(v, 0); qword(v, object);
+            dword(v, UINT32_MAX); dword(v, before); dword(v, after); dword(v, 0);
+            packet(0x1ae3c24e5dabeULL, v);
+        };
+        auto copy = [&](uint64_t dst, uint64_t src) {
+            QByteArray v; qword(v, list); qword(v, dst); qword(v, 0); qword(v, src); qword(v, 0); qword(v, 4);
+            packet(0x1ae3cd301bf84ULL, v); return record;
+        };
+        const bool implicit = qEnvironmentVariableIsSet("FLORA_EXECUTION_PATCH_IMPLICIT");
+        if (!implicit) barrier(middle, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+        barrier(target, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+        const auto producer = copy(middle, source);
+        barrier(middle, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE);
+        const auto consumer = copy(target, middle);
+        close(); const auto firstSubmission = submit(); const auto secondSubmission = submit();
+        write(path + "/thread-7-0", packets);
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        dx12::StreamDirectory directory(session->path()); dx12::SubmissionIndex index(directory);
+        Id first{}, firstEnd{}, secondEnd{};
+        for (Id id = 1; id <= index.executionCount(); ++id) {
+            const auto e = index.execution(id);
+            if (e.record == producer && e.submission == firstSubmission) first = id;
+            if (e.record == consumer) (e.submission == firstSubmission ? firstEnd : secondEnd) = id;
+        }
+        QVERIFY(first && firstEnd && secondEnd); QVERIFY(secondSubmission > firstSubmission);
+        const uint32_t seven = 7, fortyTwo = 42;
+        Experiment experiment(*session);
+        experiment.setResourcePatch(*session, firstSubmission, creations[source], 0, 0, false,
+            Bytes(reinterpret_cast<const uint8_t *>(&seven), sizeof seven));
+        experiment.setResourcePatch(*session, firstSubmission, creations[middle], 0, 0, false,
+            Bytes(reinterpret_cast<const uint8_t *>(&fortyTwo), sizeof fortyTwo), first);
+        const auto edited = experiment.dx12Edits(*session).resources;
+        QCOMPARE(edited.size(), size_t(2)); QCOMPARE(edited.back().afterExecution, first);
+        experiment.save(output + "/edited.json");
+        Experiment reopened(*session); reopened.load(output + "/edited.json", *session);
+        QCOMPARE(reopened.dx12Edits(*session).resources.back().afterExecution, first);
+        QVERIFY(experiment.undo()); const auto original = experiment.dx12Edits(*session).resources;
+        QCOMPARE(original.size(), size_t(1)); QVERIFY(experiment.redo());
+        Json evidence = Json::array();
+        dx12::NativeDevice device(sdk, true);
+        {
+            dx12::NativeReplay rejected(device, directory, 4ULL * 1024 * 1024);
+            auto invalid = edited;
+            invalid.back().submission = secondSubmission;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rejected.setResourcePatches(invalid));
+            invalid = edited;
+            invalid.back().object = source; invalid.back().creation = creations[source];
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, rejected.setResourcePatches(invalid));
+        }
+        auto replay = [&](const char *name, const std::vector<dx12::ResourcePatch> &patches, Id until, uint32_t expected) {
+            dx12::NativeReplay replay(device, directory, 4ULL * 1024 * 1024);
+            replay.setResourcePatches(patches);
+            replay.prepareExecution(until, true, true); replay.initializeTransfers(); replay.replayTo(until, true, true);
+            const auto file = output + "/" + name + ".bin";
+            replay.inspectBuffer(creations[target], 0, 4, std::filesystem::path(file.toStdWString()));
+            QFile data(file); QVERIFY(data.open(QIODevice::ReadOnly)); const auto bytes = data.readAll();
+            QCOMPARE(bytes.size(), 4); uint32_t actual{}; memcpy(&actual, bytes.data(), 4); QCOMPARE(actual, expected);
+            const auto report = replay.information();
+            const auto &applied = report.at("applied_resource_patches");
+            QCOMPARE(applied.size(), patches.size());
+            if (patches.size() == 2) {
+                QCOMPARE(applied[1].at("execution"), Json(std::to_string(first)));
+                QCOMPARE(applied[1].at("scope"), Json("after_execution"));
+                QCOMPARE(applied[1].at("method"), Json("recorded_buffer_copy"));
+                QCOMPARE(applied[1].at("state_evidence"),
+                         Json(implicit ? "following_exclusive_write_transition" : "preceding_transition"));
+            }
+            evidence.push_back({{"case", name}, {"value", actual}, {"replay", report}});
+        };
+        replay("baseline", original, firstEnd, 7);
+        replay("edited", edited, firstEnd, 42);
+        replay("repeated_submission", edited, secondEnd, 7);
+        replay("undo", original, firstEnd, 7);
+        // Three native buffers fit, but the retained upload for the overlay
+        // requires a fourth allocation. It must share the replay budget.
+        bool budgetRejected = false;
+        {
+            dx12::NativeReplay limited(device, directory, 3 * 65536);
+            limited.setResourcePatches(edited);
+            limited.prepareExecution(firstEnd, true, true); limited.initializeTransfers();
+            try { limited.replayTo(firstEnd, true, true); }
+            catch (const std::runtime_error &e) {
+                budgetRejected = std::string(e.what()).find("allocation budget exceeded") != std::string::npos;
+            }
+        }
+        QVERIFY(budgetRejected);
+        QCOMPARE(device.information().at("validation_error_count"), Json("0"));
+        write(output + "/result.json", QByteArray::fromStdString(Json{{"observations", evidence},
+            {"device", device.information()}, {"producer_execution", std::to_string(first)},
+            {"implicit_promotion", implicit}, {"rejected_mismatched_submission", true},
+            {"rejected_missing_state_evidence", true}, {"rejected_staging_over_budget", budgetRejected}}.dump(2)));
+    }
+    void executionBufferPatchWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto project = qEnvironmentVariable("FLORA_EXECUTION_PATCH_PROJECT");
+        const auto output = qEnvironmentVariable("FLORA_EXECUTION_PATCH_UI_OUTPUT");
+        if (root.isEmpty() || project.isEmpty() || output.isEmpty()) QSKIP("Set capture, execution patch project and a new UI evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile input(project); QVERIFY(input.open(QIODevice::ReadOnly));
+        const auto document = nlohmann::json::parse(input.readAll().toStdString());
+        const auto &op = document.at("history")[0].at("operations")[0];
+        QCOMPARE(op.at("scope"), nlohmann::json("after_execution"));
+        const auto asset = output + "/patch.bin";
+        write(asset, QByteArray::fromBase64(QByteArray::fromStdString(op.at("asset").at("data").get<std::string>())));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), prepared(&window, &MainWindow::experimentFinished),
+                   replayed(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/" + QString::fromStdString(document.at("frame_name").get<std::string>()));
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText(QString::fromStdString(op.at("execution").get<std::string>()));
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto debug = window.findChild<ReplayDebugView *>("replayDebug-cs");
+        QVERIFY(debug);
+        const auto oldDebug = debug->requestId();
+        window.patchDx12Resource(std::stoull(op.at("submission").get<std::string>()),
+            std::stoull(op.at("resource_creation").get<std::string>()),
+            std::stoull(op.at("offset").get<std::string>()), 0, false, asset,
+            std::stoull(op.at("execution").get<std::string>()));
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QVERIFY(debug->requestId() != oldDebug);
+        QVERIFY(!debug->finish(oldDebug, {}));
+        const auto savedPath = output + "/workspace.json";
+        const auto saved = [&] {
+            if (!window.saveDx12Experiment(savedPath)) throw std::runtime_error("Cannot save execution patch project");
+            QFile file(savedPath); if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read execution patch project");
+            return nlohmann::json::parse(file.readAll().toStdString());
+        };
+        auto result = saved();
+        QCOMPARE(result.at("cursor"), nlohmann::json(1));
+        const auto &actual = result.at("history")[0].at("operations")[0];
+        for (const auto field : {"scope", "execution", "submission", "resource_creation", "offset", "asset"})
+            QCOMPARE(actual.at(field), op.at(field));
+        window.findChild<QAction *>("undoExperiment")->trigger();
+        QCOMPARE(saved().at("cursor"), nlohmann::json(0));
+        window.findChild<QAction *>("redoExperiment")->trigger();
+        QCOMPARE(saved().at("cursor"), nlohmann::json(1));
+        window.openDx12Experiment(savedPath);
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QCOMPARE(saved().at("history")[0].at("operations")[0], actual);
+        QVERIFY(replayed.empty());
+    }
     void dx12ModifiedResourceAnalysis() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");

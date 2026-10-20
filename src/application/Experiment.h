@@ -29,7 +29,7 @@ class Experiment {
     Dx12Edits dx12Edits(const IReplaySession &session) const;
     void setShader(const IReplaySession &, Id pipeline, const std::string &stage, Bytes bytecode);
     void setResourcePatch(const IReplaySession &, Id submission, Id resource, uint64_t offset,
-                          uint32_t subresource, bool texture, Bytes bytes);
+                          uint32_t subresource, bool texture, Bytes bytes, Id afterExecution = 0);
     void load(const QString &path, const Frame &frame);
     void save(const QString &path, const nlohmann::json &ui = nullptr) const;
     void apply(const Frame &frame, ReplayOptions &options) const;

@@ -424,6 +424,10 @@ void NativeResources::completeSubmission(D3D12_COMMAND_LIST_TYPE queueType) {
     }
 }
 uint64_t NativeResources::remainingAllocationBudget() const { return impl_->limit - impl_->allocated; }
+void NativeResources::reserveRetainedAllocation(uint64_t bytes, uint64_t sourceRecord) {
+    auto &s = *impl_; s.budget(bytes, sourceRecord);
+    s.allocated += bytes; s.peakAllocated = (std::max)(s.peakAllocated, s.allocated);
+}
 nlohmann::json NativeResources::information() const {
     auto isolated = nlohmann::json::array();
     for (const auto &[creation, state] : impl_->isolatedQueries) {

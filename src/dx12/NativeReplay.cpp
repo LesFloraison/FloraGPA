@@ -99,6 +99,9 @@ struct NativeReplay::Impl {
     std::set<uint64_t> uavBarriersBefore, recordedUavBarriers, executedUavBarriers;
     std::vector<ShaderReplacement> shaderReplacements;
     std::vector<ResourcePatch> resourcePatches;
+    std::map<size_t, std::pair<D3D12_RESOURCE_STATES, uint64_t>> executionPatchStates;
+    std::vector<ComPtr<ID3D12Resource>> patchUploads;
+    json recordedResourcePatches = json::array();
     json appliedResourcePatches = json::array();
     std::map<uint64_t, std::vector<uint64_t>> completedCpuWaits;
     struct PendingSubmission {
@@ -155,6 +158,7 @@ struct NativeReplay::Impl {
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
     void applyResourcePatches(uint64_t submission);
+    void recordExecutionPatches(ID3D12GraphicsCommandList *, uint64_t execution, uint64_t record, StateActions &);
     void drainFrame(uint64_t record, const char *reason);
     void enqueueFrameOperation(uint64_t record);
     void executeFrameOperation(uint64_t record);
@@ -392,6 +396,7 @@ void NativeReplay::setIsolateMissingQueries(bool enabled) {
 void NativeReplay::setResourcePatches(std::vector<ResourcePatch> patches) {
     auto &s = *impl_;
     require(!s.frame && !s.attempted, "Set resource patches before preparing or initializing replay");
+    decltype(s.executionPatchStates) patchStates;
     for (const auto &patch : patches) {
         require(patch.submission > s.directory.initializationCount() && patch.submission <= s.directory.packets().size() &&
                 s.directory.packets()[size_t(patch.submission - 1)].type == 0x125482975df48ULL,
@@ -406,8 +411,63 @@ void NativeReplay::setResourcePatches(std::vector<ResourcePatch> patches) {
         if (!patch.texture)
             require(!patch.subresource && patch.offset <= desc.Width && patch.bytes.size() <= desc.Width - patch.offset, "Buffer patch exceeds resource bounds");
         else require(!patch.offset && desc.SampleDesc.Count == 1, "Texture patches require a single-sample full subresource");
+        if (patch.afterExecution) {
+            require(!patch.texture, "After-execution patches currently require a buffer");
+            const auto event = s.index.execution(patch.afterExecution);
+            require(event.recordingComplete && event.submission == patch.submission,
+                    "Resource patch execution does not belong to its submission");
+            const auto type = s.directory.packets().at(size_t(event.record - 1)).type;
+            require(streamPacketWork(type) || type == 0x1ae3cd301bf84ULL,
+                    "After-execution patches require Draw, Dispatch, ExecuteIndirect or CopyBufferRegion");
+            require(s.resources.creationRecord(patch.object, event.record) == patch.creation,
+                    "Resource patch creation is not active at the recording boundary");
+            std::optional<std::pair<D3D12_RESOURCE_STATES, uint64_t>> known;
+            bool inferFollowing = true;
+            const auto recording = s.index.recordingForRecord(event.record);
+            require(recording.has_value(), "Missing execution recording");
+            for (const auto id : s.index.recordings().at(*recording).records) {
+                const bool following = id > event.record;
+                if (following && (known || !inferFollowing)) break;
+                checkCancellation(s.cancelled);
+                const auto &packet = s.directory.packets().at(size_t(id - 1));
+                if (packet.type != 0x1ae3c24e5dabeULL) continue;
+                const auto args = decodeArguments(packet.type, s.directory.payload(packet));
+                require(args.supported && args.consumed == packet.size, "Incomplete resource patch barrier evidence");
+                for (const auto &barrier : args.values.at("Barriers")) {
+                    if (barrier.at("Type") == 0 && value(barrier, "Resource") == patch.object) {
+                        require(barrier.at("Subresource") == 0 || barrier.at("Subresource") == UINT32_MAX,
+                                "Invalid buffer transition subresource");
+                        if (following) {
+                            // A buffer cannot change between exclusive write states
+                            // without a transition. Before this next barrier it is
+                            // therefore in this write state or still COMMON, which
+                            // also permits a promotable StateBefore. Read masks can
+                            // widen implicitly, so do not infer them backwards.
+                            const auto before = barrier.at("StateBefore").get<UINT>();
+                            if (barrier.at("Flags") == 0 &&
+                                (before == D3D12_RESOURCE_STATE_UNORDERED_ACCESS || before == D3D12_RESOURCE_STATE_COPY_DEST))
+                                known = {D3D12_RESOURCE_STATES(before), id};
+                            inferFollowing = false;
+                            break;
+                        }
+                        inferFollowing = barrier.at("Flags") == 0;
+                        if (!inferFollowing || barrier.at("StateAfter") == 0) known.reset();
+                        else known = {D3D12_RESOURCE_STATES(barrier.at("StateAfter").get<UINT>()), id};
+                    } else if (barrier.at("Type") == 1 &&
+                               (!value(barrier, "ResourceBefore") || !value(barrier, "ResourceAfter") ||
+                                value(barrier, "ResourceBefore") == patch.object || value(barrier, "ResourceAfter") == patch.object)) {
+                        known.reset();
+                        inferFollowing = false;
+                        if (following) break;
+                    }
+                }
+            }
+            require(known.has_value(), "After-execution buffer patch needs a preceding non-COMMON transition or a following exclusive-write transition in the same command list");
+            patchStates.emplace(size_t(&patch - patches.data()), *known);
+        }
     }
     s.resourcePatches = std::move(patches);
+    s.executionPatchStates = std::move(patchStates);
 }
 void NativeReplay::setShaderReplacements(std::vector<ShaderReplacement> replacements) {
     auto &s = *impl_;
@@ -542,7 +602,7 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
         }
     }
     for (const auto &patch : s.resourcePatches)
-        if (patch.submission <= frame->lastRecord) frame->hostDrains[patch.submission] = "resource_experiment";
+        if (!patch.afterExecution && patch.submission <= frame->lastRecord) frame->hostDrains[patch.submission] = "resource_experiment";
     for (const auto &wait : frame->queueDependencies.at("waits")) {
         if (wait.value("producer_relation", "") != "later_cpu_record") continue;
         const auto record = value(wait, "record"), producer = value(wait, "producer_record");
@@ -719,6 +779,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             if (analysisMarkers)
                 native.list->EndEvent();
             if (measured) frame->performance->end(native.list.Get());
+            s.recordExecutionPatches(native.list.Get(), executionId, id, native.states);
             if (++native.recorded == native.count) {
                 if (native.statistics) native.statistics->end(native.list.Get());
                 if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
@@ -729,10 +790,60 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
         return;
     }
 }
+void NativeReplay::Impl::recordExecutionPatches(ID3D12GraphicsCommandList *list, uint64_t execution,
+                                                uint64_t record, StateActions &states) {
+    for (size_t ordinal = 0; ordinal < resourcePatches.size(); ++ordinal) {
+        const auto &patch = resourcePatches[ordinal];
+        if (!patch.afterExecution || patch.afterExecution != execution) continue;
+        checkCancellation(cancelled);
+        auto destination = resources.resource(patch.object, record);
+        D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
+        check(destination->GetHeapProperties(&heap, &flags), "Read execution patch heap properties");
+        require(heap.Type == D3D12_HEAP_TYPE_DEFAULT, "After-execution buffer patches require a default heap");
+        D3D12_RESOURCE_DESC desc{}; desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        desc.Width = patch.bytes.size(); desc.Height = 1; desc.DepthOrArraySize = desc.MipLevels = 1;
+        desc.SampleDesc.Count = 1; desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        const auto allocation = device.device()->GetResourceAllocationInfo(0, 1, &desc).SizeInBytes;
+        resources.reserveRetainedAllocation(allocation, record);
+        D3D12_HEAP_PROPERTIES uploadHeap{}; uploadHeap.Type = D3D12_HEAP_TYPE_UPLOAD;
+        ComPtr<ID3D12Resource> upload;
+        check(device.device()->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE, &desc,
+            D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload)), "Create execution patch staging");
+        void *mapped{}; D3D12_RANGE none{0, 0};
+        check(upload->Map(0, &none, &mapped), "Map execution patch staging");
+        memcpy(mapped, patch.bytes.data(), patch.bytes.size());
+        upload->Unmap(0, nullptr);
+        const auto [before, barrierRecord] = executionPatchStates.at(ordinal);
+        states.push_back([this, object = patch.object, record, before] {
+            const auto current = resources.state(object, record, 0);
+            require(current == D3D12_RESOURCE_STATE_COMMON || current == before,
+                    "Execution patch state evidence disagrees with submitted resource state");
+            resources.requireState(object, record, 0, before);
+        });
+        const auto marker = "Flora DX12 resource experiment " + std::to_string(ordinal) +
+                            " after execution " + std::to_string(execution);
+        list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
+        D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition = {destination, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, before, D3D12_RESOURCE_STATE_COPY_DEST};
+        const bool transition = before != D3D12_RESOURCE_STATE_COPY_DEST;
+        if (transition) list->ResourceBarrier(1, &barrier);
+        list->CopyBufferRegion(destination, patch.offset, upload.Get(), 0, patch.bytes.size());
+        if (transition) { std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter); list->ResourceBarrier(1, &barrier); }
+        list->EndEvent();
+        patchUploads.push_back(std::move(upload));
+        recordedResourcePatches.push_back({{"patch_ordinal", std::to_string(ordinal)},
+            {"submission", std::to_string(patch.submission)}, {"execution", std::to_string(execution)},
+            {"creation_record", std::to_string(patch.creation)}, {"offset", std::to_string(patch.offset)}, {"subresource", "0"},
+            {"bytes", std::to_string(patch.bytes.size())}, {"sha256", hash(patch.bytes)}, {"method", "recorded_buffer_copy"},
+            {"scope", "after_execution"}, {"state", uint32_t(before)}, {"state_source_record", std::to_string(barrierRecord)},
+            {"state_evidence", barrierRecord > record ? "following_exclusive_write_transition" : "preceding_transition"},
+            {"later_commands_may_overwrite", true}});
+    }
+}
 void NativeReplay::Impl::applyResourcePatches(uint64_t submission) {
     for (size_t ordinal = 0; ordinal < resourcePatches.size(); ++ordinal) {
         const auto &patch = resourcePatches[ordinal];
-        if (patch.submission != submission) continue;
+        if (patch.afterExecution || patch.submission != submission) continue;
         checkCancellation(cancelled);
         // Captured queues may reference the same allocation. Complete prior
         // submissions before a CPU map or auxiliary copy modifies it.
@@ -935,6 +1046,11 @@ void NativeReplay::Impl::drainFrame(uint64_t record, const char *reason) {
                 executedUavBarriers.insert(*id);
             for (auto id = disabledExecutions.lower_bound(first); id != disabledExecutions.end() && *id - first < count; ++id)
                 suppressedExecutions.insert(*id);
+            for (const auto &patch : recordedResourcePatches) {
+                const auto execution = value(patch, "execution");
+                if (value(patch, "submission") == submission.record && execution >= first && execution - first < count)
+                    appliedResourcePatches.push_back(patch);
+            }
         }
         for (const auto &[name, count] : submission.counts) executedCommands[name] += count;
         submissions.push_back({{"record", std::to_string(submission.record)}, {"queue", std::to_string(submission.queue)},
@@ -1566,9 +1682,10 @@ json NativeReplay::information() const {
         const bool applied = std::any_of(s.appliedResourcePatches.begin(), s.appliedResourcePatches.end(),
             [&](const auto &entry) { return entry.at("patch_ordinal") == ordinal; });
         patches.push_back({{"patch_ordinal", ordinal}, {"submission", std::to_string(patch.submission)},
+            {"execution", patch.afterExecution ? json(std::to_string(patch.afterExecution)) : json(nullptr)},
             {"creation_record", std::to_string(patch.creation)}, {"offset", std::to_string(patch.offset)},
             {"subresource", std::to_string(patch.subresource)}, {"bytes", std::to_string(patch.bytes.size())},
-            {"scope", "before_submission"}, {"applied", applied}});
+            {"scope", patch.afterExecution ? "after_execution" : "before_submission"}, {"applied", applied}});
     }
     auto waits = json::array();
     if (s.frame) for (const auto &entry : s.frame->cpuWaits) {

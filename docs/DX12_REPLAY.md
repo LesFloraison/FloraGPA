@@ -10131,10 +10131,100 @@ Evidence: `gpa-cache-trace-inputs-repeat1.json`, `cache-trace-inputs1.json`,
 remain unchanged; analysis still uses the standalone native RenderDoc
 backend. Full radiance/frame fidelity remains unverified.
 
+### Buffer overrides after a submitted execution
+
+Resource experiments now support `scope: after_execution` in addition to
+the existing `before_submission` scope. The project stores the execution,
+owning submission and resource creation as decimal strings. Import offers
+the boundary choice for buffers, and uses the existing project, undo/redo
+and analysis invalidation paths.
+
+The native backend records an upload-buffer copy immediately after the
+selected Draw/Dispatch/ExecuteIndirect/CopyBufferRegion instance. The copy
+uses the captured command list and queue, restores the buffer state, and
+retains its upload allocation through completion. Upload allocations count
+against the same resource budget as captured resources. A repeated submission
+of the original recording has a distinct execution identity and does not
+inherit the override. The helper has a separate `Flora DX12 resource
+experiment ...` marker, outside the captured execution's marker and selected
+event timing interval.
+
+This path currently requires a default-heap buffer and state evidence from
+the same recorded command list. A preceding complete non-COMMON transition
+provides the state directly. Otherwise, the nearest following transition can
+establish an exclusive UAV or COPY_DEST state: no intervening transition can
+change that write state, and a still-COMMON buffer accepts a promotable
+StateBefore. Read-state masks are not inferred backwards because they can
+widen implicitly. Relevant alias barriers and unresolved split barriers
+invalidate this inference. Submission-time tracked state must agree or be
+COMMON. Missing evidence is an error, not an assumed UAV state.
+The promotion rule follows Microsoft's
+[resource-barrier documentation](https://learn.microsoft.com/en-us/windows/desktop/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12).
+Texture overrides retain their existing before-submission boundary.
+
+The small serialized-buffer GPU fixture checks both explicit state evidence
+and implicit promotion. A producer writes **7**; an event-local override
+changes the value consumed later in the same list to **42**. The second
+submission of that recording consumes **7**, and undo also restores **7**.
+The saved/reopened project retains the execution identity. Mismatched
+submission and missing-state edits are rejected. Evidence:
+`execution-buffer-patch2` and `execution-buffer-patch-implicit1`, with their
+matching Qt test logs. Both use SDK **616** and have no debug-layer messages.
+The additional `execution-buffer-patch-budget1` case rejects a three-buffer
+allocation budget when the retained overlay upload needs a fourth allocation.
+It passes with zero validation errors.
+
+`executionBufferPatchWorkspace` imports the real Hellblade2 edit through the
+workspace, verifies decimal execution/submission/resource identities and asset
+bytes in the saved project, exercises undo/redo and reload, and rejects an old
+CS debug request after the edit. No GPU replay is scheduled by this UI check.
+Evidence: `execution-buffer-patch-ui2.txt` and
+`execution-buffer-patch-ui2/workspace.json`. The first UI check incorrectly
+submitted an empty result to the inactive Mesh panel for a Compute selection;
+the corrected check targets the active CS context. Builds:
+`build-execution-buffer-patch2.log`, `build-execution-buffer-patch-ui2.log`.
+
+For Hellblade2, the first attempt
+(`hellblade-after-execution-count1`) correctly stopped during experiment
+configuration: no preceding transition established the counter's state.
+Inspection found the following transition at source record **586367**,
+UAV → NON_PIXEL_SHADER_RESOURCE, in the same recording. The implemented
+exclusive-write evidence rule then allowed the real experiment:
+
+- after allocator execution **16988**, source record **586352**, submission
+  **594751**, overwrite counter creation **570577** at byte zero with four
+  zero bytes;
+- replay through argument-generation execution **17000** and read twelve
+  bytes from argument buffer creation **562234**;
+- obtain **(3, 3, 0)** with the override, and **(3, 3, 108)** after undo.
+
+The modified report records exactly one applied override, state **8**, and
+`state_source_record: "586367"` with
+`state_evidence: "following_exclusive_write_transition"`. The undo report
+records no applied override. Both use SDK **616**, report zero validation
+errors, and retain warning IDs **202, 679, 680, 1328, 1424**. Each terminal
+module snapshot has **77** modules and no GPA/Python dependency; this is a
+snapshot, not a lifetime load trace.
+
+Evidence: `hellblade-cache-count-zero-after16988.json`,
+`hellblade-cache-count-zero-after16988-undo.json`,
+`hellblade-after-execution-count2/report.json`,
+`hellblade-after-execution-count-undo1/report.json`, and
+`execution-buffer-patch-evidence1.json`. Raw twelve-byte output SHA256:
+modified `aa6e75c1263e5cdfb359fd6e3a627d9d94f1ee1a6b4944aec21f93c8ef0bfd3a`;
+undo `e6c449a2af89212369264c6601a10154e6bbbde14826487672f8531ebb803710`.
+
+This verifies a real GPU producer/override/consumer boundary and restored
+nonzero argument generation. It does not yet verify downstream indirect
+execution, modified histories/debugging, or full-frame equivalence.
+The allocator's previously observed scheduling-dependent task count remains
+an explicit limitation.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace import/save/reload/undo/redo and stale CS request rejection verified; downstream indirect consumption and modified analysis unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | CLI terminal marker and final CopyResource mapping verified; initial selected texel matches native raw storage but changes after history replay, correctly reported partial; pixel fidelity and full history unfinished |
