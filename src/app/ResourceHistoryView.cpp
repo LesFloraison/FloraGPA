@@ -197,6 +197,10 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                     if (kind == "whole_resource") ranges << role + ": whole resource";
                     else if (kind == "buffer_range")
                         ranges << QString("%1: bytes [%2, %3)").arg(role,field(range,"offset"),field(range,"end"));
+                    else if (kind == "buffer_view")
+                        ranges << QString("%1: UAV elements [%2, %3); %4").arg(role,field(range,"first_element"),
+                            field(range,"end_element"),range.at("whole_view").get<bool>() ? "whole view" :
+                            QString("%1 rectangles").arg(range.at("rectangles").size()));
                     else if (kind == "buffer_footprint")
                         ranges << QString("%1: footprint at byte %2, row pitch %3").arg(role,field(range,"offset"),field(range,"RowPitch"));
                     else if (kind == "texture_subresource") {
@@ -209,7 +213,13 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                             field(range,"first_layer"),field(range,"layer_count"),range.at("whole_view").get<bool>()
                                 ? "whole view" : QString("%1 rectangles").arg(range.at("rectangles").size()));
                         if (range.value("view_definition","") == "default_resource_view") ranges.back() += " (default view)";
+                        if (range.contains("plane")) ranges.back() += " / Plane " + field(range,"plane");
+                    } else if (kind == "texture_volume_view") {
+                        ranges << QString("%1: Mip %2 / first depth slice %3 / %4 slices").arg(role,field(range,"mip"),
+                            field(range,"first_depth_slice"),field(range,"depth_slice_count"));
                     }
+                    if (range.value("view_definition","") == "captured_cpu_descriptor")
+                        for (const auto &rect : range.at("rectangles")) ranges << "Clear rectangle " + regionText(rect);
                 }
                 if (operation.contains("source_box")) ranges << "Source box " + regionText(operation.at("source_box"));
                 if (operation.contains("source_rectangle")) ranges << "Source rectangle " + regionText(operation.at("source_rectangle"));

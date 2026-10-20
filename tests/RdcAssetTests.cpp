@@ -34,6 +34,72 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void uavClearOperationRanges() {
+        const auto node=[](SDObject &parent,const char *name) {
+            return parent.AddAndOwnChild(new SDObject(rdcstr(name),"struct"_lit));
+        };
+        const auto integer=[&](SDObject &parent,const char *name,uint64_t value) {
+            auto field=node(parent,name); field->type.basetype=SDBasic::UnsignedInteger;
+            field->data.basic.u=value; return field;
+        };
+        constexpr uint64_t id=9007199254740993ULL;
+        SDObject chunk("ID3D12GraphicsCommandList::ClearUnorderedAccessViewFloat"_lit,"chunk"_lit);
+        integer(chunk,"pResource",id);
+        auto target=node(chunk,"ViewCPUHandle"),view=node(*target,"Descriptor"),buffer=node(*view,"Buffer");
+        auto identity=integer(*target,"Resource",id);
+        auto dimension=integer(*view,"ViewDimension",1); integer(*view,"Format",41);
+        auto first=integer(*buffer,"FirstElement",id); integer(*buffer,"NumElements",64000);
+        integer(*buffer,"StructureByteStride",0); integer(*buffer,"Flags",0);
+        auto count=integer(chunk,"NumRects",1);
+        auto rects=node(chunk,"pRects"); rects->type.basetype=SDBasic::Array;
+        auto rect=node(*rects,"[]"); SDObject *right{};
+        for (const auto &[name,value] : std::map<std::string,int64_t>{{"left",0},{"top",0},{"right",4700},{"bottom",1}}) {
+            auto field=node(*rect,name.c_str()); field->type.basetype=SDBasic::SignedInteger; field->data.basic.i=value;
+            if (name == "right") right=field;
+        }
+        auto result=rdcOperationRanges(chunk,resource(id),{});
+        QCOMPARE(result.at("status"),Json("captured"));
+        const auto &range=result.at("ranges")[0];
+        QCOMPARE(range.at("first_element"),Json("9007199254740993"));
+        QCOMPARE(range.at("end_element"),Json("9007199254804993"));
+        QCOMPARE(range.at("whole_view"),Json(false));
+        QCOMPARE(range.at("rectangles")[0].at("right"),Json(4700));
+        chunk.name="ID3D12GraphicsCommandList::ClearUnorderedAccessViewUint"_lit;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("captured"));
+        first->data.basic.u=UINT64_MAX;
+        result=rdcOperationRanges(chunk,resource(id),{});
+        QCOMPARE(result.at("status"),Json("unavailable")); QVERIFY(result.at("ranges").empty());
+        first->data.basic.u=0; identity->data.basic.u=id+1;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        identity->data.basic.u=id; count->data.basic.u=2;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        count->data.basic.u=1; right->data.basic.i=-1;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        count->data.basic.u=0;
+        dimension->data.basic.u=5; // D3D12_UAV_DIMENSION_TEXTURE2DARRAY
+        auto array=node(*view,"Texture2DArray");
+        integer(*array,"MipSlice",1); integer(*array,"FirstArraySlice",1);
+        auto layers=integer(*array,"ArraySize",2); integer(*array,"PlaneSlice",0);
+        TextureDescription texture{}; texture.resourceId=resource(id); texture.dimension=2;
+        texture.mips=3; texture.arraysize=4; texture.depth=1;
+        result=rdcOperationRanges(chunk,resource(id),{&texture,1});
+        QCOMPARE(result.at("status"),Json("captured"));
+        QCOMPARE(result.at("ranges")[0].at("first_layer"),Json(1));
+        QCOMPARE(result.at("ranges")[0].at("layer_count"),Json(2));
+        QCOMPARE(result.at("ranges")[0].at("plane"),Json(0));
+        layers->data.basic.u=4;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{&texture,1}).at("status"),Json("unavailable"));
+        dimension->data.basic.u=8; // D3D12_UAV_DIMENSION_TEXTURE3D
+        auto volume=node(*view,"Texture3D");
+        integer(*volume,"MipSlice",1); integer(*volume,"FirstWSlice",1);
+        auto depth=integer(*volume,"WSize",UINT32_MAX);
+        texture.dimension=3; texture.depth=8;
+        result=rdcOperationRanges(chunk,resource(id),{&texture,1});
+        QCOMPARE(result.at("status"),Json("captured"));
+        QCOMPARE(result.at("ranges")[0].at("depth_slice_count"),Json(3));
+        depth->data.basic.u=4;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{&texture,1}).at("status"),Json("unavailable"));
+    }
     void bufferOperationRanges() {
         SDObject chunk("ID3D12GraphicsCommandList::CopyBufferRegion"_lit,"chunk"_lit);
         const auto integer=[&](const char *name,uint64_t value) {

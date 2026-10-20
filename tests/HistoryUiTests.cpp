@@ -224,6 +224,42 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/default-resource-history.json"),resource);
         }
     }
+    void uavClearResourceHistory() {
+        const auto path=qEnvironmentVariable("FLORA_UAV_CLEAR_HISTORY");
+        if (path.isEmpty()) QSKIP("Set the BF1 shadow UAV resource history report");
+        const auto report=read(path);
+        ResourceHistoryView view;
+        view.setContext("bf1:uav-clear",35772,300425,8697204528ULL);
+        QVERIFY(view.finish(view.requestId(),report));
+        auto rows=view.findChild<QTreeWidget *>("resourceHistoryRows");
+        bool found{};
+        for (size_t i=0; i<report.at("resource_history").size(); ++i) {
+            const auto &row=report.at("resource_history")[i];
+            if (row.value("execution",Json()) != "35703") continue;
+            QCOMPARE(row.at("evidence"),Json("recorded_operation"));
+            QCOMPARE(row.at("content_change"),Json("not_measured"));
+            const auto &operation=row.at("operation_ranges");
+            QCOMPARE(operation.at("status"),Json("captured"));
+            const auto &range=operation.at("ranges")[0];
+            QCOMPARE(range.at("kind"),Json("buffer_view"));
+            QCOMPARE(range.at("first_element"),Json("0"));
+            QCOMPARE(range.at("element_count"),Json("64000"));
+            QCOMPARE(range.at("format"),Json(41));
+            QCOMPARE(range.at("rectangles"),Json::array({{{"left",0},{"top",0},{"right",4700},{"bottom",1}}}));
+            QVERIFY(rows->topLevelItem(int(i))->text(4).contains("UAV elements [0, 64000)"));
+            QVERIFY(rows->topLevelItem(int(i))->text(4).contains("Clear rectangle"));
+            rows->setCurrentItem(rows->topLevelItem(int(i)));
+            QSignalSpy jump(&view,&ResourceHistoryView::eventRequested);
+            action(view,"locateResourceHistoryEvent")->trigger();
+            QCOMPARE(jump.count(),1); QCOMPARE(jump[0][0].toULongLong(),35703ULL);
+            found=true;
+        }
+        QVERIFY(found);
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/uav-clear-resource-history.json");
+            QCOMPARE(read(output_ + "/uav-clear-resource-history.json"),report);
+        }
+    }
     void resourceOperationRanges() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the resource operation range evidence directory");

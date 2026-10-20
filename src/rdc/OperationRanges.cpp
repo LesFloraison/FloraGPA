@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <bit>
 #include <stdexcept>
+#define NOMINMAX
+#include <d3d12.h>
 namespace flora {
 namespace {
 using Json = nlohmann::json;
@@ -42,6 +44,80 @@ Json region(const SDObject &object,bool rect) {
     }
     return result;
 }
+Json uavClearRange(const SDObject &chunk, uint64_t wanted, std::span<const TextureDescription> textures) {
+    const auto &target=child(chunk,"ViewCPUHandle"), &view=child(target,"Descriptor");
+    if (number(chunk,"pResource") != wanted || number(target,"Resource") != wanted)
+        throw std::runtime_error("UAV Clear resource and CPU descriptor do not match the queried resource");
+    Json range{{"view_definition","captured_cpu_descriptor"},{"format",number(view,"Format")},
+        {"rectangles",Json::array()}};
+    const auto count=number(chunk,"NumRects");
+    if (count > 4096) throw std::runtime_error("UAV Clear exceeds the 4096-rectangle analysis limit");
+    range["whole_view"]=count == 0;
+    if (count) {
+        const auto &rects=child(chunk,"pRects");
+        if (rects.type.basetype != SDBasic::Array || rects.NumChildren() != count)
+            throw std::runtime_error("Truncated or inconsistent UAV Clear rectangles");
+        for (size_t i=0; i<count; ++i) {
+            const auto *rect=rects.GetChild(i);
+            if (!rect) throw std::runtime_error("Missing UAV Clear rectangle");
+            auto bounds=region(*rect,true);
+            if (bounds.is_null() || bounds["left"].get<int64_t>() > bounds["right"].get<int64_t>() ||
+                bounds["top"].get<int64_t>() > bounds["bottom"].get<int64_t>())
+                throw std::runtime_error("Invalid UAV Clear rectangle");
+            range["rectangles"].push_back(std::move(bounds));
+        }
+    }
+    const auto dimension=number(view,"ViewDimension");
+    if (dimension == D3D12_UAV_DIMENSION_BUFFER) {
+        const auto &buffer=child(view,"Buffer");
+        const auto first=number(buffer,"FirstElement"), elements=number(buffer,"NumElements");
+        if (!elements || elements > UINT32_MAX || elements > UINT64_MAX-first)
+            throw std::runtime_error("Invalid UAV buffer element range");
+        range.update({{"kind","buffer_view"},{"first_element",std::to_string(first)},
+            {"element_count",std::to_string(elements)},{"end_element",std::to_string(first+elements)},
+            {"structure_byte_stride",number(buffer,"StructureByteStride")},{"flags",number(buffer,"Flags")}});
+        // Keep element and rectangle coordinates as recorded; typed, raw and
+        // structured views do not share a universal byte-size conversion.
+        return range;
+    }
+    const auto texture=std::find_if(textures.begin(),textures.end(),[&](const auto &t) {
+        return std::bit_cast<uint64_t>(t.resourceId) == wanted;
+    });
+    if (texture == textures.end()) throw std::runtime_error("UAV Clear texture metadata is unavailable");
+    const char *field{};
+    uint32_t expectedDimension{};
+    bool array=false, volume=false;
+    switch (dimension) {
+    case D3D12_UAV_DIMENSION_TEXTURE1D: field="Texture1D"; expectedDimension=1; break;
+    case D3D12_UAV_DIMENSION_TEXTURE1DARRAY: field="Texture1DArray"; expectedDimension=1; array=true; break;
+    case D3D12_UAV_DIMENSION_TEXTURE2D: field="Texture2D"; expectedDimension=2; break;
+    case D3D12_UAV_DIMENSION_TEXTURE2DARRAY: field="Texture2DArray"; expectedDimension=2; array=true; break;
+    case D3D12_UAV_DIMENSION_TEXTURE3D: field="Texture3D"; expectedDimension=3; volume=true; break;
+    default: throw std::runtime_error("UAV Clear requires an explicit supported view descriptor");
+    }
+    if (texture->dimension != expectedDimension || texture->msSamp > 1)
+        throw std::runtime_error("UAV Clear descriptor dimension does not match the texture");
+    const auto &selected=child(view,field);
+    const auto mip=number(selected,"MipSlice");
+    if (mip >= texture->mips || mip >= 32) throw std::runtime_error("UAV Clear mip exceeds the texture");
+    range["mip"]=mip;
+    if (volume) {
+        const auto first=number(selected,"FirstWSlice"), requested=number(selected,"WSize");
+        const uint64_t depth=std::max(1U,texture->depth >> mip);
+        const auto layers=requested == UINT32_MAX && first < depth ? depth-first : requested;
+        if (first >= depth || !layers || layers > depth-first)
+            throw std::runtime_error("UAV Clear depth range exceeds the texture");
+        range.update({{"kind","texture_volume_view"},{"first_depth_slice",first},{"depth_slice_count",layers}});
+    } else {
+        const auto first=array ? number(selected,"FirstArraySlice") : 0;
+        const auto layers=array ? number(selected,"ArraySize") : 1;
+        if (first >= texture->arraysize || !layers || layers > texture->arraysize-first)
+            throw std::runtime_error("UAV Clear array range exceeds the texture");
+        range.update({{"kind","texture_view"},{"first_layer",first},{"layer_count",layers}});
+        if (expectedDimension == 2) range["plane"]=number(selected,"PlaneSlice");
+    }
+    return range;
+}
 }
 Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<const TextureDescription> textures) {
     const auto wanted=std::bit_cast<uint64_t>(resource);
@@ -68,7 +144,11 @@ Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<cons
             }
             return range;
         };
-        if (name.ends_with("::CopyBufferRegion")) {
+        if (name.ends_with("::ClearUnorderedAccessViewFloat") || name.ends_with("::ClearUnorderedAccessViewUint")) {
+            append(wanted,"destination",uavClearRange(chunk,wanted,textures));
+            result["scope"]="Captured CPU UAV descriptor and Clear rectangles, not measured changes. "
+                "Buffer coordinates retain element units. GPU descriptor agreement and execution ordering are not inferred.";
+        } else if (name.ends_with("::CopyBufferRegion")) {
             const auto bytes=number(chunk,"NumBytes");
             for (bool destination : {false,true}) {
                 const auto offset=number(chunk,destination ? "DstOffset" : "SrcOffset");
