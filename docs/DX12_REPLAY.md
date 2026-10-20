@@ -10220,11 +10220,90 @@ execution, modified histories/debugging, or full-frame equivalence.
 The allocator's previously observed scheduling-dependent task count remains
 an explicit limitation.
 
+### Observe the modified indirect boundary and identify experiment history
+
+A fresh native capture through Hellblade2 execution **17074** includes the
+counter override above. It is **2,353,566,968 bytes**, SHA256
+`e9a97f62b24122e1836667f5b83367e54e3f3b12627534962ce2d232f5506ba5`.
+Its experiment cursor is **1**, document SHA256
+`7cda6e44774356c8885027c8447085b6274db7e5e650b8a5ca36e4d558e0eb18`;
+the capture directory identity is unchanged. Native capture/readback completed
+with SDK **616** and zero validation errors.
+
+Pipeline inspection maps execution **17074 / source 586459** to RDC **25827**,
+API **25826**, submission **594766**, list ordinal **1**. Both the loading-time
+index and the observed argument buffer contain **(3, 3, 0)**. The pipeline
+retains the original `FixupBordersAndGenerateMipsCS` bytecode digest and reports
+`has_workgroups: false`.
+
+The bounded native observation probe now accepts `--second-event` for an
+explicit event pair, only with `--readback --repeat-only` and without an
+intervening event. Such reports use `event_pair_equal`, not `repeat_equal`,
+and never issue Pixel History. This separates event-boundary evidence from
+the existing repeated-selection diagnostic.
+
+In one controller, readbacks at marker **25825** before the indirect call
+and dispatch **25827** after it compare exactly:
+
+- all **21,233,664 bytes** of atlas creation **537892**, also equal to the
+  native capture's raw GPU readback; SHA256
+  `afeba186313507d2b7480b0e68555fe23d6a734614a2215d45a6f6c4db821958`;
+- all **65,532 bytes** of argument buffer **562234**, whose first command
+  remains **(3, 3, 0)**;
+- the four-byte counter **570577**, which remains zero.
+
+A Shader Debug request for group/thread **(0,0,0)** is rejected before tracing.
+The saved prepared arguments confirm **(3,3,0)**. The error now explicitly
+states that there are zero workgroups and no compute invocation executed;
+it does not return an empty successful trace. The earlier generic
+out-of-bounds rejection is retained as `hellblade-zero-indirect-debug1`;
+the clarified behavior is verified in `hellblade-zero-indirect-debug2`.
+
+Resource History initially reported the overlay's two barriers and copy as
+three unknown replay operations. The DX12 event index now recognizes this
+helper's separate marker, keeps decimal patch/anchor identities, and records
+`mapping_status: replay_auxiliary`, `auxiliary_kind: resource_override`,
+`execution: null`, `selectable: false`. The original allocator and later
+consumer retain their original identities. Real helper events **25544,
+25545, 25546** are Barrier / CopyDst / Barrier after execution **16988** on
+queue **2131165364544**, submission **594751**. The CopyDst range is exactly
+**[0,4)**. History still labels content changes as unmeasured.
+
+The workspace displays these rows as **Experiment after 16988**, disables
+original-execution navigation for them, exports the unchanged report, and
+rejects both forged original-execution attribution and stale results after
+an experiment context change. Focused event-mapping tests cover 64-bit
+identities, malformed helper markers, original DX12 mappings and DX11 command
+provenance. The real-report UI check passes.
+
+One native selected-event measurement completed with zero validation errors
+and a queue-local duration of **4.128 microseconds**. Its pipeline statistics
+are explicitly absent because this is a Compute list. D3D12 pipeline-statistics
+queries support Direct lists only
+([Microsoft query rules](https://learn.microsoft.com/en-us/windows/win32/direct3d12/queries)).
+This duration is not used as evidence of invocation count or performance gain.
+No second timing run was added to infer missing statistics.
+
+Evidence: `hellblade-zero-indirect-capture1`, `hellblade-zero-indirect-pipeline1`,
+`hellblade-zero-counter-history{1,2}`, `hellblade-zero-indirect-boundaries1.json`
+and six raw readbacks, `hellblade-zero-indirect-debug{1,2}`,
+`hellblade-zero-indirect-statistics1`, `resource-override-provenance1.txt`,
+`resource-override-dx11-provenance1.txt`, `resource-override-history-ui1.txt`,
+`check-zero-indirect-evidence1.py`, and `zero-indirect-evidence1.json`.
+Five native/analysis module snapshots contain no GPA/Python dependency.
+Builds: `build-resource-override-history1.log`,
+`build-repeat-selection-event-pair1.log`, `build-zero-indirect-debug-reason1.log`.
+
+These results verify the selected modified zero-dispatch boundary, its exact
+resource preservation, and explicit experiment-operation history. They do
+not establish full-frame fidelity, measured invocation counts, complete
+resource histories, or a nonzero modified Shader Debug trace.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
-| Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace import/save/reload/undo/redo and stale CS request rejection verified; downstream indirect consumption and modified analysis unfinished |
+| Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace import/save/reload/undo/redo and stale CS request rejection verified; fresh downstream zero-dispatch capture, exact before/after atlas preservation, explicit auxiliary-operation history and zero-invocation debug rejection verified; nonzero modified debugging and complete histories unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | CLI terminal marker and final CopyResource mapping verified; initial selected texel matches native raw storage but changes after history replay, correctly reported partial; pixel fidelity and full history unfinished |

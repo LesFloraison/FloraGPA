@@ -1,7 +1,8 @@
 // Manual diagnosis of a selected texel changing during Hellblade2 history.
 // MSVC C++20, include src and third_party; link bcrypt.lib. No RenderDoc import library.
 // Arguments: renderdoc.dll, dxcompiler.dll, capture.rdc, terminal RDC event,
-// x, y, new report.json, [--readback] [--repeat-only] [--between-event event] resource creation records...
+// x, y, new report.json, [--readback] [--repeat-only] [--between-event event]
+// [--second-event event] resource creation records...
 // Two forced selections in one controller; only if both agree, query history
 // on the first resource. This is bounded fault diagnosis, not a soak test.
 // Textures inspect mip/layer/sample 0. Buffers require --readback and are
@@ -112,7 +113,7 @@ int wmain(int argc, wchar_t **argv) try {
     const auto textures = controller->GetTextures();
     const auto buffers = controller->GetBuffers();
     bool readback = false, repeatOnly = false, rdcIds = false;
-    uint32_t betweenEvent{};
+    uint32_t betweenEvent{}, secondEvent{};
     int firstCreation = 8;
     while (firstCreation < argc) {
         if (std::wstring(argv[firstCreation]) == L"--readback" && !readback) {
@@ -129,12 +130,19 @@ int wmain(int argc, wchar_t **argv) try {
             betweenEvent = number(argv[firstCreation + 1]);
             if (!betweenEvent) throw std::runtime_error("Between-event must be nonzero");
             firstCreation += 2;
+        } else if (std::wstring(argv[firstCreation]) == L"--second-event" && !secondEvent &&
+                   firstCreation + 1 < argc) {
+            secondEvent = number(argv[firstCreation + 1]);
+            if (!secondEvent) throw std::runtime_error("Second event must be nonzero");
+            firstCreation += 2;
         } else break;
     }
     if (argc <= firstCreation || argc - firstCreation > 16)
         throw std::runtime_error("Select one to sixteen resources");
     if (rdcIds && (!readback || !repeatOnly))
         throw std::runtime_error("RenderDoc-ID observations require --readback --repeat-only");
+    if (secondEvent && (!readback || !repeatOnly || betweenEvent))
+        throw std::runtime_error("Event-pair observations require --readback --repeat-only without --between-event");
     const char *identityKey = rdcIds ? "rdc_id" : "creation";
     std::vector<ResourceId> selected;
     std::vector<std::string> fileLabels;
@@ -246,6 +254,10 @@ int wmain(int argc, wchar_t **argv) try {
         {"repeat_only", repeatOnly},
         {"resource_namespace", rdcIds ? "rdc_id" : "native_creation"},
         {"between_event", betweenEvent ? Json(betweenEvent) : Json()}};
+    if (secondEvent) {
+        report["second_event"] = secondEvent;
+        report["scope"] = "Two explicit event boundaries in one controller; exact storage comparison, no repeated-state or full-frame fidelity claim.";
+    }
     const auto &structured = controller->GetStructuredFile();
     std::function<void(const rdcarray<ActionDescription> &)> inspectActions;
     inspectActions = [&](const auto &actions) {
@@ -275,14 +287,14 @@ int wmain(int argc, wchar_t **argv) try {
         controller->SetFrameEvent(betweenEvent, true);
         check(controller->GetFatalErrorStatus());
     }
-    controller->SetFrameEvent(event, true);
+    controller->SetFrameEvent(secondEvent ? secondEvent : event, true);
     check(controller->GetFatalErrorStatus());
     report["second"] = observe("second");
     check(controller->GetFatalErrorStatus());
-    report["repeat_equal"] = report["first"] == report["second"];
+    report[secondEvent ? "event_pair_equal" : "repeat_equal"] = report["first"] == report["second"];
     // An explicit round trip tests restoration only; do not add unrelated
     // PixelHistory work at an initialization boundary.
-    if (report["repeat_equal"] == true && !betweenEvent && !repeatOnly && !bufferLengths.front()) {
+    if (!secondEvent && report["repeat_equal"] == true && !betweenEvent && !repeatOnly && !bufferLengths.front()) {
         report["history_requested"] = true;
         const auto modifications = controller->PixelHistory(selected.front(), x, y, Subresource(0, 0, 0), CompType::Typeless);
         report["history_events"] = modifications.size();

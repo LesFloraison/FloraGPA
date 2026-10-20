@@ -195,6 +195,39 @@ class RdcTests : public QObject {
             indexDx12RdcEvents({node(1, marker("18446744073709551616", "19", "30", "DrawInstanced"), 0x40)},
                                Json::object()));
     }
+    void dx12ResourceOverrideProvenance() {
+        const auto marker = "Flora DX12 execution 9007199254740993 record 19 submission 30 "
+            "queue 18446744073709551615 list 9007199254740994 generation 2 ordinal 0: ID3D12GraphicsCommandListDispatch";
+        const auto helper = "Flora DX12 resource experiment 0 after execution 9007199254740993";
+        const auto roots = Json::array({
+            node(1, marker, 0x40, {node(2, "", 4)}),
+            node(3, helper, 0x40, {
+                node(5, "CopyBufferRegion", 0x400, Json::array(), {{{"eventId", 4}}, {{"eventId", 5}}}),
+                node(7, "", 0x80, Json::array(), {{{"eventId", 6}}})}),
+            node(9, "", 0x400, Json::array(), {{{"eventId", 9}}})});
+        const Json native{{"4", {{"name", "ID3D12GraphicsCommandList::ResourceBarrier"}}},
+                          {"5", {{"name", "ID3D12GraphicsCommandList::CopyBufferRegion"}}},
+                          {"6", {{"name", "ID3D12GraphicsCommandList::ResourceBarrier"}}},
+                          {"9", {{"name", "ID3D12GraphicsCommandList::CopyBufferRegion"}}}};
+        const auto result = indexDx12RdcEvents(roots, native);
+        QCOMPARE(result.at("execution_map"), Json({{"9007199254740993", 2}}));
+        for (const auto id : {4, 5, 6}) {
+            const auto p = rdcProvenance(id, result.at("reverse"));
+            QCOMPARE(p.at("mapping_status"), Json("replay_auxiliary"));
+            QCOMPARE(p.at("auxiliary_kind"), Json("resource_override"));
+            QCOMPARE(p.at("patch_ordinal"), Json("0"));
+            QCOMPARE(p.at("after_execution"), Json("9007199254740993"));
+            QCOMPARE(p.at("queue"), Json("18446744073709551615"));
+            QCOMPARE(p.at("anchor").at("execution"), Json("9007199254740993"));
+            QVERIFY(p.at("execution").is_null()); QVERIFY(!p.at("selectable").get<bool>());
+        }
+        QCOMPARE(rdcProvenance(2, result.at("reverse")).at("execution"), Json("9007199254740993"));
+        QCOMPARE(rdcProvenance(9, result.at("reverse")).at("mapping_status"), Json("unmapped_replay_action"));
+        for (const auto text : {"Flora DX12 resource experiment 18446744073709551616 after execution 1",
+                                "Flora DX12 resource experiment 0 after execution 0",
+                                "Flora DX12 resource experiment 01 after execution 1"})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, indexDx12RdcEvents({node(1, text, 0x40)}, Json::object()));
+    }
     void dx12IndirectActions() {
         const auto marker = [](unsigned execution) {
             return "Flora DX12 execution " + std::to_string(execution) +

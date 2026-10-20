@@ -255,6 +255,12 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         throw std::runtime_error("Isolated resource history must retain incomplete frame status");
     const auto &uses = result.at("resource_history");
     for (const auto &row : uses) {
+        if (row.value("mapping_status", "") == "replay_auxiliary") {
+            if (row.value("selectable", false) || !row.at("execution").is_null() ||
+                row.value("auxiliary_kind", "") != "resource_override" || !row.at("patch_ordinal").is_string())
+                throw std::runtime_error("Invalid experiment resource-history provenance");
+            (void)identity(row.at("after_execution"));
+        }
         (void)transferSourceCreation(row);
         if (row.contains("query_resolve_part") || row.contains("query_resolve_part_count")) {
             if (!isolateMissingQueries_ || row.value("name","") != "ID3D12GraphicsCommandListResolveQueryData" ||
@@ -298,6 +304,12 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         const auto &row = uses[i];
         auto item = new QTreeWidgetItem(rows_, {field(row, "execution"), field(row, "usage_name"),
                                                 field(row, "evidence"), field(row, "queue")});
+        if (row.value("mapping_status", "") == "replay_auxiliary" &&
+            row.value("auxiliary_kind", "") == "resource_override") {
+            item->setText(0, "Experiment after " + field(row, "after_execution"));
+            item->setToolTip(0, "Buffer override " + field(row, "patch_ordinal") +
+                ". This is an experiment operation, not an original execution.");
+        }
         if (row.contains("indirect_action")) item->setText(0, item->text(0) + " · action " + field(row, "indirect_action"));
         if (row.contains("query_resolve_part"))
             item->setText(0,item->text(0) + QString(" · resolve part %1/%2")

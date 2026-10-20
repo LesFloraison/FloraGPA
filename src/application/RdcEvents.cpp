@@ -271,6 +271,59 @@ Json indexDx12RdcEvents(const Json &roots, const Json &nativeEvents) {
                 selected[execution] = *eids.begin();
         }
     }
+    // Experiment helpers are sibling markers, never original executions.
+    // Keep their API events in the reverse index with separate provenance so
+    // histories can explain copies/barriers without attributing them to a Draw.
+    static const std::regex resourceOverride(
+        "^Flora DX12 resource experiment ([0-9]+) after execution ([0-9]+)$");
+    std::function<void(const Json &, Json)> auxiliary;
+    auxiliary = [&](const Json &nodes, Json scope) {
+        for (const auto &action : nodes) {
+            auto current = scope;
+            const auto name = action.at("customName").get<std::string>();
+            if (name.starts_with("Flora DX12 ")) current = nullptr;
+            std::smatch match;
+            if ((number(action.at("flags")) & push) && std::regex_match(name, match, resourceOverride)) {
+                std::string ids[2];
+                for (size_t i = 0; i < 2; ++i) {
+                    ids[i] = match[i + 1].str(); uint64_t value{};
+                    const auto parsed = std::from_chars(ids[i].data(), ids[i].data() + ids[i].size(), value);
+                    if (parsed.ec != std::errc{} || parsed.ptr != ids[i].data() + ids[i].size() ||
+                        std::to_string(value) != ids[i] || (i == 1 && !value))
+                        throw std::runtime_error("Invalid DX12 resource experiment marker identity");
+                }
+                current = {{"backend", "dx12"}, {"mapping_status", "replay_auxiliary"},
+                    {"auxiliary_kind", "resource_override"}, {"patch_ordinal", ids[0]},
+                    {"after_execution", ids[1]}, {"marker_eid", number(action.at("eventId"))},
+                    {"execution", nullptr}, {"gpa_event", nullptr}, {"selectable", false},
+                    {"scope", "Experiment resource override after the named execution; not an original captured command"}};
+                const auto anchor = commands.find(ids[1]);
+                if (anchor != commands.end() && anchor->at("status") != "duplicate_markers" &&
+                    number(anchor->at("marker_eids")[0]) < number(action.at("eventId"))) {
+                    current["anchor"] = *anchor;
+                    current["queue"] = anchor->at("queue");
+                    current["submission"] = anchor->at("submission");
+                }
+            }
+            if (!current.is_null()) {
+                for (const auto &event : action.value("events", Json::array())) {
+                    const auto id = number(event.at("eventId"));
+                    const auto native = nativeEvents.find(std::to_string(id));
+                    if (id <= number(current.at("marker_eid")) || native == nativeEvents.end()) continue;
+                    const auto methodName = native->at("name").get<std::string>();
+                    if (!methodName.ends_with("::CopyBufferRegion") && !methodName.ends_with("::ResourceBarrier"))
+                        continue;
+                    auto provenance = current;
+                    provenance["name"] = methodName;
+                    if (reverse.contains(std::to_string(id)) && reverse.at(std::to_string(id)) != provenance)
+                        throw std::runtime_error("Experiment helper overlaps another DX12 scope");
+                    reverse[std::to_string(id)] = std::move(provenance);
+                }
+            }
+            auxiliary(action.at("children"), std::move(current));
+        }
+    };
+    auxiliary(roots, nullptr);
     return {{"backend", "dx12"},
             {"actions", actions},
             {"execution_map", selected},
@@ -311,6 +364,8 @@ Json selectDx12RdcExecution(const Json &mapping, const std::string &execution, c
 }
 Json rdcProvenance(uint32_t event, const Json &reverse) {
     const auto found = reverse.find(std::to_string(event));
+    if (found != reverse.end() && found->value("mapping_status", "") == "replay_auxiliary")
+        return *found;
     if (found != reverse.end() && found->contains("execution")) {
         auto result = *found;
         result["mapping_status"] = "mapped";

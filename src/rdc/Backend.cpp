@@ -2039,6 +2039,9 @@ Json runRdcJob(const Json &job) {
                     throw std::runtime_error("Cannot save indirect debug input evidence");
                 if (session.computePrepared && inputs.value("status", "") == "read") {
                     preparedGroups = coordinates(inputs, "groups");
+                    if (inputs.at("action_present").get<bool>() &&
+                        (!(*preparedGroups)[0] || !(*preparedGroups)[1] || !(*preparedGroups)[2]))
+                        throw std::runtime_error("Prepared indirect Dispatch has zero workgroups; no compute invocation executed; inspect debug_indirect_inputs.json");
                     const auto group = coordinates(job, "group");
                     if (!inputs.at("action_present").get<bool>() || group[0] >= inputs.at("groups")[0].get<uint32_t>() ||
                         group[1] >= inputs.at("groups")[1].get<uint32_t>() || group[2] >= inputs.at("groups")[2].get<uint32_t>())
@@ -2179,7 +2182,7 @@ Json runRdcJob(const Json &job) {
         Json rows = Json::array(), initialization = Json::array();
         const auto historyTextures = controller.GetTextures();
         size_t capturedRanges{}, rangeGaps{};
-        size_t unmapped = 0;
+        size_t unmapped = 0, auxiliaryUses = 0;
         for (const auto &usage : controller.GetUsage(resource)) {
             if (usage.eventId > eid)
                 continue;
@@ -2212,7 +2215,9 @@ Json runRdcJob(const Json &job) {
             if (actionDetail != events.actionDetails.end() &&
                 (actionDetail->second->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
                 row["indexed_action"] = flora::rdcExecutedAction(*actionDetail->second);
-            if (dx12 && !row.value("selectable", false))
+            if (dx12 && row.value("mapping_status", "") == "replay_auxiliary")
+                ++auxiliaryUses;
+            else if (dx12 && !row.value("selectable", false))
                 ++unmapped;
             rows.push_back(std::move(row));
         }
@@ -2244,6 +2249,7 @@ Json runRdcJob(const Json &job) {
              {"history_scope",
               {{"through_event", eid},
                {"unmapped_uses", unmapped},
+               {"replay_auxiliary_uses", auxiliaryUses},
                {"content_changes_measured", false},
                {"captured_operation_ranges", capturedRanges},
                {"operation_range_gaps", rangeGaps},

@@ -1547,6 +1547,46 @@ class HistoryUiTests : public QObject {
         QVERIFY(summary->text().contains("Selected texel unchanged"));
         QVERIFY(summary->text().contains("completeness are not validated"));
     }
+    void dx12ResourceOverrideHistory() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_OVERRIDE_HISTORY");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 counter override history report");
+        const auto report = read(path);
+        ResourceHistoryView view; view.setContext("counter-override", 17074, 570577, 2149342527328ULL);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        size_t helpers{}, copies{};
+        QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
+        for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
+            const auto &row = report.at("resource_history")[i];
+            if (row.value("mapping_status", "") != "replay_auxiliary") continue;
+            ++helpers;
+            QVERIFY(row.at("execution").is_null());
+            QCOMPARE(row.at("after_execution"), Json("16988"));
+            QCOMPARE(row.at("patch_ordinal"), Json("0"));
+            auto item = rows->topLevelItem(int(i));
+            QCOMPARE(item->text(0), QString("Experiment after 16988"));
+            rows->setCurrentItem(item);
+            QVERIFY(!action(view, "locateResourceHistoryEvent")->isEnabled());
+            QVERIFY(jump.empty());
+            if (row.at("usage_name") == "CopyDst") {
+                ++copies;
+                QVERIFY(item->text(4).contains("destination: bytes [0, 4)"));
+                QCOMPARE(row.at("content_change"), Json("not_measured"));
+            }
+        }
+        QCOMPARE(helpers, size_t(3)); QCOMPARE(copies, size_t(1));
+        QCOMPARE(report.at("history_scope").at("unmapped_uses"), Json(0));
+        QCOMPARE(report.at("history_scope").at("replay_auxiliary_uses"), Json(3));
+        QTemporaryDir temp; const auto exported = temp.path() + "/history.json";
+        view.exportResult(exported); QCOMPARE(read(exported), report);
+        auto invalid = report;
+        for (auto &row : invalid["resource_history"])
+            if (row.value("mapping_status", "") == "replay_auxiliary") row["execution"] = "16988";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), invalid));
+        const auto old = view.requestId();
+        view.setContext("counter-override-undone", 17074, 570577, 2149342527328ULL);
+        QVERIFY(!view.finish(old, report));
+    }
     void indexedComputeResourceUses() {
         const auto path = qEnvironmentVariable("FLORA_DX12_INDEXED_HISTORY");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 mip-1 indexed history report");
