@@ -17,7 +17,8 @@ class ReplayMeshView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit ReplayMeshView(QWidget *parent = nullptr);
-    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool meshDispatch = false);
+    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool meshDispatch = false,
+                    bool isolateMissingQueries = false);
     void setWorkerBusy(bool busy);
     void selectIndirectAction(qint64 ordinal);
     QString backendPath() const { return backendPath_; }
@@ -44,6 +45,7 @@ class ReplayMeshView final : public QWidget {
     bool busy_{};
     bool dx12_{};
     bool meshDispatch_{};
+    bool isolateMissingQueries_{};
     Json result_;
     QMap<QString, QByteArray> files_;
     QAction *read_, *cancel_, *export_, *backend_, *debugVertex_;

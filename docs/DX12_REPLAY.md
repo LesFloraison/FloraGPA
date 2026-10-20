@@ -7978,6 +7978,58 @@ Evidence: ignored `talos-query-pixel-ui3/{result,recapture}.json`,
 Full histories, remaining subresources/test reasons, isolated geometry and
 performance/experiments, and complete portable acceptance remain unfinished.
 
+### Geometry in the incomplete query-isolated workspace
+
+Explicit DX12 `postmesh` requests now carry query isolation through preparation,
+worker dispatch, capture-policy validation and Replay Mesh. The execution
+identity must be a nonzero decimal string; query-output resource selectors remain
+rejected. The workspace retains the mode in its capture cache and rejects
+results missing the embedded policy, `frame_complete=false`, `partial=true`
+or `mesh_scope.query_outputs_incomplete=true`. Changing modes clears the mesh and
+invalidates pending results.
+
+Both input attributes and post-shader data use the existing geometry decoder,
+table, preview and vertex-invocation mapping. The view labels incomplete replay.
+OBJ/CSV and raw input vertex/index exports now include an adjacent `.json`
+provenance file in isolation mode, with the report, query policy, exported byte
+length and SHA-256. A failed provenance write prevents writing the data file.
+Strict-mode/DX11 exports retain their existing behavior.
+
+The actual Talos workspace check selects execution **19408**, instance **0** and
+reads **VSOut**, then **VSIn attribute 0**, reusing the identical native capture.
+Both return **552** vertex rows, **828** indices and **276** triangles. The
+post-VS stride is **60** bytes; the original input slot-0 stride is **12** bytes
+and its float3 TEXCOORD0 data is displayed without assuming a position semantic.
+Displayed vertex **1** maps to Draw vertex ordinal **0** in both stages. Its
+post-VS position words are exactly
+**[3211705538,1059942408,1065353216,1065353216]**, matching the earlier selected
+GPU/VS trace comparison. Its three input words are
+**[0x42817852,0x432e27ae,0]**, and the exported 12-byte attribute matches the
+earlier debugger input snapshot. The first original 16-bit index is **1**.
+These are selected-vertex/input checks, not validation of every vertex or the
+original full frame.
+
+The raw input exports contain **6,624** vertex bytes and **1,656** index bytes.
+Their recorded SHA-256 values are respectively
+`ec57a35bb880052b8365f260a379a0c76cb1ba43c6e9abb638b2c86698006138` and
+`144005f18006ce1325e3056d47b1b978b4bcc5d63c645aba65373efc631f7f14`.
+OBJ/CSV exports for both stages and both raw input exports retain matching
+sidecar hashes and incomplete policy. Selecting row 1 in either view prepares VS
+execution **19408**, ordinal **0**, instance **0** in query-isolated mode.
+Missing policy, incorrect completeness flags and old results after switching
+back to strict mode are rejected.
+
+Build **461** passes. The real workspace/selection checks pass **4** tests in
+**16,965 ms**; policy **3**, job preparation **4** and capability **3** pass.
+The existing strict DX12 geometry/indirect-selection report check passes **3**
+tests in **115 ms**, without another GPU replay. Counts include setup/cleanup.
+No RenderDoc patch, other-sample GPU replay or broad regression suite was added.
+Evidence: ignored `talos-query-mesh-ui1/{input,output}.json`, exported OBJ/CSV/raw
+data and their sidecars, `recapture.json`, `query-mesh-{ui1,policy1,job1,capability1,strict1}.txt`,
+and `build461.log`. Isolated GS/DS/MeshOut requests are connected but not newly
+sample-verified here; remaining stages, full geometry fidelity, performance,
+experiments and full portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -7989,7 +8041,7 @@ performance/experiments, and complete portable acceptance remain unfinished.
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; explicit workspace query-output isolation reaches original last execution 19410, exports marked incomplete storage and rejects unknown readbacks; historical values and full frame fidelity unfinished | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance, captured barrier details and real shadow-buffer UAV Clear range/navigation/export verified; full histories unfinished | Patched single-fragment D16 depths verified; two-layer modification verifies mapped fragments and separated-depth rejection/pass; selected D32 Equal Draw refresh preserves original depth bytes and aligns its mapped color-history boundary with native readback; query-isolated final-prefix resource usage, partial Resolve byte ranges/source navigation and policy rejection verified; isolated output pixel selection, three mapped color-history fragments, exact final texel boundary, filtered execution navigation and PS invocation handoff verified; exact D16 intermediate storage, other failure reasons and full histories unfinished | One mapped float pixel modification matches native before/after; LensSoftnessPS input has 11 mapped usage entries; final-color fragment query rejects changing replay as unverified; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; query-isolated final Draw VS stepping, breakpoint and Watch verified, with all four output semantics matching the selected GPU reference; selected isolated PS trace matches all four GPU output words, and a reproduced BGRA intermediate-history channel swap is corrected; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; query-isolated final Draw VS stepping, breakpoint and Watch verified, with all four output semantics matching the selected GPU reference; selected isolated PS trace matches all four GPU output words, and a reproduced BGRA intermediate-history channel swap is corrected; isolated VSIn/VSOut tables, selected vertex/input bytes, 276-triangle exports with provenance and VS invocation handoff verified; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; targeted VS shadow-factor experiment restores the full particle attachment to original GPA bytes and undo restores the native/barrier output; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; recovered original shadow buffer and a 12-vertex diagnostic shader correction account for all bytes at that boundary, while state-correct third-Draw and final-copy readbacks match the selected native results; original final-copy runs also vary at those 12 factors, and default full-frame fidelity remains unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
 | Full portable replay/analysis without GPA/Python | Packaged SDK-602-requested UAV Clear readback matches baseline; module snapshot verified; full acceptance unfinished | Packaged isolated native replay, fresh recapture and mapped Resource History verified with module snapshots; missing query values and full acceptance unfinished | Not verified |

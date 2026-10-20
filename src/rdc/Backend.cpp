@@ -1358,7 +1358,7 @@ Json runRdcJob(const Json &job) {
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
-        !((action == "pipeline" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
+        !((action == "pipeline" || action == "postmesh" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
         !((action == "resource-history" || action == "history") && job.contains("execution") && job.contains("resource_creation") &&
           !job.value("resource", Json()).is_null()))
         throw std::runtime_error("Unsupported query-isolated analysis or missing explicit DX12 selection");
@@ -1530,6 +1530,14 @@ Json runRdcJob(const Json &job) {
                       "correctness or that the validation layer was available."}};
         }
         if (dx12) {
+            if (!queryPolicy.is_null() && action == "postmesh") {
+                result["partial"] = true;
+                result["mesh_scope"] = {
+                    {"query_outputs_incomplete", true},
+                    {"warning", "Incomplete query-isolated replay: historical query values remain unavailable. "
+                                "Mesh data describes this replay's selected execution and instance; "
+                                "it does not establish complete original-frame fidelity."}};
+            }
             if (!queryPolicy.is_null() && debugging) {
                 result["partial"] = true;
                 result["debug_scope"]["query_outputs_incomplete"] = true;

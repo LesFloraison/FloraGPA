@@ -1748,12 +1748,14 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         selection.execution = 19408;
         QVERIFY(session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(session->capability(ReplayFeature::ShaderDebug,selection).supported());
+        QVERIFY(session->capability(ReplayFeature::Geometry,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported()); // Query buffer is not a texture.
         selection.resource = 35118;
         QVERIFY(session->capability(ReplayFeature::PixelHistory,selection).supported());
         selection.isolateMissingQueries = false;
         QVERIFY(!session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::ShaderDebug,selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::Geometry,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
     }
     void isolatedQueryWorkspaceReplay() {

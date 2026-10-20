@@ -7,9 +7,12 @@
 #include "application/ReplayMesh.h"
 #include <QAction>
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QLineEdit>
 #include <QLabel>
 #include <qfloat16.h>
@@ -21,6 +24,7 @@
 #include <QTemporaryDir>
 #include <QtTest>
 #include <bit>
+#include <string_view>
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
@@ -37,6 +41,129 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void isolatedQueryMeshWorkspace() {
+        try {
+            const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto output = qEnvironmentVariable("FLORA_QUERY_MESH_UI");
+            const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+            if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+                QSKIP("Set Talos captures, a new mesh output directory and the pinned RenderDoc library");
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("19408");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto view = window.findChild<ReplayMeshView *>();
+            QVERIFY(view);
+            view->setBackendPath(library, false);
+            QVERIFY(!action(*view, "replayMeshRead")->isEnabled());
+            auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation");
+            isolation->setChecked(true);
+            QVERIFY(action(*view, "replayMeshRead")->isEnabled());
+            auto stage = view->findChild<QComboBox *>("replayMeshStage");
+            auto table = view->findChild<QTableView *>("replayMeshPositions");
+            QString capture;
+            for (const bool input : {false, true}) {
+                stage->setCurrentIndex(stage->findData(input ? "VSIn" : "VSOut"));
+                const auto prefix = output + (input ? "/input" : "/output");
+                done.clear();
+                action(*view, "replayMeshRead")->trigger();
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 180000);
+                QVERIFY2(done.takeLast()[0].toBool(),
+                         qPrintable(view->findChild<QLabel *>("replayMeshSummary")->text()));
+                QVERIFY(!window.busy());
+                const auto result = view->result();
+                QCOMPARE(result.at("execution"), Json("19408"));
+                QCOMPARE(result.at("frame_complete"), Json(false));
+                QCOMPARE(result.at("partial"), Json(true));
+                QCOMPARE(result.at("mesh_scope").at("query_outputs_incomplete"), Json(true));
+                QCOMPARE(result.at("request_identity").at("missing_query_policy"),
+                         Json("isolate_readback_outputs"));
+                QCOMPARE(view->request().at("isolate_missing_queries"), Json(true));
+                QCOMPARE(result.at("index_count"), Json(828));
+                QVERIFY(result.at("vertex_count").get<size_t>() > 1);
+                QCOMPARE(table->model()->rowCount(), int(result.at("vertex_count").get<size_t>()));
+                QCOMPARE(table->model()->index(1, 0).data().toString(), QString("1"));
+                QVERIFY(view->findChild<QLabel *>("replayMeshSummary")->text().contains("Incomplete"));
+                const auto currentCapture = QString::fromStdString(result.at("capture").get<std::string>());
+                if (input)
+                    QCOMPARE(currentCapture, capture); // Stage changes reuse this exact capture/policy.
+                else {
+                    capture = currentCapture;
+                    QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"),
+                                        output + "/recapture.json"));
+                }
+                const uint32_t outputBits[]{3211705538U, 1059942408U, 1065353216U, 1065353216U};
+                const uint32_t inputBits[]{0x42817852U, 0x432e27aeU, 0U};
+                for (int c = 0; c < (input ? 3 : 4); ++c)
+                    QCOMPARE(
+                        std::bit_cast<uint32_t>(table->model()->index(1, c + 1).data().toString().toFloat()),
+                        input ? inputBits[c] : outputBits[c]);
+                view->exportResult(prefix + ".json");
+                QCOMPARE(read(prefix + ".json"), result);
+                for (const auto *extension : {".obj", ".csv", ".vbin", ".ibin"}) {
+                    if (!input &&
+                        (std::string_view(extension) == ".vbin" || std::string_view(extension) == ".ibin"))
+                        continue;
+                    const auto file = prefix + extension;
+                    view->exportResult(file);
+                    const auto bytes = readBytes(file), metadataBytes = readBytes(file + ".json");
+                    const auto metadata = Json::parse(metadataBytes.toStdString());
+                    QCOMPARE(metadata.at("frame_complete"), Json(false));
+                    QCOMPARE(metadata.at("query_isolation"), result.at("query_isolation"));
+                    QCOMPARE(metadata.at("exported_artifact").at("bytes"),
+                             Json(std::to_string(bytes.size())));
+                    QCOMPARE(metadata.at("exported_artifact").at("sha256"),
+                             Json(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256)
+                                      .toHex()
+                                      .toStdString()));
+                }
+                if (input) {
+                    QCOMPARE(readBytes(prefix + ".vbin").mid(12, 12),
+                             QByteArray::fromHex("52788142ae272e4300000000"));
+                    QCOMPARE(readBytes(prefix + ".ibin").left(2), QByteArray::fromHex("0100"));
+                }
+                for (const auto *key : {"frame_complete", "partial"}) {
+                    auto invalid = result;
+                    invalid[key] = !result.at(key).get<bool>();
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                             view->finish(view->requestId(), invalid, "missing"));
+                }
+                auto invalid = result;
+                invalid["query_isolation"] = nullptr;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         view->finish(view->requestId(), invalid, "missing"));
+                invalid = result;
+                invalid["mesh_scope"]["query_outputs_incomplete"] = false;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         view->finish(view->requestId(), invalid, "missing"));
+                table->selectRow(1);
+                QSignalSpy selected(view, &ReplayMeshView::vertexDebugRequested);
+                action(*view, "replayMeshDebugVertex")->trigger();
+                QCOMPARE(selected.size(), 1);
+                QCOMPARE(selected[0][1].toUInt(), 0U);
+                auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+                QVERIFY(debug);
+                QCOMPARE(debug->request().at("execution"), Json("19408"));
+                QCOMPARE(debug->request().at("vertex"), Json(0));
+                QCOMPARE(debug->request().at("isolate_missing_queries"), Json(true));
+            }
+            const auto result = view->result();
+            const auto old = view->requestId();
+            isolation->setChecked(false);
+            QCOMPARE(table->model()->rowCount(), 0);
+            QVERIFY(!view->finish(old, result, "missing"));
+            QVERIFY(!action(*view, "replayMeshRead")->isEnabled());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), result, "missing"));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void stripRestartGeometry() {
         const auto root = qEnvironmentVariable("FLORA_DX12_STRIP_RESTART");
         if (root.isEmpty()) QSKIP("Set the native strip-restart fixture reports directory");

@@ -9,6 +9,7 @@
 #include <QtTest>
 #include <cstdio>
 #include <limits>
+#include <string_view>
 #define NOMINMAX
 #include <Windows.h>
 using Json = nlohmann::json;
@@ -81,8 +82,25 @@ class RdcJobTests : public QObject {
         }
         auto missing=options; missing.erase("execution");
         QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",missing,"pipeline"));
-        for (const auto *action : {"postmesh","counters","buffer"})
+        for (const auto *action : {"counters","buffer"})
             QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",options,action));
+    }
+    void isolatedMeshPreparation() {
+        QTemporaryDir dir;
+        for (const auto *stage : {"VSIn", "VSOut", "GSOut", "MeshOut"}) {
+            Json options{{"isolate_missing_queries", true}, {"execution", "9007199254740993"}, {"stage", stage}};
+            if (std::string_view(stage) == "VSIn") options["attribute"] = 0;
+            const auto job = prepare(dir.path(), "success", options, "postmesh");
+            QCOMPARE(job.at("execution"), options.at("execution"));
+            QCOMPARE(job.at("stage"), options.at("stage"));
+            QCOMPARE(job.at("isolate_missing_queries"), Json(true));
+            for (const auto &bad : {Json(nullptr), Json(1), Json("0")}) {
+                auto invalid = options; invalid["execution"] = bad;
+                QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", invalid, "postmesh"));
+            }
+            options.erase("execution");
+            QVERIFY_THROWS_EXCEPTION(std::exception, prepare(dir.path(), "success", options, "postmesh"));
+        }
     }
     void isolatedShaderPreparation() {
         QTemporaryDir dir;

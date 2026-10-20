@@ -1751,8 +1751,14 @@ void MainWindow::updateCheckpointContext() {
         dx12Pipeline_->setContext(supported ? historyContextKey(true) : QString{}, selection_.execution.value_or(0),
                                   dx12 && selection_.isolateMissingQueries);
     }
-    if (replayMesh_)
-        replayMesh_->setContext((draw || meshDispatch) ? analysisKey : QString{}, selectedEvent_, dx12, meshDispatch);
+    if (replayMesh_) {
+        const auto meshKey = dx12 && selection_.isolateMissingQueries
+                                 ? (session_->capability(ReplayFeature::Geometry, selection_).supported()
+                                        ? historyContextKey(true) : QString{})
+                                 : analysisKey;
+        replayMesh_->setContext((draw || meshDispatch) ? meshKey : QString{}, selectedEvent_, dx12, meshDispatch,
+                                dx12 && selection_.isolateMissingQueries);
+    }
     const auto debugKey = dx12 ? (session_->capability(ReplayFeature::ShaderDebug,selection_).supported()
                                   ? historyContextKey(true) : QString{}) : analysisKey;
     for (size_t i = 0; i < replayDebug_.size(); ++i)
@@ -1824,8 +1830,8 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline &&
-        kind != RdcAnalysis::History) {
-        showError("Query-isolated analysis supports resource/pixel history, pipeline inspection and shader debugging in this workspace"); return;
+        kind != RdcAnalysis::History && kind != RdcAnalysis::Mesh) {
+        showError("Query-isolated analysis supports resource/pixel history, pipeline inspection, shader debugging and geometry in this workspace"); return;
     }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
@@ -1884,7 +1890,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
         historyKey_ =
-            historyContextKey(resourceHistory || pipeline || view || kind == RdcAnalysis::History) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2081,6 +2087,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             historyRequest_.is_object() &&
             ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
              (runningAnalysis_ == RdcAnalysis::History && historyRequest_.value("action", "") == "history") ||
+             (runningAnalysis_ == RdcAnalysis::Mesh && historyRequest_.value("action", "") == "postmesh") ||
              (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline") ||
              (runningAnalysis_ == RdcAnalysis::Debug && runningDebug_ &&
               rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
@@ -2088,7 +2095,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
         if ((args.contains("--renderdoc") && !isolatedAnalysis) || args.contains("--measure-event") ||
             (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation permits resource/pixel history, pipeline inspection and shader debugging; other analysis and experiments remain unsupported"); return;
+            showError("Query isolation permits resource/pixel history, pipeline inspection, shader debugging and geometry; performance and experiments remain unsupported"); return;
         }
         args << "--isolate-missing-queries";
     }

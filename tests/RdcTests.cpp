@@ -109,7 +109,7 @@ class RdcTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::exception,requireRdcQueryIsolation(policy,missing));
         missing=job; missing["execution"]="0";
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireRdcQueryIsolation(policy,missing));
-        for (const auto *action : {"debug-vertex","debug-pixel","debug-thread"}) {
+        for (const auto *action : {"debug-vertex","debug-pixel","debug-thread","postmesh"}) {
             auto debug=job; debug["action"]=action;
             requireRdcQueryIsolation(policy,debug);
             QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireRdcQueryIsolation(nullptr,debug));

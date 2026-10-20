@@ -190,8 +190,10 @@ void ReplayMeshView::invalidate() {
     summary_->setToolTip({});
     updateActions();
 }
-void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12, bool meshDispatch) {
-    if (key == key_ && event == event_ && dx12_ == dx12 && meshDispatch_ == meshDispatch)
+void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12, bool meshDispatch, bool isolateMissingQueries) {
+    isolateMissingQueries = dx12 && isolateMissingQueries;
+    if (key == key_ && event == event_ && dx12_ == dx12 && meshDispatch_ == meshDispatch &&
+        isolateMissingQueries_ == isolateMissingQueries)
         return;
     if (meshDispatch_ != meshDispatch || dx12_ != dx12) {
         const QSignalBlocker blocker(stage_);
@@ -206,6 +208,7 @@ void ReplayMeshView::setContext(const QString &key, qulonglong event, bool dx12,
         instance_->setText("0");
     }
     meshDispatch_ = meshDispatch;
+    isolateMissingQueries_ = isolateMissingQueries;
     dx12_ = dx12;
     key_ = key;
     event_ = event;
@@ -264,6 +267,7 @@ ReplayMeshView::Json ReplayMeshView::request() const {
     if (dx12_) {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
+        job["isolate_missing_queries"] = isolateMissingQueries_;
         if (!indirectAction_->text().trimmed().isEmpty()) {
             const auto ordinal = indirectAction_->text().toUInt(&ok);
             if (!ok || indirectAction_->text() != QString::number(ordinal))
@@ -290,6 +294,11 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
         const auto selection = result.value("indirect_selection", Json::object());
         const auto ordinal = indirectActionOrdinal(selection);
         const auto requested = this->request();
+        requireRdcQueryIsolation(result.value("query_isolation", Json()), requested);
+        if (isolateMissingQueries_ && (result.value("frame_complete", Json()) != false ||
+            result.value("partial", Json()) != true ||
+            result.value("mesh_scope", Json::object()).value("query_outputs_incomplete", Json()) != true))
+            throw std::runtime_error("Isolated mesh result must retain incomplete query/frame status");
         if ((requested.contains("indirect_action") && (ordinal < 0 || requested.at("indirect_action") != ordinal)) ||
             (ordinal >= 0 && (selection.at("execution") != std::to_string(event_) ||
                 (!requested.contains("indirect_action") && selection.at("indirect_action_count") != 1))))
@@ -392,6 +401,8 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                           .arg(meshData->faces.size()));
     if (dx12_ && result.contains("indirect_selection"))
         summary_->setText(summary_->text() + QString(" · indirect action %1").arg(indirectActionOrdinal(result.at("indirect_selection"))));
+    if (isolateMissingQueries_)
+        summary_->setText(summary_->text() + "\nIncomplete query-isolated replay; historical query values remain unavailable.");
     summary_->setToolTip(finite ? QString()
                                 : "Preview unavailable: positions lack three finite components. Raw values "
                                   "and exports are preserved.");
@@ -434,6 +445,16 @@ void ReplayMeshView::exportResult(const QString &path) const {
                        : suffix == "vbin" ? files_.value("input_vertices.bin")
                        : suffix == "ibin" ? files_.value("input_indices.bin")
                                          : QByteArray::fromStdString(result_.dump(2));
+    if (isolateMissingQueries_ && (suffix == "obj" || suffix == "csv" || suffix == "vbin" || suffix == "ibin")) {
+        auto metadata = result_;
+        metadata["exported_artifact"] = {
+            {"file", QFileInfo(path).fileName().toStdString()}, {"bytes", std::to_string(bytes.size())},
+            {"sha256", QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toStdString()}};
+        const auto text = QByteArray::fromStdString(metadata.dump(2));
+        QSaveFile sidecar(path + ".json");
+        if (!sidecar.open(QIODevice::WriteOnly) || sidecar.write(text) != text.size() || !sidecar.commit())
+            throw std::runtime_error("Cannot export incomplete mesh provenance");
+    }
     QSaveFile f(path);
     if (!f.open(QIODevice::WriteOnly) || f.write(bytes) != bytes.size() || !f.commit())
         throw std::runtime_error("Cannot export mesh");

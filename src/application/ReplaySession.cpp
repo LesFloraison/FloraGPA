@@ -383,8 +383,8 @@ class Dx12Session final : public IReplaySession {
             return {CapabilityStatus::Supported, "Stream packet index; typed arguments remain incomplete"};
         if (selection.isolateMissingQueries && feature != ReplayFeature::Replay && feature != ReplayFeature::ResourceInspection &&
             feature != ReplayFeature::ResourceHistory && feature != ReplayFeature::PixelHistory &&
-            feature != ReplayFeature::PipelineInspection && feature != ReplayFeature::ShaderDebug)
-            return {CapabilityStatus::NotImplemented, "Query-output isolation supports native replay, known-byte readback, resource/pixel history, pipeline inspection and shader debugging; other analysis and experiments are not yet supported"};
+            feature != ReplayFeature::PipelineInspection && feature != ReplayFeature::ShaderDebug && feature != ReplayFeature::Geometry)
+            return {CapabilityStatus::NotImplemented, "Query-output isolation supports native replay, known-byte readback, resource/pixel history, pipeline inspection, shader debugging and geometry; performance and experiments are not yet supported"};
         if (feature == ReplayFeature::Experiments) {
             if (!selection.execution) return {CapabilityStatus::MissingData, "Select an execution instance"};
             try {
