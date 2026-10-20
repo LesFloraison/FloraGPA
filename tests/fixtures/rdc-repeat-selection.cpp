@@ -6,6 +6,8 @@
 // on the first resource. This is bounded fault diagnosis, not a soak test.
 // Textures inspect mip/layer/sample 0. Buffers require --readback and are
 // bounded to 32 MiB; a first buffer never triggers PixelHistory.
+// A 3D texture requires --readback --repeat-only and reads the entire bounded
+// mip-0 volume, without a PickPixel or PixelHistory observation.
 #define NOMINMAX
 #include <Windows.h>
 #include <bcrypt.h>
@@ -128,11 +130,14 @@ int wmain(int argc, wchar_t **argv) try {
         uint64_t bufferLength{};
         for (const auto &texture : textures)
             if (texture.resourceId == found) {
-                valid = texture.dimension == 2 && x < texture.width && y < texture.height && texture.msSamp <= 1 &&
+                valid = (texture.dimension == 2 || (texture.dimension == 3 && readback && repeatOnly)) &&
+                    x < texture.width && y < texture.height && texture.msSamp <= 1 &&
                     (!readback || (texture.byteSize && texture.byteSize <= 32ULL * 1024 * 1024));
                 descriptions.back().update({{"kind", "texture"}, {"width", texture.width}, {"height", texture.height},
+                    {"dimension", texture.dimension}, {"depth", texture.depth},
                     {"array_size", texture.arraysize}, {"mips", texture.mips}, {"samples", texture.msSamp},
                     {"selected_subresource", {{"mip", 0}, {"layer", 0}, {"sample", 0}}},
+                    {"readback_scope", texture.dimension == 3 ? "whole_3d_mip" : "selected_2d_subresource"},
                     {"format_type", uint32_t(texture.format.type)}, {"component_count", texture.format.compCount},
                     {"component_bytes", texture.format.compByteWidth}});
             }
@@ -143,7 +148,8 @@ int wmain(int argc, wchar_t **argv) try {
                 descriptions.back().update({{"kind", "buffer"}, {"byte_offset", "0"},
                     {"byte_length", std::to_string(bufferLength)}});
             }
-        if (!valid) throw std::runtime_error("Expected in-bounds single-sample 2D texture or bounded buffer with --readback");
+        if (!valid) throw std::runtime_error("Unsupported bounded observation for creation " + creation +
+            ": " + descriptions.back().dump());
         selected.push_back(found);
         bufferLengths.push_back(bufferLength);
     }
@@ -153,7 +159,7 @@ int wmain(int argc, wchar_t **argv) try {
         for (size_t i = 0; i < selected.size(); ++i) {
             const auto resource = selected[i];
             values.push_back(Json::object());
-            if (!bufferLengths[i]) {
+            if (!bufferLengths[i] && descriptions[i].value("dimension", 2U) == 2) {
                 const auto value = controller->PickPixel(resource, x, y, Subresource(0, 0, 0), CompType::Typeless);
                 values.back().update({{"float", {value.floatValue[0], value.floatValue[1], value.floatValue[2], value.floatValue[3]}},
                     {"bits", {value.uintValue[0], value.uintValue[1], value.uintValue[2], value.uintValue[3]}}});

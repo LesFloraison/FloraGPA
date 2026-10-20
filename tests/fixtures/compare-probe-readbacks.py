@@ -89,6 +89,7 @@ def compare(report_path, constants_path, positions, counter, textures,
         for phase in phases:
             description, raw = read(phase, positive_f32_depth)
             if (description["kind"] != "texture" or
+                    description.get("dimension", 2) != 2 or description.get("depth", 1) != 1 or
                     description["width"] != atlas_width or description["height"] != atlas_height or
                     description["array_size"] != 1 or description["mips"] != 1 or
                     description["samples"] > 1 or description["format_type"] != 0 or
@@ -110,9 +111,10 @@ def compare(report_path, constants_path, positions, counter, textures,
         for phase in phases:
             description, raw = read(phase, creation)
             if (description["kind"] != "texture" or description["array_size"] != 1 or
+                    description.get("dimension", 2) != 2 or description.get("depth", 1) != 1 or
                     description["mips"] != 1 or description["samples"] > 1 or
                     description["selected_subresource"] != {"mip": 0, "layer": 0, "sample": 0}):
-                raise ValueError("Expected a single-mip, single-layer, single-sample texture")
+                raise ValueError("Expected a single-mip, single-layer, single-sample 2D texture")
             width, height = description["width"], description["height"]
             if (width <= 0 or height <= 0 or width % atlas_width or height % atlas_height or
                     width // atlas_width != height // atlas_height or len(raw) % (width * height)):

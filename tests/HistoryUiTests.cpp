@@ -1998,6 +1998,62 @@ class HistoryUiTests : public QObject {
         QVERIFY(view.finish(view.requestId(), legacy));
         QVERIFY(label->isHidden());
     }
+    void dx12IndirectArgumentSnapshot() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_INDIRECT_SNAPSHOT_REPORT");
+        if (path.isEmpty()) QSKIP("Set a real Hellblade2 cache-border indirect pipeline report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("17074"));
+        const auto &inputs = report.at("indirect_inputs");
+        QCOMPARE(inputs.at("status"), Json("read"));
+        QCOMPARE(inputs.at("observation_boundary"), Json("after_selected_event"));
+        QCOMPARE(inputs.at("groups")[0], Json(3)); QCOMPARE(inputs.at("groups")[1], Json(3));
+        QVERIFY(inputs.at("groups")[2].get<uint32_t>() > 0);
+        QCOMPARE(inputs.at("argument_buffer").at("mapping_status"), Json("capture_resource_marker"));
+        Dx12PipelineView view; view.resize(1400, 850); view.show();
+        view.setContext("hellblade-cache-border", 17074);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("dx12PipelineRows"); QVERIFY(rows);
+        auto summary = view.findChild<QLabel *>("dx12PipelineSummary"); QVERIFY(summary);
+        QVERIFY(summary->text().contains("Indirect argument snapshot after selection"));
+        QVERIFY(summary->text().contains("may differ from the arguments consumed by the GPU"));
+        QSignalSpy navigation(&view, &Dx12PipelineView::resourceRequested);
+        bool found{};
+        for (int i = 0; i < rows->topLevelItemCount(); ++i) {
+            const auto &row = report.at("pipeline_rows")[i];
+            if (row.at("binding") != "Indirect argument snapshot") continue;
+            QCOMPARE(row.at("details"), inputs);
+            rows->setCurrentItem(rows->topLevelItem(i));
+            QCOMPARE(Json::parse(view.findChild<QPlainTextEdit *>()->toPlainText().toStdString()), row);
+            QVERIFY(action(view, "inspectPipelineResource")->isEnabled());
+            action(view, "inspectPipelineResource")->trigger(); found = true;
+        }
+        QVERIFY(found); QCOMPARE(navigation.size(), 1);
+        QCOMPARE(navigation[0][0].toULongLong(),
+                 std::stoull(inputs.at("argument_buffer").at("resource_creation").get<std::string>()));
+        QTemporaryDir temp; const auto exported = temp.filePath("pipeline.json");
+        view.exportResult(exported); QCOMPARE(read(exported), report);
+        auto changed = report;
+        changed["indirect_inputs"]["action_present"] = false;
+        changed["indirect_inputs"]["matches_index"] = false;
+        for (auto &row : changed["pipeline_rows"])
+            if (row.at("binding") == "Indirect argument snapshot") row["details"] = changed["indirect_inputs"];
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(summary->text().contains("absent from the observed command count"));
+        QVERIFY(summary->text().contains("differ from the capture-loading index"));
+        changed["indirect_inputs"] = {{"status", "unavailable"}, {"reason", "Unsupported signature"}};
+        for (auto &row : changed["pipeline_rows"])
+            if (row.at("binding") == "Indirect argument snapshot") {
+                row["details"] = changed["indirect_inputs"];
+                row["resource"] = {{"mapping_status", "unbound"}, {"name", ""}, {"rdc_id", "ResourceId::0"},
+                                   {"resource_creation", nullptr}, {"resource_object", nullptr}};
+            }
+        QVERIFY(view.finish(view.requestId(), changed));
+        QVERIFY(summary->text().contains("snapshot unavailable: Unsupported signature"));
+        QVERIFY(!summary->text().contains("snapshot after selection"));
+        const auto serial = view.requestId(); view.setContext("changed-cache-experiment", 17074);
+        QVERIFY(!view.finish(serial, report)); QCOMPARE(rows->topLevelItemCount(), 0);
+        QVERIFY(!action(view, "inspectPipelineResource")->isEnabled());
+    }
     void dx12IndirectInvocationReport() {
         const auto path = qEnvironmentVariable("FLORA_DX12_INDIRECT_PIPELINE_REPORT");
         if (path.isEmpty()) QSKIP("Set FLORA_DX12_INDIRECT_PIPELINE_REPORT to the Hellblade2 indirect pipeline result");
@@ -2010,7 +2066,7 @@ class HistoryUiTests : public QObject {
         bool found = false;
         for (int i = 0; i < rows->topLevelItemCount(); ++i) {
             const auto &row = report.at("pipeline_rows")[i];
-            if (row.at("section") != "Execution") continue;
+            if (row.at("section") != "Execution" || row.at("binding") != "Invocation parameters") continue;
             const auto &details = row.at("details");
             QCOMPARE(details.at("group_count"), Json::array({1174, 1, 1}));
             QCOMPARE(details.at("shader_group_size"), Json::array({16, 16, 1}));

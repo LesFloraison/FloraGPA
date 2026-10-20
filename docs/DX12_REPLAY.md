@@ -9440,6 +9440,80 @@ sizes/SHA-256, repeat-only operation without PixelHistory, and absence of
 GPA/Python modules in all three native probes. The rejected early alignment
 produces no valid-remap result. Full-frame fidelity remains unfinished.
 
+### Inspect observed indirect arguments and cache update tasks
+
+DX12 pipeline inspection now adds an **Indirect argument snapshot** row for
+indirect compute dispatches. It reuses the dispatch-only signature decoder,
+checks the selected command ordinal, stride, buffer bounds and effective command
+count, and reads the arguments after the selected event without replaying another
+prefix. The report retains the loading-time dimensions separately, preserves
+decimal-string buffer identities/offsets, and maps the argument resource back to
+its captured lifetime for workspace navigation. Unsupported/unreadable signatures
+retain an explicit unavailable reason. This is a post-selection buffer snapshot,
+**not** an execution log proving which arguments the GPU consumed.
+
+For Hellblade2 execution **17074 / source 586459 / RDC 25821**, the real report
+has indexed groups **3 x 3 x 102** but observed arguments **3 x 3 x 99**,
+`matches_index: false`. The buffer is **562234 / object 2149344455040**, offset
+**0**, stride **12**, maximum/effective count **1**. The pipeline view displays
+the mismatch and snapshot scope, supports argument-resource navigation, and
+distinguishes an absent observed command from an unavailable snapshot. The
+focused `HistoryUiTests::dx12IndirectArgumentSnapshot` passes using this report,
+checking navigation, exact export, status presentation and stale-result rejection
+after an experiment-context change. This is one targeted UI case (three QtTest
+entries including setup/cleanup), not broad regression coverage.
+
+The repeat-selection diagnostic now supports a bounded **whole 3D mip 0**
+readback only with `--readback --repeat-only`. It records dimension/depth/scope
+and does not synthesize a PickPixel or PixelHistory observation for a volume.
+The existing 32 MiB bound remains. The 2D probe comparator rejects explicit
+3D metadata; its previous valid real comparison is unchanged.
+
+At early probability execution **17088 / RDC 25867**, cache indirection
+**503760** is **192 x 48 x 48 R32_UINT** (**1,769,472 bytes**). Cache radiance
+**537892** is a **2304 x 2304** packed three-channel atlas (**21,233,664 bytes**).
+Shader-verified constants give four **48-cubed** clipmaps, **128 x 128** atlas
+probes, resolution **16** with final bordered resolution **18**, modulo mask
+**127** and shift **7**. The paired observations have the same **1,310** valid
+grid cells and unique referenced probe IDs. Only **two** grid-cell indices
+change, but after aligning by grid cell, **115** radiance blocks (**3,042**
+texels) still differ. Aligned `ProbeWorldOffset` **513380** is exact; both full
+constant buffers **510820 / 537415**, velocity **511789**, and initial history
+radiance **551682** are also exact in this pair. This does not establish the
+stability of every probability-stage input.
+
+The atlas's indexed writer is execution **17074**,
+`FixupBordersAndGenerateMipsCS`, PSO **513485**, **5,860 bytes**, SHA-256
+`d57fdb753b2c4a0f4ab57f2ec9254ae156b4b78bde5b0e4821b4cb0c3f961b85`;
+the original directory export matches. It reads source atlas **543244** and
+`ProbeTraceData` **534983**. The task index comes from dispatch-thread Z;
+the low **24 bits** of each float4 record's W word select the cache probe.
+Root constants at buffer **510820 + 1,147,136** confirm resolutions **16/18**
+and maximum mip **0**. Only the selected task prefix is eligible for a
+source/output comparison; other cache blocks can retain older contents.
+
+A new paired readback includes the actual argument buffer alongside both
+atlases and task data. Its post-event argument snapshots are **3 x 3 x 114**
+and **3 x 3 x 109**. Each corresponding task prefix has unique, in-range probe
+IDs. Applying the original shader's full octahedral border reflection equations
+gives **zero packed-word differences** across respectively **36,936** and
+**35,316** destination texels, including borders. The task ID sets differ.
+This verifies these source/output relationships, not GPU argument-consumption
+history or all cached blocks. Resource History locates the argument buffer's
+writer at **17000 / source 586368 / RDC 25576**. Task selection, argument
+generation and source-atlas generation remain the next fault frontier; no
+border-shader or synchronization fix is justified by this evidence.
+
+Ignored evidence: `hellblade-radiance-cache-repeat1.json`,
+`hellblade-cache-border-arguments1.json` and their raw files,
+`hellblade-cache-constants1.json`, `hellblade-cache-border-comparison1.json`,
+`hellblade-cache-{atlas,arguments}-history1`, `hellblade-cache17074-pipeline1`,
+`hellblade-cache-border-shader1`, `hellblade-cache-indirect-snapshot2`,
+`hellblade-cache-snapshot-ui1.txt`, and `probe-volume-rejection1`.
+`hellblade-cache-evidence1.json` verifies **28** raw readbacks' sizes/digests
+and no GPA/Python modules or PixelHistory calls in the two diagnostic processes.
+Full replay fidelity and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

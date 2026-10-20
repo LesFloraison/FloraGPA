@@ -247,6 +247,23 @@ bool Dx12PipelineView::finish(uint64_t serial, const Json &result) {
             .arg(rows.size()));
     if (isolateMissingQueries_)
         summary_->setText(summary_->text() + "\nIncomplete replay: historical query values are unavailable; shader replacement is disabled.");
+    if (result.contains("indirect_inputs")) {
+        const auto &inputs = result.at("indirect_inputs");
+        if (inputs.value("status", "") == "read") {
+            const auto &groups = inputs.at("groups");
+            auto message = QString("\nIndirect argument snapshot after selection: %1 x %2 x %3. "
+                                   "Buffer contents may differ from the arguments consumed by the GPU.")
+                .arg(groups.at(0).get<uint32_t>()).arg(groups.at(1).get<uint32_t>()).arg(groups.at(2).get<uint32_t>());
+            if (!inputs.at("action_present").get<bool>())
+                message += " Selected action is absent from the observed command count.";
+            if (!inputs.at("matches_index").get<bool>())
+                message += " Dimensions differ from the capture-loading index.";
+            summary_->setText(summary_->text() + message);
+        } else {
+            summary_->setText(summary_->text() + "\nIndirect argument snapshot unavailable: " +
+                QString::fromStdString(inputs.value("reason", "No readable dispatch-only argument snapshot")));
+        }
+    }
     updateActions();
     return true;
 }

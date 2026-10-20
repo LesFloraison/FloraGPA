@@ -664,7 +664,7 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
                             const Json &provenance, const ActionDescription &action) {
     Json result{{"status", "unavailable"}, {"event_id", action.eventId},
         {"indexed_groups", {action.dispatchDimension[0], action.dispatchDimension[1], action.dispatchDimension[2]}},
-        {"scope", "Argument buffer after selected-event replay, before DebugThread. The debugger may replay the prefix again; this is not its lane-probe snapshot."}};
+        {"scope", "Argument buffer after selected-event replay. This observes buffer contents, not the arguments consumed by the GPU; subsequent analysis may replay the prefix again."}};
     try {
         const SDObject *call{};
         for (const auto &eid : provenance.at("api_event_ids")) {
@@ -740,6 +740,11 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
             {"action_index", commandIndex}, {"action_present", commandIndex < count},
             {"groups", {groups[0], groups[1], groups[2]}},
             {"matches_index", groups[0] == action.dispatchDimension[0] && groups[1] == action.dispatchDimension[1] && groups[2] == action.dispatchDimension[2]}});
+        for (const auto &resource : resources)
+            if (id(resource.resourceId) == argument) {
+                result["argument_buffer"] = flora::rdcDx12ResourceReference(resource.resourceId, text(resource.name));
+                break;
+            }
     } catch (const std::exception &e) { result["reason"] = e.what(); }
     return result;
 }
@@ -1750,6 +1755,16 @@ Json runRdcJob(const Json &job) {
         if (!dx12 || !selected || !(selected->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
             throw std::runtime_error("Pipeline inspection requires an executed DX12 Draw or Dispatch");
         result.update(readDx12Pipeline(controller, *selected));
+        if ((selected->flags & ActionFlags::Indirect) && (selected->flags & ActionFlags::Dispatch)) {
+            auto inputs = indirectDispatchInputs(controller, events, rdcProvenance(eid, mapping["reverse"]), *selected);
+            inputs["execution"] = gpa;
+            inputs["observation_boundary"] = "after_selected_event";
+            result["indirect_inputs"] = inputs;
+            result["pipeline_rows"].push_back({
+                {"section", "Execution"}, {"binding", "Indirect argument snapshot"},
+                {"resource", inputs.value("argument_buffer", rdcDx12ResourceReference(ResourceId(), ""))},
+                {"details", inputs}});
+        }
         if (!queryPolicy.is_null()) {
             result["pipeline_scope"]["query_outputs_incomplete"] = true;
             result["pipeline_scope"]["gaps"].push_back(
