@@ -11,6 +11,8 @@ namespace flora::dx12 {
 class NativeReplay final {
     struct Impl;
     std::unique_ptr<Impl> impl_;
+    void prepare(uint64_t execution, bool after, bool analysisMarkers, bool performance, bool streamEnd);
+    void replay(uint64_t execution, bool after, bool analysisMarkers, bool streamEnd);
   public:
     NativeReplay(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeReplay();
@@ -26,9 +28,13 @@ class NativeReplay final {
     // Plan before initialization to restore lists recorded in the keyframe at
     // their original CPU boundaries, without executing their frame work early.
     void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false, bool performance = false);
+    // Includes all frame submissions and CPU tail records. Present is an
+    // offscreen observation; replay never swaps a window's buffers.
+    void prepareFrame(bool analysisMarkers = false);
     nlohmann::json performanceResult() const;
     void initializeTransfers();
     void replayTo(uint64_t execution, bool after, bool analysisMarkers = false);
+    void replayFrame(bool analysisMarkers = false);
     nlohmann::json readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output, uint64_t expectedCreation = 0);
     nlohmann::json inspectBuffer(uint64_t creationRecord, uint64_t offset, uint64_t length,
                                 const std::filesystem::path &output = {});

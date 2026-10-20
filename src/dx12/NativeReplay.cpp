@@ -130,8 +130,9 @@ struct NativeReplay::Impl {
         std::map<Key, Recording> recordings;
         std::map<std::pair<uint64_t, uint64_t>, Key> instances;
         std::map<uint64_t, std::vector<Key>> starts;
-        uint64_t execution{};
-        bool after{}, markers{};
+        uint64_t execution{}, lastRecord{};
+        bool after{}, markers{}, streamEnd{};
+        json presents = json::array();
         json queryPolicy;
         std::string queryPolicyMarker;
         bool measure{};
@@ -482,6 +483,12 @@ void NativeReplay::initializeTransfers() {
     s.initialized = true;
 }
 void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers, bool performance) {
+    prepare(execution, after, analysisMarkers, performance, false);
+}
+void NativeReplay::prepareFrame(bool analysisMarkers) {
+    prepare(impl_->index.executionCount(), true, analysisMarkers, false, true);
+}
+void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers, bool performance, bool streamEnd) {
     auto &s = *impl_;
     require(!s.frameAttempted && !s.frame, "Execution plan is already prepared or attempted");
     const auto target = s.index.execution(execution);
@@ -497,8 +504,10 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     } else if (const auto issue = s.queries.firstIssue(execution, !after); !issue.is_null())
         throw std::runtime_error(issue.at("reason").get<std::string>());
     auto frame = std::make_unique<Impl::FramePlan>();
-    frame->cpuWaits = planCpuWaits(s.directory, target.submission, s.cancelled);
-    const QueueDependencyIndex dependencies(s.directory, target.submission, s.cancelled);
+    frame->streamEnd = streamEnd;
+    frame->lastRecord = streamEnd ? s.directory.packets().size() : target.submission;
+    frame->cpuWaits = planCpuWaits(s.directory, frame->lastRecord, s.cancelled);
+    const QueueDependencyIndex dependencies(s.directory, frame->lastRecord, s.cancelled);
     frame->queueDependencies = dependencies.information();
     require(frame->queueDependencies.at("unresolved_queue_operations") == "0",
             "Frame queue dependencies are missing, ambiguous or cyclic; inspect command-lists queue_dependencies");
@@ -515,13 +524,14 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
             }
     }
     for (const auto &wait : frame->cpuWaits) frame->hostDrains[wait.record] = "captured_cpu_wait";
-    for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
+    for (uint64_t id = s.directory.initializationCount() + 1; id <= frame->lastRecord; ++id) {
         if (id % 1024 == 0) checkCancellation(s.cancelled);
         const auto type = s.directory.packets()[size_t(id - 1)].type;
         if (type == 0x20000000000000ULL) frame->hostDrains[id] = "mapped_data_write";
         else if (isDescriptorWrite(type) || type == 0x12793300ba04eULL || type == 0x1279345e6c880ULL)
             frame->hostDrains[id] = "descriptor_update";
         else if (type == 0x125482264c67fULL) frame->hostDrains[id] = "tile_mapping";
+        else if (streamEnd && type == 0x1d53218275f72ULL) frame->hostDrains[id] = "offscreen_present_boundary";
         else if (type == 0x11469e993999dULL) {
             Reader r(s.directory.payload(s.directory.packets()[size_t(id - 1)]));
             const auto fence = r.read<uint64_t>(), observed = r.read<uint64_t>(); r.end();
@@ -531,7 +541,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
         }
     }
     for (const auto &patch : s.resourcePatches)
-        if (patch.submission <= target.submission) frame->hostDrains[patch.submission] = "resource_experiment";
+        if (patch.submission <= frame->lastRecord) frame->hostDrains[patch.submission] = "resource_experiment";
     for (const auto &wait : frame->queueDependencies.at("waits")) {
         if (wait.value("producer_relation", "") != "later_cpu_record") continue;
         const auto record = value(wait, "record"), producer = value(wait, "producer_record");
@@ -583,15 +593,15 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     uint64_t nativeCommandCount{};
     for (const auto &instance : s.index.lists()) {
         if (instance.submission <= s.directory.initializationCount() ||
-            instance.submission > target.submission ||
-            (instance.submission == target.submission && instance.ordinal > target.ordinal))
+            (!streamEnd && (instance.submission > target.submission ||
+                            (instance.submission == target.submission && instance.ordinal > target.ordinal))))
             continue;
         require(instance.recording.has_value(), "Missing frame command-list recording");
         const auto &original = s.index.recordings()[*instance.recording];
         require(original.hasBeginning && original.closed &&
                     (!s.initialized || original.begin > s.directory.initializationCount()),
                 "Prepare the execution before initialization to restore keyframe recording state");
-        const auto count = instance.submission == target.submission && instance.ordinal == target.ordinal
+        const auto count = !streamEnd && instance.submission == target.submission && instance.ordinal == target.ordinal
                                ? size_t(execution - instance.firstExecution + (after ? 1 : 0))
                                : original.records.size();
         require(count <= 4000000 - nativeCommandCount,
@@ -929,10 +939,16 @@ void NativeReplay::Impl::drainFrame(uint64_t record, const char *reason) {
     pendingSubmissions.clear(); dirtyQueues.clear();
 }
 void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers) {
+    replay(execution, after, analysisMarkers, false);
+}
+void NativeReplay::replayFrame(bool analysisMarkers) {
+    replay(impl_->index.executionCount(), true, analysisMarkers, true);
+}
+void NativeReplay::replay(uint64_t execution, bool after, bool analysisMarkers, bool streamEnd) {
     auto &s = *impl_;
     require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
     if (!s.frame)
-        prepareExecution(execution, after, analysisMarkers);
+        prepare(execution, after, analysisMarkers, false, streamEnd);
     s.frameAttempted = true;
     s.selectedExecution = execution;
     s.boundaryAfter = after;
@@ -940,12 +956,12 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
     require(s.frame && s.frame->execution == execution && s.frame->after == after &&
-                s.frame->markers == analysisMarkers,
+                s.frame->markers == analysisMarkers && s.frame->streamEnd == streamEnd,
             "Prepared execution does not match replay request");
     const auto abortOnFailure = qScopeGuard([&] { if (!s.boundaryReached) s.abortFrame(); });
     if (!s.frame->queryPolicyMarker.empty())
         s.queue(target.queue)->SetMarker(1, s.frame->queryPolicyMarker.c_str(), UINT(s.frame->queryPolicyMarker.size() + 1));
-    for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
+    for (uint64_t id = s.directory.initializationCount() + 1; id <= s.frame->lastRecord; ++id) {
         s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
         try {
             if (const auto drain = s.frame->hostDrains.find(id); drain != s.frame->hostDrains.end()) {
@@ -984,6 +1000,19 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             }
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
+                case 0x1d53218275f72ULL: {
+                    Reader r(s.directory.payload(p));
+                    const auto swapchain = r.read<uint64_t>();
+                    const auto interval = r.read<UINT>(), flags = r.read<UINT>();
+                    const auto result = r.read<HRESULT>();
+                    r.end();
+                    require(swapchain != 0, "Null captured Present swapchain");
+                    check(result, "Captured Present");
+                    s.frame->presents.push_back({{"record", std::to_string(id)},
+                        {"swapchain", std::to_string(swapchain)}, {"sync_interval", interval},
+                        {"flags", flags}, {"captured_hresult", uint32_t(result)}, {"displayed", false}});
+                    break;
+                }
                 case 0x12793beef5413ULL: {
                     const auto recipe = allocatorRecipe(s.directory.payload(p), id);
                     require(recipe.object != 0, "Null frame command allocator");
@@ -1196,7 +1225,6 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 case 0x15a3eb3b8e877ULL:
                 case 0x15a3edf3ce2bbULL:
                 case 0x1af998824f46bULL:
-                case 0x1d53218275f72ULL:
                 case 0x28000000000000ULL:
                     break;
                 default:
@@ -1207,7 +1235,7 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
     }
     require(s.frame->pendingOperations == 0 && s.frame->issuedOperations == s.frame->queueOperations.size(),
             "Selected boundary has unscheduled queue operations");
-    s.drainFrame(target.submission, "selected_execution_boundary");
+    s.drainFrame(s.frame->lastRecord, streamEnd ? "frame_stream_end" : "selected_execution_boundary");
     const auto validation = s.device.information();
     require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
     s.boundaryReached = true;
@@ -1449,7 +1477,7 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         {"plane",subresource/(UINT(desc.MipLevels)*arrays)},{"samples",desc.SampleDesc.Count},{"dimension",int(desc.Dimension)},
         {"width", footprint.Footprint.Width}, {"height", footprint.Footprint.Height}, {"depth", footprint.Footprint.Depth}, {"format", UINT(footprint.Footprint.Format)},
         {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
-        {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"},
+        {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.frame->streamEnd ? "frame_end" : s.boundaryAfter ? "after" : "before"},
         {"file", output.filename().string()}, {"image", imageFile}, {"display_interpretation",displayInterpretation}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
 }
 json NativeReplay::performanceResult() const {
@@ -1559,6 +1587,9 @@ json NativeReplay::information() const {
                        {"count", std::to_string(s.frame ? s.frame->cpuWaits.size() : 0)},
                        {"first_records", std::move(waits)}}},
         {"selected_execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"}, {"execution_boundary_reached", s.boundaryReached},
-        {"frame_replayed", false}, {"note", "Native initialization and selected frame execution; full-frame correctness and analysis require separate validation"}};
+        {"frame_stream_end_reached", s.boundaryReached && s.frame && s.frame->streamEnd},
+        {"planned_last_record", s.frame ? json(std::to_string(s.frame->lastRecord)) : json(nullptr)},
+        {"offscreen_presents", s.frame ? s.frame->presents : json::array()},
+        {"frame_replayed", false}, {"note", "Stream/selected execution coverage does not certify original-frame fidelity; Present observations do not display a swapchain"}};
 }
 }

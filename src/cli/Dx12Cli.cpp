@@ -102,10 +102,15 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             throw std::runtime_error(std::string("Invalid DX12 unsigned argument: --") + key);
         return uint64_t(value);
     };
-    if (!options.isSet("event"))
-        throw std::runtime_error(
-            "DX12 replay requires --event <execution instance>; full-frame replay is unfinished");
-    const auto execution = number("event"), budget = number("max-bytes");
+    const bool streamEnd = !options.isSet("event") && !buffer;
+    if (buffer && !options.isSet("event"))
+        throw std::runtime_error("DX12 buffer readback requires --event <execution instance>");
+    if (streamEnd && (options.isSet("before") || options.isSet("measure-event")))
+        throw std::runtime_error("--before and --measure-event require an explicit execution");
+    const auto execution = streamEnd ? session.executionCount() : number("event");
+    const auto budget = number("max-bytes");
+    const auto scope = streamEnd ? "frame_stream" : "selected_execution";
+    const auto valueTime = streamEnd ? "frame_end" : options.isSet("before") ? "before_event" : "after_event";
     if (!execution || !budget)
         throw std::runtime_error("DX12 execution and allocation budget must be nonzero");
     const auto sub = number("subresource");
@@ -142,9 +147,9 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                             capability.status == CapabilityStatus::NotImplemented ? "not_implemented" :
                             capability.status == CapabilityStatus::UnsupportedDevice ? "unsupported_device" : "failed";
         const nlohmann::json report{{"backend", "dx12"}, {"completed", false}, {"frame_complete", false},
-            {"image_available", false}, {"device_created", false}, {"replay_scope", "selected_execution"},
+            {"image_available", false}, {"device_created", false}, {"replay_scope", scope},
             {"execution", std::to_string(execution)}, {"event", std::to_string(execution)},
-            {"value_time", selection.before ? "before_event" : "after_event"},
+            {"value_time", valueTime}, {"frame_stream_end_reached", false},
             {"capability_status", status}, {"error", capability.reason},
             {"query_replay_coverage", session.submissionDetails().at("query_replay_coverage")}};
         QSaveFile file(output.filePath("report.json"));
@@ -184,10 +189,11 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"completed", false},
                           {"frame_complete", false},
                           {"missing_query_policy", isolateQueries ? "isolate_readback_outputs" : "fail"},
-                          {"replay_scope", "selected_execution"},
+                          {"replay_scope", scope},
+                          {"frame_stream_end_reached", false},
                           {"execution", std::to_string(execution)},
                           {"event", std::to_string(execution)},
-                          {"value_time", options.isSet("before") ? "before_event" : "after_event"},
+                          {"value_time", valueTime},
                           {"image_available", false},
                           {"width", nullptr},
                           {"height", nullptr},
@@ -222,14 +228,21 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             replay.setResourcePatches(std::move(edits.resources));
         }
         stage = "prepare_execution";
-        replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
+        if (streamEnd)
+            replay.prepareFrame(bool(capture));
+        else
+            replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
         stage = "initialize_transfers";
         replay.initializeTransfers();
         stage = "start_analysis_capture";
         if (capture)
             capture->start(device.device(), "FloraGPA independent DX12 replay");
         stage = "replay_execution";
-        replay.replayTo(execution, !options.isSet("before"), bool(capture));
+        if (streamEnd)
+            replay.replayFrame(bool(capture));
+        else
+            replay.replayTo(execution, !options.isSet("before"), bool(capture));
+        report["frame_stream_end_reached"] = streamEnd;
         if (options.isSet("measure-event"))
             report["performance"] = replay.performanceResult();
         stage = "finish_analysis_capture";
@@ -250,6 +263,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             storage["backend"] = "dx12";
             storage["missing_query_policy"] = isolateQueries ? "isolate_readback_outputs" : "fail";
             storage["frame_complete"] = false;
+            storage["replay_scope"] = scope;
+            storage["frame_stream_end_reached"] = streamEnd;
             if (report.contains("experiment")) storage["experiment"] = report.at("experiment");
             storage["storage_bytes"] = std::stoull(texture.at("bytes").get<std::string>());
             storage["storage_sha256"] = texture.at("sha256");
@@ -287,9 +302,11 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         }
         report["completed"] = true;
         report["image_status"] = buffer ? "Native GPU buffer range readback" : object ? (report["image_available"] == true
-                                               ? "Native GPU readback; selected execution only"
+                                               ? (streamEnd ? "Native GPU readback after all frame stream records; original-frame fidelity remains unverified"
+                                                            : "Native GPU readback; selected execution only")
                                                : "Raw GPU texture saved; this display format is unsupported")
-                                        : "Execution replayed; select a texture creation record for readback";
+                                        : (streamEnd ? "All frame stream records replayed; use --id for texture readback; original-frame fidelity remains unverified"
+                                                     : "Execution replayed; select a texture creation record for readback");
         if (report["image_available"] == true && report.at("native_texture").at("format") == 26)
             report["image_status"] = "Native GPU readback; R11G11B10 preview uses linear RGB clamped to [0,1], alpha 1; raw HDR storage preserved";
         if (report["image_available"] == true && report.at("native_texture").at("format") == 90)

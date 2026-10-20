@@ -2376,6 +2376,85 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 2, 30000); QVERIFY(!isolation->isChecked());
         QVERIFY(image->image().isNull());
     }
+    void dx12FrameStreamReplay() {
+        using Json = nlohmann::json;
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_FRAME_STREAM_OUTPUT");
+        const bool reuse = qEnvironmentVariableIsSet("FLORA_DX12_FRAME_STREAM_REUSE");
+        if (captures.isEmpty() || output.isEmpty())
+            QSKIP("Set Talos captures and a new frame-stream replay output directory");
+        if (reuse)
+            QVERIFY(QFileInfo::exists(output));
+        else {
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+        }
+        const auto read = [&](const QString &path) {
+            QFile file(output + '/' + path);
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Missing frame-stream replay evidence");
+            return file.readAll();
+        };
+        try {
+            // One GPU run. The strict request must fail before creating a device;
+            // explicit isolation then includes the two trailing Signals/Present.
+            for (const bool isolated : {false, true}) {
+                const auto name = isolated ? QString("isolated") : QString("strict");
+                QStringList args{"replay", captures + "/Talos_2026_10_18__00_55_08.gpa_frame",
+                                 "--id", "35118", "--max-bytes", "4294967296",
+                                 "--debug-device", "--out", output + '/' + name};
+                if (isolated) args.append("--isolate-missing-queries");
+                QProcess process;
+                process.setStandardOutputFile(output + '/' + name + ".stdout.txt");
+                process.setStandardErrorFile(output + '/' + name + ".stderr.txt");
+                if (!reuse) {
+                    process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", args);
+                    QVERIFY(process.waitForStarted(5000));
+                    QTRY_COMPARE_WITH_TIMEOUT(process.state(), QProcess::NotRunning, 180000);
+                    QCOMPARE(process.exitStatus(), QProcess::NormalExit);
+                    QCOMPARE(process.exitCode(), isolated ? 0 : 2);
+                }
+                const auto report = Json::parse(read(name + "/report.json").toStdString());
+                QCOMPARE(report.at("replay_scope"), Json("frame_stream"));
+                QCOMPARE(report.at("value_time"), Json("frame_end"));
+                QCOMPARE(report.at("execution"), Json("19410"));
+                QCOMPARE(report.at("frame_complete"), Json(false));
+                QCOMPARE(report.at("frame_stream_end_reached"), Json(isolated));
+                if (!isolated) {
+                    QCOMPARE(report.at("device_created"), Json(false));
+                    QCOMPARE(report.at("capability_status"), Json("missing_data"));
+                    continue;
+                }
+                QCOMPARE(report.at("completed"), Json(true));
+                QCOMPARE(report.at("device").at("validation_error_count"), Json("0"));
+                const auto &native = report.at("native_replay");
+                QCOMPARE(native.at("last_record"), Json("192535"));
+                QCOMPARE(native.at("planned_last_record"), Json("192535"));
+                QCOMPARE(native.at("frame_stream_end_reached"), Json(true));
+                QCOMPARE(native.at("frame_queue_schedule").at("pending_queue_operations"), Json("0"));
+                const auto &presents = native.at("offscreen_presents");
+                QCOMPARE(presents.size(), size_t(2));
+                QCOMPARE(presents.at(0).at("record"), Json("188943"));
+                QCOMPARE(presents.at(1).at("record"), Json("192535"));
+                for (const auto &present : presents)
+                    QCOMPARE(present.at("displayed"), Json(false));
+                bool firstSignal = false, secondSignal = false;
+                for (const auto &operation : native.at("frame_queue_schedule").at("first_issued_queue_operations")) {
+                    firstSignal |= operation.at("record") == "192533";
+                    secondSignal |= operation.at("record") == "192534";
+                }
+                QVERIFY(firstSignal && secondSignal);
+                const auto storage = read(name + "/output_storage.bin");
+                QCOMPARE(storage.size(), 8294400);
+                QCOMPARE(QCryptographicHash::hash(storage, QCryptographicHash::Sha256).toHex(),
+                         QByteArray("e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb"));
+                QCOMPARE(report.at("native_texture").at("boundary"), Json("frame_end"));
+                QCOMPARE(report.at("output_display").at("frame_stream_end_reached"), Json(true));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void dx12CapturedQueryCoverage() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_QUERY_COVERAGE_OUTPUT");

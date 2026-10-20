@@ -16,6 +16,10 @@ order, and an indexed record is not yet a command-list execution instance.
 `inventory`, `commands`, `command-lists`, `replay`, `buffer`, `shader` and `validate-frame` accept DX12 directories. Validation
 reports `blocked` while complete frame replay and feature acceptance remain unfinished;
 the selected native execution and isolated analysis paths below are available for investigation.
+DX12 CLI `replay` without `--event` now processes the entire captured frame
+stream, including its trailing CPU/Fence records. This reports
+`frame_stream_end_reached` separately from unverified original-frame fidelity;
+the workspace still uses selected execution boundaries.
 Selected draw, dispatch, copy, command-list, queue/fence and resource-creation
 arguments are decoded on demand. Committed, placed and reserved resource
 creation descriptors appear in the resource table with their originating record
@@ -8268,11 +8272,88 @@ All results retain incomplete query-isolation provenance. Historical query
 values, other texture formats, complete experiments and original-frame
 fidelity remain unfinished; no portable runtime acceptance is added here.
 
+### Replay through the captured stream tail
+
+`NativeReplay::prepareFrame` / `replayFrame` and CLI `replay` without `--event`
+now include all frame submissions and CPU records through the directory's final
+packet. Explicit `--event` retains selected execution semantics; buffer reads
+and event performance queries still require an explicit execution. This is a
+new runtime path, not a rename of the last submitted command's boundary.
+
+The plan extends queue dependency scheduling, CPU waits, Fence observations,
+host mutations and resource experiments to the final record. Every submitted
+list instance is included, including empty lists following the last nonempty
+execution. Unsubmitted recordings remain unsubmitted. Stream-end replay drains
+submitted work at each captured Present and at the stream tail. Present payloads
+are checked and retained with original record/swapchain/flags/HRESULT; offscreen
+replay does not create a presentation window or claim `displayed=true`.
+Selected execution replay keeps its previous drain policy.
+
+The read-only packet audit found substantial tails after the last
+ExecuteCommandLists: **3** records for Talos (two Signals and Present),
+**25,953** for BF1 (predominantly unsubmitted recordings and CPU updates), and
+**136** for Hellblade2 (including two Signals, 59 Fence observations, 14 waits
+and Present). All three directories contain two Presents in their frame stream.
+Their terminal records must not be inferred from the last GPU execution ID.
+
+One serial GPU run per sample validates this new path with the debug layer:
+
+| Capture | Last execution / stream record | Issued queue operations | Completed submissions | CPU wait drains | Readback creation |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Talos | 19410 / 192535 | 34 | 16 | 0 | 35118 |
+| BF1 | 54186 / 418061 | 4 | 2 | 0 | 11399 |
+| Hellblade2 | 37104 / 613510 | 532 | 125 | 46 | 506294 |
+
+All report zero pending queue operations, zero D3D12 validation errors and
+`frame_stream_end_reached=true`. Actual SDK version is **616** in these runs.
+Talos's strict request fails before device creation because its historical query
+values remain missing; only explicit query-output isolation reaches the end.
+Its two tail Signals at **192533 / 192534** are present in the issued schedule,
+and all **8,294,400** readback bytes match the established final-prefix baseline,
+SHA-256 `e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+
+BF1 reads the explicitly requested **first** serialized backbuffer at stream
+end, **7,749,120** bytes, SHA-256
+`c9b2625d366914e6dce7ae9e67e35c28cec46467b8b8a200323801c3ac5a3434`.
+This is evidence of complete stream traversal and that resource's readback,
+not a new comparison of BF1's final presented backbuffer (**11395**).
+
+Hellblade2 reads the final RGB10 backbuffer, **9,216,000** bytes, SHA-256
+`3860808241d51e58d82336ecf1e2819624a7816f64addf4625a1bfb3c91c9f2c`.
+Compared offline against saved `hellblade-queue-schedule2` storage, **6,543**
+pixels differ, maximum RGB10 deltas **3 / 4 / 5**, with equal alpha. Against
+the saved original GPA raw second-Present image, **5,743** pixels differ,
+maximum deltas **2 / 4 / 5**, again with equal alpha. These are observed
+differences, not a claim of improved fidelity or an attribution to tail handling.
+Original concurrency and full Win32 event semantics remain unverified.
+
+Reports use `replay_scope=frame_stream` and `value_time=frame_end`;
+raw sidecars carry that scope and texture boundary `frame_end`. Both retain
+`frame_complete=false`.
+`completed=true` means this requested native operation succeeded, not that the
+capture's original output, historical values or full analysis suite passed
+acceptance. The native report records the planned/final record and offscreen
+Presents. Workspace end-of-stream selection and automatic final-backbuffer
+selection remain to be connected; CLI callers explicitly choose `--id`.
+
+Builds **472–475** pass. The Talos test initially assumed one Present; its GPU
+run succeeded and saved both. After correcting that assumption, the retained
+reports/bytes pass **3** checks including setup/cleanup in **63 ms**, with
+`FLORA_DX12_FRAME_STREAM_REUSE=1` avoiding another GPU run. BF1 and Hellblade2
+each ran once, and their reports/storage were checked offline.
+
+Evidence: ignored `frame-tail-audit1.json`, `frame-stream-evidence1.json`,
+`talos-frame-stream1/`, `bf1-frame-stream1/`, `hellblade-frame-stream1/`,
+`frame-stream-tests1.txt`, `frame-stream-evidence-tests1.txt`, and
+`build472.log`–`build475.log`. No GPA replay, RenderDoc recapture, package run,
+or broad regression suite was added for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
+| CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
