@@ -1353,10 +1353,10 @@ Json runRdcJob(const Json &job) {
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
-        !(action == "pipeline" && job.contains("execution") && !job.at("execution").is_null()) &&
+        !((action == "pipeline" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
         !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
           !job.value("resource", Json()).is_null()))
-        throw std::runtime_error("Query-isolated analysis requires inventory, texture readback, explicit DX12 pipeline inspection or resource history");
+        throw std::runtime_error("Unsupported query-isolated analysis or missing explicit DX12 selection");
     if (job.value("depth_roundtrip", false) &&
         ((action != "texture" && action != "debug-pixel" && action != "history") || job.value("readonly_depth_snapshot", false)))
         throw std::runtime_error("Depth roundtrip requires texture, history or debug-pixel analysis without read-only depth snapshots");
@@ -1365,7 +1365,7 @@ Json runRdcJob(const Json &job) {
     if (job.value("pixel_history_reference", false) &&
         (action != "debug-pixel" || index(job, "primitive", UINT32_MAX) == UINT32_MAX))
         throw std::runtime_error("Pixel history reference requires debug-pixel and an explicit primitive");
-    const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
+    const bool debugging = rdcShaderDebugAction(action);
     if (job.value("dxil_fast_contraction", false) && (!debugging || !job.contains("execution")))
         throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (action != "history" && action != "events" && action != "counters" && action != "counter-catalog" && action != "inventory" &&
@@ -1524,6 +1524,14 @@ Json runRdcJob(const Json &job) {
                       "correctness or that the validation layer was available."}};
         }
         if (dx12) {
+            if (!queryPolicy.is_null() && debugging) {
+                result["partial"] = true;
+                result["debug_scope"]["query_outputs_incomplete"] = true;
+                auto &warnings = result["debug_scope"]["warnings"];
+                if (warnings.is_null()) warnings = Json::array();
+                warnings.push_back("Incomplete query-isolated replay: historical query values remain unavailable. "
+                    "This invocation uses the replayed resources; stepping and output comparisons do not establish complete original-frame fidelity.");
+            }
             if (!queryPolicy.is_null() && action == "resource-history") {
                 result["history_scope"]["query_outputs_incomplete"]=true;
                 result["history_scope"]["limitations"].push_back(

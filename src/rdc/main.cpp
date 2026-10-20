@@ -1,6 +1,7 @@
 #include "Assets.h"
 #include "Backend.h"
 #include "application/ReplayRequest.h"
+#include "application/RdcEvents.h"
 #include <optional>
 #include <QCoreApplication>
 #include <QDir>
@@ -41,8 +42,9 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Cannot create output directory");
         output = destination;
         if (identity && identity->isolateMissingQueries && job.at("action") != "inventory" && job.at("action") != "texture" &&
-            job.at("action") != "resource-history" && job.at("action") != "pipeline")
-            throw std::runtime_error("Query-isolated analysis requires inventory, texture readback, explicit DX12 pipeline inspection or resource history");
+            job.at("action") != "resource-history" && job.at("action") != "pipeline" &&
+            !flora::rdcShaderDebugAction(job.at("action").get<std::string>()))
+            throw std::runtime_error("Unsupported query-isolated analysis");
         result = flora::runRdcJob(job);
     } catch (const std::exception &e) {
         result["error"] = e.what();

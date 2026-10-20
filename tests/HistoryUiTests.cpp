@@ -270,6 +270,67 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/query-resolve-history.json"),through);
         }
     }
+    void isolatedQueryShaderWorkspace() {
+        const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output=qEnvironmentVariable("FLORA_QUERY_SHADER_UI");
+        const auto library=qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+        if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+            QSKIP("Set Talos captures, a new shader output directory and the pinned RenderDoc library");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window,&MainWindow::captureLoaded),done(&window,&MainWindow::taskFinished);
+        window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate=window.findChild<QLineEdit *>("apiLocate"); locate->setText("19408"); QTest::keyClick(locate,Qt::Key_Return);
+        auto view=window.findChild<ReplayDebugView *>("replayDebug-vs"); QVERIFY(view);
+        QVERIFY(!action(*view,"replayDebugRead")->isEnabled());
+        auto isolation=window.findChild<QCheckBox *>("dx12QueryIsolation"); isolation->setChecked(true);
+        view->setBackendPath(library,false); view->selectVertex(0,0);
+        QVERIFY(action(*view,"replayDebugRead")->isEnabled());
+        QCOMPARE(view->request().at("isolate_missing_queries"),Json(true));
+        done.clear(); action(*view,"replayDebugRead")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),180000);
+        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(view->findChild<QLabel *>("replayDebugSummary")->text()));
+        QVERIFY(!window.busy()); QVERIFY(view->model());
+        const auto result=view->model()->result();
+        QFile saved(output + "/result.json"); QVERIFY(saved.open(QIODevice::WriteOnly));
+        saved.write(QByteArray::fromStdString(result.dump(2))); saved.close();
+        const auto capture=QString::fromStdString(result.at("capture").get<std::string>());
+        QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"),output + "/recapture.json"));
+        QCOMPARE(result.at("execution"),Json("19408"));
+        QCOMPARE(result.at("frame_complete"),Json(false));
+        QCOMPARE(result.at("partial"),Json(true));
+        QCOMPARE(result.at("debug_scope").at("query_outputs_incomplete"),Json(true));
+        QCOMPARE(result.at("query_isolation").at("selected_execution"),Json("19408"));
+        QCOMPARE(result.at("request_identity").at("missing_query_policy"),Json("isolate_readback_outputs"));
+        QVERIFY(view->model()->size()>2); QVERIFY(view->model()->files().empty());
+        QVERIFY(view->findChild<QLabel *>("replayDebugSummary")->text().contains("Incomplete"));
+        action(*view,"debugStep")->trigger(); QCOMPARE(view->model()->position(),int64_t(1));
+        const auto instruction=result.at("steps")[view->model()->size()/2].at("nextInstruction").get<uint64_t>();
+        view->findChild<QLineEdit *>("debugInstruction")->setText(QString::number(instruction));
+        action(*view,"debugToggleInstructionBreakpoint")->trigger();
+        action(*view,"debugContinue")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view->model()->position())].at("nextInstruction"),Json(instruction));
+        view->findChild<QSpinBox *>("debugStepIndex")->setValue(int(view->model()->size()-1));
+        view->findChild<QLineEdit *>("debugWatchExpression")->setText("SV_Position.x");
+        action(*view,"debugAddWatch")->trigger();
+        QCOMPARE(view->model()->watchResults()[0].at("status"),Json("available"));
+        QVERIFY(view->findChild<QLabel *>("replayDebugSummary")->text().contains("Incomplete"));
+        view->exportResult(output + "/export.json"); QCOMPARE(read(output + "/export.json"),view->exportReport());
+        for (const auto *key : {"frame_complete","partial"}) {
+            auto invalid=result; invalid[key]=!result.at(key).get<bool>();
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        }
+        auto invalid=result; invalid["query_isolation"]=nullptr;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        invalid=result; invalid["debug_scope"]["query_outputs_incomplete"]=false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),invalid));
+        const auto old=view->requestId(); isolation->setChecked(false);
+        QVERIFY(!view->model()); QVERIFY(!view->finish(old,result));
+        QVERIFY(!action(*view,"replayDebugRead")->isEnabled());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),result));
+    }
     void isolatedQueryPipelineWorkspace() {
         const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output=qEnvironmentVariable("FLORA_QUERY_PIPELINE_UI");

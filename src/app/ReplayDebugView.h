@@ -18,7 +18,7 @@ class ReplayDebugView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit ReplayDebugView(QString stage, QWidget *parent = nullptr);
-    void setContext(const QString &key, qulonglong event, bool dx12 = false);
+    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool isolateMissingQueries = false);
     void setWorkerBusy(bool busy);
     void selectPixel(int x, int y, int sample);
     void selectPrimitive(uint32_t primitive);
@@ -48,7 +48,7 @@ class ReplayDebugView final : public QWidget {
     qulonglong event_{};
     uint64_t requestId_{};
     bool busy_{}, rendering_{};
-    bool dx12_{};
+    bool dx12_{}, isolateMissingQueries_{};
     std::unique_ptr<ReplayDebugModel> model_;
     QToolBar *inputs_, *steps_;
     QToolBar *depthOptions_{};

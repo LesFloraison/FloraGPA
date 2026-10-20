@@ -1,6 +1,10 @@
 #pragma once
 #include <nlohmann/json.hpp>
+#include <string_view>
 namespace flora {
+inline bool rdcShaderDebugAction(std::string_view action) {
+    return action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
+}
 // Adapter input uses original RenderDoc ActionFlags values and structured event
 // names. Outputs never attribute unmarked work to a nearby GPA command.
 nlohmann::json indexRdcEvents(const nlohmann::json &roots, const nlohmann::json &nativeEvents);

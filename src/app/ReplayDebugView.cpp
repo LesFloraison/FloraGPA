@@ -604,9 +604,11 @@ void ReplayDebugView::invoke(const std::function<void()> &fn) {
         emit error(QString::fromUtf8(e.what()));
     }
 }
-void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12) {
-    if (key_ != key || event_ != event || dx12_ != dx12) {
+void ReplayDebugView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries) {
+    isolateMissingQueries = dx12 && isolateMissingQueries;
+    if (key_ != key || event_ != event || dx12_ != dx12 || isolateMissingQueries_ != isolateMissingQueries) {
         dx12_ = dx12;
+        isolateMissingQueries_ = isolateMissingQueries;
         key_ = key;
         event_ = event;
         textureReference_ = Json();
@@ -698,6 +700,7 @@ Json ReplayDebugView::request() const {
     if (dx12_) {
         job.erase("gpa_event");
         job["execution"] = std::to_string(event_);
+        job["isolate_missing_queries"] = isolateMissingQueries_;
         if (fastContraction_->isChecked()) job["dxil_fast_contraction"] = true;
         if (!indirectAction_->text().trimmed().isEmpty()) job["indirect_action"] = invocationIndex(indirectAction_);
     }
@@ -748,6 +751,7 @@ void ReplayDebugView::invalidate() {
     summary_->setText(
         stage_.toUpper() + " · " +
         (event_ ? QString(dx12_ ? "DX12 execution %1" : "API %1").arg(event_) : "Select an event"));
+    if (isolateMissingQueries_) summary_->setText(summary_->text() + " · Incomplete query-isolated replay");
     rendering_ = false;
     updateActions();
 }
@@ -794,6 +798,13 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     if (dx12_ && (result.value("backend", std::string()) != "dx12" ||
                   result.value("execution", Json()) != Json(std::to_string(event_))))
         throw std::runtime_error("Shader trace does not match the DX12 execution selection");
+    if (dx12_) {
+        requireRdcQueryIsolation(result.value("query_isolation", Json()), this->request());
+        if (isolateMissingQueries_ && (result.value("frame_complete", Json()) != false ||
+            result.value("partial", Json()) != true ||
+            result.value("debug_scope", Json::object()).value("query_outputs_incomplete", Json()) != true))
+            throw std::runtime_error("Isolated shader trace must retain incomplete query/frame status");
+    }
     if (dx12_ && result.value("dxil_fast_contraction", Json::object()).value("enabled", false) != fastContraction_->isChecked())
         throw std::runtime_error("Shader trace does not match the DXIL contraction mode");
     if (dx12_ && depthRoundtrip_ &&
@@ -814,6 +825,8 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
     replacement->move(0);
     model_ = std::move(replacement);
     QStringList warnings;
+    if (isolateMissingQueries_)
+        warnings.append("Incomplete query-isolated replay: historical query results remain unavailable.");
     for (const auto &warning : result.value("debug_scope", Json::object()).value("warnings", Json::array()))
         warnings.append(text(warning));
     if (dx12_ && result.value("replay_policy", Json::object()).value("dx12_discard_policy", "") == "diagnostic_pattern")
@@ -1066,6 +1079,7 @@ void ReplayDebugView::render() {
                           .arg(model_->size() - 1)
                           .arg(text(step.at("nextInstruction")))
                           .arg(text(step.value("flags", Json(0)))));
+    if (isolateMissingQueries_) summary_->setText(summary_->text() + " · Incomplete query-isolated replay");
     const auto instructionPoints = model_->instructionBreakpoints();
     if (!instructionPoints.empty())
         summary_->setText(summary_->text() + " · Instruction breakpoints " +

@@ -1746,8 +1746,10 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(session->capability(ReplayFeature::Replay, selection).status, CapabilityStatus::NotImplemented);
         selection.execution = 19408;
         QVERIFY(session->capability(ReplayFeature::PipelineInspection,selection).supported());
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug,selection).supported());
         selection.isolateMissingQueries = false;
         QVERIFY(!session->capability(ReplayFeature::PipelineInspection,selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::ShaderDebug,selection).supported());
     }
     void isolatedQueryWorkspaceReplay() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -3186,7 +3188,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         write(temp.filePath("isolated-analysis-job.json"), QByteArray::fromStdString(isolatedAnalysis.dump()));
         worker.start(QCoreApplication::applicationDirPath()+"/FloraGPA.Rdc.exe", {"--job",temp.filePath("isolated-analysis-job.json")});
         QVERIFY(worker.waitForFinished(15000)); QCOMPARE(worker.exitCode(), 1);
-        QVERIFY(worker.readAllStandardError().contains("Analysis of isolated query replay"));
+        QVERIFY(worker.readAllStandardError().contains("Unsupported query-isolated analysis"));
         requireReplayIdentity(temp.filePath("isolated-analysis/response-identity.json"), isolated);
     }
     void isolatedQueryReportPolicy() {

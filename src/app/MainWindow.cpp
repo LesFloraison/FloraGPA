@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "application/RdcEvents.h"
 #include "ReplayAdapters.h"
 #ifdef FLORA_CAPTURE_UI
 #include "capture_ui/CaptureDialog.h"
@@ -772,7 +773,7 @@ void MainWindow::buildUi() {
     dx12Layout->addWidget(dx12Budget_);
     dx12QueryIsolation_ = new QCheckBox("Isolate missing queries");
     dx12QueryIsolation_->setObjectName("dx12QueryIsolation");
-    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Resource history and pipeline inspection are available; other analysis and experiments remain unsupported. Applies only to this open capture.");
+    dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. Resource history, pipeline inspection and shader debugging are available; other analysis and experiments remain unsupported. Applies only to this open capture.");
     dx12Layout->addWidget(dx12QueryIsolation_);
     dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
     imageBar->addSeparator();
@@ -1746,9 +1747,12 @@ void MainWindow::updateCheckpointContext() {
     }
     if (replayMesh_)
         replayMesh_->setContext((draw || meshDispatch) ? analysisKey : QString{}, selectedEvent_, dx12, meshDispatch);
+    const auto debugKey = dx12 ? (session_->capability(ReplayFeature::ShaderDebug,selection_).supported()
+                                  ? historyContextKey(true) : QString{}) : analysisKey;
     for (size_t i = 0; i < replayDebug_.size(); ++i)
         if (auto view = replayDebug_[i])
-            view->setContext((i == 2 ? dispatch : draw) ? analysisKey : QString{}, selectedEvent_, dx12);
+            view->setContext((i == 2 ? dispatch : draw) ? debugKey : QString{}, selectedEvent_, dx12,
+                             dx12 && selection_.isolateMissingQueries);
 }
 QString MainWindow::historyContextKey(bool allowQueryIsolation) const {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
@@ -1813,8 +1817,8 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
-    if (selection_.isolateMissingQueries && (view || (kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline))) {
-        showError("Query-isolated analysis currently supports resource usage history and pipeline inspection in this workspace"); return;
+    if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline) {
+        showError("Query-isolated analysis supports resource usage history, pipeline inspection and shader debugging in this workspace"); return;
     }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
@@ -1873,7 +1877,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
         historyKey_ =
-            historyContextKey(resourceHistory || pipeline) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory || pipeline || view) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2068,12 +2072,14 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         (args.first() == "replay" || args.first() == "buffer")) {
         const bool isolatedAnalysis =
             ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
-             (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline")) &&
+             (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline") ||
+             (runningAnalysis_ == RdcAnalysis::Debug && runningDebug_ &&
+              rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
             historyRequest_.value("isolate_missing_queries", false) &&
             historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
         if ((args.contains("--renderdoc") && !isolatedAnalysis) || args.contains("--measure-event") ||
             (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation permits resource history and pipeline inspection; other analysis and experiments remain unsupported"); return;
+            showError("Query isolation permits resource history, pipeline inspection and shader debugging; other analysis and experiments remain unsupported"); return;
         }
         args << "--isolate-missing-queries";
     }

@@ -81,8 +81,23 @@ class RdcJobTests : public QObject {
         }
         auto missing=options; missing.erase("execution");
         QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",missing,"pipeline"));
-        for (const auto *action : {"debug-pixel","postmesh","counters"})
+        for (const auto *action : {"postmesh","counters","buffer"})
             QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",options,action));
+    }
+    void isolatedShaderPreparation() {
+        QTemporaryDir dir;
+        for (const auto *action : {"debug-vertex","debug-pixel","debug-thread"}) {
+            Json options{{"isolate_missing_queries",true},{"execution","9007199254740993"}};
+            const auto job=prepare(dir.path(),"success",options,action);
+            QCOMPARE(job.at("execution"),options.at("execution"));
+            QCOMPARE(job.at("isolate_missing_queries"),Json(true));
+            for (const auto &bad : {Json(nullptr),Json(1),Json("0")}) {
+                auto invalid=options; invalid["execution"]=bad;
+                QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",invalid,action));
+            }
+            options.erase("execution");
+            QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",options,action));
+        }
     }
     void replayOptimisationPreparation() {
         QTemporaryDir dir;

@@ -413,9 +413,10 @@ void requireRdcQueryIsolation(const Json &policy, const Json &job) {
             throw std::runtime_error("Isolated resource history requires explicit nonzero DX12 identities");
         return; // GetUsage inspects recorded operations; it never reads query-result bytes.
     }
-    if (action == "pipeline" && !policyNumber(job.at("execution")))
-        throw std::runtime_error("Isolated pipeline inspection requires an explicit nonzero DX12 execution");
-    if (action != "inventory" && action != "texture" && action != "pipeline")
+    if ((action == "pipeline" || rdcShaderDebugAction(action)) &&
+        (!job.contains("execution") || !policyNumber(job.at("execution"))))
+        throw std::runtime_error("Isolated execution analysis requires an explicit nonzero DX12 execution");
+    if (action != "inventory" && action != "texture" && action != "pipeline" && !rdcShaderDebugAction(action))
         throw std::runtime_error("Unsupported analysis of isolated query replay");
     // Query readbacks remain excluded as a whole: later completed writes must
     // not be mistaken for valid bytes at an earlier selected analysis event.

@@ -100,6 +100,15 @@ class RdcTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::exception,requireRdcQueryIsolation(policy,missing));
         missing=job; missing["execution"]="0";
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireRdcQueryIsolation(policy,missing));
+        for (const auto *action : {"debug-vertex","debug-pixel","debug-thread"}) {
+            auto debug=job; debug["action"]=action;
+            requireRdcQueryIsolation(policy,debug);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireRdcQueryIsolation(nullptr,debug));
+            debug["resource"]="123"; debug["resource_creation"]=high;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,requireRdcQueryIsolation(policy,debug));
+            debug.erase("resource"); debug.erase("resource_creation"); debug.erase("execution");
+            QVERIFY_THROWS_EXCEPTION(std::exception,requireRdcQueryIsolation(policy,debug));
+        }
         const ReplayRequestIdentity identity{"isolated", ReplayBackend::Dx12, UINT64_MAX, UINT64_MAX, false};
         job["request_identity"] = replayIdentityJson(identity);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, job));
