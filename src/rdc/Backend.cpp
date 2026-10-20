@@ -19,7 +19,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-#include <Psapi.h>
+#include "application/ProcessModules.h"
 #include <algorithm>
 #include <charconv>
 #include <cmath>
@@ -1347,23 +1347,7 @@ extern "C" void __cdecl RENDERDOC_FreeArrayMem(void *mem) {
 extern "C" void *__cdecl RENDERDOC_AllocArrayMem(uint64_t size) { return allocate(size); }
 
 namespace flora {
-Json rdcLoadedModules() {
-    Json modules = Json::array();
-    HMODULE handles[2048];
-    DWORD length{};
-    if (!EnumProcessModules(GetCurrentProcess(), handles, sizeof(handles), &length))
-        throw std::runtime_error("Cannot enumerate analysis modules: " + std::to_string(GetLastError()));
-    if (length > sizeof(handles))
-        throw std::runtime_error("Module inventory buffer too small");
-    for (DWORD i = 0; i < length / DWORD(sizeof(HMODULE)); ++i) {
-        wchar_t name[32768]{};
-        const auto size = GetModuleFileNameW(handles[i], name, 32768);
-        if (!size || size >= 32768)
-            throw std::runtime_error("Cannot read complete analysis module path");
-        modules.push_back(QString::fromWCharArray(name).toStdString());
-    }
-    return modules;
-}
+Json rdcLoadedModules() { return processModules(); }
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const auto optimisation = rdcReplayOptimisation(job);

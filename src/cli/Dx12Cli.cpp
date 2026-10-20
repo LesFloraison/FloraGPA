@@ -3,6 +3,7 @@
 #include "application/Experiment.h"
 #include "application/SystemDisassembly.h"
 #include "application/DxilDisassembly.h"
+#include "application/ProcessModules.h"
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
@@ -306,6 +307,19 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     }
     report["device"] = deviceOwner ? deviceOwner->information() : nlohmann::json();
     report["native_replay"] = replayOwner ? replayOwner->information() : nlohmann::json();
+    try {
+        report["loaded_modules"] = processModules();
+        report["loaded_modules_scope"] = "Snapshot before native replay, device and capture teardown; not a lifetime DLL-load trace";
+    } catch (const std::exception &error) {
+        report["module_inventory_error"] = error.what();
+        if (report.at("completed").get<bool>()) {
+            report["completed"] = false;
+            report["error"] = error.what();
+            report["failure_stage"] = "module_inventory";
+            report["image_available"] = false;
+            report["image_status"] = "Native replay artifacts exist, but runtime provenance could not be recorded";
+        }
+    }
     QSaveFile file(output.filePath("report.json"));
     const auto bytes = QByteArray::fromStdString(report.dump(2));
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())

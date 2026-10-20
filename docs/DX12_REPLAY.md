@@ -7700,6 +7700,73 @@ of the Resolve endpoint, malformed-part/stale rejection and exact JSON export
 recapture or query-value recovery is claimed. Historical query contents and full
 Talos replay/debug acceptance remain unfinished.
 
+### Portable native replay and analysis dependency evidence
+
+The packaged DX12 Worker now records `loaded_modules` while its replay, device
+and optional RenderDoc capture objects are still alive. The native and analysis
+processes share the same bounded module enumerator. Enumeration failure or a
+truncated path cannot silently produce an empty/partial inventory; a native
+replay that cannot record provenance returns a failed report while retaining its
+diagnostic artifacts. The field is explicitly a **snapshot**, not a lifetime
+DLL-load or child-process trace.
+
+`tools/verify_portable_modules.ps1` checks successful DX12 reports against the
+chosen package, Windows and the capture's Agility SDK directory. It rejects
+missing inventories, missing files, external development dependencies and
+GPA/Python modules, and records hashes of the reports and non-Windows modules.
+It accepts an explicit report list and runs no GPU work:
+
+```powershell
+./tools/verify_portable_modules.ps1 `
+  -PackageDirectory <package> -CaptureDirectory <single-frame-directory> `
+  -Reports <native-report.json>,<analysis-result.json> -OutputFile <new-evidence.json>
+```
+
+Build **452** passes. `tools/package.ps1` assembles
+`out/dx12-portable-build452` with the pinned DXC and the existing 27-patch
+RenderDoc runtime (SHA-256
+`147bb78f64656ec9be4c9f5932c4ae830d9e77f8e4a36c136695b5a0d97c65a6`).
+Workers and analysis are launched from that package with PATH restricted to
+Windows/System32 and Qt/Python override variables removed.
+
+- **Talos:** packaged Worker replays through **19410**, reads texture creation
+  **35118** and creates a fresh RDC with the packaged RenderDoc. Native storage
+  remains exactly
+  `e207ad0c3ce69e174811cc7a7e1b932482c36cfd25e2bca4fac91dd48442a8cb`.
+  Packaged CLI discovers its bundled analyzer/library without an explicit
+  analysis DLL override. Resource History through **16001**, destination creation
+  **78132**, returns **52** verified ranges, zero mapping gaps and endpoint
+  **10174**. All history rows equal the verified development result, and the
+  exported native storage file's hash is checked directly. The native/analyzer
+  snapshots contain **84/88** modules, all within
+  the package or Windows. Query isolation remains explicit and
+  `frame_complete=false`.
+- **BF1 SDK compatibility:** one packaged native buffer query at UAV Clear
+  **35703**, creation **300425**, reads **18,800 bytes** with SHA-256
+  `f9ef289a12f1f8e88c143059b09b92b7c2be1ef4026b0b7420bdf5146675ed07`,
+  matching the previously verified all-ones float range. Its requested SDK is
+  **602**; `CreateDeviceFactory` succeeds and the device reports actual SDK
+  **616**, with `D3D12Core.dll` loaded from Windows. Talos requests/reports
+  **616**. No claim is made that this machine executes the old 602 runtime.
+
+An initial Talos invocation used the CLI's default **256 MiB** allocation limit
+and correctly failed initialization. The subsequent chain uses the established
+**4 GiB** sample limit; BF1 uses its established **8 GiB** limit. The successful
+chain was repeated only after adding native module provenance. Verification
+also rejects the earlier native report without an inventory and a real
+development-build analysis report. No all-sample regression, Hellblade2 GPU run
+or clean-machine validation is claimed.
+
+Evidence: ignored `portable-package1.log`, `portable-package2.log`,
+`portable-chain1/2/3`, `portable-native1/2/3.log`, `portable-history2/3.log`,
+`portable-bf1-602-1` and its log. `portable-chain3/module-verification.json`
+and `portable-bf1-602-1/module-verification.json` record loaded module hashes;
+`portable-chain3/rejected-provenance.json` records the two negative checks and
+`portable-chain3/baseline-comparison.txt` records history/file comparisons.
+These establish the selected native/analysis dependency paths. Full portable
+three-sample replay, debugger, geometry, performance and experiment acceptance
+remain unfinished, as do the underlying fidelity gaps.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -7714,7 +7781,7 @@ Talos replay/debug acceptance remain unfinished.
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; targeted VS shadow-factor experiment restores the full particle attachment to original GPA bytes and undo restores the native/barrier output; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; recovered original shadow buffer and a 12-vertex diagnostic shader correction account for all bytes at that boundary, while state-correct third-Draw and final-copy readbacks match the selected native results; original final-copy runs also vary at those 12 factors, and default full-frame fidelity remains unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
-| Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
+| Full portable replay/analysis without GPA/Python | Packaged SDK-602-requested UAV Clear readback matches baseline; module snapshot verified; full acceptance unfinished | Packaged isolated native replay, fresh recapture and mapped Resource History verified with module snapshots; missing query values and full acceptance unfinished | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
 implementation gaps include historical query state, complete Talos execution
