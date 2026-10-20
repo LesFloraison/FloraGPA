@@ -1,5 +1,6 @@
 #include "rdc/Assets.h"
 #include "rdc/InputAttribute.h"
+#include "rdc/ClearCoverage.h"
 #include "application/ReplayMesh.h"
 #include <QFile>
 #include <QtTest>
@@ -31,6 +32,51 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void clearCoverage() {
+        SDObject chunk("ID3D12GraphicsCommandList::ClearRenderTargetView"_lit, "chunk"_lit);
+        const auto node = [](SDObject &parent, const char *name) {
+            return parent.AddAndOwnChild(new SDObject(rdcstr(name), "struct"_lit));
+        };
+        const auto integer = [&](SDObject &parent, const char *name, uint64_t value) {
+            auto field = node(parent,name); field->type.basetype=SDBasic::UnsignedInteger;
+            field->data.basic.u=value; return field;
+        };
+        auto target = node(chunk,"RenderTargetView");
+        constexpr uint64_t identity=9007199254740993ULL;
+        integer(*target,"Resource",identity)->type.basetype=SDBasic::Resource;
+        auto view=node(*target,"Descriptor");
+        auto dimension=integer(*view,"ViewDimension",5); // D3D12_RTV_DIMENSION_TEXTURE2DARRAY
+        auto range=node(*view,"Texture2DArray");
+        integer(*range,"MipSlice",1); integer(*range,"FirstArraySlice",1); integer(*range,"ArraySize",2);
+        auto count=integer(chunk,"NumRects",0);
+        TextureDescription texture{}; texture.resourceId=resource(identity); texture.dimension=2; texture.mips=3; texture.arraysize=4;
+        const auto query=[&](uint32_t mip,uint32_t layer,uint32_t x=4,uint32_t y=4) {
+            return rdcClearCoverage(chunk,texture,Subresource(mip,layer,0),x,y);
+        };
+        QCOMPARE(query(1,2).at("status"),Json("covered"));
+        QCOMPARE(query(1,2).at("resource_id"),Json("9007199254740993"));
+        QCOMPARE(query(0,2).at("status"),Json("outside"));
+        QCOMPARE(query(1,0).at("status"),Json("outside"));
+        auto rects=node(chunk,"pRects"); rects->type.basetype=SDBasic::Array;
+        auto rect=node(*rects,"[]");
+        for (const auto &[name,value] : std::map<std::string,int64_t>{{"left",-1},{"top",0},{"right",5},{"bottom",5}}) {
+            auto c=node(*rect,name.c_str()); c->type.basetype=SDBasic::SignedInteger; c->data.basic.i=value;
+        }
+        count->data.basic.u=1;
+        QCOMPARE(query(1,2).at("status"),Json("covered"));
+        QCOMPARE(query(1,2,5,4).at("status"),Json("outside"));
+        count->data.basic.u=2;
+        QCOMPARE(query(1,2).at("status"),Json("unavailable"));
+        count->data.basic.u=0; dimension->data.basic.u=0;
+        QCOMPARE(query(1,2).at("status"),Json("unavailable"));
+        chunk.name="ID3D12GraphicsCommandList::ClearDepthStencilView"_lit;
+        target->name="DepthStencilView"_lit; dimension->data.basic.u=4; // D3D12_DSV_DIMENSION_TEXTURE2DARRAY
+        integer(chunk,"ClearFlags",1);
+        QCOMPARE(query(1,2).at("status"),Json("covered"));
+        QCOMPARE(query(1,0).at("status"),Json("outside"));
+        texture.resourceId=resource(identity+1);
+        QCOMPARE(query(1,2).at("status"),Json("unavailable"));
+    }
     void inputAttributePrecision() {
         ResourceFormat f{}; f.type = ResourceFormatType::Regular; f.compByteWidth = 4;
         f.compCount = 3; f.compType = CompType::UInt;

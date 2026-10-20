@@ -72,6 +72,12 @@ QString color(const Json &row, const char *key) {
     return parts.join(", ");
 }
 QString outcome(const Json &r) {
+    if (r.value("record_kind", "") == "resource_operation") {
+        const auto coverage = r.value("coverage", Json::object());
+        if (coverage.value("status", "") == "unavailable") return "Resource operation · coverage unavailable";
+        return r.value("pixel_value_changed", false) ? "Resource operation · selected value changed"
+                                                    : "Resource operation · selected value unchanged";
+    }
     if (r.value("record_kind", "") == "observed_event_depth_boundary")
         return "Observed event boundary (not a fragment)";
     if (r.value("depth_test_reason_status", "") == "unverified_backend_d16_format")
@@ -492,6 +498,11 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(sample_->value()));
     if (result.value("partial", false))
         summary_->setText("Partial history · " + summary_->text());
+    const auto excluded = scope.value("excluded_resource_operations", Json::array()).size();
+    const auto coverageGaps = scope.value("resource_operation_coverage_gaps", Json::array()).size();
+    if (excluded || coverageGaps)
+        summary_->setText(summary_->text() + QString("\n%1 resource operations excluded by captured coverage · %2 coverage gaps")
+            .arg(excluded).arg(coverageGaps));
     if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
         summary_->setText(summary_->text() +
             QString("\nExperimental D32/D32S8 depth refresh: %1 completed depth refreshes for the selected event. "

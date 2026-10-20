@@ -6895,6 +6895,55 @@ specific subresource faults. An inspected BF1 multi-mip candidate, creation
 (`bf1-mip-history-source1`); it is not claimed as a real-sample fragment proof.
 Full sample and portable acceptance remain unfinished.
 
+### Pixel History Clear view/rectangle coverage and resource operations
+
+The three resource-level Clear records remaining in the negative array query
+above are now filtered using the captured API arguments. RenderDoc 1.45's
+`Serialise_ClearRenderTargetView` and `Serialise_ClearDepthStencilView` preserve
+the descriptor at the call, including its resource and explicit view range,
+plus `NumRects`/`pRects`. The analysis worker checks these fields against the
+queried resource, mip, layer and pixel. This does not infer coverage from a
+later pipeline binding or assign an unmapped operation to a nearby Draw.
+Excluded operations retain their event provenance and coverage evidence in
+`history_scope.excluded_resource_operations`.
+
+The array negative query now returns **zero records**, with all three Clears
+excluded by their Mip 1/Layer 1 views. Its positive counterpart retains three
+Clears and six Draw fragments. The fixture's new `rect` mode adds a red Clear
+over `[0,0,4,4)` before each Draw. Querying `(5,5)` retains nine records and
+excludes those three local Clears; querying `(2,2)` retains all twelve records.
+The native prefix half words at `(5,5)` remain identical to the earlier oracle.
+Evidence: `half-blend-array1/{clear-excluded1,clear-covered1}` and
+`half-blend-rect1/{gpu.json,native_capture.rdc,outside,inside}`.
+
+BF1's particle history at execution **36560**, resource creation **325012**,
+pixel **(836,241)** still has 23 records. The captured Clear at execution
+**36391** has confirmed view coverage. All 22 remaining fragment primitive IDs,
+Shader outputs and post-modification values exactly match
+`bf1-particle-half-history1`; the new report is `bf1-particle-clear-history1`.
+The query retains the explicit experimental depth-refresh option and the
+earlier capture's UAV ordering experiment; this is not full-frame acceptance.
+
+Clear/Copy/Resolve rows are explicitly resource operations with null fragment
+index, primitive ID and Shader output. The UI shows observed value change
+separately from coverage, permits mapped event navigation and disables PS
+debugging for these rows. An unchanged value does not mean that no write occurred.
+Implicit views, unsupported Clear commands/dimensions and malformed or missing
+arguments retain an explicit coverage gap and mark the history partial.
+Copy/Resolve destination-region coverage is still unimplemented and reported
+as a gap. Current support covers explicit 2D RTV/DSV views, including array and
+multisample view layouts; this turn's GPU validation covers single-sample RTVs.
+
+Worker/CLI and app/UI-test builds **423–425** pass. The focused coverage test
+checks signed rectangle edges, malformed arrays, mip/layer ranges, DSV fields
+and a resource identity above 2^53: **3 passed**, including setup/cleanup,
+**1 ms** (`clear-coverage-unit1.txt`). Saved-report UI verification checks
+negative coverage, resource-operation labeling, the exact BF1 Clear navigation,
+PS-debug eligibility and export: **3 passed**, **103 ms**
+(`clear-history-ui1.txt`). GPU checks were serial: one tiny fixture capture,
+four focused fixture history queries and one BF1 history query. No runtime
+patch or new GPA/Python dependency was added. Full acceptance remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

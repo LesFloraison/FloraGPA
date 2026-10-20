@@ -1,6 +1,7 @@
 #include "Backend.h"
 #include "Api.h"
 #include "Assets.h"
+#include "ClearCoverage.h"
 #include "Counters.h"
 #include "DebugTrace.h"
 #include "Invocation.h"
@@ -2101,6 +2102,7 @@ Json runRdcJob(const Json &job) {
         consistency["before_error"] = e.what();
     }
     const auto modifications = controller.PixelHistory(resource, x, y, sub, CompType::Typeless);
+    Json excludedOperations = Json::array(), operationCoverageGaps = Json::array();
     for (size_t i = 0; i < modifications.size(); ++i) {
         const auto &v = modifications[i];
         auto r = record(v);
@@ -2109,6 +2111,38 @@ Json runRdcJob(const Json &job) {
         r["color_interpretation"] = kind;
         r["pixel_value_kind"] = depthTarget ? "depth_stencil" : "color";
         r["stencil_present"] = stencilPresent;
+        const auto actionIt = events.actionDetails.find(v.eventId);
+        if (dx12 && actionIt != events.actionDetails.end() &&
+            (actionIt->second->flags & (ActionFlags::Clear | ActionFlags::Copy | ActionFlags::Resolve))) {
+            r["record_kind"] = "resource_operation";
+            r["fragIndex"] = nullptr; r["primitiveID"] = nullptr; r["shaderOut"] = nullptr;
+            const bool clear = bool(actionIt->second->flags & ActionFlags::Clear);
+            r["operation"] = clear ? "clear" : bool(actionIt->second->flags & ActionFlags::Resolve) ? "resolve" : "copy";
+            r["value_observation_scope"] = "Backend before/after values at the selected subresource; equality does not imply no write.";
+            r["pixel_value_changed"] = depthTarget
+                ? Json(r["preMod"]["depth"] != r["postMod"]["depth"] ||
+                    (stencilPresent && r["preMod"]["stencil"] != r["postMod"]["stencil"]))
+                : Json(r["preMod"]["col"]["uintValue"] != r["postMod"]["col"]["uintValue"]);
+            if (clear) {
+                const auto chunk = events.chunks.find(v.eventId);
+                const auto coverage = chunk != events.chunks.end()
+                    ? flora::rdcClearCoverage(*chunk->second, tex, sub, x, y)
+                    : Json{{"status", "unavailable"}, {"reason", "Clear structured arguments are unavailable"}};
+                r["coverage"] = coverage;
+                if (coverage.at("status") == "outside") {
+                    auto excluded = rdcProvenance(v.eventId, mapping["reverse"]);
+                    excluded.update({{"eventId", v.eventId}, {"operation", "clear"}, {"coverage", coverage}});
+                    excludedOperations.push_back(std::move(excluded));
+                    continue;
+                }
+                if (coverage.at("status") == "unavailable")
+                    operationCoverageGaps.push_back({{"eventId", v.eventId}, {"coverage", coverage}});
+            } else {
+                r["coverage"] = {{"status", "unavailable"},
+                    {"reason", "Copy/Resolve destination region coverage has not been reconstructed"}};
+                operationCoverageGaps.push_back({{"eventId", v.eventId}, {"coverage", r["coverage"]}});
+            }
+        }
         if (d16History && !unreliableD16) {
             // RenderDoc reconstructs intermediate fragments in a D32 scratch DSV.
             // Only the first pre/last post values use the captured D16 format.
@@ -2230,7 +2264,7 @@ Json runRdcJob(const Json &job) {
     }
     Json boundary{{"status", "not_compared"},
         {"scope", "Final backend modification at the selected event versus the selected texel before and after history. Equal color components do not validate intermediate fragments or other events."}};
-    if (modifications.empty() || modifications.back().eventId != eid)
+    if (modifications.empty() || modifications.back().eventId != eid || !existing.contains(eid))
         boundary["reason"] = "No final backend modification at the selected event";
     else if (depthTarget || tex.format.type != ResourceFormatType::Regular ||
              !tex.format.compCount || tex.format.compCount > 4)
@@ -2281,6 +2315,8 @@ Json runRdcJob(const Json &job) {
            {"unmapped_records", unmapped},
            {"cpu_write_snapshots", added},
            {"cpu_write_gaps", gaps},
+           {"excluded_resource_operations", excludedOperations},
+           {"resource_operation_coverage_gaps", operationCoverageGaps},
            {"depth_value_status", unreliableD16 ? "event_boundaries_only" : d16History ? "patched_backend_values" : "backend_values"},
            {"depth_boundary_gaps", depthGaps},
            {"reconstructed_depth_values", reconstructedDepthValues},
@@ -2309,7 +2345,7 @@ Json runRdcJob(const Json &job) {
         result["history_scope"]["limitations"].push_back(
             "Experimental depth refresh applies only to eligible isolated replays of the selected event. "
             "It does not normalize other history events or validate intermediate fragments.");
-    if (unreliableD16 || reconstructedDepthValues || consistency.at("status") != "selected_texel_unchanged" ||
+    if (unreliableD16 || reconstructedDepthValues || !operationCoverageGaps.empty() || consistency.at("status") != "selected_texel_unchanged" ||
         boundary.at("status") == "differs_from_selected_texel")
         result["partial"] = true;
     for (const auto &r : resources)

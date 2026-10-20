@@ -54,6 +54,61 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void clearOperationCoverage() {
+        const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the Clear coverage evidence directory");
+        const auto outside = read(root + "/half-blend-array1/clear-excluded1/result.json");
+        QVERIFY(outside.at("history").empty());
+        QCOMPARE(outside.at("history_scope").at("excluded_resource_operations").size(), size_t(3));
+        const auto rect = read(root + "/half-blend-rect1/outside/result.json");
+        const auto inside = read(root + "/half-blend-rect1/inside/result.json");
+        QCOMPARE(rect.at("history").size(), size_t(9));
+        QCOMPARE(inside.at("history").size(), size_t(12));
+        for (const auto &excluded : rect.at("history_scope").at("excluded_resource_operations")) {
+            QCOMPARE(excluded.at("coverage").at("rectangles"), Json::array({Json::array({0,0,4,4})}));
+            QCOMPARE(excluded.at("coverage").at("view_covers_selection"), Json(true));
+            QCOMPARE(excluded.at("coverage").at("rectangles_cover_pixel"), Json(false));
+        }
+        QCOMPARE(rect.at("history_scope").at("excluded_resource_operations").size(), size_t(3));
+        for (const auto &row : inside.at("history")) {
+            if (row.value("record_kind", "") != "resource_operation") continue;
+            QCOMPARE(row.at("coverage").at("status"), Json("covered"));
+            QVERIFY(row.at("fragIndex").is_null()); QVERIFY(row.at("primitiveID").is_null());
+            QVERIFY(row.at("shaderOut").is_null());
+        }
+        PixelHistoryView view;
+        view.setContext("fixture:clear", 3, true); view.selectPixel(0, 5, 5, 1, 0, 0);
+        QVERIFY(view.finish(view.requestId(), outside));
+        QCOMPARE(view.findChild<QTreeWidget *>("historyRecords")->topLevelItemCount(), 0);
+        QVERIFY(view.findChild<QLabel *>("historySummary")->text().contains("3 resource operations excluded"));
+        const auto bf1 = read(root + "/bf1-particle-clear-history1/result.json");
+        const auto previous = read(root + "/bf1-particle-half-history1/result.json");
+        QCOMPARE(bf1.at("history").size(), size_t(23));
+        for (size_t i=1; i<23; ++i) {
+            const auto &row=bf1.at("history")[i], &old=previous.at("history")[i];
+            QCOMPARE(row.at("primitiveID"),old.at("primitiveID"));
+            QCOMPARE(row.at("shaderOut"),old.at("shaderOut"));
+            QCOMPARE(row.at("postMod"),old.at("postMod"));
+        }
+        view.setContext("bf1:clear", 36560, true); view.setDx12Resource(325012, 10432990048ULL);
+        view.selectPixel(10432990048ULL, 836, 241, 0, 0, 0);
+        view.findChild<QCheckBox *>("historyDepthRoundtrip")->setChecked(true);
+        QVERIFY(view.finish(view.requestId(), bf1));
+        auto rows=view.findChild<QTreeWidget *>("historyRecords");
+        rows->setCurrentItem(rows->topLevelItem(0));
+        QVERIFY(rows->topLevelItem(0)->text(3).contains("Resource operation"));
+        QVERIFY(!action(view,"debugHistoryPixel")->isEnabled());
+        QVERIFY(action(view,"locateHistoryEvent")->isEnabled());
+        QSignalSpy locate(&view,&PixelHistoryView::eventRequested);
+        action(view,"locateHistoryEvent")->trigger();
+        QCOMPARE(locate.count(),1); QCOMPARE(locate[0][0].toULongLong(),36391ULL);
+        rows->setCurrentItem(rows->topLevelItem(22));
+        QVERIFY(action(view,"debugHistoryPixel")->isEnabled());
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/clear-history.json");
+            QCOMPARE(read(output_ + "/clear-history.json"), bf1);
+        }
+    }
     void halfColorHistorySubresources() {
         const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the half-color mip/array history evidence directory");

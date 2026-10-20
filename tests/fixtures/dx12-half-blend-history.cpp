@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -14,10 +14,10 @@
 using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr))); }
 int main(int argc, char **argv) try {
-    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mip|array");
+    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mip|array|rect");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array") throw std::runtime_error("Invalid subresource mode");
-    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" ? 1 : 0;
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect") throw std::runtime_error("Invalid subresource mode");
+    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" || mode == "rect" ? 1 : 0;
     const auto library = LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -87,6 +87,10 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     const float initial[]{0.027862548828125f,0.0273284912109375f,0.024871826171875f,0.3974609375f};
     for (UINT n=1;n<=3;++n) {
         list->ClearRenderTargetView(rtv,initial,0,nullptr);
+        if (mode == "rect") {
+            const float red[]{1,0,0,1}; const D3D12_RECT clearRect{0,0,4,4};
+            list->ClearRenderTargetView(rtv,red,1,&clearRect);
+        }
         const auto marker = "Flora DX12 execution " + std::to_string(n) + " record " + std::to_string(n) +
             " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(n) + ": ID3D12GraphicsCommandListDrawInstanced";
         list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1)); list->DrawInstanced(n*3,1,0,0); list->EndEvent();
