@@ -53,6 +53,55 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void modifiedSingleProbeInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_SINGLE_PROBE_DEBUG");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 single-probe experiment debug report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("17074"));
+        QCOMPARE(report.at("step_count"), Json(66));
+        QCOMPARE(report.at("compute_invocation").at("group_count"), Json::array({3,3,1}));
+        QCOMPARE(report.at("compute_invocation").at("dispatch_thread"), Json::array({15,8,0}));
+        QCOMPARE(report.at("compute_buffer_inputs").at("status"), Json("observed_bytes_unchanged"));
+        QCOMPARE(report.at("compute_preparation").at("consumed"), Json("1"));
+        QCOMPARE(report.at("texture_stores").at("validation"), Json("not_validated"));
+        const auto &store = report.at("texture_stores").at("rows")[0];
+        QCOMPARE(report.at("texture_stores").at("rows").size(), size_t(1));
+        QCOMPARE(store.at("instruction"), Json(86));
+        QCOMPARE(store.at("resource_creation"), Json("537892"));
+        QCOMPARE(store.at("view_format"), Json(26)); // Packed RGB: no stored alpha.
+        for (size_t i = 0; i < 3; ++i)
+            QCOMPARE(store.at("value_bits")[i], store.at("gpu_reference").at("value").at("uintValue")[i]);
+        ReplayDebugView view("cs"); view.setContext("single-probe-experiment", 17074, true);
+        view.findChild<QLineEdit *>("debugGroup")->setText("1 1 0");
+        view.findChild<QLineEdit *>("debugThread")->setText("7 0 0");
+        QVERIFY(view.finish(view.requestId(), report));
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QLineEdit *>("debugInstruction")->setText("86");
+        action(view, "debugToggleInstructionBreakpoint")->trigger();
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(62));
+        view.findChild<QLineEdit *>("debugWatchExpression")->setText("_95");
+        action(view, "debugAddWatch")->trigger();
+        auto watches = view.findChild<QTreeWidget *>("debugWatchValues");
+        QCOMPARE(watches->topLevelItemCount(), 1);
+        QVERIFY(std::abs(watches->topLevelItem(0)->text(2).toDouble() - 0.34765625) < 0.000001);
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(63));
+        auto stores = view.findChild<QTreeWidget *>("debugTextureStores");
+        QCOMPARE(stores->topLevelItemCount(), 1);
+        QSignalSpy texel(&view, &ReplayDebugView::texturePixelRequested);
+        QVERIFY(QMetaObject::invokeMethod(stores, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, stores->topLevelItem(0)), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1);
+        QCOMPARE(texel[0][1].toULongLong(), 17074ULL);
+        QCOMPARE(texel[0][2].toULongLong(), 537892ULL);
+        QCOMPARE(texel[0][4].toUInt(), 627U); QCOMPARE(texel[0][5].toUInt(), 188U);
+        QCOMPARE(view.exportReport().at("texture_stores"), report.at("texture_stores"));
+        const auto old = view.requestId();
+        view.setContext("single-probe-experiment-undone", 17074, true);
+        QVERIFY(!view.finish(old, report));
+        QCOMPARE(stores->topLevelItemCount(), 0);
+    }
     void cacheTraceDepthInstructionDebug() {
         const auto path = qEnvironmentVariable("FLORA_CACHE_TRACE_DEBUG");
         if (path.isEmpty()) QSKIP("Set the Hellblade2 cache-tracing debug report");

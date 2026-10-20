@@ -10299,11 +10299,84 @@ resource preservation, and explicit experiment-operation history. They do
 not establish full-frame fidelity, measured invocation counts, complete
 resource histories, or a nonzero modified Shader Debug trace.
 
+### Debug a nonzero single-probe resource experiment
+
+The same event-local counter experiment is now exercised with value **1**.
+It overwrites four bytes at creation **570577** after execution **16988**;
+the original capture remains read-only. Native replay through **17074**
+completes with SDK **616** and zero validation errors. Its fresh analysis
+capture is **2,353,574,552 bytes**, SHA256
+`932fb2ab45890bfe976c5dea61e77ec840a565027d3b4ffbe946d84767d6a1ad`.
+Pipeline inspection at RDC **25827** reports **(3,3,1)** in both the index
+and current argument buffer, with the original border shader unchanged.
+
+The border-copy checker now distinguishes repeated post-event observations
+from explicit before/after boundaries. For the latter it verifies the
+execution marker, the post-event shader's task/source mapping, and exact
+preservation outside those selected target blocks. It reports upstream
+input differences rather than assuming equal inputs.
+
+One bounded pair at **25825 → 25827** observes the atlas, source atlas,
+task buffer, arguments, counter and root constants. Both argument snapshots
+are **(3,3,1)** and both counters are **1**. Task zero changes from probe
+**647** to probe **8** between prefix replays; the source atlas also changes.
+Root constants are identical. The post-event probe-8 block has:
+
+- **324 / 324** packed texels exactly matching the pinned shader's four
+  ordered reflection branches;
+- **8** changed texels within the block;
+- **0** changed texels among **5,308,092** texels outside it.
+
+This is an observed before/after target relationship with separately
+recorded upstream variation. It does not imply that the two replays used
+the same probe or that native/analysis full outputs are interchangeable.
+The native atlas SHA256 is
+`940b1ade9f93b7abaa5a4030196f65645f2e55f6ec18b2657b90ae3168b0a310`.
+The checker rejects a changed outside texel even when its storage digest
+is recomputed correctly, and rejects an incorrect pre-event marker.
+The prior repeated-observation case still checks **36,936 / 35,316**
+selected texels exactly.
+
+A separate single prepared compute state debugs group **(1,1,0)**,
+thread **(7,0,0)**, dispatch thread **(15,8,0)**. It returns **66 steps**
+and consumes the prepared indirect state once. The selected task in this
+debug replay refers to probe **1314**, illustrating why coordinates from
+the earlier observation are not reused.
+
+Instruction **86**, trace position **62**, stores to creation **537892**
+at **(627,188)**. RGB operands **(0.34765625, 0.3828125, 0.4609375)**
+match all three GPU-reference float bit patterns after trace release and
+restoration of the original dispatch. The R11G11B10 target has no alpha
+storage, so the fourth operand is excluded from that comparison. The
+observed **262,144-byte** read-only task buffer has the same hash across
+trace creation, stepping and dispatch restoration. This does not validate
+all texture, UAV or constant-buffer inputs; generic TextureStore validation
+correctly remains `not_validated`.
+
+The real-report UI check exercises instruction-only debugging, breakpoint
+**86**, Watch **`_95`**, stepping **62 → 63**, exact resource/texel
+navigation, export and stale-result rejection after changing the experiment
+context. The initial check used the offline disassembler's SSA numbering;
+the corrected Watch uses the actual RenderDoc trace. No additional GPU
+debug run was needed for that correction.
+
+Evidence: `hellblade-cache-count-one-after16988.json`,
+`hellblade-one-indirect-capture1`, `hellblade-one-indirect-pipeline1`,
+`hellblade-one-indirect-boundaries1.json` and twelve raw observations,
+`hellblade-one-border-comparison1.json`, `hellblade-one-indirect-debug1`,
+`single-probe-boundary-rejections1/result.json`,
+`single-probe-debug-ui2.txt`, `build-single-probe-debug-ui2.log`,
+`check-one-indirect-evidence1.py` and `one-indirect-evidence1.json`.
+All twelve readbacks' sizes and digests, exported shader bytes and four
+module snapshots are verified; no GPA/Python dependency is loaded by the
+native replay/analysis processes. Upstream task-selection variation,
+full-frame fidelity and complete Shader Debug coverage remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
-| Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace import/save/reload/undo/redo and stale CS request rejection verified; fresh downstream zero-dispatch capture, exact before/after atlas preservation, explicit auxiliary-operation history and zero-invocation debug rejection verified; nonzero modified debugging and complete histories unfinished |
+| Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | CLI terminal marker and final CopyResource mapping verified; initial selected texel matches native raw storage but changes after history replay, correctly reported partial; pixel fidelity and full history unfinished |

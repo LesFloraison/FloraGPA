@@ -1,8 +1,10 @@
 """Offline exact check of the pinned Hellblade2 cache-border shader.
 
 Uses each observation's post-event argument buffer and task prefix. These are
-not a GPU argument-consumption log, and this does not validate unselected cache
-blocks or original/native whole-frame fidelity. Python/numpy is research-only.
+not a GPU argument-consumption log. An explicit before/after event pair also
+checks preservation outside the selected probe blocks, while reporting changing
+upstream inputs separately. This does not establish original/native whole-frame
+fidelity. Python/numpy is research-only.
 """
 import argparse
 import hashlib
@@ -22,8 +24,14 @@ def analyze(report_path, pipeline_path):
                   if row["section"] == "CS" and row["binding"] == "Shader")
     if shader["details"]["bytecode_sha256"] != SHADER:
         raise ValueError("Expected the verified FixupBordersAndGenerateMipsCS shader")
-    if (not report["repeat_only"] or report["history_requested"] or report["between_event"] is not None
-            or report["event"] != pipeline["eid"]):
+    boundaries = "second_event" in report
+    if not report["repeat_only"] or report["history_requested"] or report["between_event"] is not None:
+        raise ValueError("Expected bounded observations without Pixel History or intervening events")
+    if boundaries:
+        if (report["second_event"] != pipeline["eid"] or
+                pipeline["indirect_selection"]["marker_eids"] != [report["event"]]):
+            raise ValueError("Expected the selected execution marker and its indirect dispatch")
+    elif report["event"] != pipeline["eid"]:
         raise ValueError("Expected repeated observations at the selected border dispatch")
     job = json.loads((pipeline_path.parent / "job.json").read_text(encoding="utf-8"))
     if Path(job["capture"]).resolve() != Path(report["capture"]).resolve():
@@ -82,7 +90,8 @@ def analyze(report_path, pipeline_path):
         return read(phase, binding(name)["resource"][pipeline_key])
 
     rows = []
-    for phase in ("first", "second"):
+    boundary_evidence = None
+    for phase in (("second",) if boundaries else ("first", "second")):
         _, root = read_binding(phase, "_RootShaderParameters")
         offset = int(binding("_RootShaderParameters")["byte_offset"])
         layout = struct.unpack_from("<7I", root, offset + 64)
@@ -133,7 +142,36 @@ def analyze(report_path, pipeline_path):
         rows.append({"phase": phase, "post_event_groups": list(groups),
                      "unique_task_count": len(ids), "checked_texels": int(actual.size),
                      "different_texels": different})
-    return {"status": "exact_selected_border_copy", "scope": __doc__,
+        if boundaries:
+            _, prior = read_binding("first", "RWFinalRadianceAtlasMip0")
+            before = np.frombuffer(prior, dtype="<u4").reshape(2304, 2304)
+            selected = np.zeros(target.shape, dtype=bool)
+            selected[py * 18 + y, px * 18 + x] = True
+            changed = before != target
+            outside = int(np.count_nonzero(changed & ~selected))
+            if outside:
+                raise ValueError(f"{outside} target texels changed outside the selected probe blocks")
+            inputs = {}
+            for name in ("_RootShaderParameters", "ProbeTraceData", "RadianceProbeAtlasTexture"):
+                _, first = read_binding("first", name)
+                _, second = read_binding("second", name)
+                inputs[name] = "equal" if first == second else "different"
+            _, first_args = read("first", indirect["argument_buffer"][pipeline_key])
+            boundary_evidence = {
+                "before_event": report["event"], "after_event": report["second_event"],
+                "selected_probe_ids": ids.tolist(),
+                "selected_texels": int(np.count_nonzero(selected)),
+                "changed_selected_texels": int(np.count_nonzero(changed & selected)),
+                "outside_texels": int(np.count_nonzero(~selected)),
+                "changed_outside_texels": outside,
+                "upstream_full_storage": inputs,
+                "before_groups": list(struct.unpack_from("<3I", first_args, int(indirect["argument_offset"]))),
+                "scope": "After-event source/task mapping and exact target preservation outside those blocks. "
+                         "Separate prefix replays may change upstream inputs; equality is not assumed."
+            }
+    return {"status": "exact_selected_border_copy_and_boundary_preservation" if boundaries else "exact_selected_border_copy",
+            "scope": __doc__, "observation_mode": "event_boundaries" if boundaries else "repeat_selection",
+            "boundary_evidence": boundary_evidence,
             "resource_namespace": namespace, "shader_sha256": SHADER, "observations": rows,
             "verified_resource_observations": len(verified)}
 
