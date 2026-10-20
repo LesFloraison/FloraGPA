@@ -8649,6 +8649,55 @@ Build **486** passes. Ignored evidence:
 modification observation, broader synchronization coverage, the other samples'
 frame-end history and original-frame fidelity remain unfinished.
 
+### Hellblade2 frame-end resource history and Fence producer navigation
+
+The Resource History queue context now offers **Locate Fence producer** for a
+selected Wait whose captured single-writer, monotonic-Fence dependency is
+resolved to a Signal. It navigates that Signal's original CPU record, including
+across queues, and clears API filters that hide the destination. Initial-value
+and unresolved waits do not enable this action. Before accepting a producer
+link, the panel checks the Wait record/queue/Fence/value identity, decimal-string
+string producer identities, the inspected record boundary and a sufficient
+producer value. Queue dependency evidence remains distinct from a resource
+hazard/access proof or measured GPU wait duration.
+
+One targeted Hellblade2 workspace run opens the directory, uses suggested
+creation **506294**, sets a **12 GiB** native allocation budget and requests
+frame-end Resource History in strict query mode. A fresh native capture reaches
+record **613510**, execution **37104**, with terminal RenderDoc marker **91485**.
+Actual Agility SDK **616**, zero D3D12 validation errors and zero pending queue
+operations are reported. The explicit resource usage query maps all three uses
+of object **2149283441408**, without unmapped uses:
+
+| Execution | Source record | Evidence |
+| --- | --- | --- |
+| 37102 | 613352 | All-subresource PRESENT → COPY_DEST barrier |
+| 37103 | 613353 | CopyResource whole-resource destination, reconstructed from captured API arguments |
+| 37104 | 613354 | All-subresource COPY_DEST → PRESENT barrier |
+
+These operations belong to queue **2130357605824**. Its frame context contains
+six synchronization records, including these two Wait links on Fence
+**2130586937488**:
+
+| Wait record | Required value | Producer Signal | Producer queue |
+| --- | --- | --- | --- |
+| 595604 | 22429 | 595585 | 2131165365824 |
+| 613363 | 22430 | 613342 | 2131165365824 |
+
+The UI locates Signal **613342** from Wait **613363**, restores its filtered
+visibility and rejects the old history request after navigation. CPU checks
+inside the same run reject an insufficient producer value, a numeric producer
+identity and a different Fence, and verify that an unresolved dependency
+disables producer navigation. The first run passes **3** checks including
+setup/cleanup in **75,130 ms**; no additional sample replay is run.
+
+Build **487** passes. Evidence remains ignored:
+`hellblade-frame-resource-ui1/{result.json,recapture.json,scope-evidence.json}`,
+`hellblade-frame-resource-tests1.txt` and `build487.log`. This verifies full-stream
+capture coverage and the selected resource's indexed Copy/barrier/synchronization
+navigation. It does not measure changed resource bytes, restore original-image
+fidelity or certify complete resource histories. `frame_complete` remains false.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -8656,7 +8705,7 @@ frame-end history and original-frame fidelity remain unfinished.
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
-| Frame-end Resource History | Not verified | Six mapped backbuffer uses, captured state transitions, separate creation/initialization, six queue-context Signals, terminal-marker checks and CPU-record navigation verified under query isolation; complete accesses/modifications unfinished | Not verified |
+| Frame-end Resource History | Not verified | Six mapped backbuffer uses, captured state transitions, separate creation/initialization, six queue-context Signals, terminal-marker checks and CPU-record navigation verified under query isolation; complete accesses/modifications unfinished | Strict full-stream capture, three mapped final-backbuffer Copy/barrier uses, two cross-queue Wait links and producer navigation verified; complete accesses/modifications unfinished |
 | Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
 | Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | Not verified |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |

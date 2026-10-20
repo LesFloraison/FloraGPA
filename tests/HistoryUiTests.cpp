@@ -509,6 +509,98 @@ class HistoryUiTests : public QObject {
         QVERIFY(!action(*view,"readDx12Pipeline")->isEnabled());
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),result));
     }
+    void hellbladeFrameResourceHistoryWorkspace() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_HELLBLADE_FRAME_RESOURCE_UI");
+        const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+        if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+            QSKIP("Set Hellblade2 captures, a new evidence directory and the pinned RenderDoc library");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QSpinBox *>("dx12AllocationMiB")->setValue(12288);
+        QCOMPARE(window.findChild<QTableView *>("resources")->currentIndex().data(Qt::UserRole).toULongLong(), 506294ULL);
+        auto view = window.findChild<ResourceHistoryView *>();
+        view->setBackendPath(library, false);
+        QVERIFY(action(*view, "readResourceHistory")->isEnabled());
+        QCOMPARE(view->request().at("frame_end"), Json(true));
+        QCOMPARE(view->request().at("frame_end_record"), Json("613510"));
+        QCOMPARE(view->request().at("isolate_missing_queries"), Json(false));
+        action(*view, "readResourceHistory")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 240000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.findChild<QPlainTextEdit *>("taskLog")->toPlainText()));
+        const auto result = view->result();
+        QCOMPARE(result.at("frame_stream_boundary").at("boundary").at("last_record"), Json("613510"));
+        QCOMPARE(result.at("frame_stream_boundary").at("boundary").at("last_execution"), Json("37104"));
+        QCOMPARE(result.at("frame_stream_boundary").at("boundary").at("missing_query_policy"), Json("fail"));
+        QCOMPARE(result.at("frame_complete"), Json(false));
+        bool copy = false, present = false;
+        for (const auto &row : result.at("resource_history")) {
+            if (row.value("source_record", "") == "613353") {
+                QCOMPARE(row.at("usage_name"), Json("CopyDst"));
+                QCOMPARE(row.at("queue"), Json("2130357605824"));
+                QCOMPARE(row.at("captured_call").at("arguments").at("Destination"), Json("2149283441408"));
+                const auto &range = row.at("operation_ranges").at("ranges").at(0);
+                QCOMPARE(range.at("kind"), Json("whole_resource"));
+                QCOMPARE(range.at("role"), Json("destination"));
+                copy = true;
+            }
+            if (row.value("source_record", "") == "613354") {
+                const auto &barrier = row.at("captured_resource_barriers").at(0);
+                QCOMPARE(barrier.at("StateBefore"), Json(1024));
+                QCOMPARE(barrier.at("StateAfter"), Json(0));
+                present = true;
+            }
+        }
+        QVERIFY(copy); QVERIFY(present);
+        const auto &operations = result.at("queue_context").at("operations");
+        size_t waitIndex = operations.size();
+        for (size_t i = 0; i < operations.size(); ++i)
+            if (operations[i].at("record") == "613363") waitIndex = i;
+        QVERIFY(waitIndex < operations.size());
+        const auto &wait = operations[waitIndex], &dependency = wait.at("dependency");
+        QCOMPARE(wait.at("wait"), Json(true));
+        QCOMPARE(wait.at("queue"), Json("2130357605824"));
+        QCOMPARE(wait.at("fence"), Json("2130586937488"));
+        QCOMPARE(wait.at("value"), Json("22430"));
+        QCOMPARE(dependency.at("dependency_status"), Json("resolved"));
+        QCOMPARE(dependency.at("producer_record"), Json("613342"));
+        QCOMPARE(dependency.at("producer_queue"), Json("2131165365824"));
+        QCOMPARE(dependency.at("producer_value"), Json("22430"));
+        QCOMPARE(result.at("queue_context").at("resource_dependency_proven"), Json(false));
+        view->exportResult(output + "/result.json");
+        const auto capture = QString::fromStdString(result.at("capture").get<std::string>());
+        QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+        auto wrong = result;
+        wrong["queue_context"]["operations"][waitIndex]["dependency"]["producer_value"] = "1";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        wrong = result;
+        wrong["queue_context"]["operations"][waitIndex]["dependency"]["producer_record"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        wrong = result;
+        wrong["queue_context"]["operations"][waitIndex]["dependency"]["fence"] = "1";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        auto sync = view->findChild<QTreeWidget *>("resourceHistorySynchronization");
+        sync->setCurrentItem(sync->topLevelItem(int(waitIndex)));
+        QVERIFY(action(*view, "locateResourceHistorySignal")->isEnabled());
+        ResourceHistoryView unresolved;
+        unresolved.setContext("cpu-unresolved-fixture", 37104, 506294, 2149283441408ULL, false, 613510);
+        wrong = result;
+        wrong["queue_context"]["operations"][waitIndex]["dependency"]["dependency_status"] = "unresolved_or_upstream";
+        QVERIFY(unresolved.finish(unresolved.requestId(), wrong));
+        auto unresolvedRows = unresolved.findChild<QTreeWidget *>("resourceHistorySynchronization");
+        unresolvedRows->setCurrentItem(unresolvedRows->topLevelItem(int(waitIndex)));
+        QVERIFY(!action(unresolved, "locateResourceHistorySignal")->isEnabled());
+        const auto old = view->requestId();
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        action(*view, "locateResourceHistorySignal")->trigger();
+        QCOMPARE(window.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 0);
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), 613342ULL);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(!view->finish(old, result));
+    }
     void frameEndResourceHistoryWorkspace() {
         const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_FRAME_RESOURCE_HISTORY_UI");

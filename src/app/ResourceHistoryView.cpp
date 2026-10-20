@@ -52,6 +52,9 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     cancel_ = tools->addAction("Cancel");
     locate_ = tools->addAction("Locate execution");
     locate_->setObjectName("locateResourceHistoryEvent");
+    producer_ = tools->addAction("Locate Fence producer");
+    producer_->setObjectName("locateResourceHistorySignal");
+    producer_->setToolTip("Locate the captured Signal that satisfies this queue Wait; this does not prove a resource dependency");
     export_ = tools->addAction("Export…");
     auto overview = tools->addAction("Creation / scope");
     connect(overview, &QAction::triggered, this, &ResourceHistoryView::showOverview);
@@ -107,9 +110,16 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
         if (!busy_ && item) emit recordRequested(item->data(0, Qt::UserRole).toULongLong());
     });
     connect(synchronization_, &QTreeWidget::itemSelectionChanged, this, [this] {
+        updateActions();
         if (auto item = synchronization_->currentItem(); item && !result_.is_null())
             details_->setPlainText(QString::fromStdString(result_.at("queue_context").at("operations")
                 .at(item->data(0, Qt::UserRole + 1).toULongLong()).dump(2)));
+    });
+    connect(producer_, &QAction::triggered, this, [this] {
+        if (!producer_->isEnabled()) return;
+        const auto &row = result_.at("queue_context").at("operations")
+            .at(synchronization_->currentItem()->data(0, Qt::UserRole + 1).toULongLong());
+        emit recordRequested(identity(row.at("dependency").at("producer_record")));
     });
     connect(backend_, &QAction::triggered, this, [this] {
         const auto path = QFileDialog::getOpenFileName(this, "Select RenderDoc 1.45", library_,
@@ -175,6 +185,15 @@ void ResourceHistoryView::updateActions() {
     export_->setEnabled(!busy_ && !result_.is_null());
     locate_->setEnabled(!busy_ && rows_->currentItem() &&
                         rows_->currentItem()->data(0, Qt::UserRole).isValid());
+    bool producerAvailable = false;
+    if (!busy_ && synchronization_->currentItem() && !result_.is_null()) {
+        const auto &row = result_.at("queue_context").at("operations")
+            .at(synchronization_->currentItem()->data(0, Qt::UserRole + 1).toULongLong());
+        const auto dependency = row.value("dependency", Json::object());
+        producerAvailable = row.at("wait").get<bool>() && dependency.value("condition", "") == "queue_signal" &&
+                            dependency.value("dependency_status", "") == "resolved";
+    }
+    producer_->setEnabled(producerAvailable);
 }
 ResourceHistoryView::Json ResourceHistoryView::request() const {
     if (key_.isEmpty() || !execution_ || !creation_ || !object_)
@@ -227,8 +246,21 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
             context.at("resource_dependency_proven") != false || context.at("gpu_stall_duration_measured") != false ||
             (frameEndRecord_ && context.at("through_record") != std::to_string(frameEndRecord_)))
             throw std::runtime_error("Invalid resource queue-context scope");
-        for (const auto &row : context.at("operations"))
+        for (const auto &row : context.at("operations")) {
             for (const auto key : {"record", "queue", "fence"}) (void)identity(row.at(key));
+            if (!row.at("wait").get<bool>()) continue;
+            const auto &dependency = row.at("dependency");
+            if (dependency.value("condition", "") == "queue_signal") {
+                for (const auto key : {"record", "queue", "fence", "value"})
+                    if (dependency.at(key) != row.at(key))
+                        throw std::runtime_error("Fence producer link belongs to another Wait");
+                for (const auto key : {"producer_record", "producer_queue", "producer_value"})
+                    (void)identity(dependency.at(key));
+                if (identity(dependency.at("producer_record")) > identity(context.at("through_record")) ||
+                    identity(dependency.at("producer_value")) < identity(row.at("value")))
+                    throw std::runtime_error("Fence producer does not satisfy the inspected Wait boundary");
+            }
+        }
     }
     const QSignalBlocker block(rows_), syncBlock(synchronization_);
     result_ = result;
