@@ -1,6 +1,6 @@
 #include "InputMesh.h"
 #include "Assets.h"
-#include <qfloat16.h>
+#include "InputAttribute.h"
 #include <QCryptographicHash>
 #include <QByteArrayView>
 #include <algorithm>
@@ -14,31 +14,7 @@ namespace {
 using Json = nlohmann::json;
 void require(bool test, const char *reason) { if (!test) throw std::runtime_error(reason); }
 std::string name(ResourceId id) { uint64_t value{}; memcpy(&value, &id, 8); return "ResourceId::" + std::to_string(value); }
-uint32_t size(const ResourceFormat &f) {
-    require(f.type == ResourceFormatType::Regular && f.compCount >= 1 && f.compCount <= 4 &&
-            (f.compByteWidth == 1 || f.compByteWidth == 2 || f.compByteWidth == 4),
-            "Input mesh attribute needs a regular 8/16/32-bit format; packed formats are not implemented");
-    return f.compCount * f.compByteWidth;
-}
-float component(const uint8_t *data, const ResourceFormat &f) {
-    uint32_t u{}; memcpy(&u, data, f.compByteWidth);
-    int32_t s{};
-    if (f.compByteWidth == 1) s = int8_t(u);
-    else if (f.compByteWidth == 2) s = int16_t(u);
-    else memcpy(&s, &u, 4);
-    switch (f.compType) {
-    case CompType::Float:
-        if (f.compByteWidth == 2) { qfloat16 value; memcpy(&value, data, 2); return float(value); }
-        if (f.compByteWidth == 4) { float value; memcpy(&value, data, 4); return value; }
-        break;
-    case CompType::UInt: return float(u);
-    case CompType::SInt: return float(s);
-    case CompType::UNorm: return float(double(u) / double(f.compByteWidth == 4 ? UINT32_MAX : (1U << (f.compByteWidth * 8)) - 1));
-    case CompType::SNorm: return std::max(-1.0f, float(double(s) / double(f.compByteWidth == 4 ? INT32_MAX : (1U << (f.compByteWidth * 8 - 1)) - 1)));
-    default: break;
-    }
-    throw std::runtime_error("Unsupported input attribute component interpretation");
-}
+
 }
 InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescription &draw,
                                uint32_t instance, uint32_t attribute) {
@@ -47,7 +23,8 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
     require(instance < draw.numInstances, "Input instance is outside the draw");
     require(attribute < ia.layouts.size(), "Input attribute index is outside the layout");
     require(draw.numIndices && draw.numIndices <= 4000000, "Input mesh requires 1 to four million vertex/index references");
-    const auto &layout = ia.layouts[attribute]; const auto bytesPerElement = size(layout.format);
+    const auto &layout = ia.layouts[attribute]; const auto format = inputAttributeFormat(layout.format);
+    const auto bytesPerElement = format.bytes;
     require(layout.inputSlot < ia.vertexBuffers.size(), "Input attribute vertex buffer slot is unbound");
     const auto &vb = ia.vertexBuffers[layout.inputSlot];
     require(vb.resourceId != ResourceId::Null(), "Input vertex buffer is null");
@@ -58,10 +35,10 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
         uint32_t offset = entry.byteOffset;
         if (offset == D3D12Pipe::Layout::TightlyPacked) {
             require(!unknownOffset.contains(entry.inputSlot), "Append-aligned layout follows an unsupported packed format");
-            offset = nextOffset[entry.inputSlot];
+            offset = appendInputAttributeOffset(nextOffset[entry.inputSlot], entry.format);
         }
         try {
-            const auto width = size(entry.format); require(offset <= UINT32_MAX - width, "Input layout offset overflow");
+            const auto width = inputAttributeFormat(entry.format).bytes; require(offset <= UINT32_MAX - width, "Input layout offset overflow");
             nextOffset[entry.inputSlot] = offset + width; unknownOffset.erase(entry.inputSlot);
         } catch (const std::exception &) { unknownOffset.insert(entry.inputSlot); }
         layouts.push_back({{"index", i}, {"semantic", std::string(entry.semanticName.c_str())}, {"semantic_index", entry.semanticIndex},
@@ -111,11 +88,9 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
     require(raw.size() == length, "Truncated input vertex data"); result.rawVertices.assign(raw.begin(), raw.end());
     result.vertices.resize(size_t(vertexCount) * 16); result.indices.resize(size_t(draw.numIndices) * 4);
     for (uint64_t i = 0; i < vertexCount; ++i) {
-        float value[4]{0, 0, 0, 1};
         const auto source = raw.data() + (layout.perInstance ? 0 : i * vb.byteStride);
-        for (uint32_t c = 0; c < layout.format.compCount; ++c) value[c] = component(source + c * layout.format.compByteWidth, layout.format);
-        if (layout.format.BGRAOrder()) std::swap(value[0], value[2]);
-        memcpy(result.vertices.data() + i * 16, value, 16);
+        const auto value = inputAttributeValue({source, bytesPerElement}, layout.format);
+        memcpy(result.vertices.data() + i * 16, value.data(), 16);
     }
     for (size_t i = 0; i < references.size(); ++i) { const auto index = references[i] - minimum; memcpy(result.indices.data() + i * 4, &index, 4); }
     const auto digest = [](const auto &bytes) {
@@ -124,7 +99,7 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
     result.metadata = {{"vertexResourceId", name(vb.resourceId)}, {"vertexByteOffset", 0}, {"vertexByteStride", 16},
         {"indexResourceId", "input-remapped-indices"}, {"indexByteOffset", 0}, {"indexByteStride", 4}, {"baseVertex", 0},
         {"numIndices", draw.numIndices}, {"topology", uint32_t(ia.topology)},
-        {"format", {{"compType", 1}, {"compCount", 4}, {"compByteWidth", 4}}}, {"perspective_divide", false},
+        {"format", {{"compType", uint32_t(format.outputType)}, {"compCount", 4}, {"compByteWidth", 4}}}, {"perspective_divide", false},
         {"input", {{"attribute", attribute}, {"layouts", layouts}, {"vertex_buffers", bindings},
             {"first_vertex", std::to_string(minimum)}, {"vertex_span", std::to_string(vertexCount)},
             {"raw_vertex_offset", std::to_string(vb.byteOffset + relative)}, {"raw_vertex_bytes", std::to_string(length)},
@@ -134,7 +109,7 @@ InputMeshData readDx12InputMesh(IReplayController &controller, const ActionDescr
             {"index_width", indexed ? ia.indexBuffer.byteStride : 0}, {"indexed", indexed},
             {"instance", instance}, {"instance_count", draw.numInstances}, {"start_instance", draw.instanceOffset},
             {"start_index", draw.indexOffset}, {"start_vertex", draw.vertexOffset}, {"base_vertex", draw.baseVertex},
-            {"interpretation", "Selected input attribute converted to float32; exact original bytes retained separately"}}}};
+            {"interpretation", "Selected input attribute expanded to typed 32-bit components; integers retain all bits and exact original bytes are retained separately"}}}};
     return result;
 }
 }

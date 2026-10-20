@@ -6591,6 +6591,53 @@ Runtime SHA-256:
 patch SHA-256:
 `9679916b73c7fd43641198b169dbdb78cab04f09e69b23ff0072b4e3283b9ce4`.
 
+### Preserve typed DX12 input attributes and decode packed vertex formats
+
+The VSIn reader previously converted every integer attribute through float32.
+Values such as **16,777,217** and **4,294,967,295** therefore lost bits before
+reaching the geometry table/export. The reader now expands integer inputs into
+typed uint32/sint32 storage; the existing mesh model retains their exact numeric
+values. Float/normalized inputs retain float32 storage, with original input and
+index bytes exported separately. Integer OBJ exports identify their interpretation;
+the legacy float OBJ text remains unchanged so saved reports remain readable.
+
+The same path now decodes **R10G10B10A2_UNORM/UINT** and **R11G11B10_FLOAT**,
+and aligns APPEND_ALIGNED_ELEMENT offsets to the element's required 1/2/4-byte
+boundary. Unsupported format interpretations and truncated elements fail explicitly.
+The format/alignment rules follow Microsoft's
+[DX12 format support table](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/hardware-support-for-direct3d-12-0-formats),
+[input element description](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_input_element_desc),
+and [element alignment specification](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#4.4.6%20Element%20Alignment).
+
+Focused evidence (`input-attributes1`, GPU fixture source
+`tests/fixtures/dx12-input-attributes.cpp`): one native Draw of three vertices
+and two instances writes its IA-fetched inputs directly from VS to a UAV.
+Eight attribute readbacks compare **96 uint32 storage words exactly** against
+that native GPU output, including large unsigned/signed integers, both packed
+formats, R8/R16 input, and the second instance's uint4. The fixture explicitly
+constructs missing components for its scalar and float3 comparison vectors;
+typed default components also have a separate CPU check. The R16 attribute after
+R8 resolves to offset **46**, skipping padding byte **0x99** at offset 45. No
+GPA module is loaded. This fixture establishes the selected format conversions,
+not full geometry acceptance for all three captures.
+
+The saved-report workspace check verifies the eight typed tables, exact CSV/raw
+exports, selected-instance VS-debug handoff, and stale-result rejection. It reports
+**3 passed** including setup/cleanup (**248 ms**); screenshot
+`input-attributes-ui1/replay-mesh/integer-input.png`. The focused decoder checks
+report **4 passed** including setup/cleanup (**1 ms**), including sign extension,
+normalized values, packed subnormal/infinity/NaN, truncation and alignment overflow.
+The existing mesh-model executable passes. Builds **408/409** pass.
+
+One Talos compatibility comparison at execution **14835**, VSIn attribute **0**,
+retains exact original vertex bytes (**5,448**), index bytes (**1,272**), expanded
+vertices (**7,264**), remapped indices (**2,544**) and CSV/OBJ exports. Expanded
+vertex SHA-256: `79050ace6ec4c59f29f3b3ca70246182fc51100d85b39d372f6b35d849b78b0a`.
+Evidence: `talos-input-layout1`, `talos-input-layout2/comparison.json`.
+The indexed Talos frame has no Dispatch actions, so this work does not claim a
+Talos CS invocation validation. Historical query results, complete geometry/stage
+coverage and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -1,4 +1,6 @@
 #include "rdc/Assets.h"
+#include "rdc/InputAttribute.h"
+#include "application/ReplayMesh.h"
 #include <QFile>
 #include <QtTest>
 #include <bit>
@@ -29,6 +31,71 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void inputAttributePrecision() {
+        ResourceFormat f{}; f.type = ResourceFormatType::Regular; f.compByteWidth = 4;
+        f.compCount = 3; f.compType = CompType::UInt;
+        const uint32_t source[]{UINT32_MAX, 0x80000000, 16777217};
+        const auto bytes = std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(source), sizeof source);
+        auto value = inputAttributeValue(bytes, f);
+        QCOMPARE(value, (std::array<uint32_t, 4>{UINT32_MAX, 0x80000000, 16777217, 1}));
+        Json m{{"input", {{"first_vertex", "0"}}}, {"perspective_divide", false},
+            {"format", {{"compType", uint32_t(inputAttributeFormat(f).outputType)}, {"compCount", 4}, {"compByteWidth", 4}}},
+            {"vertexByteStride", 16}, {"indexResourceId", "ResourceId::0"}, {"indexByteStride", 0},
+            {"baseVertex", 0}, {"numIndices", 1}, {"topology", 1}};
+        const auto mesh = ReplayMesh::decode(m, {reinterpret_cast<const uint8_t *>(value.data()), 16}, {});
+        QCOMPARE(mesh.positions.at(0), (std::array<double, 4>{4294967295., 2147483648., 16777217., 1.}));
+        QVERIFY(mesh.csv().find("4294967295.0,2147483648.0,16777217.0,1.0") != std::string::npos);
+        QVERIFY(mesh.obj().find("Exact 32-bit values") != std::string::npos);
+        f.compType = CompType::SInt;
+        QCOMPARE(inputAttributeFormat(f).outputType, CompType::SInt);
+        QCOMPARE(inputAttributeValue(bytes, f), value);
+        f.compByteWidth = 1; f.compCount = 2;
+        const uint8_t small[]{0x80, 0xff};
+        QCOMPARE(inputAttributeValue(small, f), (std::array<uint32_t, 4>{0xffffff80, UINT32_MAX, 0, 1}));
+        f.compType = CompType::SNorm;
+        value = inputAttributeValue(small, f);
+        QCOMPARE(std::bit_cast<float>(value[0]), -1.f);
+        QCOMPARE(std::bit_cast<float>(value[1]), -1.f / 127.f);
+        QCOMPARE(std::bit_cast<float>(value[3]), 1.f);
+        f.compType = CompType::Float; f.compByteWidth = 4;
+        const uint32_t special[]{0x80000000, 0x7fc12345};
+        value = inputAttributeValue({reinterpret_cast<const uint8_t *>(special), sizeof special}, f);
+        QCOMPARE(value[0], special[0]); QCOMPARE(value[1], special[1]);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, inputAttributeValue({}, f));
+    }
+    void packedInputAttributes() {
+        ResourceFormat f{}; f.type = ResourceFormatType::R10G10B10A2; f.compCount = 4; f.compType = CompType::UInt;
+        const uint32_t packed = 1 | (511U << 10) | (1023U << 20) | (2U << 30);
+        const auto bytes = std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(&packed), 4);
+        QCOMPARE(inputAttributeFormat(f).bytes, 4U);
+        QCOMPARE(inputAttributeValue(bytes, f), (std::array<uint32_t, 4>{1, 511, 1023, 2}));
+        f.compType = CompType::UNorm;
+        const auto normalized = inputAttributeValue(bytes, f);
+        QCOMPARE(std::bit_cast<float>(normalized[0]), 1.f / 1023.f);
+        QCOMPARE(std::bit_cast<float>(normalized[1]), 511.f / 1023.f);
+        QCOMPARE(std::bit_cast<float>(normalized[2]), 1.f);
+        QCOMPARE(std::bit_cast<float>(normalized[3]), 2.f / 3.f);
+        f.compType = CompType::SInt;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, inputAttributeFormat(f));
+        f.type = ResourceFormatType::R11G11B10; f.compCount = 3; f.compType = CompType::Float;
+        uint32_t mini = 1 | ((15U << 6) << 11) | ((31U << 5) << 22);
+        auto value = inputAttributeValue({reinterpret_cast<const uint8_t *>(&mini), 4}, f);
+        QCOMPARE(std::bit_cast<float>(value[0]), std::ldexp(1.f, -20));
+        QCOMPARE(std::bit_cast<float>(value[1]), 1.f);
+        QVERIFY(std::isinf(std::bit_cast<float>(value[2])));
+        QCOMPARE(std::bit_cast<float>(value[3]), 1.f);
+        mini = (31U << 6) | 1;
+        value = inputAttributeValue({reinterpret_cast<const uint8_t *>(&mini), 4}, f);
+        QVERIFY(std::isnan(std::bit_cast<float>(value[0])));
+        QCOMPARE(appendInputAttributeOffset(1, f), 4U);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, appendInputAttributeOffset(UINT32_MAX, f));
+        f.type = ResourceFormatType::Regular; f.compType = CompType::UInt; f.compCount = 1; f.compByteWidth = 2;
+        QCOMPARE(appendInputAttributeOffset(1, f), 2U);
+        f.compByteWidth = 1;
+        QCOMPARE(appendInputAttributeOffset(1, f), 1U);
+        f.type = ResourceFormatType::BC1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, inputAttributeFormat(f));
+    }
     void textureReadbackSelection() {
         TextureDescription t{};
         t.dimension = 3;

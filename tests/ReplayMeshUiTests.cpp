@@ -19,6 +19,7 @@
 #include <QTableView>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <bit>
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
@@ -35,6 +36,47 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void typedInputAttributes() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_INPUT_ATTRIBUTES");
+        if (root.isEmpty()) QSKIP("Set the input-attribute GPU fixture reports directory");
+        const auto gpu = read(root + "/gpu.json").at("bits").get<std::vector<uint32_t>>();
+        QCOMPARE(gpu.size(), size_t(192));
+        ReplayMeshView view; view.resize(1300, 800); view.show(); view.setContext("typed-input", 1, true);
+        const auto stage = view.findChild<QComboBox *>("replayMeshStage"); stage->setCurrentIndex(stage->findData("VSIn"));
+        auto table = view.findChild<QTableView *>("replayMeshPositions");
+        auto attribute = view.findChild<QLineEdit *>("replayMeshAttribute");
+        auto instance = view.findChild<QLineEdit *>("replayMeshInstance");
+        QTemporaryDir exports; QSignalSpy invocation(&view, &ReplayMeshView::vertexDebugRequested);
+        for (unsigned a = 0; a < 8; ++a) {
+            const unsigned inst = a == 7 ? 1 : 0;
+            attribute->setText(QString::number(a)); instance->setText(QString::number(inst));
+            const auto directory = root + QString("/attribute-%1").arg(a);
+            const auto result = read(directory + "/result.json");
+            QVERIFY(result.at("gpa_modules_loaded").empty());
+            const auto type = result.at("mesh").at("format").at("compType").get<unsigned>();
+            QCOMPARE(type, a == 1 ? 5U : (a == 2 || a == 4) ? 1U : 4U);
+            const auto data = readBytes(directory + "/post_vertices.bin"); QCOMPARE(data.size(), qsizetype(48));
+            QVERIFY(view.finish(view.requestId(), result, directory)); QCOMPARE(table->model()->rowCount(), 3);
+            for (unsigned v = 0; v < 3; ++v) for (unsigned c = 0; c < 4; ++c) {
+                uint32_t actual{}; memcpy(&actual, data.constData() + (v * 4 + c) * 4, 4);
+                const auto expected = gpu.at((inst * 3 + v) * 32 + a * 4 + c);
+                QCOMPARE(actual, expected);
+                const auto numeric = type == 1 ? double(std::bit_cast<float>(expected))
+                    : type == 5 ? double(std::bit_cast<int32_t>(expected)) : double(expected);
+                QCOMPARE(table->model()->index(int(v), int(c + 1)).data().toString().toDouble(), numeric);
+            }
+            view.exportResult(exports.filePath("attribute.csv"));
+            QCOMPARE(readBytes(exports.filePath("attribute.csv")), readBytes(directory + "/post_vertices.csv"));
+            view.exportResult(exports.filePath("input.vbin"));
+            QCOMPARE(readBytes(exports.filePath("input.vbin")), readBytes(directory + "/input_vertices.bin"));
+            table->selectRow(2); invocation.clear(); action(view, "replayMeshDebugVertex")->trigger();
+            QCOMPARE(invocation.size(), 1); QCOMPARE(invocation[0][1].toUInt(), 2U); QCOMPARE(invocation[0][2].toUInt(), inst);
+            if (!output_.isEmpty() && a == 0) QVERIFY(view.grab().save(output_ + "/integer-input.png"));
+        }
+        const auto old = view.requestId(); instance->setText("0");
+        QVERIFY(view.result().is_null());
+        QVERIFY(!view.finish(old, read(root + "/attribute-7/result.json"), root + "/attribute-7"));
+    }
     void indirectMeshSelection() {
         const auto root = qEnvironmentVariable("FLORA_DX12_BF1_VERTEX_ROOT");
         if (root.isEmpty()) QSKIP("Set BF1 mesh evidence directory");

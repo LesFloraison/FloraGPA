@@ -12,6 +12,7 @@ struct ReplayMesh {
     uint64_t indexCount{}, candidateFaceCount{};
     uint64_t firstVertex{};
     bool perspectiveDivide = true;
+    bool integerInput = false;
     std::vector<std::array<double, 4>> positions;
     std::vector<std::array<uint64_t, 3>> faces;
     // First index/vertex ordinal referencing each displayed row. Unreferenced

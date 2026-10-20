@@ -52,6 +52,7 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
     const auto &format = m.at("format");
     // RenderDoc CompType: Float=1, UInt=4, SInt=5 (2/3 are normalized).
     const auto componentType = number(format.at("compType"), 5);
+    result.integerInput = m.contains("input") && (componentType == 4 || componentType == 5);
     if ((componentType != 1 && componentType != 4 && componentType != 5) || format.at("compByteWidth") != 4)
         throw std::runtime_error("Mesh component is not float32/uint32/sint32");
     result.components = uint32_t(number(format.at("compCount"), 4));
@@ -139,6 +140,7 @@ std::string ReplayMesh::csv() const {
 }
 std::string ReplayMesh::obj() const {
     std::string out = perspectiveDivide ? "# Post-shader positions. Perspective divide applied when w is available.\r\n"
+        : integerInput ? "# Selected integer input attribute. Exact 32-bit values. No perspective divide.\r\n"
         : "# Selected input attribute, converted to float32. No perspective divide.\r\n";
     for (const auto &p : positions) {
         const auto w = perspectiveDivide && components > 3 && p[3] != 0 ? p[3] : 1;
