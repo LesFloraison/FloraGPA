@@ -1,7 +1,7 @@
 // Manual diagnosis of a selected texel changing during Hellblade2 history.
 // MSVC C++20, include src and third_party; link bcrypt.lib. No RenderDoc import library.
 // Arguments: renderdoc.dll, dxcompiler.dll, capture.rdc, terminal RDC event,
-// x, y, new report.json, [--readback] resource creation records...
+// x, y, new report.json, [--readback] [--between-event event] resource creation records...
 // Two forced selections in one controller; only if both agree, query history
 // on the first resource. This is bounded fault diagnosis, not a soak test.
 #define NOMINMAX
@@ -12,6 +12,7 @@
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -85,8 +86,20 @@ int wmain(int argc, wchar_t **argv) try {
     const auto event = number(argv[4]), x = number(argv[5]), y = number(argv[6]);
     const auto resources = controller->GetResources();
     const auto textures = controller->GetTextures();
-    const bool readback = std::wstring(argv[8]) == L"--readback";
-    const int firstCreation = readback ? 9 : 8;
+    bool readback = false;
+    uint32_t betweenEvent{};
+    int firstCreation = 8;
+    while (firstCreation < argc) {
+        if (std::wstring(argv[firstCreation]) == L"--readback" && !readback) {
+            readback = true;
+            ++firstCreation;
+        } else if (std::wstring(argv[firstCreation]) == L"--between-event" && !betweenEvent &&
+                   firstCreation + 1 < argc) {
+            betweenEvent = number(argv[firstCreation + 1]);
+            if (!betweenEvent) throw std::runtime_error("Between-event must be nonzero");
+            firstCreation += 2;
+        } else break;
+    }
     if (argc <= firstCreation || argc - firstCreation > 8)
         throw std::runtime_error("Select one to eight resources");
     std::vector<ResourceId> selected;
@@ -151,17 +164,37 @@ int wmain(int argc, wchar_t **argv) try {
     };
     Json report{{"scope", "Two forced selections in one controller; conditional PixelHistory. No native/original-frame fidelity claim."},
         {"capture", utf8(fs::canonical(argv[3]))}, {"event", event}, {"x", x}, {"y", y},
-        {"resources", descriptions}, {"history_requested", false}};
+        {"resources", descriptions}, {"history_requested", false},
+        {"between_event", betweenEvent ? Json(betweenEvent) : Json()}};
+    std::function<void(const rdcarray<ActionDescription> &)> inspectActions;
+    inspectActions = [&](const auto &actions) {
+        for (const auto &action : actions) {
+            const std::string name(action.customName.c_str());
+            if (action.eventId == event) report["selection_action_name"] = name;
+            if (name.starts_with("Flora DX12 execution ") &&
+                (!report.contains("first_execution_marker") ||
+                 action.eventId < report["first_execution_marker"]["event"].get<uint32_t>()))
+                report["first_execution_marker"] = {{"event", action.eventId}, {"name", name}};
+            inspectActions(action.children);
+        }
+    };
+    inspectActions(controller->GetRootActions());
     controller->SetFrameEvent(event, true);
     check(controller->GetFatalErrorStatus());
     report["first"] = observe("first");
     check(controller->GetFatalErrorStatus());
+    if (betweenEvent) {
+        controller->SetFrameEvent(betweenEvent, true);
+        check(controller->GetFatalErrorStatus());
+    }
     controller->SetFrameEvent(event, true);
     check(controller->GetFatalErrorStatus());
     report["second"] = observe("second");
     check(controller->GetFatalErrorStatus());
     report["repeat_equal"] = report["first"] == report["second"];
-    if (report["repeat_equal"] == true) {
+    // An explicit round trip tests restoration only; do not add unrelated
+    // PixelHistory work at an initialization boundary.
+    if (report["repeat_equal"] == true && !betweenEvent) {
         report["history_requested"] = true;
         const auto modifications = controller->PixelHistory(selected.front(), x, y, Subresource(0, 0, 0), CompType::Typeless);
         report["history_events"] = modifications.size();

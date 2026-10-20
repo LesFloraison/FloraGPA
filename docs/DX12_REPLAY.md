@@ -8905,6 +8905,87 @@ The standalone fixture compiles successfully. Evidence remains ignored:
 There is no new application build or unrelated GPU regression in this milestone.
 The root cause, correct repeated replay and complete histories remain unfinished.
 
+### Separate history-input variation from initial-resource restoration
+
+Dispatch **36734**, source **611485**, RDC **90301**, binds a **50,496-byte**
+`MainCS` from PSO creation **530386**, object **2144334917152**. Offline export
+from the GPA directory and the bound replay shader have the same SHA-256:
+`6fdff4d9ff04a4123a009d4027893f4cfc8c00ed4fb8b0da7dffae8a5ebf6639`.
+Its **240 × 101 × 1** groups each contain **32 × 1 × 1** threads. The two
+`SceneColorOutputMip` UAVs correctly select mip **0** and **1** of creation
+**531690**; this investigation does not reproduce a duplicate-mip binding.
+The shader also reads current color, previous history, rejection masks,
+velocity and filtering data.
+
+A bounded **768-byte** read of `_RootShaderParameters` at buffer creation
+**537415**, byte offset **1574912**, confirms current input, history output and
+previous-history viewport minima **(0,0)** and maxima **(1920,803)**. Input
+pixel maxima are **(1919,802)**, camera-cut flag **0**, history sample count
+**16**. Offsets come from the exported DXIL layout, not inferred allocation
+dimensions. The subsequent CPU comparison uses that viewport:
+
+| Creation | Binding | Changed pixels inside viewport | Outside viewport |
+| --- | --- | ---: | ---: |
+| 531690 | SceneColorOutputMip0 | 8,251 | 0 |
+| 571434 | InputSceneColorTexture | 14,369 | 2,385 |
+| 562426 | PrevHistory_HighFrequency | 2,741 | 0 |
+| 562670 | PrevHistory_Metadata | 1,945 | 0 |
+| 573358 | HistoryRejectionTexture | 16,959 | 2,565 |
+| 570657 | DilatedVelocityTexture | 0 | 0 |
+| 515054 | NoiseFilteringTexture | 971 | 0 |
+| 535587 | AntiAliasingTexture | 6 | 0 |
+
+These are two forced selections of the same dispatch within one controller,
+with bounded per-resource readbacks, not two independent native captures.
+Pixel History is not called. This identifies changing inputs; it does not
+prove this shader's intermediate arithmetic or explain their cause. In
+particular a selected pixel can remain unchanged while its whole input varies.
+
+Resource History also shows that `PrevHistory_HighFrequency` is not merely an
+immutable initial texture: it is a UAV at earlier Dispatch **23063**, source
+**593614**, RDC **44652**, before becoming an input to 36734. Its native resource
+is committed, with a captured initial-contents record. Current input color
+**571434** has its latest candidate UAV writer at Dispatch **36656**, source
+**611384**, RDC **90033**, after Discard **36566** / source **611282**.
+Both usage queries have zero mapping gaps and do not select/replay an analysis
+event; capture loading may still execute GPU work. UAV usage remains candidate
+write evidence, not a complete per-thread access observation.
+
+The manual probe now supports `--between-event <eid>` to test a bounded
+restoration round trip. It observes its selected boundary, forces the supplied
+intermediate event, then observes the original boundary again. This mode never
+adds Pixel History. It also records the selected action name and first original
+execution marker, and checks backend fatal status after replay/inspection.
+For example:
+
+```powershell
+<probe.exe> <renderdoc.dll> <dxcompiler.dll> <full-stream.rdc> `
+  327 22 0 <new-report.json> --readback --between-event 90301 `
+  531690 562426 571434 573358
+```
+
+Event **327** is confirmed as the first original execution marker:
+execution **9701**, source **578129**, before its `EndQuery`. After the
+intervening selection of 90301, all four selected mip-0 textures return to
+exactly the same full storage bytes. Their sizes are **9,216,000** bytes each
+for 531690/562426/571434 and **4,608,000** for 573358. This rules out directly
+retaining the changed results in these four checked subresources at that
+boundary. It does not validate every initial resource, descriptor, constant,
+queue or shader dependency; it does not establish a general replay fix.
+
+The extended standalone fixture compiles and the round-trip check completes
+without backend fatal error. Evidence remains ignored:
+`hellblade-color36734-pipeline1`, `hellblade-tsr-shader1`,
+`hellblade-tsr-repeat1.json`, `hellblade-tsr-repeat1-difference.json`,
+`hellblade-prevhistory-usage1`, `hellblade-tsr-input-history1`,
+`hellblade-tsr-initial-roundtrip1.json`, their bounded raw readbacks,
+`hellblade-tsr-constants1/{buffer.bin,decoded.json,result.json}` and
+`build-repeat-selection6.log`. All GPU work serves this specific variation;
+no new native capture or broad sample regression is run.
+The remaining investigation starts at current-color producer **36656** and
+the earlier history chain. Original-frame fidelity and full acceptance remain
+unfinished; no default replay behavior or arithmetic policy is changed here.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
