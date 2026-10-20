@@ -1267,26 +1267,41 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty()) QSKIP("Set Talos capture for the local SDK/device configuration");
         dx12::StreamDirectory directory(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
-        dx12::NativeDevice device(directory, true); dx12::NativeTimeline timeline(device.device(), 3);
+        dx12::NativeDevice device(directory, true); dx12::NativeTimeline timeline(device.device(), 3, 3);
         uint64_t submission = 9007199254740993ULL;
         for (const auto type : {D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_TYPE_COMPUTE, D3D12_COMMAND_LIST_TYPE_COPY}) {
             Microsoft::WRL::ComPtr<ID3D12CommandQueue> queue;
             Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator;
             Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list;
-            Microsoft::WRL::ComPtr<ID3D12Fence> fence;
+            Microsoft::WRL::ComPtr<ID3D12Fence> fence, gate;
             D3D12_COMMAND_QUEUE_DESC desc{}; desc.Type = type;
             QVERIFY(SUCCEEDED(device.device()->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue))));
             QVERIFY(SUCCEEDED(device.device()->CreateCommandAllocator(type, IID_PPV_ARGS(&allocator))));
             QVERIFY(SUCCEEDED(device.device()->CreateCommandList(0, type, allocator.Get(), nullptr, IID_PPV_ARGS(&list))));
             QVERIFY(SUCCEEDED(device.device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))));
+            QVERIFY(SUCCEEDED(device.device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&gate))));
+            // A failed assertion must still release the queued GPU Wait.
+            struct ReleaseGate { ID3D12Fence *fence; ~ReleaseGate() { fence->Signal(1); } } release{gate.Get()};
             const auto entry = timeline.begin(list.Get(), {{"submission", std::to_string(submission)},
                 {"queue", std::to_string(submission)}, {"command_list", "7"}, {"generation", "1"},
                 {"list_ordinal", "0"}, {"first_execution", nullptr}, {"execution_count", "0"}});
             timeline.end(list.Get(), entry); QVERIFY(SUCCEEDED(list->Close()));
             timeline.beforeSubmit(submission, queue.Get());
             ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists);
+            const auto waitRecord = submission + 100;
+            timeline.beforeWait(waitRecord, submission, queue.Get());
             QVERIFY(SUCCEEDED(queue->Signal(fence.Get(), 1)));
+            QVERIFY(SUCCEEDED(queue->Wait(gate.Get(), 1)));
+            timeline.afterWait(waitRecord, queue.Get());
+            timeline.synchronization(waitRecord, submission, submission + 200, 1, true);
             QTRY_VERIFY_WITH_TIMEOUT(fence->GetCompletedValue() >= 1, 5000);
+            // The first timestamp has completed; deliberately keep the GPU
+            // gate closed so this checks a real wait rather than two empty lists.
+            QTest::qWait(20);
+            QVERIFY(SUCCEEDED(gate->Signal(1)));
+            QVERIFY(SUCCEEDED(queue->Signal(fence.Get(), 2)));
+            QTRY_VERIFY_WITH_TIMEOUT(fence->GetCompletedValue() >= 2, 5000);
+            timeline.afterQueueComplete(submission, queue.Get());
             timeline.afterComplete(submission, queue.Get()); ++submission;
         }
         const auto result = timeline.result(); QCOMPARE(result.at("entries").size(), size_t(3));
@@ -1297,6 +1312,22 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QVERIFY(row.at("first_execution").is_null());
         }
         QVERIFY(measured >= 2); QVERIFY(calibrated >= 2);
+        QCOMPARE(result.at("synchronization").size(), size_t(3));
+        for (const auto &row : result.at("synchronization")) {
+            const auto &bracket = row.at("gpu_wait_bracket");
+            QCOMPARE(bracket.at("record"), row.at("record")); QCOMPARE(bracket.at("queue"), row.at("queue"));
+            QCOMPARE(bracket.at("pure_fence_stall_measured"), nlohmann::json(false));
+            QVERIFY(row.at("gpu_wait_duration").is_null());
+            if (bracket.at("status") == "measured") {
+                QVERIFY(bracket.at("duration_seconds").get<double>() >= 0.015);
+                const auto begin = std::stoull(bracket.at("timestamp_begin").get<std::string>());
+                const auto end = std::stoull(bracket.at("timestamp_end").get<std::string>());
+                const auto frequency = std::stoull(bracket.at("timestamp_frequency_hz").get<std::string>());
+                QCOMPARE(bracket.at("duration_seconds").get<double>(), double(end - begin) / double(frequency));
+                qInfo() << "GPU Wait bracket queue type" << bracket.at("queue_type").get<unsigned>()
+                        << "seconds" << bracket.at("duration_seconds").get<double>();
+            }
+        }
         qInfo() << "Queue timestamp support" << measured << "calibrated queues" << calibrated;
         const auto info = device.information();
         const auto output = qEnvironmentVariable("FLORA_DX12_TIMELINE_PROBE");
@@ -2249,6 +2280,122 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
+    }
+    void hellbladeWaitBracketEvidence() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto saved = qEnvironmentVariable("FLORA_HELLBLADE_WAIT_BRACKETS");
+        const auto output = qEnvironmentVariable("FLORA_HELLBLADE_WAIT_OUTPUT");
+        if (root.isEmpty() || saved.isEmpty() || output.isEmpty())
+            QSKIP("Set Hellblade capture, saved Wait-bracket report and a new output directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile file(saved); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = Json::parse(file.readAll().toStdString());
+        QCOMPARE(report.at("completed"), Json(true));
+        QCOMPARE(report.at("device").at("validation_error_count"), Json("0"));
+        QCOMPARE(report.at("execution"), Json("16641"));
+        const auto &timeline = report.at("performance").at("timeline");
+        QCOMPARE(timeline.at("entries").size(), size_t(72));
+        size_t waits{};
+        std::map<uint64_t, const Json *> brackets;
+        for (const auto &row : timeline.at("synchronization")) {
+            QVERIFY(row.at("gpu_wait_duration").is_null());
+            if (row.at("operation") != "queue_wait") { QVERIFY(!row.contains("gpu_wait_bracket")); continue; }
+            ++waits;
+            const auto &bracket = row.at("gpu_wait_bracket");
+            QCOMPARE(bracket.at("status"), Json("measured"));
+            QCOMPARE(bracket.at("record"), row.at("record")); QCOMPARE(bracket.at("queue"), row.at("queue"));
+            QCOMPARE(bracket.at("includes_instrumentation_overhead"), Json(true));
+            QCOMPARE(bracket.at("pure_fence_stall_measured"), Json(false));
+            const auto begin = std::stoull(bracket.at("timestamp_begin").get<std::string>());
+            const auto end = std::stoull(bracket.at("timestamp_end").get<std::string>());
+            const auto hz = std::stoull(bracket.at("timestamp_frequency_hz").get<std::string>());
+            QVERIFY(end >= begin); QVERIFY(hz);
+            QCOMPARE(bracket.at("duration_seconds").get<double>(), double(end - begin) / double(hz));
+            QVERIFY(brackets.emplace(std::stoull(row.at("record").get<std::string>()), &bracket).second);
+        }
+        QCOMPARE(waits, size_t(32));
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(
+                (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+            dx12::SubmissionIndex submissions(directory);
+            const auto boundary = submissions.execution(16641).submission;
+            std::map<uint64_t, const dx12::QueueSynchronization *> expected;
+            for (const auto &sync : submissions.synchronization())
+                if (sync.wait && sync.record > directory.initializationCount() && sync.record <= boundary)
+                    expected.emplace(sync.record, &sync);
+            QCOMPARE(expected.size(), waits);
+            for (const auto &row : timeline.at("synchronization")) {
+                if (row.at("operation") != "queue_wait") continue;
+                const auto record = std::stoull(row.at("record").get<std::string>());
+                const auto it = expected.find(record); QVERIFY(it != expected.end());
+                QCOMPARE(row.at("queue"), Json(std::to_string(it->second->queue)));
+                QCOMPARE(row.at("fence"), Json(std::to_string(it->second->fence)));
+                QCOMPARE(row.at("value"), Json(std::to_string(it->second->value)));
+                expected.erase(it);
+            }
+            QVERIFY(expected.empty());
+        }
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        QVERIFY(locate); locate->setText("16641"); QTest::keyClick(locate, Qt::Key_Return);
+        auto metrics = window.findChild<RdcCountersView *>();
+        const auto request = metrics->requestId();
+        auto fallback = report;
+        for (auto &row : fallback["performance"]["timeline"]["synchronization"])
+            if (row.contains("gpu_wait_bracket")) {
+                row["gpu_wait_bracket"]["clock_scope"] = "queue_only";
+                row["gpu_wait_bracket"]["begin_seconds"] = nullptr;
+                row["gpu_wait_bracket"]["end_seconds"] = nullptr;
+            }
+        QVERIFY(metrics->finishNative(request, fallback));
+        auto fallbackTree = metrics->findChild<QTreeWidget *>("rdcReplayTimeline");
+        size_t queueOnly{};
+        for (int q = 0; q < fallbackTree->topLevelItemCount(); ++q) {
+            const auto parent = fallbackTree->topLevelItem(q);
+            for (int i = 0; i < parent->childCount(); ++i)
+                if (parent->child(i)->text(2).startsWith("Queue ") && parent->child(i)->text(2).contains("Wait bracket")) ++queueOnly;
+        }
+        QCOMPARE(queueOnly, waits);
+        QVERIFY(metrics->finishNative(request, report));
+        auto tree = metrics->findChild<QTreeWidget *>("rdcReplayTimeline");
+        QTreeWidgetItem *selected{};
+        size_t visible{};
+        for (int q = 0; q < tree->topLevelItemCount(); ++q) {
+            const auto parent = tree->topLevelItem(q);
+            for (int i = 0; i < parent->childCount(); ++i) {
+                const auto item = parent->child(i);
+                const auto record = item->data(0, Qt::UserRole + 3).toULongLong();
+                if (!brackets.contains(record)) continue;
+                ++visible; selected = item;
+                const auto &bracket = *brackets.at(record);
+                QVERIFY(item->text(2).contains("Wait bracket"));
+                QCOMPARE(item->text(4), QString::number(bracket.at("duration_seconds").get<double>() * 1e6, 'f', 3));
+                QVERIFY(item->data(5, Qt::UserRole + 2).isValid());
+                QVERIFY(item->toolTip(0).contains("overhead"));
+            }
+        }
+        QCOMPARE(visible, waits); QVERIFY(selected);
+        metrics->exportResult(output + "/workspace.json");
+        auto corrupted = report;
+        for (auto &row : corrupted["performance"]["timeline"]["synchronization"])
+            if (row.contains("gpu_wait_bracket")) { row["gpu_wait_bracket"]["record"] = "1"; break; }
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finishNative(request, corrupted));
+        corrupted = report;
+        for (auto &row : corrupted["performance"]["timeline"]["synchronization"])
+            if (row.contains("gpu_wait_bracket")) { row["gpu_wait_bracket"]["duration_seconds"] = -1.0; break; }
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finishNative(request, corrupted));
+        const auto record = selected->data(0, Qt::UserRole + 3).toULongLong();
+        window.findChild<QLineEdit *>("apiSearch")->setText("hidden-wait");
+        metrics->findChild<QTabWidget *>("rdcCounterTabs")->setCurrentWidget(tree);
+        tree->setCurrentItem(selected); metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+        QCOMPARE(window.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 0);
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), record);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(!metrics->finishNative(request, report)); QVERIFY(metrics->result().is_null());
     }
     void hellbladeFramePerformanceEvidence() {
         using Json = nlohmann::json;

@@ -61,6 +61,29 @@ void validateSynchronization(const Json &timeline, uint64_t lastRecord) {
             throw std::runtime_error("Invalid or out-of-bound timeline synchronization record");
         (void)decimal(row.at("queue")); (void)decimal(row.at("fence"));
         (void)decimal(row.at("value"), false); (void)decimal(row.at("cpu_observed_qpc"), false);
+        if (row.contains("gpu_wait_bracket")) {
+            const auto &bracket = row.at("gpu_wait_bracket");
+            if (row.at("operation") != "queue_wait" || bracket.at("record") != row.at("record") ||
+                bracket.at("queue") != row.at("queue") || bracket.at("scope") != "queue_wait_bracket" ||
+                bracket.at("source") != "native_d3d12_queries" || bracket.at("includes_instrumentation_overhead") != true ||
+                bracket.at("pure_fence_stall_measured") != false)
+                throw std::runtime_error("Wait bracket does not match its synchronization record");
+            if (bracket.at("status") == "measured") {
+                const auto begin = decimal(bracket.at("timestamp_begin"), false), end = decimal(bracket.at("timestamp_end"), false);
+                const auto frequency = decimal(bracket.at("timestamp_frequency_hz"), false);
+                if (end < begin || (frequency && (!bracket.at("duration_seconds").is_number() ||
+                    bracket.at("duration_seconds").get<double>() != double(end - begin) / double(frequency))) ||
+                    (!frequency && !bracket.at("duration_seconds").is_null()))
+                    throw std::runtime_error("Invalid Wait bracket timestamps or duration");
+                if (bracket.at("clock_scope") == "calibrated_cpu_qpc") {
+                    const auto a = bracket.at("begin_seconds").get<double>(), b = bracket.at("end_seconds").get<double>();
+                    if (!frequency || !std::isfinite(a) || !std::isfinite(b) || b < a)
+                        throw std::runtime_error("Invalid calibrated Wait bracket");
+                } else if (bracket.at("clock_scope") != "queue_only")
+                    throw std::runtime_error("Unknown Wait bracket clock");
+            } else if (bracket.at("status") != "unsupported")
+                throw std::runtime_error("Unknown Wait bracket measurement status");
+        }
     }
 }
 QTreeWidget *table(const char *name, const QStringList &columns) {
@@ -657,7 +680,11 @@ void RdcCountersView::render() {
         std::map<std::string, uint64_t> origins;
         std::map<std::string, std::pair<double, double>> ranges;
         std::map<std::string, QTreeWidgetItem *> queues;
-        for (const auto &row : entries) if (row.at("status") == "measured") {
+        std::vector<const Json *> intervals;
+        for (const auto &row : entries) intervals.push_back(&row);
+        for (const auto &row : data.at("synchronization"))
+            if (row.contains("gpu_wait_bracket")) intervals.push_back(&row.at("gpu_wait_bracket"));
+        for (const auto entry : intervals) if (const auto &row = *entry; row.at("status") == "measured") {
             const auto queue = row.at("queue").get<std::string>(); const auto tick = decimal(row.at("timestamp_begin"), false);
             const auto it = origins.find(queue); if (it == origins.end() || tick < it->second) origins[queue] = tick;
         }
@@ -669,7 +696,7 @@ void RdcCountersView::render() {
                 double(decimal(row.at("timestamp_end"), false) - origin) / double(frequency)};
         };
         auto clock = [](const Json &row) { return row.at("clock_scope") == "calibrated_cpu_qpc" ? std::string("QPC") : "Queue " + row.at("queue").get<std::string>(); };
-        for (const auto &row : entries) if (row.at("status") == "measured" && row.at("duration_seconds").is_number()) {
+        for (const auto entry : intervals) if (const auto &row = *entry; row.at("status") == "measured" && row.at("duration_seconds").is_number()) {
             const auto key = clock(row); const auto span = interval(row); const auto found = ranges.find(key);
             if (found == ranges.end()) ranges[key] = span;
             else { found->second.first = std::min(found->second.first, span.first); found->second.second = std::max(found->second.second, span.second); }
@@ -701,6 +728,19 @@ void RdcCountersView::render() {
             item->setData(0, Qt::UserRole + 3, qulonglong(decimal(row.at("record"))));
             item->setToolTip(0, "CPU record " + text(row.at("record")) + "; Fence value " + text(row.at("value")) +
                 "; GPU wait duration was not measured. Double-click to locate this API record.");
+            if (row.contains("gpu_wait_bracket")) {
+                const auto &bracket = row.at("gpu_wait_bracket");
+                item->setToolTip(0, "CPU record " + text(row.at("record")) + "; Fence value " + text(row.at("value")) +
+                    "; GPU Wait bracket includes timestamp, submission and scheduling overhead; pure Fence stall time is not measured.");
+                if (bracket.at("status") == "measured" && bracket.at("duration_seconds").is_number()) {
+                    const auto span = interval(bracket), range = ranges.at(clock(bracket));
+                    item->setText(2, QString::fromStdString(clock(bracket)) + " · Wait bracket");
+                    item->setText(3, QString::number(span.first * 1000, 'f', 6));
+                    item->setText(4, QString::number(bracket.at("duration_seconds").get<double>() * 1e6, 'f', 3));
+                    if (range.second > range.first) item->setData(5, Qt::UserRole + 2,
+                        QVariantList{(span.first - range.first) / (range.second - range.first), (span.second - range.first) / (range.second - range.first)});
+                } else item->setText(2, "Wait bracket unavailable");
+            }
         }
         if (entries.size() <= 128) timeline_->expandAll();
     }

@@ -10942,10 +10942,63 @@ unstabilized clocks and conservative host drains, not original-application
 timing. GPU Fence stall durations, vendor counters and complete frame fidelity
 remain unverified; reaching the end of the stream does not establish them.
 
+### GPU timestamp brackets around queue Waits
+
+Native performance replay now places timestamp-only helper command lists
+immediately before and after each captured queue `Wait`. Query storage is
+bounded and shared by queue type; command allocators and lists remain alive
+through queue completion. The completion drain supplies the second clock
+calibration. The same range/drift validation as submitted-list intervals
+determines whether a Wait can use the common CPU-QPC axis or must remain
+queue-local. Copy-queue timestamps are conditional on device support.
+
+Each synchronization row retains its exact CPU record, queue, fence and
+64-bit value and may now contain `gpu_wait_bracket`. This measures elapsed GPU
+time between the two helper timestamps, including submission, timestamp and
+scheduling overhead. It is **not pure Fence stall time**: the existing
+`gpu_wait_duration` remains null, and the bracket explicitly reports
+`includes_instrumentation_overhead: true` and
+`pure_fence_stall_measured: false`. Signal rows remain CPU observations.
+Replay Timeline displays the bracket duration, clock and interval bar while
+preserving CPU-record navigation and export.
+
+A controlled probe gates Direct, Compute and Copy queues with an unsignaled
+Fence. After confirming the first timestamp completed, it holds the gate for
+20 ms before releasing it. All three measured brackets exceed 15 ms
+(approximately **90.58**, **85.32** and **23.27 ms**, including host polling and
+submission overhead), with zero D3D12 validation errors. This checks a real
+GPU wait rather than merely timing adjacent empty command lists.
+
+One Hellblade2 replay through execution **16641** then verifies the real
+scheduler path. It retains **72 measured submitted lists** and **85 queue
+synchronization observations**. All **32 Waits** have measured, calibrated
+brackets: **28** are satisfied by initial Fence values and **four** depend on
+prior frame Signals. The four latter records **594612, 594613, 594614, 594633**
+measure approximately **8.22, 5.44, 6.05, 7.81 microseconds** in this sample.
+These durations do not prove the consumer was stalled: even already-satisfied
+Waits include instrumentation overhead. Executed command counts and submitted
+instances exactly match the preceding prefix report. SDK 616 reports zero
+validation errors; its 77 loaded modules contain no GPA/Python modules.
+
+Saved-report workspace checks match all Wait identities against the capture,
+verify displayed durations/bars/export, reject another record's bracket and a
+negative duration, and check filtered navigation and stale-result rejection.
+A forced queue-local report checks the calibration-unavailable display path;
+the prior full-stream report without brackets remains readable. No second
+native replay is needed for these UI checks.
+
+Evidence: `wait-bracket-probe1.{json,txt}`,
+`hellblade-wait-brackets1/{report,comparison}.json`,
+`hellblade-wait-bracket-ui{1,2}/workspace.json`,
+`wait-bracket-workspace{1,2}.txt`, and `build-wait-brackets{1,2,3,4}.log`.
+Full-frame Wait coverage on all three samples, original application
+concurrency and pure GPU Fence stall attribution remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| Queue Wait GPU intervals | Not verified | Not verified on captured work; local SDK/device used by the controlled queue probe | Selected execution 16641 prefix has 32 calibrated Wait brackets, including four prior-Signal dependencies; exact record mapping, timeline bars, queue-local fallback, export and navigation verified; measured intervals include overhead, pure Fence stall attribution and full-frame coverage unfinished |
 | Mesh shader replacement and primitive attribute export | Not exercised | Not exercised | MS-only replacement in PSO 515336 preserves original PS/root, produces 65,536 exact controlled texels and one triangle; undo restores original mask/depth with known raw-index variation; corrected offsets and reflection expose 96,731 primitive rows, typed vertex/primitive selection, meshlet-local identities, raw/CSV export and provenance; unsupported scalar layouts and AS/MS debugging remain unavailable |
 | PS debugging after Mesh Dispatch | Not verified on this sample | Not verified on this sample | Execution 10267 yields 38 PS steps; stage-specific workspace entry, breakpoint, exact 64-bit Watch and stale-result rejection verified; packed operand matches one GPU texel observation but the texel changes during debug replays, correctly reported partial; AS/MS and complete fidelity unfinished |
 | Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; coherent same-context readbacks show all 19,702 written pixels preserve visible-entry words, local primitive and depth despite a one-to-one remapping of 486 indices; raw undo equivalence still fails, and full referenced scene data/fidelity remain unverified |

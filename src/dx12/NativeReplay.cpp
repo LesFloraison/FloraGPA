@@ -679,7 +679,11 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
     }
     for (const auto &[key, native] : recordings)
         starts[s.index.recordings()[key.first].begin].push_back(key);
-    if (performance) frame->timeline = std::make_unique<NativeTimeline>(s.device.device(), recordings.size());
+    if (performance) {
+        const auto waits = std::count_if(s.index.synchronization().begin(), s.index.synchronization().end(),
+            [](const auto &operation) { return operation.wait; });
+        frame->timeline = std::make_unique<NativeTimeline>(s.device.device(), recordings.size(), size_t(waits));
+    }
     s.frame = std::move(frame);
 }
 void NativeReplay::Impl::recordFrame(uint64_t id) {
@@ -991,8 +995,11 @@ void NativeReplay::Impl::executeFrameOperation(uint64_t id) {
         s.dirtyQueues.insert(queue);
         if (p.type == 0x12548dab1bf2dULL)
             check(nativeQueue->Signal(nativeFence, value), "Replay frame signal");
-        else
+        else {
+            if (s.frame->timeline) s.frame->timeline->beforeWait(id, queue, nativeQueue);
             check(nativeQueue->Wait(nativeFence, value), "Replay frame wait");
+            if (s.frame->timeline) s.frame->timeline->afterWait(id, nativeQueue);
+        }
         if (s.frame->timeline)
             s.frame->timeline->synchronization(id, queue, fence, value, p.type == 0x12548db3bfde2ULL);
     }
@@ -1041,8 +1048,10 @@ void NativeReplay::Impl::drainFrame(uint64_t record, const char *reason) {
     if (dirtyQueues.empty())
         return;
     const auto pending = pendingSubmissions.size();
-    for (const auto queueId : dirtyQueues)
+    for (const auto queueId : dirtyQueues) {
         wait(queue(queueId));
+        if (frame->timeline) frame->timeline->afterQueueComplete(queueId, queue(queueId));
+    }
     for (auto &submission : pendingSubmissions) {
         if (frame->timeline) frame->timeline->afterComplete(submission.record, queue(submission.queue));
         for (const auto &list : submission.lists) {
