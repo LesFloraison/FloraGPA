@@ -209,6 +209,7 @@ class Session {
     uint32_t layerTestHistoryPatch{};
     uint32_t bgraHistoryPatch{};
     uint32_t emptyPixelInputsPatch{};
+    uint32_t uploadWriteWatchPatch{};
     using LayerTestStats = void (RENDERDOC_CC *)(uint32_t *, uint32_t *, uint32_t *);
     LayerTestStats layerTestStats{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
@@ -362,6 +363,10 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12EmptyPixelInputsPatchVersion"))) {
             emptyPixelInputsPatch = patch();
             if (emptyPixelInputsPatch != 1) throw std::runtime_error("Unsupported DX12 empty pixel inputs patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12UploadWriteWatchPatchVersion"))) {
+            uploadWriteWatchPatch = patch();
+            if (uploadWriteWatchPatch != 1) throw std::runtime_error("Unsupported DX12 upload write-watch patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1520,6 +1525,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_layer_test_history_patch", session.layerTestHistoryPatch},
         {"backend_dx12_bgra_history_patch", session.bgraHistoryPatch},
         {"backend_dx12_empty_pixel_inputs_patch", session.emptyPixelInputsPatch},
+        {"backend_dx12_upload_write_watch_patch", session.uploadWriteWatchPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},

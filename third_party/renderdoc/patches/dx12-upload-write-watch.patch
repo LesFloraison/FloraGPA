@@ -1,0 +1,28 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_device_rescreate_wrap.cpp b/renderdoc/driver/d3d12/d3d12_device_rescreate_wrap.cpp
+index accf6c20c..1647198db 100644
+--- a/renderdoc/driver/d3d12/d3d12_device_rescreate_wrap.cpp
++++ b/renderdoc/driver/d3d12/d3d12_device_rescreate_wrap.cpp
+@@ -26,6 +26,11 @@
+ #include "driver/dxgi/dxgi_common.h"
+ #include "d3d12_resources.h"
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12UploadWriteWatchPatchVersion()
++{
++  return 1;
++}
++
+ bool WrappedID3D12Device::Serialise_CreateResource(
+     D3D12Chunk chunkType, ID3D12Heap *pHeap, UINT64 HeapOffset, D3D12_HEAP_PROPERTIES &props,
+     D3D12_HEAP_FLAGS HeapFlags, D3D12_RESOURCE_DESC1 &desc, D3D12ResourceLayout InitialLayout,
+@@ -59,6 +64,11 @@ bool WrappedID3D12Device::Serialise_CreateResource(
+       RDCLOG("Remapping committed resource %s from upload to default for efficient replay",
+              ToStr(pResource).c_str());
+       props.Type = D3D12_HEAP_TYPE_DEFAULT;
++      // Write-watch describes CPU writes to the original upload allocation.
++      // The replay upload-to-default conversion uses tracked maps and GPU
++      // copies, and DEFAULT heaps cannot carry this CPU-only flag.
++      HeapFlags &= ~D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH;
++
+       m_UploadResourceIds.insert(pResource);
+     }
+   }

@@ -73,6 +73,7 @@ $routedLayerHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx
 $layerTestHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-layer-test-history.patch'
 $bgraHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-bgra-history.patch'
 $emptyPixelInputsPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-empty-pixel-inputs.patch'
+$uploadWriteWatchPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-upload-write-watch.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -108,6 +109,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dx12_layer_test_history_patch_version -ne 1 -or
         $patchManifest.dx12_bgra_history_patch_version -ne 1 -or
         $patchManifest.dx12_empty_pixel_inputs_patch_version -ne 1 -or
+        $patchManifest.dx12_upload_write_watch_patch_version -ne 1 -or
+        $patchManifest.dx12_upload_write_watch_patch_sha256 -ne (Get-PackageSha256 $uploadWriteWatchPatchPath) -or
         $patchManifest.dx12_empty_pixel_inputs_patch_sha256 -ne (Get-PackageSha256 $emptyPixelInputsPatchPath) -or
         $patchManifest.dx12_bgra_history_patch_sha256 -ne (Get-PackageSha256 $bgraHistoryPatchPath) -or
         $patchManifest.dx12_layer_test_history_patch_sha256 -ne (Get-PackageSha256 $layerTestHistoryPatchPath) -or

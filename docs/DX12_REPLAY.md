@@ -9587,6 +9587,168 @@ and raw files, `hellblade-cache-budget-check2.json`, and `cache-budget-rejection
 repeat-only execution without PixelHistory, and no GPA/Python modules in the
 three native probes. The checker uses Python/numpy offline only.
 
+### Diagnose the original-player capture hook conflict
+
+The radiance-cache budget comparison above still needs an original-player
+counterpart. A controlled attempt to capture GPA's first Present with the
+pinned RenderDoc 1.45 failed before device creation. This is a failure of
+that comparison path, not evidence against the native allocator result.
+No image, cache counter, or shader result was obtained from the failed launch.
+
+The installed GPA player is **2025.1.3.1269**. The binaries used for this
+investigation are:
+
+| Binary | SHA-256 |
+|---|---|
+| `gpa-player.exe` | `aa605ff70e677f7d71cb841ee8b3573475c228d4b7d871d35c3d4e1cea11c7db` |
+| `dynamic-functions-x64.dll` | `a84fafa32b286d7a3061c7afbab17ad32d5abe273269448e1fc713bd5dbf0785` |
+| Patched RenderDoc 1.45 | `efcd5800c001d4f8a41e4251454f6df2ebc07428aa120f712159f4db6c469fcb` |
+
+The research launcher injects RenderDoc into its own suspended, hidden
+`gpa-player.exe` child, queues frame zero before resuming, and observes
+exceptions through the Windows debugger API. Only that child is terminated
+on failure or deadline. The command uses `--offscreen --exit-after-frame 1`
+and the original Hellblade2 directory. This is an instrumented original
+player, not an uninstrumented reference. Installed binaries and captures
+remain unchanged.
+
+The first Windows crash report named an unknown module. Bounded debugger
+observations identify the following chain:
+
+- GPA `dynamic-functions-x64.dll` calls its `GetProcAddress` import at
+  **RVA 0x1b11e**, with return address **0x1b124** and IAT slot **0x1f080**.
+  Before GPA's Win32 hook setup, the import points to RenderDoc
+  **RVA 0x1d84c0**, at **0x7ff913ed84c0** in this run.
+- GPA replaces that function's first 11 bytes with
+  `e9 eb 7b e9 06 90 90 90 90 90 90`. The encoded signed relative jump goes
+  to **0x7ff91ad700b0**, which `VirtualQueryEx` reports as `MEM_FREE`.
+  The exception is **0xc0000005**, operation **8** (execute), at that address.
+- A committed executable private relay exists at **0x7ffa1ad700b0**,
+  exactly **4 GiB higher**. Its `ff 25 00 00 00 00` absolute jump points to
+  GPA player **RVA 0x7f3f40**. Ghidra's targeted decompilation/disassembly
+  identifies that function as a wrapper around the saved function pointer
+  at **RVA 0x12ffd20**, followed by the optional playback callback.
+- That saved pointer addresses **0x7ffa1ad70090**. Its first 11 bytes
+  exactly preserve RenderDoc's `push r12; push r15; sub rsp,0x98`.
+  Its following `e9 2b 84 16 f9` returns to **0x7ffa13ed84cb** instead of
+  **0x7ff913ed84cb**: the return displacement also wraps by **4 GiB**.
+  Kernel32's actual export address and observed bytes remain unchanged.
+
+These are address-layout observations, not general claims that every GPA
+and RenderDoc combination fails. They explain this launch's crash without
+attributing it to missing PIX runtime messages, DX12 SDK selection, or GPU
+replay semantics.
+
+`tests/fixtures/check-gpa-hook-relays.py` checks the captured instruction
+bytes, both signed displacements, memory classifications, saved prologue,
+GPA detour ownership/RVA, unchanged Kernel32 observation, and matching
+execute exception. The recorded report passes; changing one displacement
+byte is rejected. The checker runs offline and does not start GPU work.
+Its status explicitly excludes frame/fidelity acceptance.
+
+The guarded research workaround validates both directions before changing
+anything. It supplies the missing entry relay in a new private executable
+page and replaces the generated trampoline's overflowing return with a
+14-byte absolute jump, within its existing 32-byte slot. It preserves the
+11 original instructions and calls the same GPA handler. A first attempt
+refused the unexpected relative-return layout before any write; the next
+attempt passed the checks and reached D3D12 API registration and resource
+restoration. Any result from this workaround must remain labeled as an
+experimental, modified in-memory GPA/RenderDoc comparison.
+
+The second attempt completed normally, exit **0**, and produced
+`original_gpa_frame0.rdc`, **2,511,452,791 bytes**, SHA-256
+`f3c58c15038ae9f6a1604239d5b7bc147bd27f42c28cf1e4cdf43694d54f92f2`.
+The player logged restoration of **575,095** calls and completion of frame
+1. Its allocator-state warnings are retained in the log. The presence of
+this file alone does not establish successful replay or reference fidelity.
+
+Research artifacts are `gpa-cache-capture-debug{1,2,3}`,
+`gpa-cache-capture-relay{1,2}`, `gpa-getproc-hook2.txt`,
+`gpa-getproc-hook-code1.txt`,
+`dynamic-functions-{disassembly1,imports1}.txt`,
+`gpa-hook-overflow-check{1,2}.json`, and `gpa-hook-overflow-rejection1.json`.
+Large binaries, debugger reports and launcher builds remain outside Git.
+
+### Replay write-watch uploads and locate the original cache allocator
+
+Opening that original-player capture exposed a separate RenderDoc replay
+failure: `CreateCommittedResource` returned **E_INVALIDARG** immediately
+after remapping upload resource **350**. The API-validation debugger message
+identifies **CREATERESOURCEANDHEAP_INVALIDHEAPMISCFLAGS (#640)**: a
+CPU-inaccessible heap cannot retain `D3D12_HEAP_FLAG_ALLOW_WRITE_WATCH`.
+RenderDoc moves upload buffers of at least **1 MiB** into DEFAULT memory,
+but previously retained that upload-only flag. A preceding descriptor-heap
+expansion warning is separate; it is not the failing resource operation.
+
+`dx12-upload-write-watch.patch` clears the flag **only when that
+upload-to-default conversion takes place**. Uploads left in their original
+heap retain their flags. The existing map tracking, cached initial contents
+and GPU-copy path remain in use. The isolated backend reports
+`backend_dx12_upload_write_watch_patch: 1`; the source build and portable
+package checks require the corresponding patch digest. The resulting
+**30-patch** RenderDoc DLL SHA-256 is
+`5f57c032343751b8ab7afb8ee9bc0842230e47164af077268c62474b8f993229`.
+The 29-patch DLL used for the failure and original-player capture is
+preserved separately.
+
+Focused validation:
+
+- `tests/fixtures/dx12-upload-write-watch.cpp` creates a **1-MiB** and a
+  **256-byte** write-watch upload, records their Map writes and two GPU
+  copies, then independently verifies all **1,048,832 bytes** of readback.
+  It does not use GPA, a shader, or a game capture.
+- The same small capture fails with the previous DLL's
+  `CreateCommittedResource: E_INVALIDARG`. With patch 1, selecting the
+  second copy and exporting the complete destination succeeds. Every byte
+  matches the independent result, SHA-256
+  `825340efd379ca229405715af8db73878ba4bb18ed0c891a44603b2c509afb74`.
+  The small upload exercises the path below the conversion threshold.
+- The already-recorded original-player capture now opens successfully:
+  **1,634 Draw/Dispatch actions**, **3,252 buffers**, **1,641 textures**,
+  **6,925 resource descriptions**. This inventory is capture-loading
+  metadata; it does not claim that every action has been individually
+  selected or verified.
+- Selecting original-capture **RDC event 543199** succeeds and binds
+  `AllocateProbeTracesCS`, **33,360 bytes**, SHA-256
+  `7894a72075225484a9559207da1c8644081135bf028b707b2458c7413793acc0`.
+  This matches the original directory export and the native replay's
+  **execution 16988 / source 586352 / RDC 25540** shader. The original
+  capture dispatch is **48 x 12 x 12** groups, and its Root/View constant
+  offsets are the same **1,139,456 / 1,377,280** bytes.
+
+The following are **original-capture RenderDoc IDs**, not original GPA
+object identities or native-replay resource creation IDs:
+
+| Reflected allocator binding | Original-capture RDC resource |
+|---|---|
+| `_RootShaderParameters` / `UniformBufferConstants_View` | 463 / 14393 |
+| `RadianceProbeIndirectionTexture` | 12566 |
+| `MaxUpdateBucket` / `MaxTracesFromMaxUpdateBucket` | 14315 / 13845 |
+| `ProbeLastUsedFrame` / `RWProbeLastTracedFrame` | 12534 / 2216 |
+| `RWProbesToUpdateTraceCost` / `RWProbeTraceAllocator` | 14316 / 14313 |
+| `RWProbeTraceData` | 14321 |
+
+The pipeline report correctly leaves these resources **unmapped** because
+this capture has no Flora execution/resource markers. Shader equality,
+matching offsets and reflected roles identify the comparison target; they
+do not establish equality of buffer contents, selected task order, GPU
+argument consumption, original execution identities or final pixels.
+The original/native allocator-value comparison remains unfinished.
+
+Both the corrected fixture readback and original-capture pipeline analysis
+have module inventories without GPA or Python. The guarded GPA launcher is
+only a research instrument and is not part of the application or portable
+runtime. Targeted backend/CLI builds succeeded; no full portable rebuild,
+DX11 regression suite or additional game-capture run was used for this fix.
+
+Evidence: `upload-watch-native1_capture.rdc` (4,505,212 bytes),
+`upload-watch-native1.gpu.bin`, `upload-watch-before2`,
+`upload-watch-after1`, `gpa-cache-capture-{inventory1,validation1}`,
+`gpa-cache-capture-debug-validation1-messages.txt`,
+`gpa-cache-capture-inventory-fixed1`, `gpa-cache-allocator-pipeline1`,
+and the source/runtime manifests in the research workspace.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

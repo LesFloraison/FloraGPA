@@ -44,6 +44,8 @@ $bgraHistoryPatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-bgra-his
 $patches += $bgraHistoryPatch
 $emptyPixelInputsPatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-empty-pixel-inputs.patch'
 $patches += $emptyPixelInputsPatch
+$uploadWriteWatchPatch = Join-Path $repo 'third_party/renderdoc/patches/dx12-upload-write-watch.patch'
+$patches += $uploadWriteWatchPatch
 $head = & git -C $source rev-parse HEAD
 if ($LASTEXITCODE -ne 0 -or $head -ne $upstream) { throw 'Use a dedicated RenderDoc v1.45 checkout at the pinned upstream commit.' }
 $actual = (& git -C $source diff --binary --no-ext-diff --no-color HEAD) -join "`n"
@@ -129,6 +131,8 @@ $manifest = [ordered]@{
     dx12_layer_test_history_patch_version = 1
     dx12_bgra_history_patch_version = 1
     dx12_empty_pixel_inputs_patch_version = 1
+    dx12_upload_write_watch_patch_version = 1
+    dx12_upload_write_watch_patch_sha256 = (Get-FileHash -LiteralPath $uploadWriteWatchPatch -Algorithm SHA256).Hash.ToLowerInvariant()
     dx12_empty_pixel_inputs_patch_sha256 = (Get-FileHash -LiteralPath $emptyPixelInputsPatch -Algorithm SHA256).Hash.ToLowerInvariant()
     dx12_bgra_history_patch_sha256 = (Get-FileHash -LiteralPath $bgraHistoryPatch -Algorithm SHA256).Hash.ToLowerInvariant()
     dx12_layer_test_history_patch_sha256 = (Get-FileHash -LiteralPath $layerTestHistoryPatch -Algorithm SHA256).Hash.ToLowerInvariant()
