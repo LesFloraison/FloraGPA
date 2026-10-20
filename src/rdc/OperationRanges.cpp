@@ -110,7 +110,8 @@ Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<cons
             auto view=rdcClearCoverage(chunk,*texture,Subresource(0,0,0),0,0);
             if (view.at("status") == "unavailable") throw std::runtime_error(view.at("reason").get<std::string>());
             Json range{{"kind","texture_view"},{"mip",view.at("mip")},{"first_layer",view.at("first_layer")},
-                {"layer_count",view.at("layer_count")},{"rectangles",view.at("rectangles")},{"whole_view",view.at("rect_count") == 0}};
+                {"layer_count",view.at("layer_count")},{"rectangles",view.at("rectangles")},{"whole_view",view.at("rect_count") == 0},
+                {"view_definition",view.at("view_definition")}};
             if (view.contains("clear_flags")) range["clear_flags"]=view.at("clear_flags");
             append(wanted,"destination",std::move(range));
         } else throw std::runtime_error("Operation range reconstruction is not implemented for this API");

@@ -1,0 +1,40 @@
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -92,6 +92,11 @@
+ const uint32_t D3D12_PIXEL_HISTORY_MIN_EVENTS_TO_STORE = 128;
+ const uint32_t D3D12_PIXEL_HISTORY_AVG_FRAGMENTS_PER_EVENT = 8;
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12DefaultViewHistoryPatchVersion()
++{
++  return 1;
++}
++
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12HalfColorHistoryPatchVersion()
+ {
+   return 2;
+@@ -814,6 +819,12 @@
+     const Subresource &sub = m_CallbackInfo.targetSubresource;
+     switch(view.ViewDimension)
+     {
++      case D3D12_RTV_DIMENSION_UNKNOWN:
++        if(view.Format == DXGI_FORMAT_UNKNOWN &&
++           m_CallbackInfo.targetDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
++           !IsTypelessFormat(m_CallbackInfo.targetDesc.Format))
++          return sub.mip == 0 && sub.slice < m_CallbackInfo.targetDesc.DepthOrArraySize;
++        return true;
+       case D3D12_RTV_DIMENSION_TEXTURE2D:
+         return sub.mip == view.Texture2D.MipSlice && sub.slice == 0;
+       case D3D12_RTV_DIMENSION_TEXTURE2DARRAY:
+@@ -833,6 +844,12 @@
+     const Subresource &sub = m_CallbackInfo.targetSubresource;
+     switch(view.ViewDimension)
+     {
++      case D3D12_DSV_DIMENSION_UNKNOWN:
++        if(view.Format == DXGI_FORMAT_UNKNOWN && view.Flags == D3D12_DSV_FLAG_NONE &&
++           m_CallbackInfo.targetDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
++           !IsTypelessFormat(m_CallbackInfo.targetDesc.Format))
++          return sub.mip == 0 && sub.slice < m_CallbackInfo.targetDesc.DepthOrArraySize;
++        return true;
+       case D3D12_DSV_DIMENSION_TEXTURE2D:
+         return sub.mip == view.Texture2D.MipSlice && sub.slice == 0;
+       case D3D12_DSV_DIMENSION_TEXTURE2DARRAY:

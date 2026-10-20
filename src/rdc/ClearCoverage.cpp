@@ -51,15 +51,24 @@ nlohmann::json rdcClearCoverage(const SDObject &chunk, const TextureDescription 
         const auto dimension = number(view, "ViewDimension");
         uint64_t mip{}, first{}, count{1};
         const SDObject *range{};
-        if (dimension == uint64_t(depth ? D3D12_DSV_DIMENSION_TEXTURE2D : D3D12_RTV_DIMENSION_TEXTURE2D)) {
+        if (dimension == 0) {
+            // RenderDoc serializes a NULL Create*View description as a zeroed
+            // descriptor. D3D12 defaults select mip zero and every array slice.
+            if (number(view,"Format") != 0 || (depth && number(view,"Flags") != 0) ||
+                texture.format.compType == CompType::Typeless)
+                throw std::runtime_error("Default Clear view requires an empty descriptor and a typed resource");
+            count=texture.arraysize;
+            result["view_definition"]="default_resource_view";
+        } else if (dimension == uint64_t(depth ? D3D12_DSV_DIMENSION_TEXTURE2D : D3D12_RTV_DIMENSION_TEXTURE2D)) {
             mip = number(child(view, "Texture2D"), "MipSlice");
         } else if (dimension == uint64_t(depth ? D3D12_DSV_DIMENSION_TEXTURE2DARRAY : D3D12_RTV_DIMENSION_TEXTURE2DARRAY)) {
             range = &child(view, "Texture2DArray"); mip = number(*range, "MipSlice");
         } else if (dimension == uint64_t(depth ? D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY : D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY)) {
             range = &child(view, "Texture2DMSArray");
         } else if (dimension != uint64_t(depth ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2DMS)) {
-            throw std::runtime_error("Clear view is implicit or has an unsupported dimension");
+            throw std::runtime_error("Clear view has an unsupported dimension");
         }
+        if (!result.contains("view_definition")) result["view_definition"]="explicit_descriptor";
         if (range) { first = number(*range, "FirstArraySlice"); count = number(*range, "ArraySize"); }
         if (mip >= texture.mips || first >= texture.arraysize || !count || count > texture.arraysize - first)
             throw std::runtime_error("Clear view range exceeds the queried texture");

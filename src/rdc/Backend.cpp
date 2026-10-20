@@ -200,6 +200,7 @@ class Session {
     uint32_t vertexInputsPatch{};
     uint32_t halfColorHistoryPatch{};
     uint32_t resolveHistoryPatch{};
+    uint32_t defaultViewHistoryPatch{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -327,6 +328,10 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12ResolveHistoryPatchVersion"))) {
             resolveHistoryPatch = patch();
             if (resolveHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 Resolve history patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12DefaultViewHistoryPatchVersion"))) {
+            defaultViewHistoryPatch = patch();
+            if (defaultViewHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 default-view history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1445,6 +1450,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_vertex_inputs_patch", session.vertexInputsPatch},
         {"backend_dx12_half_color_history_patch", session.halfColorHistoryPatch},
         {"backend_dx12_resolve_history_patch", session.resolveHistoryPatch},
+        {"backend_dx12_default_view_history_patch", session.defaultViewHistoryPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -2370,6 +2376,9 @@ Json runRdcJob(const Json &job) {
         if (session.halfColorHistoryPatch >= 2)
             result["history_scope"]["subresource_filter"] =
                 "Draws outside all known 2D RTV/DSV mip/layer ranges are omitted. Unknown view layouts and resource operations remain candidates; this does not validate per-primitive array-layer routing.";
+        result["history_scope"]["default_view_filter"] = session.defaultViewHistoryPatch
+            ? "Default typed 2D attachments select mip zero and all array layers; other mip draws are excluded. Per-primitive array routing remains unverified."
+            : "Default attachment ranges are not filtered by this runtime; history at other mips can contain unrelated Draw fragments.";
     }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(

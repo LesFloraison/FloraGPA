@@ -7066,6 +7066,56 @@ exact execution navigation, BF1 Clear display and exported evidence:
 capture and four serial resource-index queries. Full resource lifetime,
 synchronization history and observed-content coverage remain unfinished.
 
+### Default RTV/DSV ranges and wrong-mip Draw attribution
+
+The default-view Clear gap found in the preceding source-resource query is now
+resolved for typed 2D textures. RenderDoc 1.45 `D3D12Descriptor::Init` stores a
+NULL RTV/DSV creation description as a zeroed descriptor, and its serializer
+explicitly identifies the UNKNOWN view dimension as this representation.
+This is distinct from missing structured fields. Microsoft's
+[CreateRenderTargetView](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createrendertargetview)
+and [CreateDepthStencilView](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createdepthstencilview)
+contracts define default views as the first mip and all array slices of a
+compatible typed resource. The worker checks the zero format/dimension, DSV flags
+and resource type before applying that rule. Malformed descriptions and typeless
+resources remain unavailable. Reports distinguish `default_resource_view` from
+`explicit_descriptor`; Resource History labels the default view.
+
+The small fixture's `default` mode uses a 32x32 RGBA16F texture with two mips and
+two layers, bound through a NULL RTV description. Its native three-prefix oracle
+is unchanged. Querying Mip 1 with the 23-patch runtime reproduced **six unrelated
+Draw fragments**, despite the new worker correctly excluding the three default
+Clears. The twenty-fourth patch, `dx12-default-view-history.patch`, applies the
+same default-view range to the runtime's RTV/DSV attachment overlap check. The
+Mip 1 query now returns **zero records**. The positive Mip 0/Layer 0 query retains
+three Clears and six fragments, and all **12** components of execution 3 agree
+exactly with native prefix readbacks. A query immediately after the first Clear
+at Layer 1 confirms the two-layer default view and agrees with the selected
+replay texel; this is not a claim about per-primitive Draw routing between layers.
+
+Evidence: `half-blend-default1/{gpu.json,other-mip-before,other-mip-after,positive,
+clear-layer1}`. Re-querying the previous source resource in
+`half-blend-operation-ranges1/default-source` preserves five indexed uses, raises
+recovered operation ranges from three to four, and removes its one default-view
+gap. No new original-sample fidelity claim is made by these reproductions.
+
+Runtime reports expose `backend_dx12_default_view_history_patch=1`; unpatched
+runtimes explicitly describe the default-attachment filtering limitation.
+Complete 24-patch source verification/build passes. Runtime SHA-256:
+`07c7bfdff028c00b96ac4a95a23600d055f051458f96705c14530a0b94e951fd`;
+patch SHA-256:
+`d96568cfd45ccf1ea20d0a74344ae7a7509717f002ef97e1a63c90011b167353`.
+Build/package manifests verify and include the new source patch; PowerShell
+syntax checks pass. App/worker/CLI/test builds **434–436** pass. The focused RTV/DSV
+coverage test checks both default ranges, malformed descriptions and typeless
+rejection: **3 passed**, including setup/cleanup, **1 ms**
+(`default-clear-unit1.txt`). Saved-report UI verification checks wrong-mip
+exclusion, native values, Layer 1 Clear evidence, default-range display and
+export: **3 passed**, **35 ms** (`default-view-ui1.txt`). Work used one tiny
+capture and five serial targeted queries. Interruptions were resumed from
+completed output files without repeating GPU queries. Full sample/portable
+acceptance and general per-primitive array routing remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

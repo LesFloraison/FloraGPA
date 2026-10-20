@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -16,10 +16,10 @@ void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + s
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default")
         throw std::runtime_error("Invalid subresource mode");
     const bool transfer = mode == "copy" || mode == "resolve";
-    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" || mode == "rect" || transfer ? 1 : 0;
+    const UINT mip = mode == "base" || mode == "default" ? 0 : 1, layer = mode == "array" || mode == "rect" || transfer ? 1 : 0;
     const auto library = LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -61,6 +61,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     D3D12_HEAP_PROPERTIES heap{}; heap.Type = D3D12_HEAP_TYPE_DEFAULT;
     D3D12_RESOURCE_DESC texture{}; texture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; texture.Width = texture.Height = 16 << mip;
     texture.DepthOrArraySize = UINT16(layer + 1); texture.MipLevels = UINT16(mip + 1); texture.SampleDesc.Count = 1;
+    if (mode == "default") { texture.Width=texture.Height=32; texture.MipLevels=2; texture.DepthOrArraySize=2; }
     const UINT subresource = mip + layer * texture.MipLevels;
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
@@ -74,7 +75,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY; view.Texture2DArray.MipSlice = mip;
         view.Texture2DArray.FirstArraySlice = layer; view.Texture2DArray.ArraySize = 1;
     } else { view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; view.Texture2D.MipSlice = mip; }
-    device->CreateRenderTargetView(target.Get(), &view, rtv);
+    device->CreateRenderTargetView(target.Get(), mode == "default" ? nullptr : &view, rtv);
     ComPtr<ID3D12Resource> transferSource;
     auto sourceRtv = rtv; sourceRtv.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     if (transfer) {
@@ -118,7 +119,13 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
     };
     for (UINT n=1;n<=3;++n) {
+        if (mode == "default") {
+            const auto marker="Flora DX12 execution " + std::to_string(20+n) + " record " + std::to_string(20+n) +
+                " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(20+n) + ": ID3D12GraphicsCommandListClearRenderTargetView";
+            list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1));
+        }
         list->ClearRenderTargetView(rtv,initial,0,nullptr);
+        if (mode == "default") list->EndEvent();
         if (mode == "rect") {
             const float red[]{1,0,0,1}; const D3D12_RECT clearRect{0,0,4,4};
             list->ClearRenderTargetView(rtv,red,1,&clearRect);

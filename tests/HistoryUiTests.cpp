@@ -54,6 +54,52 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void defaultViewHistory() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the default-view history evidence directory");
+        const auto base=root + "/half-blend-default1/";
+        const auto before=read(base + "other-mip-before/result.json");
+        const auto after=read(base + "other-mip-after/result.json");
+        QCOMPARE(before.at("history").size(),size_t(6));
+        QVERIFY(after.at("history").empty());
+        QCOMPARE(after.at("backend_dx12_default_view_history_patch"),Json(1));
+        QCOMPARE(after.at("history_scope").at("excluded_resource_operations").size(),size_t(3));
+        const auto positive=read(base + "positive/result.json"), native=read(base + "gpu.json");
+        size_t fragment{};
+        for (const auto &row : positive.at("history")) {
+            if (row.value("execution",Json()) != "3") continue;
+            QVERIFY(fragment < 3);
+            for (size_t c=0;c<4;++c) {
+                const auto bits=native.at("prefix_half_words")[fragment][c].get<uint16_t>();
+                QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                    std::ldexp(1.0 + double(bits & 1023) / 1024.0,int(bits >> 10)-15));
+            }
+            ++fragment;
+        }
+        QCOMPARE(fragment,size_t(3));
+        const auto layer=read(base + "clear-layer1/result.json");
+        QCOMPARE(layer.at("history").size(),size_t(1));
+        const auto &clear=layer.at("history")[0];
+        QCOMPARE(clear.at("coverage").at("view_definition"),Json("default_resource_view"));
+        QCOMPARE(clear.at("coverage").at("mip"),Json(0));
+        QCOMPARE(clear.at("coverage").at("layer_count"),Json(2));
+        QCOMPARE(clear.at("postMod").at("col").at("floatValue"),
+            Json::array({0.027862548828125,0.0273284912109375,0.024871826171875,0.3974609375}));
+        QCOMPARE(layer.at("history_scope").at("replay_consistency").at("history_boundary").at("status"),Json("matches_selected_texel"));
+        PixelHistoryView pixel; pixel.setContext("default:mip",3,true); pixel.setDx12Resource(1,1001);
+        pixel.selectPixel(1001,5,5,1,0,0); QVERIFY(pixel.finish(pixel.requestId(),after));
+        QCOMPARE(pixel.findChild<QTreeWidget *>("historyRecords")->topLevelItemCount(),0);
+        const auto resource=read(root + "/half-blend-operation-ranges1/default-source/result.json");
+        QCOMPARE(resource.at("history_scope").at("captured_operation_ranges"),Json(4));
+        QCOMPARE(resource.at("history_scope").at("operation_range_gaps"),Json(0));
+        ResourceHistoryView view; view.setContext("default:resource",3,2,1002);
+        QVERIFY(view.finish(view.requestId(),resource));
+        QVERIFY(view.findChild<QTreeWidget *>("resourceHistoryRows")->topLevelItem(0)->text(4).contains("default view"));
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/default-resource-history.json");
+            QCOMPARE(read(output_ + "/default-resource-history.json"),resource);
+        }
+    }
     void resourceOperationRanges() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the resource operation range evidence directory");

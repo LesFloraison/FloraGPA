@@ -168,11 +168,22 @@ class RdcAssetTests : public QObject {
         QCOMPARE(query(1,2).at("status"),Json("unavailable"));
         count->data.basic.u=0; dimension->data.basic.u=0;
         QCOMPARE(query(1,2).at("status"),Json("unavailable"));
+        auto format=integer(*view,"Format",0); texture.format.compType=CompType::Float;
+        QCOMPARE(query(0,3).at("status"),Json("covered"));
+        QCOMPARE(query(1,3).at("status"),Json("outside"));
+        QCOMPARE(query(0,3).at("layer_count"),Json(4));
+        QCOMPARE(query(0,3).at("view_definition"),Json("default_resource_view"));
+        format->data.basic.u=10; QCOMPARE(query(0,3).at("status"),Json("unavailable")); format->data.basic.u=0;
+        texture.format.compType=CompType::Typeless; QCOMPARE(query(0,3).at("status"),Json("unavailable"));
+        texture.format.compType=CompType::Depth;
         chunk.name="ID3D12GraphicsCommandList::ClearDepthStencilView"_lit;
         target->name="DepthStencilView"_lit; dimension->data.basic.u=4; // D3D12_DSV_DIMENSION_TEXTURE2DARRAY
         integer(chunk,"ClearFlags",1);
         QCOMPARE(query(1,2).at("status"),Json("covered"));
         QCOMPARE(query(1,0).at("status"),Json("outside"));
+        dimension->data.basic.u=0; integer(*view,"Flags",0);
+        QCOMPARE(query(0,3).at("status"),Json("covered"));
+        QCOMPARE(query(1,3).at("status"),Json("outside"));
         texture.resourceId=resource(identity+1);
         QCOMPARE(query(1,2).at("status"),Json("unavailable"));
     }
