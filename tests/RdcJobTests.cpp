@@ -151,10 +151,12 @@ class RdcJobTests : public QObject {
         for (const auto *action : {"resource-history", "history", "debug-pixel", "postmesh", "counters"})
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, prepare(dir.path(), "success", options, action));
         auto indexed=options; indexed.update({{"execution","19410"},{"resource","1651480816"},{"resource_creation","35118"}});
-        QCOMPARE(prepare(dir.path(),"success",indexed,"resource-history").at("isolate_missing_queries"),Json(true));
-        for (const auto key : {"execution","resource","resource_creation"}) {
-            auto missing=indexed; missing.erase(key);
-            QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",missing,"resource-history"));
+        for (const auto *action : {"resource-history", "history"}) {
+            QCOMPARE(prepare(dir.path(),"success",indexed,action).at("isolate_missing_queries"),Json(true));
+            for (const auto key : {"execution","resource","resource_creation"}) {
+                auto missing=indexed; missing.erase(key);
+                QVERIFY_THROWS_EXCEPTION(std::exception,prepare(dir.path(),"success",missing,action));
+            }
         }
         for (const auto &value : {Json(1), Json("true"), Json(nullptr)})
             QVERIFY_THROWS_EXCEPTION(std::runtime_error,

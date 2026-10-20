@@ -1359,7 +1359,7 @@ Json runRdcJob(const Json &job) {
     if (action == "buffer") rdcBufferRange(job);
     if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
         !((action == "pipeline" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
-        !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
+        !((action == "resource-history" || action == "history") && job.contains("execution") && job.contains("resource_creation") &&
           !job.value("resource", Json()).is_null()))
         throw std::runtime_error("Unsupported query-isolated analysis or missing explicit DX12 selection");
     if (job.value("depth_roundtrip", false) &&
@@ -1543,6 +1543,14 @@ Json runRdcJob(const Json &job) {
                 result["history_scope"]["limitations"].push_back(
                     "Isolated query resolves include only available results. Omitted writes remain in query_isolation; "
                     "usage records do not establish query-result byte availability.");
+            }
+            if (!queryPolicy.is_null() && action == "history") {
+                result["partial"] = true;
+                result["history_scope"]["query_outputs_incomplete"] = true;
+                result["history_scope"]["limitations"].push_back(
+                    "Incomplete query-isolated replay: historical query values remain unavailable. "
+                    "Pixel History describes this replay's selected texture; its values and test results "
+                    "do not establish complete original-frame fidelity.");
             }
             result["execution_map"] = mapping["execution_map"];
             result["record_executions"] = mapping["record_executions"];

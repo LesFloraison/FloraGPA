@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Cannot create output directory");
         output = destination;
         if (identity && identity->isolateMissingQueries && job.at("action") != "inventory" && job.at("action") != "texture" &&
-            job.at("action") != "resource-history" && job.at("action") != "pipeline" &&
+            job.at("action") != "resource-history" && job.at("action") != "history" && job.at("action") != "pipeline" &&
             !flora::rdcShaderDebugAction(job.at("action").get<std::string>()))
             throw std::runtime_error("Unsupported query-isolated analysis");
         result = flora::runRdcJob(job);

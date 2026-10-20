@@ -284,9 +284,14 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
-void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12) {
-    if (dx12_ != dx12 || key_ != key || event_ != event)
+void PixelHistoryView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries) {
+    isolateMissingQueries = dx12 && isolateMissingQueries;
+    if (dx12_ != dx12 || key_ != key || event_ != event || isolateMissingQueries_ != isolateMissingQueries)
         depthRoundtrip_->setChecked(false);
+    if (isolateMissingQueries_ != isolateMissingQueries) {
+        isolateMissingQueries_ = isolateMissingQueries;
+        invalidate();
+    }
     if (dx12_ != dx12) {
         dx12_ = dx12;
         creation_ = object_ = 0;
@@ -357,6 +362,7 @@ Json PixelHistoryView::request() const {
         job["execution"] = std::to_string(event_);
         job["resource"] = std::to_string(object_);
         job["resource_creation"] = std::to_string(creation_);
+        job["isolate_missing_queries"] = isolateMissingQueries_;
         if (depthRoundtrip_->isChecked()) job["depth_roundtrip"] = true;
     }
     return job;
@@ -441,6 +447,13 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
         throw std::runtime_error("History result does not match the DX12 execution selection");
     if (dx12_ && result.value("depth_roundtrip", Json::object()).value("requested", false) != depthRoundtrip_->isChecked())
         throw std::runtime_error("History result does not match the D32/D32S8 depth refresh mode");
+    if (dx12_) {
+        requireRdcQueryIsolation(result.value("query_isolation", Json()), this->request());
+        if (isolateMissingQueries_ && (result.value("frame_complete", Json()) != false ||
+            result.value("partial", Json()) != true ||
+            result.value("history_scope", Json::object()).value("query_outputs_incomplete", Json()) != true))
+            throw std::runtime_error("Isolated pixel history must retain incomplete query/frame status");
+    }
     auto rows = result.at("history");
     if (dx12_)
         for (const auto &boundary : result.value("depth_event_boundaries", Json::array()))
@@ -500,6 +513,8 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(sample_->value()));
     if (result.value("partial", false))
         summary_->setText("Partial history · " + summary_->text());
+    if (isolateMissingQueries_)
+        summary_->setText(summary_->text() + "\nIncomplete query-isolated replay; historical query values remain unavailable.");
     const auto layerTests=scope.value("array_layer_test_reason_status", "");
     if (layerTests == "backend_selected_layer_probes")
         summary_->setText(summary_->text() + "\nArray-layer tests use selected-layer GPU queries; per-fragment and early-test limitations apply.");

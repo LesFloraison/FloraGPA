@@ -1665,7 +1665,8 @@ void MainWindow::setBusy(bool busy) {
     for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
         findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
     historyPick_->setEnabled(
-        !busy && (bool(frame_) || (dx12 && !selection_.isolateMissingQueries && !outputReport_.is_null() && !image_->image().isNull())));
+        !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull() &&
+                                  session_->capability(ReplayFeature::PixelHistory, selection_).supported())));
     dx12Subresource_->setEnabled(dx12 && !busy);
     dx12Budget_->setEnabled(dx12 && !busy);
     dx12QueryIsolation_->setEnabled(dx12 && !busy && (!experiment_ || experiment_->document().at("history").empty()));
@@ -1724,7 +1725,12 @@ void MainWindow::updateCheckpointContext() {
         }
     }
     if (history_) {
-        history_->setContext(dx12 ? (selection_.resource && !analysisKey.isEmpty() ? analysisKey+':'+QString::number(selection_.resource) : QString{}) : analysisKey,selectedEvent_,dx12);
+        const auto pixelKey = dx12 && selection_.isolateMissingQueries
+                                  ? (session_->capability(ReplayFeature::PixelHistory, selection_).supported()
+                                         ? historyContextKey(true) : QString{})
+                                  : analysisKey;
+        history_->setContext(dx12 ? (selection_.resource && !pixelKey.isEmpty() ? pixelKey+':'+QString::number(selection_.resource) : QString{}) : pixelKey,
+                             selectedEvent_, dx12, dx12 && selection_.isolateMissingQueries);
         if (dx12)
             history_->setDx12Resource(
                 selection_.resource,
@@ -1817,8 +1823,9 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
-    if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline) {
-        showError("Query-isolated analysis supports resource usage history, pipeline inspection and shader debugging in this workspace"); return;
+    if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline &&
+        kind != RdcAnalysis::History) {
+        showError("Query-isolated analysis supports resource/pixel history, pipeline inspection and shader debugging in this workspace"); return;
     }
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
     if (dx12 && kind == RdcAnalysis::Counters && !view && rdcCounters_->nativeMode()) {
@@ -1877,7 +1884,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
         historyKey_ =
-            historyContextKey(resourceHistory || pipeline || view) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+            historyContextKey(resourceHistory || pipeline || view || kind == RdcAnalysis::History) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2071,7 +2078,9 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
         (args.first() == "replay" || args.first() == "buffer")) {
         const bool isolatedAnalysis =
+            historyRequest_.is_object() &&
             ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
+             (runningAnalysis_ == RdcAnalysis::History && historyRequest_.value("action", "") == "history") ||
              (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline") ||
              (runningAnalysis_ == RdcAnalysis::Debug && runningDebug_ &&
               rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
@@ -2079,7 +2088,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             historyRequest_.value("execution", "") == std::to_string(selection_.execution.value_or(0));
         if ((args.contains("--renderdoc") && !isolatedAnalysis) || args.contains("--measure-event") ||
             (experiment_ && !experiment_->document().at("history").empty())) {
-            showError("Query isolation permits resource history, pipeline inspection and shader debugging; other analysis and experiments remain unsupported"); return;
+            showError("Query isolation permits resource/pixel history, pipeline inspection and shader debugging; other analysis and experiments remain unsupported"); return;
         }
         args << "--isolate-missing-queries";
     }

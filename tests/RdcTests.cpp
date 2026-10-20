@@ -90,6 +90,15 @@ class RdcTests : public QObject {
         job["action"]="resource-history"; job["resource"]="123";
         job["execution"]="18446744073709551615";
         requireRdcQueryIsolation(policy,job); // Index-only history also permits isolated query resources.
+        auto pixel = job; pixel["action"] = "history";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcQueryIsolation(policy, pixel));
+        pixel["resource"] = "124"; requireRdcQueryIsolation(policy, pixel);
+        for (const auto *key : {"execution", "resource", "resource_creation"}) {
+            auto invalidPixel = pixel; invalidPixel[key] = "0";
+            QVERIFY_THROWS_EXCEPTION(std::exception, requireRdcQueryIsolation(policy, invalidPixel));
+            invalidPixel.erase(key);
+            QVERIFY_THROWS_EXCEPTION(std::exception, requireRdcQueryIsolation(policy, invalidPixel));
+        }
         auto missing=job; missing.erase("resource_creation");
         QVERIFY_THROWS_EXCEPTION(std::exception,requireRdcQueryIsolation(policy,missing));
         job["action"]="pipeline";

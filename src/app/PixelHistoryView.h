@@ -14,7 +14,7 @@ class PixelHistoryView final : public QWidget {
     Q_OBJECT
   public:
     explicit PixelHistoryView(QWidget *parent = nullptr);
-    void setContext(const QString &key, qulonglong event, bool dx12 = false);
+    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool isolateMissingQueries = false);
     void setDx12Resource(qulonglong creation, qulonglong object);
     void setWorkerBusy(bool busy);
     void selectPixel(qulonglong resource, int x, int y, int mip, int layer, int sample);
@@ -41,7 +41,7 @@ class PixelHistoryView final : public QWidget {
     QString key_, backendPath_;
     qulonglong event_{};
     uint64_t requestId_{};
-    bool busy_{}, dx12_{};
+    bool busy_{}, dx12_{}, isolateMissingQueries_{};
     qulonglong creation_{}, object_{};
     nlohmann::json result_, rows_;
     QAction *read_, *cancel_, *locate_, *debug_, *export_, *backend_;

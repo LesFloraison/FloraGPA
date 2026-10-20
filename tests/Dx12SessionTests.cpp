@@ -1738,7 +1738,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto session = openReplaySession(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
         ReplaySelection selection; selection.execution = 19410; selection.isolateMissingQueries = true;
         QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
-        for (const auto feature : {ReplayFeature::PixelHistory, ReplayFeature::ShaderDebug,
+        QCOMPARE(session->capability(ReplayFeature::PixelHistory, selection).status, CapabilityStatus::MissingData);
+        for (const auto feature : {ReplayFeature::ShaderDebug,
                                    ReplayFeature::Geometry, ReplayFeature::PipelineInspection, ReplayFeature::Performance, ReplayFeature::Experiments})
             QCOMPARE(session->capability(feature, selection).status, CapabilityStatus::NotImplemented);
         selection.resource = 78132;
@@ -1747,9 +1748,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         selection.execution = 19408;
         QVERIFY(session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(session->capability(ReplayFeature::ShaderDebug,selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported()); // Query buffer is not a texture.
+        selection.resource = 35118;
+        QVERIFY(session->capability(ReplayFeature::PixelHistory,selection).supported());
         selection.isolateMissingQueries = false;
         QVERIFY(!session->capability(ReplayFeature::PipelineInspection,selection).supported());
         QVERIFY(!session->capability(ReplayFeature::ShaderDebug,selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
     }
     void isolatedQueryWorkspaceReplay() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

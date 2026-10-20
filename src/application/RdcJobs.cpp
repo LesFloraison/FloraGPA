@@ -155,7 +155,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!job.at("isolate_missing_queries").is_boolean() ||
         (job.at("isolate_missing_queries").get<bool>() && action != "inventory" && action != "texture" &&
          !((action == "pipeline" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
-         !(action == "resource-history" && job.contains("execution") && job.contains("resource_creation") &&
+         !((action == "resource-history" || action == "history") && job.contains("execution") && job.contains("resource_creation") &&
            !job.value("resource", Json()).is_null())))
         throw std::runtime_error("Unsupported query-isolated analysis or missing explicit DX12 selection");
     if (!job["dxil_fast_contraction"].is_boolean() ||

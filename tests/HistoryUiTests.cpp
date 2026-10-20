@@ -270,6 +270,120 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/query-resolve-history.json"),through);
         }
     }
+    void isolatedQueryPixelHistoryWorkspace() {
+        try {
+            const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+            const auto output = qEnvironmentVariable("FLORA_QUERY_PIXEL_HISTORY_UI");
+            const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+            if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+                QSKIP("Set Talos captures, a new pixel-history output directory and the pinned RenderDoc "
+                      "library");
+            QVERIFY(!QFileInfo::exists(output));
+            QVERIFY(QDir().mkpath(output));
+            MainWindow window;
+            QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+            window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            auto locate = window.findChild<QLineEdit *>("apiLocate");
+            locate->setText("19408");
+            QTest::keyClick(locate, Qt::Key_Return);
+            auto resources = window.findChild<QTableView *>("resources");
+            QModelIndex selected;
+            for (int row = 0; row < resources->model()->rowCount(); ++row)
+                if (resources->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 35118)
+                    selected = resources->model()->index(row, 0);
+            QVERIFY(selected.isValid());
+            resources->setCurrentIndex(selected);
+            auto view = window.findChild<PixelHistoryView *>();
+            QVERIFY(view);
+            view->setBackendPath(library, false);
+            QVERIFY(!action(*view, "readPixelHistory")->isEnabled());
+            auto isolation = window.findChild<QCheckBox *>("dx12QueryIsolation");
+            isolation->setChecked(true);
+            window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+            done.clear();
+            window.replay();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QVERIFY(!window.busy());
+            auto image = window.findChild<ImageView *>("frameOutput");
+            QCOMPARE(image->image().size(), QSize(1920, 1080));
+            auto pick = action(window, "pickPixelHistory");
+            QVERIFY(pick->isEnabled());
+            pick->setChecked(true);
+            done.clear();
+            QVERIFY(QMetaObject::invokeMethod(image, "pixelSelected", Qt::DirectConnection, Q_ARG(int, 65),
+                                              Q_ARG(int, 172),
+                                              Q_ARG(QColor, image->image().pixelColor(65, 172))));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 180000);
+            QVERIFY2(done.takeLast()[0].toBool(),
+                     qPrintable(view->findChild<QLabel *>("historySummary")->text()));
+            QVERIFY(!window.busy());
+            view->exportResult(output + "/result.json");
+            const auto result = read(output + "/result.json");
+            const auto capture = QString::fromStdString(result.at("capture").get<std::string>());
+            QVERIFY(
+                QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+            QCOMPARE(result.at("execution"), Json("19408"));
+            QCOMPARE(result.at("frame_complete"), Json(false));
+            QCOMPARE(result.at("partial"), Json(true));
+            QCOMPARE(result.at("history_scope").at("query_outputs_incomplete"), Json(true));
+            QCOMPARE(result.at("query_isolation").at("selected_execution"), Json("19408"));
+            QCOMPARE(result.at("request_identity").at("missing_query_policy"),
+                     Json("isolate_readback_outputs"));
+            QCOMPARE(view->request().at("isolate_missing_queries"), Json(true));
+            QCOMPARE(view->request().at("resource_creation"), Json("35118"));
+            const auto &consistency = result.at("history_scope").at("replay_consistency");
+            QCOMPARE(consistency.at("status"), Json("selected_texel_unchanged"));
+            QCOMPARE(consistency.at("history_boundary").at("status"), Json("matches_selected_texel"));
+            QVERIFY(
+                view->findChild<QLabel *>("historySummary")->text().contains("Incomplete query-isolated"));
+            auto rows = view->findChild<QTreeWidget *>("historyRecords");
+            QVERIFY(rows->topLevelItemCount() > 0);
+            int fragment = -1;
+            for (size_t i = 0; i < result.at("history").size(); ++i) {
+                const auto &row = result.at("history")[i];
+                if (row.value("execution", Json()) == "19408" && row.value("fragIndex", Json()) == 0) {
+                    QCOMPARE(row.at("postMod").at("col").at("uintValue"),
+                             Json::array({1015054465U, 1015054465U, 998277249U, 1060155569U}));
+                    fragment = int(i);
+                }
+            }
+            QVERIFY(fragment >= 0);
+            for (const auto *key : {"frame_complete", "partial"}) {
+                auto invalid = result;
+                invalid[key] = !result.at(key).get<bool>();
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), invalid));
+            }
+            auto invalid = result;
+            invalid["query_isolation"] = nullptr;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), invalid));
+            invalid = result;
+            invalid["history_scope"]["query_outputs_incomplete"] = false;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), invalid));
+            rows->setCurrentItem(rows->topLevelItem(fragment));
+            auto filter = window.findChild<QLineEdit *>("apiSearch");
+            filter->setText("no matching execution");
+            action(*view, "debugHistoryPixel")->trigger();
+            auto debug = window.findChild<ReplayDebugView *>("replayDebug-ps");
+            QVERIFY(debug);
+            QCOMPARE(debug->request().at("execution"), Json("19408"));
+            QCOMPARE(debug->request().at("primitive"), Json(0));
+            QCOMPARE(debug->request().at("x"), Json(65));
+            QCOMPARE(debug->request().at("y"), Json(172));
+            QCOMPARE(debug->request().at("isolate_missing_queries"), Json(true));
+            QVERIFY(filter->text().isEmpty()); // Locating the history execution restores visibility.
+            const auto old = view->requestId();
+            isolation->setChecked(false);
+            QCOMPARE(rows->topLevelItemCount(), 0);
+            QVERIFY(!view->finish(old, result));
+            QVERIFY(!action(*view, "readPixelHistory")->isEnabled());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), result));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void isolatedQueryShaderWorkspace() {
         const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output=qEnvironmentVariable("FLORA_QUERY_SHADER_UI");
@@ -416,7 +530,7 @@ class HistoryUiTests : public QObject {
         view->setBackendPath(library,false);
         QVERIFY(action(*view,"readResourceHistory")->isEnabled());
         QCOMPARE(view->request().at("isolate_missing_queries"),Json(true));
-        QVERIFY(!action(*window.findChild<PixelHistoryView *>(),"readPixelHistory")->isEnabled());
+        QVERIFY(action(*window.findChild<PixelHistoryView *>(),"readPixelHistory")->isEnabled());
         done.clear(); action(*view,"readResourceHistory")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),180000);
         QVERIFY2(done.takeLast()[0].toBool(),qPrintable(view->findChild<QLabel *>("resourceHistorySummary")->text()));
