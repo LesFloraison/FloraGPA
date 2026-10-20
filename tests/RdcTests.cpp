@@ -36,6 +36,8 @@ class RdcTests : public QObject {
             {"frame_end_record", boundary.at("last_record")}, {"execution", boundary.at("last_execution")},
             {"isolate_missing_queries", true}};
         requireRdcFrameEnd(parsed, job);
+        auto resourceJob = job; resourceJob["action"] = "resource-history";
+        requireRdcFrameEnd(parsed, resourceJob);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireRdcFrameEnd(nullptr, job));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, readRdcFrameEnd(Json::array({marker, marker})));
         QVERIFY(readRdcFrameEnd(Json::array()).is_null());

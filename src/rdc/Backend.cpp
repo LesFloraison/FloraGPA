@@ -2160,7 +2160,8 @@ Json runRdcJob(const Json &job) {
                 {"Bindings indicate possible use, not observed reads or writes.",
                  "Operation ranges are reconstructed from captured arguments where available; binding ranges and fence dependencies remain incomplete.",
                  "Replay initialization is separate from original execution markers.",
-                 "Only the captured replay prefix is covered; empty usage is not proof of no access."}}}}});
+                 frameEndHistory ? "Only indexed uses in the verified full-stream capture are covered; empty usage is not proof of no access."
+                                 : "Only the captured replay prefix is covered; empty usage is not proof of no access."}}}}});
         if (dx12) {
             result["history_scope"]["shader_stage_binding_status"] =
                 session.dx12UsageVisibilityPatch == 1 ? "stage_visibility_matched"

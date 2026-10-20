@@ -1336,6 +1336,11 @@ void MainWindow::buildUi() {
     connect(resourceHistory_, &ResourceHistoryView::eventRequested, this, [locateAnalysisAction](qulonglong id, qint64 action) {
         locateAnalysisAction(id, action);
     });
+    connect(resourceHistory_, &ResourceHistoryView::recordRequested, this, [this](qulonglong id) {
+        if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+        findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+        locateEvent(id);
+    });
     connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [locateAnalysisAction](qulonglong id, qint64 action) {
@@ -1773,11 +1778,14 @@ void MainWindow::updateCheckpointContext() {
                                  metricsSelection.frameEnd && !session_->events().empty() ? session_->events().back() : 0);
     }
     if (resourceHistory_) {
-        const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
-        resourceHistory_->setContext(supported ? historyContextKey(true) : QString{}, selection_.execution.value_or(0),
+        const auto resourceSelection = outputReplaySelection();
+        const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, resourceSelection).supported();
+        resourceHistory_->setContext(supported ? historyContextKey(true, resourceSelection.frameEnd) : QString{},
+                                    resourceSelection.frameEnd ? session_->executionCount() : selection_.execution.value_or(0),
                                     dx12 ? selection_.resource : 0,
                                     dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0,
-                                    dx12 && selection_.isolateMissingQueries);
+                                    dx12 && selection_.isolateMissingQueries,
+                                    resourceSelection.frameEnd && !session_->events().empty() ? session_->events().back() : 0);
     }
     if (dx12Pipeline_) {
         const bool supported =
@@ -1930,7 +1938,8 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         if (!digest.addData(&file))
             throw std::runtime_error("Cannot read RenderDoc library identity");
         historyRequest_["renderdoc"] = library.toStdString();
-        const bool frameEndHistory = kind == RdcAnalysis::History && historyRequest_.value("frame_end", false);
+        const bool frameEndHistory = (kind == RdcAnalysis::History || kind == RdcAnalysis::ResourceHistory) &&
+                                     historyRequest_.value("frame_end", false);
         historyKey_ =
             historyContextKey(resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
                               frameEndHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
@@ -2129,7 +2138,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
         (args.first() == "replay" || args.first() == "buffer")) {
-        const bool frameEndHistory = runningAnalysis_ == RdcAnalysis::History &&
+        const bool frameEndHistory = (runningAnalysis_ == RdcAnalysis::History || runningAnalysis_ == RdcAnalysis::ResourceHistory) &&
                                      historyRequest_.is_object() && historyRequest_.value("frame_end", false);
         const bool isolatedAnalysis =
             historyRequest_.is_object() &&

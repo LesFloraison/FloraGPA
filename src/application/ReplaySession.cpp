@@ -1,5 +1,6 @@
 #include "ReplaySession.h"
 #include "ApiCommands.h"
+#include "RdcEvents.h"
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
@@ -14,6 +15,7 @@
 #include <mutex>
 #include <bit>
 #include <charconv>
+#include <set>
 
 namespace flora {
 namespace {
@@ -429,7 +431,9 @@ class Dx12Session final : public IReplaySession {
             executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported()) return replay;
-            return {CapabilityStatus::Supported, "Partial replay-prefix usage history; bindings are potential "
+            return {CapabilityStatus::Supported, selection.frameEnd
+                ? "Partial full-stream usage history with a verified terminal marker and captured queue context; bindings are potential accesses, content changes are not measured"
+                : "Partial replay-prefix usage history; bindings are potential "
                     "accesses, content changes and complete subresource/synchronization coverage are not measured"};
         }
         if (feature == ReplayFeature::PipelineInspection) {
@@ -573,6 +577,7 @@ void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohm
         result.at("resource_creation") != std::to_string(creation) || result.at("resource_object") != object)
         throw std::runtime_error("Resource history does not match the captured lifetime");
     result["captured_creation"] = session.resourceDetails(creation);
+    std::set<std::string> usedQueues;
     for (auto &row : result.at("resource_history")) {
         if (!row.value("selectable", false)) continue;
         const auto text = row.at("execution").get<std::string>();
@@ -584,6 +589,9 @@ void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohm
         const auto &call = row.at("captured_call");
         if (row.contains("source_record") && row.at("source_record") != call.at("source_record"))
             throw std::runtime_error("Resource history execution maps to a different source record");
+        if (row.contains("queue") && row.at("queue") != call.at("queue"))
+            throw std::runtime_error("Resource history execution maps to a different queue");
+        usedQueues.insert(call.at("queue").get<std::string>());
         if (row.value("usage_name", "") == "Barrier") {
             row["captured_resource_barriers"] = nlohmann::json::array();
             if (call.contains("arguments") && call["arguments"].contains("Barriers"))
@@ -601,6 +609,42 @@ void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohm
             row["content_definition"] = "discarded_until_rewritten";
             row["discard_note"] = "Discard does not clear to zero. Contents need not be preserved in the specified region; later bindings alone do not establish which texels were written.";
         }
+    }
+    result.erase("queue_context");
+    if (result.value("frame_end", false)) {
+        const auto lastRecord = session.events().back();
+        requireRdcFrameEnd(result.at("frame_stream_boundary"),
+            {{"action", "resource-history"}, {"frame_end", true},
+             {"frame_end_record", std::to_string(lastRecord)}, {"execution", std::to_string(session.executionCount())},
+             {"isolate_missing_queries", !result.value("query_isolation", nlohmann::json()).is_null()}});
+        if (result.at("execution") != std::to_string(session.executionCount()))
+            throw std::runtime_error("Resource history does not cover the captured frame stream");
+        const auto submissions = session.submissionDetails();
+        const auto initialization = session.information().at("initialization_records").get<uint64_t>();
+        auto operations = nlohmann::json::array();
+        std::map<std::string, nlohmann::json> waits;
+        for (const auto &wait : submissions.at("queue_dependencies").at("waits"))
+            waits.emplace(wait.at("record").get<std::string>(), wait);
+        for (const auto &operation : submissions.at("synchronization")) {
+            const auto record = std::stoull(operation.at("record").get<std::string>());
+            if (record <= initialization || record > lastRecord ||
+                !usedQueues.contains(operation.at("queue").get<std::string>())) continue;
+            auto row = operation;
+            row["evidence"] = "captured_queue_operation";
+            if (row.at("wait").get<bool>()) {
+                const auto found = waits.find(row.at("record").get<std::string>());
+                row["dependency"] = found == waits.end() ? nlohmann::json{{"condition", "unresolved"}} : found->second;
+            }
+            operations.push_back(std::move(row));
+        }
+        result["queue_context"] = {
+            {"scope", "captured_frame_operations_on_resource_usage_queues"},
+            {"through_record", std::to_string(lastRecord)}, {"queues", usedQueues},
+            {"operations", std::move(operations)}, {"resource_dependency_proven", false},
+            {"gpu_stall_duration_measured", false},
+            {"limitations", "Queue-wide context from captured CPU stream records, not a resource hazard/access proof or "
+                            "an observed GPU schedule. Unrelated work can share these queues. "
+                            "Fence links cover single-writer monotonic dependencies; CPU event/timeout semantics remain incomplete."}};
     }
 }
 }

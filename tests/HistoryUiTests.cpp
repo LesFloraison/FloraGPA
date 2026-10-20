@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <bit>
 #include <cmath>
+#include <set>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QTextBlock>
@@ -507,6 +508,84 @@ class HistoryUiTests : public QObject {
         QVERIFY(!view->finish(old,result));
         QVERIFY(!action(*view,"readDx12Pipeline")->isEnabled());
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,view->finish(view->requestId(),result));
+    }
+    void frameEndResourceHistoryWorkspace() {
+        const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_FRAME_RESOURCE_HISTORY_UI");
+        const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
+        if (captures.isEmpty() || output.isEmpty() || library.isEmpty())
+            QSKIP("Set captures, a new frame-end resource history directory and the pinned RenderDoc library");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto view = window.findChild<ResourceHistoryView *>();
+        QCOMPARE(window.findChild<QTableView *>("resources")->currentIndex().data(Qt::UserRole).toULongLong(), 35118ULL);
+        QVERIFY(!action(*view, "readResourceHistory")->isEnabled());
+        window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        view->setBackendPath(library, false);
+        QCOMPARE(view->request().at("frame_end"), Json(true));
+        QCOMPARE(view->request().at("frame_end_record"), Json("192535"));
+        QVERIFY(action(*view, "readResourceHistory")->isEnabled());
+        action(*view, "readResourceHistory")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 180000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.findChild<QPlainTextEdit *>("taskLog")->toPlainText()));
+        const auto result = view->result();
+        QCOMPARE(result.at("frame_end"), Json(true));
+        QCOMPARE(result.at("frame_complete"), Json(false));
+        QCOMPARE(result.at("history_scope").at("output_boundary"), Json("frame_end"));
+        QCOMPARE(result.at("history_scope").at("through_record"), Json("192535"));
+        QCOMPARE(result.at("history_scope").at("selected_event_replayed"), Json(false));
+        QCOMPARE(result.at("frame_stream_boundary").at("boundary").at("last_record"), Json("192535"));
+        const auto &uses = result.at("resource_history");
+        QCOMPARE(uses.size(), size_t(6));
+        QCOMPARE(uses.front().at("execution"), Json("19378"));
+        QCOMPARE(uses.back().at("execution"), Json("19410"));
+        QCOMPARE(uses.back().at("source_record"), Json("192530"));
+        QCOMPARE(uses.back().at("usage_name"), Json("Barrier"));
+        const auto &transition = uses.back().at("captured_resource_barriers").at(0);
+        QCOMPARE(transition.at("Resource"), Json("1651480816"));
+        QCOMPARE(transition.at("StateBefore"), Json(4));
+        QCOMPARE(transition.at("StateAfter"), Json(0));
+        QVERIFY(uses.back().at("eventId").get<uint32_t>() < result.at("frame_stream_boundary").at("event_id").get<uint32_t>());
+        QVERIFY(!result.at("captured_creation").empty());
+        QVERIFY(!result.at("replay_initialization").empty());
+        const auto &context = result.at("queue_context");
+        QCOMPARE(context.at("resource_dependency_proven"), Json(false));
+        QCOMPARE(context.at("gpu_stall_duration_measured"), Json(false));
+        QCOMPARE(context.at("through_record"), Json("192535"));
+        std::set<std::string> records;
+        for (const auto &row : context.at("operations")) {
+            QCOMPARE(row.at("queue"), Json("175347920"));
+            records.insert(row.at("record").get<std::string>());
+        }
+        QVERIFY(records.contains("192533")); QVERIFY(records.contains("192534"));
+        auto sync = view->findChild<QTreeWidget *>("resourceHistorySynchronization");
+        QCOMPARE(size_t(sync->topLevelItemCount()), context.at("operations").size());
+        QVERIFY(view->findChild<QLabel *>("resourceHistorySummary")->text().contains("Frame stream end"));
+        view->exportResult(output + "/result.json");
+        const auto capture = QString::fromStdString(result.at("capture").get<std::string>());
+        QVERIFY(QFile::copy(QFileInfo(capture).dir().filePath("report.json"), output + "/recapture.json"));
+        auto wrong = result; wrong["frame_end"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        wrong = result; wrong["frame_stream_boundary"]["boundary"]["last_record"] = "192532";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        wrong = result; wrong["queue_context"]["resource_dependency_proven"] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view->finish(view->requestId(), wrong));
+        const auto old = view->requestId();
+        QTreeWidgetItem *signalItem{};
+        for (int i = 0; i < sync->topLevelItemCount(); ++i)
+            if (sync->topLevelItem(i)->data(0, Qt::UserRole).toULongLong() == 192534)
+                signalItem = sync->topLevelItem(i);
+        QVERIFY(signalItem);
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        emit sync->itemDoubleClicked(signalItem, 0);
+        QCOMPARE(window.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 0);
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), 192534ULL);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(!view->finish(old, result));
+        QVERIFY(view->result().is_null());
     }
     void isolatedQueryResourceHistoryWorkspace() {
         const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

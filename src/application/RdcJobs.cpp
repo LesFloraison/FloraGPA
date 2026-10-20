@@ -131,9 +131,9 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (job.contains("frame_end") && !job.at("frame_end").is_boolean())
         throw std::runtime_error("Frame-end selection must be a boolean");
     if (job.value("frame_end", false)) {
-        if (action != "history" || !job.contains("execution") || !job.contains("resource_creation") ||
+        if ((action != "history" && action != "resource-history") || !job.contains("execution") || !job.contains("resource_creation") ||
             job.contains("indirect_action") || job.value("depth_roundtrip", false))
-            throw std::runtime_error("Frame end requires explicit DX12 pixel-history identities without a Draw depth experiment");
+            throw std::runtime_error("Frame end requires explicit DX12 history identities without a Draw depth experiment");
         decimalIdentity(job.at("frame_end_record"), "frame_end_record");
     } else if (job.contains("frame_end_record"))
         throw std::runtime_error("A frame-end record requires frame-end history");

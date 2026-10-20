@@ -421,7 +421,7 @@ Json readRdcFrameEnd(const Json &roots) {
 }
 void requireRdcFrameEnd(const Json &marker, const Json &job) {
     if (!job.value("frame_end", false)) return;
-    if (job.at("action") != "history" || marker.is_null())
+    if ((job.at("action") != "history" && job.at("action") != "resource-history") || marker.is_null())
         throw std::runtime_error("Frame-end history requires a completed stream capture marker");
     const auto &boundary = marker.at("boundary");
     validateFrameEnd(boundary);

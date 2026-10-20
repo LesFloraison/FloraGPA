@@ -8589,6 +8589,66 @@ Evidence stays outside Git: `talos-frame-metrics-ui1/{result.json,oracle.json,me
 Original concurrency/timing, hardware-counter coverage, full image fidelity and
 portable acceptance remain unfinished.
 
+### Resource History through the verified frame-stream boundary
+
+Resource History now follows **Frame end** without requiring an execution
+selection. It shares the full-stream capture cache with frame-end Pixel History
+and requires the same embedded terminal marker, final record/execution and
+query policy. Selected-event and frame-end results cannot be interchanged.
+The backend reads the explicit resource's usage index through the terminal
+marker; it does not replay a selected event just to resolve that resource.
+Capture loading may still execute GPU work.
+
+Original resource creation and replay initialization remain separate from the
+indexed uses. Mapped barrier rows retain the exact captured resource, subresource,
+states and execution identity. The new **Queue context** tab lists captured
+frame Signal/Wait operations on queues with mapped resource uses, through the
+same final record. Where available, Wait rows retain the existing single-writer,
+monotonic-Fence dependency proof. Double-clicking a context row locates its CPU
+stream record, clears obstructing API filters and invalidates the old analysis.
+Resource-use rows continue to navigate execution instances.
+
+This context is deliberately queue-wide: unrelated work can share a queue.
+It is not proof of a resource hazard, observed access or GPU stall duration.
+The resource history remains partial, bound uses remain potential accesses,
+and content changes are not measured by this index. Original-record and queue
+identities are checked against the mapped execution before enrichment.
+
+A fresh Talos workspace capture under explicit query isolation reaches record
+**192535** and contains terminal RenderDoc marker **20544**. Resource creation
+**35118**, object **1651480816**, has six indexed uses:
+
+| Execution | Source record | Captured use |
+| --- | --- | --- |
+| 19378 | 192478 | All-subresource PRESENT → RT transition |
+| 19389 | 192489 | Color-target binding |
+| 19396 | 192496 | Color-target binding |
+| 19404 | 192504 | Color-target binding |
+| 19408 | 192508 | Color-target binding |
+| 19410 | 192530 | All-subresource RT → PRESENT transition |
+
+All six uses map to queue **175347920**. Its context contains six captured
+Signals, including terminal records **192533** (Fence **1647885200**, value
+**2954**) and **192534** (Fence **178976608**, value **17973**). This sample has
+no Wait in the selected resource's queue context; that new tab's Wait display
+is not claimed GPU-verified here. The native recapture reports zero validation
+errors and the result retains `frame_complete=false`.
+
+The first targeted GPU/UI run passes **3** checks including setup/cleanup in
+**13,562 ms**. It checks creation/initialization provenance, all six mappings,
+the final barrier, terminal marker, Signal navigation and stale/wrong-boundary
+rejection. Existing partial query-resolve history is reused for a CPU-only
+compatibility check (**3** checks, **60 ms**); marker validation adds the
+resource-history action and passes **3** checks in **1 ms**. No BF1/Hellblade2
+replay was repeated.
+
+Build **486** passes. Ignored evidence:
+`talos-frame-resource-ui1/{result.json,recapture.json,scope-evidence.json}`,
+`frame-resource-ui-tests1.txt`, `frame-resource-compat1.txt`,
+`frame-resource-marker-tests1.txt` and `build486.log`. Full resource access/
+modification observation, broader synchronization coverage, the other samples'
+frame-end history and original-frame fidelity remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -8596,6 +8656,7 @@ portable acceptance remain unfinished.
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
+| Frame-end Resource History | Not verified | Six mapped backbuffer uses, captured state transitions, separate creation/initialization, six queue-context Signals, terminal-marker checks and CPU-record navigation verified under query isolation; complete accesses/modifications unfinished | Not verified |
 | Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
 | Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | Not verified |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |

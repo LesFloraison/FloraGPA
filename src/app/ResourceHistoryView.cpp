@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QSignalBlocker>
 #include <QSplitter>
+#include <QTabWidget>
 #include <QToolBar>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -69,7 +70,18 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     details_ = new QPlainTextEdit;
     details_->setReadOnly(true);
     details_->setObjectName("resourceHistoryDetails");
-    split->addWidget(rows_);
+    auto tabs = new QTabWidget;
+    tabs->setObjectName("resourceHistoryTabs");
+    tabs->addTab(rows_, "Resource uses");
+    synchronization_ = new QTreeWidget;
+    synchronization_->setObjectName("resourceHistorySynchronization");
+    synchronization_->setHeaderLabels({"Record", "Queue", "Operation", "Fence", "Value", "Queue dependency"});
+    synchronization_->setRootIsDecorated(false);
+    synchronization_->setUniformRowHeights(true);
+    synchronization_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    synchronization_->setToolTip("Captured operations on queues with indexed resource uses; not proof of a resource dependency or GPU stall duration");
+    tabs->addTab(synchronization_, "Queue context");
+    split->addWidget(tabs);
     split->addWidget(details_);
     layout->addWidget(split);
     connect(read_, &QAction::triggered, this, [this] {
@@ -91,6 +103,14 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
             details_->setPlainText(QString::fromStdString(
                 result_.at("resource_history").at(item->data(0, Qt::UserRole + 1).toULongLong()).dump(2)));
     });
+    connect(synchronization_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item) {
+        if (!busy_ && item) emit recordRequested(item->data(0, Qt::UserRole).toULongLong());
+    });
+    connect(synchronization_, &QTreeWidget::itemSelectionChanged, this, [this] {
+        if (auto item = synchronization_->currentItem(); item && !result_.is_null())
+            details_->setPlainText(QString::fromStdString(result_.at("queue_context").at("operations")
+                .at(item->data(0, Qt::UserRole + 1).toULongLong()).dump(2)));
+    });
     connect(backend_, &QAction::triggered, this, [this] {
         const auto path = QFileDialog::getOpenFileName(this, "Select RenderDoc 1.45", library_,
                                                        "RenderDoc (renderdoc.dll)");
@@ -111,14 +131,15 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     updateActions();
 }
 void ResourceHistoryView::setContext(const QString &key, uint64_t execution, uint64_t creation,
-                                     uint64_t object, bool isolateMissingQueries) {
+                                     uint64_t object, bool isolateMissingQueries, uint64_t frameEndRecord) {
     if (key != key_ || execution != execution_ || creation != creation_ || object != object_ ||
-        isolateMissingQueries != isolateMissingQueries_) {
+        isolateMissingQueries != isolateMissingQueries_ || frameEndRecord != frameEndRecord_) {
         key_ = key;
         execution_ = execution;
         creation_ = creation;
         object_ = object;
         isolateMissingQueries_ = isolateMissingQueries;
+        frameEndRecord_ = frameEndRecord;
         invalidate();
     }
     updateActions();
@@ -137,12 +158,14 @@ void ResourceHistoryView::setWorkerBusy(bool busy) {
     updateActions();
 }
 void ResourceHistoryView::invalidate() {
-    const QSignalBlocker block(rows_);
+    const QSignalBlocker block(rows_), syncBlock(synchronization_);
     ++serial_;
     result_ = nullptr;
     rows_->clear();
+    synchronization_->clear();
     details_->clear();
-    summary_->setText("Select a DX12 resource and executed event; Read queries its replay prefix");
+    summary_->setText(frameEndRecord_ ? "Select a DX12 resource; Read queries the verified frame-stream capture"
+                                     : "Select a DX12 resource and executed event; Read queries its replay prefix");
     updateActions();
 }
 void ResourceHistoryView::updateActions() {
@@ -156,11 +179,16 @@ void ResourceHistoryView::updateActions() {
 ResourceHistoryView::Json ResourceHistoryView::request() const {
     if (key_.isEmpty() || !execution_ || !creation_ || !object_)
         throw std::runtime_error("Select a DX12 resource and executed event");
-    return {{"action", "resource-history"},
+    Json result{{"action", "resource-history"},
             {"isolate_missing_queries", isolateMissingQueries_},
             {"execution", std::to_string(execution_)},
             {"resource", std::to_string(object_)},
             {"resource_creation", std::to_string(creation_)}};
+    if (frameEndRecord_) {
+        result["frame_end"] = true;
+        result["frame_end_record"] = std::to_string(frameEndRecord_);
+    }
+    return result;
 }
 bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
     if (serial != serial_)
@@ -174,6 +202,9 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         result.at("resource_creation") != std::to_string(creation_))
         throw std::runtime_error("Resource history identity does not match selection");
     requireRdcQueryIsolation(result.value("query_isolation", Json()), request());
+    if (result.value("frame_end", false) != bool(frameEndRecord_))
+        throw std::runtime_error("Resource history belongs to a different replay boundary");
+    requireRdcFrameEnd(result.value("frame_stream_boundary", Json()), request());
     if (isolateMissingQueries_ && result.value("frame_complete", Json()) != false)
         throw std::runtime_error("Isolated resource history must retain incomplete frame status");
     const auto &uses = result.at("resource_history");
@@ -190,9 +221,19 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
             (void)indirectActionOrdinal(row);
         }
     }
-    const QSignalBlocker block(rows_);
+    const auto context = result.value("queue_context", Json());
+    if (!context.is_null()) {
+        if (context.at("scope") != "captured_frame_operations_on_resource_usage_queues" ||
+            context.at("resource_dependency_proven") != false || context.at("gpu_stall_duration_measured") != false ||
+            (frameEndRecord_ && context.at("through_record") != std::to_string(frameEndRecord_)))
+            throw std::runtime_error("Invalid resource queue-context scope");
+        for (const auto &row : context.at("operations"))
+            for (const auto key : {"record", "queue", "fence"}) (void)identity(row.at(key));
+    }
+    const QSignalBlocker block(rows_), syncBlock(synchronization_);
     result_ = result;
     rows_->clear();
+    synchronization_->clear();
     for (size_t i = 0; i < uses.size(); ++i) {
         const auto &row = uses[i];
         auto item = new QTreeWidgetItem(rows_, {field(row, "execution"), field(row, "usage_name"),
@@ -291,12 +332,30 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         if (row.value("selectable", false))
             item->setData(0, Qt::UserRole, qulonglong(identity(row.at("execution"))));
     }
+    if (!context.is_null())
+        for (size_t i = 0; i < context.at("operations").size(); ++i) {
+            const auto &row = context.at("operations")[i];
+            const auto dependency = row.value("dependency", Json::object());
+            auto item = new QTreeWidgetItem(synchronization_, {field(row, "record"), field(row, "queue"),
+                row.at("wait").get<bool>() ? "Wait" : "Signal", field(row, "fence"), field(row, "value"),
+                dependency.value("condition", "") == "queue_signal"
+                    ? "Signal " + field(dependency, "producer_record") + " · " + field(dependency, "dependency_status")
+                    : row.at("wait").get<bool>() ? field(dependency, "condition") : "Queue operation only"});
+            item->setData(0, Qt::UserRole, qulonglong(identity(row.at("record"))));
+            item->setData(0, Qt::UserRole + 1, qulonglong(i));
+            item->setToolTip(0, "Double-click to locate the original CPU stream record");
+            item->setToolTip(5, QString::fromStdString(context.at("limitations").get<std::string>()));
+        }
     showOverview();
     summary_->setText(QString("Partial resource history · %1 indexed uses through execution %2\nBindings are "
                               "potential accesses; content changes were not measured. See details for "
                               "creation and replay initialization.")
                           .arg(uses.size())
                           .arg(execution_));
+    if (frameEndRecord_)
+        summary_->setText(QString("Frame stream end · %1 indexed uses through record %2\nBindings are potential "
+                                 "accesses; content changes were not measured. Queue context does not prove resource hazards.")
+                             .arg(uses.size()).arg(frameEndRecord_));
     if (isolateMissingQueries_)
         summary_->setText(summary_->text() + "\nIncomplete replay: missing query outputs. Usage is indexed; query-result bytes are not read.");
     for (const auto &warning : result.value("history_scope", Json::object()).value("warnings", Json::array()))
@@ -310,7 +369,8 @@ void ResourceHistoryView::showOverview() {
     Json overview;
     for (const auto key : {"resource_name", "resource_object", "resource_creation", "execution",
                            "captured_creation", "replay_initialization", "history_scope", "query_isolation", "frame_complete",
-                           "query_resolve_mapping_gaps", "resource_history_selection"})
+                           "query_resolve_mapping_gaps", "resource_history_selection",
+                           "frame_end", "frame_stream_boundary", "queue_context"})
         overview[key] = result_.value(key, Json());
     details_->setPlainText(QString::fromStdString(overview.dump(2)));
 }
