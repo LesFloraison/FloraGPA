@@ -49,6 +49,20 @@ uint64_t decimal(const Json &value, bool nonzero = true) {
     return id;
 }
 uint64_t executionId(const Json &value) { return decimal(value); }
+void validateSynchronization(const Json &timeline, uint64_t lastRecord) {
+    const auto &rows = timeline.at("synchronization");
+    if (!rows.is_array()) throw std::runtime_error("Invalid timeline synchronization records");
+    std::set<uint64_t> records;
+    for (const auto &row : rows) {
+        const auto record = decimal(row.at("record"));
+        if ((lastRecord && record > lastRecord) || !records.insert(record).second ||
+            (row.at("operation") != "queue_signal" && row.at("operation") != "queue_wait") ||
+            !row.at("gpu_wait_duration").is_null())
+            throw std::runtime_error("Invalid or out-of-bound timeline synchronization record");
+        (void)decimal(row.at("queue")); (void)decimal(row.at("fence"));
+        (void)decimal(row.at("value"), false); (void)decimal(row.at("cpu_observed_qpc"), false);
+    }
+}
 QTreeWidget *table(const char *name, const QStringList &columns) {
     auto tree = new QTreeWidget;
     tree->setObjectName(name);
@@ -146,10 +160,10 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
         catalog_->header()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
     catalog_->setRootIsDecorated(false);
     tabs->addTab(catalog_, "Catalog");
-    timeline_ = table("rdcReplayTimeline", {"Queue / submission / list", "First execution", "Clock", "Begin (ms)", "Duration (µs)", "Interval"});
+    timeline_ = table("rdcReplayTimeline", {"Queue / submission / list", "Execution / CPU record", "Clock", "Begin (ms)", "Duration (µs)", "Interval"});
     timeline_->setItemDelegateForColumn(5, new TimelineBar(timeline_));
     timeline_->setColumnWidth(5, 180);
-    timeline_->setToolTip("Measured replay prefix; submissions are CPU-serialized. This is not original-application concurrency. Double-click to locate.");
+    timeline_->setToolTip("Measured replay with captured Fence dependencies and conservative host drains, not original-application timing. Double-click a list or synchronization record to locate.");
     tabs->addTab(timeline_, "Replay timeline");
     tabs->setTabVisible(2, false);
     details_ = new QPlainTextEdit;
@@ -237,18 +251,25 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
                 result_.at("available").at(item->data(0, Qt::UserRole).toULongLong()).dump(2)));
     });
     connect(locate_, &QAction::triggered, this, [this] {
-        auto item = values_->currentItem();
-        if (item && !busy_ && item->data(0, Qt::UserRole).toULongLong())
-            emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
+        const auto active = findChild<QTabWidget *>("rdcCounterTabs")->currentWidget();
+        const auto item = active == timeline_ ? timeline_->currentItem() : active == values_ ? values_->currentItem() : nullptr;
+        if (!item || busy_ || result_.is_null()) return;
+        if (active == timeline_ && item->data(0, Qt::UserRole + 3).isValid())
+            emit recordRequested(item->data(0, Qt::UserRole + 3).toULongLong());
+        else if (item->data(0, Qt::UserRole).toULongLong()) emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
     });
     connect(values_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
     connect(timeline_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item) {
-        if (!busy_ && item->data(0, Qt::UserRole).toULongLong()) emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
+        if (busy_ || result_.is_null()) return;
+        if (const auto record = item->data(0, Qt::UserRole + 3).toULongLong()) emit recordRequested(record);
+        else if (const auto execution = item->data(0, Qt::UserRole).toULongLong()) emit eventRequested(execution);
     });
     connect(timeline_, &QTreeWidget::itemSelectionChanged, this, [this] {
+        updateActions();
         const auto item = timeline_->currentItem();
         if (item) details_->setPlainText(item->data(0, Qt::UserRole + 1).toString());
     });
+    connect(tabs, &QTabWidget::currentChanged, this, [this] { updateActions(); });
     setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
@@ -319,8 +340,11 @@ void RdcCountersView::updateActions() {
     list_->setEnabled(!busy_ && !key_.isEmpty() && !isolateMissingQueries_);
     backend_->setEnabled(!busy_ && !nativeMode() && !isolateMissingQueries_);
     export_->setEnabled(!busy_ && !result_.is_null());
-    locate_->setEnabled(!busy_ && values_->currentItem() &&
-                        values_->currentItem()->data(0, Qt::UserRole).toULongLong());
+    const auto active = findChild<QTabWidget *>("rdcCounterTabs")->currentWidget();
+    const auto item = active == timeline_ ? timeline_->currentItem() : active == values_ ? values_->currentItem() : nullptr;
+    locate_->setEnabled(!busy_ && !result_.is_null() && item &&
+        (item->data(0, Qt::UserRole).toULongLong() ||
+         (active == timeline_ && item->data(0, Qt::UserRole + 3).toULongLong())));
 }
 bool RdcCountersView::nativeMode() const { return dx12_ && source_->currentIndex() == 0; }
 RdcCountersView::Json RdcCountersView::request() const {
@@ -513,6 +537,8 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
         if (frameEndRecord_ && (result.at("native_measurement").at("last_record") != std::to_string(frameEndRecord_) ||
                                result.value("frame_complete", Json()) != false))
             throw std::runtime_error("Frame metrics do not match the complete stream boundary");
+        if (nativeMode() && result.at("native_measurement").contains("timeline"))
+            validateSynchronization(result.at("native_measurement").at("timeline"), frameEndRecord_);
         if (isolateMissingQueries_ && (!nativeMode() || result.value("frame_complete", Json()) != false ||
             result.value("partial", Json()) != true ||
             !result.value("query_replay_coverage", Json()).is_object() ||
@@ -669,9 +695,12 @@ void RdcCountersView::render() {
             if (!filter.isEmpty() && !QString::fromStdString(row.dump()).contains(filter, Qt::CaseInsensitive)) continue;
             const auto queue = row.at("queue").get<std::string>(); auto &parent = queues[queue];
             if (!parent) parent = new QTreeWidgetItem(timeline_, {"Queue " + QString::fromStdString(queue)});
-            auto item = new QTreeWidgetItem(parent, {text(row.at("operation")) + " fence " + text(row.at("fence")), "—", "CPU observation", "—", "—"});
+            auto item = new QTreeWidgetItem(parent, {text(row.at("operation")) + " fence " + text(row.at("fence")),
+                "Record " + text(row.at("record")), "CPU observation", "—", "—"});
             item->setData(0, Qt::UserRole + 1, QString::fromStdString(row.dump(2)));
-            item->setToolTip(0, "Fence value " + text(row.at("value")) + "; GPU wait duration was not measured");
+            item->setData(0, Qt::UserRole + 3, qulonglong(decimal(row.at("record"))));
+            item->setToolTip(0, "CPU record " + text(row.at("record")) + "; Fence value " + text(row.at("value")) +
+                "; GPU wait duration was not measured. Double-click to locate this API record.");
         }
         if (entries.size() <= 128) timeline_->expandAll();
     }

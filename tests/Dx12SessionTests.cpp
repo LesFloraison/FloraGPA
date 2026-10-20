@@ -2250,6 +2250,163 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QFAIL(error.what());
         }
     }
+    void hellbladeFramePerformanceEvidence() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto saved = qEnvironmentVariable("FLORA_HELLBLADE_FRAME_PERFORMANCE");
+        const auto output = qEnvironmentVariable("FLORA_HELLBLADE_FRAME_PERFORMANCE_OUTPUT");
+        if (root.isEmpty() || saved.isEmpty() || output.isEmpty())
+            QSKIP("Set Hellblade capture, saved full-stream measurement and a new evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        QFile file(saved); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto report = Json::parse(file.readAll().toStdString());
+        QVERIFY(report.at("completed").get<bool>());
+        QCOMPARE(report.at("device").at("validation_error_count"), Json("0"));
+        const auto &performance = report.at("performance");
+        QCOMPARE(performance.at("scope"), Json("frame_stream"));
+        QCOMPARE(performance.at("last_record"), Json("613510"));
+        QCOMPARE(performance.at("execution"), Json("37104"));
+        const auto &rows = performance.at("list_measurements");
+        QCOMPARE(rows.size(), size_t(323));
+        Json oracles = Json::array();
+        size_t direct{}, mesh{}, checkedLists{};
+        std::set<std::string> queues;
+        const auto path = root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame";
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            dx12::SubmissionIndex submissions(directory);
+            std::map<std::pair<uint64_t, uint64_t>, const dx12::SubmittedList *> expected;
+            for (const auto &list : submissions.lists())
+                if (list.submission > directory.initializationCount())
+                    QVERIFY(expected.emplace(std::pair{list.submission, list.ordinal}, &list).second);
+            QCOMPARE(rows.size(), expected.size());
+            for (const auto &row : rows) {
+                const auto submission = std::stoull(row.at("submission").get<std::string>());
+                const auto ordinal = std::stoull(row.at("list_ordinal").get<std::string>());
+                const auto it = expected.find({submission, ordinal}); QVERIFY(it != expected.end());
+                const auto &list = *it->second; QVERIFY(list.recording.has_value());
+                const auto &recording = submissions.recordings().at(*list.recording);
+                QCOMPARE(row.at("queue"), Json(std::to_string(list.queue)));
+                QCOMPARE(row.at("command_list"), Json(std::to_string(list.list)));
+                QCOMPARE(row.at("generation"), Json(std::to_string(recording.generation)));
+                QCOMPARE(row.at("execution_count"), Json(std::to_string(list.count)));
+                QCOMPARE(row.at("first_execution"), list.count ? Json(std::to_string(list.firstExecution)) : Json(nullptr));
+                expected.erase(it); queues.insert(row.at("queue").get<std::string>());
+                QCOMPARE(row.at("status"), Json("measured"));
+                const auto begin = std::stoull(row.at("timestamp_begin").get<std::string>());
+                const auto end = std::stoull(row.at("timestamp_end").get<std::string>());
+                const auto frequency = std::stoull(row.at("timestamp_frequency_hz").get<std::string>());
+                QVERIFY(end >= begin); QVERIFY(frequency);
+                QCOMPARE(row.at("duration_seconds").get<double>(), double(end - begin) / double(frequency));
+                if (row.at("pipeline_statistics_status") != "measured") continue;
+                ++direct; QCOMPARE(row.at("queue_type"), Json(0));
+                const auto &statistics = row.at("pipeline_statistics");
+                if (statistics.at("MSInvocations") != "0") ++mesh;
+                uint64_t vertices{}; bool uncertain{}, hasDraw{};
+                for (const auto id : recording.records) {
+                    const auto &packet = directory.packets().at(size_t(id - 1));
+                    const auto name = dx12::streamPacketName(packet.type);
+                    // Indirect/predicated/bundle work requires a GPU argument
+                    // oracle; do not turn unknown work into a zero count.
+                    if (name.find("ExecuteIndirect") != std::string::npos ||
+                        name.find("SetPredication") != std::string::npos ||
+                        name.find("ExecuteBundle") != std::string::npos) uncertain = true;
+                    if (packet.type != 0x1ae3c190d8b1eULL && packet.type != 0x1ae3c86b1c3b9ULL) continue;
+                    const auto args = dx12::decodeArguments(packet.type, directory.payload(packet)).values;
+                    vertices += args.at(packet.type == 0x1ae3c190d8b1eULL ? "VertexCountPerInstance" : "IndexCountPerInstance").get<uint64_t>() *
+                                args.at("InstanceCount").get<uint64_t>();
+                    hasDraw = true;
+                }
+                if (!uncertain && hasDraw) {
+                    QCOMPARE(statistics.at("IAVertices"), Json(std::to_string(vertices)));
+                    ++checkedLists;
+                    oracles.push_back({{"submission", row.at("submission")}, {"list_ordinal", row.at("list_ordinal")},
+                        {"expected_ia_vertices", std::to_string(vertices)}, {"measured_ia_vertices", statistics.at("IAVertices")}});
+                }
+                if (submission == 579109 && ordinal == 1) {
+                    QCOMPARE(statistics.at("MSPrimitives"), Json("96731"));
+                    QCOMPARE(statistics.at("MSInvocations"), Json("101760"));
+                }
+            }
+            QVERIFY(expected.empty());
+            std::map<uint64_t, const dx12::QueueSynchronization *> sync;
+            for (const auto &item : submissions.synchronization())
+                if (item.record > directory.initializationCount()) QVERIFY(sync.emplace(item.record, &item).second);
+            QCOMPARE(performance.at("timeline").at("synchronization").size(), sync.size());
+            for (const auto &row : performance.at("timeline").at("synchronization")) {
+                const auto record = std::stoull(row.at("record").get<std::string>());
+                const auto it = sync.find(record); QVERIFY(it != sync.end());
+                const auto &item = *it->second;
+                QCOMPARE(row.at("queue"), Json(std::to_string(item.queue)));
+                QCOMPARE(row.at("fence"), Json(std::to_string(item.fence)));
+                QCOMPARE(row.at("value"), Json(std::to_string(item.value)));
+                QCOMPARE(row.at("operation"), Json(item.wait ? "queue_wait" : "queue_signal"));
+                QVERIFY(row.at("gpu_wait_duration").is_null()); sync.erase(it);
+            }
+            QVERIFY(sync.empty());
+        }
+        QCOMPARE(direct, size_t(261)); QCOMPARE(mesh, size_t(6)); QCOMPARE(queues.size(), size_t(3));
+        QVERIFY(checkedLists > 0);
+        write(output + "/direct-draw-oracles.json", QByteArray::fromStdString(oracles.dump(2)));
+        qInfo() << "Verified direct Draw IA counts for" << checkedLists << "submitted lists";
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(path); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto metrics = window.findChild<RdcCountersView *>();
+        QCOMPARE(metrics->request().at("frame_end"), Json(true));
+        const auto request = metrics->requestId();
+        QVERIFY(metrics->finishNative(request, report));
+        auto values = metrics->findChild<QTreeWidget *>("rdcCounterValues");
+        QCOMPARE(values->topLevelItemCount(), 323);
+        metrics->exportResult(output + "/workspace.json");
+        auto mismatch = report;
+        mismatch["performance"]["list_measurements"][0]["generation"] = "999999";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finishNative(request, mismatch));
+        mismatch = report;
+        mismatch["performance"]["timeline"]["synchronization"][0]["record"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finishNative(request, mismatch));
+        QVERIFY(!metrics->result().is_null());
+        auto item = values->topLevelItem(0); values->setCurrentItem(item);
+        const auto execution = item->data(0, Qt::UserRole).toULongLong(); QVERIFY(execution);
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), execution);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(!metrics->finishNative(request, report)); QVERIFY(metrics->result().is_null());
+        for (const bool wait : {false, true}) {
+            window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+            const auto restoredRequest = metrics->requestId();
+            QVERIFY(metrics->finishNative(restoredRequest, report));
+            auto timeline = metrics->findChild<QTreeWidget *>("rdcReplayTimeline");
+            QCOMPARE(timeline->topLevelItemCount(), 3);
+            QTreeWidgetItem *synchronization{};
+            size_t synchronizationCount{};
+            for (int queue = 0; queue < timeline->topLevelItemCount(); ++queue) {
+                const auto parent = timeline->topLevelItem(queue);
+                for (int i = 0; i < parent->childCount(); ++i) {
+                    auto child = parent->child(i);
+                    if (child->data(0, Qt::UserRole + 3).isValid()) {
+                        ++synchronizationCount;
+                        if (child->text(0).startsWith(wait ? "queue_wait" : "queue_signal")) synchronization = child;
+                    }
+                }
+            }
+            QCOMPARE(synchronizationCount, size_t(407)); QVERIFY(synchronization);
+            const auto record = synchronization->data(0, Qt::UserRole + 3).toULongLong();
+            QVERIFY(record); QVERIFY(!synchronization->data(0, Qt::UserRole).isValid());
+            window.findChild<QLineEdit *>("apiSearch")->setText("hidden-sync-record");
+            metrics->findChild<QTabWidget *>("rdcCounterTabs")->setCurrentWidget(timeline);
+            timeline->setCurrentItem(synchronization);
+            QVERIFY(metrics->findChild<QAction *>("locateRdcCounter")->isEnabled());
+            if (wait) {
+                QVERIFY(QMetaObject::invokeMethod(timeline, "itemDoubleClicked", Qt::DirectConnection,
+                    Q_ARG(QTreeWidgetItem *, synchronization), Q_ARG(int, 0)));
+            } else metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+            QCOMPARE(window.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 0);
+            QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), record);
+            QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+            QVERIFY(!metrics->finishNative(restoredRequest, report)); QVERIFY(metrics->result().is_null());
+        }
+    }
     void frameStreamPerformanceWorkspace() {
         using Json = nlohmann::json;
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

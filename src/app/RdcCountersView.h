@@ -29,6 +29,7 @@ class RdcCountersView final : public QWidget {
     void readRequested();
     void cancelRequested();
     void eventRequested(qulonglong event);
+    void recordRequested(qulonglong record);
     void error(const QString &message);
     void inspectionFinished(bool success);
 

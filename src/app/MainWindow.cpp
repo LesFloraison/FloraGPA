@@ -1460,6 +1460,11 @@ void MainWindow::buildUi() {
             locateEvent(event);
         }
     });
+    connect(rdcCounters_, &RdcCountersView::recordRequested, this, [this](qulonglong record) {
+        if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+        findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+        locateEvent(record);
+    });
     auto right = new QDockWidget("Inspector", workspace_);
     right->setObjectName("inspectorDock");
     right->setWidget(rightTabs);

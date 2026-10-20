@@ -10903,6 +10903,45 @@ layout checks), `mesh-attribute-workspace1.txt`,
 captures. This adds typed geometry inspection; it does not establish complete
 original-frame fidelity or add AS/MS instruction debugging.
 
+### Hellblade full-stream metrics and synchronization navigation
+
+One native `--measure-frame --debug-device` replay using SDK 616 reached
+record **613510** and execution **37104**, with zero validation errors.
+The report contains **323 submitted command-list instances** on **three
+queues**, all with timestamps in the calibrated CPU-QPC clock domain.
+There are **261 Direct-list pipeline-statistics measurements** and **62
+Compute-list timestamp measurements**; Compute-list pipeline statistics
+remain explicitly unsampled. Six lists report nonzero mesh statistics.
+Submission 579109, list ordinal 1 reports **101,760 MSInvocations** and
+**96,731 MSPrimitives**, agreeing with the earlier selected mesh measurement
+and MeshOut triangle count.
+
+The saved-evidence check matches every measured instance against the capture's
+submission, list ordinal, command list, recording generation, queue and
+execution range. For **15 lists** containing direct Draw calls without
+indirect, predicated or bundle work, independently decoded vertex/index count
+times instance count sums exactly match `IAVertices`. All **407** queue
+synchronization observations (**254 Signals**, **153 Waits**) match the
+captured CPU record, queue, fence and full-width fence value.
+
+Replay Timeline now displays those CPU record IDs and supports both
+double-click and toolbar navigation. Synchronization navigation switches to
+the CPU API domain; list navigation selects the execution domain. Both restore
+filtered-out records and invalidate the prior boundary's measurements.
+Result validation rejects duplicate, malformed and out-of-frame synchronization
+identities, including numeric JSON IDs that would lose 64-bit precision.
+The toolbar follows the active Values/Timeline tab.
+
+Evidence: `hellblade-frame-performance1/report.json`,
+`hellblade-frame-performance-ui2/{workspace,direct-draw-oracles}.json`,
+`hellblade-frame-metrics-workspace{1,2}.txt` and
+`build-frame-sync-navigation{1,2}.log`. The final saved-report test passes in
+4.2 seconds and performs no GPU replay. The native module snapshot contains
+77 modules and no GPA/Python modules. This is one instrumented replay with
+unstabilized clocks and conservative host drains, not original-application
+timing. GPU Fence stall durations, vendor counters and complete frame fidelity
+remain unverified; reaching the end of the stream does not establish them.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -10917,7 +10956,7 @@ original-frame fidelity or add AS/MS instruction debugging.
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | CLI terminal marker and final CopyResource mapping verified; initial selected texel matches native raw storage but changes after history replay, correctly reported partial; pixel fidelity and full history unfinished |
 | Frame-end Resource History | Not verified | Six mapped backbuffer uses, captured state transitions, separate creation/initialization, six queue-context Signals, terminal-marker checks and CPU-record navigation verified under query isolation; complete accesses/modifications unfinished | Strict full-stream capture, three mapped final-backbuffer Copy/barrier uses, two cross-queue Wait links and producer navigation verified; complete accesses/modifications unfinished |
 | Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
-| Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | Not verified |
+| Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | 323 timed/calibrated list instances on three queues, 261 Direct-list statistics, six mesh-statistics lists, 15 independent direct-Draw IA count oracles and 407 captured Signal/Wait identities verified; CPU-record/execution navigation and stale-result rejection pass; original timing, Fence stalls, vendor counters and complete fidelity unfinished |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
