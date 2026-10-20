@@ -87,6 +87,13 @@ class RdcAssetTests : public QObject {
         QCOMPARE(result.at("ranges")[0].at("first_layer"),Json(1));
         QCOMPARE(result.at("ranges")[0].at("layer_count"),Json(2));
         QCOMPARE(result.at("ranges")[0].at("plane"),Json(0));
+        count->data.basic.u=1; right->data.basic.i=4700;
+        QCOMPARE(rdcClearCoverage(chunk,texture,Subresource(1,2,0),4,0).at("status"),Json("covered"));
+        QCOMPARE(rdcClearCoverage(chunk,texture,Subresource(0,2,0),4,0).at("status"),Json("outside"));
+        QCOMPARE(rdcClearCoverage(chunk,texture,Subresource(1,0,0),4,0).at("status"),Json("outside"));
+        QCOMPARE(rdcClearCoverage(chunk,texture,Subresource(1,2,0),4700,0).at("status"),Json("outside"));
+        QCOMPARE(rdcClearCoverage(chunk,texture,Subresource(1,2,0),4,1).at("status"),Json("outside"));
+        count->data.basic.u=0;
         layers->data.basic.u=4;
         QCOMPARE(rdcOperationRanges(chunk,resource(id),{&texture,1}).at("status"),Json("unavailable"));
         dimension->data.basic.u=8; // D3D12_UAV_DIMENSION_TEXTURE3D

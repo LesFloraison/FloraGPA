@@ -1,4 +1,5 @@
 #include "ClearCoverage.h"
+#include "OperationRanges.h"
 #include <bit>
 #include <stdexcept>
 #define NOMINMAX
@@ -38,6 +39,27 @@ nlohmann::json rdcClearCoverage(const SDObject &chunk, const TextureDescription 
     Json result{{"status", "unavailable"}, {"source", "captured_api_arguments"},
                 {"api", name}, {"scope", "Clear view and rectangle coverage; a covered pixel may retain the same value."}};
     try {
+        if (name.ends_with("::ClearUnorderedAccessViewFloat") || name.ends_with("::ClearUnorderedAccessViewUint")) {
+            if (texture.dimension != 2) throw std::runtime_error("UAV Clear pixel coverage requires a 2D texture");
+            const auto range=rdcUavClearRange(chunk,texture.resourceId,{&texture,1});
+            if (range.at("kind") != "texture_view" || range.at("plane") != 0)
+                throw std::runtime_error("UAV Clear pixel coverage requires a supported plane-zero texture view");
+            result.update(range);
+            result["resource_id"]=std::to_string(std::bit_cast<uint64_t>(texture.resourceId));
+            result["rect_count"]=range.at("rectangles").size();
+            bool pixelCovered=range.at("whole_view").get<bool>();
+            for (const auto &rect : range.at("rectangles"))
+                pixelCovered |= int64_t(x) >= rect.at("left").get<int64_t>() &&
+                    int64_t(x) < rect.at("right").get<int64_t>() &&
+                    int64_t(y) >= rect.at("top").get<int64_t>() && int64_t(y) < rect.at("bottom").get<int64_t>();
+            const auto first=range.at("first_layer").get<uint64_t>();
+            const bool viewCovered=sub.mip == range.at("mip").get<uint64_t>() && sub.slice >= first &&
+                uint64_t(sub.slice)-first < range.at("layer_count").get<uint64_t>();
+            result["status"]=viewCovered && pixelCovered ? "covered" : "outside";
+            result["view_covers_selection"]=viewCovered;
+            result["rectangles_cover_pixel"]=pixelCovered;
+            return result;
+        }
         const bool depth = name.ends_with("ClearDepthStencilView");
         if (!depth && !name.ends_with("ClearRenderTargetView"))
             throw std::runtime_error("Clear API coverage is not implemented for this command");

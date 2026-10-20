@@ -314,6 +314,51 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/resource-operation-ranges.json"),bf1);
         }
     }
+    void uavClearPixelHistory() {
+        const auto root=qEnvironmentVariable("FLORA_UAV_PIXEL_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the UAV Clear pixel-history evidence directory");
+        const auto report=read(root + "/inside/result.json"), gpu=read(root + "/gpu.json");
+        const auto outside=read(root + "/outside/result.json"), layer=read(root + "/other-layer/result.json");
+        QCOMPARE(report.at("history").size(),size_t(12));
+        QCOMPARE(outside.at("history").size(),size_t(9));
+        QCOMPARE(outside.at("history_scope").at("excluded_resource_operations").size(),size_t(3));
+        QVERIFY(layer.at("history").empty());
+        QCOMPARE(layer.at("history_scope").at("excluded_resource_operations").size(),size_t(6));
+        QVERIFY(report.at("history_scope").at("resource_operation_coverage_gaps").empty());
+        QCOMPARE(report.at("history_scope").at("replay_consistency").at("history_boundary").at("status"),
+            Json("matches_selected_texel"));
+        size_t clears{};
+        for (const auto &row : report.at("history")) {
+            if (!row.contains("coverage") ||
+                row.at("coverage").value("view_definition","") != "captured_cpu_descriptor") continue;
+            QCOMPARE(row.at("execution"),Json(std::to_string(11+clears)));
+            QCOMPARE(row.at("coverage").at("status"),Json("covered"));
+            QCOMPARE(row.at("coverage").at("mip"),Json(1));
+            QCOMPARE(row.at("coverage").at("first_layer"),Json(1));
+            QVERIFY(row.at("primitiveID").is_null()); QVERIFY(row.at("shaderOut").is_null());
+            QCOMPARE(row.at("preMod").at("col").at("floatValue"),
+                Json::array({0.027862548828125,0.0273284912109375,0.024871826171875,0.3974609375}));
+            for (size_t c=0;c<4;++c) {
+                const auto bits=gpu.at("transfer_half_words")[clears][c].get<uint16_t>();
+                QVERIFY(bits == 0 || bits == 0x3c00);
+                QCOMPARE(row.at("postMod").at("col").at("floatValue")[c],Json(bits ? 1. : 0.));
+            }
+            ++clears;
+        }
+        QCOMPARE(clears,size_t(3));
+        PixelHistoryView view; view.setContext("fixture:uav",3,true);
+        view.setDx12Resource(1,1001); view.selectPixel(1001,5,5,1,1,0);
+        QVERIFY(view.finish(view.requestId(),report));
+        auto rows=view.findChild<QTreeWidget *>("historyRecords"); rows->setCurrentItem(rows->topLevelItem(1));
+        QVERIFY(!action(view,"debugHistoryPixel")->isEnabled());
+        QSignalSpy locate(&view,&PixelHistoryView::eventRequested);
+        action(view,"locateHistoryEvent")->trigger();
+        QCOMPARE(locate.count(),1); QCOMPARE(locate[0][0].toULongLong(),11ULL);
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/uav-clear-pixel-history.json");
+            QCOMPARE(read(output_ + "/uav-clear-pixel-history.json"),report);
+        }
+    }
     void transferOperationHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the transfer history evidence directory");

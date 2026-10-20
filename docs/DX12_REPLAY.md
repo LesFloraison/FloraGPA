@@ -7560,6 +7560,48 @@ coverage only at this milestone. Evidence: ignored `bf1-shadow-uav-history1`,
 `bf1-shadow-uav-history-ui1`, `uav-clear-ranges-unit1.txt` and
 `uav-clear-history-ui2.txt`. Full Resource/Pixel History acceptance remains open.
 
+### UAV Clear pixel coverage and actual before/after values
+
+Pixel History now applies the shared captured-UAV range decoder to float and
+integer Clears of supported plane-zero 2D texture views. It filters by the chosen
+Mip, array layer and half-open rectangles. Previously a UAV Clear remained an
+unresolved coverage candidate, including when the queried pixel or layer was
+outside its view. Unsupported dimensions, planes and descriptor layouts retain
+an explicit coverage gap. This change does not infer shader fragments, counter
+clears, ordering barriers or measured writes from descriptor coverage.
+
+The `uav` mode of `tests/fixtures/dx12-half-blend-history.cpp` creates a two-Mip,
+two-layer RGBA16_FLOAT target, matching CPU/GPU UAV descriptors for Mip **1**,
+Layer **1**, and rectangle **[4,8) × [4,8)**. Three marked float Clear operations
+(**11/12/13**) write red before the existing independent Draw prefixes. Explicit
+RT-to-UAV and reverse transitions bracket each Clear. The fixture copies the
+selected texel to readback immediately afterward; all three GPU results are
+binary16 words **[15360,0,0,15360]**.
+
+Three serial queries on that one capture verify distinct coverage conditions:
+
+- **(5,5), Mip 1 / Layer 1:** 12 records, including all three mapped UAV Clears.
+  Each before value is the captured initial color and each after value is exactly
+  **[1,0,0,1]**, matching the fixture's GPU readbacks. The final history value also
+  matches the selected texel before and after the analysis replays.
+- **(8,5), Mip 1 / Layer 1:** 9 records; the three UAV Clears are explicitly
+  excluded by the right-open rectangle boundary, with no coverage gaps.
+- **(5,5), Mip 1 / Layer 0:** no modification records; all six RTV/UAV Clears
+  are excluded by their captured view ranges. Uninitialized contents of that
+  unused layer are not asserted as a reference image.
+
+Builds **445/446**, the relevant parser/RTV coverage tests (**4 passes including
+setup/cleanup**) and the report-backed Pixel History workspace test (**3 passes**)
+succeed. The workspace test verifies execution navigation to **11**, disables
+shader debugging for the Clear operation and checks exported JSON equality.
+The inside query's API-validation report contains two loading-stage buffer-state
+warnings; it does not expose the analysis replay validation queue, so this is not
+a claim of validation-clean replay. Evidence: ignored `half-blend-uav1`,
+`uav-pixel-coverage-unit1.txt` and `uav-pixel-history-ui1.txt`. No game sample was
+replayed for this isolated coverage correction, and no RenderDoc runtime patch
+was required. Integer Clear coverage has structural tests; the GPU value evidence
+here is for float Clears only. Full sample histories remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

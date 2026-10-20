@@ -44,7 +44,9 @@ Json region(const SDObject &object,bool rect) {
     }
     return result;
 }
-Json uavClearRange(const SDObject &chunk, uint64_t wanted, std::span<const TextureDescription> textures) {
+}
+Json rdcUavClearRange(const SDObject &chunk, ResourceId resource, std::span<const TextureDescription> textures) {
+    const auto wanted=std::bit_cast<uint64_t>(resource);
     const auto &target=child(chunk,"ViewCPUHandle"), &view=child(target,"Descriptor");
     if (number(chunk,"pResource") != wanted || number(target,"Resource") != wanted)
         throw std::runtime_error("UAV Clear resource and CPU descriptor do not match the queried resource");
@@ -118,7 +120,6 @@ Json uavClearRange(const SDObject &chunk, uint64_t wanted, std::span<const Textu
     }
     return range;
 }
-}
 Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<const TextureDescription> textures) {
     const auto wanted=std::bit_cast<uint64_t>(resource);
     const std::string name(chunk.name.c_str(),chunk.name.size());
@@ -145,7 +146,7 @@ Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<cons
             return range;
         };
         if (name.ends_with("::ClearUnorderedAccessViewFloat") || name.ends_with("::ClearUnorderedAccessViewUint")) {
-            append(wanted,"destination",uavClearRange(chunk,wanted,textures));
+            append(wanted,"destination",rdcUavClearRange(chunk,resource,textures));
             result["scope"]="Captured CPU UAV descriptor and Clear rectangles, not measured changes. "
                 "Buffer coordinates retain element units. GPU descriptor agreement and execution ordering are not inferred.";
         } else if (name.ends_with("::CopyBufferRegion")) {

@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed|split0|split1|cull|discard|depth. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|uav|default|routed|split0|split1|cull|discard|depth. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -18,13 +18,14 @@ void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + s
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1" && mode != "cull" && mode != "discard" && mode != "depth")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "uav" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1" && mode != "cull" && mode != "discard" && mode != "depth")
         throw std::runtime_error("Invalid subresource mode");
     const bool split = mode == "split0" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth";
     const bool routed = mode == "routed" || split;
     const bool transfer = mode == "copy" || mode == "resolve";
+    const bool uav = mode == "uav", operationReadback = transfer || uav;
     const bool defaultView = mode == "default" || routed;
-    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth" || transfer ? 1 : 0;
+    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || mode == "cull" || mode == "discard" || mode == "depth" || operationReadback ? 1 : 0;
     const bool nativeOnly=GetEnvironmentVariableA("FLORA_FIXTURE_NATIVE",nullptr,0) != 0;
     const auto library = nativeOnly ? nullptr : LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
@@ -121,6 +122,7 @@ float4 psgs(GSOut input) : SV_Target {
     if (defaultView) { texture.Width=texture.Height=32; texture.MipLevels=2; texture.DepthOrArraySize=2; }
     const UINT subresource = mip + layer * texture.MipLevels;
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+    if (uav) texture.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
         D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&target)));
     check(target->SetName(L"Flora DX12 resource 1001 creation 1"));
@@ -133,6 +135,18 @@ float4 psgs(GSOut input) : SV_Target {
         view.Texture2DArray.FirstArraySlice = layer; view.Texture2DArray.ArraySize = 1;
     } else { view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; view.Texture2D.MipSlice = mip; }
     device->CreateRenderTargetView(target.Get(), defaultView ? nullptr : &view, rtv);
+    ComPtr<ID3D12DescriptorHeap> uavCpu, uavGpu;
+    if (uav) {
+        D3D12_DESCRIPTOR_HEAP_DESC desc{}; desc.Type=D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; desc.NumDescriptors=1;
+        check(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&uavCpu)));
+        desc.Flags=D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        check(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&uavGpu)));
+        D3D12_UNORDERED_ACCESS_VIEW_DESC selected{}; selected.Format=texture.Format;
+        selected.ViewDimension=D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+        selected.Texture2DArray.MipSlice=mip; selected.Texture2DArray.FirstArraySlice=layer; selected.Texture2DArray.ArraySize=1;
+        device->CreateUnorderedAccessView(target.Get(),nullptr,&selected,uavCpu->GetCPUDescriptorHandleForHeapStart());
+        device->CreateUnorderedAccessView(target.Get(),nullptr,&selected,uavGpu->GetCPUDescriptorHandleForHeapStart());
+    }
     ComPtr<ID3D12Resource> transferSource;
     auto sourceRtv = rtv; sourceRtv.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     if (transfer) {
@@ -160,7 +174,7 @@ float4 psgs(GSOut input) : SV_Target {
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,subresource,1,0,&fp,nullptr,nullptr,&size);
     const UINT64 stride = (size + 511) & ~UINT64(511);
     heap.Type = D3D12_HEAP_TYPE_READBACK;
-    D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * (transfer ? 6 : 3);
+    D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * (operationReadback ? 6 : 3);
     buffer.Height = buffer.DepthOrArraySize = buffer.MipLevels = 1; buffer.SampleDesc.Count = 1; buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     ComPtr<ID3D12Resource> readback; check(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&buffer,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&readback)));
     check(readback->SetName(L"Flora DX12 resource 1003 creation 3"));
@@ -224,6 +238,21 @@ float4 psgs(GSOut input) : SV_Target {
             std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
             readTarget(n+2);
         }
+        if (uav) {
+            ID3D12DescriptorHeap *heaps[]{uavGpu.Get()}; list->SetDescriptorHeaps(1,heaps);
+            D3D12_RESOURCE_BARRIER barrier{}; barrier.Type=D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barrier.Transition={target.Get(),subresource,D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_UNORDERED_ACCESS};
+            list->ResourceBarrier(1,&barrier);
+            const auto marker="Flora DX12 execution " + std::to_string(10+n) + " record " + std::to_string(10+n) +
+                " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(10+n) + ": ID3D12GraphicsCommandListClearUnorderedAccessViewFloat";
+            list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1));
+            const float red[]{1,0,0,1}; const D3D12_RECT selected{4,4,8,8};
+            list->ClearUnorderedAccessViewFloat(uavGpu->GetGPUDescriptorHandleForHeapStart(),
+                uavCpu->GetCPUDescriptorHandleForHeapStart(),target.Get(),red,1,&selected);
+            list->EndEvent();
+            std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
+            readTarget(n+2);
+        }
         const auto marker = "Flora DX12 execution " + std::to_string(n) + " record " + std::to_string(n) +
             " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(n) + ": ID3D12GraphicsCommandListDrawInstanced";
         list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1)); list->DrawInstanced(n*3,1,0,0); list->EndEvent();
@@ -242,7 +271,7 @@ float4 psgs(GSOut input) : SV_Target {
         std::cout << (n ? ",[" : "["); for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << words[c]; std::cout << ']';
     }
     std::cout << ']';
-    if (transfer) {
+    if (operationReadback) {
         std::cout << ",\"transfer_half_words\":[";
         for (UINT n=3;n<6;++n) {
             const auto words=reinterpret_cast<const uint16_t *>(static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+8*5);
