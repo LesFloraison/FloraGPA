@@ -8831,6 +8831,80 @@ Evidence: ignored `frame-end-cli-tests1.txt`, `build490.log`,
 `hellblade-frame-cli1/{resource,pixel,evidence.json}` and the two analysis logs.
 The changed texel remains an explicit unresolved replay fault.
 
+### Localize Hellblade2 variation before Pixel History and motion blur
+
+The frame-end discrepancy above now has a bounded same-controller reproduction,
+`tests/fixtures/rdc-repeat-selection.cpp`. It forces the same event twice and
+observes explicitly named captured resource lifetimes. Pixel History is called
+only if both observations agree. Optional `--readback` saves mip/layer/sample-0
+storage and SHA-256 alongside the selected pixel, with at most eight resources
+and 32 MiB per resource. It is a manual fault probe, not an automatic GPU test;
+exit zero means the probe completed, while `repeat_equal` records the outcome.
+It uses the selected native RenderDoc and DXC libraries and records loaded
+modules. It does not use GPA or Python to execute the replay.
+
+Compile with MSVC C++20, include `src` and `third_party`, and link `bcrypt.lib`.
+For example, in a VS developer shell:
+
+```powershell
+cl /std:c++20 /EHsc /O2 /MD /I src /I third_party `
+  tests/fixtures/rdc-repeat-selection.cpp /Fe:<probe.exe> /Fo:<probe.obj> /link bcrypt.lib
+<probe.exe> <renderdoc.dll> <dxcompiler.dll> <full-stream.rdc> `
+  91485 541 451 <new-report.json> 506294 544605
+```
+
+All observations below reuse `portable-hellblade487/native/native-dx12_capture.rdc`
+and the existing 29-patch runtime. No runtime patch or new native capture is
+introduced.
+
+1. At terminal event **91485**, backbuffer **506294** and its CopyResource
+   source **544605** both change from RGB10/A2 **(86,122,160,3)** to
+   **(85,120,156,3)** at **(541,451)**. Source and destination agree within each
+   observation. This probe performs no Pixel History and no whole-texture
+   readback. Repeated event replay itself is sufficient to reproduce variation;
+   it is not specific to history fragment extraction or the final copy.
+2. At MainPS execution **37003**, RDC **91126**, bounded readbacks of output
+   **553172** and input `ColorTexture` **571530** differ between the two
+   selections. In the previously established viewport **[0,1920) × [0,803)**,
+   **5,866** output pixels and **7,541** input pixels change, with zero changed
+   pixels outside it. Output maximum RGB10 deltas are **47/50/69**, alpha equal.
+   The largest input differences occur at **(1596,0)**: R11G11B10 decoded RGB
+   changes from **(0.126953125,0.1201171875,0.16015625)** to
+   **(0.1005859375,0.09765625,0.12890625)**. All compared input values in the
+   viewport are finite. The selected **(541,451)** texel happens to be unchanged
+   here; its stability would not establish whole-input stability.
+3. At execution **36780**, RDC **90447**, immediately following the four known
+   motion-blur indirect dispatches, output **571530** has **7,094** changed
+   viewport pixels, and its input `ColorTexture` **531690** has **7,101**.
+   Both have zero changes outside the viewport. `VelocityFlatTexture`
+   **573318** has zero changes inside this rectangle and **410** outside it.
+   That distinction does not prove every padded texel is unsampled, but places
+   a confirmed changing color input before the motion-blur shader.
+
+Each probe uses two selections, and all three report `repeat_equal=false`;
+none enters its conditional Pixel History branch. The readback cases save
+**9,216,000 bytes per resource per observation**, rather than loading the
+sample's large resource file. Readbacks/inspection add GPU work and do not
+establish the original application's scheduling or original-frame fidelity.
+
+One additional explicit-resource usage query, without selecting/replaying an
+analysis event, identifies the next candidate producer of creation **531690**:
+Dispatch execution **36734**, source **611485**, RDC **90301**, recorded twice
+as `CS_RWResource`. The full index has **18** entries and zero mapping gaps.
+This is a potential UAV writer, not an observed per-thread modification.
+Capture loading may execute GPU work. The next investigation is this dispatch
+and its inputs; no unproven MainPS arithmetic change, history-value correction,
+or frame acceptance is substituted for that investigation.
+
+The standalone fixture compiles successfully. Evidence remains ignored:
+`build-repeat-selection2.log`, `build-repeat-selection3.log`,
+`hellblade-frame-repeat1.json`, `hellblade-main-repeat1.json`,
+`hellblade-main-repeat1-difference.json`, `hellblade-motion-repeat1.json`,
+`hellblade-motion-repeat1-difference.json`, their bounded raw readbacks,
+`hellblade-motion-input-history1`, and `hellblade-motion-input-frontier1.json`.
+There is no new application build or unrelated GPU regression in this milestone.
+The root cause, correct repeated replay and complete histories remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
