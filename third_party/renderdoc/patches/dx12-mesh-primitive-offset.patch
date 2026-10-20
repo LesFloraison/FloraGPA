@@ -1,0 +1,27 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_postvs.cpp b/renderdoc/driver/d3d12/d3d12_postvs.cpp
+index c07631a97..6a71055f6 100644
+--- a/renderdoc/driver/d3d12/d3d12_postvs.cpp
++++ b/renderdoc/driver/d3d12/d3d12_postvs.cpp
+@@ -36,6 +36,11 @@
+ #include "d3d12_rootsig.h"
+ #include "d3d12_shader_cache.h"
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12MeshPrimitiveOffsetPatchVersion()
++{
++  return 1;
++}
++
+ RDOC_CONFIG(rdcstr, D3D12_Debug_PostVSDumpDirPath, "",
+             "Path to dump post mesh shader patched DXIL files.");
+ 
+@@ -2829,7 +2834,9 @@ void D3D12Replay::InitPostMSBuffers(uint32_t eventId)
+   ret.meshout.farPlane = farp;
+ 
+   ret.meshout.primStride = layout.primStride;
+-  ret.meshout.primOffset = layout.primStride * totalVerts;
++  // Primitive attributes follow the compacted vertex array, whose stride can
++  // differ from the per-primitive stride.
++  ret.meshout.primOffset = uint64_t(layout.vertStride) * totalVerts;
+ 
+   ret.meshout.useIndices = true;
+   ret.meshout.numVerts = totalPrims * layout.indexCountPerPrim;

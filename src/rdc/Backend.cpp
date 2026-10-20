@@ -210,6 +210,7 @@ class Session {
     uint32_t bgraHistoryPatch{};
     uint32_t emptyPixelInputsPatch{};
     uint32_t uploadWriteWatchPatch{};
+    uint32_t meshPrimitiveOffsetPatch{};
     using LayerTestStats = void (RENDERDOC_CC *)(uint32_t *, uint32_t *, uint32_t *);
     LayerTestStats layerTestStats{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
@@ -367,6 +368,10 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12UploadWriteWatchPatchVersion"))) {
             uploadWriteWatchPatch = patch();
             if (uploadWriteWatchPatch != 1) throw std::runtime_error("Unsupported DX12 upload write-watch patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12MeshPrimitiveOffsetPatchVersion"))) {
+            meshPrimitiveOffsetPatch = patch();
+            if (meshPrimitiveOffsetPatch != 1) throw std::runtime_error("Unsupported DX12 mesh primitive-offset patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1569,6 +1574,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_bgra_history_patch", session.bgraHistoryPatch},
         {"backend_dx12_empty_pixel_inputs_patch", session.emptyPixelInputsPatch},
         {"backend_dx12_upload_write_watch_patch", session.uploadWriteWatchPatch},
+        {"backend_dx12_mesh_primitive_offset_patch", session.meshPrimitiveOffsetPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -1889,9 +1895,9 @@ Json runRdcJob(const Json &job) {
                 vertexBytes > mesh.vertexByteSize || vertexBytes > (1ULL << 30))
                 throw std::runtime_error("Empty, inconsistent or oversized mesh output");
             // The D3D12 backend compacts vertices first, then per-primitive
-            // attributes, then rebased indices. Its reported primitive offset
-            // can disagree with the vertex count/stride; do not use it to size
-            // the position table or interpret primitive attributes.
+            // attributes, then rebased indices. Unpatched runtimes report an
+            // incorrect primitive offset. Size positions from vertex counts;
+            // the optional primitive export below requires the correction.
             if (mesh.topology != Topology::TriangleList || indices % 3)
                 throw std::runtime_error("Mesh output currently requires triangle-list topology");
             if (mesh.indexResourceId == mesh.vertexResourceId &&
@@ -1946,6 +1952,32 @@ Json runRdcJob(const Json &job) {
                              {"per_primitive_stride", mesh.perPrimitiveStride},
                              {"per_primitive_attributes_exported", false},
                              {"scope", "all_meshlets_positions_and_triangle_indices"}});
+        if (meshOutput && dx12) {
+            Json primitiveData{{"status", mesh.perPrimitiveStride ? "unavailable" : "not_present"}};
+            if (mesh.perPrimitiveStride && session.meshPrimitiveOffsetPatch == 1) {
+                const uint64_t offset = mesh.perPrimitiveOffset;
+                const uint64_t length = uint64_t(mesh.numIndices / 3) * mesh.perPrimitiveStride;
+                if (offset != mesh.vertexByteOffset + vertexBytes || length > 256ULL * 1024 * 1024 ||
+                    offset > mesh.vertexByteSize || length > mesh.vertexByteSize - offset ||
+                    (mesh.indexResourceId == mesh.vertexResourceId &&
+                     (offset > mesh.indexByteOffset || length > mesh.indexByteOffset - offset)))
+                    throw std::runtime_error("Invalid mesh primitive attribute range");
+                const auto primitives = controller.GetBufferData(mesh.vertexResourceId, offset, length);
+                if (primitives.size() != length)
+                    throw std::runtime_error("Truncated mesh primitive attribute readback");
+                save(L"post_primitives.bin", primitives.data(), primitives.size());
+                const QByteArrayView bytes(reinterpret_cast<const char *>(primitives.data()), qsizetype(primitives.size()));
+                primitiveData = {{"status", "available"}, {"file", "post_primitives.bin"},
+                    {"byte_offset", std::to_string(offset)}, {"bytes", std::to_string(length)},
+                    {"stride", mesh.perPrimitiveStride}, {"primitive_count", mesh.numIndices / 3},
+                    {"sha256", QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toStdString()},
+                    {"layout", "Raw per-primitive attributes in compacted meshlet/triangle order; semantic decoding is not provided"}};
+                metadata["per_primitive_attributes_exported"] = true;
+            } else if (mesh.perPrimitiveStride) {
+                primitiveData["reason"] = "The selected RenderDoc runtime lacks the DX12 mesh primitive-offset correction";
+            }
+            metadata["per_primitive_data"] = std::move(primitiveData);
+        }
         const auto decoded = ReplayMesh::decode(metadata, {raw.data(), raw.size()}, {ib.data(), ib.size()});
         if (meshOutput && decoded.faces.size() != decoded.candidateFaceCount)
             throw std::runtime_error("Mesh output contains out-of-range triangle indices");

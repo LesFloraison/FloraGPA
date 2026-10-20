@@ -10779,10 +10779,88 @@ Evidence: `hellblade-visibility-pair1/{baseline,undo}/report.json`,
 `build-visibility-pair1.log`. The recorded comparison uses only saved bytes;
 it does not launch another GPU replay.
 
+### Mesh shader replacement and per-primitive geometry export
+
+Hellblade2 execution **10267**, source record **578355**, uses pipeline
+creation **515336** (object **2144280591200**). The existing experiment
+overlay now has an actual MS-stage exercise using
+`tests/fixtures/dx12-visibility-mesh.hlsl`, compiled as `ms_6_6`. It retains
+the captured root signature and original PS, and replaces only MS. Group
+zero emits one full-viewport triangle; the remaining 794 groups emit no
+vertices or primitives. The fixture preserves the captured stage interface,
+including the per-primitive `TEXCOORD7`, and uses the captured counterclockwise
+front-face convention.
+
+The replacement SHA-256 is
+`dd68ae439e97f59e4b3d0b24f9a4473b7766d8d77bcc9c83464d36dfaabdae3c`.
+Native replay rebuilds the PSO successfully under SDK **616**, reports zero
+D3D12 validation errors and produces **65,536 exact texels** with words
+`[135, 1056964608]`. The unmodified captured PS generates these words from
+the replacement's primitive identity and depth 0.5. The complete texture hash
+is `d2a59818c6ba93a29b34f4b63814bbb1047ba17b1d1605e71f8a4983d0604800`.
+A pipeline inspection of the new capture maps the MS and PS back to creation
+515336, confirms the replacement MS digest, and confirms the original PS
+digest `90346d5813fe2eda8cc39855778fefe0b566a34829932586ac95c5e1e246137b`.
+This is a controlled modification, not reconstructed original geometry.
+
+Save, undo, redo and reload preserve the intended shader assets and active
+revision. A separate native undo replay has no shader replacements and
+restores the original **19,702-pixel** written mask and depth words when
+compared with the preceding visibility baseline. **19,623 raw texels still
+differ** through the already observed visibility-index variation. Complete
+raw-output restoration is not claimed.
+
+The controlled geometry exposed a RenderDoc 1.45 offset bug:
+`D3D12Replay::InitPostMSBuffers` placed primitive attributes after the
+compacted vertex array but reported `primitiveStride * totalVertices`.
+For three 60-byte vertices and a 16-byte primitive stride, this returned
+**48** rather than **180**. The pinned
+`dx12-mesh-primitive-offset.patch` changes the reported offset to
+`uint64_t(vertexStride) * totalVertices` and exports patch version 1.
+The corrected runtime SHA-256 is
+`0d590881d578d4bebbe431e9903806e13dfa8c0f48f869921ddf38d87879ad19`;
+the build and package manifests record the patch digest and version.
+
+The analyzer now reads per-primitive bytes only with that correction
+present, checking the vertex/primitive/index ranges and returned byte count.
+For the controlled replacement it exports the exact 16 bytes representing
+`uint4(0, 7, 0, 0)` at offset 180. MeshOut contains three vertices, indices
+`0, 2, 1`, one triangle and 795 meshlet entries, of which 794 are empty.
+The original, unchanged game MeshOut also succeeds: **97,608 vertices**,
+**96,731 triangles**, primitive offset **5,856,480**, stride **16**, and
+**1,547,696 primitive bytes** with SHA-256
+`007b0cf292342790ca272e6f24c2be80bf5ca172d4e45afa95d5faa9489a4a7f`.
+Both geometry inspections reuse saved captures; they do not create another
+native replay capture.
+
+Replay Mesh exposes available primitive attributes through **Export →
+Raw primitive attributes (.pbin)** with a JSON provenance sidecar.
+Import validates length, stride, primitive count and SHA-256 before replacing
+the current result. Experiment changes clear the bytes and reject old
+responses. Older runtimes keep position/index viewing and explicitly report
+primitive attributes unavailable. These are raw attributes in compacted
+meshlet/triangle order; semantic decoding and an attribute table are not yet
+implemented. AS/MS invocation debugging remains unavailable.
+
+Evidence: `hellblade-mesh-shader-project1/{modified,restored,redone,pipeline}.json`,
+`hellblade-mesh-shader-native1/{report,output_storage}.json` and
+`output_storage.bin`, `hellblade-mesh-shader-pipeline1/result.json`,
+`hellblade-mesh-shader-geometry1/result.json` (original bad offset),
+`hellblade-mesh-shader-geometry2/` (corrected offset/bytes/OBJ),
+`hellblade-mesh-primitive-original1/`,
+`hellblade-mesh-shader-restored1/{report,comparison}.json`,
+`mesh-shader-project1.txt`, `mesh-shader-workspace1.txt`,
+`mesh-primitive-workspace2.txt` (controlled and original-game export checks),
+`build-renderdoc-mesh-offset1.log`, and
+`build-mesh-primitive-export{1,2}.log`. Native undo lists 77 modules; geometry
+analysis reports no GPA modules. Research compilation/byte comparison does
+not introduce a Python runtime dependency.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| Mesh shader replacement and primitive attribute export | Not exercised | Not exercised | MS-only replacement in PSO 515336 preserves original PS/root, produces 65,536 exact controlled texels and one triangle; undo restores original mask/depth with known raw-index variation; corrected RenderDoc offset exposes original 96,731-primitive raw data; workspace export/hash/stale-result checks verified; semantic attribute table and AS/MS debugging unfinished |
 | PS debugging after Mesh Dispatch | Not verified on this sample | Not verified on this sample | Execution 10267 yields 38 PS steps; stage-specific workspace entry, breakpoint, exact 64-bit Watch and stale-result rejection verified; packed operand matches one GPU texel observation but the texel changes during debug replays, correctly reported partial; AS/MS and complete fidelity unfinished |
 | Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; coherent same-context readbacks show all 19,702 written pixels preserve visible-entry words, local primitive and depth despite a one-to-one remapping of 486 indices; raw undo equivalence still fails, and full referenced scene data/fidelity remain unverified |
 | Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |

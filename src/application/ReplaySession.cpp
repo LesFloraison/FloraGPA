@@ -485,7 +485,7 @@ class Dx12Session final : public IReplaySession {
                 return feature == ReplayFeature::Geometry
                            ? SessionCapability{CapabilityStatus::Supported,
                                                "Mesh output positions and triangle indices through RenderDoc "
-                                               "1.45; all meshlets"}
+                                               "1.45; all meshlets. Raw per-primitive attributes require the patched runtime"}
                            : SessionCapability{CapabilityStatus::NotImplemented,
                                                "AS/MS invocation debugging is not implemented by the current "
                                                "analysis backend"};

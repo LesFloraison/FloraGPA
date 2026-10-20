@@ -3457,6 +3457,94 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
     void hellbladeIndirectShaderProjects() {
         prepareHellbladeShaderProjects(36779, 611544, "CS");
     }
+    void hellbladeMeshShaderProjects() {
+        prepareHellbladeShaderProjects(10267, 578355, "MS");
+    }
+    void hellbladeMeshShaderEvidence() {
+        const auto native = qEnvironmentVariable("FLORA_DX12_MESH_SHADER_NATIVE");
+        const auto geometry = qEnvironmentVariable("FLORA_DX12_MESH_SHADER_GEOMETRY");
+        const auto pipeline = qEnvironmentVariable("FLORA_DX12_MESH_SHADER_PIPELINE");
+        const auto output = qEnvironmentVariable("FLORA_DX12_MESH_SHADER_OUTPUT");
+        if (native.isEmpty() || geometry.isEmpty() || pipeline.isEmpty() || output.isEmpty())
+            QSKIP("Set saved native, MeshOut, pipeline evidence and a new workspace export directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto read = [](const QString &path) {
+            QFile file(path);
+            if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read mesh shader evidence");
+            return file.readAll();
+        };
+        using Json = nlohmann::json;
+        const auto replay = Json::parse(read(native + "/report.json").toStdString());
+        QVERIFY(replay.at("completed").get<bool>());
+        QCOMPARE(replay.at("device").at("validation_error_count"), Json("0"));
+        const auto &replacements = replay.at("native_replay").at("shader_replacements");
+        QCOMPARE(replacements.size(), size_t(1));
+        QCOMPARE(replacements[0].at("pipeline_creation"), Json("515336"));
+        QCOMPARE(replacements[0].at("stage"), Json("MS"));
+        QCOMPARE(replacements[0].at("pso_created"), Json(true));
+        const auto pixels = read(native + "/output_storage.bin");
+        QCOMPARE(pixels.size(), qsizetype(524288));
+        for (qsizetype at = 0; at < pixels.size(); at += 8) {
+            uint32_t value[2]{}; memcpy(value, pixels.constData() + at, 8);
+            QCOMPARE(value[0], 135U); QCOMPARE(value[1], 1056964608U);
+        }
+        const auto mesh = Json::parse(read(geometry + "/result.json").toStdString());
+        QCOMPARE(mesh.at("execution"), Json("10267"));
+        QCOMPARE(mesh.at("vertex_count"), Json(3)); QCOMPARE(mesh.at("face_count"), Json(1));
+        QCOMPARE(mesh.at("backend_dx12_mesh_primitive_offset_patch"), Json(1));
+        const auto &info = mesh.at("mesh");
+        QCOMPARE(info.at("meshlets").size(), size_t(795));
+        size_t nonempty{};
+        for (const auto &group : info.at("meshlets"))
+            if (group.at("vertices") != 0 || group.at("indices") != 0) {
+                ++nonempty; QCOMPARE(group.at("vertices"), Json(3)); QCOMPARE(group.at("indices"), Json(3));
+            }
+        QCOMPARE(nonempty, size_t(1));
+        QCOMPARE(info.at("per_primitive_offset"), Json("180"));
+        QCOMPARE(info.at("per_primitive_data").at("bytes"), Json("16"));
+        const uint32_t expected[]{0, 7, 0, 0};
+        const QByteArray primitive(reinterpret_cast<const char *>(expected), sizeof(expected));
+        QCOMPARE(read(geometry + "/post_primitives.bin"), primitive);
+        ReplayMeshView view;
+        view.setContext("mesh-shader-experiment", 10267, true, true);
+        const auto request = view.requestId();
+        QVERIFY(view.finish(request, mesh, geometry));
+        view.exportResult(output + "/primitive.pbin");
+        QCOMPARE(read(output + "/primitive.pbin"), primitive);
+        const auto sidecar = Json::parse(read(output + "/primitive.pbin.json").toStdString());
+        QCOMPARE(sidecar.at("execution"), Json("10267"));
+        QCOMPARE(sidecar.at("exported_artifact").at("bytes"), Json("16"));
+        auto invalid = mesh;
+        invalid["mesh"]["per_primitive_data"]["sha256"] = std::string(64, '0');
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(request, invalid, geometry));
+        QCOMPARE(view.result().at("mesh"), mesh.at("mesh"));
+        view.setContext("restored-experiment", 10267, true, true);
+        QVERIFY(view.result().is_null()); QVERIFY(!view.finish(request, mesh, geometry));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.exportResult(output + "/stale.pbin"));
+
+        const auto state = Json::parse(read(pipeline + "/result.json").toStdString());
+        Dx12PipelineView pipelineView; pipelineView.setContext("mesh-shader-experiment", 10267);
+        QVERIFY(pipelineView.finish(pipelineView.requestId(), state));
+        auto rows = pipelineView.findChild<QTreeWidget *>("dx12PipelineRows");
+        bool foundMS{}, foundPS{};
+        for (size_t row = 0; row < state.at("pipeline_rows").size(); ++row) {
+            const auto &entry = state.at("pipeline_rows")[row];
+            if (entry.at("binding") != "Shader") continue;
+            if (entry.at("section") == "MS") {
+                foundMS = true;
+                QCOMPARE(entry.at("details").at("bytecode_sha256"), replacements[0].at("replacement_sha256"));
+                QCOMPARE(entry.at("resource").at("pipeline").at("object_creation"), Json("515336"));
+                rows->setCurrentItem(rows->topLevelItem(int(row)));
+                QVERIFY(pipelineView.findChild<QAction *>("replaceBoundPipelineShader")->isEnabled());
+            }
+            if (entry.at("section") == "PS") {
+                foundPS = true;
+                QCOMPARE(entry.at("details").at("bytecode_sha256"),
+                         Json("90346d5813fe2eda8cc39855778fefe0b566a34829932586ac95c5e1e246137b"));
+            }
+        }
+        QVERIFY(foundMS); QVERIFY(foundPS);
+    }
   private:
     void prepareHellbladeShaderProjects(uint64_t execution, uint64_t source, const char *stage) {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -4089,6 +4177,14 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(actual.open(QIODevice::ReadOnly) && expected.open(QIODevice::ReadOnly));
         QCOMPARE(QCryptographicHash::hash(actual.readAll(), QCryptographicHash::Sha256),
                  QCryptographicHash::hash(expected.readAll(), QCryptographicHash::Sha256));
+        if (result.at("mesh").value("per_primitive_attributes_exported", false)) {
+            mesh->exportResult(exported.filePath("mesh.pbin"));
+            QFile primitive(exported.filePath("mesh.pbin")), reference(output + "/post_primitives.bin");
+            QVERIFY(primitive.open(QIODevice::ReadOnly) && reference.open(QIODevice::ReadOnly));
+            QCOMPARE(primitive.size(), qint64(96731 * 16));
+            QCOMPARE(primitive.readAll(), reference.readAll());
+            QVERIFY(QFileInfo::exists(exported.filePath("mesh.pbin.json")));
+        }
         const auto serial = mesh->requestId();
         locate->setText("10135");
         QTest::keyClick(locate, Qt::Key_Return);

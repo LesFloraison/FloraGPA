@@ -165,8 +165,9 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     });
     connect(export_, &QAction::triggered, this, [this] {
         try {
-            auto path = QFileDialog::getSaveFileName(this, "Export mesh", "mesh.json",
-                                                     "JSON (*.json);;Wavefront OBJ (*.obj);;CSV (*.csv);;Raw input vertices (*.vbin);;Raw input indices (*.ibin)");
+            QString filters = "JSON (*.json);;Wavefront OBJ (*.obj);;CSV (*.csv);;Raw input vertices (*.vbin);;Raw input indices (*.ibin)";
+            if (files_.contains("post_primitives.bin")) filters += ";;Raw primitive attributes (*.pbin)";
+            auto path = QFileDialog::getSaveFileName(this, "Export mesh", "mesh.json", filters);
             if (!path.isEmpty())
                 exportResult(path);
         } catch (const std::exception &e) {
@@ -318,6 +319,12 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
             throw std::runtime_error("Input attribute result does not match selection");
         names << "input_vertices.bin" << "input_indices.bin";
     }
+    const auto primitiveData = result.at("mesh").value("per_primitive_data", Json::object());
+    if (primitiveData.value("status", "") == "available") {
+        if (result.at("stage") != "MeshOut" || primitiveData.at("file") != "post_primitives.bin")
+            throw std::runtime_error("Primitive attributes require a mesh output result");
+        names << "post_primitives.bin";
+    }
     for (const auto &name : names) {
         QFile f(QDir(directory).filePath(name));
         if (!f.open(QIODevice::ReadOnly) || f.size() > 256LL * 1024 * 1024)
@@ -329,6 +336,19 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
     auto bytes = [](const QByteArray &v) {
         return std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(v.constData()), size_t(v.size()));
     };
+    if (files.contains("post_primitives.bin")) {
+        const auto &data = files["post_primitives.bin"];
+        const auto stride = primitiveData.at("stride").get<uint64_t>();
+        const auto count = primitiveData.at("primitive_count").get<uint64_t>();
+        if (!stride || stride > UINT32_MAX || count > UINT32_MAX ||
+            primitiveData.at("stride") != result.at("mesh").at("per_primitive_stride") ||
+            primitiveData.at("byte_offset") != result.at("mesh").at("per_primitive_offset") ||
+            primitiveData.at("bytes") != std::to_string(data.size()) ||
+            primitiveData.at("sha256") != QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex().toStdString() ||
+            primitiveData.at("primitive_count") != result.at("face_count") ||
+            stride * count != uint64_t(data.size()))
+            throw std::runtime_error("Mesh primitive artifact length, count or hash mismatch");
+    }
     if (result.at("stage") == "VSIn") {
         const auto &input = result.at("mesh").at("input");
         for (const auto &[file, prefix] : {std::pair{"input_vertices.bin", "raw_vertex"}, std::pair{"input_indices.bin", "raw_index"}}) {
@@ -401,6 +421,10 @@ bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString 
                           .arg(meshData->faces.size()));
     if (dx12_ && result.contains("indirect_selection"))
         summary_->setText(summary_->text() + QString(" · indirect action %1").arg(indirectActionOrdinal(result.at("indirect_selection"))));
+    if (files_.contains("post_primitives.bin"))
+        summary_->setText(summary_->text() + "\nRaw per-primitive attributes are available in Export (.pbin); semantic decoding is not provided.");
+    else if (primitiveData.value("status", "") == "unavailable")
+        summary_->setText(summary_->text() + "\n" + QString::fromStdString(primitiveData.value("reason", "Primitive attributes are unavailable")));
     if (isolateMissingQueries_)
         summary_->setText(summary_->text() + "\nIncomplete query-isolated replay; historical query values remain unavailable.");
     summary_->setToolTip(finite ? QString()
@@ -440,12 +464,15 @@ void ReplayMeshView::exportResult(const QString &path) const {
     const auto suffix = QFileInfo(path).suffix().toLower();
     if ((suffix == "vbin" || suffix == "ibin") && result_.at("stage") != "VSIn")
         throw std::runtime_error("Raw input export requires Input attribute stage");
+    if (suffix == "pbin" && !files_.contains("post_primitives.bin"))
+        throw std::runtime_error("This mesh result has no verified primitive attribute artifact");
     const auto bytes = suffix == "obj"   ? files_.value("post_geometry.obj")
                        : suffix == "csv" ? selectedCsv_
                        : suffix == "vbin" ? files_.value("input_vertices.bin")
                        : suffix == "ibin" ? files_.value("input_indices.bin")
+                       : suffix == "pbin" ? files_.value("post_primitives.bin")
                                          : QByteArray::fromStdString(result_.dump(2));
-    if (isolateMissingQueries_ && (suffix == "obj" || suffix == "csv" || suffix == "vbin" || suffix == "ibin")) {
+    if (suffix == "pbin" || (isolateMissingQueries_ && (suffix == "obj" || suffix == "csv" || suffix == "vbin" || suffix == "ibin"))) {
         auto metadata = result_;
         metadata["exported_artifact"] = {
             {"file", QFileInfo(path).fileName().toStdString()}, {"bytes", std::to_string(bytes.size())},
@@ -453,7 +480,7 @@ void ReplayMeshView::exportResult(const QString &path) const {
         const auto text = QByteArray::fromStdString(metadata.dump(2));
         QSaveFile sidecar(path + ".json");
         if (!sidecar.open(QIODevice::WriteOnly) || sidecar.write(text) != text.size() || !sidecar.commit())
-            throw std::runtime_error("Cannot export incomplete mesh provenance");
+            throw std::runtime_error("Cannot export mesh provenance");
     }
     QSaveFile f(path);
     if (!f.open(QIODevice::WriteOnly) || f.write(bytes) != bytes.size() || !f.commit())
