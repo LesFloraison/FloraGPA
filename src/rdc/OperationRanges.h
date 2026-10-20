@@ -7,5 +7,6 @@ namespace flora {
 nlohmann::json rdcUavClearRange(const SDObject &chunk, ResourceId resource,
                                std::span<const TextureDescription> textures);
 nlohmann::json rdcOperationRanges(const SDObject &chunk, ResourceId resource,
-                                 std::span<const TextureDescription> textures);
+                                 std::span<const TextureDescription> textures,
+                                 std::span<const ResourceDescription> resources = {});
 }

@@ -2144,7 +2144,8 @@ Json runRdcJob(const Json &job) {
                 const auto chunk = events.chunks.find(usage.eventId);
                 row["operation_ranges"] = chunk == events.chunks.end()
                     ? Json{{"status", "unavailable"}, {"reason", "Resource operation arguments are unavailable"}}
-                    : rdcOperationRanges(*chunk->second, resource, {historyTextures.data(), historyTextures.size()});
+                    : rdcOperationRanges(*chunk->second, resource, {historyTextures.data(), historyTextures.size()},
+                                         {resources.data(), resources.size()});
                 if (row["operation_ranges"].at("status") == "captured") {
                     row["subresource_status"] = "see_captured_operation_ranges"; ++capturedRanges;
                 } else ++rangeGaps;

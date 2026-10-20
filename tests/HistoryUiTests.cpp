@@ -55,6 +55,79 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void transferResourceIdentities() {
+        ResourceHistoryView view;
+        view.setContext("copy-fixture", 9007199254740993ULL, 7, 8);
+        Json source{{"role", "source"}, {"resource", {
+            {"mapping_status", "capture_resource_marker"},
+            {"resource_object", "18446744073709551615"},
+            {"resource_creation", "9007199254740994"}}}};
+        Json destination{{"role", "destination"}, {"resource", {
+            {"mapping_status", "unmapped"}, {"rdc_id", "ResourceId::9007199254740995"}}}};
+        Json operation{{"status", "captured"}, {"scope", "Captured transfer endpoints, not observed content changes"},
+            {"ranges", {{{"role", "destination"}, {"kind", "whole_resource"}}}},
+            {"transfer_endpoints", {source, destination}}};
+        Json row{{"execution", "9007199254740993"}, {"selectable", true},
+            {"usage_name", "CopyDst"}, {"evidence", "recorded_operation"}, {"operation_ranges", operation}};
+        Json report{{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740993"},
+            {"resource_creation", "7"}, {"resource_object", "8"}, {"resource_history", {row}}};
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        QVERIFY(rows); QCOMPARE(rows->topLevelItemCount(), 1);
+        const auto range = rows->topLevelItem(0)->text(4);
+        QVERIFY(range.contains("source resource 18446744073709551615 (creation 9007199254740994)"));
+        QVERIFY(range.contains("destination ResourceId::9007199254740995 (capture identity unavailable)"));
+        rows->setCurrentItem(rows->topLevelItem(0));
+        QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
+        action(view, "locateResourceHistoryEvent")->trigger();
+        QCOMPARE(jump.size(), 1);
+        QCOMPARE(jump[0][0].toULongLong(), 9007199254740993ULL);
+        QSignalSpy sourceJump(&view, &ResourceHistoryView::recordRequested);
+        auto sourceAction = action(view, "locateResourceHistoryTransferSource");
+        QVERIFY(sourceAction->isEnabled());
+        sourceAction->trigger();
+        QCOMPARE(sourceJump.size(), 1);
+        QCOMPARE(sourceJump[0][0].toULongLong(), 9007199254740994ULL);
+        view.setWorkerBusy(true);
+        QVERIFY(!sourceAction->isEnabled());
+        view.setWorkerBusy(false);
+        report["resource_history"][0]["operation_ranges"]["transfer_endpoints"][0]["resource"]["mapping_status"] = "unmapped";
+        QVERIFY(view.finish(view.requestId(), report));
+        rows->setCurrentItem(rows->topLevelItem(0));
+        QVERIFY(!sourceAction->isEnabled());
+        view.setContext("other-session", 1, 2, 3);
+        QVERIFY(rows->topLevelItemCount() == 0);
+        QVERIFY(!sourceAction->isEnabled());
+    }
+    void capturedTransferEndpoints() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_TRANSFER_REPORT");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 Recombine input resource-history report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("36656"));
+        QCOMPARE(report.at("resource_creation"), Json("550849"));
+        QCOMPARE(report.at("history_scope").at("operation_range_gaps"), Json(0));
+        QVERIFY(report.at("gpa_modules_loaded").empty());
+        ResourceHistoryView view;
+        view.setContext("hellblade-transfer", 36656, 550849, 2149346441808ULL);
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        size_t copies{};
+        for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
+            const auto &row = report.at("resource_history")[i];
+            if (row.value("execution", "") != "36568") continue;
+            ++copies;
+            const auto &endpoints = row.at("operation_ranges").at("transfer_endpoints");
+            QCOMPARE(endpoints[0].at("resource").at("resource_creation"), Json("571450"));
+            QCOMPARE(endpoints[1].at("resource").at("resource_creation"), Json("550849"));
+            rows->setCurrentItem(rows->topLevelItem(int(i)));
+            QVERIFY(rows->currentItem()->text(4).contains("source resource 2152463590288 (creation 571450)"));
+            QSignalSpy sourceJump(&view, &ResourceHistoryView::recordRequested);
+            action(view, "locateResourceHistoryTransferSource")->trigger();
+            QCOMPARE(sourceJump.size(), 1);
+            QCOMPARE(sourceJump[0][0].toULongLong(), 571450ULL);
+        }
+        QCOMPARE(copies, size_t(1));
+    }
     void layerTestHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the array-layer test evidence directory");

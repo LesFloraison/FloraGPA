@@ -1,4 +1,5 @@
 #include "OperationRanges.h"
+#include "Assets.h"
 #include "ClearCoverage.h"
 #include "dx12/QueryResultLayout.h"
 #include <algorithm>
@@ -121,17 +122,32 @@ Json rdcUavClearRange(const SDObject &chunk, ResourceId resource, std::span<cons
     }
     return range;
 }
-Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<const TextureDescription> textures) {
+Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<const TextureDescription> textures,
+                        std::span<const ResourceDescription> resources) {
     const auto wanted=std::bit_cast<uint64_t>(resource);
     const std::string name(chunk.name.c_str(),chunk.name.size());
     Json result{{"status","unavailable"},{"source","captured_api_arguments"},{"api",name},
         {"scope","Native API ranges, not measured content changes. Copy box units and plane formats retain their captured API semantics."},
         {"ranges",Json::array()}};
+    const bool transfer = name.ends_with("::CopyBufferRegion") || name.ends_with("::CopyResource") ||
+        name.ends_with("::CopyTextureRegion") || name.ends_with("::ResolveSubresource") ||
+        name.ends_with("::ResolveSubresourceRegion");
+    if (transfer) result["transfer_endpoints"] = Json::array();
     try {
         const auto append=[&](uint64_t object,const char *role,Json range) {
-            if (object != wanted) return;
             range["resource_id"]=std::to_string(object); range["role"]=role;
-            result["ranges"].push_back(std::move(range));
+            if (transfer) {
+                const auto id = std::bit_cast<ResourceId>(object);
+                const auto found = std::find_if(resources.begin(), resources.end(),
+                    [&](const auto &r) { return r.resourceId == id; });
+                auto endpoint = range;
+                endpoint["resource"] = rdcDx12ResourceReference(id,
+                    found == resources.end() ? std::string_view{} : std::string_view(found->name.c_str(), found->name.size()));
+                result["transfer_endpoints"].push_back(std::move(endpoint));
+            }
+            // Preserve ranges as the queried resource's ranges, including both
+            // roles for a self-copy. Other endpoints are separate provenance.
+            if (object == wanted) result["ranges"].push_back(std::move(range));
         };
         const auto subresource=[&](uint64_t object,uint64_t index) {
             if (index > UINT32_MAX) throw std::runtime_error("Invalid native subresource index");
@@ -213,7 +229,11 @@ Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<cons
         } else throw std::runtime_error("Operation range reconstruction is not implemented for this API");
         if (result["ranges"].empty()) throw std::runtime_error("Operation does not name the queried resource");
         result["status"]="captured";
-    } catch (const std::exception &e) { result["ranges"]=Json::array(); result["reason"]=e.what(); }
+    } catch (const std::exception &e) {
+        result["ranges"]=Json::array();
+        if (transfer) result["transfer_endpoints"]=Json::array();
+        result["reason"]=e.what();
+    }
     return result;
 }
 }

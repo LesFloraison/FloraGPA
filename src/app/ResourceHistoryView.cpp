@@ -40,6 +40,22 @@ QString regionText(const nlohmann::json &region) {
     if (region.contains("front")) text += QString(" × [%1, %2)").arg(field(region,"front"),field(region,"back"));
     return text;
 }
+uint64_t transferSourceCreation(const nlohmann::json &row) {
+    const auto operation = row.value("operation_ranges", nlohmann::json::object());
+    if (operation.value("status", "") != "captured") return 0;
+    uint64_t creation{};
+    size_t sources{};
+    for (const auto &endpoint : operation.value("transfer_endpoints", nlohmann::json::array())) {
+        if (endpoint.value("role", "") != "source") continue;
+        ++sources;
+        const auto &resource = endpoint.at("resource");
+        if (resource.value("mapping_status", "") == "capture_resource_marker") {
+            (void)identity(resource.at("resource_object"));
+            creation = identity(resource.at("resource_creation"));
+        }
+    }
+    return sources == 1 ? creation : 0;
+}
 } // namespace
 ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     setObjectName("resourceHistoryView");
@@ -55,6 +71,9 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     producer_ = tools->addAction("Locate Fence producer");
     producer_->setObjectName("locateResourceHistorySignal");
     producer_->setToolTip("Locate the captured Signal that satisfies this queue Wait; this does not prove a resource dependency");
+    transferSource_ = tools->addAction("Locate transfer source");
+    transferSource_->setObjectName("locateResourceHistoryTransferSource");
+    transferSource_->setToolTip("Locate the source resource's creation record for this Copy or Resolve; this is not its last writer");
     export_ = tools->addAction("Export…");
     auto overview = tools->addAction("Creation / scope");
     connect(overview, &QAction::triggered, this, &ResourceHistoryView::showOverview);
@@ -98,6 +117,11 @@ ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
         if (locate_->isEnabled())
             emit eventRequested(rows_->currentItem()->data(0, Qt::UserRole).toULongLong(),
                 indirectActionOrdinal(result_.at("resource_history").at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())));
+    });
+    connect(transferSource_, &QAction::triggered, this, [this] {
+        if (transferSource_->isEnabled())
+            emit recordRequested(transferSourceCreation(result_.at("resource_history")
+                .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())));
     });
     connect(rows_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
     connect(rows_, &QTreeWidget::itemSelectionChanged, this, [this] {
@@ -194,6 +218,9 @@ void ResourceHistoryView::updateActions() {
                             dependency.value("dependency_status", "") == "resolved";
     }
     producer_->setEnabled(producerAvailable);
+    transferSource_->setEnabled(!busy_ && rows_->currentItem() && !result_.is_null() &&
+        transferSourceCreation(result_.at("resource_history")
+            .at(rows_->currentItem()->data(0, Qt::UserRole + 1).toULongLong())) != 0);
 }
 ResourceHistoryView::Json ResourceHistoryView::request() const {
     if (key_.isEmpty() || !execution_ || !creation_ || !object_)
@@ -228,6 +255,7 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         throw std::runtime_error("Isolated resource history must retain incomplete frame status");
     const auto &uses = result.at("resource_history");
     for (const auto &row : uses) {
+        (void)transferSourceCreation(row);
         if (row.contains("query_resolve_part") || row.contains("query_resolve_part_count")) {
             if (!isolateMissingQueries_ || row.value("name","") != "ID3D12GraphicsCommandListResolveQueryData" ||
                 !row.at("query_resolve_part").is_number_integer() || !row.at("query_resolve_part_count").is_number_integer() ||
@@ -314,6 +342,15 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                 if (operation.contains("source_box")) ranges << "Source box " + regionText(operation.at("source_box"));
                 if (operation.contains("source_rectangle")) ranges << "Source rectangle " + regionText(operation.at("source_rectangle"));
                 if (operation.contains("destination_origin")) ranges << "Destination origin " + field(operation,"destination_origin");
+                if (operation.contains("transfer_endpoints"))
+                    for (const auto &endpoint : operation.at("transfer_endpoints")) {
+                        const auto &resource = endpoint.at("resource");
+                        ranges << (resource.value("mapping_status", "") == "capture_resource_marker"
+                            ? QString("%1 resource %2 (creation %3)").arg(field(endpoint, "role"),
+                                field(resource, "resource_object"), field(resource, "resource_creation"))
+                            : QString("%1 %2 (capture identity unavailable)").arg(field(endpoint, "role"),
+                                field(resource, "rdc_id")));
+                    }
                 item->setToolTip(4, field(operation,"scope"));
             }
         }

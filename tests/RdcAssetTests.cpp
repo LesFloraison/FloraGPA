@@ -34,6 +34,49 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void transferEndpointIdentities() {
+        constexpr uint64_t src = 9007199254740993ULL, dst = src + 1;
+        SDObject chunk("ID3D12GraphicsCommandList::CopyResource"_lit, "chunk"_lit);
+        const auto integer = [&](const char *name, uint64_t value) {
+            auto field = chunk.AddAndOwnChild(new SDObject(rdcstr(name), "uint64_t"_lit));
+            field->type.basetype = SDBasic::Resource; field->data.basic.u = value; return field;
+        };
+        integer("pSrcResource", src);
+        auto destination = integer("pDstResource", dst);
+        std::array<ResourceDescription, 2> descriptions{};
+        descriptions[0].resourceId = resource(src);
+        descriptions[0].name = "Flora DX12 resource 18446744073709551615 creation 9007199254740993";
+        descriptions[1].resourceId = resource(dst);
+        // A reused captured address still has a separate resource lifetime.
+        descriptions[1].name = "Flora DX12 resource 18446744073709551615 creation 9007199254740994";
+        auto result = rdcOperationRanges(chunk, resource(dst), {}, descriptions);
+        QCOMPARE(result.at("status"), Json("captured"));
+        QCOMPARE(result.at("ranges").size(), size_t(1));
+        QCOMPARE(result.at("ranges")[0].at("role"), Json("destination"));
+        const auto &endpoints = result.at("transfer_endpoints");
+        QCOMPARE(endpoints.size(), size_t(2));
+        QCOMPARE(endpoints[0].at("resource_id"), Json("9007199254740993"));
+        QCOMPARE(endpoints[0].at("resource").at("resource_object"), Json("18446744073709551615"));
+        QCOMPARE(endpoints[0].at("resource").at("resource_creation"), Json("9007199254740993"));
+        QCOMPARE(endpoints[1].at("resource").at("resource_creation"), Json("9007199254740994"));
+        result = rdcOperationRanges(chunk, resource(dst), {});
+        QCOMPARE(result.at("transfer_endpoints")[0].at("resource").at("mapping_status"), Json("unmapped"));
+        for (const char *name : {"Flora DX12 resource 0 creation 1",
+                                "Flora DX12 resource 01 creation 1",
+                                "Flora DX12 resource 1 creation 18446744073709551616",
+                                "Flora DX12 resource 1 creation 2 trailing"}) {
+            QCOMPARE(rdcDx12ResourceReference(resource(src), name).at("mapping_status"), Json("unmapped"));
+        }
+        QCOMPARE(rdcDx12ResourceReference(resource(0), descriptions[0].name.c_str()).at("mapping_status"), Json("unbound"));
+        result = rdcOperationRanges(chunk, resource(dst + 1), {}, descriptions);
+        QCOMPARE(result.at("status"), Json("unavailable"));
+        QVERIFY(result.at("transfer_endpoints").empty());
+        destination->type.basetype = SDBasic::Null;
+        result = rdcOperationRanges(chunk, resource(src), {}, descriptions);
+        QCOMPARE(result.at("status"), Json("unavailable"));
+        QVERIFY(result.at("ranges").empty());
+        QVERIFY(result.at("transfer_endpoints").empty());
+    }
     void queryResolveOperationRanges() {
         SDObject chunk("ID3D12GraphicsCommandList::ResolveQueryData"_lit,"chunk"_lit);
         const auto integer=[&](const char *name,uint64_t value) {
@@ -155,10 +198,14 @@ class RdcAssetTests : public QObject {
         QCOMPARE(result.at("ranges")[1].at("role"),Json("destination"));
         QCOMPARE(result.at("ranges")[1].at("offset"),Json("9007199254741093"));
         QCOMPARE(result.at("ranges")[1].at("end"),Json("9007199254741100"));
+        QCOMPARE(result.at("transfer_endpoints").size(),size_t(2));
+        QCOMPARE(result.at("transfer_endpoints")[0].at("role"),Json("source"));
+        QCOMPARE(result.at("transfer_endpoints")[1].at("role"),Json("destination"));
         QCOMPARE(rdcOperationRanges(chunk,resource(id+1),{}).at("status"),Json("unavailable"));
         offset->data.basic.u=UINT64_MAX;
         result=rdcOperationRanges(chunk,resource(id),{});
         QCOMPARE(result.at("status"),Json("unavailable")); QVERIFY(result.at("ranges").empty());
+        QVERIFY(result.at("transfer_endpoints").empty());
     }
     void transferCoverage() {
         const auto node=[](SDObject &parent,const char *name) {
@@ -195,6 +242,9 @@ class RdcAssetTests : public QObject {
         QCOMPARE(dstRange.at("ranges")[0].at("layer"),Json(1));
         QCOMPARE(dstRange.at("ranges")[0].at("plane"),Json(0));
         QCOMPARE(srcRange.at("ranges")[0].at("role"),Json("source"));
+        QCOMPARE(dstRange.at("transfer_endpoints"),srcRange.at("transfer_endpoints"));
+        QCOMPARE(dstRange.at("transfer_endpoints")[1].at("native_subresource"),Json(3));
+        QCOMPARE(dstRange.at("transfer_endpoints")[0].at("resource_id"),Json("9007199254740994"));
         QCOMPARE(dstRange.at("source_box").at("left"),Json(2));
         QCOMPARE(result.at("source_resource_id"),Json("9007199254740994"));
         QCOMPARE(result.at("destination_rectangle"),Json::array({4,4,8,8}));
@@ -220,11 +270,16 @@ class RdcAssetTests : public QObject {
         integer(resolve,"pDstResource",identity); integer(resolve,"pSrcResource",identity+1);
         integer(resolve,"DstSubresource",3); integer(resolve,"SrcSubresource",0);
         integer(resolve,"DstX",4); integer(resolve,"DstY",4);
+        integer(resolve,"ResolveMode",0);
         auto rect=node(resolve,"pSrcRect");
         for (const auto &[name,value] : std::map<std::string,int64_t>{{"left",0},{"top",0},{"right",4},{"bottom",4}}) {
             auto field=node(*rect,name.c_str()); field->type.basetype=SDBasic::SignedInteger; field->data.basic.i=value;
         }
         source.resourceId=resource(identity+1); source.msSamp=4;
+        const auto resolveRange=rdcOperationRanges(resolve,target.resourceId,descriptions);
+        QCOMPARE(resolveRange.at("status"),Json("captured"));
+        QCOMPARE(resolveRange.at("transfer_endpoints")[0].at("native_subresource"),Json(0));
+        QCOMPARE(resolveRange.at("transfer_endpoints")[1].at("native_subresource"),Json(3));
         QCOMPARE(query(resolve).at("status"),Json("covered"));
         QCOMPARE(query(resolve,8,5).at("status"),Json("outside"));
         resolve.name="ID3D12GraphicsCommandList::ResolveSubresource"_lit;

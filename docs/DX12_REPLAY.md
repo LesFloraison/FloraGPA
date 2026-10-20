@@ -8986,6 +8986,115 @@ The remaining investigation starts at current-color producer **36656** and
 the earlier history chain. Original-frame fidelity and full acceptance remain
 unfinished; no default replay behavior or arithmetic policy is changed here.
 
+### Transfer endpoints and the Hellblade2 Recombine input frontier
+
+Resource History now retains **both endpoints** of captured `CopyResource`,
+`CopyBufferRegion`, `CopyTextureRegion`, `ResolveSubresource` and
+`ResolveSubresourceRegion` operations in `operation_ranges.transfer_endpoints`.
+The existing `ranges` array still describes only the queried resource.
+Self-copies retain separate source/destination ranges; a captured address reused
+by another lifetime is distinguished by its creation record. Endpoint IDs,
+captured objects, creation records and buffer offsets remain decimal strings.
+Missing or noncanonical resource markers stay explicitly unmapped. Failed
+argument reconstruction clears both ranges and endpoints, rather than publishing
+a partially decoded transfer.
+
+The Resource History view displays the endpoint identities. **Locate transfer
+source** navigates to the source resource's **creation record**, using the
+existing CPU-record navigation path. It does not claim to locate the last
+writer or prove that bytes changed. The action requires a single mapped source,
+is disabled while a worker is busy, and is invalidated with the view's context.
+Per-endpoint subresource/byte ranges remain available in the selected-row
+details and JSON export.
+
+This addresses a concrete investigation gap: Hellblade2 resource **550849**
+has a `CopyDst` at execution **36568**, source record **611284**, RDC event
+**89759**, list **2146199218400**, generation **3**, submission **613133**,
+queue **2131165365824**. The new report identifies the whole-resource transfer:
+
+| Role | Captured object | Creation | RDC resource |
+| --- | --- | --- | --- |
+| Source | 2152463590288 | 571450 | 612 |
+| Destination | 2149346441808 | 550849 | 640 |
+
+The real input Resource History report through execution **36656** contains
+250 uses, two reconstructed operation ranges and zero operation-range gaps.
+The view test consumes this report, checks both endpoint identities, displays
+the source and emits creation **571450** through its navigation signal.
+The existing MainWindow connection switches to CPU records and calls
+`locateEvent`; a fresh full MainWindow/capture-opening test was not repeated.
+
+Release builds **491/492** succeed. Targeted tests only:
+
+- `FloraRdcAssetTests transferEndpointIdentities bufferOperationRanges
+  transferCoverage`: **5 passes** including setup/cleanup, **1 ms**. Covers
+  IDs beyond 2^53, `UINT64_MAX` captured object, reused addresses, unknown and
+  malformed markers, self-copy roles, overflowing ranges, invalid argument
+  fields, texture-copy subresources and Resolve endpoints. The first test run
+  exposed a missing `ResolveMode` field in the existing synthetic Resolve
+  fixture; supplying that captured argument made the range assertion valid.
+- `FloraHistoryUiTests transferResourceIdentities capturedTransferEndpoints`:
+  **4 passes** including setup/cleanup, **86 ms**, using the real report above.
+  Checks exact uint64 navigation, unknown-source disablement, busy/context
+  invalidation and existing execution navigation. The offscreen platform emits
+  its existing missing-font-directory warning; these are functional view tests,
+  not visual screenshot acceptance.
+
+The same full-stream RDC from `portable-hellblade487/native` remains the input.
+No native recapture, RenderDoc rebuild, arithmetic-policy change, GPA runtime,
+Python runtime dependency or broad sample regression is introduced.
+Pipeline inspection of **36656 / 611384 / 90033** identifies
+`RecombineMainCS`, bytecode **33,080 B**, SHA-256
+`7badadb9804bc0d9123555afe3ab268ad8b96a2aef10bf920c2320c506754767`.
+Two forced selections in one controller, with mip-0 raw readbacks and no
+PixelHistory, give:
+
+| Creation | Binding / extent | Changed pixels, rows 0–802 | Changed pixels below row 802 |
+| --- | --- | --- | --- |
+| 571434 | SceneColorOutput, 1920×1200 | 13,798 | 2,734 |
+| 550849 | SceneColorInput, 1920×1200 | 13,798 | 216 |
+| 563063 | SceneDepthTexture / FullResDepthTexture, 1920×1200 | 0 | 0 |
+| 510570 | LowResDepthTexture, 1×1 | 0 | — |
+| 510486 | SceneSeparateTranslucency, 1×1 | 0 | — |
+| 505987 | SceneSeparateTranslucencyModulateColor, 1×1 | 0 | — |
+
+In **each** selection the output's complete upper **1920×803** storage equals
+the scene-color input byte-for-byte. Thus the variation in that region is
+already present in the input, not newly introduced by this Dispatch.
+`ForegroundConvolution_SceneColor` **512587**, 960×600, changes at **2,757**
+pixels, all in rows **402–599**. Region counts use the downstream extent
+confirmed in the previous section; they do not independently validate this
+pass's constants or declare unused allocation rows incorrect.
+
+The copy source history leads to **36564 / 611280 / 89747**:
+`RecombineCS`, PSO creation **514796**, captured PSO **2144042196864**,
+direct groups **240×101×1**, thread group **8×8×1**, bytecode **30,316 B**,
+SHA-256 `429213092c491c3221f02ca1e479f9deec20debbebaa75ab73f76c2f84887934`.
+A bounded two-selection comparison at this earlier Dispatch finds:
+
+| Creation | Binding | Extent | Changed pixels, rows 0–802 | Below row 802 |
+| --- | --- | --- | --- | --- |
+| 571450 | Output | 1920×1200 | 15,560 | 275 |
+| 550849 | InputTexture, before the later copy overwrites it | 1920×1200 | 16,815 | 0 |
+| 540765 | ScatteringTexture | 1920×803 | 141,031 | 0 |
+| 574767 | SetupTexture | 1920×803 | 16,911 | 0 |
+
+All three texture inputs vary; this does not isolate `RecombineCS` as the
+cause. The earlier write frontier for **550849** is execution **35915**,
+record **611126**, RDC event **87715** (`ColorTarget` use); other inputs also
+need their own provenance. These are candidates, not proven observed writes.
+Whole-frame repeatability, original-image fidelity and full acceptance remain
+unfinished.
+
+Ignored evidence: `hellblade-color36656-pipeline1`,
+`hellblade-recombine-repeat1.json`, its raw readbacks and difference report,
+`hellblade-recombine-copy-equivalence1.json`,
+`hellblade-recombine-{color,foreground}-history1`,
+`hellblade-recombine-transfer491`, `hellblade-recombine-source-history1`,
+`hellblade-color36564-pipeline1`, `hellblade-scattering-repeat1.json` and its
+raw readbacks/difference report, `transfer-endpoints491-assets.txt`,
+`transfer-endpoints492-ui.txt`, and `build491.log` / `build492.log`.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

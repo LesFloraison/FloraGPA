@@ -1,7 +1,9 @@
 #pragma once
 #include "Api.h"
 #include <nlohmann/json.hpp>
+#include <string_view>
 namespace flora {
+nlohmann::json rdcDx12ResourceReference(ResourceId id, std::string_view name);
 nlohmann::json rdcResourceDescription(const ResourceDescription &resource);
 nlohmann::json rdcTextureDescription(const TextureDescription &texture);
 nlohmann::json rdcTextureReadbackDescription(const TextureDescription &texture, const Subresource &sub);

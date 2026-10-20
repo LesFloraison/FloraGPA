@@ -1,5 +1,6 @@
 #include "Assets.h"
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <cstring>
 namespace flora {
@@ -48,6 +49,29 @@ Json annotation(const SDObject *value) {
                 {"id", "ResourceId::" + std::to_string(u)}}}}}};
 }
 } // namespace
+nlohmann::json rdcDx12ResourceReference(ResourceId id, std::string_view name) {
+    Json result{{"rdc_id", resource(id)}, {"name", std::string(name)},
+        {"resource_object", nullptr}, {"resource_creation", nullptr},
+        {"mapping_status", id == ResourceId() ? "unbound" : "unmapped"}};
+    constexpr std::string_view prefix = "Flora DX12 resource ";
+    if (id == ResourceId() || !name.starts_with(prefix)) return result;
+    const auto tail = name.substr(prefix.size());
+    const auto split = tail.find(" creation ");
+    if (split == std::string_view::npos) return result;
+    const auto object = tail.substr(0, split), creation = tail.substr(split + 10);
+    const auto canonical = [](std::string_view value) {
+        uint64_t number{};
+        const auto parsed = std::from_chars(value.data(), value.data() + value.size(), number);
+        return number && parsed.ec == std::errc{} && parsed.ptr == value.data() + value.size() &&
+            std::to_string(number) == value;
+    };
+    if (canonical(object) && canonical(creation)) {
+        result["resource_object"] = std::string(object);
+        result["resource_creation"] = std::string(creation);
+        result["mapping_status"] = "capture_resource_marker";
+    }
+    return result;
+}
 nlohmann::json rdcResourceFormat(const ResourceFormat &format) {
     // Private format flags are not properties of the original Python adapter.
     return {{"type", uint32_t(format.type)},
