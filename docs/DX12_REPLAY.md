@@ -9275,6 +9275,93 @@ Ignored evidence: `hellblade-integrate32943-pipeline1`,
 GPA/Python modules in the three native probe processes. Offline Python/numpy
 comparison is research only. Full replay/debug acceptance remains unfinished.
 
+### Trace the changing probe inputs through ray generation
+
+Continuing from irradiance input **551682**, execution
+**32888 / source 604830 / RDC 78379** runs
+`ScreenProbeFilterGatherTracesCS`, PSO **510847**, **38,052 bytes**, SHA-256
+`bc33c4f0fbb442db81bf14d70616c57a50f0ba061b63e8ca103d95ba0c72c028`.
+The original directory shader export matches the bound shader. Its root constants
+are in buffer **537415** at **3,229,184**: gather resolution **8**, downsample
+**32**, uniform probes **1,560**, maximum adaptive probes **780**, atlas allocation
+**60 x 57**. Both observations have **732** active adaptive probes with the same
+unique screen-position set, and the complete **4 MiB** constant buffer is exact.
+The shader derives noise and neighboring-screen coordinates from probe screen
+position, including the adaptive position buffer, rather than directly from the
+allocated adaptive index. Reordering alone is not a demonstrated cause.
+
+`tests/fixtures/compare-probe-readbacks.py` makes the preceding manual alignment
+reusable for this diagnosis. It verifies bounded raw sizes/digests, full buffer
+reads, unique equal active-position sets, counter capacity, single-subresource
+textures and an explicitly supplied square per-probe block layout. It excludes
+unused capacity and rejects incompatible evidence instead of aligning only an
+intersection. It is an offline Python/numpy research helper, not an application
+dependency or a general texture comparator. Its result is `compared`, not a
+fidelity pass. Digest corruption and an undersized adaptive capacity are rejected
+using small temporary report copies.
+
+At **78379**, after position alignment, input radiance **570138** differs in
+**595 uniform / 327 adaptive** blocks (**2,692** texels); output **551682**
+differs in **593 / 322** blocks (**2,722** texels). Active depth **510833**
+is exact. The input's previous writer **32883 / 604823 / 78362** runs the
+same filter and reads **555250**. The shared hit-distance input **567169**
+leads to **32862 / 604796 / 78293**, `ScreenProbeCompositeTracesWithScatterCS`,
+PSO **513637**, **35,552 bytes**, SHA-256
+`c4e4268c65439cfd76c135831ff034876fd59d40c1ed6db006b1cd6f27ee6946`.
+Its paired, position-aligned observations show:
+
+| Resource / role | Changed uniform blocks | Changed adaptive blocks | Changed active texels |
+| --- | --- | --- | --- |
+| 560576 / output radiance | 616 | 360 | 2,561 |
+| 567169 / output hit distance | 6 | 171 | 745 |
+| 537848 / input trace hit | 36 | 195 | 1,100 |
+| 550915 / input ray information | 54 | 24 | 258 |
+| 570609 / input trace radiance | 772 | 396 | 3,986 |
+| 510833 / input depth | 0 | 0 | 0 |
+
+Inputs already differ; this does not establish a scatter/filter arithmetic
+defect. Ray-information **550915** changes at uniform probe **56**, texel
+**(448,6)**, from R16_UINT **4352** to **4481**. Its current writer is indirect
+execution **30752 / source 604548 / RDC 71516**, command-list generation **4**,
+submission **612599**, compute queue **2131165364544**.
+`ScreenProbeGenerateRaysCS` is **9,144 bytes**, SHA-256
+`e03b79a0cee3ab7649cd64eaffb9d6e0043106f24b96249451ea687612b79899`.
+The bound probability inputs are BRDF SH buffer **569005** and lighting
+probability texture **539075**; their generation/input stability remains to be
+investigated. Trace radiance **570609** has current writer candidates **30756**,
+**30767**, **32815** and **32853**, so it is not treated as immutable history.
+
+A real `debug-thread` request at execution **30752**, group **(56,0,0)**,
+thread **(0,6,0)** returns **1,252 steps**. The group size is **8 x 8 x 1**,
+giving dispatch thread **(448,6,0)**. Instruction **351**, trace position **1248**,
+observes one in-bounds R16_UINT store of **4481** to creation **550915** at
+**(448,6)**. Its post-dispatch GPU observation, taken after trace release and
+restoration of the original dispatch, is also **4481**. Retained-input patch
+version **2** reports `released_dispatch_restored`. This verifies the selected
+integer store/reference pair; it does not prove earlier/later replay input
+stability or validate every UAV write. The generic store report therefore
+retains `validation: not_validated`.
+
+There are no source files in this trace. The focused
+`ReplayDebugUiTests::screenProbeRayInstructionDebug` consumes the saved real
+report and verifies instruction **351** breakpoint, SSA Watch `_383 = 4481`,
+forward/backward stepping, exact execution/resource/texel navigation, preserved
+reference scope and rejection after changing the experiment context. The selected
+test passes (three QtTest entries including setup/cleanup), without another GPU
+run. No application behavior or floating-point tolerance was changed.
+
+Ignored evidence: `hellblade-{radiance32888,filter32883,composite32862,ray30752}-pipeline1`,
+`hellblade-gatherfilter-shader1`, `hellblade-gatherfilter-constants1.json`,
+`hellblade-{gatherfilter,composite}-repeat1.json` and their raw files,
+`hellblade-gatherfilter-remap1.json`, `hellblade-composite-remap2.json`,
+`hellblade-irradiance-remap-cli1.json`, `probe-compare-rejections1`,
+`hellblade-{filter-input,probe-hit,rayinfo,traceradiance}-history1`,
+`hellblade-ray-debug1`, `hellblade-ray-debug-ui2.txt` and its UI artifact directory.
+`hellblade-ray-evidence-verification1.json` verifies the **32** new paired raw
+files' lengths/hashes, no PixelHistory calls in those probes, and no GPA/Python
+modules in either probe or the shader-debug analyzer. Full replay/debug
+acceptance remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

@@ -457,6 +457,66 @@ class ReplayDebugUiTests : public QObject {
         const auto serial = view.requestId(); view.setContext("new-experiment", 36779, true);
         QVERIFY(!view.finish(serial, result)); QVERIFY(notice->isHidden());
     }
+    void screenProbeRayInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_PROBE_RAY_DEBUG_REPORT");
+        if (path.isEmpty()) QSKIP("Set the recorded Hellblade2 screen-probe ray debug report");
+        const auto result = read(path);
+        QCOMPARE(result.at("execution"), Json("30752"));
+        QCOMPARE(result.at("step_count"), Json(1252));
+        QCOMPARE(result.at("compute_invocation").at("dispatch_thread"), Json::array({448, 6, 0}));
+        QCOMPARE(result.at("compute_input_lifecycle").at("status"), Json("released_dispatch_restored"));
+        const auto &stores = result.at("texture_stores");
+        QCOMPARE(stores.at("validation"), Json("not_validated"));
+        QCOMPARE(stores.at("rows").size(), size_t(1));
+        const auto &store = stores.at("rows")[0];
+        QCOMPARE(store.at("resource_creation"), Json("550915"));
+        QCOMPARE(store.at("view_format"), Json(57)); // R16_UINT.
+        QCOMPARE(store.at("value")[0], Json(4481));
+        QCOMPARE(store.at("gpu_reference").at("value").at("uintValue")[0], Json(4481));
+        QCOMPARE(result.at("gpu_reference").at("consistency"), Json("single_post_dispatch_observation"));
+        ReplayDebugView view("cs"); view.resize(1450, 1000); view.show();
+        view.setContext("hellblade-ray-instruction", 30752, true);
+        view.selectTextureReference(2149337228608ULL, 550915, 448, 6, 0, 0, 0);
+        view.findChild<QLineEdit *>("debugGroup")->setText("56 0 0");
+        view.findChild<QLineEdit *>("debugThread")->setText("0 6 0");
+        QVERIFY(view.finish(view.requestId(), result));
+        QVERIFY(view.model()->files().empty());
+        QSignalSpy errors(&view, &ReplayDebugView::error);
+        auto input = view.findChild<QLineEdit *>("debugInstruction"); QVERIFY(input);
+        input->setText("351"); action(view, "debugToggleInstructionBreakpoint")->trigger();
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1248));
+        view.findChild<QLineEdit *>("debugWatchExpression")->setText("_383");
+        action(view, "debugAddWatch")->trigger();
+        auto watches = view.findChild<QTreeWidget *>("debugWatchValues"); QVERIFY(watches);
+        QCOMPARE(watches->topLevelItemCount(), 1);
+        QCOMPARE(watches->topLevelItem(0)->text(2), QString("4481"));
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1249));
+        action(view, "debugPrevious")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1248));
+        QCOMPARE(watches->topLevelItem(0)->text(2), QString("4481"));
+        auto tree = view.findChild<QTreeWidget *>("debugTextureStores"); QVERIFY(tree);
+        QCOMPARE(tree->topLevelItemCount(), 1);
+        QSignalSpy texel(&view, &ReplayDebugView::texturePixelRequested);
+        QVERIFY(QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, tree->topLevelItem(0)), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1);
+        QCOMPARE(texel[0][1].toULongLong(), 30752ULL);
+        QCOMPARE(texel[0][2].toULongLong(), 550915ULL);
+        QCOMPARE(texel[0][4].toUInt(), 448U); QCOMPARE(texel[0][5].toUInt(), 6U);
+        auto reference = view.findChild<QLabel *>("debugGpuReference"); QVERIFY(reference);
+        QVERIFY(reference->text().contains("after trace release"));
+        QCOMPARE(view.exportReport().at("texture_stores"), stores);
+        for (auto tabs : view.findChildren<QTabWidget *>())
+            if (tabs->indexOf(watches) >= 0) tabs->setCurrentWidget(watches);
+        if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + "/screen-probe-ray.png"));
+        const auto serial = view.requestId();
+        view.setContext("changed-ray-experiment", 30752, true);
+        QVERIFY(!view.finish(serial, result));
+        QCOMPARE(tree->topLevelItemCount(), 0);
+        QVERIFY(reference->isHidden()); QVERIFY(errors.isEmpty());
+    }
     void indirectComputeInvocation() {
         const auto root = qEnvironmentVariable("FLORA_DX12_INDIRECT_DEBUG_ROOT");
         if (root.isEmpty()) QSKIP("Set the Hellblade2 indirect compute evidence directory");
