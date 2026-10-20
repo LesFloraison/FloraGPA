@@ -10714,12 +10714,77 @@ The analyzer's reference run lists 87 modules with no GPA module loaded.
 AS/MS invocation debugging, general shader fidelity and the upstream
 visible-index comparison remain unfinished.
 
+### Coherent visibility-entry comparison after undo
+
+The follow-up investigation compares two native prefixes through Hellblade2
+execution **10267**, with all texture and related buffer readbacks taken from
+each **same completed replay context**. No original commands run between these
+reads. The completed record and executed-command counts remain unchanged;
+both runs use SDK **616** on the RTX 5090 Laptop GPU and report zero D3D12
+validation errors.
+
+The baseline has no edits. The second run disables execution 10267 and then
+undoes it before replay. Both project cursors are zero and active edits are
+empty. Their complete project documents differ because the second retains
+the operation in redo history; this is not a change to active replay state.
+
+The investigation reads the selected PS visibility UAV (creation **574650**)
+and the MS bindings established by the earlier pipeline/bytecode evidence:
+
+| Read | Resource creation | Byte offset | Byte length |
+| --- | --- | --- | --- |
+| Indirect arguments | 520068 | 16 | 12 |
+| Globals | 537415 | 2338816 | 28 |
+| RasterBinMeta selected entry | 521198 | 0 | 24 |
+| RasterBinData hardware entries | 562546 | 67576 | 6360 |
+| VisibleClustersSWHW observed-index window, baseline | 562379 | 33548072 | 6352 |
+| VisibleClustersSWHW observed-index window, undo | 562379 | 33548088 | 6272 |
+
+The arguments are **(795, 1, 1)** and agree with the selected metadata's
+hardware count. All observed visibility indices are present in their own
+run's hardware-bin input. An additional CPU inspection of the saved bytes
+checks that each pixel's local primitive number lies within the corresponding
+input entry's primitive interval.
+
+Both outputs contain **19,702 written pixels** and **486 observed indices**.
+All written pixels change index, with a one-to-one observed remapping.
+However, every pixel has exactly the same **two-word visible entry, local
+primitive number and depth bits** in both runs; the written/clear mask also
+matches. The 20-byte-per-pixel projection includes an explicit presence word
+to distinguish clear pixels from a zero-valued entry. Its SHA-256 is
+`06bfd84875bf0f087e5399684b0ea122c4294d98076845840d606284cce8d3f3`
+for both runs.
+
+The raw texture hashes still differ:
+`806b783927d5cd7b7a80c5752347bdda65689df1e40fd67203c92adee308b3a4`
+versus
+`01ac8baf816ea354b8d35ab2b9270bfc6cd46b68e2c39b0a66db0d2f7e39d3f4`.
+This proves a stable entry/primitive/depth projection for this pair, not
+raw-byte restoration, equality of every referenced scene buffer, correct
+atomic ordering, complete synchronization or original GPA fidelity.
+The existing raw-undo failure gate remains unchanged.
+
+`FloraDx12VisibilityTests::coherentUndoIdentity` is opt-in: set
+`FLORA_DX12_CAPTURE_DIR` and `FLORA_DX12_VISIBILITY_PAIR_OUTPUT` (a new
+directory) to run its two serial prefixes. It reads narrow buffer windows
+rather than copying the large backing resources and saves intermediate
+reports before assertions, so failures can be investigated without another
+GPU replay. With neither variable set, it skips.
+
+Evidence: `hellblade-visibility-pair1/{baseline,undo}/report.json`,
+`visibility.bin`, the five named buffer `.bin` files and
+`entry_triangle_depth.bin` in each run directory;
+`hellblade-visibility-pair1/{comparison,recorded-comparison}.json`;
+`visibility-pair1.txt` (pass, 63.8 seconds) and
+`build-visibility-pair1.log`. The recorded comparison uses only saved bytes;
+it does not launch another GPU replay.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | PS debugging after Mesh Dispatch | Not verified on this sample | Not verified on this sample | Execution 10267 yields 38 PS steps; stage-specific workspace entry, breakpoint, exact 64-bit Watch and stale-result rejection verified; packed operand matches one GPU texel observation but the texel changes during debug replays, correctly reported partial; AS/MS and complete fidelity unfinished |
-| Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; undo resumes work but all 19,702 written low words vary across identically configured enabled replays; raw undo equivalence fails and remains unresolved |
+| Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; coherent same-context readbacks show all 19,702 written pixels preserve visible-entry words, local primitive and depth despite a one-to-one remapping of 486 indices; raw undo equivalence still fails, and full referenced scene data/fidelity remain unverified |
 | Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
