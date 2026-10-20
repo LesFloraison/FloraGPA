@@ -122,6 +122,13 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         object = session.resource(creation).capturedObject;
     } else if (options.isSet("subresource"))
         throw std::runtime_error("DX12 subresource requires --id <resource creation record>");
+    const auto suggestedOutput = session.outputSuggestion();
+    const bool useSuggestion = streamEnd && !options.isSet("id") && !options.isSet("renderdoc") &&
+                               suggestedOutput.value("status", "") == "suggested";
+    if (useSuggestion) {
+        creation = std::stoull(suggestedOutput.at("resource").get<std::string>());
+        object = session.resource(creation).capturedObject;
+    }
     uint64_t offset{}, length{};
     if (buffer) {
         if (!creation) throw std::runtime_error("DX12 buffer requires --id <resource creation record>");
@@ -199,7 +206,9 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                           {"width", nullptr},
                           {"height", nullptr},
                           {"resource", nullptr},
-                          {"requested_resource", creation ? nlohmann::json(std::to_string(creation)) : nlohmann::json()},
+                          {"requested_resource", options.isSet("id") ? nlohmann::json(std::to_string(creation)) : nlohmann::json()},
+                          {"output_selection", {{"mode", useSuggestion ? "suggested" : options.isSet("id") ? "explicit" : "none"},
+                                                {"suggestion", suggestedOutput}}},
                           {"allocation_limit", std::to_string(budget)},
                           {"rgba_sha256", nullptr}};
     if (experiment) {
@@ -266,6 +275,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             storage["frame_complete"] = false;
             storage["replay_scope"] = scope;
             storage["frame_stream_end_reached"] = streamEnd;
+            storage["output_selection"] = report.at("output_selection");
             if (report.contains("experiment")) storage["experiment"] = report.at("experiment");
             storage["storage_bytes"] = std::stoull(texture.at("bytes").get<std::string>());
             storage["storage_sha256"] = texture.at("sha256");

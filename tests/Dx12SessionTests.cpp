@@ -5577,6 +5577,112 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             }
         }
     }
+    void suggestedFrameOutput() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for default output selection");
+        const std::array<std::pair<const char *, uint64_t>, 3> cases{{
+            {"bf1_2025_12_10__14_29_55.gpa_frame", 11395},
+            {"Talos_2026_10_18__00_55_08.gpa_frame", 35118},
+            {"Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame", 506294}}};
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        for (const auto &[name, expected] : cases) {
+            const auto path = root + '/' + name;
+            const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+            const auto suggestion = session->outputSuggestion();
+            qInfo().noquote() << name << QString::fromStdString(suggestion.dump());
+            QCOMPARE(suggestion.at("status"), nlohmann::json("suggested"));
+            QCOMPARE(suggestion.at("resource"), nlohmann::json(std::to_string(expected)));
+            QCOMPARE(suggestion.at("inferred"), nlohmann::json(true));
+            const auto &evidence = suggestion.at("candidates").front();
+            const auto execution = session->executionEvent(std::stoull(evidence.at("execution").get<std::string>()));
+            QCOMPARE(std::to_string(*execution.sourceRecord), evidence.at("source_record").get<std::string>());
+            QCOMPARE(std::to_string(*execution.submission), evidence.at("submission").get<std::string>());
+            loaded.clear();
+            window.openCapture(path);
+            QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+            QCOMPARE(window.findChild<QTableView *>("resources")->currentIndex().data(Qt::UserRole).toULongLong(),
+                     expected);
+            QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 0);
+            QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("Suggested backbuffer"));
+            QVERIFY(window.findChild<ImageView *>("frameOutput")->image().isNull());
+        }
+        QVERIFY(done.empty()); // Selection/indexing only; no GPU work on directory open.
+    }
+    void ambiguousFrameOutput() {
+        using Json = nlohmann::json;
+        for (const QString mode : {"single", "unsubmitted", "multiple", "wrong_queue", "repeated", "after_present"}) {
+            QTemporaryDir temp;
+            const auto path = fixture(temp);
+            const uint64_t chain = UINT64_MAX - 10, queue = UINT64_MAX - 11, object = UINT64_MAX - 12, list = 31;
+            QByteArray packets; uint64_t timestamp{};
+            const auto packet = [&](uint64_t type, const QByteArray &payload) {
+                qword(packets, type); qword(packets, ++timestamp); qword(packets, 0);
+                qword(packets, payload.size()); packets += payload;
+            };
+            QByteArray create;
+            qword(create, 1); qword(create, queue); qword(create, 0); create.append(char(1));
+            DXGI_SWAP_CHAIN_DESC1 desc{};
+            desc.Width = 32; desc.Height = 16; desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.SampleDesc.Count = 1; desc.BufferCount = 2; desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+            create.append(reinterpret_cast<const char *>(&desc), sizeof(desc));
+            create.append(char(0)); qword(create, 0);
+            create.append(char(1)); qword(create, 1); qword(create, chain); dword(create, 0);
+            packet(0x188b77bd89599ULL, create);
+            for (unsigned i = 0; i < 2; ++i) {
+                QByteArray get; qword(get, chain); dword(get, i);
+                const auto iid = __uuidof(ID3D12Resource);
+                get.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+                get.append(char(1)); qword(get, 1); qword(get, object - i); dword(get, 0);
+                packet(0x1d532a4b90915ULL, get);
+            }
+            QFile metadataFile(path + "/metadata"); QVERIFY(metadataFile.open(QIODevice::ReadOnly));
+            auto metadata = metadataFile.readAll(); metadataFile.close();
+            qword(metadata, 3); qword(metadata, 0); qword(metadata, 0);
+            qword(metadata, 0x288 + 40 + packets.size()); dword(metadata, 0); dword(metadata, 0);
+            metadata += packets; write(path + "/metadata", metadata); packets.clear();
+            const auto reset = [&] {
+                QByteArray bytes; qword(bytes, list); qword(bytes, 17); qword(bytes, 0); dword(bytes, 0);
+                packet(0x1ae3c721c351aULL, bytes);
+            };
+            const auto barrier = [&](uint64_t target) {
+                QByteArray bytes; qword(bytes, list); dword(bytes, 1); bytes.append(char(1)); qword(bytes, 1);
+                dword(bytes, 0); dword(bytes, 0); qword(bytes, target); dword(bytes, UINT32_MAX);
+                dword(bytes, D3D12_RESOURCE_STATE_RENDER_TARGET); dword(bytes, D3D12_RESOURCE_STATE_PRESENT);
+                dword(bytes, 0); packet(0x1ae3c24e5dabeULL, bytes);
+            };
+            const auto close = [&] {
+                QByteArray bytes; qword(bytes, list); dword(bytes, 0); packet(0x1ae3cd6acf667ULL, bytes);
+            };
+            const auto submit = [&] {
+                QByteArray bytes; qword(bytes, mode == "wrong_queue" ? queue - 1 : queue);
+                dword(bytes, 1); bytes.append(char(1)); qword(bytes, 1); qword(bytes, list);
+                packet(0x125482975df48ULL, bytes);
+            };
+            reset(); barrier(object);
+            if (mode == "multiple") barrier(object - 1);
+            close(); submit();
+            if (mode == "repeated") submit();
+            if (mode == "unsubmitted") { reset(); barrier(object - 1); close(); }
+            QByteArray current; qword(current, chain); dword(current, 1);
+            packet(0x1af998824f46bULL, current); // Live index must not override the serialized resource evidence.
+            QByteArray present; qword(present, chain); dword(present, 0); dword(present, 0); dword(present, 0);
+            packet(0x1d53218275f72ULL, present);
+            if (mode == "after_present") submit();
+            write(path + "/thread-7-0", packets);
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            dx12::SubmissionIndex submissions(directory); dx12::BackBufferIndex buffers(directory);
+            const auto result = buffers.suggestFrameOutput(directory, submissions);
+            const bool available = mode == "single" || mode == "unsubmitted" || mode == "repeated";
+            QCOMPARE(result.at("status"), Json(available ? "suggested" : "unavailable"));
+            if (available) {
+                QCOMPARE(result.at("resource"), Json("2"));
+                QCOMPARE(result.at("candidates").front().at("object"), Json(std::to_string(object)));
+                QCOMPARE(result.at("candidates").front().at("execution"), Json(mode == "repeated" ? "2" : "1"));
+            } else QVERIFY(result.at("resource").is_null());
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled, buffers.suggestFrameOutput(directory, submissions, [] { return true; }));
+        }
+    }
     void nativeDescriptorHandles() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for native descriptor translation");

@@ -276,11 +276,28 @@ MainWindow::MainWindow() : loader_(this) {
                 outputHigh_->setText("1");
             }
             image_->setImage({});
+            imageLabel_->setToolTip({});
             imageLabel_->setText(frame_ ? "" : "Frame end · Select a texture creation for output, then press Replay");
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
             selectionLabel_->setText(QString("%1 API calls").arg(commands_->rowCount()));
             boundary_->setCurrentIndex(0);
+            if (!frame_) {
+                const auto suggested = session_->outputSuggestion();
+                if (suggested.value("status", "") == "suggested") {
+                    const auto creation = std::stoull(suggested.at("resource").get<std::string>());
+                    for (int row = 0; row < resourceFilter_->rowCount(); ++row) {
+                        const auto index = resourceFilter_->index(row, 0);
+                        if (index.data(Qt::UserRole).toULongLong() != creation) continue;
+                        resourceView_->setCurrentIndex(index);
+                        imageLabel_->setText(QString("Frame end · Suggested backbuffer %1 · Press Replay").arg(creation));
+                        imageLabel_->setToolTip(QString::fromStdString(suggested.dump(2)));
+                        break;
+                    }
+                } else {
+                    imageLabel_->setToolTip(QString::fromStdString(suggested.value("reason", "Select a texture resource")));
+                }
+            }
             updateStatistics();
             setBusy(false);
             emit captureLoaded();

@@ -76,6 +76,7 @@ class Dx12Session final : public IReplaySession {
     dx12::QueryReplayIndex queries_;
     dx12::QueueDependencyIndex queueDependencies_;
     dx12::BackBufferIndex backBuffers_;
+    nlohmann::json outputSuggestion_;
     mutable std::mutex contentMutex_;
     mutable std::string contentHash_;
     std::map<uint64_t, std::vector<Id>> signatures_;
@@ -158,6 +159,13 @@ class Dx12Session final : public IReplaySession {
     Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled)
         : directory_(path, cancelled), submissions_(directory_, cancelled), queries_(directory_, submissions_, cancelled),
           queueDependencies_(directory_, 0, cancelled), backBuffers_(directory_, cancelled) {
+        try {
+            outputSuggestion_ = backBuffers_.suggestFrameOutput(directory_, submissions_, cancelled);
+        } catch (const OperationCancelled &) {
+            throw;
+        } catch (const std::exception &error) {
+            outputSuggestion_ = {{"status", "unavailable"}, {"resource", nullptr}, {"reason", error.what()}};
+        }
         ids_.reserve(directory_.packets().size());
         for (Id i = 1; i <= directory_.packets().size(); ++i) {
             if (i % 1024 == 0)
@@ -191,10 +199,12 @@ class Dx12Session final : public IReplaySession {
     }
     const std::string &identity() const override { return identity_; }
     const std::filesystem::path &path() const override { return directory_.path(); }
+    nlohmann::json outputSuggestion() const override { return outputSuggestion_; }
     nlohmann::json information() const override {
         return {{"backend", "dx12"}, {"events", ids_.size()},
                 {"decoded_resource_creations", resources_.size()}, {"resource_catalog_complete", false},
                 {"swapchain_buffers", backBuffers_.buffers().size()},
+                {"output_suggestion", outputSuggestion_},
                 {"indexed_execution_instances", std::to_string(submissions_.executionCount())},
                 {"submitted_lists", submissions_.lists().size()}, {"gpu_order_resolved", false},
                 {"initialization_records", directory_.initializationCount()},
@@ -230,6 +240,8 @@ class Dx12Session final : public IReplaySession {
                                        {"index_domain", "serialized_getbuffer_index"},
                                        {"description", resourceDescription(id)},
                                        {"source", "captured_swapchain_description_and_GetBuffer"}};
+            if (outputSuggestion_.value("resource", nlohmann::json()) == std::to_string(id))
+                out["default_output_suggestion"] = outputSuggestion_;
         }
         out["resource_status"] =
             "Creation descriptor only; contents, lifetime aliases and GPU state are not restored";

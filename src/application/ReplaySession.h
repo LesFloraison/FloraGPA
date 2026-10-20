@@ -53,6 +53,8 @@ class IReplaySession {
     }
     virtual const std::filesystem::path &path() const = 0;
     virtual nlohmann::json information() const = 0;
+    // Optional default resource with explicit inference provenance.
+    virtual nlohmann::json outputSuggestion() const { return nullptr; }
     virtual std::span<const Id> events() const = 0;
     virtual SessionEvent event(Id id) const = 0;
     virtual nlohmann::json eventDetails(Id id) const = 0;

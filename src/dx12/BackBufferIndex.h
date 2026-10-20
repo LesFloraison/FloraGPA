@@ -3,6 +3,7 @@
 #include <map>
 
 namespace flora::dx12 {
+class SubmissionIndex;
 struct BackBufferRecipe {
     uint64_t swapchain{}, generation{}, queue{}, object{};
     // Serialized GetBuffer index: GPA restoration can rotate it relative to
@@ -17,5 +18,9 @@ class BackBufferIndex final {
   public:
     explicit BackBufferIndex(const StreamDirectory &, const CancelCheck &cancelled = {});
     const auto &buffers() const { return buffers_; }
+    // Conservative default resource suggestion, not proof of displayed pixels.
+    // Uses submitted transitions on the owning queue, never a live index.
+    nlohmann::json suggestFrameOutput(const StreamDirectory &, const SubmissionIndex &,
+                                     const CancelCheck &cancelled = {}) const;
 };
 }

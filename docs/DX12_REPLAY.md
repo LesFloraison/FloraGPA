@@ -8451,6 +8451,77 @@ the raw exports and their sidecars, `frame-history-ui-tests1.txt`,
 samples, automatic final-backbuffer selection, original-image fidelity and full
 portable acceptance remain unverified or unfinished.
 
+### Suggested final backbuffer from submitted presentation evidence
+
+Opening each sample now selects a suggested frame-end output resource in the
+existing workspace, with its inference evidence in the output tooltip and
+resource details. It does not start a GPU replay automatically. CLI full-stream
+`replay` without `--id` uses the same suggestion; explicit `--id` continues to
+override it. Analysis recapture with `--renderdoc` keeps its existing behavior
+and does not add an unsolicited texture readback. Reports and raw sidecars
+record the selection mode and evidence; `requested_resource` remains null
+when no explicit ID was supplied.
+
+The suggestion uses the unique backbuffer whose last submitted transition in
+the final successful non-test Present interval changes RT/COPY_DEST to PRESENT
+on the swapchain's own queue. It records the resource creation/object, source
+record, execution instance, recording generation, submission, queue and Present.
+Unsubmitted recordings do not participate; repeated submissions retain their
+own execution identities. This is a bounded, cancellable index scan over mapped
+record payloads, without reading/copying the resource-storage file.
+
+The result is explicitly **inferred**. It does not equate a live
+`GetCurrentBackBufferIndex` observation to a serialized GetBuffer index, certify
+displayed pixels or establish original-frame fidelity. Multiple candidates or
+presenting swapchains, unresolved recordings, cross-queue/split transitions,
+ambiguous buffer lifetimes, frame resizes and submissions after the final Present
+leave selection unavailable. Initialization resizes with one unambiguous final
+buffer generation are accepted: BF1's GetBuffer records follow one resize and
+Hellblade2's follow three. A null aliasing-barrier resource is scoped to
+placed/reserved resources, as specified by
+[Microsoft's aliasing-barrier documentation](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_aliasing_barrier);
+an explicit aliasing reference to a backbuffer still prevents the suggestion.
+Manual resource selection remains available.
+
+| Sample | Suggested creation | Transition source / execution | Submission | Final Present |
+| --- | --- | --- | --- | --- |
+| BF1 | 11395 | 391654 / 54186 | 392108 | 418061 |
+| Talos | 35118 | 192530 / 19410 | 192532 | 192535 |
+| Hellblade2 | 506294 | 613354 / 37104 | 613374 | 613510 |
+
+All three selections agree with earlier output-resource research. The targeted
+CPU/UI check opens the three directories, verifies the selected resource and
+frame-end boundary, and confirms that opening has not initiated GPU work.
+Minimal fixtures check a differing live index, unsubmitted trailing recordings,
+multiple candidates, foreign queues, repeated submissions, work after Present,
+high uint64 object identities and cancellation. The focused run passes **4**
+checks including setup/cleanup in **1,407 ms**.
+
+One additional BF1 GPU run exercises the newly added CLI default:
+
+```powershell
+FloraGPA.Cli.exe replay <BF1-directory> --max-bytes 8589934592 --debug-device --out <new-output>
+```
+
+Without `--id`, it reaches record **418061** and reads creation **11395** /
+object **2119326144**, yielding **1920×1009 RGBA8**, **7,749,120** bytes, SHA-256
+`0527714ad4ea57124f2b05dae3b93994be30f023e763511622183a5158a21480`.
+The native report has zero validation errors, `boundary=frame_end`,
+`output_selection.mode=suggested` and `frame_complete=false`. This verifies the
+new selection/readback path, not equality with the original GPA frame or prior
+variable BF1 replay outputs. Talos and Hellblade2 were not replayed for this
+selection change.
+
+Build **480** exposed a misplaced anonymous-namespace boundary and was fixed;
+builds **481–483** pass. The first two CPU checks respectively exposed an overly
+strict generation-one restriction and an overly broad null-alias rejection;
+the real initialization records and documented alias scope resolve both.
+Evidence: ignored `suggested-output-tests1.txt`–`suggested-output-tests3.txt`,
+`bf1-suggested-output1/{report.json,selection-evidence.json,output_storage.bin,output_storage.json}`,
+and the corresponding build logs. General presentation selection outside this
+conservative inference, complete frame fidelity and full portable acceptance
+remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -8458,6 +8529,7 @@ portable acceptance remain unverified or unfinished.
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
+| Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |
