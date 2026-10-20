@@ -10421,11 +10421,42 @@ do not establish split-barrier completion, overlapping heap ranges,
 observed content changes, or complete resource lifetimes/history.
 Enhanced barriers remain explicitly unavailable in this decoder.
 
+### Original allocation context for alias endpoints
+
+The workspace now enriches mapped alias endpoints with their original
+resource creation arguments. It first verifies the captured resource object
+against the exact creation record, rejecting mismatched markers and
+floating-point creation identities. A bounded 128-entry detail cache avoids
+retaining the full resource catalog. The history row displays placed-heap
+objects and offsets; exported details retain the descriptor and source API.
+Unmapped endpoints do not acquire inferred allocation metadata.
+
+For the preceding Hellblade2 alias, original record **585994** contains
+the same before/after resource objects as replay event **23645**. Creation
+**567419** is a **1920 × 1200** texture placed at offset **42,139,648**;
+creation **570577** is a **4-byte** buffer placed at offset **50,135,040**.
+Both creation calls name heap object **2144370999472**. These are captured
+placement arguments, not a measurement of allocation extents or proof that
+the heap object still denotes the same lifetime at execution.
+
+Inspection also reproduced an omission in original-call history enrichment:
+its explicit-resource filter dropped the same record's null-resource UAV
+barrier. The filter now preserves global UAV barriers and wildcard alias
+endpoints, with their scope stated in the table. The real-report check
+verifies both retained original barriers, placement values, alias creation
+navigation and rejection of incorrect identity mappings.
+
+Evidence: `hellblade-alias-allocation-history2.json`,
+`alias-allocation-history2.txt`, `build-alias-allocation-history3.log`.
+This check opens the original capture and the existing analysis report
+without running GPU replay. Allocation extent, overlap, alias lifetime and
+content preservation remain explicitly unverified.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
-| Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; completion, heap overlap and full lifetime/history remain unverified |
+| Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; completion, heap overlap and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |

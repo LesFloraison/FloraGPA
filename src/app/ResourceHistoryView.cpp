@@ -414,8 +414,11 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                               .arg(barrier.at("StateBefore").get<uint32_t>(), 0, 16)
                               .arg(barrier.at("StateAfter").get<uint32_t>(), 0, 16)
                               .arg(field(barrier, "Flags"));
+            else if (barrier.at("Type") == 1)
+                ranges << (barrier.value("ResourceBefore", "") == "0" || barrier.value("ResourceAfter", "") == "0"
+                    ? "Aliasing barrier (wildcard endpoint)" : "Aliasing barrier");
             else
-                ranges << (barrier.at("Type") == 1 ? "Aliasing barrier" : "UAV barrier");
+                ranges << (barrier.value("Resource", "") == "0" ? "UAV barrier (all UAV resources)" : "UAV barrier");
         }
         if (row.contains("replay_resource_barriers")) {
             const auto &details = row.at("replay_resource_barriers");
@@ -425,8 +428,13 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
             } else {
                 const auto endpoint = [&](const Json &ref) {
                     if (ref.at("rdc_id") == "ResourceId::0") return QString("any resource");
-                    return ref.value("mapping_status", "") == "capture_resource_marker"
+                    auto label = ref.value("mapping_status", "") == "capture_resource_marker"
                         ? "creation " + field(ref, "resource_creation") : field(ref, "rdc_id");
+                    const auto allocation = ref.value("captured_allocation", Json::object());
+                    if (allocation.value("kind", "") == "placed")
+                        label += QString(" (heap %1 + %2)")
+                            .arg(field(allocation, "heap_object"), field(allocation, "heap_offset"));
+                    return label;
                 };
                 for (const auto &barrier : details.at("barriers")) {
                     if (barrier.at("Type") == 0)

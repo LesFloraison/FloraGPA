@@ -5046,6 +5046,74 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         wrong = report; wrong["resource_history"][last]["source_record"] = "1";
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, enrichDx12ResourceHistory(*session, 570673, wrong));
     }
+    void capturedAliasAllocations() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto path = qEnvironmentVariable("FLORA_DX12_OVERRIDE_HISTORY");
+        if (root.isEmpty() || path.isEmpty()) QSKIP("Set Hellblade2 capture and counter barrier history report");
+        QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto original = nlohmann::json::parse(file.readAll().toStdString());
+        auto report = original;
+        const auto session = openReplaySession(std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        enrichDx12ResourceHistory(*session, 570577, report);
+        size_t aliases{}; int selected = -1;
+        for (size_t i = 0; i < report.at("resource_history").size(); ++i) {
+            const auto &row = report.at("resource_history")[i];
+            if (row.at("eventId") != 23645) continue;
+            selected = int(i);
+            QCOMPARE(row.at("source_record"), Json("585994"));
+            QCOMPARE(row.at("captured_resource_barriers").size(), size_t(2));
+            QCOMPARE(row.at("captured_resource_barriers")[0].at("Type"), Json(2));
+            QCOMPARE(row.at("captured_resource_barriers")[0].at("Resource"), Json("0"));
+            QCOMPARE(row.at("captured_resource_barriers")[1].at("ResourceBefore"), Json("2152463551120"));
+            QCOMPARE(row.at("captured_resource_barriers")[1].at("ResourceAfter"), Json("2149342527328"));
+            for (const auto &barrier : row.at("replay_resource_barriers").at("barriers")) {
+                if (barrier.at("Type") != 1) continue;
+                ++aliases;
+                const auto &before = barrier.at("resource_before").at("captured_allocation");
+                const auto &after = barrier.at("resource_after").at("captured_allocation");
+                QCOMPARE(before.at("source_record"), Json("567419"));
+                QCOMPARE(after.at("source_record"), Json("570577"));
+                QCOMPARE(before.at("source_api"), Json("ID3D12DeviceCreatePlacedResource"));
+                QCOMPARE(after.at("source_api"), Json("ID3D12DeviceCreatePlacedResource"));
+                QCOMPARE(before.at("heap_object"), Json("2144370999472"));
+                QCOMPARE(after.at("heap_object"), before.at("heap_object"));
+                QCOMPARE(before.at("heap_offset"), Json("42139648"));
+                QCOMPARE(after.at("heap_offset"), Json("50135040"));
+                QCOMPARE(before.at("resource_description").at("Dimension"), Json(3));
+                QCOMPARE(before.at("resource_description").at("Width"), Json("1920"));
+                QCOMPARE(after.at("resource_description").at("Dimension"), Json(1));
+                QCOMPARE(after.at("resource_description").at("Width"), Json("4"));
+                QCOMPARE(before.at("allocation_extent"), Json("not_observed"));
+                QCOMPARE(after.at("allocation_extent"), Json("not_observed"));
+            }
+        }
+        QCOMPARE(aliases, size_t(1)); QVERIFY(selected >= 0);
+        ResourceHistoryView view;
+        view.setContext("alias-allocations", 17074, 570577, 2149342527328ULL);
+        QVERIFY(view.finish(view.requestId(), report));
+        const auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        const auto item = rows->topLevelItem(selected);
+        QVERIFY(item->text(4).contains("UAV barrier (all UAV resources)"));
+        QVERIFY(item->text(4).contains("creation 567419 (heap 2144370999472 + 42139648)"));
+        QVERIFY(item->text(4).contains("creation 570577 (heap 2144370999472 + 50135040)"));
+        rows->setCurrentItem(item);
+        QSignalSpy record(&view, &ResourceHistoryView::recordRequested);
+        view.findChild<QAction *>("locateResourceHistoryAliasSource")->trigger();
+        QCOMPARE(record.size(), 1); QCOMPARE(record[0][0].toULongLong(), 567419ULL);
+        const auto output = qEnvironmentVariable("FLORA_DX12_ALIAS_EXPORT");
+        if (!output.isEmpty()) view.exportResult(output);
+        auto invalid = original;
+        auto &barriers = invalid["resource_history"][selected]["replay_resource_barriers"]["barriers"];
+        for (auto &barrier : barriers)
+            if (barrier.at("Type") == 1) barrier["resource_before"]["resource_object"] = "2149342527328";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, enrichDx12ResourceHistory(*session, 570577, invalid));
+        invalid = original;
+        for (auto &barrier : invalid["resource_history"][selected]["replay_resource_barriers"]["barriers"])
+            if (barrier.at("Type") == 1) barrier["resource_before"]["resource_creation"] = 567419.0;
+        QVERIFY_THROWS_EXCEPTION(nlohmann::json::type_error, enrichDx12ResourceHistory(*session, 570577, invalid));
+    }
     void resourceBarrierDetails() {
         QByteArray bytes;
         qword(bytes, 0x1234);

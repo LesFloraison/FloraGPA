@@ -578,7 +578,44 @@ void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohm
         throw std::runtime_error("Resource history does not match the captured lifetime");
     result["captured_creation"] = session.resourceDetails(creation);
     std::set<std::string> usedQueues;
+    std::map<Id, nlohmann::json> aliasAllocations;
+    const auto annotateAlias = [&](nlohmann::json &reference) {
+        reference.erase("captured_allocation");
+        if (reference.value("mapping_status", "") != "capture_resource_marker") return;
+        const auto text = reference.at("resource_creation").get<std::string>();
+        Id id{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), id);
+        if (!id || parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size())
+            throw std::runtime_error("Invalid alias resource creation identity");
+        if (reference.at("resource_object") != std::to_string(session.resource(id).capturedObject))
+            throw std::runtime_error("Alias resource marker does not match the captured creation");
+        if (!aliasAllocations.contains(id)) {
+            const auto details = session.resourceDetails(id);
+            const auto args = details.value("arguments", nlohmann::json::object());
+            nlohmann::json allocation{
+                {"source_record", std::to_string(id)}, {"source_api", details.at("name")},
+                {"resource_description", args.value("Description", nlohmann::json())},
+                {"allocation_extent", "not_observed"},
+                {"scope", "Original resource creation arguments. Heap object and offset do not establish "
+                          "heap lifetime, allocation extent, memory overlap or preserved contents."}};
+            if (details.at("name") == "ID3D12DeviceCreatePlacedResource")
+                allocation.update({{"kind", "placed"}, {"heap_object", args.at("Heap")},
+                                   {"heap_offset", args.at("HeapOffset")}});
+            else allocation["kind"] = "not_placed";
+            // Bound repeated detail decoding without retaining the entire resource catalog.
+            if (aliasAllocations.size() >= 128) aliasAllocations.erase(aliasAllocations.begin());
+            aliasAllocations.emplace(id, std::move(allocation));
+        }
+        reference["captured_allocation"] = aliasAllocations.at(id);
+    };
     for (auto &row : result.at("resource_history")) {
+        if (row.contains("replay_resource_barriers") &&
+            row.at("replay_resource_barriers").value("status", "") == "captured")
+            for (auto &barrier : row["replay_resource_barriers"]["barriers"])
+                if (barrier.at("Type") == 1) {
+                    annotateAlias(barrier.at("resource_before"));
+                    annotateAlias(barrier.at("resource_after"));
+                }
         if (!row.value("selectable", false)) continue;
         const auto text = row.at("execution").get<std::string>();
         uint64_t execution{};
@@ -597,7 +634,10 @@ void enrichDx12ResourceHistory(const IReplaySession &session, Id creation, nlohm
             if (call.contains("arguments") && call["arguments"].contains("Barriers"))
                 for (const auto &barrier : call["arguments"]["Barriers"])
                     if (barrier.value("Resource", "") == object || barrier.value("ResourceBefore", "") == object ||
-                        barrier.value("ResourceAfter", "") == object)
+                        barrier.value("ResourceAfter", "") == object ||
+                        (barrier.at("Type") == 2 && barrier.value("Resource", "") == "0") ||
+                        (barrier.at("Type") == 1 &&
+                         (barrier.value("ResourceBefore", "") == "0" || barrier.value("ResourceAfter", "") == "0")))
                         row["captured_resource_barriers"].push_back(barrier);
             if (!row["captured_resource_barriers"].empty()) row["subresource_status"] = "see_captured_resource_barriers";
         } else if (row.value("usage_name", "") == "Discard") {
