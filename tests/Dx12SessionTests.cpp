@@ -5114,6 +5114,48 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             if (barrier.at("Type") == 1) barrier["resource_before"]["resource_creation"] = 567419.0;
         QVERIFY_THROWS_EXCEPTION(nlohmann::json::type_error, enrichDx12ResourceHistory(*session, 570577, invalid));
     }
+    void nativeAliasPlacementRequirements() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_PLACEMENT_EXPORT");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set Hellblade2 capture and placement report output");
+        QVERIFY(!QFileInfo::exists(output));
+        dx12::StreamDirectory directory(std::filesystem::path(
+            (root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(directory, true);
+        dx12::NativeResources resources(device, directory, 1);
+        const auto before = resources.placement(567419), after = resources.placement(570577);
+        QCOMPARE(before.at("status"), Json("available")); QCOMPARE(after.at("status"), Json("available"));
+        QCOMPARE(before.at("resource_object"), Json("2152463551120"));
+        QCOMPARE(after.at("resource_object"), Json("2149342527328"));
+        QCOMPARE(before.at("heap_object"), Json("2144370999472"));
+        QCOMPARE(before.at("heap_creation"), after.at("heap_creation"));
+        QCOMPARE(before.at("heap_offset"), Json("42139648"));
+        QCOMPARE(after.at("heap_offset"), Json("50135040"));
+        const auto number = [](const Json &j, const char *key) { return std::stoull(j.at(key).get<std::string>()); };
+        const auto begin = (std::max)(number(before, "heap_offset"), number(after, "heap_offset"));
+        const auto end = (std::min)(number(before, "heap_range_end"), number(after, "heap_range_end"));
+        QVERIFY(end > begin);
+        QCOMPARE(end - begin, number(after, "allocation_size"));
+        QVERIFY(number(before, "allocation_size") >= 1920ULL * 1200 * 8);
+        QCOMPARE(resources.information().at("created_resources"), Json(0));
+        QCOMPARE(resources.information().at("created_heaps"), Json(0));
+        QCOMPARE(resources.information().at("allocation_bytes"), Json("0"));
+        const auto upload = resources.placement(102);
+        QCOMPARE(upload.at("status"), Json("not_placed"));
+        QVERIFY(!upload.contains("heap_creation")); QVERIFY(!upload.contains("allocation_size"));
+        // Reject CPU barrier records as allocation recipes, before querying their bytes as a descriptor.
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, resources.placement(585994));
+        const auto validation = device.information();
+        QCOMPARE(validation.at("validation_error_count"), Json("0"));
+        Json report{{"before", before}, {"after", after}, {"committed_upload", upload}, {"device", validation},
+            {"resources", resources.information()}, {"overlap_begin", std::to_string(begin)},
+            {"overlap_end", std::to_string(end)}, {"overlap_bytes", std::to_string(end - begin)},
+            {"gpu_commands_executed", false},
+            {"scope", "Overlap of current replay-device placement requirements in one captured heap creation; "
+                      "not original-adapter allocation sizes, active alias ownership or content preservation"}};
+        write(output, QByteArray::fromStdString(report.dump(2)));
+    }
     void resourceBarrierDetails() {
         QByteArray bytes;
         qword(bytes, 0x1234);

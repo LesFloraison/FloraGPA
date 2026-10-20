@@ -171,6 +171,36 @@ uint64_t NativeResources::creationRecord(uint64_t object, uint64_t atRecord) con
     return resolve(impl_->resourceRecords, object, atRecord, impl_->directory.initializationCount());
 }
 ResourceRecipe NativeResources::recipe(uint64_t object, uint64_t atRecord) const { return impl_->recipe(creationRecord(object, atRecord)); }
+nlohmann::json NativeResources::placement(uint64_t creation) const {
+    auto &s = *impl_; checkCancellation(s.cancelled);
+    require(creation && creation <= s.directory.packets().size(), "Invalid placement resource creation");
+    const auto recipe = s.recipe(creation);
+    require(SUCCEEDED(recipe.result) && recipe.object &&
+        creationRecord(recipe.object, creation) == creation, "Placement requires a successful resource creation");
+    nlohmann::json out{{"status", "not_placed"}, {"resource_creation", std::to_string(creation)},
+        {"resource_object", std::to_string(recipe.object)},
+        {"source", "replay_device_allocation_requirements"},
+        {"scope", "Captured placement and heap creation with requirements from the current replay device. "
+                  "This does not recover the original adapter's allocation size or establish active alias ownership, "
+                  "content preservation or synchronization."}};
+    if (recipe.kind != ResourceRecipe::Kind::Placed) return out;
+    const auto heapCreation = resolve(s.heapRecords, recipe.heap, creation, s.directory.initializationCount());
+    const auto heap = decodeHeapRecipe(s.directory.payload(s.directory.packets().at(size_t(heapCreation - 1))));
+    const auto allocation = s.device.device()->GetResourceAllocationInfo(0, 1, &recipe.description);
+    require(allocation.SizeInBytes && allocation.SizeInBytes != UINT64_MAX && allocation.Alignment,
+        "Replay device rejected the placed resource allocation description");
+    const bool fits = recipe.heapOffset % allocation.Alignment == 0 &&
+        recipe.heapOffset <= heap.description.SizeInBytes &&
+        allocation.SizeInBytes <= heap.description.SizeInBytes - recipe.heapOffset;
+    out.update({{"status", fits ? "available" : "incompatible"},
+        {"heap_object", std::to_string(recipe.heap)}, {"heap_creation", std::to_string(heapCreation)},
+        {"heap_size", std::to_string(heap.description.SizeInBytes)}, {"heap_offset", std::to_string(recipe.heapOffset)},
+        {"allocation_size", std::to_string(allocation.SizeInBytes)}, {"alignment", std::to_string(allocation.Alignment)},
+        {"allocation_api", "ID3D12Device::GetResourceAllocationInfo"},
+        {"heap_range_end", fits ? nlohmann::json(std::to_string(recipe.heapOffset + allocation.SizeInBytes)) : nlohmann::json()}});
+    if (!fits) out["reason"] = "Replay-device allocation does not fit the captured heap or offset alignment";
+    return out;
+}
 ID3D12Resource *NativeResources::resource(uint64_t object, uint64_t atRecord) {
     const auto creation = creationRecord(object, atRecord);
     if (impl_->isolatedQueries.contains(creation))

@@ -8,6 +8,7 @@
 #include "dx12/InitializationCopy.h"
 #include "dx12/PipelineRecipes.h"
 #include "dx12/NativeReplay.h"
+#include "dx12/NativeResources.h"
 #include "replay/RenderDocCapture.h"
 #include <QDir>
 #include <QSaveFile>
@@ -380,7 +381,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         allowed.insert({"event", "before", "id", "offset", "length", "max-bytes", "debug-device", "experiment", "disable", "no-buffer-csv"});
     if (command == "replay" || command == "buffer") allowed.insert({"uav-barrier-before", "isolate-missing-queries"});
     if (command == "validate-frame") {
-        allowed.insert({"check-device", "check-copy", "check-pipeline", "check-initialization"});
+        allowed.insert({"check-device", "check-copy", "check-pipeline", "check-placement", "check-initialization"});
+        if (options.isSet("check-placement")) allowed.insert("debug-device");
         if (options.isSet("check-copy") || options.isSet("check-initialization")) allowed.insert("max-bytes");
         if (options.isSet("check-initialization")) {
             allowed.insert({"id", "offset", "length", "verify-texture-copy", "check-execution", "texture-object", "subresource", "before", "debug-device"});
@@ -391,7 +393,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         if (!allowed.contains(option))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
-    if (int(options.isSet("check-copy")) + int(options.isSet("check-pipeline")) + int(options.isSet("check-initialization")) > 1)
+    if (int(options.isSet("check-copy")) + int(options.isSet("check-pipeline")) +
+        int(options.isSet("check-placement")) + int(options.isSet("check-initialization")) > 1)
         throw std::runtime_error("Choose one targeted initialization check per invocation");
     const QDir output(options.value("out"));
     if (output.exists() && !output.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System).empty())
@@ -410,7 +413,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     auto report = session->information();
     report["status"] = command == "validate-frame" ? "blocked" : "indexed";
     report["note"] = "Stream indexing does not establish native replay support";
-    if (options.isSet("check-device") || options.isSet("check-copy") || options.isSet("check-pipeline") || options.isSet("check-initialization")) {
+    if (options.isSet("check-device") || options.isSet("check-copy") || options.isSet("check-pipeline") ||
+        options.isSet("check-placement") || options.isSet("check-initialization")) {
         try {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             std::optional<dx12::InitializationCopy> copy;
@@ -434,6 +438,21 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
             dx12::NativeDevice device(directory, options.isSet("debug-device"));
             report["device"] = device.information();
+            if (options.isSet("check-placement")) {
+                bool valid{}; const auto record = options.value("check-placement").toULongLong(&valid);
+                if (!valid || !record) throw std::runtime_error("Invalid placement creation record");
+                dx12::NativeResources resources(device, directory, 1);
+                try {
+                    report["placement"] = resources.placement(record);
+                } catch (const std::exception &error) {
+                    report["placement"] = {{"status", "failed"}, {"reason", error.what()}};
+                }
+                report["placement_query"] = {{"gpu_commands_executed", false},
+                    {"resources", resources.information()}};
+                report["device"] = device.information();
+                report["loaded_modules"] = processModules();
+                report["loaded_modules_scope"] = "Snapshot while the placement-query device is alive; not a lifetime DLL-load trace";
+            }
             if (copy) report["initialization_copy"] = dx12::executeInitializationCopy(device, *copy);
             if (pipelineRecord) {
                 dx12::NativePipelines pipelines(device, directory); pipelines.create(*pipelineRecord);
@@ -500,7 +519,9 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 report["device"] = device.information();
             }
         } catch (const std::exception &e) {
-            report[options.isSet("check-initialization") ? "initialization" : options.isSet("check-copy") ? "initialization_copy" : options.isSet("check-pipeline") ? "pipeline" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
+            report[options.isSet("check-initialization") ? "initialization" : options.isSet("check-copy") ? "initialization_copy" :
+                options.isSet("check-pipeline") ? "pipeline" : options.isSet("check-placement") ? "placement" : "device"] =
+                {{"status", "failed"}, {"reason", e.what()}};
         }
     }
     if (command == "commands") {

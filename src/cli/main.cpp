@@ -115,6 +115,7 @@ int main(int argc, char **argv) {
     p.addOption({"check-device", "Check DX12 device/SDK initialization during validate-frame (does not validate replay)"});
     p.addOption({"check-copy", "Check one DX12 initialization CopyBufferRegion and compare GPU readback (validate-frame only)", "record"});
     p.addOption({"check-pipeline", "Recreate a captured DX12 pipeline and its root signature (validate-frame only)", "record"});
+    p.addOption({"check-placement", "Query one DX12 placed resource's heap and replay-device allocation requirements without replay (validate-frame only)", "record"});
     p.addOption({"check-initialization", "Execute captured DX12 initialization transfers (validate-frame only); optional --id/--length inspect a buffer"});
     p.addOption({"verify-texture-copy", "Compare an initialized DX12 texture subresource against its captured full-subresource upload", "record"});
     p.addOption({"check-execution", "Execute DX12 commands to an execution instance after initialization (validate-frame)", "execution"});
@@ -225,6 +226,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--check-copy requires DX12 validate-frame");
         if (p.isSet("check-pipeline") && command != "validate-frame")
             throw std::runtime_error("--check-pipeline requires DX12 validate-frame");
+        if (p.isSet("check-placement") && command != "validate-frame")
+            throw std::runtime_error("--check-placement requires DX12 validate-frame");
         if (p.isSet("check-initialization") && command != "validate-frame")
             throw std::runtime_error("--check-initialization requires DX12 validate-frame");
         if ((p.isSet("check-execution") || p.isSet("texture-object")) && command != "validate-frame")

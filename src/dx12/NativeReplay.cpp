@@ -1401,6 +1401,7 @@ json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t le
         require(s.device.information().value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported buffer readback errors");
         if (!output.empty()) require(file.commit(), "Cannot publish buffer output");
         return json{{"creation_record", std::to_string(creation)}, {"object", std::to_string(recipe.object)}, {"offset", std::to_string(offset)},
+            {"placement", s.resources.placement(creation)},
             {"length", std::to_string(length)}, {"sha256", digest.result().toHex().toStdString()}, {"preview_hex", preview},
             {"source", "native_gpu_readback"}, {"boundary", s.boundaryReached ? (s.boundaryAfter ? "after_event" : "before_event") : "after_initialization_submissions"},
             {"execution", s.boundaryReached ? json(std::to_string(s.selectedExecution)) : json(nullptr)}, {"frame_replayed", false}};
@@ -1603,6 +1604,7 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
     D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); require(file.commit(), "Cannot publish frame texture output");
     const UINT arrays=desc.Dimension==D3D12_RESOURCE_DIMENSION_TEXTURE3D ? 1 : desc.DepthOrArraySize;
     return {{"object", std::to_string(object)}, {"creation_record", std::to_string(s.resources.creationRecord(object, s.currentRecord))}, {"subresource", subresource},
+        {"placement", s.resources.placement(s.resources.creationRecord(object, s.currentRecord))},
         {"mip",subresource%desc.MipLevels},{"layer",(subresource/desc.MipLevels)%arrays},
         {"plane",subresource/(UINT(desc.MipLevels)*arrays)},{"samples",desc.SampleDesc.Count},{"dimension",int(desc.Dimension)},
         {"width", footprint.Footprint.Width}, {"height", footprint.Footprint.Height}, {"depth", footprint.Footprint.Depth}, {"format", UINT(footprint.Footprint.Format)},

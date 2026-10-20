@@ -10452,11 +10452,70 @@ This check opens the original capture and the existing analysis report
 without running GPU replay. Allocation extent, overlap, alias lifetime and
 content preservation remain explicitly unverified.
 
+### Replay-device placement requirements
+
+Native buffer/texture readback reports now include placement metadata.
+The same query is available independently through:
+
+```text
+FloraGPA.Cli validate-frame <capture-directory> --check-placement <creation-record> --debug-device --out <new-directory>
+```
+
+It resolves the heap at the resource's creation record, including the
+existing unique forward-reference rule for initialization data, and queries
+the current device for allocation size/alignment. It reports the exact
+heap creation, offset, size and exclusive range end as decimal strings.
+An incompatible offset/range is marked `incompatible`; non-placed resources
+return `not_placed` without invented heap metadata. Querying a CPU barrier
+record as a resource fails explicitly. The command retains `validate-frame`'s
+exit code **2** and top-level `blocked` status: a successful placement query
+does not validate a frame.
+
+The focused Hellblade2 check uses SDK **616** on the **NVIDIA GeForce RTX
+5090 Laptop GPU**, UMD file version **32.0.16.1742**. Both alias endpoints
+resolve to heap creation **530246**, size **134,217,728 bytes**:
+
+| Resource creation | Heap offset | Device allocation size | Exclusive range end |
+| --- | --- | --- | --- |
+| 567419 | 42,139,648 | 19,660,800 | 61,800,448 |
+| 570577 | 50,135,040 | 65,536 | 50,200,576 |
+
+Both require **65,536-byte** alignment. The buffer's complete required range
+falls within the texture's required range, giving **65,536 bytes** of overlap.
+The texture size is obtained from the device rather than inferred from its
+1920 × 1200 pixel dimensions. These requirements are specific to the replay
+adapter/driver, as documented by
+[GetResourceAllocationInfo](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-getresourceallocationinfo%28uint_uint_constd3d12_resource_desc%29);
+they are not recovered original-adapter allocation sizes.
+
+The query creates no resources or heaps, allocates **0 bytes** through
+`NativeResources`, submits no GPU commands and reports **0 validation
+errors**. The CLI module snapshot contains **77 modules**, with no GPA or
+Python runtime. The native check also verifies the committed upload case
+and rejects a barrier record. Readback metadata integration is compiled;
+this milestone does not add another frame replay to validate that additive
+report field.
+
+A separate CPU audit finds **61 distinct heap objects from 61 creation
+records** and no captured Heap Release records in this sample. Thus it
+cannot validate heap-pointer reuse. A placed resource retains a heap
+reference according to [CreateHeap](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createheap);
+an assumed live-resource/heap-reuse scenario was not treated as a reproduced
+replay bug. Heap retirement, active alias ownership, synchronization and
+content preservation still require their own evidence.
+
+Evidence: `hellblade-alias-placement1.json`, `native-alias-placement1.txt`,
+`hellblade-placement-cli1/validation.json`,
+`hellblade-placement-rejection1/validation.json`,
+`hellblade-heap-lifetime-index1.json`, `placement-driver1.json`,
+`build-native-placement1.log`, `build-native-placement2.log` and
+`build-native-placement-cli3.log`.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
-| Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; completion, heap overlap and full lifetime/history remain unverified |
+| Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |
 | Open/index in shared workspace | Passed | Passed | Passed |
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
