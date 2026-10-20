@@ -4,6 +4,8 @@
 // x, y, new report.json, [--readback] [--repeat-only] [--between-event event] resource creation records...
 // Two forced selections in one controller; only if both agree, query history
 // on the first resource. This is bounded fault diagnosis, not a soak test.
+// Textures inspect mip/layer/sample 0. Buffers require --readback and are
+// bounded to 32 MiB; a first buffer never triggers PixelHistory.
 #define NOMINMAX
 #include <Windows.h>
 #include <bcrypt.h>
@@ -86,6 +88,7 @@ int wmain(int argc, wchar_t **argv) try {
     const auto event = number(argv[4]), x = number(argv[5]), y = number(argv[6]);
     const auto resources = controller->GetResources();
     const auto textures = controller->GetTextures();
+    const auto buffers = controller->GetBuffers();
     bool readback = false, repeatOnly = false;
     uint32_t betweenEvent{};
     int firstCreation = 8;
@@ -106,6 +109,7 @@ int wmain(int argc, wchar_t **argv) try {
     if (argc <= firstCreation || argc - firstCreation > 8)
         throw std::runtime_error("Select one to eight resources");
     std::vector<ResourceId> selected;
+    std::vector<uint64_t> bufferLengths;
     Json descriptions = Json::array();
     for (int i = firstCreation; i < argc; ++i) {
         const auto creation = utf8(argv[i]);
@@ -121,29 +125,46 @@ int wmain(int argc, wchar_t **argv) try {
         }
         if (found == ResourceId::Null()) throw std::runtime_error("Missing resource lifetime");
         bool valid = false;
+        uint64_t bufferLength{};
         for (const auto &texture : textures)
             if (texture.resourceId == found) {
                 valid = texture.dimension == 2 && x < texture.width && y < texture.height && texture.msSamp <= 1 &&
                     (!readback || (texture.byteSize && texture.byteSize <= 32ULL * 1024 * 1024));
-                descriptions.back().update({{"width", texture.width}, {"height", texture.height},
+                descriptions.back().update({{"kind", "texture"}, {"width", texture.width}, {"height", texture.height},
+                    {"array_size", texture.arraysize}, {"mips", texture.mips}, {"samples", texture.msSamp},
+                    {"selected_subresource", {{"mip", 0}, {"layer", 0}, {"sample", 0}}},
                     {"format_type", uint32_t(texture.format.type)}, {"component_count", texture.format.compCount},
                     {"component_bytes", texture.format.compByteWidth}});
             }
-        if (!valid) throw std::runtime_error("Expected in-bounds single-sample 2D texture");
+        for (const auto &buffer : buffers)
+            if (buffer.resourceId == found) {
+                bufferLength = buffer.length;
+                valid = readback && bufferLength && bufferLength <= 32ULL * 1024 * 1024;
+                descriptions.back().update({{"kind", "buffer"}, {"byte_offset", "0"},
+                    {"byte_length", std::to_string(bufferLength)}});
+            }
+        if (!valid) throw std::runtime_error("Expected in-bounds single-sample 2D texture or bounded buffer with --readback");
         selected.push_back(found);
+        bufferLengths.push_back(bufferLength);
     }
     Json readbackFiles = Json::array();
     auto observe = [&](const char *phase) {
         Json values = Json::array();
         for (size_t i = 0; i < selected.size(); ++i) {
             const auto resource = selected[i];
-            const auto value = controller->PickPixel(resource, x, y, Subresource(0, 0, 0), CompType::Typeless);
-            values.push_back({{"float", {value.floatValue[0], value.floatValue[1], value.floatValue[2], value.floatValue[3]}},
-                {"bits", {value.uintValue[0], value.uintValue[1], value.uintValue[2], value.uintValue[3]}}});
+            values.push_back(Json::object());
+            if (!bufferLengths[i]) {
+                const auto value = controller->PickPixel(resource, x, y, Subresource(0, 0, 0), CompType::Typeless);
+                values.back().update({{"float", {value.floatValue[0], value.floatValue[1], value.floatValue[2], value.floatValue[3]}},
+                    {"bits", {value.uintValue[0], value.uintValue[1], value.uintValue[2], value.uintValue[3]}}});
+            }
             if (readback) {
-                const auto bytes = controller->GetTextureData(resource, Subresource(0, 0, 0));
+                const auto bytes = bufferLengths[i] ? controller->GetBufferData(resource, 0, bufferLengths[i])
+                    : controller->GetTextureData(resource, Subresource(0, 0, 0));
                 if (bytes.empty() || bytes.size() > 32ULL * 1024 * 1024)
-                    throw std::runtime_error("Unexpected bounded texture readback");
+                    throw std::runtime_error("Unexpected bounded resource readback");
+                if (bufferLengths[i] && bytes.size() != bufferLengths[i])
+                    throw std::runtime_error("Incomplete bounded buffer readback");
                 unsigned char hash[32]{};
                 if (BCryptHash(BCRYPT_SHA256_ALG_HANDLE, nullptr, 0, const_cast<PUCHAR>(bytes.data()),
                                ULONG(bytes.size()), hash, sizeof(hash)) < 0)
@@ -198,7 +219,7 @@ int wmain(int argc, wchar_t **argv) try {
     report["repeat_equal"] = report["first"] == report["second"];
     // An explicit round trip tests restoration only; do not add unrelated
     // PixelHistory work at an initialization boundary.
-    if (report["repeat_equal"] == true && !betweenEvent && !repeatOnly) {
+    if (report["repeat_equal"] == true && !betweenEvent && !repeatOnly && !bufferLengths.front()) {
         report["history_requested"] = true;
         const auto modifications = controller->PixelHistory(selected.front(), x, y, Subresource(0, 0, 0), CompType::Typeless);
         report["history_events"] = modifications.size();

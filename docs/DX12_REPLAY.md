@@ -9185,6 +9185,96 @@ modules, and `history_requested: false`. Python/numpy was used only for
 offline evidence comparison. Original-frame fidelity and full feature
 acceptance remain unfinished.
 
+### Separate adaptive probe permutation from changing radiance
+
+The bounded manual fixture now also reads buffers (requires `--readback`,
+maximum **32 MiB**, exact returned length checked). Buffer observations contain
+raw byte counts/digests, never fabricated pixel values; a first buffer cannot
+trigger PixelHistory. Texture metadata now records array size, mip count,
+samples and the inspected **mip 0 / layer 0 / sample 0** explicitly.
+The final fixture compiles in `build-repeat-selection9.log`; its mixed
+texture/buffer path is exercised below. No application build or default replay
+policy changes; application build remains **492**.
+
+At **32943 / 604899 / 78554**, `ScreenProbeIntegrateCS` (PSO **512761**) uses
+an indexed indirect dispatch of **471×1×1**, threads **8×8×1**. Indexed indirect
+counts are not asserted to remain identical on subsequent replays.
+The original exported **52,788 B** bytecode matches the bound shader SHA-256
+`4c0e1e2059e56edf4352d4b77225ffbb89b2b7a109f7379bfd17149e7b5cae36`.
+Two selections show changing output light textures, probe radiance and probe
+depth, but stable per-tile adaptive probe counts. Probe-depth storage differs
+only in rows **26–38**, and its complete uint32 multiset remains identical.
+
+To distinguish renumbering from incorrect data, a second paired readback
+includes **AdaptiveScreenProbeData 570505** (3,120 B), **IntegrateTileData
+573211** (432,000 B), probe depth **510833**, tile headers **548563**, indices
+**568997**, and ambient/directional coefficients **504171/540083**.
+The inspected integration shader and **512 B** of bound constants at buffer
+**537415 + 3,232,000** establish:
+
+- Downsample factor **32**, probe view **60×26**, atlas view **60×39**, atlas
+  allocation **60×57**, **1,560** uniform probes and capacity for **780**
+  adaptive probes.
+- For tile `(x,y)` and local index `j`, the shader loads the adaptive ID at
+  `(x + 60*(j%32), y + 26*(j/32))`. The packed data word stores screen X in
+  the low 16 bits and Y in the high 16 bits. Atlas index is `1560 + adaptiveID`.
+- The stable header counts sum to **732**. All 732 active IDs are referenced
+  exactly once, and both phases contain the same **732 unique screen positions**.
+  Every tile retains the same position set; **7** tiles change their local order
+  (**25** changed coordinate slots).
+- Reindexing by screen position makes **all active adaptive depths bit-exact**;
+  uniform depths are already exact. The unused **48** capacity entries are
+  excluded from semantic comparison. Their raw changes do not prove an access
+  or a faulty resource restore.
+- This is not the whole explanation: after reindexing, ambient coefficients
+  still differ at **45 uniform** and **172 adaptive** probes in this pair.
+  Entire unused `IntegrateTileData` storage is likewise not treated as evidence
+  that its active tile set or indirect argument count changed.
+
+The placement pipeline **30557 / 604290 / 70891** binds
+`ScreenProbeAdaptivePlacementCS`, PSO **514269**. Its original exported
+**43,984 B** bytecode matches SHA-256
+`70a183bb606d40d5406dddc2c38a747536c465db76ce56f1ec74c89a150c821a`.
+DXIL `%1061` atomically increments `RWNumAdaptiveScreenProbes` and uses the
+returned value as `SharedAdaptiveProbeBaseIndex`; `%1116` atomically increments
+the tile header to choose the local index slot. These original shader operations
+and the paired identity mapping account for the observed numbering/order
+variation. They do not establish equivalence of Flora's final output to GPA.
+
+The remaining ambient variation is already present upstream of conversion:
+**32895 / 604839 / 78402**, `ScreenProbeConvertToIrradianceCS`, PSO **513515**,
+reads radiance **551682** and writes **504171/540083**. Original **8,908 B**
+bytecode matches SHA-256
+`ef54813fef30bdff0fbb4bc6567c58ef68e120eec213e2fd65fe0770cf56ffcc`.
+Its DXIL loads one **8×8** radiance block per probe; the matching **312 B**
+constant read at **537415 + 3,229,440** verifies resolution 8 and the same atlas
+dimensions/counts. A paired readback also measures counter **534993** as **732**
+in both phases. After aligning active probes by screen position:
+
+| Quantity | Uniform probes | Adaptive probes |
+| --- | --- | --- |
+| Radiance blocks with differing storage | 832 | 428 |
+| Ambient coefficients with differing storage | 73 | 178 |
+
+Across the **2,292 active probes**, **3,673** radiance texels differ. **Zero**
+probes have unchanged complete radiance blocks but changed ambient coefficients.
+This bounds the remaining investigation to earlier radiance computation;
+resource **551682** has its sole indexed UAV-use candidate at
+**32888 / 604830 / 78379**. No conversion-arithmetic or replay-restoration fix,
+acceptable output tolerance, or original-GPA repeatability claim follows.
+
+Ignored evidence: `hellblade-integrate32943-pipeline1`,
+`hellblade-adaptive30557-pipeline1`, `hellblade-ambient32895-pipeline1`,
+`hellblade-{integrate,adaptive,irradiance}-shader1`,
+`hellblade-{integrate,irradiance}-constants1`, the three
+`hellblade-{integrate,adaptive,irradiance}-repeat1.json` reports/raw readbacks,
+`hellblade-adaptive-remap1.json`, `hellblade-irradiance-remap1.json`,
+`hellblade-{probe-ambient,adaptive-data,probe-radiance}-history1`, and
+`hellblade-adaptive-evidence-verification1.json`. The latter verifies all
+**48** bounded readback files' lengths/SHA-256, no PixelHistory calls, and no
+GPA/Python modules in the three native probe processes. Offline Python/numpy
+comparison is research only. Full replay/debug acceptance remains unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
