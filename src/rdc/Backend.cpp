@@ -504,8 +504,10 @@ struct Events {
     std::map<uint32_t, const SDObject *> chunks;
     std::set<uint32_t> actions;
     std::map<uint32_t, const ActionDescription *> actionDetails;
+    std::map<uint32_t, uint32_t> indirectCalls;
     size_t visited{};
-    Json walk(const rdcarray<ActionDescription> &nodes, const SDFile &file, unsigned depth = 0) {
+    Json walk(const rdcarray<ActionDescription> &nodes, const SDFile &file, unsigned depth = 0,
+              uint32_t enclosingIndirectCall = 0) {
         if (depth > 128)
             throw std::runtime_error("RenderDoc action tree is too deep");
         Json roots = Json::array();
@@ -515,6 +517,7 @@ struct Events {
             actions.insert(node.eventId);
             actionDetails.emplace(node.eventId, &node);
             Json events = Json::array();
+            auto indirectCall = enclosingIndirectCall;
             for (const auto &event : node.events) {
                 events.push_back({{"eventId", event.eventId}});
                 if (event.chunkIndex >= file.chunks.size())
@@ -524,7 +527,12 @@ struct Events {
                     continue;
                 native[std::to_string(event.eventId)] = {{"name", text(chunk->name)}};
                 chunks[event.eventId] = chunk;
+                if (text(chunk->name) == "ID3D12GraphicsCommandList::ExecuteIndirect")
+                    indirectCall = event.eventId;
             }
+            if (indirectCall && (node.flags & ActionFlags::Indirect) &&
+                (node.flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
+                indirectCalls[node.eventId] = indirectCall;
             roots.push_back(
                 {{"eventId", node.eventId},
                  {"customName", text(node.customName)},
@@ -538,7 +546,7 @@ struct Events {
                   {node.dispatchThreadsDimension[0], node.dispatchThreadsDimension[1],
                    node.dispatchThreadsDimension[2]}},
                  {"events", events},
-                 {"children", walk(node.children, file, depth + 1)}});
+                 {"children", walk(node.children, file, depth + 1, indirectCall)}});
         }
         return roots;
     }
@@ -672,13 +680,35 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
         {"scope", "Argument buffer after selected-event replay. This observes buffer contents, not the arguments consumed by the GPU; subsequent analysis may replay the prefix again."}};
     try {
         const SDObject *call{};
-        for (const auto &eid : provenance.at("api_event_ids")) {
-            const auto found = events.chunks.find(eid.get<uint32_t>());
-            if (found != events.chunks.end() && text(found->second->name).find("ExecuteIndirect") != std::string::npos) {
-                call = found->second; break;
+        uint32_t callEvent{};
+        const bool mapped = provenance.contains("api_event_ids");
+        if (mapped) {
+            for (const auto &eid : provenance.at("api_event_ids")) {
+                const auto found = events.chunks.find(eid.get<uint32_t>());
+                if (found != events.chunks.end() &&
+                    text(found->second->name) == "ID3D12GraphicsCommandList::ExecuteIndirect") {
+                    // RenderDoc's closing event can reference the same
+                    // serialized call as its parent event.
+                    if (call && call != found->second)
+                        throw std::runtime_error("Ambiguous ExecuteIndirect API mapping");
+                    if (!call) { call = found->second; callEvent = found->first; }
+                }
             }
+        } else if (const auto parent = events.indirectCalls.find(action.eventId);
+                   parent != events.indirectCalls.end()) {
+            const auto found = events.chunks.find(parent->second);
+            if (found != events.chunks.end()) { call = found->second; callEvent = found->first; }
         }
-        if (!call) throw std::runtime_error("Original ExecuteIndirect API chunk is unavailable");
+        if (!call) throw std::runtime_error("Containing ExecuteIndirect API chunk is unavailable");
+        if (const auto parent = events.indirectCalls.find(action.eventId);
+            parent != events.indirectCalls.end() && parent->second != callEvent) {
+            const auto containing = events.chunks.find(parent->second);
+            if (containing == events.chunks.end() || containing->second != call)
+                throw std::runtime_error("Indirect API mapping differs from the containing call");
+            callEvent = parent->second;
+        }
+        result["api_event_id"] = callEvent;
+        result["identity_scope"] = mapped ? "mapped_flora_execution" : "capture_local_renderdoc";
         const auto signature = field(*call, "pCommandSignature");
         const auto argument = field(*call, "pArgumentBuffer");
         const auto offset = field(*call, "ArgumentBufferOffset");
@@ -709,13 +739,18 @@ Json indirectDispatchInputs(IReplayController &controller, const Events &events,
         // synthetic subcommand recorded by RenderDoc before reading its bytes.
         auto selectedProvenance = provenance;
         selectedProvenance["eid"] = action.eventId;
-        const auto ordinal = flora::indirectActionOrdinal(selectedProvenance);
         const auto subcommand = events.chunks.find(action.eventId);
-        if (ordinal < 0 || subcommand == events.chunks.end() ||
-            field(*subcommand->second, "CommandIndex") != uint64_t(ordinal) ||
+        if (subcommand == events.chunks.end() ||
             field(*subcommand->second, "ArgumentIndex") != 0)
-            throw std::runtime_error("Indirect command index differs from its execution mapping");
-        const auto commandIndex = uint64_t(ordinal);
+            throw std::runtime_error("Selected indirect dispatch subcommand is unavailable");
+        const auto commandIndex = field(*subcommand->second, "CommandIndex");
+        if (field(child(*subcommand->second, "ArgumentSignature"), "Type") != 2)
+            throw std::runtime_error("Selected indirect subcommand is not a dispatch");
+        if (mapped) {
+            const auto ordinal = flora::indirectActionOrdinal(selectedProvenance);
+            if (ordinal < 0 || commandIndex != uint64_t(ordinal))
+                throw std::runtime_error("Indirect command index differs from its execution mapping");
+        }
         if (stride < 12 || stride % 4 || offset % 4 || commandIndex >= maximum ||
             commandIndex > (UINT64_MAX - offset) / stride)
             throw std::runtime_error("Invalid indirect argument range");

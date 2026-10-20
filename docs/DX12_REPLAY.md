@@ -9824,6 +9824,84 @@ Evidence: `gpa-cache-allocation-{before1,after1}.json` and their raw files,
 `upload-watch-native-repeat1.json`. Python/numpy remains research-only;
 the new probe module inventories contain neither GPA nor Python.
 
+### Inspect unmarked indirect calls and verify cache-border writes
+
+Selecting the original-capture border dispatch exposed an analysis defect:
+pipeline inspection succeeded, but the indirect argument snapshot returned
+a JSON missing-field error because it required Flora's `api_event_ids`.
+The backend now records each generated indirect action's containing
+`ExecuteIndirect` from the RenderDoc action tree. Unmarked captures use that
+capture-local context and the structured subcommand's `CommandIndex`,
+`ArgumentIndex` and signature. They retain **null execution** and unmapped
+resource identities. Mapped Flora executions still validate their recorded
+ordinal against the structured command.
+
+This is containment-based lookup, not selection of the closest preceding
+Draw or API call. The signature must still contain exactly one Dispatch
+argument; stride, offsets, count and buffer bounds remain checked. The
+report adds `api_event_id` and `identity_scope`. A closing event can refer
+to the exact same serialized API chunk as its parent; that duplicate is
+accepted, while different mapped chunks remain ambiguous.
+
+Targeted validation:
+
+- Original **RDC 543313** resolves to containing API **543312**, command
+  signature **319**, argument buffer **12979**, byte offset **0**, stride
+  **12**, maximum/effective count **1**. Its pipeline snapshot reads
+  **(3,3,107)** against indexed **(3,3,111)** and correctly reports
+  `identity_scope: capture_local_renderdoc`, null execution and an unmapped
+  buffer. These numbers are post-selection observations, not GPU-consumed
+  argument telemetry.
+- The small existing two-command fixture selects native execution **1**,
+  indirect action **1**, RDC **9**. It resolves containing API **7**, reads
+  byte offset **44** and **(2,1,1)**, and retains
+  `identity_scope: mapped_flora_execution`. Its first test exposed the
+  duplicate closing-event regression; the corrected test passes.
+
+The original border pipeline binds `FixupBordersAndGenerateMipsCS`,
+**5,860 bytes**, SHA-256
+`d57fdb753b2c4a0f4ab57f2ec9254ae156b4b78bde5b0e4821b4cb0c3f961b85`,
+matching the native shader. Root constants are buffer **463** at offset
+**1,147,136**; task data **14321**, source atlas **13851** and destination
+atlas **12538** are original-capture RenderDoc IDs.
+
+`check-cache-border-copy.py` verifies the pinned shader, binding identities,
+argument layout, atlas dimensions/format and every selected packed texel.
+It transcribes the shader's four ordered integer reflection branches for
+the **18 x 18** destination block into its **16 x 16** source block. It uses
+each observation's own post-event argument count and task prefix, not a
+stale indexed Z count. Non-finite packed inputs require separate analysis
+and are rejected by this checker.
+
+| Capture / selection | Observed groups | Selected tasks | Exact texels checked |
+|---|---|---:|---:|
+| Original, first | 3 x 3 x 102 | 102 | 33,048 |
+| Original, second | 3 x 3 x 117 | 117 | 37,908 |
+| Prior native, first | 3 x 3 x 114 | 114 | 36,936 |
+| Prior native, second | 3 x 3 x 109 | 109 | 35,316 |
+
+All selected texels match exactly. A changed selected output texel with a
+recomputed valid digest, and a mixed resource-identity namespace, are both
+rejected. Whole unselected atlas storage is not accepted by this check.
+
+Offline grid-cell alignment of the existing readbacks locates residual
+differences before this shader. Between the two original selections, **57**
+cells are selected by both: **16** source blocks / **102** source texels
+differ, propagated into the same **16** destination blocks / **127** texels.
+Between the first original and first native selections, **61** cells are
+common: **18** source blocks / **85** texels differ, propagated into **18**
+destination blocks / **108** texels. These are exact comparisons on the
+intersection of the observed selected sets; neither omitted cells nor
+whole-frame fidelity is accepted. The source-radiance producer remains the
+next unresolved comparison.
+
+Evidence: `gpa-cache-border-pipeline{1,2}`, `native-indirect-context{1,2}`,
+`gpa-cache-border-repeat1.json`, `gpa-cache-border-check1.json`,
+`native-cache-border-check2.json`, `gpa-native-cache-border-comparison1.json`
+and `cache-border-rejections1/result.json`. The final backend build and the
+focused mapped/unmapped requests succeed; all GPU work was serial and no
+new original-player capture was made.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
