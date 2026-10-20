@@ -811,9 +811,13 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
     const auto kind = job.at("action").get<std::string>();
     const auto *selected = findAction(controller.GetRootActions(), eid);
     const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
-    if (!selected || !(selected->flags & (compute ? ActionFlags::Dispatch : ActionFlags::Drawcall)))
+    const bool meshDispatch = selected && (selected->flags & ActionFlags::MeshDispatch);
+    if (!selected || (compute ? !(selected->flags & ActionFlags::Dispatch) || meshDispatch
+                      : vertex ? !(selected->flags & ActionFlags::Drawcall) || meshDispatch
+                               : !(selected->flags & (ActionFlags::Drawcall | ActionFlags::MeshDispatch))))
         throw std::runtime_error(compute ? "Compute debugging requires an executed dispatch action"
-                                         : "Selected analysis requires an executed draw action");
+                                 : vertex ? "Vertex debugging requires an executed vertex Draw"
+                                          : "Pixel debugging requires an executed Draw or Mesh Dispatch");
     const bool dx12 = controller.GetAPIProperties().pipelineType == GraphicsAPI::D3D12;
     const auto *pipe = dx12 ? nullptr : controller.GetD3D11PipelineState();
     const auto *pipe12 = dx12 ? controller.GetD3D12PipelineState() : nullptr;
@@ -893,13 +897,14 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
         CompType cast;
     };
     std::optional<ReferenceSelection> referenceSelection;
-    if (dx12 && compute && !job.value("resource", Json()).is_null()) {
+    const bool explicitTextureReference = dx12 && !vertex && !job.value("resource", Json()).is_null();
+    if (explicitTextureReference) {
         const auto resource = capturedResource(controller.GetResources(), job, true);
         const auto textures = controller.GetTextures();
         const auto found = std::find_if(textures.begin(), textures.end(),
                                         [&](const auto &t) { return t.resourceId == resource; });
         if (found == textures.end())
-            throw std::runtime_error("Compute GPU reference requires a texture resource");
+            throw std::runtime_error("Explicit shader GPU reference requires a texture resource");
         const Subresource sub(index(job, "mip"), index(job, "layer"), index(job, "sample"));
         const auto x = index(job, "x"), y = index(job, "y");
         validate(*found, sub, x, y);
@@ -926,12 +931,12 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
                                                              : "float"},
                  {"value", session.computePrepared ? Json() : pixel(controller.PickPixel(resource, x, y, sub, cast))},
                  {"method", "RenderDoc PickPixel with texture component interpretation"},
-                 {"note", "Explicit selected texel after the dispatch, before DebugThread replays. This is "
+                 {"note", "Explicit selected texel after the event, before shader-debug replays. This is "
                           "not proof that the selected invocation wrote this location."}});
         }
         result["gpu_reference"] = std::move(reference);
     }
-    if (dx12 && !compute && !vertex) {
+    if (dx12 && !compute && !vertex && !explicitTextureReference) {
         // Capture the selected event's target before DebugPixel performs any
         // diagnostic replays. This is post-event GPU output, not the selected
         // fragment's shader return value (blending/other fragments may differ).
@@ -1353,7 +1358,9 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
                        {"method", "RenderDoc PixelHistory shaderOut after debugger stepping"},
                        {"scope", "GPU fragment output before blending/storage conversion. Separate instrumented "
                                  "replays; matching output alone does not validate every instruction or input."}};
-        if (!referenceSelection) {
+        if (explicitTextureReference) {
+            reference["reason"] = "An explicit texture reference does not identify color target 0";
+        } else if (!referenceSelection) {
             reference["reason"] = "No unambiguous color target 0 reference is available";
         } else if (selected->numInstances != 1) {
             reference["reason"] = "Pixel history primitive selection does not identify a draw instance";

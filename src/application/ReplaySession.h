@@ -13,6 +13,7 @@ struct SessionCapability {
     std::string reason;
     bool supported() const { return status == CapabilityStatus::Supported; }
 };
+enum class ReplayShaderStage { Unspecified, Vertex, Pixel, Compute, Amplification, Mesh };
 struct ReplaySelection {
     std::string session;
     Id event{}, resource{};
@@ -23,6 +24,7 @@ struct ReplaySelection {
     // Output boundary only; the selected execution remains available to event
     // inspection and analysis panels while the output replays the whole stream.
     bool frameEnd = false;
+    ReplayShaderStage shaderStage = ReplayShaderStage::Unspecified;
 };
 // Resolves a plane-0, single-sample 1D/2D texel for the native output viewer.
 // Volume slice display is not yet supported by that viewer.

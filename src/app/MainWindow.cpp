@@ -1801,12 +1801,16 @@ void MainWindow::updateCheckpointContext() {
         replayMesh_->setContext((draw || meshDispatch) ? meshKey : QString{}, selectedEvent_, dx12, meshDispatch,
                                 dx12 && selection_.isolateMissingQueries);
     }
-    const auto debugKey = dx12 ? (session_->capability(ReplayFeature::ShaderDebug,selection_).supported()
-                                  ? historyContextKey(true) : QString{}) : analysisKey;
     for (size_t i = 0; i < replayDebug_.size(); ++i)
-        if (auto view = replayDebug_[i])
-            view->setContext((i == 2 ? dispatch : draw) ? debugKey : QString{}, selectedEvent_, dx12,
+        if (auto view = replayDebug_[i]) {
+            auto debugSelection = selection_;
+            debugSelection.shaderStage = i == 0 ? ReplayShaderStage::Vertex
+                                       : i == 1 ? ReplayShaderStage::Pixel : ReplayShaderStage::Compute;
+            const auto debugKey = dx12 ? (session_->capability(ReplayFeature::ShaderDebug, debugSelection).supported()
+                                         ? historyContextKey(true) : QString{}) : analysisKey;
+            view->setContext((i == 2 ? dispatch : draw || (i == 1 && meshDispatch)) ? debugKey : QString{}, selectedEvent_, dx12,
                              dx12 && selection_.isolateMissingQueries);
+        }
 }
 QString MainWindow::historyContextKey(bool allowQueryIsolation, bool frameEnd) const {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {

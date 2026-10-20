@@ -10638,10 +10638,87 @@ The earlier decoder failure remains at
 Build logs: `build-indirect-disable3.log` and
 `build-indirect-disable-evidence5.log`.
 
+### Pixel debugging after Mesh Dispatch and visibility-index provenance
+
+The shared selection now carries an optional shader stage for capability
+queries. Mesh Dispatch exposes its PS debugging path while VS, CS, AS and
+MS remain disabled for that execution. The isolated analyzer accepts a
+pixel invocation on a mapped Mesh Dispatch action; it continues to reject
+vertex/compute invocations on that action. This distinction fixes the
+previous blanket exclusion of Mesh Dispatch from PS debugging.
+
+Two targeted analyses reuse `hellblade-first-mesh1/native-dx12_capture.rdc`;
+no new native frame capture or replay was run. At execution **10267**,
+RDC event **2215**, pixel **(2, 0)**, sample **0**, the actual SM6.6
+`HWRasterizePS` produces a **38-step** trace. Its exported bytecode SHA-256
+`90346d5813fe2eda8cc39855778fefe0b566a34829932586ac95c5e1e246137b`
+matches the original capture bytes. No source files are present, so this
+is instruction-level debugging with the recorded entry name.
+
+The captured PS packs its 64-bit atomic operand as:
+
+```
+low32  = ((TEXCOORD7.x << 7) + 128) | TEXCOORD7.y
+high32 = asuint(saturate(TEXCOORD0.z / TEXCOORD0.w))
+```
+
+The matching original MS bytecode SHA-256 is
+`ade63c450a9584c74b5ee606106be91f4cbf00bba3cda90967195b6b9b8fb947`.
+Its primitive TEXCOORD7.x originates from the first word of a
+`RasterBinData` entry (SRV register 6, resource creation **562546**) and
+indexes `VisibleClustersSWHW` (register 3, creation **562379**) in
+eight-byte units. TEXCOORD7.y contains the local primitive number.
+The two earlier native enabled outputs have identical depth words and
+low-seven-bit primitive numbers. Their **486 observed visible indices**
+form a one-to-one candidate remapping. This localizes the raw difference
+to visible-index assignment; it does not yet prove that the corresponding
+upstream entries identify the same geometry or establish original GPA
+equivalence. The exact raw-undo gate remains failed.
+
+The PS has no color target. Explicit texture references are now also
+supported for pixel-debug jobs, separately from the automatic RT0
+reference and from Pixel History's fragment-output check. For resource
+creation 574650 the three GPU observations around debugging are:
+
+| Observation | Low word | High word |
+| --- | --- | --- |
+| Before DebugPixel | 536,852,785 | 1,065,348,174 |
+| After trace creation | 536,855,089 | 1,065,348,174 |
+| After stepping | 536,861,489 | 1,065,348,174 |
+
+The trace's packed operand matches the first pair exactly. The report
+nevertheless marks `partial: true` and `selected_texel_changed`; the UI
+shows that the changing reference cannot validate the trace. This is not
+proof of the complete atomic simulation, stable shader inputs or fragment
+ownership.
+
+The workspace check also exposed that typed int64/uint64 trace variables
+were rejected by Watch. Expressions now preserve those integers, support
+64-bit literals/casts, shifts, comparisons and arithmetic, and reject
+invalid shifts, out-of-range float conversions and signed division
+overflow. Integer add/subtract/multiply/negation retain width wrapping.
+Existing 32-bit expression checks pass. At instruction 33 of the first
+saved trace, `_49` evaluates exactly to **4575635566720147377**;
+`_49 & 0xffffffffu` and `_49 >> 32` give **536829873** and
+**1065348174**. Breakpoint, single-step, export, stage gating, stale-result
+rejection and explicit-reference warning display pass using saved results.
+
+Evidence: `hellblade-mesh-ps1/result.json`,
+`hellblade-mesh-ps-reference1/result.json`,
+`hellblade-visibility-shaders1/{sources.json,PS.asm,MS.asm}`,
+`hellblade-mesh-disable1/visible-index-remapping.json`,
+`mesh-pixel-workspace3.txt`, `mesh-pixel-wide-watch1.txt`,
+`mesh-pixel-stage-capabilities1.txt`, `build-mesh-pixel-debug2.log`,
+`build-mesh-pixel-watch4.log` and `build-mesh-pixel-stage6.log`.
+The analyzer's reference run lists 87 modules with no GPA module loaded.
+AS/MS invocation debugging, general shader fidelity and the upstream
+visible-index comparison remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
+| PS debugging after Mesh Dispatch | Not verified on this sample | Not verified on this sample | Execution 10267 yields 38 PS steps; stage-specific workspace entry, breakpoint, exact 64-bit Watch and stale-result rejection verified; packed operand matches one GPU texel observation but the texel changes during debug replays, correctly reported partial; AS/MS and complete fidelity unfinished |
 | Work-only indirect disable experiment | Not verified on this sample | Not verified on this sample | Mesh execution 10267 disable preserves all 524,288 pre-event bytes; save/undo/redo/reload and stale MeshOut rejection verified; undo resumes work but all 19,702 written low words vary across identically configured enabled replays; raw undo equivalence fails and remains unresolved |
 | Replay barrier arguments and alias navigation | Not verified on this sample | Not verified on this sample | Four barrier uses decoded from the counter experiment capture; global UAV scope, explicit alias predecessor navigation and helper state transitions verified; original placement arguments and marker/creation cross-check verified, dropped global barriers restored; current-device requirements establish 65,536-byte overlap in heap creation 530246; original-adapter extents, completion, active ownership and full lifetime/history remain unverified |
 | Buffer override after an execution | Not verified on this sample | Not verified on this sample | Allocator counter override changes later native argument generation to (3, 3, 0); undo restores (3, 3, 108); workspace persistence and stale CS rejection verified; zero-dispatch resource preservation, auxiliary history and debug rejection verified; value-1 experiment has exact 324-texel border mapping and preservation outside the selected block, plus a nonzero CS store with exact RGB GPU-reference bits and breakpoint/Watch/navigation; upstream replay variation and complete histories/debugging unfinished |

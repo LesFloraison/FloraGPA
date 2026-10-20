@@ -500,6 +500,29 @@ class CheckpointTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("s.x").evaluate(DebugEnvironment(records)));
         QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("s.y").evaluate(DebugEnvironment(records)));
     }
+    void wideIntegerExpressions() {
+        const DebugEnvironment empty(Json::array());
+        const auto text = [&](const char *s) { return DebugExpression(s).evaluate(empty).text(); };
+        QCOMPARE(text("4575635566720147377"), std::string("4575635566720147377"));
+        QCOMPARE(text("4575635566720147377 >> 32"), std::string("1065348174"));
+        QCOMPARE(text("4575635566720147377 & 0xffffffffu"), std::string("536829873"));
+        QCOMPARE(text("uint64(1) << 63"), std::string("9223372036854775808"));
+        QCOMPARE(text("0xffffffffffffffffu > 0x7fffffffffffffff"), std::string("true"));
+        QCOMPARE(text("0xffffffffffffffffu / uint64(2)"), std::string("9223372036854775807"));
+        QCOMPARE(text("0xffffffffffffffffu % uint64(2)"), std::string("1"));
+        QCOMPARE(text("0xffffffffffffffffu + uint64(1)"), std::string("0"));
+        QCOMPARE(text("int64(0xffffffffffffffffu)"), std::string("-1"));
+        QCOMPARE(text("-int64(0x8000000000000000u)"), std::string("-9223372036854775808"));
+        QCOMPARE(text("int64(0x8000000000000000u) >> 63"), std::string("-1"));
+        QCOMPARE(text("abs(0xffffffffffffffffu)"), std::string("18446744073709551615"));
+        QCOMPARE(text("~uint64(0)"), std::string("18446744073709551615"));
+        QCOMPARE(text("min(0xffffffffffffffffu, uint64(2))"), std::string("2"));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("uint64(1) << 64").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("uint64(1) >> -1").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("int64(0x8000000000000000u) / -1").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("18446744073709551616").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("uint64(-1.0)").evaluate(empty));
+    }
     void sourceTraceConditionStops() {
         const auto report = Json::parse(R"({"trace":true,"catalog":[
           {"instruction":0,"word_offset":2,"checkpoint_allowed":true,"source_location":{"file":0,"line_start":1,"line_end":1}},

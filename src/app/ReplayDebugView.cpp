@@ -867,11 +867,12 @@ bool ReplayDebugView::finish(uint64_t request, const Json &result) {
         if (reference.value("status", "") == "read") {
             const auto kind = reference.value("interpretation", "float");
             const auto key = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
-            if (stage_ == "cs") {
+            if (stage_ == "cs" || reference.value("scope", "") == "post_event_selected_texel_before_debug_replays") {
                 gpuReference_->setText(
-                    QString("GPU selected texel after dispatch · (%1, %2) mip %3 layer %4 sample %5 · %6 %7\n"
+                    (QString(stage_ == "cs" ? "GPU selected texel after dispatch" : "GPU selected texel after event") +
+                     QString(" · (%1, %2) mip %3 layer %4 sample %5 · %6 %7\n"
                             "Read before debugger replay; this does not prove the selected invocation wrote "
-                            "this location.")
+                            "this location."))
                         .arg(text(reference.at("x")), text(reference.at("y")), text(reference.at("mip")),
                              text(reference.at("layer")), text(reference.at("sample")),
                              QString::fromStdString(kind), text(reference.at("value").at(key))));

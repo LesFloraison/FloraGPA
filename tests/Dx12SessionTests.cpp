@@ -3957,6 +3957,24 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
         QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
                  CapabilityStatus::NotImplemented);
+        selection.shaderStage = ReplayShaderStage::Pixel;
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        for (const auto stage : {ReplayShaderStage::Vertex, ReplayShaderStage::Compute,
+                                 ReplayShaderStage::Amplification, ReplayShaderStage::Mesh}) {
+            selection.shaderStage = stage;
+            QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status, CapabilityStatus::NotImplemented);
+        }
+        selection.shaderStage = ReplayShaderStage::Unspecified;
+        auto computeSelection = selection; computeSelection.execution = 10233;
+        computeSelection.shaderStage = ReplayShaderStage::Pixel;
+        QCOMPARE(session->capability(ReplayFeature::ShaderDebug, computeSelection).status, CapabilityStatus::NotImplemented);
+        computeSelection.shaderStage = ReplayShaderStage::Compute;
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, computeSelection).supported());
+        auto drawSelection = selection; drawSelection.execution = 9731;
+        drawSelection.shaderStage = ReplayShaderStage::Vertex;
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, drawSelection).supported());
+        drawSelection.shaderStage = ReplayShaderStage::Compute;
+        QCOMPARE(session->capability(ReplayFeature::ShaderDebug, drawSelection).status, CapabilityStatus::NotImplemented);
         QVERIFY(session->capability(ReplayFeature::Geometry, selection).supported());
         QVERIFY(session->capability(ReplayFeature::Experiments, selection).supported());
         const auto &packet = directory.packets().at(578354);
@@ -3971,6 +3989,73 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QCOMPARE(arguments.values.at("CountBuffer"), nlohmann::json("0"));
         QCOMPARE(arguments.resources, (std::vector<uint64_t>{2144426640464ULL}));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeArguments(packet.type, payload.first(payload.size() - 1)));
+    }
+    void hellbladeMeshPixelWorkspace() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_MESH_PS_OUTPUT");
+        const auto referencePath = qEnvironmentVariable("FLORA_DX12_MESH_PS_REFERENCE");
+        if (root.isEmpty() || output.isEmpty() || referencePath.isEmpty())
+            QSKIP("Set Hellblade2 capture, recorded mesh PS debug directory and explicit texture reference report");
+        QFile file(output + "/result.json"); QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto result = Json::parse(file.readAll().toStdString());
+        QCOMPARE(result.at("ok"), Json(true));
+        QCOMPARE(result.at("execution"), Json("10267"));
+        QCOMPARE(result.at("step_count"), Json(38));
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("10267"); QTest::keyClick(locate, Qt::Key_Return);
+        auto ps = window.findChild<ReplayDebugView *>("replayDebug-ps");
+        for (const auto stage : {"vs", "cs"})
+            QVERIFY(!window.findChild<ReplayDebugView *>(QString("replayDebug-") + stage)
+                         ->findChild<QAction *>("replayDebugRead")->isEnabled());
+        QVERIFY(ps->findChild<QAction *>("replayDebugRead")->isEnabled());
+        ps->selectPixel(2, 0, 0);
+        QCOMPARE(ps->request().at("action"), Json("debug-pixel"));
+        QCOMPARE(ps->request().at("execution"), Json("10267"));
+        QVERIFY(ps->finish(ps->requestId(), result));
+        ps->model()->toggleInstruction(33);
+        ps->findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(ps->model()->position(), int64_t(33));
+        ps->model()->addWatch("_49");
+        ps->model()->addWatch("_49 & 0xffffffffu");
+        ps->model()->addWatch("_49 >> 32");
+        const auto watch = ps->model()->watchResults();
+        QCOMPARE(watch.at(0).at("status"), Json("available"));
+        QCOMPARE(watch.at(0).at("values").at(0), Json(4575635566720147377ULL));
+        QCOMPARE(watch.at(1).at("values").at(0), Json(536829873));
+        QCOMPARE(watch.at(2).at("values").at(0), Json(1065348174));
+        ps->findChild<QAction *>("debugStep")->trigger();
+        QCOMPARE(ps->model()->position(), int64_t(34));
+        QTemporaryDir exported;
+        ps->exportResult(exported.filePath("mesh-ps.json"));
+        QVERIFY(QFileInfo(exported.filePath("mesh-ps.json")).size() > 0);
+        QFile referenceFile(referencePath); QVERIFY(referenceFile.open(QIODevice::ReadOnly));
+        const auto reference = Json::parse(referenceFile.readAll().toStdString());
+        QCOMPARE(reference.at("partial"), Json(true));
+        QCOMPARE(reference.at("gpu_reference").at("consistency"), Json("selected_texel_changed"));
+        Json packed;
+        for (const auto &step : reference.at("steps"))
+            for (const auto &change : step.at("changes"))
+                if (change.at("after").at("name") == "_49")
+                    packed = change.at("after").at("value").at("u32v");
+        QVERIFY(packed.is_array());
+        for (size_t i = 0; i < 2; ++i)
+            QCOMPARE(packed.at(i), reference.at("gpu_reference").at("value").at("uintValue").at(i));
+        QVERIFY(ps->finish(ps->requestId(), reference));
+        const auto label = ps->findChild<QLabel *>("debugGpuReference")->text();
+        QVERIFY(label.contains("GPU selected texel after event"));
+        QVERIFY(!label.contains("RT0"));
+        QVERIFY(label.contains("changed; reference cannot validate this trace"));
+        const auto stale = ps->requestId();
+        locate->setText("10233"); QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(!ps->model());
+        QVERIFY(!ps->finish(stale, result));
+        QVERIFY(!ps->findChild<QAction *>("replayDebugRead")->isEnabled());
     }
     void hellbladeMeshOutputWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

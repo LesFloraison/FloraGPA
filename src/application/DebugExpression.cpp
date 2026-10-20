@@ -7,6 +7,8 @@
 #include <charconv>
 #include <cmath>
 #include <locale.h>
+#include <limits>
+#include <type_traits>
 
 namespace flora {
 namespace {
@@ -22,11 +24,24 @@ double real(const Scalar &v) {
 int64_t integer(const Scalar &v) {
     return std::visit([](auto x) { return int64_t(x); }, v);
 }
-bool integerKind(const std::string &kind) { return kind == "int" || kind == "uint"; }
-const std::set<std::string> kinds{"bool", "int", "uint", "float", "double"};
+uint64_t bits(const Scalar &v) {
+    return std::visit([](auto x) { return uint64_t(x); }, v);
+}
+bool wideInteger(const std::string &kind) { return kind == "int64" || kind == "uint64"; }
+bool integerKind(const std::string &kind) { return kind == "int" || kind == "uint" || wideInteger(kind); }
+const std::set<std::string> kinds{"bool", "int", "uint", "int64", "uint64", "float", "double"};
 Scalar convert(const Scalar &v, const std::string &kind) {
     if (kind == "bool")
         return truth(v);
+    if (wideInteger(kind)) {
+        if (const auto f = std::get_if<double>(&v)) {
+            const bool sign = kind == "int64";
+            if (!std::isfinite(*f) || *f < (sign ? -0x1p63 : 0.0) || *f >= (sign ? 0x1p63 : 0x1p64))
+                throw ExpressionError("Float-to-64-bit-integer conversion is out of range");
+            return sign ? Scalar(int64_t(*f)) : Scalar(uint64_t(*f));
+        }
+        return kind == "int64" ? Scalar(std::bit_cast<int64_t>(bits(v))) : Scalar(bits(v));
+    }
     if (integerKind(kind)) {
         uint32_t bits;
         if (const auto f = std::get_if<double>(&v)) {
@@ -74,7 +89,7 @@ const std::map<std::string, int> precedence{{"||", 1}, {"&&", 2}, {"|", 3},  {"^
                                             {">>", 8}, {"+", 9},  {"-", 9},  {"*", 10}, {"/", 10}, {"%", 10}};
 Value binary(const std::string &op, const Value &left, const Value &right) {
     std::string kind;
-    for (const auto &k : {"double", "float", "uint", "int", "bool"})
+    for (const auto &k : {"double", "float", "uint64", "int64", "uint", "int", "bool"})
         if (left.kind == k || right.kind == k) {
             kind = k;
             break;
@@ -100,8 +115,9 @@ Value binary(const std::string &op, const Value &left, const Value &right) {
         const auto y = shift ? rawY : convert(rawY, kind);
         if ((op == "/" || op == "%") && !truth(y))
             throw ExpressionError("Expression divisor is zero");
-        if (shift && (integer(y) < 0 || integer(y) >= 32))
-            throw ExpressionError("Shift count must be between 0 and 31");
+        if (shift && bits(y) >= (wideInteger(kind) ? 64 : 32))
+            throw ExpressionError(wideInteger(kind) ? "Shift count must be between 0 and 63"
+                                                    : "Shift count must be between 0 and 31");
         if (kind == "float" || kind == "double") {
             const double a = real(x), b = real(y);
             Scalar z;
@@ -137,47 +153,52 @@ Value binary(const std::string &op, const Value &left, const Value &right) {
                 throw ExpressionError("Unsupported expression operator");
             items.push_back(z);
         } else {
-            const auto a = integer(x), b = integer(y);
-            Scalar z;
+            const auto operate = [&]<class I>(I a, I b) -> Scalar {
+            if constexpr (std::is_signed_v<I>) {
+                if ((op == "/" || op == "%") && a == std::numeric_limits<I>::min() && b == -1)
+                    throw ExpressionError("Signed integer division overflow");
+            }
             if (op == "+")
-                z = a + b;
+                return uint64_t(a) + uint64_t(b);
             else if (op == "-")
-                z = a - b;
+                return uint64_t(a) - uint64_t(b);
             else if (op == "*")
-                z = uint64_t(a) * uint64_t(b);
+                return uint64_t(a) * uint64_t(b);
             else if (op == "/")
-                z = a / b;
+                return a / b;
             else if (op == "%")
-                z = a % b;
+                return a % b;
             else if (op == "&")
-                z = a & b;
+                return a & b;
             else if (op == "|")
-                z = a | b;
+                return a | b;
             else if (op == "^")
-                z = a ^ b;
+                return a ^ b;
             else if (op == "<<")
-                z = uint64_t(a) << b;
+                return uint64_t(a) << b;
             else if (op == ">>")
-                z = a >> b;
+                return a >> b;
             else if (op == "==")
-                z = a == b;
+                return a == b;
             else if (op == "!=")
-                z = a != b;
+                return a != b;
             else if (op == "<")
-                z = a < b;
+                return a < b;
             else if (op == "<=")
-                z = a <= b;
+                return a <= b;
             else if (op == ">")
-                z = a > b;
+                return a > b;
             else if (op == ">=")
-                z = a >= b;
+                return a >= b;
             else if (op == "min")
-                z = std::min(a, b);
+                return std::min(a, b);
             else if (op == "max")
-                z = std::max(a, b);
+                return std::max(a, b);
             else
                 throw ExpressionError("Unsupported expression operator");
-            items.push_back(z);
+            };
+            items.push_back(kind == "uint" || kind == "uint64" ? operate(bits(x), bits(y))
+                                                              : operate(integer(x), integer(y)));
         }
     }
     return value(compare ? "bool" : kind, items);
@@ -229,7 +250,7 @@ class Parser {
                 token.pop_back();
             auto result = std::from_chars(token.data() + 2, token.data() + token.size(), number, 16);
             if (result.ec != std::errc{} || result.ptr != token.data() + token.size())
-                throw ExpressionError("Integer literal exceeds uint32");
+                throw ExpressionError("Integer literal exceeds uint64");
         } else if (token.find_first_of(".e") != std::string::npos || token.ends_with('f')) {
             if (token.ends_with('u'))
                 throw ExpressionError("Floating literal cannot use an unsigned suffix");
@@ -251,10 +272,10 @@ class Parser {
                 token.pop_back();
             auto result = std::from_chars(token.data(), token.data() + token.size(), number);
             if (result.ec != std::errc{} || result.ptr != token.data() + token.size())
-                throw ExpressionError("Integer literal exceeds uint32");
+                throw ExpressionError("Integer literal exceeds uint64");
         }
         if (number > UINT32_MAX)
-            throw ExpressionError("Integer literal exceeds uint32");
+            return value(unsign || number > INT64_MAX ? "uint64" : "int64", {number});
         return value(unsign || number > INT32_MAX ? "uint" : "int", {number});
     }
     NodePtr parse(int minimum = 0, int depth = 0) {
@@ -559,14 +580,14 @@ Value DebugEnvironment::evaluate(const expression_detail::Node &n) const {
             if (!integerKind(x.kind))
                 throw ExpressionError("Bitwise complement requires integers");
             for (const auto &v : x.values)
-                result.push_back(~integer(v));
+                result.push_back(~bits(v));
             return value(x.kind, result);
         }
         const auto kind = x.kind == "bool" ? "int" : x.kind;
         for (const auto &v : x.values)
             result.push_back(n.text == "+"                           ? v
                              : (kind == "float" || kind == "double") ? Scalar(-real(v))
-                                                                     : Scalar(-integer(v)));
+                                                                     : Scalar(uint64_t(0) - bits(v)));
         return value(kind, result);
     }
     if (op == "binary") {
@@ -593,7 +614,8 @@ Value DebugEnvironment::evaluate(const expression_detail::Node &n) const {
             std::vector<Scalar> values;
             for (const auto &v : x.values)
                 values.push_back((x.kind == "float" || x.kind == "double") ? Scalar(std::abs(real(v)))
-                                                                           : Scalar(std::abs(integer(v))));
+                                 : x.kind == "uint" || x.kind == "uint64" ? v
+                                 : integer(v) < 0 ? Scalar(uint64_t(0) - bits(v)) : v);
             return value(x.kind == "bool" ? "int" : x.kind, values);
         }
         if (name == "min" || name == "max") {
@@ -601,7 +623,7 @@ Value DebugEnvironment::evaluate(const expression_detail::Node &n) const {
                 throw ExpressionError(name + " requires two arguments");
             return binary(name, args[0], args[1]);
         }
-        const bool vector = name.back() >= '2' && name.back() <= '4';
+        const bool vector = !kinds.contains(name) && name.back() >= '2' && name.back() <= '4';
         const auto count = vector ? size_t(name.back() - '0') : 1;
         const auto kind = vector ? name.substr(0, name.size() - 1) : name;
         std::vector<Scalar> items;

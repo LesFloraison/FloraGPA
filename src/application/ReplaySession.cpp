@@ -477,6 +477,10 @@ class Dx12Session final : public IReplaySession {
             if (!replay.supported())
                 return replay;
             const auto event = executionEvent(*selection.execution);
+            if (event.workKind == ReplayWorkKind::MeshDispatch && feature == ReplayFeature::ShaderDebug &&
+                selection.shaderStage == ReplayShaderStage::Pixel)
+                return {CapabilityStatus::Supported,
+                        "Pixel invocation after Mesh Dispatch through RenderDoc 1.45; requires a bound debuggable PS. AS/MS debugging is separate and remains unavailable"};
             if (event.workKind == ReplayWorkKind::MeshDispatch)
                 return feature == ReplayFeature::Geometry
                            ? SessionCapability{CapabilityStatus::Supported,
@@ -493,6 +497,12 @@ class Dx12Session final : public IReplaySession {
                                                           "this signature layout are not implemented"};
             const bool draw = event.workKind == ReplayWorkKind::Draw;
             const bool dispatch = event.workKind == ReplayWorkKind::Dispatch;
+            if (feature == ReplayFeature::ShaderDebug && selection.shaderStage != ReplayShaderStage::Unspecified) {
+                const bool stageSupported = dispatch ? selection.shaderStage == ReplayShaderStage::Compute
+                    : draw && (selection.shaderStage == ReplayShaderStage::Vertex || selection.shaderStage == ReplayShaderStage::Pixel);
+                if (!stageSupported)
+                    return {CapabilityStatus::NotImplemented, "The selected execution does not support debugging this shader stage"};
+            }
             if (!draw && !(feature == ReplayFeature::ShaderDebug && dispatch))
                 return {CapabilityStatus::NotImplemented,
                         "Select a Draw or Dispatch with a supported direct call or command signature"};
