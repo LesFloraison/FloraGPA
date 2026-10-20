@@ -1762,12 +1762,15 @@ void MainWindow::updateCheckpointContext() {
                 selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
     }
     if (rdcCounters_) {
-        const auto metricsKey = dx12 && selection_.isolateMissingQueries
-                                    ? (session_->capability(ReplayFeature::Performance, selection_).supported()
-                                           ? historyContextKey(true) : QString{})
+        const auto metricsSelection = outputReplaySelection();
+        const auto metricsKey = dx12
+                                    ? (session_->capability(ReplayFeature::Performance, metricsSelection).supported()
+                                           ? historyContextKey(true, metricsSelection.frameEnd) : QString{})
                                     : analysisKey;
-        rdcCounters_->setContext((frame_ || (dx12 && (draw || dispatch))) ? metricsKey : QString{},
-                                 selectedEvent_, dx12, dx12 && selection_.isolateMissingQueries);
+        rdcCounters_->setContext((frame_ || (dx12 && (metricsSelection.frameEnd || draw || dispatch))) ? metricsKey : QString{},
+                                 metricsSelection.frameEnd ? session_->executionCount() : selectedEvent_, dx12,
+                                 dx12 && selection_.isolateMissingQueries,
+                                 metricsSelection.frameEnd && !session_->events().empty() ? session_->events().back() : 0);
     }
     if (resourceHistory_) {
         const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
@@ -1874,8 +1877,11 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         historyRequestId_ = rdcCounters_->requestId();
         try {
             const auto request = rdcCounters_->request();
-            startWorker({"replay", capturePath_, "--event", QString::fromStdString(request.at("execution").get<std::string>()),
-                         "--measure-event", "--max-bytes", QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)}, false);
+            QStringList args{"replay", capturePath_};
+            if (request.value("frame_end", false)) args << "--measure-frame";
+            else args << "--event" << QString::fromStdString(request.at("execution").get<std::string>()) << "--measure-event";
+            args << "--max-bytes" << QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024);
+            startWorker(args, false);
             if (process_.state() == QProcess::NotRunning) throw std::runtime_error("Cannot start native metrics worker");
             runningKind_ = "native-counters";
         } catch (const std::exception &e) {
@@ -2137,8 +2143,9 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             historyRequest_.value("execution", "") ==
                 std::to_string(frameEndHistory ? session_->executionCount() : selection_.execution.value_or(0));
         const bool isolatedMetrics = runningAnalysis_ == RdcAnalysis::Counters && rdcCounters_->nativeMode() &&
-                                     args.contains("--measure-event") && !args.contains("--renderdoc");
-        if ((args.contains("--renderdoc") && !isolatedAnalysis) || (args.contains("--measure-event") && !isolatedMetrics)) {
+                                     (args.contains("--measure-event") || args.contains("--measure-frame")) && !args.contains("--renderdoc");
+        if ((args.contains("--renderdoc") && !isolatedAnalysis) ||
+            ((args.contains("--measure-event") || args.contains("--measure-frame")) && !isolatedMetrics)) {
             showError("Query isolation requires supported analysis or native instrumentation"); return;
         }
         args << "--isolate-missing-queries";

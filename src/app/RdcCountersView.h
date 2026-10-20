@@ -13,7 +13,8 @@ class RdcCountersView final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit RdcCountersView(QWidget *parent = nullptr);
-    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool isolateMissingQueries = false);
+    void setContext(const QString &key, qulonglong event, bool dx12 = false, bool isolateMissingQueries = false,
+                    uint64_t frameEndRecord = 0);
     bool finishNative(uint64_t request, const Json &report);
     void setWorkerBusy(bool busy);
     void setBackendPath(const QString &path, bool persist = true);
@@ -35,6 +36,7 @@ class RdcCountersView final : public QWidget {
     QString key_, backendPath_;
     qulonglong event_{};
     uint64_t requestId_{};
+    uint64_t frameEndRecord_{};
     bool busy_{}, dx12_{}, catalogRequest_{}, isolateMissingQueries_{};
     Json result_;
     QAction *read_, *cancel_, *export_, *backend_, *locate_, *list_, *sourceAction_;

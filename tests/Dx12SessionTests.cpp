@@ -2214,6 +2214,92 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QFAIL(error.what());
         }
     }
+    void frameStreamPerformanceWorkspace() {
+        using Json = nlohmann::json;
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto output = qEnvironmentVariable("FLORA_DX12_FRAME_METRICS_UI");
+        if (root.isEmpty() || output.isEmpty()) QSKIP("Set captures and a new frame metrics evidence directory");
+        QVERIFY(!QFileInfo::exists(output)); QVERIFY(QDir().mkpath(output));
+        const auto path = root + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(path); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        auto metrics = window.findChild<RdcCountersView *>();
+        auto measure = metrics->findChild<QAction *>("readRdcCounters");
+        QVERIFY(!measure->isEnabled());
+        window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        QVERIFY(measure->isEnabled());
+        QCOMPARE(metrics->request().at("frame_end"), Json(true));
+        QCOMPARE(metrics->request().at("frame_end_record"), Json("192535"));
+        QVERIFY(!metrics->findChild<QComboBox *>("rdcCountersSource")->isEnabled());
+        measure->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.findChild<QPlainTextEdit *>("taskLog")->toPlainText()));
+        const auto result = metrics->result();
+        const auto &measurement = result.at("native_measurement"), &timeline = measurement.at("timeline");
+        QCOMPARE(measurement.at("scope"), Json("frame_stream"));
+        QCOMPARE(measurement.at("last_record"), Json("192535"));
+        QCOMPARE(result.at("execution"), Json("19410"));
+        QCOMPARE(result.at("frame_complete"), Json(false));
+        QCOMPARE(measurement.at("query_outputs_incomplete"), Json(true));
+        QCOMPARE(timeline.at("scope"), Json("frame_stream_submitted_lists"));
+        QCOMPARE(timeline.at("entries").size(), size_t(16));
+        QCOMPARE(measurement.at("list_measurements").size(), size_t(16));
+        std::set<std::string> signalRecords;
+        for (const auto &row : timeline.at("synchronization")) signalRecords.insert(row.at("record").get<std::string>());
+        QVERIFY(signalRecords.contains("192533")); QVERIFY(signalRecords.contains("192534"));
+        dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+        dx12::SubmissionIndex submissions(directory);
+        const auto selected = submissions.execution(19408);
+        const auto &recording = submissions.recordings().at(*submissions.recordingForRecord(selected.record));
+        uint64_t expectedVertices{};
+        for (const auto id : recording.records) {
+            const auto &packet = directory.packets().at(size_t(id - 1));
+            QVERIFY(packet.type != 0x1ae3ccddf9f8cULL); // Oracle is for direct Draw arguments only.
+            if (packet.type != 0x1ae3c190d8b1eULL && packet.type != 0x1ae3c86b1c3b9ULL) continue;
+            const auto args = dx12::decodeArguments(packet.type, directory.payload(packet)).values;
+            expectedVertices += args.at(packet.type == 0x1ae3c190d8b1eULL ? "VertexCountPerInstance" : "IndexCountPerInstance").get<uint64_t>() *
+                                args.at("InstanceCount").get<uint64_t>();
+        }
+        QVERIFY(expectedVertices >= 828);
+        bool checked{};
+        for (const auto &row : measurement.at("list_measurements")) {
+            QCOMPARE(row.at("status"), Json("measured"));
+            const auto begin = std::stoull(row.at("timestamp_begin").get<std::string>());
+            const auto end = std::stoull(row.at("timestamp_end").get<std::string>());
+            QVERIFY(end >= begin);
+            QCOMPARE(row.at("duration_seconds").get<double>(),
+                     double(end - begin) / double(std::stoull(row.at("timestamp_frequency_hz").get<std::string>())));
+            if (row.at("submission") == std::to_string(selected.submission) &&
+                row.at("list_ordinal") == std::to_string(selected.ordinal)) {
+                QCOMPARE(row.at("pipeline_statistics_status"), Json("measured"));
+                QCOMPARE(row.at("pipeline_statistics").at("IAVertices"), Json(std::to_string(expectedVertices)));
+                checked = true;
+            }
+        }
+        QVERIFY(checked);
+        for (const auto &row : result.at("values")) QCOMPARE(row.at("sampling_scope"), Json("submitted_list"));
+        auto rows = metrics->findChild<QTreeWidget *>("rdcCounterValues");
+        QCOMPARE(rows->topLevelItemCount(), 16);
+        metrics->exportResult(output + "/result.json");
+        write(output + "/oracle.json", QByteArray::fromStdString(Json{{"submission", std::to_string(selected.submission)},
+            {"list_ordinal", std::to_string(selected.ordinal)}, {"ia_vertices_from_direct_draw_arguments", std::to_string(expectedVertices)}}.dump(2)));
+        auto wrong = result; wrong["native_measurement"]["scope"] = "selected_execution";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), wrong));
+        wrong = result; wrong["native_measurement"]["last_record"] = "192532";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, metrics->finish(metrics->requestId(), wrong));
+        const auto request = metrics->requestId();
+        auto first = rows->topLevelItem(0); QVERIFY(first->text(0).startsWith("Submit "));
+        const auto execution = first->data(0, Qt::UserRole).toULongLong(); QVERIFY(execution);
+        rows->setCurrentItem(first);
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        metrics->findChild<QAction *>("locateRdcCounter")->trigger();
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), execution);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 2);
+        QVERIFY(!metrics->finish(request, result));
+        QVERIFY(metrics->result().is_null());
+    }
     void isolatedQueryPerformanceWorkspace() {
         using Json = nlohmann::json;
         try {

@@ -452,6 +452,8 @@ class Dx12Session final : public IReplaySession {
             auto executionOnly = selection; executionOnly.resource = 0; executionOnly.before = false;
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported()) return replay;
+            if (selection.frameEnd)
+                return {CapabilityStatus::Supported, "One full-stream replay sample: submitted-list timestamps, direct-list pipeline statistics and calibrated queue timeline; initialization/helpers excluded, no original timing or vendor counters"};
             const auto kind = executionEvent(*selection.execution).workKind;
             if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch)
                 return {CapabilityStatus::NotImplemented, "Select a supported Draw or Dispatch for native GPU queries"};

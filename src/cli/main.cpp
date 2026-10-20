@@ -124,6 +124,7 @@ int main(int argc, char **argv) {
     p.addOption({"debug-device", "Enable D3D11 validation"});
     p.addOption({"renderdoc", "Optional RenderDoc DLL for independent replay recapture", "path"});
     p.addOption({"measure-event", "Measure the selected native DX12 execution with GPU queries"});
+    p.addOption({"measure-frame", "Measure native DX12 full-stream submitted lists and queue timeline"});
     p.addOption({"isolate-missing-queries", "DX12 incomplete replay: isolate missing READBACK query values and reject consumers"});
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
@@ -276,6 +277,7 @@ int main(int argc, char **argv) {
         if (p.isSet("dxcompiler")) throw std::runtime_error("--dxcompiler requires DX12 shader export");
         if (p.isSet("uav-barrier-before")) throw std::runtime_error("--uav-barrier-before requires DX12 replay");
         if (p.isSet("measure-event")) throw std::runtime_error("--measure-event requires native DX12 replay");
+        if (p.isSet("measure-frame")) throw std::runtime_error("--measure-frame requires native DX12 replay");
         if (p.isSet("isolate-missing-queries")) throw std::runtime_error("--isolate-missing-queries requires native DX12 replay");
         if (command == "validate-frame") {
             for (const auto &option : optionNames)

@@ -8522,6 +8522,73 @@ and the corresponding build logs. General presentation selection outside this
 conservative inference, complete frame fidelity and full portable acceptance
 remain unfinished.
 
+### Full-stream native GPU metrics in the workspace
+
+With the output boundary set to **Frame end**, the existing performance panel
+now measures the complete frame stream without requiring a selected Draw or
+Dispatch. The CLI exposes the same path as `replay --measure-frame`; it rejects
+an explicit event, `--measure-event` or RenderDoc capture in combination with
+this mode. Timing-only requests do not automatically read back the suggested
+output texture. Explicit resource readback remains available with `--id`.
+
+Each submitted command-list instance has a timestamp bracket, including
+repeated invocations. Direct lists additionally receive native pipeline-statistics
+queries. Compute/copy lists retain their separately reported timestamp support
+and do not acquire invented statistics. Results include the full-stream final
+record and execution, list ranges, queue identities, calibrated timing where
+available, and trailing queue Signal/Wait observations. The backend must finish
+the stream and drain all pending queue operations before the panel accepts the
+result. Query-isolated Talos results retain `frame_complete=false` and explicit
+missing-query provenance.
+
+The Values tab groups measurements as **Submit / list**, with units and source,
+and navigation targets the first execution in that list. A list's aggregate
+statistics are not attributed to that first Draw; the sampling scope and
+execution count remain in each row and export. The Timeline tab retains
+queue-local fallback when calibration is unavailable. No cross-queue duration
+sum is presented as a frame time, and Fence rows remain CPU observations with
+unmeasured GPU wait duration. Source switching to RenderDoc is disabled for this
+native frame-stream mode. Returning to an event invalidates the frame sample
+and restores selected-execution measurement.
+
+One Talos workspace GPU run under explicit query isolation reaches record
+**192535**, execution **19410**, and reports:
+
+| Evidence | Result |
+| --- | --- |
+| Submitted-list timestamp brackets | 16, all calibrated in this run |
+| Lists with pipeline statistics | 4 Direct lists |
+| Other measured list types | Copy lists; no pipeline-statistics claim |
+| Exported metric values | 60 |
+| Trailing queue observations | Signals at records 192533 and 192534 |
+| Final list identity | Submission 192532, ordinal 0, list 1650859184, generation 2 |
+| Final list execution range | 16021–19410, 3390 executions |
+| Final list IA vertices | 1,425,066, exactly equal to the sum of its captured direct Draw/DrawIndexed vertex/index counts × instance counts |
+| Final list IA primitives | 475,022 |
+| Final list timestamp interval | 798,528 ticks at 1,000,000,000 Hz = 798.528 µs |
+
+The timestamp interval includes replay instrumentation and is a single sample
+with unstabilized clocks. Initialization and experiment-helper submissions are
+excluded. It is not original-application frame time, a vendor hardware counter
+measurement or proof of restored historical query values. The Draw-argument
+oracle validates the selected list's IA vertex count; it does not independently
+validate every exported statistic.
+
+The focused GPU/UI check passes **3** checks including setup/cleanup in
+**4,526 ms**. It verifies the terminal boundary, list coverage, tail Signals,
+raw timestamp arithmetic, IA count oracle, list grouping, filtered navigation
+and rejection of a stale sample/wrong scope/final record. Existing selected-event
+conversion and queue-clock fallback checks reuse `bf1-native-timeline2.json` and
+pass **4** checks including setup/cleanup in **28 ms**, without GPU work.
+BF1 and Hellblade2 full-stream metrics have not been measured by this milestone.
+
+Build **484** builds the implementation but exposes a test variable colliding
+with Qt's `signals` macro; the variable is renamed and build **485** passes.
+Evidence stays outside Git: `talos-frame-metrics-ui1/{result.json,oracle.json,measurement-evidence.json}`,
+`frame-metrics-ui-tests1.txt`, `frame-metrics-compat1.txt`, and the build logs.
+Original concurrency/timing, hardware-counter coverage, full image fidelity and
+portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -8530,6 +8597,7 @@ remain unfinished.
 | Frame-end output in workspace | Available; not separately GPU-checked in this UI milestone | Frame-end → event → frame-end invalidation, exact raw exports and distinct boundary provenance verified under query isolation | Available; not separately GPU-checked in this UI milestone |
 | Frame-end Pixel History | Not verified | Fresh full-stream capture, terminal marker, three mapped fragments, native selected-texel agreement and stale-boundary rejection verified under query isolation; full history unfinished | Not verified |
 | Suggested final output resource | Workspace selects 11395; CLI default GPU readback verified | Workspace selects 35118; prior native readback evidence reused | Workspace selects 506294; prior native readback evidence reused |
+| Full-stream native performance | Not verified | 16 timed/calibrated submitted lists, 4 Direct-list statistics, trailing Signals, exact final-list IA vertex oracle and scope/navigation rejection verified under query isolation | Not verified |
 | CLI replay through stream end | Reached record 418061; unsubmitted tail recordings stay unsubmitted; selected first-backbuffer readback verified | Reached record 192535 with two trailing Signals under explicit incomplete-query isolation; full readback matches final-prefix baseline | Reached record 613510, 532 queue operations and 46 CPU wait drains; final RGB10 readback obtained, original-image differences remain |
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Replayed pipeline/binding inspection | Tone-map shader inputs, descriptor ranges and output creation mapped; full state unfinished | PSO/root creation navigation and original/replaced VS ownership/digests verified; direct stage import and stale-result rejection verified; shader-constant navigation and query-isolated final Draw bindings/PSO/resource navigation verified; full state unfinished | LensSoftnessPS output, three input resources, viewport/scissor and execution provenance mapped; existing RDC lacks new PSO/root markers; full state unfinished |

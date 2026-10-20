@@ -30,7 +30,7 @@ class NativeReplay final {
     void prepareExecution(uint64_t execution, bool after, bool analysisMarkers = false, bool performance = false);
     // Includes all frame submissions and CPU tail records. Present is an
     // offscreen observation; replay never swaps a window's buffers.
-    void prepareFrame(bool analysisMarkers = false);
+    void prepareFrame(bool analysisMarkers = false, bool performance = false);
     nlohmann::json performanceResult() const;
     void initializeTransfers();
     void replayTo(uint64_t execution, bool after, bool analysisMarkers = false);

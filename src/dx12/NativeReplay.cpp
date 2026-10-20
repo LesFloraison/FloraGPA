@@ -125,6 +125,7 @@ struct NativeReplay::Impl {
             bool closed = false;
             SubmittedList instance;
             size_t timelineEntry{};
+            std::unique_ptr<NativePerformance> statistics;
         };
         using Key = std::pair<size_t, size_t>;
         std::map<Key, Recording> recordings;
@@ -485,8 +486,8 @@ void NativeReplay::initializeTransfers() {
 void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers, bool performance) {
     prepare(execution, after, analysisMarkers, performance, false);
 }
-void NativeReplay::prepareFrame(bool analysisMarkers) {
-    prepare(impl_->index.executionCount(), true, analysisMarkers, false, true);
+void NativeReplay::prepareFrame(bool analysisMarkers, bool performance) {
+    prepare(impl_->index.executionCount(), true, analysisMarkers, performance, true);
 }
 void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers, bool performance, bool streamEnd) {
     auto &s = *impl_;
@@ -581,7 +582,7 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
         frame->queryPolicyMarker = rdcQueryIsolationMarker(frame->queryPolicy);
     }
     require(!performance || after, "Performance queries require an after-event replay boundary");
-    require(!performance || !s.disabledExecutions.contains(execution), "Selected execution is disabled by the experiment");
+    require(!performance || streamEnd || !s.disabledExecutions.contains(execution), "Selected execution is disabled by the experiment");
     require(!performance || !analysisMarkers, "Native performance queries cannot be combined with RenderDoc capture");
     frame->measure = performance;
     frame->commands =
@@ -635,7 +636,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             const auto allocatorId = value(args, "CommandAllocator");
             require(s.allocatorRecipes.contains(allocatorId), "Missing frame allocator recipe");
             const auto type = s.allocatorRecipes.at(allocatorId).type;
-            if (frame->measure && native.instance.firstExecution <= frame->execution &&
+            if (frame->measure && !frame->streamEnd && native.instance.firstExecution <= frame->execution &&
                 frame->execution - native.instance.firstExecution < native.count) {
                 require(!frame->performance, "Ambiguous performance execution instance");
                 frame->performance = std::make_unique<NativePerformance>(s.device.device(), type);
@@ -661,7 +662,12 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                      {"list_ordinal", std::to_string(instance.ordinal)}, {"first_execution", native.count ? json(std::to_string(instance.firstExecution)) : json(nullptr)},
                      {"execution_count", std::to_string(native.count)}});
             }
+            if (frame->measure && frame->streamEnd && type == D3D12_COMMAND_LIST_TYPE_DIRECT) {
+                native.statistics = std::make_unique<NativePerformance>(s.device.device(), type);
+                native.statistics->begin(native.list.Get());
+            }
             if (!native.count) {
+                if (native.statistics) native.statistics->end(native.list.Get());
                 if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
                 check(native.list->Close(), "Close empty frame prefix");
                 native.closed = true;
@@ -699,7 +705,8 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                     std::to_string(instance.ordinal) + ": " + streamPacketName(p.type);
                 native.list->BeginEvent(1, marker.c_str(), UINT(marker.size() + 1));
             }
-            const bool measured = frame->measure && native.instance.firstExecution + native.recorded == frame->execution;
+            const bool measured = frame->measure && !frame->streamEnd &&
+                                  native.instance.firstExecution + native.recorded == frame->execution;
             if (measured) frame->performance->begin(native.list.Get());
             if (disabled) {} // Suppress only this submitted instance, retaining all surrounding state commands.
             else if (transfer(p.type))
@@ -713,6 +720,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                 native.list->EndEvent();
             if (measured) frame->performance->end(native.list.Get());
             if (++native.recorded == native.count) {
+                if (native.statistics) native.statistics->end(native.list.Get());
                 if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
                 check(native.list->Close(), "Close frame execution prefix");
                 native.closed = true;
@@ -1488,11 +1496,44 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
 }
 json NativeReplay::performanceResult() const {
     auto &s = *impl_;
-    require(s.boundaryReached && s.boundaryAfter && s.frame && s.frame->performance &&
+    require(s.boundaryReached && s.boundaryAfter && s.frame && s.frame->measure &&
                 s.selectedExecution == s.frame->execution,
             "Performance results require a completed measured execution");
+    if (s.frame->streamEnd) {
+        auto timeline = s.frame->timeline->result();
+        timeline["scope"] = "frame_stream_submitted_lists";
+        timeline["last_record"] = std::to_string(s.frame->lastRecord);
+        auto lists = json::array();
+        for (const auto &entry : timeline.at("entries")) {
+            auto row = entry;
+            const auto submission = value(entry, "submission"), ordinal = value(entry, "list_ordinal");
+            const auto &recording = s.frame->recordings.at(s.frame->instances.at({submission, ordinal}));
+            row["pipeline_statistics"] = nullptr;
+            row["pipeline_statistics_status"] = "not_sampled_on_compute_or_copy_list";
+            if (recording.statistics) {
+                const auto statistics = recording.statistics->result(s.queue(value(entry, "queue")));
+                row["pipeline_statistics"] = statistics.at("pipeline_statistics");
+                row["pipeline_statistics_status"] = statistics.at("pipeline_statistics_status");
+            }
+            lists.push_back(std::move(row));
+        }
+        return {{"source", "native_d3d12_queries"}, {"scope", "frame_stream"},
+            {"execution", std::to_string(s.selectedExecution)}, {"last_record", std::to_string(s.frame->lastRecord)},
+            {"frame_complete", false}, {"sample_count", 1}, {"warmup_count", 0}, {"stable_power_state", false},
+            {"missing_query_policy", s.isolateMissingQueries ? "isolate_readback_outputs" : "fail"},
+            {"query_outputs_incomplete", s.isolateMissingQueries}, {"timeline", std::move(timeline)},
+            {"list_measurements", std::move(lists)},
+            {"limitations", {"One instrumented full-stream replay sample; clocks are not stabilized. Not original-application timing.",
+                "Durations bracket submitted command-list instances, including query instrumentation; they are not individual Draw/Dispatch durations.",
+                "Pipeline statistics cover direct lists only. Initialization and experiment helper submissions are excluded.",
+                "Cross-queue durations are not summed into a frame time. No vendor hardware counters or GPU Fence stall measurements.",
+                s.isolateMissingQueries ? "Historical query outputs remain unavailable; this measures incomplete query-isolated replay."
+                                        : "Original-frame fidelity remains unverified."}}};
+    }
+    require(bool(s.frame->performance), "Selected execution performance queries are missing");
     const auto execution = s.index.execution(s.selectedExecution);
     auto result = s.frame->performance->result(s.queue(execution.queue));
+    result["scope"] = "selected_execution";
     if (s.frame->timeline) result["timeline"] = s.frame->timeline->result();
     if (s.isolateMissingQueries) {
         result["missing_query_policy"] = "isolate_readback_outputs";

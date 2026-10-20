@@ -261,18 +261,24 @@ void RdcCountersView::setBackendPath(const QString &path, bool persist) {
         QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
-void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries) {
+void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12, bool isolateMissingQueries,
+                                 uint64_t frameEndRecord) {
+    frameEndRecord = dx12 ? frameEndRecord : 0;
+    const bool boundaryChanged = frameEndRecord != frameEndRecord_;
+    frameEndRecord_ = frameEndRecord;
     isolateMissingQueries = dx12 && isolateMissingQueries;
-    if (key != key_ || dx12 != dx12_ || isolateMissingQueries_ != isolateMissingQueries) {
+    if (key != key_ || dx12 != dx12_ || isolateMissingQueries_ != isolateMissingQueries || boundaryChanged) {
         const QSignalBlocker block(source_);
         source_->setCurrentIndex(0); counterIds_->clear(); catalogRequest_ = false;
     }
     const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_) ||
-                         isolateMissingQueries_ != isolateMissingQueries;
+                         isolateMissingQueries_ != isolateMissingQueries || boundaryChanged;
     isolateMissingQueries_ = isolateMissingQueries;
     dx12_ = dx12;
     findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, dx12);
-    scope_->setItemText(1, dx12 ? "Measured events" : "Frame");
+    scope_->setItemText(1, frameEndRecord_ ? "Submitted lists" : dx12 ? "Measured events" : "Frame");
+    if (boundaryChanged) { const QSignalBlocker block(scope_); scope_->setCurrentIndex(frameEndRecord_ ? 1 : 0); }
+    scope_->setEnabled(!frameEndRecord_);
     const bool selectionChanged = event != event_;
     key_ = key;
     event_ = event;
@@ -304,8 +310,9 @@ void RdcCountersView::updateActions() {
     cancel_->setEnabled(busy_);
     sourceAction_->setVisible(dx12_);
     findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, nativeMode());
-    source_->setEnabled(!busy_ && !isolateMissingQueries_);
-    source_->setToolTip(isolateMissingQueries_ ? "Incomplete query-isolated replay supports native instrumentation only" : QString());
+    source_->setEnabled(!busy_ && !isolateMissingQueries_ && !frameEndRecord_);
+    source_->setToolTip(frameEndRecord_ ? "Frame-stream measurements use native submitted-list instrumentation" :
+                       isolateMissingQueries_ ? "Incomplete query-isolated replay supports native instrumentation only" : QString());
     counterIds_->setVisible(!nativeMode());
     counterIds_->setEnabled(!busy_);
     list_->setVisible(!nativeMode());
@@ -321,9 +328,15 @@ RdcCountersView::Json RdcCountersView::request() const {
         throw std::runtime_error("Open a frame first");
     if (isolateMissingQueries_ && !nativeMode())
         throw std::runtime_error("Query-isolated performance analysis requires native instrumentation");
-    if (nativeMode())
-        return {{"action", "counters"}, {"execution", std::to_string(event_)},
-                {"isolate_missing_queries", isolateMissingQueries_}};
+    if (nativeMode()) {
+        Json result{{"action", "counters"}, {"execution", std::to_string(event_)},
+                    {"isolate_missing_queries", isolateMissingQueries_}};
+        if (frameEndRecord_) {
+            result["frame_end"] = true;
+            result["frame_end_record"] = std::to_string(frameEndRecord_);
+        }
+        return result;
+    }
     if (catalogRequest_) return {{"action", "counter-catalog"}};
     Json result{{"action", "counters"}};
     if (dx12_) result["execution"] = std::to_string(event_);
@@ -352,6 +365,14 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
     if (measurement.at("execution") != std::to_string(event_) ||
         measurement.at("source") != "native_d3d12_queries")
         throw std::runtime_error("Native performance identity mismatch");
+    if (measurement.value("scope", "selected_execution") != (frameEndRecord_ ? "frame_stream" : "selected_execution"))
+        throw std::runtime_error("Native metrics belong to a different replay boundary");
+    if (frameEndRecord_) {
+        requireDx12ReplayBoundary(report, event_, false, true, frameEndRecord_);
+        if (measurement.at("last_record") != std::to_string(frameEndRecord_) ||
+            !measurement.at("list_measurements").is_array() || measurement.at("list_measurements").empty())
+            throw std::runtime_error("Native frame metrics have an incomplete sampling boundary");
+    }
     if (report.value("missing_query_policy", "fail") !=
         (isolateMissingQueries_ ? "isolate_readback_outputs" : "fail"))
         throw std::runtime_error("Native metrics belong to a different query replay policy");
@@ -359,9 +380,13 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
         requireDx12QueryPolicyReport(report, true);
     if (measurement.contains("timeline")) {
         const auto &timeline = measurement.at("timeline");
-        if (timeline.at("source") != "native_d3d12_queries" || timeline.at("scope") != "frame_prefix_submitted_lists" ||
+        if (timeline.at("source") != "native_d3d12_queries" ||
+            timeline.at("scope") != (frameEndRecord_ ? "frame_stream_submitted_lists" : "frame_prefix_submitted_lists") ||
             !timeline.at("entries").is_array() || timeline.at("entries").empty() || timeline.at("entries").size() > 65536)
             throw std::runtime_error("Invalid native replay timeline");
+        if (frameEndRecord_ && (timeline.at("last_record") != std::to_string(frameEndRecord_) ||
+                               timeline.at("entries").size() != measurement.at("list_measurements").size()))
+            throw std::runtime_error("Frame metrics and timeline do not cover the same submitted lists");
         for (const auto &entry : timeline.at("entries")) {
             for (const auto key : {"queue", "submission", "command_list"}) (void)executionId(entry.at(key));
             const auto count = decimal(entry.at("execution_count"), false);
@@ -399,11 +424,13 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
         result["missing_query_policy"] = "isolate_readback_outputs";
         result["query_replay_coverage"] = report.at("native_replay").at("query_replay_coverage");
     }
-    auto add = [&](unsigned counter, const std::string &name, const Json &value, bool seconds) {
-        result["available"].push_back({{"counter", counter},
+    std::set<unsigned> registered;
+    auto add = [&](unsigned counter, const std::string &name, const Json &value, bool seconds, const Json &owner) {
+        if (registered.insert(counter).second) result["available"].push_back({{"counter", counter},
                                        {"name", name},
                                        {"category", "Native D3D12 queries"},
-                                       {"description", "Single selected execution; clocks not stabilized"},
+                                       {"description", frameEndRecord_ ? "Submitted command-list instance; clocks not stabilized" :
+                                                                        "Single selected execution; clocks not stabilized"},
                                        {"resultType", seconds ? 1 : 4},
                                        {"resultByteWidth", 8}});
         Json row{{"eventId", 0},
@@ -411,19 +438,39 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
                  {"name", name},
                  {"value", value},
                  {"unit", seconds ? "CounterUnit.Seconds" : "CounterUnit.Absolute"},
-                 {"execution", std::to_string(event_)},
-                 {"selectable", true},
+                 {"execution", frameEndRecord_ ? owner.at("first_execution") : Json(std::to_string(event_))},
+                 {"selectable", !frameEndRecord_ || !owner.at("first_execution").is_null()},
                  {"source", "native_d3d12_queries"}};
-        for (const auto key :
-             {"source_record", "queue", "submission", "command_list", "generation", "list_ordinal"})
-            row[key] = measurement.at(key);
+        for (const auto key : {"queue", "submission", "command_list", "generation", "list_ordinal"})
+            row[key] = owner.at(key);
+        if (frameEndRecord_) {
+            row["sampling_scope"] = "submitted_list";
+            row["execution_count"] = owner.at("execution_count");
+            row["first_execution"] = owner.at("first_execution");
+        } else row["source_record"] = owner.at("source_record");
         result["values"].push_back(std::move(row));
     };
-    add(1, "GPU Duration", measurement.at("duration_seconds"), true);
-    unsigned counter = 2;
-    if (measurement.at("pipeline_statistics_status") == "measured")
-        for (const auto &[name, value] : measurement.at("pipeline_statistics").items())
-            add(counter++, name, value, false);
+    const auto addMeasurement = [&](const Json &owner) {
+        if (owner.value("duration_seconds", Json()).is_number())
+            add(1, "GPU Duration", owner.at("duration_seconds"), true, owner);
+        unsigned counter = 2;
+        if (owner.at("pipeline_statistics_status") == "measured")
+            for (const auto &[name, value] : owner.at("pipeline_statistics").items())
+                add(counter++, name, value, false, owner);
+    };
+    if (frameEndRecord_) {
+        result["frame_complete"] = false;
+        for (size_t i = 0; i < measurement.at("list_measurements").size(); ++i) {
+            const auto &row = measurement.at("list_measurements")[i];
+            const auto &entry = measurement.at("timeline").at("entries")[i];
+            for (const auto key : {"submission", "queue", "command_list", "generation", "list_ordinal",
+                                   "first_execution", "execution_count", "timestamp_begin", "timestamp_end",
+                                   "duration_seconds", "status"})
+                if (row.value(key, Json()) != entry.value(key, Json()))
+                    throw std::runtime_error("Frame measurement does not match its timeline instance");
+            addMeasurement(row);
+        }
+    } else addMeasurement(measurement);
     result["result_count"] = result["values"].size();
     return finish(request, result);
 }
@@ -451,6 +498,13 @@ bool RdcCountersView::finish(uint64_t request, const Json &result) {
         if (nativeMode() && result.value("native_measurement", Json::object()).value("missing_query_policy", "fail") !=
             (isolateMissingQueries_ ? "isolate_readback_outputs" : "fail"))
             throw std::runtime_error("Native measurement belongs to a different query replay policy");
+        if (nativeMode() &&
+            result.at("native_measurement").value("scope", "selected_execution") !=
+                (frameEndRecord_ ? "frame_stream" : "selected_execution"))
+            throw std::runtime_error("Counter result belongs to a different replay boundary");
+        if (frameEndRecord_ && (result.at("native_measurement").at("last_record") != std::to_string(frameEndRecord_) ||
+                               result.value("frame_complete", Json()) != false))
+            throw std::runtime_error("Frame metrics do not match the complete stream boundary");
         if (isolateMissingQueries_ && (!nativeMode() || result.value("frame_complete", Json()) != false ||
             result.value("partial", Json()) != true ||
             !result.value("query_replay_coverage", Json()).is_object() ||
@@ -499,9 +553,13 @@ void RdcCountersView::render() {
                         : dx12_       ? (r.value("selectable", false) ? executionId(gpa) : 0)
                                       : gpa.get<qulonglong>();
         if (scope_->currentIndex()) {
-            auto &group = groups[dx12_ ? gpa.dump() + ':' + std::to_string(eid) : std::to_string(eid)];
+            auto &group = groups[r.value("sampling_scope", "") == "submitted_list"
+                                     ? r.at("submission").dump() + ':' + r.at("list_ordinal").dump()
+                                     : dx12_ ? gpa.dump() + ':' + std::to_string(eid) : std::to_string(eid)];
             if (!group) {
-                group = new QTreeWidgetItem(values_, {id ? QString(dx12_ ? "Execution %1" : "API %1").arg(id)
+                group = new QTreeWidgetItem(values_, {r.value("sampling_scope", "") == "submitted_list"
+                                                         ? "Submit " + text(r.at("submission")) + " / list " + text(r.at("list_ordinal"))
+                                                         : id ? QString(dx12_ ? "Execution %1" : "API %1").arg(id)
                                                          : QString("RDC %1").arg(eid)});
                 group->setData(0, Qt::UserRole, id);
                 group->setToolTip(0, dx12_ ? "Execution on queue " +
@@ -522,6 +580,9 @@ void RdcCountersView::render() {
                                                          .arg(text(gpa))
                                                          .arg(eid)
                                                          .arg(text(r.at("counter")))));
+        if (r.value("sampling_scope", "") == "submitted_list")
+            item->setToolTip(0, item->text(0) + "\nSubmitted-list measurement; navigate to its first execution " +
+                text(r.at("first_execution")) + " · " + text(r.at("execution_count")) + " executions; not one Draw.");
         ++shown;
     }
     for (size_t i = 0; i < result_.at("available").size(); ++i) {
@@ -612,7 +673,7 @@ void RdcCountersView::render() {
         summary_->setText(summary_->text() + "\nIncomplete query-isolated replay; measurements do not restore historical query values.");
     summary_->setToolTip(result_.contains("note") ? text(result_.at("note")) : summary_->text());
     if (dx12_ && result_.contains("native_measurement") && result_.at("native_measurement").contains("timeline"))
-        summary_->setText(summary_->text() + " · serialized replay prefix");
+        summary_->setText(summary_->text() + (frameEndRecord_ ? " · frame stream · submitted-list scope" : " · serialized replay prefix"));
     updateActions();
 }
 void RdcCountersView::exportResult(const QString &path) const {
