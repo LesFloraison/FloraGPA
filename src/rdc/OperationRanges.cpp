@@ -1,5 +1,6 @@
 #include "OperationRanges.h"
 #include "ClearCoverage.h"
+#include "dx12/QueryResultLayout.h"
 #include <algorithm>
 #include <bit>
 #include <stdexcept>
@@ -149,6 +150,20 @@ Json rdcOperationRanges(const SDObject &chunk,ResourceId resource,std::span<cons
             append(wanted,"destination",rdcUavClearRange(chunk,resource,textures));
             result["scope"]="Captured CPU UAV descriptor and Clear rectangles, not measured changes. "
                 "Buffer coordinates retain element units. GPU descriptor agreement and execution ordering are not inferred.";
+        } else if (name.ends_with("::ResolveQueryData")) {
+            const auto type=number(chunk,"Type"), start=number(chunk,"StartIndex"), count=number(chunk,"NumQueries");
+            const auto offset=number(chunk,"AlignedDestinationBufferOffset");
+            if (type > UINT32_MAX || start > UINT32_MAX || !count || count > UINT32_MAX-start || offset % 8)
+                throw std::runtime_error("Invalid query resolve type, slot range or alignment");
+            const auto stride=dx12::queryResultStride(uint32_t(type));
+            const auto bytes=count*stride;
+            if (bytes > UINT64_MAX-offset) throw std::runtime_error("Query result byte range overflows");
+            append(number(chunk,"pDestinationBuffer"),"destination",
+                {{"kind","buffer_range"},{"offset",std::to_string(offset)},{"byte_length",std::to_string(bytes)},
+                 {"end",std::to_string(offset+bytes)},{"query_type",type},{"query_start",start},{"query_count",count},
+                 {"query_heap",std::to_string(number(chunk,"pQueryHeap"))},{"query_result_stride",stride}});
+            result["scope"]="Actual captured ResolveQueryData destination range, not query-result values. "
+                "An isolated replay may omit other parts of the original resolve.";
         } else if (name.ends_with("::CopyBufferRegion")) {
             const auto bytes=number(chunk,"NumBytes");
             for (bool destination : {false,true}) {

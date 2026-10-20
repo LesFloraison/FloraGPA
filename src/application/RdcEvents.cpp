@@ -422,6 +422,36 @@ void requireRdcQueryIsolation(const Json &policy, const Json &job) {
             (!job.contains("resource_creation") || job.at("resource_creation") == resource.at("creation")))
             throw std::runtime_error("Analysis cannot read isolated query output resources");
 }
+void verifyRdcQueryResolveExpansion(const Json &command, const Json &entry,
+                                    const Json &operations, const std::string &resourceId) {
+    const auto fail=[] { throw std::runtime_error("Isolated query resolve expansion does not match captured provenance/ranges"); };
+    if (command.value("status","") != "mapped" ||
+        command.value("name","") != "ID3D12GraphicsCommandListResolveQueryData" ||
+        command.at("marker_eids").size() != 1) fail();
+    for (const auto key : {"execution","source_record","submission","queue"})
+        if (command.at(key) != entry.at(key)) fail();
+    Json available=Json::array();
+    for (const auto &range : entry.at("ranges"))
+        if (range.at("available_from_replayed_queries") == true) available.push_back(range);
+    const auto &events=command.at("event_ids");
+    if (available.empty() || !operations.is_array() || operations.size() != available.size() ||
+        events.size() != operations.size()) fail();
+    uint64_t previous{};
+    for (size_t i=0;i<operations.size();++i) {
+        const auto &actual=operations[i], &expected=available[i];
+        const auto event=number(actual.at("eventId"));
+        if (!event || event > UINT32_MAX || event <= previous || event != number(events[i]) ||
+            actual.at("kind") != "buffer_range" || actual.at("resource_id") != resourceId ||
+            actual.at("role") != "destination") fail();
+        previous=event;
+        for (const auto &[a,b] : {std::pair{"offset","offset"}, {"byte_length","bytes"},
+                                 {"query_start","query_start"}, {"query_count","query_count"}})
+            if (actual.at(a) != expected.at(b)) fail();
+        if (i && (actual.at("query_heap") != operations[0].at("query_heap") ||
+                  actual.at("query_type") != operations[0].at("query_type") ||
+                  actual.at("query_result_stride") != operations[0].at("query_result_stride"))) fail();
+    }
+}
 int64_t indirectActionOrdinal(const Json &p) {
     if (!p.contains("indirect_action") && !p.contains("indirect_action_count")) return -1;
     if (p.value("name", "") != "ID3D12GraphicsCommandListExecuteIndirect" ||

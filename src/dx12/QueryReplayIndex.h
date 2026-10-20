@@ -1,12 +1,10 @@
 #pragma once
 #include "SubmissionIndex.h"
+#include "QueryResultLayout.h"
 #include <nlohmann/json.hpp>
 #include <set>
 
 namespace flora::dx12 {
-// Shared by CPU preflight and native recording. Unknown layouts must not be
-// treated as a single uint64 result.
-uint32_t queryResultStride(uint32_t type);
 void validateQueryDestination(uint32_t type, uint32_t count, uint64_t offset, uint64_t width);
 struct QueryResultRange {
     uint32_t start{}, count{};

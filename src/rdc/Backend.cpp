@@ -1576,16 +1576,62 @@ Json runRdcJob(const Json &job) {
         }
     }
     const auto resources = controller.GetResources();
+    // Only indexed Resource History can select the end of a verified partial
+    // query resolve. Other analyses still require a unique replay action.
+    std::map<std::string,uint32_t> queryResolveEnds;
+    if (action == "resource-history" && !queryPolicy.is_null()) {
+        result["query_resolve_mapping_gaps"]=Json::array();
+        for (const auto &entry : queryPolicy.at("resolves")) {
+            const auto execution=entry.at("execution").get<std::string>();
+            try {
+                const auto &command=mapping.at("execution_commands").at(execution);
+                const auto target=std::find_if(queryPolicy.at("resources").begin(),queryPolicy.at("resources").end(),
+                    [&](const auto &r) { return r.at("creation") == entry.at("creation"); });
+                if (target == queryPolicy.at("resources").end()) throw std::runtime_error("Missing isolated query resource");
+                const auto resource=capturedResource(resources,
+                    {{"resource",target->at("object")},{"resource_creation",target->at("creation")}},true);
+                Json operations=Json::array();
+                for (const auto &id : command.at("event_ids")) {
+                    const auto event=id.get<uint32_t>();
+                    const auto chunk=events.chunks.find(event);
+                    if (chunk == events.chunks.end() ||
+                        !text(chunk->second->name).ends_with("::ResolveQueryData"))
+                        throw std::runtime_error("Partial query resolve arguments are missing");
+                    const auto ranges=rdcOperationRanges(*chunk->second,resource,{});
+                    if (ranges.at("status") != "captured" || ranges.at("ranges").size() != 1)
+                        throw std::runtime_error("Partial query resolve destination cannot be verified");
+                    auto operation=ranges.at("ranges")[0]; operation["eventId"]=event;
+                    operations.push_back(std::move(operation));
+                }
+                verifyRdcQueryResolveExpansion(command,entry,operations,std::to_string(std::bit_cast<uint64_t>(resource)));
+                for (size_t part=0;part<operations.size();++part) {
+                    auto &provenance=mapping["reverse"][std::to_string(operations[part].at("eventId").get<uint32_t>())];
+                    provenance.update({{"selectable",true},{"query_resolve_part",part},
+                        {"query_resolve_part_count",operations.size()},
+                        {"navigation_scope","Original ResolveQueryData execution; emitted parts cover only query results available in the isolated replay"}});
+                }
+                queryResolveEnds[execution]=operations.back().at("eventId").get<uint32_t>();
+            } catch (const std::exception &e) {
+                result["query_resolve_mapping_gaps"].push_back({{"execution",execution},{"reason",e.what()}});
+            }
+        }
+    }
     const auto gpa = job.value(dx12 ? "execution" : "gpa_event", Json(nullptr));
     const auto selectionMap = dx12 ? "execution_map" : "gpa_event_map";
     if (job.contains("indirect_action") && (!dx12 || gpa.is_null()))
         throw std::runtime_error("Indirect action selection requires a DX12 execution");
     uint32_t eid = index(job, "eid");
     if (dx12 && !gpa.is_null()) {
-        const auto selected = selectDx12RdcExecution(mapping, std::to_string(number(gpa)),
-                                                     job.value("indirect_action", Json()));
-        eid = selected.at("eid").get<uint32_t>();
-        if (selected.contains("indirect_action")) result["indirect_selection"] = selected;
+        const auto execution=std::to_string(number(gpa));
+        if (queryResolveEnds.contains(execution) && job.value("indirect_action",Json()).is_null()) {
+            eid=queryResolveEnds.at(execution);
+            result["resource_history_selection"]={{"execution",execution},{"eventId",eid},
+                {"scope","Index through the last verified emitted part of the isolated query resolve; missing query values remain unavailable"}};
+        } else {
+            const auto selected = selectDx12RdcExecution(mapping, execution, job.value("indirect_action", Json()));
+            eid = selected.at("eid").get<uint32_t>();
+            if (selected.contains("indirect_action")) result["indirect_selection"] = selected;
+        }
     } else if (!eid) {
         if (!gpa.is_null()) {
             const auto key = std::to_string(number(gpa));

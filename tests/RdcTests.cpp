@@ -24,6 +24,38 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void isolatedQueryResolveExpansion() {
+        Json command{{"status","mapped"},{"name","ID3D12GraphicsCommandListResolveQueryData"},
+            {"execution","9007199254740993"},{"source_record","8"},{"submission","9"},{"queue","10"},
+            {"event_ids",Json::array({20,21})},{"marker_eids",Json::array({19})}};
+        Json entry{{"execution","9007199254740993"},{"source_record","8"},{"submission","9"},{"queue","10"},
+            {"ranges",Json::array({
+                {{"offset","0"},{"bytes","8"},{"query_start",0},{"query_count",1},{"available_from_replayed_queries",false}},
+                {{"offset","8"},{"bytes","8"},{"query_start",1},{"query_count",1},{"available_from_replayed_queries",true}},
+                {{"offset","16"},{"bytes","8"},{"query_start",2},{"query_count",1},{"available_from_replayed_queries",false}},
+                {{"offset","24"},{"bytes","16"},{"query_start",3},{"query_count",2},{"available_from_replayed_queries",true}}})}};
+        Json first{{"eventId",20},{"resource_id","9007199254740995"},{"kind","buffer_range"},{"role","destination"},
+            {"offset","8"},{"byte_length","8"},{"query_start",1},{"query_count",1},{"query_heap","12"},
+            {"query_type",0},{"query_result_stride",8}};
+        auto second=first; second.update({{"eventId",21},{"offset","24"},{"byte_length","16"},{"query_start",3},{"query_count",2}});
+        const auto operations=Json::array({first,second});
+        verifyRdcQueryResolveExpansion(command,entry,operations,"9007199254740995");
+        for (const auto key : {"execution","source_record","submission","queue","name","status"}) {
+            auto changed=command; changed[key]="different";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,verifyRdcQueryResolveExpansion(changed,entry,operations,"9007199254740995"));
+        }
+        for (const auto key : {"offset","byte_length","resource_id","query_heap"}) {
+            auto changed=operations; changed[1][key]="0";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,verifyRdcQueryResolveExpansion(command,entry,changed,"9007199254740995"));
+        }
+        for (const auto key : {"eventId","query_start","query_count","query_type","query_result_stride"}) {
+            auto changed=operations; changed[1][key]=99;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,verifyRdcQueryResolveExpansion(command,entry,changed,"9007199254740995"));
+        }
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,verifyRdcQueryResolveExpansion(command,entry,Json::array({first}),"9007199254740995"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,selectDx12RdcExecution({{"execution_commands",{{"9007199254740993",command}}}},
+            "9007199254740993"));
+    }
     void isolatedQueryCapturePolicy() {
         const auto high = std::to_string((1ULL << 53) + 8);
         Json policy{{"schema", 1}, {"policy", "isolate_readback_outputs"}, {"frame_complete", false},

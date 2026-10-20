@@ -224,6 +224,52 @@ class HistoryUiTests : public QObject {
             QCOMPARE(read(output_ + "/default-resource-history.json"),resource);
         }
     }
+    void isolatedQueryResolveHistory() {
+        const auto root=qEnvironmentVariable("FLORA_QUERY_RESOLVE_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the verified Talos query-resolve history directory");
+        const auto report=read(root + "/full/result.json"), through=read(root + "/through/result.json");
+        QCOMPARE(report.at("frame_complete"),Json(false));
+        QVERIFY(report.at("query_resolve_mapping_gaps").empty());
+        QCOMPARE(report.at("history_scope").at("captured_operation_ranges"),Json(52));
+        QCOMPARE(report.at("history_scope").at("operation_range_gaps"),Json(0));
+        QCOMPARE(report.at("history_scope").at("unmapped_uses"),Json(0));
+        QCOMPARE(report.at("resource_history").size(),size_t(52));
+        QCOMPARE(report.at("resource_history"),through.at("resource_history"));
+        QCOMPARE(through.at("execution"),Json("16001"));
+        QCOMPARE(through.at("history_scope").at("through_event"),through.at("resource_history_selection").at("eventId"));
+        QCOMPARE(through.at("history_scope").at("selected_event_replayed"),Json(false));
+        uint64_t bytes{},previousEnd{};
+        for (size_t i=0;i<report.at("resource_history").size();++i) {
+            const auto &row=report.at("resource_history")[i], &range=row.at("operation_ranges").at("ranges")[0];
+            QCOMPARE(row.at("execution"),Json("16001")); QCOMPARE(row.at("source_record"),Json("188923"));
+            QCOMPARE(row.at("selectable"),Json(true)); QCOMPARE(row.at("query_resolve_part"),Json(i));
+            QCOMPARE(row.at("query_resolve_part_count"),Json(52));
+            QCOMPARE(row.at("content_change"),Json("not_measured"));
+            const auto offset=std::stoull(range.at("offset").get<std::string>());
+            const auto size=std::stoull(range.at("byte_length").get<std::string>());
+            QVERIFY(offset >= previousEnd); previousEnd=offset+size; bytes+=size;
+            QCOMPARE(size,range.at("query_count").get<uint64_t>()*8);
+        }
+        QCOMPARE(bytes,768ULL);
+        ResourceHistoryView view; view.setContext("isolated:query",19410,78132,1643440736,true);
+        QVERIFY(view.finish(view.requestId(),report));
+        auto rows=view.findChild<QTreeWidget *>("resourceHistoryRows");
+        QVERIFY(rows->topLevelItem(0)->text(0).contains("resolve part 1/52"));
+        QVERIFY(rows->topLevelItem(0)->text(4).contains("bytes [64, 72)"));
+        rows->setCurrentItem(rows->topLevelItem(51));
+        QSignalSpy locate(&view,&ResourceHistoryView::eventRequested);
+        action(view,"locateResourceHistoryEvent")->trigger();
+        QCOMPARE(locate.count(),1); QCOMPARE(locate[0][0].toULongLong(),16001ULL);
+        QCOMPARE(locate[0][1].toLongLong(),-1LL); // Original execution, not an indirect action.
+        auto invalid=report; invalid["resource_history"][0]["query_resolve_part"]=52;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,view.finish(view.requestId(),invalid));
+        const auto old=view.requestId(); view.setContext("isolated:through-query",16001,78132,1643440736,true);
+        QVERIFY(!view.finish(old,report)); QVERIFY(view.finish(view.requestId(),through));
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/query-resolve-history.json");
+            QCOMPARE(read(output_ + "/query-resolve-history.json"),through);
+        }
+    }
     void isolatedQueryResourceHistoryWorkspace() {
         const auto captures=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output=qEnvironmentVariable("FLORA_QUERY_HISTORY_UI");

@@ -34,6 +34,39 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void queryResolveOperationRanges() {
+        SDObject chunk("ID3D12GraphicsCommandList::ResolveQueryData"_lit,"chunk"_lit);
+        const auto integer=[&](const char *name,uint64_t value) {
+            auto field=chunk.AddAndOwnChild(new SDObject(rdcstr(name),"uint64_t"_lit));
+            field->type.basetype=SDBasic::UnsignedInteger; field->data.basic.u=value; return field;
+        };
+        constexpr uint64_t id=9007199254740993ULL, offset=9007199254741000ULL;
+        integer("pDestinationBuffer",id); integer("pQueryHeap",id+1);
+        auto type=integer("Type",0), start=integer("StartIndex",8), count=integer("NumQueries",3);
+        auto location=integer("AlignedDestinationBufferOffset",offset);
+        auto result=rdcOperationRanges(chunk,resource(id),{});
+        QCOMPARE(result.at("status"),Json("captured"));
+        QCOMPARE(result.at("ranges")[0].at("offset"),Json("9007199254741000"));
+        QCOMPARE(result.at("ranges")[0].at("end"),Json("9007199254741024"));
+        QCOMPARE(result.at("ranges")[0].at("query_heap"),Json("9007199254740994"));
+        QCOMPARE(result.at("ranges")[0].at("query_count"),Json(3));
+        for (const auto &[query,stride] : std::map<uint64_t,uint64_t>{{1,8},{2,8},{3,88},{4,16},{7,16},{10,112}}) {
+            type->data.basic.u=query;
+            result=rdcOperationRanges(chunk,resource(id),{});
+            QCOMPARE(result.at("status"),Json("captured"));
+            QCOMPARE(result.at("ranges")[0].at("byte_length"),Json(std::to_string(stride*3)));
+        }
+        type->data.basic.u=UINT32_MAX;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        type->data.basic.u=0; location->data.basic.u=UINT64_MAX-7;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        location->data.basic.u=offset+1;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        location->data.basic.u=offset; start->data.basic.u=UINT32_MAX-1;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+        start->data.basic.u=8; count->data.basic.u=0;
+        QCOMPARE(rdcOperationRanges(chunk,resource(id),{}).at("status"),Json("unavailable"));
+    }
     void uavClearOperationRanges() {
         const auto node=[](SDObject &parent,const char *name) {
             return parent.AddAndOwnChild(new SDObject(rdcstr(name),"struct"_lit));

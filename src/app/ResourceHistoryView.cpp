@@ -177,11 +177,19 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
     if (isolateMissingQueries_ && result.value("frame_complete", Json()) != false)
         throw std::runtime_error("Isolated resource history must retain incomplete frame status");
     const auto &uses = result.at("resource_history");
-    for (const auto &row : uses)
+    for (const auto &row : uses) {
+        if (row.contains("query_resolve_part") || row.contains("query_resolve_part_count")) {
+            if (!isolateMissingQueries_ || row.value("name","") != "ID3D12GraphicsCommandListResolveQueryData" ||
+                !row.at("query_resolve_part").is_number_integer() || !row.at("query_resolve_part_count").is_number_integer() ||
+                !row.at("query_resolve_part_count").get<uint64_t>() || row.at("query_resolve_part_count").get<uint64_t>() > UINT32_MAX ||
+                row.at("query_resolve_part").get<uint64_t>() >= row.at("query_resolve_part_count").get<uint64_t>())
+                throw std::runtime_error("Invalid isolated query resolve part");
+        }
         if (row.value("selectable", false)) {
             (void)identity(row.at("execution"));
             (void)indirectActionOrdinal(row);
         }
+    }
     const QSignalBlocker block(rows_);
     result_ = result;
     rows_->clear();
@@ -190,6 +198,9 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
         auto item = new QTreeWidgetItem(rows_, {field(row, "execution"), field(row, "usage_name"),
                                                 field(row, "evidence"), field(row, "queue")});
         if (row.contains("indirect_action")) item->setText(0, item->text(0) + " · action " + field(row, "indirect_action"));
+        if (row.contains("query_resolve_part"))
+            item->setText(0,item->text(0) + QString(" · resolve part %1/%2")
+                .arg(row.at("query_resolve_part").get<uint64_t>()+1).arg(field(row,"query_resolve_part_count")));
         QStringList ranges;
         if (row.contains("operation_ranges")) {
             const auto &operation = row.at("operation_ranges");
@@ -298,7 +309,8 @@ void ResourceHistoryView::showOverview() {
         return;
     Json overview;
     for (const auto key : {"resource_name", "resource_object", "resource_creation", "execution",
-                           "captured_creation", "replay_initialization", "history_scope", "query_isolation", "frame_complete"})
+                           "captured_creation", "replay_initialization", "history_scope", "query_isolation", "frame_complete",
+                           "query_resolve_mapping_gaps", "resource_history_selection"})
         overview[key] = result_.value(key, Json());
     details_->setPlainText(QString::fromStdString(overview.dump(2)));
 }

@@ -14,4 +14,8 @@ int64_t indirectActionOrdinal(const nlohmann::json &provenance);
 std::string rdcQueryIsolationMarker(const nlohmann::json &policy);
 nlohmann::json readRdcQueryIsolation(const nlohmann::json &roots);
 void requireRdcQueryIsolation(const nlohmann::json &policy, const nlohmann::json &job);
+// Verifies every emitted partial resolve against the isolated capture policy.
+// operations are ordered captured destination ranges, each with its eventId.
+void verifyRdcQueryResolveExpansion(const nlohmann::json &command, const nlohmann::json &entry,
+                                    const nlohmann::json &operations, const std::string &resourceId);
 } // namespace flora
