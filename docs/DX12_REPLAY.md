@@ -6838,6 +6838,63 @@ before/after display, event/primitive/depth-option handoff and exported evidence
 **3 passed** including setup/cleanup, **322 ms** (`half-color-history-ui1.txt`).
 Its screenshot was inspected. Full portable acceptance remains unfinished.
 
+### Pixel History mip/layer selection and attachment-range filtering
+
+The half-blend reproduction now has `mip` and `array` modes. Both render into
+Mip **1** of a 32 x 32 RGBA16F texture; the array mode uses Layer **1**, native
+subresource **3**. The effective render size remains 16 x 16. Native prefix
+readbacks retain the three sets of half words listed above.
+
+Two defects were reproduced with the 21-patch runtime. For a non-array Mip 1
+query, only **one** record was returned for the three-fragment execution **3**.
+The scratch RTV and DSV left `Texture2D.MipSlice` at zero, while fragment-count
+readback used Mip 1. The array query returned all three records but retained the
+four wrong intermediate components because the original-format blend scratch
+path excluded arrays/mips.
+
+The twenty-second patch, `dx12-history-subresources.patch`, explicitly binds
+the selected non-array mip in both scratch views and extends RGBA16F blend
+storage to the selected mip/layer of single-sample 2D resources. The post-blend
+RTV is explicit rather than a default view. Both final positive queries now
+return three correctly identified fragments with all **12** components exactly
+matching their independent native prefix readbacks.
+
+A negative query exposed a separate attribution error: asking for **Layer 0**,
+which none of the fixture draws bind, still produced all **six** fragments from
+the three Draw calls targeting Layer 1. Even its final history/texel comparison
+said they matched. The occlusion pass now rejects a Draw when all known views
+of that resource exclude the requested mip/layer. MRT selection also finds the
+overlapping view instead of merely the first view of the same resource. Unknown
+view layouts remain candidates; UAV writes and resource operations are not
+discarded by this attachment check. Final negative queries for Mip 1/Layer 0
+and Mip 0/Layer 1 contain **zero Draw fragments**. Three backend resource-level
+Clear records remain unmapped in this synthetic capture; their presence is not
+evidence of modification to the queried subresource.
+Per-primitive array routing, MSAA, 3D targets and other format storage fidelity
+are outside this validation.
+
+Reports accept both half-color patch versions and identify version **2** for
+the extended runtime, with `history_scope.subresource_filter` describing its
+limits. Build/package manifests verify and include the extension patch. Complete
+22-patch source verification/build and worker/CLI builds **421/422** pass.
+Runtime SHA-256:
+`497eec5449f6f3358127ff2ae230baf8428137ec56832197d2c1638108544ff9`;
+extension SHA-256:
+`093a131d33bd9d9fc2488de84d29862a037cdfece267f3bc23ff0ca331b8c046`.
+
+Evidence: `half-blend-mip1` and `half-blend-array1`, each containing native
+`gpu.json`, failing `before` and verified `final` reports. The array directory
+also retains `other-layer-before`, `other-layer-final` and `other-mip-final`.
+The initial positive `after` reports precede the negative-control filtering fix;
+final acceptance uses `final`. Saved-report checks verify native component
+values, primitive identities, requested subresources and negative Draw exclusion:
+**3 passed** including setup/cleanup, **4 ms** (`half-color-subresources1.txt`).
+GPU checks were serial and restricted to these two tiny reproductions and the
+specific subresource faults. An inspected BF1 multi-mip candidate, creation
+**238058**, has only PS read uses in the selected capture prefix
+(`bf1-mip-history-source1`); it is not claimed as a real-sample fragment proof.
+Full sample and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

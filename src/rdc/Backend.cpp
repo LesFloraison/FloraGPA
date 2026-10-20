@@ -317,7 +317,8 @@ class Session {
         }
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12HalfColorHistoryPatchVersion"))) {
             halfColorHistoryPatch = patch();
-            if (halfColorHistoryPatch != 1) throw std::runtime_error("Unsupported DX12 half-color history patch version");
+            if (halfColorHistoryPatch != 1 && halfColorHistoryPatch != 2)
+                throw std::runtime_error("Unsupported DX12 half-color history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -2295,9 +2296,14 @@ Json runRdcJob(const Json &job) {
                                         : "Pixel values and test-failure reasons retain RenderDoc's backend limitations."}}}}});
     result["resource_name"] = nullptr;
     if (dx12) {
-        result["history_scope"]["intermediate_color_storage"] = session.halfColorHistoryPatch
+        result["history_scope"]["intermediate_color_storage"] = session.halfColorHistoryPatch >= 2
+            ? "RGBA16_FLOAT single-sample 2D targets use original-format GPU scratch storage at the selected mip/layer after each fragment; shader output remains float32. Other formats retain backend reconstruction."
+            : session.halfColorHistoryPatch
             ? "RGBA16_FLOAT single-mip/single-layer/single-sample 2D targets use original-format GPU scratch storage after each fragment; shader output remains float32. Other formats retain backend reconstruction."
             : "Backend reconstruction: intermediate colors can be blended at a different precision from the original target, then converted on the CPU. Final event values do not validate intermediate fragments.";
+        if (session.halfColorHistoryPatch >= 2)
+            result["history_scope"]["subresource_filter"] =
+                "Draws outside all known 2D RTV/DSV mip/layer ranges are omitted. Unknown view layouts and resource operations remain candidates; this does not validate per-primitive array-layer routing.";
     }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(

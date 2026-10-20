@@ -54,6 +54,43 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void halfColorHistorySubresources() {
+        const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the half-color mip/array history evidence directory");
+        for (const auto &name : {QString("half-blend-mip1"), QString("half-blend-array1")}) {
+            const auto native = read(root + '/' + name + "/gpu.json");
+            const auto report = read(root + '/' + name + "/final/result.json");
+            QCOMPARE(report.at("backend_dx12_half_color_history_patch"), Json(2));
+            const auto &scope = report.at("history_scope").at("replay_consistency");
+            QCOMPARE(scope.at("mip"), native.at("mip")); QCOMPARE(scope.at("layer"), native.at("layer"));
+            QCOMPARE(scope.at("history_boundary").at("status"), Json("matches_selected_texel"));
+            size_t fragment{};
+            for (const auto &row : report.at("history")) {
+                if (row.value("execution", Json()) != "3") continue;
+                QVERIFY(fragment < 3); QCOMPARE(row.at("primitiveID").get<size_t>(), fragment);
+                for (size_t c=0; c<4; ++c) {
+                    const auto bits = native.at("prefix_half_words")[fragment][c].get<uint16_t>();
+                    QVERIFY(bits > 0x400 && bits < 0x7c00);
+                    QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                        std::ldexp(1.0 + double(bits & 1023) / 1024.0, int(bits >> 10) - 15));
+                }
+                ++fragment;
+            }
+            QCOMPARE(fragment, size_t(3));
+        }
+        const auto missing = read(root + "/half-blend-mip1/before/result.json");
+        QCOMPARE(std::count_if(missing.at("history").begin(), missing.at("history").end(),
+            [](const Json &row) { return row.value("execution", Json()) == "3"; }), 1);
+        const auto wrongLayer = read(root + "/half-blend-array1/other-layer-before/result.json");
+        QCOMPARE(std::count_if(wrongLayer.at("history").begin(), wrongLayer.at("history").end(),
+            [](const Json &row) { return row.value("execution", Json()).is_string(); }), 6);
+        for (const auto &name : {QString("other-layer-final"), QString("other-mip-final")}) {
+            const auto report = read(root + "/half-blend-array1/" + name + "/result.json");
+            QVERIFY(report.at("history_scope").contains("subresource_filter"));
+            for (const auto &row : report.at("history"))
+                QVERIFY(!row.value("execution", Json()).is_string());
+        }
+    }
     void halfColorFragmentHistory() {
         const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the half-color fixture and BF1 history evidence directory");

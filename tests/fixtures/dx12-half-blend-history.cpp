@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -14,7 +14,10 @@
 using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr))); }
 int main(int argc, char **argv) try {
-    if (argc != 3) throw std::runtime_error("Expected RenderDoc DLL and capture prefix");
+    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mip|array");
+    const std::string mode = argc == 4 ? argv[3] : "base";
+    if (mode != "base" && mode != "mip" && mode != "array") throw std::runtime_error("Invalid subresource mode");
+    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" ? 1 : 0;
     const auto library = LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -54,15 +57,22 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     blend.BlendOp = blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     ComPtr<ID3D12PipelineState> pipeline; check(device->CreateGraphicsPipelineState(&p, IID_PPV_ARGS(&pipeline)));
     D3D12_HEAP_PROPERTIES heap{}; heap.Type = D3D12_HEAP_TYPE_DEFAULT;
-    D3D12_RESOURCE_DESC texture{}; texture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; texture.Width = texture.Height = 16;
-    texture.DepthOrArraySize = texture.MipLevels = 1; texture.SampleDesc.Count = 1;
+    D3D12_RESOURCE_DESC texture{}; texture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; texture.Width = texture.Height = 16 << mip;
+    texture.DepthOrArraySize = UINT16(layer + 1); texture.MipLevels = UINT16(mip + 1); texture.SampleDesc.Count = 1;
+    const UINT subresource = mip + layer * texture.MipLevels;
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
         D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&target)));
     D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 1;
     ComPtr<ID3D12DescriptorHeap> rtvs; check(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&rtvs)));
-    const auto rtv = rtvs->GetCPUDescriptorHandleForHeapStart(); device->CreateRenderTargetView(target.Get(), nullptr, rtv);
-    D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,0,1,0,&fp,nullptr,nullptr,&size);
+    const auto rtv = rtvs->GetCPUDescriptorHandleForHeapStart();
+    D3D12_RENDER_TARGET_VIEW_DESC view{}; view.Format = texture.Format;
+    if (layer) {
+        view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY; view.Texture2DArray.MipSlice = mip;
+        view.Texture2DArray.FirstArraySlice = layer; view.Texture2DArray.ArraySize = 1;
+    } else { view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; view.Texture2D.MipSlice = mip; }
+    device->CreateRenderTargetView(target.Get(), &view, rtv);
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,subresource,1,0,&fp,nullptr,nullptr,&size);
     const UINT64 stride = (size + 511) & ~UINT64(511);
     heap.Type = D3D12_HEAP_TYPE_READBACK;
     D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * 3;
@@ -81,9 +91,10 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
             " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(n) + ": ID3D12GraphicsCommandListDrawInstanced";
         list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1)); list->DrawInstanced(n*3,1,0,0); list->EndEvent();
         D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition = {target.Get(),D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_COPY_SOURCE};
+        barrier.Transition = {target.Get(),subresource,D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_COPY_SOURCE};
         list->ResourceBarrier(1,&barrier);
         D3D12_TEXTURE_COPY_LOCATION src{}; src.pResource=target.Get(); src.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        src.SubresourceIndex = subresource;
         D3D12_TEXTURE_COPY_LOCATION dst{}; dst.pResource=readback.Get(); dst.Type=D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
         dst.PlacedFootprint=fp; dst.PlacedFootprint.Offset=stride*(n-1); list->CopyTextureRegion(&dst,0,0,0,&src,nullptr);
         std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
@@ -95,7 +106,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     if (waited!=WAIT_OBJECT_0) throw std::runtime_error("GPU fixture timed out");
     if (!api->EndFrameCapture(device.Get(),nullptr)) throw std::runtime_error("Capture failed");
     void *mapped{}; D3D12_RANGE range{0,SIZE_T(buffer.Width)},none{}; check(readback->Map(0,&range,&mapped));
-    std::cout << "{\"x\":5,\"y\":5,\"prefix_half_words\":[";
+    std::cout << "{\"x\":5,\"y\":5,\"mip\":" << mip << ",\"layer\":" << layer << ",\"subresource\":" << subresource << ",\"prefix_half_words\":[";
     for (UINT n=0;n<3;++n) {
         const auto words=reinterpret_cast<const uint16_t *>(static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+8*5);
         std::cout << (n ? ",[" : "["); for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << words[c]; std::cout << ']';

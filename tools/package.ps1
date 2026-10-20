@@ -65,6 +65,7 @@ $readOnlyRoundtripPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx1
 $cubeCoordinatesPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-cube-coordinates.patch'
 $vertexInputsPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-vertex-inputs.patch'
 $halfColorHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-half-color-history.patch'
+$historySubresourcesPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-history-subresources.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -93,7 +94,9 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dxil_prepared_compute_patch_version -ne 1 -or
         $patchManifest.dx12_placed_heap_restore_patch_version -ne 1 -or
         $patchManifest.dx12_depth_roundtrip_patch_version -ne 2 -or
-        $patchManifest.dx12_half_color_history_patch_version -ne 1 -or
+        $patchManifest.dx12_half_color_history_patch_version -ne 2 -or
+        $patchManifest.dx12_history_subresources_patch_version -ne 1 -or
+        $patchManifest.dx12_history_subresources_patch_sha256 -ne (Get-PackageSha256 $historySubresourcesPatchPath) -or
         $patchManifest.dx12_half_color_history_patch_sha256 -ne (Get-PackageSha256 $halfColorHistoryPatchPath) -or
         $patchManifest.dx12_vertex_inputs_patch_version -ne 1 -or
         $patchManifest.dx12_vertex_inputs_patch_sha256 -ne (Get-PackageSha256 $vertexInputsPatchPath) -or
@@ -227,6 +230,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $cubeCoordinatesPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $vertexInputsPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $halfColorHistoryPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $historySubresourcesPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

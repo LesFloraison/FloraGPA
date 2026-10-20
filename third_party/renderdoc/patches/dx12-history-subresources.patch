@@ -1,0 +1,146 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -94,7 +94,7 @@
+ 
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12HalfColorHistoryPatchVersion()
+ {
+-  return 1;
++  return 2;
+ }
+ 
+ struct D3D12CopyPixelParams
+@@ -809,6 +809,66 @@
+     }
+   }
+ 
++  bool OverlapsSelectedSubresource(const D3D12_RENDER_TARGET_VIEW_DESC &view) const
++  {
++    const Subresource &sub = m_CallbackInfo.targetSubresource;
++    switch(view.ViewDimension)
++    {
++      case D3D12_RTV_DIMENSION_TEXTURE2D:
++        return sub.mip == view.Texture2D.MipSlice && sub.slice == 0;
++      case D3D12_RTV_DIMENSION_TEXTURE2DARRAY:
++        return sub.mip == view.Texture2DArray.MipSlice &&
++               sub.slice >= view.Texture2DArray.FirstArraySlice &&
++               sub.slice - view.Texture2DArray.FirstArraySlice < view.Texture2DArray.ArraySize;
++      case D3D12_RTV_DIMENSION_TEXTURE2DMS: return sub.mip == 0 && sub.slice == 0;
++      case D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY:
++        return sub.mip == 0 && sub.slice >= view.Texture2DMSArray.FirstArraySlice &&
++               sub.slice - view.Texture2DMSArray.FirstArraySlice < view.Texture2DMSArray.ArraySize;
++      default: return true;    // Unknown layouts remain candidates, never silently omitted.
++    }
++  }
++
++  bool OverlapsSelectedSubresource(const D3D12_DEPTH_STENCIL_VIEW_DESC &view) const
++  {
++    const Subresource &sub = m_CallbackInfo.targetSubresource;
++    switch(view.ViewDimension)
++    {
++      case D3D12_DSV_DIMENSION_TEXTURE2D:
++        return sub.mip == view.Texture2D.MipSlice && sub.slice == 0;
++      case D3D12_DSV_DIMENSION_TEXTURE2DARRAY:
++        return sub.mip == view.Texture2DArray.MipSlice &&
++               sub.slice >= view.Texture2DArray.FirstArraySlice &&
++               sub.slice - view.Texture2DArray.FirstArraySlice < view.Texture2DArray.ArraySize;
++      case D3D12_DSV_DIMENSION_TEXTURE2DMS: return sub.mip == 0 && sub.slice == 0;
++      case D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY:
++        return sub.mip == 0 && sub.slice >= view.Texture2DMSArray.FirstArraySlice &&
++               sub.slice - view.Texture2DMSArray.FirstArraySlice < view.Texture2DMSArray.ArraySize;
++      default: return true;
++    }
++  }
++
++  bool HasOverlappingAttachment(const D3D12RenderState &state) const
++  {
++    const ResourceId target = GetResID(m_CallbackInfo.targetImage);
++    bool found = false;
++    for(const D3D12Descriptor &rt : state.rts)
++    {
++      if(rt.GetResResourceId() != target)
++        continue;
++      found = true;
++      if(OverlapsSelectedSubresource(rt.GetRTV()))
++        return true;
++    }
++    if(state.dsv.GetResResourceId() == target)
++    {
++      found = true;
++      if(OverlapsSelectedSubresource(state.dsv.GetDSV()))
++        return true;
++    }
++    // UAV/unknown targets are not proven absent by an attachment-range check.
++    return !found;
++  }
++
+   // Returns the render target index that corresponds to the target image for pixel history.
+   uint32_t GetPixelHistoryRenderTargetIndex(const D3D12RenderState &renderstate)
+   {
+@@ -820,7 +880,7 @@
+     for(uint32_t i = 0; i < renderstate.rts.size(); i++)
+     {
+       ResourceId id = renderstate.rts[i].GetResResourceId();
+-      if(id == targetId)
++      if(id == targetId && OverlapsSelectedSubresource(renderstate.rts[i].GetRTV()))
+       {
+         targetIndex = i;
+         break;
+@@ -864,6 +924,14 @@
+ 
+     m_SavedState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
+     D3D12RenderState pipeState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
++
++    // Resource usage is whole-resource. Do not manufacture fragments on a mip
++    // or layer outside all of this Draw's actual views of that resource.
++    if(!HasOverlappingAttachment(pipeState))
++    {
++      m_Events.removeIf([eid](uint32_t event) { return event == eid; });
++      return;
++    }
+ 
+     pipeState.rts.clear();
+     pipeState.dsv = *m_CallbackInfo.dsDescriptor;
+@@ -2852,6 +2920,8 @@
+   rtvDesc.Format = typedFmt;
+   rtvDesc.ViewDimension = imageDesc.SampleDesc.Count > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS
+                                                          : D3D12_RTV_DIMENSION_TEXTURE2D;
++  if(imageDesc.SampleDesc.Count == 1)
++    rtvDesc.Texture2D.MipSlice = sub.mip;
+ 
+   if(imageDesc.DepthOrArraySize > 1)
+   {
+@@ -2923,6 +2993,8 @@
+   dsvDesc.Format = imageDesc.Format;
+   dsvDesc.ViewDimension = imageDesc.SampleDesc.Count > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS
+                                                          : D3D12_DSV_DIMENSION_TEXTURE2D;
++  if(imageDesc.SampleDesc.Count == 1)
++    dsvDesc.Texture2D.MipSlice = sub.mip;
+ 
+   if(imageDesc.DepthOrArraySize > 1)
+   {
+@@ -2994,10 +3066,9 @@
+   resources.dstBuffer = dstBuffer;
+ 
+   // Keep full-precision shader output separate from half-float blend storage.
+-  // Other formats, arrays/mips and MSAA retain the upstream path for now.
++  // Other formats and MSAA retain the upstream path for now.
+   if(desc.Format == DXGI_FORMAT_R16G16B16A16_FLOAT &&
+-     desc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && desc.SampleDesc.Count == 1 &&
+-     desc.DepthOrArraySize == 1 && desc.MipLevels == 1)
++     desc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && desc.SampleDesc.Count == 1)
+   {
+     imageDesc = desc;
+     imageDesc.Alignment = 0;
+@@ -3024,7 +3095,10 @@
+       return false;
+     }
+     D3D12_CPU_DESCRIPTOR_HANDLE postRtv = resources.postModHeap->GetCPUDescriptorHandleForHeapStart();
+-    m_pDevice->CreateRenderTargetView(resources.postModImage, NULL, postRtv);
++    // Preserve the requested mip and layer for both rendering and raw readback.
++    // A null description would bind mip zero and all layers of an array.
++    rtvDesc.Format = desc.Format;
++    m_pDevice->CreateRenderTargetView(resources.postModImage, &rtvDesc, postRtv);
+     resources.postModDescriptor = GetWrapped(postRtv);
+     resources.postModImage->SetName(L"Pixel History Half Color Postmod");
+   }
