@@ -9514,6 +9514,79 @@ Ignored evidence: `hellblade-radiance-cache-repeat1.json`,
 and no GPA/Python modules or PixelHistory calls in the two diagnostic processes.
 Full replay fidelity and portable acceptance remain unfinished.
 
+### Check the radiance-cache allocation budget
+
+The argument writer **17000 / source 586368 / RDC 25576** runs
+`SetupProbeIndirectArgsCS`, PSO **512817**, **6,732 bytes**, SHA-256
+`490841604088c40c906366261daaa03fc376b5ce3334e9f577d31a2d7d776570`.
+The original directory export matches the bound shader. It reads scalar
+`ProbeTraceAllocator` **570577** and copies that count to the Z component of
+border-fixup arguments **562234**. A paired observation gives **113 -> 120**
+input tasks and exactly **(3,3,113) -> (3,3,120)** output arguments; the full
+root buffer **510820** is unchanged. Argument generation does not explain
+the changing count in this pair.
+
+The counter's preceding writer is
+**16988 / source 586352 / RDC 25540**, `AllocateProbeTracesCS`, PSO **511260**,
+**33,360 bytes**, SHA-256
+`7894a72075225484a9559207da1c8644081135bf028b707b2458c7413793acc0`.
+This original export also matches. The direct dispatch is **48 x 12 x 12**
+groups of **4 x 4 x 4** threads, covering four **48-cubed** clipmaps.
+At its preceding execution marker **25539**, both observations have zero task
+counter **570577**, zero two-word cost accumulator **570497**, update bucket
+**516514 = 11**, and boundary budget **569029 = 960**. Full last-used and
+last-traced frame arrays **559856 / 512096**, and root buffer **510820**, are
+exact. There are two indirection-ID changes among the same **1,310** valid
+grid cells, with identical frame records after grid-cell alignment.
+
+The shader computes priority from the last-used/traced frames and clipmap.
+Distance determines task cost **1**, **4** or **16**. For candidates in the
+boundary priority bucket, `%116` atomically adds the cost to cost word **1**;
+`%117/%118` reject the candidate when the returned old total plus its cost
+exceeds the boundary budget. The reservation still advances for rejected
+candidates. Accepted candidates atomically add their cost to word **0** and
+append their task through `%127`. Therefore different atomic arrival orders
+can select different weighted prefixes and task counts without any changed
+budget constant. This is an inference from the actual shader, not an inferred
+missing barrier or a proposed change to its allocation policy.
+
+`tests/fixtures/check-cache-allocation-budget.py` checks the observed task
+prefixes against this exact shader hash and layout. It verifies bounded
+readback sizes/digests, marker/API identity, zero pre-boundary accumulators,
+stable root/view observations, grid-cell/frame references, unique task IDs,
+clipmap membership, per-task distance costs, priority inclusion and both GPU
+cost totals. It rejects distance classifications close to thresholds instead
+of treating its CPU arithmetic as an exact GPU numerical emulator.
+
+For the separate post-allocation pair:
+
+| Quantity | First observation | Second observation |
+| --- | --- | --- |
+| Observed tasks | 114 | 114 |
+| Mandatory higher-priority tasks / cost | 30 / 240 | 30 / 240 |
+| Boundary candidates / aggregate cost | 427 / 4,492 | 427 / 4,492 |
+| Boundary budget / accepted cost | 960 / 948 | 960 / 960 |
+| Cost-4 / cost-16 selected tasks | 53 / 61 | 52 / 62 |
+| Total accepted cost, matching GPU word 0 | 1,188 | 1,200 |
+
+The unaccepted boundary candidates include cost **16**, so either accepted
+prefix is compatible with the budget condition (including the first's unused
+**12** units). The checker reports `compatible_with_order_dependent_budget`,
+not a fidelity pass. Its frame-record reference comes from the **independent
+pre-boundary replay pair**; these are not before/after snapshots of the same
+dispatch. An intentionally inconsistent GPU cost with a correctly updated
+digest is rejected. No application code, shader, tolerance or synchronization
+policy was changed. A corresponding original-GPA allocation observation and
+the remaining full-frame fidelity requirements are still unverified.
+
+Ignored evidence: `hellblade-cache17000-pipeline1`, `hellblade-cache16988-pipeline1`,
+`hellblade-cache-trace-allocator-history1`, `hellblade-cache-{setup,allocation}-shader1`,
+`hellblade-cache-setup-repeat1.json`, `hellblade-cache-allocation-{inputs,costs}1.json`
+and raw files, `hellblade-cache-budget-check2.json`, and `cache-budget-rejection1`.
+`hellblade-cache-budget-evidence1.json` verifies **42** readbacks' sizes/digests,
+repeat-only execution without PixelHistory, and no GPA/Python modules in the
+three native probes. The checker uses Python/numpy offline only.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
