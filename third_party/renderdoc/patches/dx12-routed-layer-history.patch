@@ -1,0 +1,177 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+--- a/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
++++ b/renderdoc/driver/d3d12/d3d12_pixelhistory.cpp
+@@ -92,6 +92,11 @@
+ const uint32_t D3D12_PIXEL_HISTORY_MIN_EVENTS_TO_STORE = 128;
+ const uint32_t D3D12_PIXEL_HISTORY_AVG_FRAGMENTS_PER_EVENT = 8;
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12RoutedLayerHistoryPatchVersion()
++{
++  return 1;
++}
++
+ extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12DefaultViewHistoryPatchVersion()
+ {
+   return 2;
+@@ -812,6 +817,108 @@
+       std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
+       cmd->ResourceBarrier(1, &barrier);
+     }
++  }
++
++  void ConfigureScratchViews(const D3D12RenderState &state)
++  {
++    if(m_CallbackInfo.targetDesc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D ||
++       m_CallbackInfo.targetDesc.DepthOrArraySize <= 1)
++      return;
++
++    const Subresource &sub = m_CallbackInfo.targetSubresource;
++    UINT first = sub.slice, count = 1;
++    const ResourceId target = GetResID(m_CallbackInfo.targetImage);
++    for(const D3D12Descriptor &rt : state.rts)
++    {
++      if(rt.GetResResourceId() != target || !OverlapsSelectedSubresource(rt.GetRTV(), true))
++        continue;
++      const D3D12_RENDER_TARGET_VIEW_DESC &view = rt.GetRTV();
++      if(view.ViewDimension == D3D12_RTV_DIMENSION_TEXTURE2DARRAY)
++      {
++        first = view.Texture2DArray.FirstArraySlice;
++        count = view.Texture2DArray.ArraySize;
++      }
++      else if(view.ViewDimension == D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY)
++      {
++        first = view.Texture2DMSArray.FirstArraySlice;
++        count = view.Texture2DMSArray.ArraySize;
++      }
++      else if(view.ViewDimension == D3D12_RTV_DIMENSION_UNKNOWN && view.Format == DXGI_FORMAT_UNKNOWN)
++      {
++        first = 0;
++        count = m_CallbackInfo.targetDesc.DepthOrArraySize;
++      }
++      break;
++    }
++    if(state.dsv.GetResResourceId() == target)
++    {
++      const D3D12_DEPTH_STENCIL_VIEW_DESC &view = state.dsv.GetDSV();
++      if(view.ViewDimension == D3D12_DSV_DIMENSION_TEXTURE2DARRAY)
++      {
++        first = view.Texture2DArray.FirstArraySlice;
++        count = view.Texture2DArray.ArraySize;
++      }
++      else if(view.ViewDimension == D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY)
++      {
++        first = view.Texture2DMSArray.FirstArraySlice;
++        count = view.Texture2DMSArray.ArraySize;
++      }
++      else if(view.ViewDimension == D3D12_DSV_DIMENSION_UNKNOWN && view.Format == DXGI_FORMAT_UNKNOWN)
++      {
++        first = 0;
++        count = m_CallbackInfo.targetDesc.DepthOrArraySize;
++      }
++    }
++
++    // SV_RenderTargetArrayIndex is relative to the attachment view. A selected-
++    // layer-only scratch view changes that routing (single-layer views can ignore
++    // the index). Preserve the original first layer and count on every Draw.
++    D3D12_RENDER_TARGET_VIEW_DESC rtv = m_CallbackInfo.typedColorDescriptor->GetRTV();
++    D3D12_DEPTH_STENCIL_VIEW_DESC dsv = m_CallbackInfo.dsDescriptor->GetDSV();
++    if(m_CallbackInfo.targetDesc.SampleDesc.Count > 1)
++    {
++      rtv.Texture2DMSArray.FirstArraySlice = dsv.Texture2DMSArray.FirstArraySlice = first;
++      rtv.Texture2DMSArray.ArraySize = dsv.Texture2DMSArray.ArraySize = count;
++    }
++    else
++    {
++      rtv.Texture2DArray.FirstArraySlice = dsv.Texture2DArray.FirstArraySlice = first;
++      rtv.Texture2DArray.ArraySize = dsv.Texture2DArray.ArraySize = count;
++    }
++    D3D12DebugManager *debug = m_pDevice->GetDebugManager();
++    m_pDevice->CreateDepthStencilView(m_CallbackInfo.dsImage, &dsv, debug->GetCPUHandle(PIXEL_HISTORY_DSV));
++    m_pDevice->CreateRenderTargetView(m_CallbackInfo.colorImage, &rtv, debug->GetCPUHandle(PIXEL_HISTORY_TYPED_RTV));
++    rtv.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
++    m_pDevice->CreateRenderTargetView(m_CallbackInfo.colorImage, &rtv, debug->GetCPUHandle(PIXEL_HISTORY_FLOAT_RTV));
++    if(m_CallbackInfo.postModImage)
++    {
++      rtv.Format = m_CallbackInfo.targetDesc.Format;
++      m_pDevice->CreateRenderTargetView(m_CallbackInfo.postModImage, &rtv, m_CallbackInfo.postModRtv);
++    }
++  }
++
++  void PrepareSelectedLayerMask(ID3D12GraphicsCommandListX *cmd)
++  {
++    D3D12_CPU_DESCRIPTOR_HANDLE handle = m_pDevice->GetDebugManager()->GetCPUHandle(PIXEL_HISTORY_DSV);
++    D3D12_DEPTH_STENCIL_VIEW_DESC full = m_CallbackInfo.dsDescriptor->GetDSV();
++    D3D12_DEPTH_STENCIL_VIEW_DESC selected = full;
++    D3D12_RECT pixel = {(LONG)m_CallbackInfo.x, (LONG)m_CallbackInfo.y,
++                        (LONG)m_CallbackInfo.x + 1, (LONG)m_CallbackInfo.y + 1};
++    cmd->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_STENCIL, 0.0f, 0, 1, &pixel);
++    if(selected.ViewDimension == D3D12_DSV_DIMENSION_TEXTURE2DARRAY)
++    {
++      selected.Texture2DArray.FirstArraySlice = m_CallbackInfo.targetSubresource.slice;
++      selected.Texture2DArray.ArraySize = 1;
++    }
++    else if(selected.ViewDimension == D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY)
++    {
++      selected.Texture2DMSArray.FirstArraySlice = m_CallbackInfo.targetSubresource.slice;
++      selected.Texture2DMSArray.ArraySize = 1;
++    }
++    // CPU RTV/DSV descriptors are consumed when recording each command.
++    m_pDevice->CreateDepthStencilView(m_CallbackInfo.dsImage, &selected, handle);
++    cmd->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_STENCIL, 0.0f, 1, 1, &pixel);
++    m_pDevice->CreateDepthStencilView(m_CallbackInfo.dsImage, &full, handle);
+   }
+ 
+   bool ShaderSelectsArrayLayer(const D3D12RenderState &state) const
+@@ -975,6 +1082,8 @@
+       return;
+     }
+ 
++    ConfigureScratchViews(pipeState);
++    PrepareSelectedLayerMask(cmd);
+     pipeState.rts.clear();
+     pipeState.dsv = *m_CallbackInfo.dsDescriptor;
+     ID3D12PipelineState *pso = GetPixelOcclusionPipeline(eid, pipeState);
+@@ -983,8 +1092,8 @@
+     // set the scissor
+     for(uint32_t i = 0; i < pipeState.views.size() && i < pipeState.scissors.size(); i++)
+       ScissorToPixel(pipeState.views[i], pipeState.scissors[i]);
+-    pipeState.stencilRefFront = 0;
+-    pipeState.stencilRefBack = 0;
++    pipeState.stencilRefFront = 1;
++    pipeState.stencilRefBack = 1;
+ 
+     pipeState.ApplyState(m_pDevice, cmd);
+ 
+@@ -1113,6 +1222,14 @@
+     origPSO->Fill(pipeDesc);
+ 
+     ModifyPSOForStencilIncrement(eid, pipeDesc, true);
++    // Only the requested physical slice has stencil 1; other array layers
++    // must not contribute to this pixel's coverage query.
++    pipeDesc.DepthStencilState.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
++    pipeDesc.DepthStencilState.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
++    pipeDesc.DepthStencilState.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
++    pipeDesc.DepthStencilState.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
++    pipeDesc.DepthStencilState.FrontFace.StencilWriteMask = 0;
++    pipeDesc.DepthStencilState.BackFace = pipeDesc.DepthStencilState.FrontFace;
+ 
+     bool dxil = IsPSOUsingDXIL(pipeDesc);
+ 
+@@ -1187,6 +1304,8 @@
+ 
+     m_SavedState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
+     D3D12RenderState &pipeState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
++
++    ConfigureScratchViews(pipeState);
+ 
+     // Get pre-modification values
+     size_t storeOffset = m_EventIndices.size() * sizeof(D3D12EventInfo);
+@@ -2221,6 +2340,8 @@
+ 
+     D3D12RenderState prevState = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
+     D3D12RenderState &state = m_pDevice->GetQueue()->GetCommandData()->GetCurRenderState();
++
++    ConfigureScratchViews(state);
+ 
+     uint32_t numFragmentsInEvent = m_EventFragments[eid];
+ 

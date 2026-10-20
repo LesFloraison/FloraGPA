@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve|default|routed|split0|split1. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -18,11 +18,13 @@ void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + s
 int main(int argc, char **argv) try {
     if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed")
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve" && mode != "default" && mode != "routed" && mode != "split0" && mode != "split1")
         throw std::runtime_error("Invalid subresource mode");
+    const bool split = mode == "split0" || mode == "split1";
+    const bool routed = mode == "routed" || split;
     const bool transfer = mode == "copy" || mode == "resolve";
-    const bool defaultView = mode == "default" || mode == "routed";
-    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || transfer ? 1 : 0;
+    const bool defaultView = mode == "default" || routed;
+    const UINT mip = mode == "base" || defaultView ? 0 : 1, layer = mode == "array" || mode == "rect" || mode == "routed" || mode == "split1" || transfer ? 1 : 0;
     const bool nativeOnly=GetEnvironmentVariableA("FLORA_FIXTURE_NATIVE",nullptr,0) != 0;
     const auto library = nativeOnly ? nullptr : LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
@@ -48,7 +50,13 @@ float4 vs(uint id : SV_VertexID) : SV_Position {
 struct GSOut { float4 pos : SV_Position; uint layer : SV_RenderTargetArrayIndex; nointerpolation uint primitive : TEXCOORD0; };
 [maxvertexcount(3)]
 void gs(triangle float4 vertices[3] : SV_Position, uint id : SV_PrimitiveID, inout TriangleStream<GSOut> stream) {
-    GSOut output; output.layer=1; output.primitive=id;
+    GSOut output;
+#if FLORA_SPLIT
+    output.layer=id == 2 ? 0 : 1;
+#else
+    output.layer=1;
+#endif
+    output.primitive=id;
     for (uint i=0;i<3;++i) { output.pos=vertices[i]; stream.Append(output); }
 }
 float4 ps(uint id : SV_PrimitiveID) : SV_Target {
@@ -57,17 +65,18 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
 }
 float4 psgs(GSOut input) : SV_Target { return ps(input.primitive); }
 )";
+    const D3D_SHADER_MACRO defines[] = {{"FLORA_SPLIT", split ? "1" : "0"}, {nullptr, nullptr}};
     const auto compile = [&](const char *entry, const char *profile) {
-        ComPtr<ID3DBlob> blob; const auto hr = D3DCompile(source, sizeof source, "half-blend-history", nullptr, nullptr,
+        ComPtr<ID3DBlob> blob; const auto hr = D3DCompile(source, sizeof source, "half-blend-history", defines, nullptr,
             entry, profile, D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &blob, &errors);
         if (FAILED(hr) && errors) std::cerr << static_cast<const char *>(errors->GetBufferPointer());
         check(hr); return blob;
     };
-    const auto vs = compile("vs", "vs_5_1"), ps = compile(mode == "routed" ? "psgs" : "ps", "ps_5_1");
+    const auto vs = compile("vs", "vs_5_1"), ps = compile(routed ? "psgs" : "ps", "ps_5_1");
     D3D12_GRAPHICS_PIPELINE_STATE_DESC p{}; p.pRootSignature = root.Get();
     p.VS = {vs->GetBufferPointer(), vs->GetBufferSize()}; p.PS = {ps->GetBufferPointer(), ps->GetBufferSize()};
     ComPtr<ID3DBlob> gs;
-    if (mode == "routed") { gs=compile("gs","gs_5_1"); p.GS={gs->GetBufferPointer(),gs->GetBufferSize()}; }
+    if (routed) { gs=compile("gs","gs_5_1"); p.GS={gs->GetBufferPointer(),gs->GetBufferSize()}; }
     p.SampleMask = UINT_MAX; p.SampleDesc.Count = 1; p.NumRenderTargets = 1; p.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
     p.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     p.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; p.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; p.RasterizerState.DepthClipEnable = TRUE;

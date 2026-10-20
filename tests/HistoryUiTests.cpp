@@ -54,6 +54,52 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void routedLayerHistory() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the routed-layer history evidence directory");
+        const auto negative=read(root + "/half-blend-routed1/other-layer-masked/result.json");
+        QCOMPARE(negative.at("history").size(),size_t(3));
+        for (const auto &row : negative.at("history"))
+            QCOMPARE(row.at("record_kind"),Json("resource_operation"));
+        for (int layer=0;layer<2;++layer) {
+            const auto report=read(root + "/half-blend-split1/" + (layer ? "layer1-scoped" : "layer0") + "/result.json");
+            if (layer) {
+                QCOMPARE(report.at("partial"),Json(true));
+                QCOMPARE(report.at("backend_dx12_routed_layer_history_patch"),Json(1));
+                QCOMPARE(report.at("history_scope").at("array_layer_test_reason_status"),Json("unverified"));
+            }
+            const auto native=read(root + "/half-blend-split1/" + (layer ? "gpu.json" : "native-layer0.json"));
+            QCOMPARE(report.at("history").size(),layer ? size_t(8) : size_t(4));
+            size_t fragment{};
+            for (const auto &row : report.at("history")) {
+                if (row.value("execution",Json()) != "3") continue;
+                QVERIFY(fragment < (layer ? 2 : 1));
+                const size_t nativePrefix=layer ? fragment : 2;
+                for (size_t c=0;c<4;++c) {
+                    const auto bits=native.at("prefix_half_words")[nativePrefix][c].get<uint16_t>();
+                    QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                        std::ldexp(1.0 + double(bits & 1023) / 1024.0,int(bits >> 10)-15));
+                }
+                ++fragment;
+            }
+            QCOMPARE(fragment,layer ? size_t(2) : size_t(1));
+            PixelHistoryView pixel; pixel.setContext("routed:layer",3,true); pixel.setDx12Resource(1,1001);
+            pixel.selectPixel(1001,5,5,0,layer,0); QVERIFY(pixel.finish(pixel.requestId(),report));
+            auto rows=pixel.findChild<QTreeWidget *>("historyRecords");
+            QCOMPARE(rows->topLevelItemCount(),int(report.at("history").size()));
+            rows->setCurrentItem(rows->topLevelItem(rows->topLevelItemCount()-1));
+            // This GS passes its color selector through TEXCOORD0; it does not
+            // output SV_PrimitiveID. An unavailable ID must not launch PS debugging.
+            QVERIFY(!action(pixel,"debugHistoryPixel")->isEnabled());
+            QSignalSpy jump(&pixel,&PixelHistoryView::eventRequested);
+            action(pixel,"locateHistoryEvent")->trigger();
+            QCOMPARE(jump.count(),1); QCOMPARE(jump[0][0].toULongLong(),3ULL);
+            if (!output_.isEmpty()) {
+                const auto file=output_ + "/routed-layer" + QString::number(layer) + ".json";
+                pixel.exportResult(file); QCOMPARE(read(file),report);
+            }
+        }
+    }
     void fixedLayerHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the fixed-layer history evidence directory");

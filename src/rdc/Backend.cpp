@@ -201,6 +201,7 @@ class Session {
     uint32_t halfColorHistoryPatch{};
     uint32_t resolveHistoryPatch{};
     uint32_t defaultViewHistoryPatch{};
+    uint32_t routedLayerHistoryPatch{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -333,6 +334,11 @@ class Session {
             defaultViewHistoryPatch = patch();
             if (defaultViewHistoryPatch != 1 && defaultViewHistoryPatch != 2)
                 throw std::runtime_error("Unsupported DX12 default-view history patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12RoutedLayerHistoryPatchVersion"))) {
+            routedLayerHistoryPatch = patch();
+            if (routedLayerHistoryPatch != 1)
+                throw std::runtime_error("Unsupported DX12 routed-layer history patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1452,6 +1458,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_half_color_history_patch", session.halfColorHistoryPatch},
         {"backend_dx12_resolve_history_patch", session.resolveHistoryPatch},
         {"backend_dx12_default_view_history_patch", session.defaultViewHistoryPatch},
+        {"backend_dx12_routed_layer_history_patch", session.routedLayerHistoryPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},
@@ -2378,11 +2385,20 @@ Json runRdcJob(const Json &job) {
             result["history_scope"]["subresource_filter"] =
                 "Draws outside all known 2D RTV/DSV mip/layer ranges are omitted. Unknown view layouts and resource operations remain candidates; this does not validate per-primitive array-layer routing.";
         result["history_scope"]["default_view_filter"] = session.defaultViewHistoryPatch
-            ? "Default typed 2D attachments select mip zero and all array layers; other mip draws are excluded. Per-primitive array routing remains unverified."
+            ? "Default typed 2D attachments select mip zero and all array layers; other mip draws are excluded. See array_layer_filter for Draw routing support."
             : "Default attachment ranges are not filtered by this runtime; history at other mips can contain unrelated Draw fragments.";
-        result["history_scope"]["array_layer_filter"] = session.defaultViewHistoryPatch >= 2
+        result["history_scope"]["array_layer_filter"] = session.routedLayerHistoryPatch
+            ? "Known 2D array attachment ranges are preserved in GPU scratch views. A selected-layer stencil mask filters Draw coverage; fragment counts and colors use the selected physical layer. Mesh/view-instancing and cross-layer test-failure reasons remain unverified."
+            : session.defaultViewHistoryPatch >= 2
             ? "Without a render-target array index output in the last VS/DS/GS stage, Draws only affect the view's first layer. Dynamic layer outputs, mesh shaders and view instancing remain unverified."
             : "This runtime does not exclude other array layers when the last vertex-processing stage has no layer-index output.";
+    }
+    if (dx12 && tex.arraysize > 1) {
+        result["partial"] = true;
+        result["history_scope"]["array_layer_test_reason_status"] = "unverified";
+        result["history_scope"]["limitations"].push_back(
+            "Array-layer coverage and color reconstruction do not validate failure reasons: "
+            "backend test queries can aggregate primitives from other layers. Those reasons remain unverified.");
     }
     if (session.depthRoundtripCopies)
         result["history_scope"]["limitations"].push_back(

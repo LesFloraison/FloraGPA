@@ -69,6 +69,7 @@ $historySubresourcesPatchPath = Join-Path $repo 'third_party/renderdoc/patches/d
 $resolveHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-resolve-history.patch'
 $defaultViewHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-default-view-history.patch'
 $fixedLayerHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-fixed-layer-history.patch'
+$routedLayerHistoryPatchPath = Join-Path $repo 'third_party/renderdoc/patches/dx12-routed-layer-history.patch'
 if ($PatchedRenderDocRoot) {
     $PatchedRenderDocRoot = [IO.Path]::GetFullPath($PatchedRenderDocRoot)
     $patchManifestPath = Join-Path $PatchedRenderDocRoot 'flora-d16-patch.json'
@@ -101,6 +102,8 @@ if ($PatchedRenderDocRoot) {
         $patchManifest.dx12_history_subresources_patch_version -ne 1 -or
         $patchManifest.dx12_resolve_history_patch_version -ne 1 -or
         $patchManifest.dx12_default_view_history_patch_version -ne 2 -or
+        $patchManifest.dx12_routed_layer_history_patch_version -ne 1 -or
+        $patchManifest.dx12_routed_layer_history_patch_sha256 -ne (Get-PackageSha256 $routedLayerHistoryPatchPath) -or
         $patchManifest.dx12_fixed_layer_history_patch_version -ne 1 -or
         $patchManifest.dx12_fixed_layer_history_patch_sha256 -ne (Get-PackageSha256 $fixedLayerHistoryPatchPath) -or
         $patchManifest.dx12_default_view_history_patch_sha256 -ne (Get-PackageSha256 $defaultViewHistoryPatchPath) -or
@@ -242,7 +245,7 @@ if ($patchedLibrary) {
     Copy-Item -LiteralPath $historySubresourcesPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $resolveHistoryPatchPath -Destination $rdcDestination
     Copy-Item -LiteralPath $defaultViewHistoryPatchPath -Destination $rdcDestination
-    Copy-Item -LiteralPath $fixedLayerHistoryPatchPath -Destination $rdcDestination
+    Copy-Item -LiteralPath $fixedLayerHistoryPatchPath, $routedLayerHistoryPatchPath -Destination $rdcDestination
 }
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force

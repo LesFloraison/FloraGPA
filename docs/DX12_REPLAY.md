@@ -7159,6 +7159,66 @@ The local runtime checkout required a process-scoped Git safe-directory setting
 after an ownership change; its pinned upstream commit was rechecked, and no
 global Git trust setting was changed.
 
+### GS array routing: selected-layer coverage and fragment reconstruction
+
+The dynamic-routing fault reproduced above is repaired for the tested 2D GS
+array paths by the twenty-sixth patch, `dx12-routed-layer-history.patch`.
+Previously, scratch RTV/DSV views exposed only the requested slice. This changed
+`SV_RenderTargetArrayIndex` routing, and a whole-Draw occlusion query could count
+primitives from another layer. Each Draw now reconstructs its original first
+slice/count in the scratch views. Coverage uses a scratch stencil mask: clear
+the bound range to zero, clear only the selected physical layer to one, then
+query with EQUAL/KEEP and reference one. Original capture resources are not used
+for this mask. Per-fragment stencil counts and color readbacks retain the selected
+physical slice while geometry keeps its original view-relative index.
+
+`half-blend-routed1/other-layer-masked` removes all six unrelated Draw fragments
+and retains the three actual Clears. `selected-layer-masked` preserves nine
+records, with all 12 selected-Draw color components matching native prefixes.
+The explicit single-slice view starting at Layer 1 remains correct in
+`half-blend-array1/routed-runtime-positive` (nine records, 12 exact components).
+
+The new `split0`/`split1` modes make the same GS route primitives 0/1 to Layer 1
+and primitive 2 to Layer 0. Primitive 1 outputs zero RGBA; it is a real fragment
+whose blend does not change the target, not a discarded invocation. A single
+capture plus an independent native Layer 0 prefix run provides the oracles:
+`half-blend-split1/{gpu.json,native-layer0.json,native_capture.rdc}`. The Layer 0
+query returns three Clears and one execution-3 fragment; Layer 1 returns three
+Clears and five Draw fragments, including exactly two at execution 3. All four
+Layer 0 and eight Layer 1 selected-Draw components match their corresponding
+native prefixes. This checks separation within a Draw, not only whole-Draw
+exclusion. Evidence is in `half-blend-split1/{layer0,layer1}`.
+
+One targeted BF1 single-layer regression, `bf1-particle-routed-history1`, retains
+all 23 records from `bf1-particle-clear-history1`. Event/fragment/primitive IDs,
+pre/post/shader colors and recorded culling/depth/stencil/discard fields are
+unchanged. Its selected texel is stable and the final boundary matches. This
+checks the mask's effect on the existing query; it does not resolve BF1's original
+frame fidelity or concurrency gaps. Saved-report UI checks for layer-specific
+row counts, native values, execution navigation, unavailable GS primitive IDs
+and JSON export pass: **3 passed**, **45 ms** (`routed-layer-ui1.txt`). After
+adding the partial-result contract, the focused UI check passes again: **3
+passed**, **48 ms** (`routed-layer-ui2.txt`).
+
+Runtime reports expose `backend_dx12_routed_layer_history_patch=1`, and the build
+and package manifests pin/include the new patch. The complete 26-patch source
+verification/build and application/CLI/UI builds **439–441** pass. Final runtime
+SHA-256: `08a5e40359277ff7cdef52e400c30a16edc844d56272afe81012e3ba94d844a8`;
+patch SHA-256: `fc48eb9b9893ac659f9c61e584045688df45ccae681f2f2855e5d8a29e508e01`.
+The first five fixture queries used the same implementation immediately before
+its version export was added; BF1 checked the final versioned runtime. One later
+`half-blend-split1/layer1-scoped` query verifies the new partial/unverified report
+contract and preserves all eight prior history rows. No fixture queries were
+repeated merely for the export addition.
+
+**Still unfinished:** per-layer test-failure queries can aggregate other layers;
+coverage/color agreement does not validate those reasons. Array texture reports
+are explicitly partial and label this reason status unverified. GS primitive-ID
+recovery, mesh/view-instancing, general MSAA and depth-array routing remain
+unverified. No original-sample/full portable acceptance item is promoted by
+these fixtures. GPU work for this repair was one new tiny capture, one native
+prefix run, six focused fixture queries and one existing BF1 query, serialized.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
