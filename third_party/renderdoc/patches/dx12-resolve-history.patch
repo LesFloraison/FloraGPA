@@ -1,0 +1,36 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_command_list1_wrap.cpp b/renderdoc/driver/d3d12/d3d12_command_list1_wrap.cpp
+index c9714de19..8a5367a1e 100644
+--- a/renderdoc/driver/d3d12/d3d12_command_list1_wrap.cpp
++++ b/renderdoc/driver/d3d12/d3d12_command_list1_wrap.cpp
+@@ -25,6 +25,11 @@
+ #include "d3d12_command_list.h"
+ #include "driver/dxgi/dxgi_common.h"
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12ResolveHistoryPatchVersion()
++{
++  return 1;
++}
++
+ template <typename SerialiserType>
+ bool WrappedID3D12GraphicsCommandList::Serialise_AtomicCopyBufferUINT(
+     SerialiserType &ser, ID3D12Resource *pDstBuffer, UINT64 DstOffset, ID3D12Resource *pSrcBuffer,
+@@ -463,10 +468,18 @@ bool WrappedID3D12GraphicsCommandList::Serialise_ResolveSubresourceRegion(
+     {
+       if(m_Cmd->InRerecordRange(m_Cmd->m_LastCmdListID))
+       {
+-        ID3D12GraphicsCommandList1 *list = m_Cmd->RerecordCmdList(m_Cmd->m_LastCmdListID);
++        ID3D12GraphicsCommandListX *list = m_Cmd->RerecordCmdList(m_Cmd->m_LastCmdListID);
++        uint32_t eventId = m_Cmd->HandlePreCallback(list, ActionFlags::Resolve);
+         Unwrap1(list)->ResolveSubresourceRegion(Unwrap(pDstResource), DstSubresource, DstX, DstY,
+                                                 Unwrap(pSrcResource), SrcSubresource, pSrcRect,
+                                                 Format, ResolveMode);
++        if(eventId && m_Cmd->m_ActionCallback->PostMisc(eventId, ActionFlags::Resolve, list))
++        {
++          Unwrap1(list)->ResolveSubresourceRegion(Unwrap(pDstResource), DstSubresource, DstX, DstY,
++                                                Unwrap(pSrcResource), SrcSubresource, pSrcRect,
++                                                Format, ResolveMode);
++          m_Cmd->m_ActionCallback->PostRemisc(eventId, ActionFlags::Resolve, list);
++        }
+       }
+     }
+     else

@@ -1,6 +1,7 @@
 #include "rdc/Assets.h"
 #include "rdc/InputAttribute.h"
 #include "rdc/ClearCoverage.h"
+#include "rdc/TransferCoverage.h"
 #include "application/ReplayMesh.h"
 #include <QFile>
 #include <QtTest>
@@ -32,6 +33,69 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void transferCoverage() {
+        const auto node=[](SDObject &parent,const char *name) {
+            return parent.AddAndOwnChild(new SDObject(rdcstr(name),"struct"_lit));
+        };
+        const auto integer=[&](SDObject &parent,const char *name,uint64_t value) {
+            auto field=node(parent,name); field->type.basetype=SDBasic::UnsignedInteger;
+            field->data.basic.u=value; return field;
+        };
+        constexpr uint64_t identity=9007199254740993ULL;
+        TextureDescription target{}; target.resourceId=resource(identity); target.dimension=2;
+        target.width=target.height=32; target.mips=2; target.arraysize=2;
+        target.format.type=ResourceFormatType::Regular; target.format.compType=CompType::Float;
+        auto source=target; source.resourceId=resource(identity+1); source.width=source.height=8;
+        source.mips=source.arraysize=1;
+        SDObject copy("ID3D12GraphicsCommandList::CopyTextureRegion"_lit,"chunk"_lit);
+        auto dst=node(copy,"dst"),src=node(copy,"src");
+        integer(*dst,"pResource",identity); integer(*dst,"Type",0); integer(*dst,"SubresourceIndex",3);
+        integer(*src,"pResource",identity+1); auto srcType=integer(*src,"Type",0); integer(*src,"SubresourceIndex",0);
+        auto dx=integer(copy,"DstX",4); integer(copy,"DstY",4); integer(copy,"DstZ",0);
+        auto box=node(copy,"pSrcBox");
+        integer(*box,"left",2); integer(*box,"top",1); integer(*box,"front",0);
+        integer(*box,"right",6); integer(*box,"bottom",5); integer(*box,"back",1);
+        const auto query=[&](const SDObject &chunk,uint32_t x=5,uint32_t y=5,uint32_t mip=1,uint32_t layer=1) {
+            return rdcTransferCoverage(chunk,target,{&source,1},Subresource(mip,layer,0),x,y);
+        };
+        auto result=query(copy); QCOMPARE(result.at("status"),Json("covered"));
+        QCOMPARE(result.at("source_resource_id"),Json("9007199254740994"));
+        QCOMPARE(result.at("destination_rectangle"),Json::array({4,4,8,8}));
+        QCOMPARE(query(copy,4,4).at("status"),Json("covered"));
+        QCOMPARE(query(copy,8,4).at("status"),Json("outside"));
+        QCOMPARE(query(copy,5,5,0).at("status"),Json("outside"));
+        QCOMPARE(query(copy,5,5,1,0).at("status"),Json("outside"));
+        dx->data.basic.u=UINT64_MAX; QCOMPARE(query(copy).at("status"),Json("unavailable")); dx->data.basic.u=4;
+        box->type.basetype=SDBasic::Null;
+        QCOMPARE(query(copy,11,11).at("status"),Json("covered"));
+        QCOMPARE(query(copy,12,11).at("status"),Json("outside"));
+        source.resourceId=resource(0); QCOMPARE(query(copy).at("status"),Json("unavailable"));
+        srcType->data.basic.u=1; auto placed=node(*src,"PlacedFootprint"),fp=node(*placed,"Footprint");
+        auto format=integer(*fp,"Format",10); integer(*fp,"Width",8); integer(*fp,"Height",8); integer(*fp,"Depth",1);
+        QCOMPARE(query(copy).at("status"),Json("covered")); // Footprint needs no texture object metadata.
+        format->data.basic.u=71; QCOMPARE(query(copy).at("status"),Json("unavailable"));
+        SDObject whole("ID3D12GraphicsCommandList::CopyResource"_lit,"chunk"_lit);
+        integer(whole,"pDstResource",identity); integer(whole,"pSrcResource",identity+1);
+        QCOMPARE(query(whole).at("status"),Json("covered"));
+        target.resourceId=resource(identity+1); QCOMPARE(query(whole).at("status"),Json("outside"));
+        target.resourceId=resource(identity);
+        SDObject resolve("ID3D12GraphicsCommandList1::ResolveSubresourceRegion"_lit,"chunk"_lit);
+        integer(resolve,"pDstResource",identity); integer(resolve,"pSrcResource",identity+1);
+        integer(resolve,"DstSubresource",3); integer(resolve,"SrcSubresource",0);
+        integer(resolve,"DstX",4); integer(resolve,"DstY",4);
+        auto rect=node(resolve,"pSrcRect");
+        for (const auto &[name,value] : std::map<std::string,int64_t>{{"left",0},{"top",0},{"right",4},{"bottom",4}}) {
+            auto field=node(*rect,name.c_str()); field->type.basetype=SDBasic::SignedInteger; field->data.basic.i=value;
+        }
+        source.resourceId=resource(identity+1); source.msSamp=4;
+        QCOMPARE(query(resolve).at("status"),Json("covered"));
+        QCOMPARE(query(resolve,8,5).at("status"),Json("outside"));
+        resolve.name="ID3D12GraphicsCommandList::ResolveSubresource"_lit;
+        QCOMPARE(query(resolve).at("status"),Json("unavailable")); // Full Resolve requires equal extents.
+        source.width=source.height=16;
+        QCOMPARE(query(resolve,15,15).at("status"),Json("covered"));
+        QCOMPARE(query(resolve,5,5,1,0).at("status"),Json("outside"));
+    }
     void clearCoverage() {
         SDObject chunk("ID3D12GraphicsCommandList::ClearRenderTargetView"_lit, "chunk"_lit);
         const auto node = [](SDObject &parent, const char *name) {

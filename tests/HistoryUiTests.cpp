@@ -54,6 +54,73 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void transferOperationHistory() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the transfer history evidence directory");
+        for (const auto &mode : {QString("copy"),QString("resolve")}) {
+            const auto base=root + "/half-blend-" + mode + "1/";
+            const auto report=read(base + (mode == "copy" ? "inside/result.json" : "patched/result.json"));
+            const auto native=read(base + "gpu.json"), outside=read(base + "outside/result.json");
+            QCOMPARE(report.at("history").size(),size_t(12));
+            QCOMPARE(outside.at("history").size(),size_t(9));
+            QCOMPARE(outside.at("history_scope").at("excluded_resource_operations").size(),size_t(3));
+            size_t fragment{},operations{};
+            for (const auto &row : report.at("history")) {
+                if (row.value("operation","") == mode.toStdString()) {
+                    QCOMPARE(row.at("coverage").at("status"),Json("covered"));
+                    QCOMPARE(row.at("coverage").at("destination_rectangle"),Json::array({4,4,8,8}));
+                    QCOMPARE(row.at("postMod").at("col").at("floatValue"),Json::array({1.,0.,0.,1.}));
+                    QVERIFY(row.at("primitiveID").is_null()); QVERIFY(row.at("shaderOut").is_null()); ++operations;
+                }
+                if (row.value("execution",Json()) != "3") continue;
+                QVERIFY(fragment < 3);
+                for (size_t c=0;c<4;++c) {
+                    const auto bits=native.at("prefix_half_words")[fragment][c].get<uint16_t>();
+                    QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),
+                        std::ldexp(1.0 + double(bits & 1023) / 1024.0,int(bits >> 10)-15));
+                }
+                ++fragment;
+            }
+            QCOMPARE(fragment,size_t(3)); QCOMPARE(operations,size_t(3));
+        }
+        const auto wrongLayer=read(root + "/half-blend-copy1/other-layer/result.json");
+        QVERIFY(wrongLayer.at("history").empty());
+        QCOMPARE(wrongLayer.at("history_scope").at("excluded_resource_operations").size(),size_t(6));
+        const auto old=read(root + "/half-blend-resolve1/inside/result.json");
+        QCOMPARE(old.at("history")[1].at("postMod").at("col").at("uintValue")[0],Json(0xdeadbeefU));
+        const auto report=read(root + "/half-blend-resolve2/transfer/result.json");
+        const auto native=read(root + "/half-blend-resolve2/gpu.json");
+        QCOMPARE(report.at("backend_dx12_resolve_history_patch"),Json(1));
+        size_t transfers{};
+        for (const auto &row : report.at("history")) {
+            if (row.value("operation","") != "resolve") continue;
+            const auto &words=native.at("transfer_half_words")[transfers++];
+            for (size_t c=0;c<4;++c) {
+                const auto bits=words[c].get<uint16_t>();
+                QVERIFY(bits == 0 || bits == 0x3c00);
+                QCOMPARE(row.at("postMod").at("col").at("floatValue")[c].get<double>(),bits ? 1. : 0.);
+            }
+        }
+        QCOMPARE(transfers,size_t(3));
+        QCOMPARE(report.at("history_scope").at("replay_consistency").at("history_boundary").at("status"),Json("matches_selected_texel"));
+        PixelHistoryView view; view.setContext("fixture:resolve",13,true); view.selectPixel(0,5,5,1,1,0);
+        QVERIFY(view.finish(view.requestId(),report));
+        auto rows=view.findChild<QTreeWidget *>("historyRecords"); rows->setCurrentItem(rows->topLevelItem(1));
+        QVERIFY(!action(view,"debugHistoryPixel")->isEnabled());
+        QSignalSpy locate(&view,&PixelHistoryView::eventRequested); action(view,"locateHistoryEvent")->trigger();
+        QCOMPARE(locate.count(),1); QCOMPARE(locate[0][0].toULongLong(),11ULL);
+        const auto guarded=read(root + "/half-blend-resolve1/unpatched-guard/result.json");
+        QVERIFY(guarded.at("partial").get<bool>());
+        QCOMPARE(guarded.at("history_scope").at("resource_operation_value_gaps").size(),size_t(3));
+        QCOMPARE(guarded.at("history_scope").at("replay_consistency").at("history_boundary").at("status"),Json("not_compared"));
+        QVERIFY(view.finish(view.requestId(),guarded));
+        QVERIFY(rows->topLevelItem(1)->text(4).contains("Value unavailable"));
+        QVERIFY(rows->topLevelItem(1)->text(3).contains("values unavailable"));
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/resolve-unavailable.json");
+            QCOMPARE(read(output_ + "/resolve-unavailable.json"),guarded);
+        }
+    }
     void clearOperationCoverage() {
         const auto root = qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the Clear coverage evidence directory");

@@ -6944,6 +6944,70 @@ PS-debug eligibility and export: **3 passed**, **103 ms**
 four focused fixture history queries and one BF1 history query. No runtime
 patch or new GPA/Python dependency was added. Full acceptance remains unfinished.
 
+### Pixel History Copy/Resolve coverage and regional Resolve values
+
+The worker now reconstructs destination coverage for `CopyResource`,
+`CopyTextureRegion`, `ResolveSubresource` and `ResolveSubresourceRegion` from
+their captured structured arguments. Region transfers decode the destination
+subresource, source box/rectangle, destination offsets and source dimensions;
+buffer sources use the placed footprint rather than a texture index. Resource
+identities remain decimal strings. Whole-resource copies cover all subresources.
+Region support is currently limited to regular single-plane 2D color textures;
+unsupported formats, invalid ranges and missing source metadata remain explicit
+coverage gaps. This does not claim support for compressed-coordinate conversion,
+depth/stencil planes, 3D transfers or every special Resolve mode.
+
+Two small GPU reproductions extend the existing half-blend fixture. `copy`
+copies source box `[2,1,6,5)` into destination `[4,4,8,8)` of Mip 1/Layer 1.
+`resolve` resolves a 4x MSAA source rectangle into that same destination region.
+Both positive queries at `(5,5)` retain three transfers, three Clears and six
+Draw fragments. Negative queries at `(2,2)` exclude the three transfers and
+retain nine records. The copy query for Layer 0 excludes six resource operations
+and returns no records. Excluded operations preserve their exact execution
+provenance rather than becoming fragments of an adjacent Draw.
+
+The Resolve reproduction also exposed an upstream 1.45 fault independent of
+coverage: `Serialise_ResolveSubresourceRegion` did not invoke the active replay
+analysis callback. Pixel History therefore returned its initialization sentinels
+`0xDEADBEEF`/`0xDEADF00D` as before/after color, even though the following Draw's
+final value matched the selected texel. The twenty-third patch,
+`dx12-resolve-history.patch`, dispatches the same Pre/PostMisc and optional
+repeat callbacks used by full-subresource Resolve. It exports
+`RENDERDOC_GetFloraDx12ResolveHistoryPatchVersion=1`.
+
+With the patch, all three regional Resolves report the initial Clear color
+before the operation and `(1,0,0,1)` afterward. A second native capture reads
+the destination immediately after each Resolve, before the Draw; all **12**
+components agree exactly with the native half words `[15360,0,0,15360]`.
+The selected last Resolve's history boundary also matches direct texel readback.
+For both Copy and Resolve, the three fragments of execution 3 match all **12**
+native prefix components. On an unpatched runtime, regional Resolve values are
+now null, with an explicit value gap, partial history, no numeric UI color and
+no boundary comparison. Uninitialized values are never interpreted as an
+unchanged pixel. These reproductions validate the analysis paths, not complete
+BF1/Talos/Hellblade2 fidelity.
+
+Evidence: `half-blend-copy1/{gpu.json,inside,outside,other-layer}`;
+`half-blend-resolve1/{gpu.json,inside,outside,patched,unpatched-guard}`;
+`half-blend-resolve2/{gpu.json,transfer}`. Resolve1 `inside` is the failing
+22-patch result; `patched` is the same capture with callback recovery. Resolve2
+adds the independent immediate readbacks. GPU work was serial and limited to
+three tiny captures and eight targeted history queries for these faults.
+
+The complete 23-patch source verification/build passes. Runtime SHA-256:
+`15a7506f7b2c0e77d6ef22481263f7feec8f763ec8fb5a272b1dbe6e4e2d1f2f`;
+patch SHA-256:
+`b441aea780102c0a45a2f1eb660e9a6c7238aecb8beeecc85e44b6b2176a4b3e`.
+Build/package scripts verify the manifest and ship the new patch source;
+PowerShell syntax checks pass. App/worker/CLI/test builds **426–429** pass.
+Focused transfer-field tests cover offsets, edge exclusion, layers, overflow,
+null source boxes, footprints, source metadata, full Resolve extents and 64-bit
+identities: **3 passed**, including setup/cleanup, **1 ms**
+(`transfer-coverage-unit1.txt`). The saved-report UI check verifies native values,
+exact transfer navigation, PS-debug exclusion, unpatched-runtime presentation
+and export: **3 passed**, **33 ms** (`transfer-history-ui1.txt`).
+Full sample and portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

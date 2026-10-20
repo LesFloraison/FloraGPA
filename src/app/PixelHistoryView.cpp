@@ -48,6 +48,7 @@ QString scalar(const Json &v) {
     return QString::fromStdString(v.is_string() ? v.get<std::string>() : v.dump());
 }
 QString color(const Json &row, const char *key) {
+    if (row.value("value_status", "") == "unavailable_resolve_callback") return "Value unavailable";
     if (row.value("record_kind", "") == "observed_event_depth_boundary") {
         const auto &value = row.at(std::string(key) == "preMod" ? "pre" : "post");
         return scalar(value.at("depth")) + " (raw " + scalar(value.at("raw_unorm16")) + ')';
@@ -73,6 +74,7 @@ QString color(const Json &row, const char *key) {
 }
 QString outcome(const Json &r) {
     if (r.value("record_kind", "") == "resource_operation") {
+        if (r.value("value_status", "") == "unavailable_resolve_callback") return "Resource operation · values unavailable";
         const auto coverage = r.value("coverage", Json::object());
         if (coverage.value("status", "") == "unavailable") return "Resource operation · coverage unavailable";
         return r.value("pixel_value_changed", false) ? "Resource operation · selected value changed"
@@ -500,9 +502,12 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
         summary_->setText("Partial history · " + summary_->text());
     const auto excluded = scope.value("excluded_resource_operations", Json::array()).size();
     const auto coverageGaps = scope.value("resource_operation_coverage_gaps", Json::array()).size();
+    const auto valueGaps = scope.value("resource_operation_value_gaps", Json::array()).size();
     if (excluded || coverageGaps)
         summary_->setText(summary_->text() + QString("\n%1 resource operations excluded by captured coverage · %2 coverage gaps")
             .arg(excluded).arg(coverageGaps));
+    if (valueGaps)
+        summary_->setText(summary_->text() + QString("\n%1 resource operations have unavailable values").arg(valueGaps));
     if (const auto refresh = result.value("depth_roundtrip", Json()); refresh.is_object())
         summary_->setText(summary_->text() +
             QString("\nExperimental D32/D32S8 depth refresh: %1 completed depth refreshes for the selected event. "

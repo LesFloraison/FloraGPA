@@ -1,5 +1,5 @@
 // MSVC C++20; include third_party/renderdoc; link d3d12 dxgi d3dcompiler.
-// Args: RenderDoc DLL, capture prefix, optional mip|array|rect. Independent GPU prefix draws are the
+// Args: RenderDoc DLL, capture prefix, optional mip|array|rect|copy|resolve. Independent GPU prefix draws are the
 // oracle for the three fragments of execution 3, not CPU half conversions.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -14,10 +14,12 @@
 using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr))); }
 int main(int argc, char **argv) try {
-    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mip|array|rect");
+    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional mode");
     const std::string mode = argc == 4 ? argv[3] : "base";
-    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect") throw std::runtime_error("Invalid subresource mode");
-    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" || mode == "rect" ? 1 : 0;
+    if (mode != "base" && mode != "mip" && mode != "array" && mode != "rect" && mode != "copy" && mode != "resolve")
+        throw std::runtime_error("Invalid subresource mode");
+    const bool transfer = mode == "copy" || mode == "resolve";
+    const UINT mip = mode == "base" ? 0 : 1, layer = mode == "array" || mode == "rect" || transfer ? 1 : 0;
     const auto library = LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -63,7 +65,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
         D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&target)));
-    D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 1;
+    D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 2;
     ComPtr<ID3D12DescriptorHeap> rtvs; check(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&rtvs)));
     const auto rtv = rtvs->GetCPUDescriptorHandleForHeapStart();
     D3D12_RENDER_TARGET_VIEW_DESC view{}; view.Format = texture.Format;
@@ -72,10 +74,20 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         view.Texture2DArray.FirstArraySlice = layer; view.Texture2DArray.ArraySize = 1;
     } else { view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; view.Texture2D.MipSlice = mip; }
     device->CreateRenderTargetView(target.Get(), &view, rtv);
+    ComPtr<ID3D12Resource> transferSource;
+    auto sourceRtv = rtv; sourceRtv.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    if (transfer) {
+        auto sourceTexture = texture; sourceTexture.Width = sourceTexture.Height = mode == "copy" ? 8 : 16;
+        sourceTexture.MipLevels = sourceTexture.DepthOrArraySize = 1;
+        sourceTexture.SampleDesc.Count = mode == "copy" ? 1 : 4;
+        check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &sourceTexture,
+            D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&transferSource)));
+        device->CreateRenderTargetView(transferSource.Get(), nullptr, sourceRtv);
+    }
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,subresource,1,0,&fp,nullptr,nullptr,&size);
     const UINT64 stride = (size + 511) & ~UINT64(511);
     heap.Type = D3D12_HEAP_TYPE_READBACK;
-    D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * 3;
+    D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * (transfer ? 6 : 3);
     buffer.Height = buffer.DepthOrArraySize = buffer.MipLevels = 1; buffer.SampleDesc.Count = 1; buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     ComPtr<ID3D12Resource> readback; check(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&buffer,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&readback)));
     D3D12_COMMAND_QUEUE_DESC q{}; ComPtr<ID3D12CommandQueue> queue; check(device->CreateCommandQueue(&q,IID_PPV_ARGS(&queue)));
@@ -84,24 +96,57 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     list->SetGraphicsRootSignature(root.Get()); list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     D3D12_VIEWPORT vp{0,0,16,16,0,1}; D3D12_RECT rect{0,0,16,16}; list->RSSetViewports(1,&vp); list->RSSetScissorRects(1,&rect);
     list->OMSetRenderTargets(1,&rtv,FALSE,nullptr);
+    if (transfer) {
+        const float red[]{1,0,0,1}; list->ClearRenderTargetView(sourceRtv,red,0,nullptr);
+        D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition = {transferSource.Get(),0,D3D12_RESOURCE_STATE_RENDER_TARGET,
+            mode == "copy" ? D3D12_RESOURCE_STATE_COPY_SOURCE : D3D12_RESOURCE_STATE_RESOLVE_SOURCE};
+        list->ResourceBarrier(1,&barrier);
+    }
     const float initial[]{0.027862548828125f,0.0273284912109375f,0.024871826171875f,0.3974609375f};
-    for (UINT n=1;n<=3;++n) {
-        list->ClearRenderTargetView(rtv,initial,0,nullptr);
-        if (mode == "rect") {
-            const float red[]{1,0,0,1}; const D3D12_RECT clearRect{0,0,4,4};
-            list->ClearRenderTargetView(rtv,red,1,&clearRect);
-        }
-        const auto marker = "Flora DX12 execution " + std::to_string(n) + " record " + std::to_string(n) +
-            " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(n) + ": ID3D12GraphicsCommandListDrawInstanced";
-        list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1)); list->DrawInstanced(n*3,1,0,0); list->EndEvent();
+    const auto readTarget = [&](UINT slot) {
         D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Transition = {target.Get(),subresource,D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_COPY_SOURCE};
         list->ResourceBarrier(1,&barrier);
         D3D12_TEXTURE_COPY_LOCATION src{}; src.pResource=target.Get(); src.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
         src.SubresourceIndex = subresource;
         D3D12_TEXTURE_COPY_LOCATION dst{}; dst.pResource=readback.Get(); dst.Type=D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-        dst.PlacedFootprint=fp; dst.PlacedFootprint.Offset=stride*(n-1); list->CopyTextureRegion(&dst,0,0,0,&src,nullptr);
+        dst.PlacedFootprint=fp; dst.PlacedFootprint.Offset=stride*slot; list->CopyTextureRegion(&dst,0,0,0,&src,nullptr);
         std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
+    };
+    for (UINT n=1;n<=3;++n) {
+        list->ClearRenderTargetView(rtv,initial,0,nullptr);
+        if (mode == "rect") {
+            const float red[]{1,0,0,1}; const D3D12_RECT clearRect{0,0,4,4};
+            list->ClearRenderTargetView(rtv,red,1,&clearRect);
+        }
+        if (transfer) {
+            D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barrier.Transition = {target.Get(),subresource,D3D12_RESOURCE_STATE_RENDER_TARGET,
+                mode == "copy" ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_RESOLVE_DEST};
+            list->ResourceBarrier(1,&barrier);
+            const auto marker = "Flora DX12 execution " + std::to_string(10+n) + " record " + std::to_string(10+n) +
+                " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(10+n) + ": ID3D12GraphicsCommandList" +
+                (mode == "copy" ? "CopyTextureRegion" : "ResolveSubresourceRegion");
+            list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1));
+            if (mode == "copy") {
+                D3D12_TEXTURE_COPY_LOCATION src{},dst{}; src.pResource=transferSource.Get(); dst.pResource=target.Get();
+                src.Type=dst.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX; dst.SubresourceIndex=subresource;
+                const D3D12_BOX box{2,1,0,6,5,1}; list->CopyTextureRegion(&dst,4,4,0,&src,&box);
+            } else {
+                ComPtr<ID3D12GraphicsCommandList1> list1; check(list.As(&list1));
+                D3D12_RECT rect{0,0,4,4};
+                list1->ResolveSubresourceRegion(target.Get(),subresource,4,4,transferSource.Get(),0,&rect,
+                    texture.Format,D3D12_RESOLVE_MODE_AVERAGE);
+            }
+            list->EndEvent();
+            std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter); list->ResourceBarrier(1,&barrier);
+            readTarget(n+2);
+        }
+        const auto marker = "Flora DX12 execution " + std::to_string(n) + " record " + std::to_string(n) +
+            " submission 1 queue 1 list 1 generation 1 ordinal " + std::to_string(n) + ": ID3D12GraphicsCommandListDrawInstanced";
+        list->BeginEvent(1,marker.c_str(),UINT(marker.size()+1)); list->DrawInstanced(n*3,1,0,0); list->EndEvent();
+        readTarget(n-1);
     }
     check(list->Close()); ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1,lists);
     ComPtr<ID3D12Fence> fence; check(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence))); check(queue->Signal(fence.Get(),1));
@@ -115,5 +160,14 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         const auto words=reinterpret_cast<const uint16_t *>(static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+8*5);
         std::cout << (n ? ",[" : "["); for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << words[c]; std::cout << ']';
     }
-    std::cout << "]}\n"; readback->Unmap(0,&none); return 0;
+    std::cout << ']';
+    if (transfer) {
+        std::cout << ",\"transfer_half_words\":[";
+        for (UINT n=3;n<6;++n) {
+            const auto words=reinterpret_cast<const uint16_t *>(static_cast<const uint8_t *>(mapped)+stride*n+fp.Footprint.RowPitch*5+8*5);
+            std::cout << (n > 3 ? ",[" : "["); for (UINT c=0;c<4;++c) std::cout << (c ? "," : "") << words[c]; std::cout << ']';
+        }
+        std::cout << ']';
+    }
+    std::cout << "}\n"; readback->Unmap(0,&none); return 0;
 } catch (const std::exception &e) { std::cerr << e.what() << '\n'; return 1; }
