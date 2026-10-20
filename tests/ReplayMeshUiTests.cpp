@@ -36,6 +36,50 @@ class ReplayMeshUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void typedVertexDebugInputs() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_VERTEX_INPUT_DEBUG");
+        if (root.isEmpty()) QSKIP("Set the DXBC/DXIL vertex-input debug evidence root");
+        const auto before = read(root + "/input-attributes1/debug-before/result.json");
+        QCOMPARE(before.at("trace").at("inputs")[3].at("value").at("u32v")[0], Json(1023));
+        QCOMPARE(before.at("trace").at("inputs")[6].at("value").at("u32v")[0], Json(64921));
+        QCOMPARE(before.at("vertex_input_snapshots").at("status"), Json("unavailable"));
+        for (bool dxil : {false, true}) {
+            const auto directory = root + (dxil ? "/input-attributes-dxil1" : "/input-attributes1");
+            const auto report = read(directory + "/debug-after/result.json");
+            const auto gpu = read(directory + "/gpu.json").at("bits").get<std::vector<uint32_t>>();
+            QCOMPARE(report.at("backend_dx12_vertex_inputs_patch"), Json(1));
+            QVERIFY(report.at("gpa_modules_loaded").empty());
+            const auto inputs = dxil ? report.at("trace").at("inputs")[0].at("members") : report.at("trace").at("inputs");
+            const auto &snapshots = report.at("vertex_input_snapshots");
+            QCOMPARE(snapshots.at("status"), Json("observed_bytes_unchanged"));
+            QCOMPARE(snapshots.at("before_debug"), snapshots.at("after_steps"));
+            QCOMPARE(snapshots.at("before_debug"), snapshots.at("after_output_replay"));
+            for (unsigned a = 0; a < 8; ++a) {
+                const auto &input = inputs[a];
+                QCOMPARE(input.at("name"), Json(std::string(dxil ? "DATA" : "v") + std::to_string(a)));
+                for (unsigned c = 0; c < input.at("columns").get<unsigned>(); ++c)
+                    QCOMPARE(input.at("value").at("u32v")[c], Json(gpu.at(5 * 32 + a * 4 + c)));
+                const auto &snapshot = snapshots.at("before_debug").at("attributes")[a];
+                QCOMPARE(snapshot.at("status"), Json("read"));
+                // Compare with the independently exported VSIn source bytes from the prior fixture.
+                const auto meshRoot = root + QString("/input-attributes1/attribute-%1").arg(a);
+                const auto raw = readBytes(meshRoot + "/input_vertices.bin");
+                const auto offset = a == 7 ? 0 : 2 * 48;
+                const auto actual = snapshot.at("bytes").get<std::vector<uint8_t>>();
+                QCOMPARE(QByteArray(reinterpret_cast<const char *>(actual.data()), qsizetype(actual.size())),
+                         raw.mid(offset, qsizetype(actual.size())));
+            }
+            QCOMPARE(snapshots.at("before_debug").at("attributes")[6].at("byte_offset"), Json("142"));
+            ReplayDebugView view("vs"); view.resize(1350, 900); view.show(); view.setContext("typed-vertex", 1, true);
+            view.selectVertex(2, 1); QVERIFY(view.finish(view.requestId(), report));
+            auto label = view.findChild<QLabel *>("debugGpuInvocationReference"); QVERIFY(label);
+            QVERIFY(label->text().contains("unchanged at three observation points"));
+            const auto exported = view.exportReport();
+            QCOMPARE(exported.at("backend_dx12_vertex_inputs_patch"), Json(1));
+            QCOMPARE(exported.at("vertex_input_snapshots"), snapshots);
+            if (!output_.isEmpty()) QVERIFY(view.grab().save(output_ + (dxil ? "/dxil-vertex-inputs.png" : "/dxbc-vertex-inputs.png")));
+        }
+    }
     void typedInputAttributes() {
         const auto root = qEnvironmentVariable("FLORA_DX12_INPUT_ATTRIBUTES");
         if (root.isEmpty()) QSKIP("Set the input-attribute GPU fixture reports directory");

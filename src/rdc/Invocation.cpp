@@ -1,4 +1,5 @@
 #include "Invocation.h"
+#include "InputAttribute.h"
 #include <stdexcept>
 #include <cstring>
 #include <bit>
@@ -227,23 +228,35 @@ Json rdcVertexInputSnapshot(const ActionDescription &action, const D3D12Pipe::In
     if (ia.layouts.size() > 128) { result["reason"] = "Input layout exceeds snapshot limit"; return result; }
     try { result["invocation"] = rdcVertexInvocation(action, ia, vertex, instance, read); }
     catch (const std::exception &e) { result["reason"] = e.what(); return result; }
-    std::map<uint32_t, std::optional<uint64_t>> next;
+    std::map<uint32_t, std::optional<uint32_t>> next;
     bool complete = true;
     for (const auto &layout : ia.layouts) {
         Json entry{{"semantic", std::string(layout.semanticName.c_str())}, {"semantic_index", layout.semanticIndex},
                    {"slot", layout.inputSlot}, {"status", "unavailable"}};
         const auto &f = layout.format;
-        const bool regular = f.type == ResourceFormatType::Regular && f.compCount && f.compCount <= 4 &&
-                             (f.compByteWidth == 1 || f.compByteWidth == 2 || f.compByteWidth == 4 || f.compByteWidth == 8);
-        const auto previous = next.find(layout.inputSlot);
-        const std::optional<uint64_t> offset = layout.byteOffset == D3D12Pipe::Layout::TightlyPacked
-            ? (previous == next.end() ? std::optional<uint64_t>(0) : previous->second)
-            : std::optional<uint64_t>(layout.byteOffset);
-        const uint64_t length = uint64_t(f.compCount) * f.compByteWidth;
-        next[layout.inputSlot] = regular && offset ? std::optional<uint64_t>(*offset + length) : std::nullopt;
-        if (!regular || !offset) entry["reason"] = "Packed input size or append offset is unavailable";
-        else if (layout.inputSlot >= ia.vertexBuffers.size()) entry["reason"] = "Input slot is unbound";
-        else {
+        std::optional<uint32_t> offset;
+        uint64_t length{};
+        try {
+            length = inputAttributeFormat(f).bytes;
+            uint32_t resolved = layout.byteOffset;
+            if (resolved == D3D12Pipe::Layout::TightlyPacked) {
+                const auto previous = next.find(layout.inputSlot);
+                if (previous != next.end() && !previous->second)
+                    throw std::runtime_error("Append-aligned input follows an unknown element size");
+                resolved = appendInputAttributeOffset(previous == next.end() ? 0 : *previous->second, f);
+            }
+            if (length > UINT32_MAX - resolved) throw std::runtime_error("Input layout offset overflows");
+            offset = resolved;
+            next[layout.inputSlot] = resolved + uint32_t(length);
+            entry.update({{"layout_offset", resolved}, {"byte_length", std::to_string(length)},
+                {"format", {{"type", uint32_t(f.type)}, {"compType", uint32_t(f.compType)},
+                    {"compCount", f.compCount}, {"compByteWidth", f.compByteWidth}, {"bgra", f.BGRAOrder()}}}});
+        } catch (const std::exception &e) {
+            next[layout.inputSlot] = std::nullopt;
+            entry["reason"] = e.what();
+        }
+        if (offset && layout.inputSlot >= ia.vertexBuffers.size()) entry["reason"] = "Input slot is unbound";
+        else if (offset) {
             const auto &vb = ia.vertexBuffers[layout.inputSlot];
             const uint64_t element = layout.perInstance
                 ? uint64_t(action.instanceOffset) + (layout.instanceDataStepRate ? instance / layout.instanceDataStepRate : 0)

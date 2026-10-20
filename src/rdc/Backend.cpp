@@ -194,6 +194,7 @@ class Session {
     uint32_t discardLayoutPatch{};
     uint32_t discardPatternControlPatch{};
     uint32_t cubeCoordinatesPatch{};
+    uint32_t vertexInputsPatch{};
     using SetDiscardPatterns = void (RENDERDOC_CC *)(bool);
     using DiscardPatternCount = uint64_t (RENDERDOC_CC *)();
     SetDiscardPatterns setDiscardPatterns{};
@@ -308,6 +309,10 @@ class Session {
         if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12CubeCoordinatesPatchVersion"))) {
             cubeCoordinatesPatch = patch();
             if (cubeCoordinatesPatch != 1) throw std::runtime_error("Unsupported DX12 cube-coordinate patch version");
+        }
+        if (const auto patch = reinterpret_cast<PatchVersion>(GetProcAddress(library, "RENDERDOC_GetFloraDx12VertexInputsPatchVersion"))) {
+            vertexInputsPatch = patch();
+            if (vertexInputsPatch != 1) throw std::runtime_error("Unsupported DX12 vertex-input patch version");
         }
         if (job.value("readonly_depth_snapshot", false)) {
             if (readOnlyDepthSnapshotPatch != 1)
@@ -1193,7 +1198,7 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job, const S
                                 snapshots.at("before_debug") == snapshots.at("after_steps") &&
                                 snapshots.at("before_debug") == snapshots.at("after_output_replay");
         snapshots["status"] = completeInputs ? sameInputs ? "observed_bytes_unchanged" : "observed_bytes_changed" : "unavailable";
-        snapshots["scope"] = "Selected index and regular vertex attributes at three observation points. "
+        snapshots["scope"] = "Selected index and supported regular/packed vertex attributes at three observation points. "
                              "Unchanged bytes do not prove stable inputs during execution; textures, constants and other vertices are not checked.";
         if (completeInputs && !sameInputs) {
             result["partial"] = true;
@@ -1423,6 +1428,7 @@ Json runRdcJob(const Json &job) {
         {"backend_dx12_discard_layout_patch", session.discardLayoutPatch},
         {"backend_dx12_discard_pattern_control_patch", session.discardPatternControlPatch},
         {"backend_dx12_cube_coordinates_patch", session.cubeCoordinatesPatch},
+        {"backend_dx12_vertex_inputs_patch", session.vertexInputsPatch},
         {"backend_readonly_depth_snapshot_patch", session.readOnlyDepthSnapshotPatch},
         {"backend_depth_roundtrip_patch", session.depthRoundtripPatch},
         {"backend_dxil_instruction_flags_patch", session.dxilInstructionFlagsPatch},

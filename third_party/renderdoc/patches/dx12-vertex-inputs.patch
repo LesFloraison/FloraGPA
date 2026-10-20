@@ -1,0 +1,64 @@
+diff --git a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+--- a/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
++++ b/renderdoc/driver/d3d12/d3d12_shaderdebug.cpp
+@@ -140,6 +140,11 @@
+   return 1;
+ }
+ 
++extern "C" RENDERDOC_API uint32_t RENDERDOC_CC RENDERDOC_GetFloraDx12VertexInputsPatchVersion()
++{
++  return 1;
++}
++
+ bool D3D12ShaderDebug::QueueSampleGather(
+     bool dxil, WrappedID3D12Device *device, ID3D12GraphicsCommandListX *cmdList, int sampleOp,
+     SampleGatherResourceData resourceData, SampleGatherSamplerData samplerData,
+@@ -2118,18 +2123,13 @@
+ 
+     vertexbuffers.insert(slot);
+ 
++    ResourceFormat fmt = MakeResourceFormat(inputlayout[i].Format);
++    const UINT elementSize = fmt.ElementSize();
++    const UINT alignment = elementSize <= 1 ? 1 : elementSize == 2 ? 2 : 4;
+     if(inputlayout[i].AlignedByteOffset == ~0U)
+-    {
+-      inputlayout[i].AlignedByteOffset = trackingOffs[slot];
+-    }
+-    else
+-    {
+-      trackingOffs[slot] = inputlayout[i].AlignedByteOffset;
+-    }
+-
+-    ResourceFormat fmt = MakeResourceFormat(inputlayout[i].Format);
+-
+-    trackingOffs[slot] += fmt.compByteWidth * fmt.compCount;
++      inputlayout[i].AlignedByteOffset = AlignUp(trackingOffs[slot], alignment);
++    // Packed formats are one element, not compCount times compByteWidth.
++    trackingOffs[slot] = inputlayout[i].AlignedByteOffset + elementSize;
+   }
+ 
+   bytebuf vertData[D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+@@ -2300,9 +2300,9 @@
+ 
+             if(fmt.compType == CompType::UInt)
+             {
+-              state.inputs[i].value.u32v[2] = (packed >> 0) & 0x3ff;
++              state.inputs[i].value.u32v[0] = (packed >> 0) & 0x3ff;
+               state.inputs[i].value.u32v[1] = (packed >> 10) & 0x3ff;
+-              state.inputs[i].value.u32v[0] = (packed >> 20) & 0x3ff;
++              state.inputs[i].value.u32v[2] = (packed >> 20) & 0x3ff;
+               state.inputs[i].value.u32v[3] = (packed >> 30) & 0x003;
+             }
+             else
+@@ -2823,9 +2823,9 @@
+ 
+               if(fmt.compType == CompType::UInt)
+               {
+-                inputs[i].value.u32v[2] = (packed >> 0) & 0x3ff;
++                inputs[i].value.u32v[0] = (packed >> 0) & 0x3ff;
+                 inputs[i].value.u32v[1] = (packed >> 10) & 0x3ff;
+-                inputs[i].value.u32v[0] = (packed >> 20) & 0x3ff;
++                inputs[i].value.u32v[2] = (packed >> 20) & 0x3ff;
+                 inputs[i].value.u32v[3] = (packed >> 30) & 0x003;
+               }
+               else

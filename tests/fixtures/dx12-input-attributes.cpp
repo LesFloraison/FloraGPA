@@ -1,5 +1,6 @@
 // Focused VSIn fidelity fixture. MSVC C++20; include third_party/renderdoc;
-// link d3d12.lib dxgi.lib d3dcompiler.lib. Args: RenderDoc DLL, capture prefix.
+// link d3d12.lib dxgi.lib d3dcompiler.lib. Args: RenderDoc DLL, capture prefix,
+// optional compiled VS (the same shader below, compiled with DXC for the DXIL path).
 // The VS writes the actual IA-fetched values to a UAV for independent comparison.
 #include <windows.h>
 #include "renderdoc_app.h"
@@ -9,13 +10,15 @@
 #include <wrl/client.h>
 #include <array>
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("HRESULT " + std::to_string(uint32_t(hr))); }
 int main(int argc, char **argv) try {
-    if (argc != 3) throw std::runtime_error("Expected RenderDoc DLL and capture prefix");
+    if (argc != 3 && argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix and optional compiled VS");
     const auto library = LoadLibraryA(argv[1]);
     const auto getAPI = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -53,6 +56,13 @@ float4 main(uint4 a : DATA0, int4 b : DATA1, float4 c : DATA2, uint4 d : DATA3,
     const auto compiled = D3DCompile(shader, sizeof shader, "input-attributes", nullptr, nullptr, "main", "vs_5_1", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &vs, &errors);
     if (FAILED(compiled) && errors) std::cerr << static_cast<const char *>(errors->GetBufferPointer());
     check(compiled);
+    if (argc == 4) {
+        std::ifstream input(argv[3], std::ios::binary);
+        const std::vector<char> bytes((std::istreambuf_iterator<char>(input)), {});
+        if (bytes.empty()) throw std::runtime_error("Missing compiled vertex shader");
+        vs.Reset(); check(D3DCreateBlob(bytes.size(), &vs));
+        memcpy(vs->GetBufferPointer(), bytes.data(), bytes.size());
+    }
     const D3D12_INPUT_ELEMENT_DESC layout[]{
         {"DATA", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
         {"DATA", 1, DXGI_FORMAT_R32G32B32A32_SINT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},

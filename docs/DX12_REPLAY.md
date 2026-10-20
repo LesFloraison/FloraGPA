@@ -6638,6 +6638,55 @@ The indexed Talos frame has no Dispatch actions, so this work does not claim a
 Talos CS invocation validation. Historical query results, complete geometry/stage
 coverage and portable acceptance remain unfinished.
 
+### Match packed/aligned VS debug inputs to native IA values
+
+Following the typed VSIn work, the same fixture exposed **three wrong components**
+in RenderDoc's DXBC VS input reconstruction at vertex ordinal **2**, instance **1**:
+R10G10B10A2_UINT was `(1023,511,3,2)` instead of native `(3,511,1023,2)`,
+and the appended R16_UINT was **64921** instead of **65533**. The debugger used
+the low ten packed bits as B, swapped R/B, and read the R16 at byte **141**
+instead of **142**, incorporating padding byte `0x99`.
+
+The twentieth patch, `dx12-vertex-inputs.patch`, fixes both DXBC/DXIL UINT
+unpacking and their shared input-layout expansion. Appended elements use the
+required alignment, and packed formats advance by their complete element size.
+The Flora input-snapshot reader now uses the same format-size/alignment helpers
+as VSIn. Snapshots include format, layout offset and byte length; unsupported or
+overflowing elements remain unavailable, and an explicit later offset can restore
+known addressing. Before this change the three packed attributes were unavailable
+and the R16 snapshot itself also read the padding byte.
+
+Actual GPU validation uses `input-attributes1/native_capture.rdc` (DXBC) and
+`input-attributes-dxil1/native_capture.rdc` (the same fixture shader compiled
+with DXC 1.8.2505.1, `-T vs_6_0 -E main -O3`). Each fixed trace has **25 declared
+attribute components**, all bit-exact against that fixture's independent native
+VS-to-UAV output. DXBC has **24** states; DXIL has **63**. All eight attribute
+byte ranges match the independently exported VSIn source bytes at each of the
+three observation points. Both reports mark those observed bytes unchanged;
+this does not prove stability during execution or validate every instruction/UAV
+side effect. Source mappings are not fabricated when PDB data is absent.
+
+Evidence: `input-attributes1/debug-before`, `debug-after`, `debug-comparison.json`,
+and `input-attributes-dxil1/debug-after`. One existing DXBC capture was queried
+before/after; one additional DXIL fixture Draw and debug query covered the second
+decoder. No full-sample GPU sweep was run, and no GPA module was loaded.
+The saved-report UI check covers both traces, native input comparisons, geometry
+byte correspondence, invocation display and exported patch/snapshot metadata:
+**3 passed** including setup/cleanup (**399 ms**). The initial UI check used the
+wrong widget name and failed; after correcting the test it passed. Screenshots:
+`vertex-input-debug-ui1/replay-mesh`. Focused snapshot CPU checks pass (**4**
+including setup/cleanup, **1 ms**), including unknown append dependencies and
+recovery at explicit offsets. Builds **410–412** and PowerShell syntax checks pass.
+
+The complete 20-patch source verification/build passes. Reports expose
+`backend_dx12_vertex_inputs_patch=1`; package manifests verify its version/hash
+and include the patch. Runtime SHA-256:
+`5e36f05cc59d27e9e57c300b50f10128b76c6489995795dea215581836ed90b4`;
+patch SHA-256:
+`1575891a7f386670d996919411a5fc25d1b6f058b3a46ea203b3eb16cd417c6e`.
+Primitive restart, broader geometry/debug fidelity, historical query recovery
+and full portable acceptance remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

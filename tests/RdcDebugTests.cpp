@@ -178,7 +178,8 @@ class RdcDebugTests : public QObject {
         for (unsigned i = 0; i < 3; ++i) {
             auto &l = ia.layouts[i]; l.semanticName = "TEXCOORD"; l.semanticIndex = i;
             l.inputSlot = i == 2 ? 1 : 0; l.byteOffset = i == 1 ? D3D12Pipe::Layout::TightlyPacked : 0;
-            l.format.type = ResourceFormatType::Regular; l.format.compByteWidth = 4; l.format.compCount = i == 2 ? 1 : 2;
+            l.format.type = ResourceFormatType::Regular; l.format.compType = CompType::Float;
+            l.format.compByteWidth = 4; l.format.compCount = i == 2 ? 1 : 2;
             l.perInstance = i == 2; l.instanceDataStepRate = i == 2 ? 3 : 0;
         }
         bool truncated{}; unsigned reads{};
@@ -200,6 +201,37 @@ class RdcDebugTests : public QObject {
         ia.vertexBuffers[0].byteOffset = UINT64_MAX - 3; ia.vertexBuffers[0].byteSize = 1024;
         QCOMPARE(rdcVertexInputSnapshot(draw, ia, 1, 5, read).at("status"), Json("partial"));
         QCOMPARE(rdcVertexInputSnapshot(draw, ia, 4, 5, read).at("status"), Json("unavailable"));
+    }
+    void packedVertexInputSnapshots() {
+        using Json = nlohmann::json;
+        ActionDescription draw; draw.flags = ActionFlags::Drawcall; draw.numIndices = 1; draw.numInstances = 1;
+        D3D12Pipe::InputAssembly ia; ia.vertexBuffers.resize(1); ia.layouts.resize(4);
+        uint64_t id = 1; memcpy(&ia.vertexBuffers[0].resourceId, &id, 8);
+        ia.vertexBuffers[0].byteSize = 16; ia.vertexBuffers[0].byteStride = 16;
+        for (unsigned i = 0; i < 4; ++i) {
+            auto &l = ia.layouts[i]; l.byteOffset = i ? D3D12Pipe::Layout::TightlyPacked : 0;
+            l.format.type = ResourceFormatType::Regular; l.format.compType = CompType::UInt;
+            l.format.compCount = 1; l.format.compByteWidth = i ? 2 : 1;
+        }
+        ia.layouts[2].format.type = ResourceFormatType::R10G10B10A2;
+        ia.layouts[2].format.compCount = 4; ia.layouts[2].format.compByteWidth = 0;
+        const uint8_t data[]{0x12, 0x99, 0x34, 0x12, 1, 2, 3, 4, 0x78, 0x56, 0, 0, 0, 0, 0, 0};
+        const auto read = [&](ResourceId, uint64_t offset, uint64_t length) {
+            if (offset > sizeof data || length > sizeof data - offset) throw std::runtime_error("Unexpected snapshot range");
+            bytebuf bytes; bytes.assign(data + offset, size_t(length)); return bytes;
+        };
+        auto snapshot = rdcVertexInputSnapshot(draw, ia, 0, 0, read);
+        QCOMPARE(snapshot.at("status"), Json("read"));
+        const auto &attrs = snapshot.at("attributes");
+        QCOMPARE(attrs[1].at("byte_offset"), Json("2")); QCOMPARE(attrs[1].at("bytes"), Json({0x34, 0x12}));
+        QCOMPARE(attrs[2].at("byte_offset"), Json("4")); QCOMPARE(attrs[2].at("byte_length"), Json("4"));
+        QCOMPARE(attrs[3].at("byte_offset"), Json("8")); QCOMPARE(attrs[3].at("bytes"), Json({0x78, 0x56}));
+        ia.layouts[0].format.type = ResourceFormatType::BC1;
+        ia.layouts[3].byteOffset = 8;
+        snapshot = rdcVertexInputSnapshot(draw, ia, 0, 0, read);
+        QCOMPARE(snapshot.at("status"), Json("partial"));
+        for (unsigned i = 0; i < 3; ++i) QCOMPARE(snapshot.at("attributes")[i].at("status"), Json("unavailable"));
+        QCOMPARE(snapshot.at("attributes")[3].at("status"), Json("read"));
     }
     void vertexOutputLayout() {
         using Json = nlohmann::json;
