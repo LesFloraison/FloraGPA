@@ -32,6 +32,13 @@ QString field(const nlohmann::json &row, const char *key) {
                ? QString("—")
                : QString::fromStdString(value.is_string() ? value.get<std::string>() : value.dump());
 }
+QString regionText(const nlohmann::json &region) {
+    if (region.is_null()) return "whole source subresource";
+    auto text=QString("[%1, %2) × [%3, %4)").arg(field(region,"left"),field(region,"right"),
+        field(region,"top"),field(region,"bottom"));
+    if (region.contains("front")) text += QString(" × [%1, %2)").arg(field(region,"front"),field(region,"back"));
+    return text;
+}
 } // namespace
 ResourceHistoryView::ResourceHistoryView(QWidget *parent) : QWidget(parent) {
     setObjectName("resourceHistoryView");
@@ -178,6 +185,36 @@ bool ResourceHistoryView::finish(uint64_t serial, const Json &result) {
                                                 field(row, "evidence"), field(row, "queue")});
         if (row.contains("indirect_action")) item->setText(0, item->text(0) + " · action " + field(row, "indirect_action"));
         QStringList ranges;
+        if (row.contains("operation_ranges")) {
+            const auto &operation = row.at("operation_ranges");
+            if (operation.at("status") != "captured") {
+                ranges << "Operation range unavailable";
+                item->setToolTip(4, field(operation,"reason"));
+            } else {
+                for (const auto &range : operation.at("ranges")) {
+                    const auto role = field(range,"role");
+                    const auto kind = range.at("kind").get<std::string>();
+                    if (kind == "whole_resource") ranges << role + ": whole resource";
+                    else if (kind == "buffer_range")
+                        ranges << QString("%1: bytes [%2, %3)").arg(role,field(range,"offset"),field(range,"end"));
+                    else if (kind == "buffer_footprint")
+                        ranges << QString("%1: footprint at byte %2, row pitch %3").arg(role,field(range,"offset"),field(range,"RowPitch"));
+                    else if (kind == "texture_subresource") {
+                        auto description=role + ": subresource " + field(range,"native_subresource");
+                        if (range.contains("mip")) description += QString(" (Mip %1 / Layer %2 / Plane %3)")
+                            .arg(field(range,"mip"),field(range,"layer"),field(range,"plane"));
+                        ranges << description;
+                    } else if (kind == "texture_view")
+                        ranges << QString("%1: Mip %2 / first Layer %3 / %4 layers; %5").arg(role,field(range,"mip"),
+                            field(range,"first_layer"),field(range,"layer_count"),range.at("whole_view").get<bool>()
+                                ? "whole view" : QString("%1 rectangles").arg(range.at("rectangles").size()));
+                }
+                if (operation.contains("source_box")) ranges << "Source box " + regionText(operation.at("source_box"));
+                if (operation.contains("source_rectangle")) ranges << "Source rectangle " + regionText(operation.at("source_rectangle"));
+                if (operation.contains("destination_origin")) ranges << "Destination origin " + field(operation,"destination_origin");
+                item->setToolTip(4, field(operation,"scope"));
+            }
+        }
         if (row.contains("captured_discard_region")) {
             const auto &region = row.at("captured_discard_region");
             if (region.is_null()) ranges << "All subresources discarded; contents undefined";

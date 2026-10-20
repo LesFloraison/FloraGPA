@@ -2,6 +2,7 @@
 #include "rdc/InputAttribute.h"
 #include "rdc/ClearCoverage.h"
 #include "rdc/TransferCoverage.h"
+#include "rdc/OperationRanges.h"
 #include "application/ReplayMesh.h"
 #include <QFile>
 #include <QtTest>
@@ -33,6 +34,26 @@ Json annotationProbe() {
 class RdcAssetTests : public QObject {
     Q_OBJECT
   private slots:
+    void bufferOperationRanges() {
+        SDObject chunk("ID3D12GraphicsCommandList::CopyBufferRegion"_lit,"chunk"_lit);
+        const auto integer=[&](const char *name,uint64_t value) {
+            auto field=chunk.AddAndOwnChild(new SDObject(rdcstr(name),"uint64_t"_lit));
+            field->type.basetype=SDBasic::UnsignedInteger; field->data.basic.u=value; return field;
+        };
+        constexpr uint64_t id=9007199254740993ULL;
+        integer("pSrcBuffer",id); integer("pDstBuffer",id);
+        integer("SrcOffset",id+10); auto offset=integer("DstOffset",id+100); integer("NumBytes",7);
+        auto result=rdcOperationRanges(chunk,resource(id),{});
+        QCOMPARE(result.at("status"),Json("captured")); QCOMPARE(result.at("ranges").size(),size_t(2));
+        QCOMPARE(result.at("ranges")[0].at("role"),Json("source"));
+        QCOMPARE(result.at("ranges")[1].at("role"),Json("destination"));
+        QCOMPARE(result.at("ranges")[1].at("offset"),Json("9007199254741093"));
+        QCOMPARE(result.at("ranges")[1].at("end"),Json("9007199254741100"));
+        QCOMPARE(rdcOperationRanges(chunk,resource(id+1),{}).at("status"),Json("unavailable"));
+        offset->data.basic.u=UINT64_MAX;
+        result=rdcOperationRanges(chunk,resource(id),{});
+        QCOMPARE(result.at("status"),Json("unavailable")); QVERIFY(result.at("ranges").empty());
+    }
     void transferCoverage() {
         const auto node=[](SDObject &parent,const char *name) {
             return parent.AddAndOwnChild(new SDObject(rdcstr(name),"struct"_lit));
@@ -59,6 +80,16 @@ class RdcAssetTests : public QObject {
             return rdcTransferCoverage(chunk,target,{&source,1},Subresource(mip,layer,0),x,y);
         };
         auto result=query(copy); QCOMPARE(result.at("status"),Json("covered"));
+        const std::array<TextureDescription,2> descriptions{target,source};
+        const auto dstRange=rdcOperationRanges(copy,target.resourceId,descriptions);
+        const auto srcRange=rdcOperationRanges(copy,source.resourceId,descriptions);
+        QCOMPARE(dstRange.at("status"),Json("captured")); QCOMPARE(srcRange.at("status"),Json("captured"));
+        QCOMPARE(dstRange.at("ranges")[0].at("native_subresource"),Json(3));
+        QCOMPARE(dstRange.at("ranges")[0].at("mip"),Json(1));
+        QCOMPARE(dstRange.at("ranges")[0].at("layer"),Json(1));
+        QCOMPARE(dstRange.at("ranges")[0].at("plane"),Json(0));
+        QCOMPARE(srcRange.at("ranges")[0].at("role"),Json("source"));
+        QCOMPARE(dstRange.at("source_box").at("left"),Json(2));
         QCOMPARE(result.at("source_resource_id"),Json("9007199254740994"));
         QCOMPARE(result.at("destination_rectangle"),Json::array({4,4,8,8}));
         QCOMPARE(query(copy,4,4).at("status"),Json("covered"));
@@ -119,6 +150,10 @@ class RdcAssetTests : public QObject {
         };
         QCOMPARE(query(1,2).at("status"),Json("covered"));
         QCOMPARE(query(1,2).at("resource_id"),Json("9007199254740993"));
+        const auto viewRange=rdcOperationRanges(chunk,texture.resourceId,{&texture,1});
+        QCOMPARE(viewRange.at("status"),Json("captured"));
+        QCOMPARE(viewRange.at("ranges")[0].at("first_layer"),Json(1));
+        QCOMPARE(viewRange.at("ranges")[0].at("layer_count"),Json(2));
         QCOMPARE(query(0,2).at("status"),Json("outside"));
         QCOMPARE(query(1,0).at("status"),Json("outside"));
         auto rects=node(chunk,"pRects"); rects->type.basetype=SDBasic::Array;

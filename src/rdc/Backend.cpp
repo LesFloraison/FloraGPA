@@ -3,6 +3,7 @@
 #include "Assets.h"
 #include "ClearCoverage.h"
 #include "TransferCoverage.h"
+#include "OperationRanges.h"
 #include "Counters.h"
 #include "DebugTrace.h"
 #include "Invocation.h"
@@ -1956,6 +1957,8 @@ Json runRdcJob(const Json &job) {
                                                   "Barrier",        "CPUWrite"};
         static_assert(std::size(usageNames) == size_t(ResourceUsage::CPUWrite) + 1);
         Json rows = Json::array(), initialization = Json::array();
+        const auto historyTextures = controller.GetTextures();
+        size_t capturedRanges{}, rangeGaps{};
         size_t unmapped = 0;
         for (const auto &usage : controller.GetUsage(resource)) {
             if (usage.eventId > eid)
@@ -1975,6 +1978,16 @@ Json runRdcJob(const Json &job) {
                      {"subresource_status", "not_provided_by_usage_index"}};
             row.update(rdcProvenance(usage.eventId, mapping["reverse"]));
             const auto actionDetail = events.actionDetails.find(usage.eventId);
+            if (dx12 && actionDetail != events.actionDetails.end() &&
+                (actionDetail->second->flags & (ActionFlags::Clear | ActionFlags::Copy | ActionFlags::Resolve))) {
+                const auto chunk = events.chunks.find(usage.eventId);
+                row["operation_ranges"] = chunk == events.chunks.end()
+                    ? Json{{"status", "unavailable"}, {"reason", "Resource operation arguments are unavailable"}}
+                    : rdcOperationRanges(*chunk->second, resource, {historyTextures.data(), historyTextures.size()});
+                if (row["operation_ranges"].at("status") == "captured") {
+                    row["subresource_status"] = "see_captured_operation_ranges"; ++capturedRanges;
+                } else ++rangeGaps;
+            }
             if (actionDetail != events.actionDetails.end() &&
                 (actionDetail->second->flags & (ActionFlags::Drawcall | ActionFlags::Dispatch | ActionFlags::MeshDispatch)))
                 row["indexed_action"] = flora::rdcExecutedAction(*actionDetail->second);
@@ -2011,13 +2024,15 @@ Json runRdcJob(const Json &job) {
               {{"through_event", eid},
                {"unmapped_uses", unmapped},
                {"content_changes_measured", false},
+               {"captured_operation_ranges", capturedRanges},
+               {"operation_range_gaps", rangeGaps},
                {"selected_event_replayed", !indexedResourceHistory},
                {"query_source", indexedResourceHistory ? "capture_usage_index_with_explicit_resource"
                                                         : "capture_usage_index_with_replayed_selection"},
                {"capture_loading_may_execute_gpu_work", true},
                {"limitations",
                 {"Bindings indicate possible use, not observed reads or writes.",
-                 "Usage records do not supply subresource ranges or fence dependencies.",
+                 "Operation ranges are reconstructed from captured arguments where available; binding ranges and fence dependencies remain incomplete.",
                  "Replay initialization is separate from original execution markers.",
                  "Only the captured replay prefix is covered; empty usage is not proof of no access."}}}}});
         if (dx12) {

@@ -65,6 +65,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     texture.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; texture.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     ComPtr<ID3D12Resource> target; check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture,
         D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&target)));
+    check(target->SetName(L"Flora DX12 resource 1001 creation 1"));
     D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 2;
     ComPtr<ID3D12DescriptorHeap> rtvs; check(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&rtvs)));
     const auto rtv = rtvs->GetCPUDescriptorHandleForHeapStart();
@@ -82,6 +83,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
         sourceTexture.SampleDesc.Count = mode == "copy" ? 1 : 4;
         check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &sourceTexture,
             D3D12_RESOURCE_STATE_RENDER_TARGET, nullptr, IID_PPV_ARGS(&transferSource)));
+        check(transferSource->SetName(L"Flora DX12 resource 1002 creation 2"));
         device->CreateRenderTargetView(transferSource.Get(), nullptr, sourceRtv);
     }
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp{}; UINT64 size{}; device->GetCopyableFootprints(&texture,subresource,1,0,&fp,nullptr,nullptr,&size);
@@ -90,6 +92,7 @@ float4 ps(uint id : SV_PrimitiveID) : SV_Target {
     D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = stride * (transfer ? 6 : 3);
     buffer.Height = buffer.DepthOrArraySize = buffer.MipLevels = 1; buffer.SampleDesc.Count = 1; buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     ComPtr<ID3D12Resource> readback; check(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&buffer,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&readback)));
+    check(readback->SetName(L"Flora DX12 resource 1003 creation 3"));
     D3D12_COMMAND_QUEUE_DESC q{}; ComPtr<ID3D12CommandQueue> queue; check(device->CreateCommandQueue(&q,IID_PPV_ARGS(&queue)));
     ComPtr<ID3D12CommandAllocator> allocator; check(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&allocator)));
     ComPtr<ID3D12GraphicsCommandList> list; check(device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,allocator.Get(),pipeline.Get(),IID_PPV_ARGS(&list)));

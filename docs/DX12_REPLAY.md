@@ -7008,6 +7008,64 @@ exact transfer navigation, PS-debug exclusion, unpatched-runtime presentation
 and export: **3 passed**, **33 ms** (`transfer-history-ui1.txt`).
 Full sample and portable acceptance remain unfinished.
 
+### Resource History operation ranges
+
+Resource History now reads captured operation arguments instead of leaving every
+Copy/Clear range unknown. Rows expose `operation_ranges`, distinguishing source
+and destination roles, whole-resource copies, buffer byte intervals, texture
+subresource indices and buffer footprints. CopyTextureRegion preserves its source
+box and destination origin; Resolve preserves native subresources and optional
+source rectangles/mode. Texture metadata decodes mip/layer/plane indices where
+available. Explicit 2D Clear views reuse the captured descriptor-range validation.
+Resource identities, buffer offsets, lengths and interval ends remain decimal
+strings, including values above 2^53. Overflow or malformed fields produce an
+unavailable range rather than a partial valid-looking list.
+
+These are native API ranges, not measured content modifications. In particular,
+compressed copy coordinate units and planar formats are not converted into
+guessed texel coverage. A footprint's pitch and offset do not imply a contiguous
+written byte interval. Draw/Dispatch bindings still describe potential access,
+and existing captured barriers/discards retain their separate annotations.
+The UI shows the role/range, preserves exact execution navigation and exports
+the original evidence. Unknown or implicit Clear views retain a visible gap.
+
+The existing copy fixture now names its target, source and readback resources
+with distinct original object/creation identities. In
+`half-blend-operation-ranges1`, three independent resource queries through Draw
+execution 3 produce:
+
+| Resource | Indexed uses | Recovered operation ranges | Range gaps |
+| --- | ---: | ---: | ---: |
+| Target 1001 / creation 1 | 30 | 11 | 0 |
+| Source 1002 / creation 2 | 5 | 3 | 1 |
+| Readback 1003 / creation 3 | 5 | 5 | 0 |
+
+Copy execution **11** names target native subresource **3** (Mip 1/Layer 1,
+plane 0) and source subresource **0** (Mip 0/Layer 0). The source box remains
+`[2,6) x [1,5) x [0,1)`, with destination origin `(4,4,0)`. Readback uses carry
+256-byte row pitches and their distinct destination offsets. Their five
+unmapped native copy actions remain unmapped; none is assigned to a nearby
+Draw. The source's default-view Clear is the one explicit range gap.
+
+BF1 creation **325012**, object **10432990048**, through execution **36560** has
+16 indexed uses. Its Clear execution **36391** now reports Mip 0, first Layer 0,
+one layer and the complete view. All uses continue to report
+`content_change: not_measured`. Evidence is
+`bf1-particle-operation-ranges1/result.json`. All four queries use explicit
+resource identities and the existing usage index, without replaying the selected
+event; capture loading can still execute GPU work. Their module inventories
+contain no GPA/Python modules.
+
+App/worker/CLI/test builds **430–433** pass. Focused field tests cover source and
+destination roles, same-resource buffer copies, >2^53 offsets, overflow,
+texture indices and Clear view ranges: **5 passed**, including setup/cleanup,
+**1 ms** (`operation-ranges-unit1.txt`). The saved-report UI check verifies
+source/destination presentation, readback footprints, the default-view gap,
+exact execution navigation, BF1 Clear display and exported evidence:
+**3 passed**, **79 ms** (`resource-ranges-ui1.txt`). This turn used one tiny
+capture and four serial resource-index queries. Full resource lifetime,
+synchronization history and observed-content coverage remain unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

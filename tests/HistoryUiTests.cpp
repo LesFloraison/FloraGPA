@@ -54,6 +54,60 @@ class HistoryUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void resourceOperationRanges() {
+        const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
+        if (root.isEmpty()) QSKIP("Set the resource operation range evidence directory");
+        ResourceHistoryView view;
+        for (const auto &side : {QString("target"),QString("source"),QString("readback")}) {
+            const auto report=read(root + "/half-blend-operation-ranges1/" + side + "/result.json");
+            const uint64_t creation=side == "target" ? 1 : side == "source" ? 2 : 3;
+            view.setContext("fixture:" + side,3,creation,1000+creation);
+            QVERIFY(view.finish(view.requestId(),report));
+            auto rows=view.findChild<QTreeWidget *>("resourceHistoryRows");
+            size_t found{};
+            for (size_t i=0;i<report.at("resource_history").size();++i) {
+                const auto &row=report.at("resource_history")[i];
+                QCOMPARE(row.at("content_change"),Json("not_measured"));
+                if (side == "readback") {
+                    const auto &range=row.at("operation_ranges").at("ranges")[0];
+                    QCOMPARE(range.at("kind"),Json("buffer_footprint"));
+                    QCOMPARE(range.at("RowPitch"),Json(256));
+                    QVERIFY(rows->topLevelItem(int(i))->text(4).contains("footprint at byte")); ++found;
+                } else if (row.value("execution",Json()) == "11") {
+                    const auto &range=row.at("operation_ranges").at("ranges")[0];
+                    QCOMPARE(range.at("role"),Json(side == "target" ? "destination" : "source"));
+                    QCOMPARE(range.at("mip"),Json(side == "target" ? 1 : 0));
+                    QCOMPARE(range.at("layer"),Json(side == "target" ? 1 : 0));
+                    QVERIFY(rows->topLevelItem(int(i))->text(4).contains("Source box"));
+                    rows->setCurrentItem(rows->topLevelItem(int(i)));
+                    QSignalSpy jump(&view,&ResourceHistoryView::eventRequested);
+                    action(view,"locateResourceHistoryEvent")->trigger();
+                    QCOMPARE(jump.count(),1); QCOMPARE(jump[0][0].toULongLong(),11ULL); ++found;
+                }
+            }
+            QCOMPARE(found,side == "readback" ? size_t(5) : size_t(1));
+            if (side == "source") {
+                QCOMPARE(report.at("history_scope").at("operation_range_gaps"),Json(1));
+                QVERIFY(rows->topLevelItem(0)->text(4).contains("range unavailable"));
+            }
+        }
+        const auto bf1=read(root + "/bf1-particle-operation-ranges1/result.json");
+        view.setContext("bf1:operation-ranges",36560,325012,10432990048ULL);
+        QVERIFY(view.finish(view.requestId(),bf1));
+        QCOMPARE(bf1.at("history_scope").at("captured_operation_ranges"),Json(1));
+        auto rows=view.findChild<QTreeWidget *>("resourceHistoryRows"); bool clear{};
+        for (size_t i=0;i<bf1.at("resource_history").size();++i) {
+            const auto &row=bf1.at("resource_history")[i];
+            if (row.value("execution",Json()) != "36391") continue;
+            QCOMPARE(row.at("operation_ranges").at("ranges")[0].at("mip"),Json(0));
+            QVERIFY(rows->topLevelItem(int(i))->text(4).contains("whole view")); clear=true;
+        }
+        QVERIFY(clear);
+        if (!output_.isEmpty()) {
+            view.exportResult(output_ + "/resource-operation-ranges.json");
+            QCOMPARE(read(output_ + "/resource-operation-ranges.json"),bf1);
+        }
+    }
     void transferOperationHistory() {
         const auto root=qEnvironmentVariable("FLORA_HALF_COLOR_HISTORY");
         if (root.isEmpty()) QSKIP("Set the transfer history evidence directory");
