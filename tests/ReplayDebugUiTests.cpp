@@ -53,6 +53,56 @@ class ReplayDebugUiTests : public QObject {
     Q_OBJECT
     QString output_;
   private slots:
+    void cacheTraceDepthInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_CACHE_TRACE_DEBUG");
+        if (path.isEmpty()) QSKIP("Set the Hellblade2 cache-tracing debug report");
+        const auto report = read(path);
+        QCOMPARE(report.at("execution"), Json("17049"));
+        QCOMPARE(report.at("step_count"), Json(1048));
+        QCOMPARE(report.at("compute_buffer_inputs").at("status"), Json("incomplete"));
+        QCOMPARE(report.at("texture_stores").at("validation"), Json("not_validated"));
+        const auto &depth = report.at("texture_stores").at("rows")[1];
+        QCOMPARE(depth.at("instruction"), Json(1700));
+        QCOMPARE(depth.at("resource_creation"), Json("507326"));
+        QCOMPARE(depth.at("view_format"), Json(54)); // R16_FLOAT.
+        QCOMPARE(depth.at("value")[0], Json(91.204071044921875));
+        QCOMPARE(depth.at("gpu_reference").at("value").at("floatValue")[0], Json(91.1875));
+        ReplayDebugView view("cs"); view.resize(1500, 1000); view.show();
+        view.setContext("hellblade-cache-tracing", 17049, true);
+        view.findChild<QLineEdit *>("debugGroup")->setText("0 0 0");
+        view.findChild<QLineEdit *>("debugThread")->setText("4 4 0");
+        QVERIFY(view.finish(view.requestId(), report));
+        QVERIFY(view.model()->files().empty());
+        auto instruction = view.findChild<QLineEdit *>("debugInstruction");
+        instruction->setText("1700"); action(view, "debugToggleInstructionBreakpoint")->trigger();
+        action(view, "debugContinue")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1044));
+        view.findChild<QLineEdit *>("debugWatchExpression")->setText("_1721");
+        action(view, "debugAddWatch")->trigger();
+        auto watches = view.findChild<QTreeWidget *>("debugWatchValues");
+        QCOMPARE(watches->topLevelItemCount(), 1);
+        QVERIFY(std::abs(watches->topLevelItem(0)->text(2).toDouble() - 91.204071044921875) < 0.0001);
+        action(view, "debugStep")->trigger();
+        QCOMPARE(view.model()->position(), int64_t(1045));
+        auto stores = view.findChild<QTreeWidget *>("debugTextureStores");
+        QCOMPARE(stores->topLevelItemCount(), 2);
+        QSignalSpy texel(&view, &ReplayDebugView::texturePixelRequested);
+        QVERIFY(QMetaObject::invokeMethod(stores, "itemDoubleClicked", Qt::DirectConnection,
+            Q_ARG(QTreeWidgetItem *, stores->topLevelItem(1)), Q_ARG(int, 2)));
+        QCOMPARE(texel.size(), 1);
+        QCOMPARE(texel[0][1].toULongLong(), 17049ULL);
+        QCOMPARE(texel[0][2].toULongLong(), 507326ULL);
+        QCOMPARE(texel[0][4].toUInt(), 1524U); QCOMPARE(texel[0][5].toUInt(), 20U);
+        bool warning{};
+        for (auto label : view.findChildren<QLabel *>())
+            warning |= label->isVisible() && label->text().contains("Read-only buffer observations are incomplete");
+        QVERIFY(warning);
+        QCOMPARE(view.exportReport().at("compute_buffer_inputs").at("status"), Json("incomplete"));
+        const auto serial = view.requestId();
+        view.setContext("changed-cache-experiment", 17049, true);
+        QVERIFY(!view.finish(serial, report));
+        QCOMPARE(stores->topLevelItemCount(), 0);
+    }
     void preparedIndirectInvocationDisplay() {
         const auto path = qEnvironmentVariable("FLORA_PREPARED_INDIRECT_DEBUG");
         if (path.isEmpty()) QSKIP("Set the prepared indirect compute debug report");

@@ -9987,6 +9987,98 @@ The comparison script and large readbacks remain research artifacts outside
 Git; Python is used only for offline comparison. No new GPA capture, broad
 regression suite or repeated whole-frame native replay was required.
 
+### Radiance-trace tile mapping and selected depth debugging
+
+Native execution **17049** / source **586426** / RDC **25738** corresponds
+to original RDC **543280**. Both bind `TraceFromProbesCS`, **52,052 bytes**,
+SHA-256 `70a1a54570da8bdc500527bedbb072b636dc527a0512b1449139908f61926a88`.
+CPU export from original PSO creation **515440** confirms the same bytecode.
+The original reference remains the instrumented GPA capture.
+
+The shader decodes the tile ordinal as `groupY * 128 + groupX`, checks it
+against `ProbeTraceTileAllocator`, and loads two words from
+`ProbeTraceTileData`. The first packs X, Y and resolution level; the second
+indexes `ProbeTraceData`. Resolution is `8 << level`. Probe identity and
+clipmap come from that task's fourth word. The root parameters bind buffer
+**510820** / original RDC **463** at offset **1,143,552**.
+
+`tests/fixtures/check-cache-trace-tiles.py` checks this pinned mapping with
+bounded, digest-verified observations. It rejects out-of-range task indices,
+unsupported levels, inconsistent levels within a task, missing/duplicate
+tiles, duplicate probe writes, invalid grid mappings and clipmap disagreement.
+Each observed task below contains exactly four 8 x 8 tiles at resolution 16,
+covering its complete 16 x 16 output block. Native tile/task/allocator/argument
+creations are **515424 / 534983 / 570561 / 562611**; original RDC IDs are
+**14324 / 14321 / 14323 / 12974**.
+
+| Observation | Observed groups | Tiles | Selected probe tasks |
+|---|---|---:|---:|
+| Native first | 128 x 4 x 1 | 444 | 111 |
+| Native second | 128 x 4 x 1 | 444 | 111 |
+| Original first | 128 x 4 x 1 | 444 | 111 |
+| Original second | 128 x 4 x 1 | 456 | 114 |
+
+All **32** resource observations are bounded and digest-verified. Root
+parameters and common tasks' position, clipmap and resolution agree after
+alignment by the same **1,310** active grid cells. Physical probe IDs can
+still differ for a few cells and are reported separately.
+
+| Pair | Common selected cells | Radiance differing blocks / texels | Depth differing texels |
+|---|---:|---:|---:|
+| Native first / second | 55 | 0 / 0 | 0 |
+| Native first / original first | 62 | 0 / 0 | 0 |
+| Native second / original first | 64 | 0 / 0 | 0 |
+| Native first / original second | 57 | 12 / 25 | 0 |
+| Native second / original second | 62 | 15 / 31 | 0 |
+| Original first / second | 60 | 13 / 30 | 0 |
+
+These are exact packed-storage comparisons on common selected tasks, not
+whole-atlas acceptance. Across these six pairs, all **92,160** depth texel
+comparisons agree; repeated cells are counted per pair. Radiance differences
+remain even with identical physical probe IDs (11 of the 13 differing blocks
+in the original pair), so ID reassignment alone does not explain them.
+Packed channel code distances are reported without treating them as a
+tolerance. No ray-tracing arithmetic or complete scene-input equivalence is
+claimed by the tile checker.
+
+A separate original-player replay pair at the same event has identical
+full bytes for the 4 MiB final-lighting atlas **12559**, 2 MiB depth atlas
+**12551**, root buffer **463** and shared constant buffer **14393**. This
+separate pair is not the state in which the table's radiance differences
+were observed; it cannot exclude input variation in that earlier pair.
+
+The selected native CS invocation, group **(0,0,0)** / thread **(4,4,0)**,
+completes **1,048** steps. It writes radiance creation **559864** and depth
+creation **507326** at **(1524,20)**. The depth operand is
+**91.204071044921875**; binary16 conversion gives **91.1875**, matching the
+post-restoration GPU reference. Radiance is zero in this invocation.
+Instruction **1700**, trace position **1044**, uses SSA value **`_1721`**.
+The actual report verifies instruction breakpoint, Watch, stepping, precise
+depth-resource/texel navigation, export and stale-session rejection in the
+workspace without another GPU execution. The initial UI test referenced
+the alternative unexecuted store branch; correcting it to the recorded
+instruction mapping passes.
+
+Eight observed read-only buffer ranges remain unchanged during retained
+debugging. The **112 MiB** object-grid buffer exceeds the 16 MiB snapshot
+budget, so overall input stability remains **incomplete**, visibly reported
+and preserved in export. General texture-store validation stays
+`not_validated`; the selected depth agreement is not a complete shader
+validation. Analysis module inventories contain no GPA/Python modules.
+
+Evidence: `native-cache-trace-pipeline1`, `gpa-cache-trace-pipeline1`,
+`hellblade-cache-trace-shader1`, `hellblade-cache-trace-debug1`,
+`native-cache-trace-repeat1.json`, `gpa-cache-trace-repeat2.json`,
+`cache-trace-tiles2.json`, `cache-trace-evidence1.json`,
+`gpa-cache-lighting-input-repeat1.json` and `cache-trace-debug-ui2.txt`.
+`cache-trace-tile-rejections1` rejects a duplicated tile with a recomputed
+valid digest and the initial original observation with an incorrectly
+selected argument resource. The latter is excluded from the comparison;
+the corrected pair uses the pipeline's explicit RDC **12974** identity.
+Only this producer and its relevant inputs were inspected; no new capture
+or broad GPU regression was run. Complete original/native fidelity remains
+unfinished.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
