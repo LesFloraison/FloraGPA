@@ -6731,6 +6731,50 @@ This closes the demonstrated Triangle Strip restart path; it does not establish
 full geometry/GS analysis, adjacency topology rendering or complete sample
 fidelity. Historical query recovery and portable acceptance remain unfinished.
 
+### BF1 main-color synchronization experiment and workspace controls
+
+The existing four-barrier particle experiment was extended to main-color producer
+execution **36758**, resource creation **324859** (1920 x 1009, R11G11B10).
+All requested barriers before **35713,35732,35751,35770** were recorded and
+GPU-completed. Native readback and a separate texture query of that recapture
+match all **7,749,120 bytes**, SHA-256
+`821f6dd581a275fa3d882538df42e34dfd577c4630d155afcc71541aa18ab948`.
+However, this still differs from original GPA `gpa-bf1-main-raw2` at **95,980**
+packed pixels, within **(1329,394)–(1919,865)**. The selected pixel (1674,485)
+also differs. This is a verified native/analysis boundary for an explicit
+synchronization modification, **not** restored original-frame fidelity.
+
+An unmodified recapture queried with the current 20-patch runtime differed from
+the same original data at **41,781** pixels; enabling diagnostic discard fills
+in a separate query yielded the above `821f6d…` result. The default query's
+skipped-fill counter was **zero**, so this comparison does not establish that
+discard policy caused the difference. The latter hash also occurred in an older
+unmodified query. No improvement is attributed to a specific patch, and no
+repeatability or full-frame acceptance is claimed. Evidence:
+`bf1-producer-runtime20`, `bf1-producer-runtime20-diagnostic`,
+`bf1-producer-barrier20`, `bf1-producer-barrier20-analysis`, with compact
+`comparison.json` files. The four GPU requests were serial and targeted this
+existing discrepancy; no sample sweep was performed.
+
+The Edit menu now exposes **Insert DX12 UAV Barrier Before Event** and
+**Remove Inserted DX12 UAV Barrier** for eligible submitted Draw/Dispatch
+instances. The operation uses the existing capture-bound project and native
+barrier implementation. It preserves other experiment edits, supports undo/redo
+and save/load, invalidates prior analysis/output, and retains asynchronous
+capture verification, cancellation and session checks. The tooltip explains
+that ordering and timing change, including when the target draw is disabled.
+CPU-record selections, query isolation and busy workers cannot insert a barrier.
+This supersedes the earlier CLI-only workspace limitation; it does not silently
+alter original replay or repair synchronization automatically.
+
+Build **417** passes for the workspace, worker and targeted test executable.
+`dx12UavBarrierWorkspace` opens BF1 and checks insertion/removal, preservation of
+a disabled draw, undo/redo and redo truncation, saved string execution identities,
+reloading per-instance state, CPU-record/busy gating and rejection of stale VS
+debug/mesh results. Automatic replay stays off and no GPU worker runs during this
+UI check: **3 passed** including setup/cleanup, **17,277 ms**
+(`uav-barrier-workspace1.txt`).
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |

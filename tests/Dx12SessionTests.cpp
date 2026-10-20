@@ -2511,6 +2511,68 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!window.findChild<QAction *>("undoExperiment")->isEnabled());
         QVERIFY(!window.findChild<QAction *>("redoExperiment")->isEnabled());
     }
+    void dx12UavBarrierWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set the BF1 capture directory for the UAV barrier workspace check");
+        QTemporaryDir temp;
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), prepared(&window, &MainWindow::experimentFinished);
+        QSignalSpy replayed(&window, &MainWindow::taskFinished);
+        auto barrier = window.findChild<QAction *>("insertDx12UavBarrier");
+        QVERIFY(barrier); QVERIFY(!barrier->isEnabled());
+        window.openCapture(root + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        QVERIFY(!barrier->isEnabled());
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+        auto domain = window.findChild<QComboBox *>("apiEventDomain"); domain->setCurrentIndex(1);
+        const auto locate = [&](const char *id) {
+            auto field = window.findChild<QLineEdit *>("apiLocate"); field->setText(id); QTest::keyClick(field, Qt::Key_Return);
+        };
+        locate("35713"); QVERIFY(barrier->isEnabled());
+        auto debug = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        auto mesh = window.findChild<ReplayMeshView *>("replayMeshView");
+        const auto oldDebug = debug->requestId(), oldMesh = mesh->requestId();
+        barrier->trigger(); QVERIFY(window.busy()); QVERIFY(!barrier->isEnabled());
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QCOMPARE(barrier->text(), QString("Remove Inserted DX12 UAV Barrier"));
+        QVERIFY(!debug->finish(oldDebug, {})); QVERIFY(!mesh->finish(oldMesh, {}, {}));
+        const auto project = temp.path() + "/barrier.json";
+        QVERIFY(window.saveDx12Experiment(project));
+        const auto readProject = [&] {
+            QFile file(project); if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read saved barrier experiment");
+            return nlohmann::json::parse(file.readAll().toStdString());
+        };
+        auto saved = readProject();
+        QCOMPARE(saved.at("cursor").get<int>(), 1);
+        QCOMPARE(saved.at("history")[0]["operations"][0],
+            (nlohmann::json{{"kind", "uav_barrier"}, {"scope", "before_execution"}, {"event", "35713"}, {"value", true}}));
+        // Editing a barrier must preserve other operations, including disabled draws.
+        auto enable = window.findChild<QAction *>("enableExperimentEvent"); enable->trigger();
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        barrier->trigger(); QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 10000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QCOMPARE(barrier->text(), QString("Insert DX12 UAV Barrier Before Event"));
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        QVERIFY(window.saveDx12Experiment(project)); saved = readProject();
+        QCOMPARE(saved.at("cursor").get<int>(), 3);
+        QCOMPARE(saved.at("history")[1]["operations"][0]["kind"].get<std::string>(), std::string("enabled"));
+        QVERIFY(!saved.at("history")[2]["operations"][0]["value"].get<bool>());
+        auto undo = window.findChild<QAction *>("undoExperiment"), redo = window.findChild<QAction *>("redoExperiment");
+        undo->trigger(); QCOMPARE(barrier->text(), QString("Remove Inserted DX12 UAV Barrier"));
+        redo->trigger(); QCOMPARE(barrier->text(), QString("Insert DX12 UAV Barrier Before Event"));
+        undo->trigger(); locate("35732");
+        QCOMPARE(barrier->text(), QString("Insert DX12 UAV Barrier Before Event"));
+        barrier->trigger(); QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 10000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QVERIFY(!redo->isEnabled()); QVERIFY(window.saveDx12Experiment(project)); saved = readProject();
+        QCOMPARE(saved.at("history").size(), size_t(3));
+        QCOMPARE(saved.at("history")[2]["operations"][0]["event"].get<std::string>(), std::string("35732"));
+        domain->setCurrentIndex(0); QVERIFY(!barrier->isEnabled());
+        window.openDx12Experiment(project);
+        QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 10000); QVERIFY(prepared.takeFirst()[0].toBool());
+        QVERIFY(barrier->isEnabled()); QCOMPARE(barrier->text(), QString("Remove Inserted DX12 UAV Barrier"));
+        locate("35713"); QCOMPARE(barrier->text(), QString("Remove Inserted DX12 UAV Barrier"));
+        QCOMPARE(enable->text(), QString("Enable Event"));
+        QVERIFY(replayed.empty()); // This test changes the project with automatic GPU replay disabled.
+    }
     void dx12ExperimentWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto output = qEnvironmentVariable("FLORA_DX12_WORKSPACE_EXPERIMENT_OUTPUT");

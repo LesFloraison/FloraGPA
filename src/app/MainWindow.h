@@ -92,7 +92,8 @@ class MainWindow final : public QMainWindow {
         QString path;
     };
     void prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit = {},
-                               std::optional<Dx12ShaderImport> shader = {}, std::optional<Dx12ResourceImport> resource = {});
+                               std::optional<Dx12ShaderImport> shader = {}, std::optional<Dx12ResourceImport> resource = {},
+                               std::optional<std::pair<Id, bool>> barrier = {});
     void importDx12Shader();
     void importDx12Resource();
     QSpinBox *dx12Subresource_ = nullptr, *dx12Budget_ = nullptr;

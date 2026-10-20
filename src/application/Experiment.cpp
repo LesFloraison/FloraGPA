@@ -549,6 +549,14 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
         }
     options.experiment = std::move(summary);
 }
+bool Experiment::uavBarrierBefore(Id execution) const {
+    bool inserted = false;
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_.at("history").at(i).at("operations"))
+            if (op.at("kind") == "uav_barrier" && identifier(op.at("event")) == execution)
+                inserted = op.at("value").get<bool>();
+    return inserted;
+}
 bool Experiment::enabled(Id event) const {
     bool enabled = true;
     for (size_t i = 0; i < revision(); ++i)

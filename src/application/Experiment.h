@@ -18,6 +18,7 @@ class Experiment {
     void load(const QString &path, const IReplaySession &session);
     void setEnabled(const IReplaySession &session, Id execution, bool enabled);
     void setUavBarrierBefore(const IReplaySession &session, Id execution, bool enabled);
+    bool uavBarrierBefore(Id execution) const;
     std::set<Id> disabledExecutions(const IReplaySession &session) const;
     struct Dx12Edits {
         std::set<Id> disabled;

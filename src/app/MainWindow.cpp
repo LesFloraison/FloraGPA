@@ -478,6 +478,15 @@ void MainWindow::buildUi() {
         }
     });
     enableAction_->setObjectName("enableExperimentEvent");
+    auto uavBarrier = edit->addAction("Insert DX12 UAV Barrier Before Event", this, [this] {
+        if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.execution ||
+            selection_.isolateMissingQueries || !session_->capability(ReplayFeature::Experiments, selection_).supported()) return;
+        const auto execution = *selection_.execution;
+        prepareDx12Experiment({}, {}, {}, {}, {{execution, !experiment_ || !experiment_->uavBarrierBefore(execution)}});
+    });
+    uavBarrier->setObjectName("insertDx12UavBarrier");
+    uavBarrier->setToolTip("Insert a global UAV ordering barrier immediately before this execution instance, even if its draw is disabled. "
+                           "This experiment changes synchronization and timing; it does not recover missing captured barriers.");
     edit->addAction("Replace DX12 Pipeline Shader…", this, &MainWindow::importDx12Shader)
         ->setObjectName("replaceDx12Shader");
     edit->addAction("Import DX12 Resource Data…", this, &MainWindow::importDx12Resource)
@@ -3412,6 +3421,10 @@ void MainWindow::updateExperimentActions() {
     const auto type = frame_ && selectedEvent_ ? frame_->entry(selectedEvent_).type : 0;
     bool editable = isDraw(uint16_t(type)) || isWritableCommand(uint16_t(type));
     if (dx12) editable = !busy() && session_->capability(ReplayFeature::Experiments, selection_).supported();
+    auto uavBarrier = findChild<QAction *>("insertDx12UavBarrier");
+    uavBarrier->setEnabled(dx12 && editable && !selection_.isolateMissingQueries);
+    uavBarrier->setText(dx12 && selection_.execution && experiment_ && experiment_->uavBarrierBefore(*selection_.execution)
+        ? "Remove Inserted DX12 UAV Barrier" : "Insert DX12 UAV Barrier Before Event");
     enableAction_->setEnabled(editable);
     enableAction_->setToolTip(dx12 ? QString::fromStdString(session_->capability(ReplayFeature::Experiments, selection_).reason) : QString{});
     if (clearAction_)

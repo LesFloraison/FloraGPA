@@ -46,12 +46,13 @@ struct ExperimentResult {
 };
 }
 void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit,
-                                      std::optional<Dx12ShaderImport> shader, std::optional<Dx12ResourceImport> resource) {
+                                      std::optional<Dx12ShaderImport> shader, std::optional<Dx12ResourceImport> resource,
+                                      std::optional<std::pair<Id, bool>> barrier) {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
     if (selection_.isolateMissingQueries) { showError("Turn off query isolation before opening or editing an experiment"); return; }
     const auto session = session_;
     const auto revision = revision_;
-    const auto current = (shader || resource) && experiment_ ? std::make_shared<Experiment>(*experiment_) : nullptr;
+    const auto current = (shader || resource || barrier) && experiment_ ? std::make_shared<Experiment>(*experiment_) : nullptr;
     const auto token = std::make_shared<std::atomic_bool>(false);
     experimentCancel_ = token;
     setBusy(true);
@@ -100,7 +101,7 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
         statusBar()->showMessage(path.isEmpty() ? "Experiment updated" : "Experiment loaded", 3000);
         emit experimentFinished(true);
     });
-    watcher->setFuture(QtConcurrent::run([session, token, path, edit, shader, resource, current] {
+    watcher->setFuture(QtConcurrent::run([session, token, path, edit, shader, resource, barrier, current] {
         ExperimentResult result;
         try {
             const CancelCheck cancelled = [token] { return token->load(); };
@@ -108,6 +109,7 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
             if (!path.isEmpty()) result.experiment->load(path, *session);
             checkCancellation(cancelled);
             if (edit) result.experiment->setEnabled(*session, edit->first, edit->second);
+            if (barrier) result.experiment->setUavBarrierBefore(*session, barrier->first, barrier->second);
             if (shader) {
                 const auto &[pipeline, stage, source] = *shader;
                 QFile file(source);
