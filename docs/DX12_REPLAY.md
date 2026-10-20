@@ -8698,6 +8698,77 @@ capture coverage and the selected resource's indexed Copy/barrier/synchronizatio
 navigation. It does not measure changed resource bytes, restore original-image
 fidelity or certify complete resource histories. `frame_complete` remains false.
 
+### Pin the portable DXIL analysis compiler
+
+The first Hellblade2 portable shader-debug check exposed an external runtime
+dependency: the packaged analyzer loaded
+`Windows Kits/10/bin/10.0.26100.0/x64/dxcompiler.dll`, even with PATH restricted
+to Windows/System32. RenderDoc 1.45's `SearchForDXC` checks the Windows SDK
+registry before PATH; Flora's deployed `DXCompiler` directory was not selected
+by that search. `verify_portable_modules.ps1` correctly rejected this report.
+A successful trace alone did not establish portable analysis.
+
+The analyzer now validates the existing pinned **DXC v1.8.2505.1** compiler
+beside its executable and sets RenderDoc's process-local **D3D12.DXCPath**
+after opening the capture metadata, before `OpenCapture` creates a replay
+device. Missing or mismatched compiler files fail before GPU replay; there is
+no SDK fallback. The setting is not saved to the user's RenderDoc configuration.
+DX11 keeps its existing path. DXIL disassembly and analysis share the checksum
+validator. Successful reports include `dxil_compiler`, distinguishing a
+configured compiler from an actually loaded module, and reject a loaded module
+whose file differs from the selected library. This configures generated DXIL
+helpers; it does not recompile the original captured shaders.
+
+One packaged native full-stream replay (build **487**) reads final backbuffer
+creation **506294**, reaches execution **37104** and final record **613510**,
+and records zero debug-layer errors, SDK **616**, and **9,216,000** raw RGB10A2
+bytes. Its storage SHA-256 is
+`b128de84f40b9a044c78a39ef6293a8357abaf5eb37de0ed2aaf4abb33074f60`.
+The fresh RDC has **2,852,993,849 bytes**. This is real readback, not a preview
+image; no new whole-image fidelity comparison is claimed.
+
+The initial and corrected analysis queries use that same capture, execution
+**9731**, pixel **(169,269)**, primitive **1**, with GPU fragment reference
+enabled. Both map the execution to RDC event **420** and return **276** DXIL
+steps. The corrected build **488** still exactly matches all four GPU
+fragment-output words:
+`[1057153024,3209830400,1138105536,1054272978]`.
+The selected texel remains unchanged across debug/history queries, and the
+history endpoint exactly matches the post-event target. This validates the
+selected final output, not every intermediate instruction or input.
+The exported **33,276-byte** DXIL has SHA-256
+`3f577c66c88334e96f619ba7e47f12b215ec1451c6d73b17695a79d7c56ee3d3`.
+The earlier contraction-sensitive MainPS invocation is a different Draw and
+remains unresolved; this change introduces no arithmetic substitution.
+
+The native snapshot contains **84** modules and the corrected analyzer
+snapshot **89**. Separate checks against their respective build-487/build-488
+packages pass: modules are within those packages or Windows, with no GPA,
+Python or external SDK dependency. The corrected analyzer loads
+`DXCompiler/dxcompiler.dll` with SHA-256
+`5888d3e590f5bfd8743484e7f31313996734adec5741506271a5c6368cbe8ba9`.
+These are process snapshots, not lifetime load traces or clean-machine tests.
+The native capture was reused after the analyzer-only fix; no second
+Hellblade2 native replay or other-sample GPU regression was run.
+
+Build **488** and packaging pass. Build **489** updates only the focused test
+so its failure fixtures run without optional development runtime deployment.
+The final runtime validation test passes **3** checks including setup/cleanup
+(**136 ms**); the existing original and
+modified DXIL disassembly/error checks pass **3** (**484 ms**) without GPU work.
+Two isolated worker fault checks use the real capture metadata with missing
+and invalid local compiler files; both exit **1** with the expected diagnostic
+and no loaded `dxcompiler.dll`, before device creation.
+
+Evidence remains ignored: `portable-package487.log`, `portable-package488.log`,
+`portable-hellblade487/{native,debug,debug-pinned,dxc-rejection}`,
+`native-module-verification.json`, `debug-module-verification.json` and
+`evidence.json` inside that directory, `pinned-dxc-runtime-tests1.txt`,
+`pinned-dxc-runtime-tests2.txt`, `pinned-dxc-disassembly-compat1.txt`,
+and `build488.log` / `build489.log`.
+Full portable feature acceptance and the original-frame fidelity gaps remain
+unfinished; the two package versions above are recorded explicitly.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -8718,7 +8789,7 @@ fidelity or certify complete resource histories. `frame_complete` remains false.
 | VS/PS/CS debugging and geometry | DXBC VS, PS and selected CS traces/workspace paths checked; nonzero DXBC shared-memory group IDs fixed with an exact GPU reproduction; selected temporal CS stores match the correct GPU replay phase after format truncation; GPU DXBC dot products correct the selected VS position W mismatch and all four position components match post-VS readback; GPU MAD corrects TEXCOORD4.xy while TEXCOORD2.xyz still varies across GPU reads; transient replay variation, geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; selected filter PS instruction breakpoint/stepping and mapped Watch verified, with traced discard-border sample and native-policy GPU alpha agreement; corrected Cube direction gives selected PS GPU shader-output agreement within one float32 ULP and exact stored values after observed binary16 truncation; query-isolated final Draw VS stepping, breakpoint and Watch verified, with all four output semantics matching the selected GPU reference; selected isolated PS trace matches all four GPU output words, and a reproduced BGRA intermediate-history channel swap is corrected; isolated VSIn/VSOut tables, selected vertex/input bytes, 276-triangle exports with provenance and VS invocation handoff verified; inputless replacement PS auxiliary-signature failure fixed with a same-capture reproduction and exact four-component output; remaining stages/formats unfinished | One DXIL SM6.6 PS verified against GPU shader output; MainPS contraction-sensitive dither mismatch reproduced and explicitly reported, numerical fix unfinished; selected indirect CS RGB stores match their corresponding GPU phases; retained DXIL inputs fix the selected downsample comparison, while earlier replay output and full input fidelity remain unverified; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; full UAV validation, other stages and complete geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; replacement CS writes exactly checked output through the existing experiment overlay; targeted VS shadow-factor experiment restores the full particle attachment to original GPA bytes and undo restores the native/barrier output; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; selected query-isolated Draw timestamp/statistics and 16-list calibrated prefix timeline verified with incomplete-frame provenance; isolated final Draw disable preserves the preceding pixel and undo restores every output byte, with project policy persistence, export experiment identity and stale-analysis rejection verified; isolated PS replacement and alpha-buffer patch have native output, fresh debug/pipeline identity and full-storage undo evidence; isolated typeless BGRA8 texture import has exact full-input readback, explicit preview interpretation, modified pixel history, context-safe navigation and exact full-output undo evidence; full experiments and performance unfinished | Selected compute Dispatch timestamp and 72-list/two-queue calibrated native timeline measured; four Fence dependency brackets verified, no overlap observed; changed DXIL PS produces an exact full-viewport constant-color image; indirect CS replacement produces 295,552 exact marker texels and undo restores the selected original texel; whole-image undo has unresolved raw variation; full stage/resource experiments and performance unfinished |
 | Comparison with original GPA frame/intermediate resources | Output and tone-map boundary compared; raw R11G11B10 main input differs at its producer before tone mapping; original and independent variation remain unexplained; screenshot alpha forcing identified; original RGBA16F particle boundary differs at 26,473 RGB pixels with all Alpha words equal; recovered original shadow buffer and a 12-vertex diagnostic shader correction account for all bytes at that boundary, while state-correct third-Draw and final-copy readbacks match the selected native results; original final-copy runs also vary at those 12 factors, and default full-frame fidelity remains unfinished | First color RGB exactly matches original playback; screenshot alpha forcing identified; raw-alpha/full/intermediate comparisons unfinished | Second original Present compared as raw RGB10: 6,402 pixels differ, maximum channel delta 4; screenshot high-eight-bit conversion and serialized backbuffer rotation identified; full/intermediate fidelity unfinished |
-| Full portable replay/analysis without GPA/Python | Packaged SDK-602-requested UAV Clear readback matches baseline; module snapshot verified; full acceptance unfinished | Packaged isolated native replay, fresh recapture and mapped Resource History verified with module snapshots; missing query values and full acceptance unfinished | Not verified |
+| Full portable replay/analysis without GPA/Python | Packaged SDK-602-requested UAV Clear readback matches baseline; module snapshot verified; full acceptance unfinished | Packaged isolated native replay, fresh recapture and mapped Resource History verified with module snapshots; missing query values and full acceptance unfinished | Packaged full-stream native readback and fresh capture verified; same capture's selected DXIL PS returns 276 steps and exact GPU fragment-output words; external Windows SDK compiler dependency reproduced and fixed with the pinned package compiler; separate native/analyzer module snapshots verified across builds 487/488; full acceptance unfinished |
 
 No unfinished item above has been attributed to a hardware limitation. Known
 implementation gaps include historical query state, complete Talos execution

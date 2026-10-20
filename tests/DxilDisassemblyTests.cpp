@@ -1,4 +1,5 @@
 #include "application/DxilDisassembly.h"
+#include "application/DxcRuntime.h"
 #include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -7,6 +8,21 @@ using namespace flora;
 class DxilDisassemblyTests : public QObject {
     Q_OBJECT
   private slots:
+    void pinnedRuntimeValidation() {
+        const auto runtime = QCoreApplication::applicationDirPath() + "/DXCompiler/dxcompiler.dll";
+        // Offline failure checks also run on builds without the optional
+        // runtime deployment. When deployed, validate the real library too.
+        if (QFileInfo::exists(runtime))
+            QCOMPARE(requireDxcRuntime(runtime), QFileInfo(runtime).canonicalFilePath());
+        QTemporaryDir temp;
+        const auto missing = temp.filePath("dxcompiler.dll");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDxcRuntime(missing));
+        QFile wrong(missing);
+        QVERIFY(wrong.open(QIODevice::WriteOnly));
+        QCOMPARE(wrong.write("wrong runtime"), qint64(13));
+        wrong.close();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireDxcRuntime(missing));
+    }
     void actualShadersAndFailures() {
         const auto runtime = qEnvironmentVariable("FLORA_DXC_LIBRARY");
         const auto reports = qEnvironmentVariable("FLORA_DXIL_EXPORTS");

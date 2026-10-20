@@ -13,6 +13,9 @@
 #include "application/RdcJobs.h"
 #include "application/ReplayMesh.h"
 #include "application/ReplayRequest.h"
+#include "application/DxcRuntime.h"
+#include <QCoreApplication>
+#include <QDir>
 #include <QCryptographicHash>
 #include <QFile>
 #include <QSaveFile>
@@ -179,6 +182,7 @@ class Session {
   public:
     std::unique_ptr<IReplayController, Shutdown> controller;
     std::string version, commit;
+    Json dxcRuntime;
     uint32_t d16HistoryPatch{};
     uint32_t dxbcWorkgroupPatch{};
     uint32_t dx12UsageVisibilityPatch{};
@@ -404,6 +408,21 @@ class Session {
                 throw std::runtime_error("RenderDoc did not create a capture handle");
             const auto filename = std::filesystem::canonical(path(job.at("capture"))).u8string();
             checked(file->OpenFile(reinterpret_cast<const char *>(filename.c_str()), "", {}));
+            if (file->DriverName() == "D3D12") {
+                const auto compiler = flora::requireDxcRuntime(
+                    QDir(QCoreApplication::applicationDirPath()).filePath("DXCompiler/dxcompiler.dll"));
+                auto *setting = symbol<decltype(&RENDERDOC_SetConfigSetting)>(
+                    "RENDERDOC_SetConfigSetting")("D3D12.DXCPath");
+                if (!setting || setting->type.basetype != SDBasic::String)
+                    throw std::runtime_error("RenderDoc does not expose the DX12 compiler path setting");
+                // Process-local only. Do not persist over the user's RenderDoc
+                // settings or rely on its SDK-registry / plugin / PATH search.
+                setting->data.str = compiler.toUtf8().constData();
+                dxcRuntime = {{"library", compiler.toStdString()},
+                    {"release", flora::dxcRuntimeRelease}, {"sha256", flora::dxcRuntimeSha256},
+                    {"selection", "D3D12.DXCPath"},
+                    {"scope", "Pinned before replay device creation; applies to RenderDoc-generated DXIL helpers, not original captured shaders"}};
+            }
             ReplayOptions options;
             static_assert(uint32_t(ReplayOptimisationLevel::NoOptimisation) == 0 &&
                           uint32_t(ReplayOptimisationLevel::Conservative) == 1 &&
@@ -447,6 +466,21 @@ class Session {
             close();
             throw;
         }
+    }
+    Json compilerInformation() const {
+        if (dxcRuntime.is_null()) return nullptr;
+        auto result = dxcRuntime;
+        const auto module = GetModuleHandleW(L"dxcompiler.dll");
+        result["status"] = module ? "loaded" : "configured_not_loaded";
+        if (module) {
+            wchar_t actual[32768]{};
+            const auto count = GetModuleFileNameW(module, actual, 32768);
+            if (!count || count >= 32768 ||
+                !std::filesystem::equivalent(path(result.at("library")), actual))
+                throw std::runtime_error("DX12 analysis loaded a different DXC runtime");
+            result["loaded_library"] = QString::fromWCharArray(actual).toStdString();
+        }
+        return result;
     }
     void close() noexcept {
         controller.reset();
@@ -1590,6 +1624,7 @@ Json runRdcJob(const Json &job) {
             result["execution"] = job.value("execution", Json(nullptr));
             result.erase("gpa_event");
         }
+        result["dxil_compiler"] = session.compilerInformation();
         result["loaded_modules"] = rdcLoadedModules();
         return std::move(result);
     };

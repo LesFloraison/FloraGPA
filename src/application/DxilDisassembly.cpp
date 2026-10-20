@@ -1,6 +1,5 @@
 #include "DxilDisassembly.h"
-#include <QCryptographicHash>
-#include <QFile>
+#include "DxcRuntime.h"
 #include <Windows.h>
 #include <dxcapi.h>
 #include <wrl/client.h>
@@ -22,19 +21,8 @@ struct Library {
 };
 } // namespace
 DxilDisassembly disassembleDxil(format::Bytes bytecode, const std::filesystem::path &compiler) {
-    const auto path = std::filesystem::absolute(compiler).lexically_normal();
-    const auto name = QString::fromStdWString(path.wstring());
-    QFile libraryFile(name);
-    if (!libraryFile.open(QIODevice::ReadOnly))
-        throw std::runtime_error(
-            "DXC runtime is missing; deploy DXCompiler or pass --dxcompiler with the pinned DLL");
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-    if (!hash.addData(&libraryFile))
-        throw std::runtime_error("Cannot hash DXC runtime");
-    const auto digest = hash.result().toHex();
-    if (digest != "5888d3e590f5bfd8743484e7f31313996734adec5741506271a5c6368cbe8ba9")
-        throw std::runtime_error("DXC runtime differs from the pinned v1.8.2505.1 x64 release");
-    libraryFile.close();
+    const auto name = requireDxcRuntime(QString::fromStdWString(compiler.wstring()));
+    const auto path = std::filesystem::path(name.toStdWString());
     Library library;
     library.handle = LoadLibraryExW(path.c_str(), nullptr,
                                     LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -69,9 +57,9 @@ DxilDisassembly disassembleDxil(format::Bytes bytecode, const std::filesystem::p
         throw std::runtime_error("DXC returned empty disassembly");
     return {std::string(assembly->GetStringPointer(), assembly->GetStringLength()),
             {{"name", "Microsoft DirectX Shader Compiler"},
-             {"release", "v1.8.2505.1"},
+             {"release", dxcRuntimeRelease},
              {"library", name.toStdString()},
-             {"sha256", digest.toStdString()},
+             {"sha256", dxcRuntimeSha256},
              {"method", "IDxcCompiler3::Disassemble"},
              {"gpu_commands_executed", false}}};
 }
