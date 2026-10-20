@@ -1762,12 +1762,14 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QVERIFY(!session->capability(ReplayFeature::PixelHistory,selection).supported());
     }
     void isolatedQueryOverlayWorkspace_data() {
-        QTest::addColumn<bool>("shader");
-        QTest::newRow("shader") << true;
-        QTest::newRow("buffer") << false;
+        QTest::addColumn<QString>("overlay");
+        QTest::newRow("shader") << QString("shader");
+        QTest::newRow("buffer") << QString("buffer");
+        QTest::newRow("texture") << QString("texture");
     }
     void isolatedQueryOverlayWorkspace() {
-        QFETCH(bool, shader);
+        QFETCH(QString, overlay);
+        const bool shader = overlay == "shader", texture = overlay == "texture";
         using Json = nlohmann::json;
         try {
             const auto captures = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
@@ -1775,7 +1777,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             const auto library = qEnvironmentVariable("FLORA_QUERY_HISTORY_RENDERDOC");
             if (captures.isEmpty() || evidence.isEmpty() || library.isEmpty())
                 QSKIP("Set Talos captures, a new overlay output directory and the pinned RenderDoc library");
-            const auto output = evidence + (shader ? "/shader" : "/buffer");
+            const auto output = evidence + '/' + overlay;
             QVERIFY(!QFileInfo::exists(output));
             QVERIFY(QDir().mkpath(output));
             QByteArray replacement;
@@ -1790,12 +1792,27 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
                 replacement = QByteArray(static_cast<const char *>(blob->GetBufferPointer()),
                                          qsizetype(blob->GetBufferSize()));
                 write(output + "/replacement.hlsl", source);
+            } else if (texture) {
+                const auto session = openReplaySession(std::filesystem::path(
+                    (captures + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+                const auto description = Json::parse(session->resource(51141).summary);
+                write(output + "/texture-description.json", QByteArray::fromStdString(description.dump(2)));
+                QCOMPARE(description.at("Dimension"), Json(3));
+                QCOMPARE(description.at("Width"), Json("1024"));
+                QCOMPARE(description.at("Height"), Json(1024));
+                QCOMPARE(description.at("MipLevels"), Json(1));
+                QCOMPARE(description.at("Format"), Json(90)); // B8G8R8A8_TYPELESS storage.
+                // Distinct storage channels verify BGRA preview ordering. Zero
+                // alpha keeps the selected Draw transparent without changing PS.
+                replacement = QByteArray::fromHex("21436500").repeated(1024 * 1024);
             } else {
                 // PS cb0[0].zw are the alpha scale/bias. Zero both before
                 // submission 192532; keep all other bytes and the shader intact.
                 replacement = QByteArray(8, '\0');
             }
-            const auto asset = output + (shader ? "/replacement.dxbc" : "/alpha.bin");
+            const auto asset = output + (shader    ? "/replacement.dxbc"
+                                         : texture ? "/texture.bin"
+                                                   : "/alpha.bin");
             write(asset, replacement);
             QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
             MainWindow window;
@@ -1850,6 +1867,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             };
             if (shader)
                 window.replaceDx12Shader(156511, "PS", asset);
+            else if (texture)
+                window.patchDx12Resource(192532, 51141, 0, 0, true, asset);
             else
                 window.patchDx12Resource(192532, 150566, 32866312, 0, false, asset);
             QTRY_COMPARE_WITH_TIMEOUT(prepared.count(), 1, 60000);
@@ -1863,9 +1882,11 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QCOMPARE(modified.size(), 8294400);
             QCOMPARE(modified.mid((172 * 1920 + 65) * 4, 4).toHex(),
                      shader ? QByteArray("ff00ffff") : QByteArray("020606d9"));
-            if (!shader)
+            if (!shader && !texture)
                 QCOMPARE(QCryptographicHash::hash(modified, QCryptographicHash::Sha256).toHex(),
                          QByteArray("5e3aae068d6743e52729350ec8e958861a21e5c800bad41b33946dddc4450f82"));
+            // Texture import affects every use after the submission boundary;
+            // unlike this per-draw constant range, it need not match Draw disable.
             const auto metadata = Json::parse(read("modified.bin.json").toStdString());
             QCOMPARE(metadata.at("frame_complete"), Json(false));
             QCOMPARE(metadata.at("missing_query_policy"), Json("isolate_readback_outputs"));
@@ -1925,6 +1946,79 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
                 QVERIFY(pipeline->findChild<QAction *>("replaceBoundPipelineShader")->isEnabled());
             }
             QVERIFY(found);
+            QString pixelContext;
+            auto history = window.findChild<PixelHistoryView *>();
+            uint64_t oldHistory{};
+            Json pixelHistory;
+            if (texture) {
+                // Exercise the navigation slot with the current analysis context.
+                // This does not claim that the PS has a compute texture-store row.
+                const auto suffix =
+                    ':' + QFileInfo(library).canonicalFilePath() + ':' +
+                    QString::fromLatin1(QCryptographicHash::hash(
+                                            [&] {
+                                                QFile file(library);
+                                                if (!file.open(QIODevice::ReadOnly))
+                                                    throw std::runtime_error("Cannot read analysis library");
+                                                return file.readAll();
+                                            }(),
+                                            QCryptographicHash::Sha256)
+                                            .toHex());
+                pixelContext = QString::fromStdString(result.at("experiment_key").get<std::string>());
+                QVERIFY(pixelContext.endsWith(suffix));
+                pixelContext.chop(suffix.size());
+                QVERIFY(pixelContext.endsWith(":query-isolated"));
+                auto wrongMode = pixelContext;
+                wrongMode.chop(QString(":query-isolated").size());
+                wrongMode += ":strict";
+                auto image = window.findChild<ImageView *>("frameOutput");
+                const auto beforeJump = image->image();
+                debug->texturePixelRequested(wrongMode, 19408, 51141, 4146950352ULL, 0, 0, 0, 0, 0);
+                QCOMPARE(image->image(), beforeJump);
+                debug->texturePixelRequested({}, 19408, 51141, 4146950352ULL, 0, 0, 0, 0, 0);
+                QCOMPARE(image->image(), beforeJump);
+                debug->texturePixelRequested(pixelContext, 19408, 51141, 4146950352ULL, 0, 0, 0, 0, 0);
+                QVERIFY(image->image().isNull());
+                QCOMPARE(history->request().at("resource_creation"), Json("51141"));
+                done.clear();
+                window.replay();
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+                QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+                QCOMPARE(image->image().size(), QSize(1024, 1024));
+                QCOMPARE(image->image().pixelColor(0, 0), QColor(101, 67, 33, 0));
+                QCOMPARE(image->selectedPixel(), std::optional<QPoint>(QPoint(0, 0)));
+                exportRaw("input-readback");
+                QCOMPARE(read("input-readback.bin"), replacement);
+                const auto input = Json::parse(read("input-readback.bin.json").toStdString());
+                QCOMPARE(input.at("creation_record"), Json("51141"));
+                QCOMPARE(input.at("format"), Json(90));
+                QCOMPARE(input.at("display_interpretation"),
+                         Json("typeless_bgra8_storage_as_unorm_no_color_space_transform"));
+                QCOMPARE(input.at("missing_query_policy"), Json("isolate_readback_outputs"));
+                debug->texturePixelRequested(pixelContext, 19408, 35118, 1651480816ULL, 65, 172, 0, 0, 0);
+                QVERIFY(image->image().isNull());
+                history->setBackendPath(library, false);
+                done.clear();
+                history->queryPixel(19408, 1651480816ULL, 65, 172, 0, 0, 0);
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+                QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+                history->exportResult(output + "/history.json");
+                pixelHistory = Json::parse(read("history.json").toStdString());
+                QCOMPARE(pixelHistory.at("capture"), result.at("capture"));
+                QCOMPARE(pixelHistory.at("frame_complete"), Json(false));
+                QCOMPARE(pixelHistory.at("history").size(), size_t(3));
+                const auto &last = pixelHistory.at("history").back();
+                QCOMPARE(last.at("execution"), Json("19408"));
+                QCOMPARE(last.at("source_record"), Json("192508"));
+                for (size_t component = 0; component < 4; ++component) {
+                    const auto expected = std::array<int, 4>{6, 6, 2, 217}[component];
+                    QCOMPARE(
+                        int(last.at("postMod").at("col").at("floatValue")[component].get<double>() * 255.0 +
+                            0.5),
+                        expected);
+                }
+                oldHistory = history->requestId();
+            }
             const auto oldDebug = debug->requestId(), oldPipeline = pipeline->requestId();
             done.clear();
             window.findChild<QAction *>("undoExperiment")->trigger();
@@ -1932,6 +2026,8 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QVERIFY(pipeline->result().is_null());
             QVERIFY(!debug->finish(oldDebug, result));
             QVERIFY(!pipeline->finish(oldPipeline, {}));
+            if (texture)
+                QVERIFY(!history->finish(oldHistory, pixelHistory));
             QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
             QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
             exportRaw("restored");
@@ -1942,6 +2038,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QCOMPARE(restored.at("experiment").at("cursor"), Json("0"));
             QVERIFY(restored.at("experiment").at("document_sha256") !=
                     metadata.at("experiment").at("document_sha256"));
+            if (texture) {
+                auto image = window.findChild<ImageView *>("frameOutput");
+                const auto restoredImage = image->image();
+                debug->texturePixelRequested(pixelContext, 19408, 51141, 4146950352ULL, 0, 0, 0, 0, 0);
+                QCOMPARE(image->image(), restoredImage);
+                QVERIFY(!image->selectedPixel());
+            }
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }

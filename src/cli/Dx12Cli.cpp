@@ -292,6 +292,8 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
                                         : "Execution replayed; select a texture creation record for readback";
         if (report["image_available"] == true && report.at("native_texture").at("format") == 26)
             report["image_status"] = "Native GPU readback; R11G11B10 preview uses linear RGB clamped to [0,1], alpha 1; raw HDR storage preserved";
+        if (report["image_available"] == true && report.at("native_texture").at("format") == 90)
+            report["image_status"] = "Native GPU readback; typeless BGRA8 storage previewed as UNORM without color-space conversion; raw storage preserved";
         if (isolateQueries) report["image_status"] = report.at("image_status").get<std::string>() +
             "; incomplete query outputs isolated; historical values and full-frame fidelity are not restored";
     } catch (const std::exception &error) {

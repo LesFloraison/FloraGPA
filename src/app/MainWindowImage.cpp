@@ -44,8 +44,9 @@ void MainWindow::invalidateDx12Output() {
 }
 void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
                                        uint32_t x, uint32_t y, uint32_t mip, uint32_t layer, uint32_t sample) {
+    const auto expectedContext = historyContextKey(true);
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 ||
-        context != historyContextKey() || selection_.execution != execution)
+        expectedContext.isEmpty() || context != expectedContext || selection_.execution != execution)
         return;
     try {
         const auto resource = session_->resource(creation);
@@ -177,7 +178,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         if (dx12PixelTarget_) {
             const auto &target = *dx12PixelTarget_;
             const auto &display = replayReport.at("output_display");
-            if (target.context != historyContextKey() || target.execution != *selection_.execution ||
+            if (target.context != historyContextKey(true) || target.execution != *selection_.execution ||
                 target.creation != selection_.resource || target.before != selection_.before ||
                 target.subresource != uint32_t(dx12Subresource_->value()) ||
                 display.at("mip") != target.mip || display.at("layer") != target.layer ||

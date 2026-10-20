@@ -1390,10 +1390,14 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
             require(file.write(reinterpret_cast<const char *>(data), qint64(rowBytes)) == qint64(rowBytes), "Cannot write frame texture output");
         }
         const auto pixelFormat = footprint.Footprint.Format;
-        const bool bgra = pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM || pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+        const bool typelessBgra = pixelFormat == DXGI_FORMAT_B8G8R8A8_TYPELESS;
+        const bool bgra = pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM || pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB || typelessBgra;
         const bool rgba = pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM || pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         if ((bgra || rgba) && footprint.Footprint.Depth == 1) {
-            displayInterpretation="stored_rgba8_components";
+            // A typeless resource has no inherent numeric or color-space view.
+            // Preview its storage bytes explicitly as UNORM, preserving raw data.
+            displayInterpretation = typelessBgra ? "typeless_bgra8_storage_as_unorm_no_color_space_transform"
+                                                 : "stored_rgba8_components";
             const QImage image(static_cast<const uchar *>(mapped) + footprint.Offset, int(footprint.Footprint.Width), int(footprint.Footprint.Height),
                 qsizetype(footprint.Footprint.RowPitch), bgra ? QImage::Format_ARGB32 : QImage::Format_RGBA8888);
             auto imagePath = output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
