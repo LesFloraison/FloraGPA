@@ -128,7 +128,8 @@ void ResourceBrowser::setContext(const QString &key, std::vector<DrawResourceBin
                              b.error.empty() ? (b.texture ? QStyle::SP_FileIcon : QStyle::SP_DriveHDIcon)
                                              : QStyle::SP_MessageBoxWarning));
         if (!b.error.empty())
-            item->setText(0, text + "\nUnavailable");
+            item->setText(0, text + (b.native.is_object() && b.native.at("reference").value("mapping_status", "") == "pending_cpu_binding"
+                ? "\nPending replay confirmation" : "\nUnavailable"));
         items_[b.key] = item;
     }
     inputs->setExpanded(true);

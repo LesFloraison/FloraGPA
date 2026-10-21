@@ -28,16 +28,24 @@ void save(const QString &path, const void *data, size_t size) {
         !file.commit()) throw std::runtime_error("Cannot publish resource artifact");
 }
 }
-Json readResourceWorkspace(IReplayController &controller, const Json &job, const Json &queryPolicy) {
+ResourceWorkspaceIndex::ResourceWorkspaceIndex(IReplayController &controller) {
+    for (const auto &resource : controller.GetResources()) {
+        const std::string name(resource.name.c_str());
+        if (!name.starts_with("Flora DX12 resource ")) continue;
+        if (!identities.emplace(name, resource.resourceId).second) identities[name] = ResourceId();
+    }
+    for (const auto &texture : controller.GetTextures()) textures.emplace(texture.resourceId, texture);
+    for (const auto &buffer : controller.GetBuffers()) buffers.emplace(buffer.resourceId, buffer);
+}
+Json readResourceWorkspace(IReplayController &controller, const Json &job, const Json &queryPolicy, const ResourceWorkspaceIndex *retainedIndex) {
     const auto &requests = job.at("resource_requests");
     if (!requests.is_array() || requests.empty() || requests.size() > 16)
         throw std::runtime_error("Resource read requires 1 to 16 requests");
     const QDir directory(QString::fromStdString(job.at("out").get<std::string>()));
     Json results = Json::array();
     std::map<std::string, Json> shared;
-    const auto resources = controller.GetResources();
-    const auto textures = controller.GetTextures();
-    const auto buffers = controller.GetBuffers();
+    const auto localIndex = retainedIndex ? nullptr : std::make_unique<ResourceWorkspaceIndex>(controller);
+    const auto &index = retainedIndex ? *retainedIndex : *localIndex;
     for (size_t i = 0; i < requests.size(); ++i) {
         const auto &request = requests[i];
         auto content = request; content.erase("key");
@@ -61,20 +69,20 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                 requireRdcQueryIsolation(queryPolicy, check);
             }
             const auto marker = "Flora DX12 resource " + std::to_string(object) + " creation " + std::to_string(creation);
-            ResourceId id;
-            for (const auto &r : resources) if (std::string(r.name.c_str()) == marker) {
-                if (id != ResourceId()) throw std::runtime_error("Ambiguous captured resource marker");
-                id = r.resourceId;
-            }
+            const auto identity = index.identities.find(marker);
+            const auto id = identity == index.identities.end() ? ResourceId() : identity->second;
             if (id == ResourceId()) throw std::runtime_error("Captured resource lifetime is absent at this boundary");
             const auto stem = QString("resource-%1").arg(i);
             if (request.value("buffer", false)) {
-                const auto found = std::find_if(buffers.begin(), buffers.end(), [&](const auto &b) { return b.resourceId == id; });
+                const auto found = index.buffers.find(id);
                 const auto offset = number(request.at("offset")), length = number(request.at("length"));
-                if (found == buffers.end() || !length || length > 256 * 1024 * 1024 ||
-                    offset > found->length || length > found->length - offset)
+                if (found == index.buffers.end() || !length || length > 256 * 1024 * 1024 ||
+                    offset > found->second.length || length > found->second.length - offset)
                     throw std::runtime_error("Buffer range exceeds resource or 256 MiB limit");
+                QElapsedTimer readTimer; readTimer.start();
                 const auto bytes = controller.GetBufferData(id, offset, length);
+                result["resource_read_ms"] = readTimer.nsecsElapsed() / 1e6;
+                result["read_bytes"] = std::to_string(bytes.size());
                 if (bytes.size() != length) throw std::runtime_error("Incomplete buffer readback");
                 save(directory.filePath(stem + ".bin"), bytes.data(), bytes.size());
                 result["file"] = (stem + ".bin").toStdString();
@@ -83,9 +91,9 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     QByteArrayView(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())),
                     QCryptographicHash::Sha256).toHex().toStdString();
             } else {
-                const auto found = std::find_if(textures.begin(), textures.end(), [&](const auto &t) { return t.resourceId == id; });
-                if (found == textures.end()) throw std::runtime_error("Selected resource is not a texture");
-                const auto &t = *found;
+                const auto found = index.textures.find(id);
+                if (found == index.textures.end()) throw std::runtime_error("Selected resource is not a texture");
+                const auto &t = found->second;
                 const auto mip = request.at("mip").get<uint32_t>(), layer = request.at("layer").get<uint32_t>();
                 const auto slice = request.value("slice", 0u), sample = request.at("sample").get<uint32_t>();
                 if (mip >= t.mips || mip >= 32 || layer >= t.arraysize ||
@@ -115,10 +123,11 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     throw std::runtime_error("Invalid display range");
                 const auto png = directory.filePath(stem + ".png");
                 QImage image;
+                QElapsedTimer displayTimer; displayTimer.start();
                 if (display && output == "thumbnail" && !qEnvironmentVariableIsSet("FLORA_DISABLE_FAST_PREVIEW")) {
                     // Render directly into a bounded GPU target: never export a full-sized PNG.
                     const auto size = QSize(int(std::max(1u, t.width >> mip)), int(std::max(1u, t.height >> mip)))
-                                          .scaled(96, 96, Qt::KeepAspectRatio);
+                                          .scaled(96, 96, Qt::KeepAspectRatio).expandedTo(QSize(1, 1));
                     auto destroy = [](IReplayOutput *p) { if (p) p->Shutdown(); };
                     std::unique_ptr<IReplayOutput, decltype(destroy)> target(
                         controller.CreateOutput(CreateHeadlessWindowingData(size.width(), size.height()), ReplayOutputType::Texture), destroy);
@@ -162,10 +171,15 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     }
                 }
                 }
+                result["display_conversion_ms"] = display ? displayTimer.nsecsElapsed() / 1e6 : 0.0;
+                result["read_bytes"] = "0";
                 if (storage) {
                     // Preserve API-provided storage separately from the display transform.
                     // For a resolved display, the raw artifact is explicitly sample zero.
+                    QElapsedTimer readTimer; readTimer.start();
                     const auto bytes = controller.GetTextureData(id, Subresource(mip, layer, sample == UINT32_MAX ? 0 : sample));
+                    result["resource_read_ms"] = readTimer.nsecsElapsed() / 1e6;
+                    result["read_bytes"] = std::to_string(bytes.size());
                     if (bytes.empty() || bytes.size() > 512ULL * 1024 * 1024)
                         throw std::runtime_error("Texture storage readback is empty or exceeds 512 MiB");
                     save(directory.filePath(stem + ".bin"), bytes.data(), bytes.size());

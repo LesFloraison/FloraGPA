@@ -11,6 +11,7 @@
 #include "dx12/NativeResources.h"
 #include "replay/RenderDocCapture.h"
 #include <QDir>
+#include <QElapsedTimer>
 #include <QSaveFile>
 #include <QTextStream>
 #include <QImage>
@@ -225,18 +226,23 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             {"document_sha256", QCryptographicHash::hash(document, QCryptographicHash::Sha256).toHex().toStdString()}};
     }
     std::string stage = "load_analysis_library";
+    QElapsedTimer stageTimer; stageTimer.start();
+    auto advanceStage = [&](const std::string &next) {
+        report["latency_ms"][stage] = stageTimer.nsecsElapsed() / 1e6;
+        stageTimer.restart(); stage = next;
+    };
     try {
         if (options.isSet("renderdoc"))
             capture.emplace(std::filesystem::path(options.value("renderdoc").toStdWString()),
                             std::filesystem::path(output.filePath("native-dx12").toStdWString()), false);
-        stage = "create_device";
+        advanceStage("create_device");
         deviceOwner = std::make_unique<dx12::NativeDevice>(directory, options.isSet("debug-device"));
         auto &device = *deviceOwner;
-        stage = "create_replay";
+        advanceStage("create_replay");
         replayOwner = std::make_unique<dx12::NativeReplay>(device, directory, budget);
         auto &replay = *replayOwner;
         replay.setIsolateMissingQueries(isolateQueries);
-        stage = "apply_experiment";
+        advanceStage("apply_experiment");
         if (experiment) {
             auto edits = experiment->dx12Edits(session);
             replay.setDisabledExecutions(std::move(edits.disabled));
@@ -244,17 +250,17 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
             replay.setShaderReplacements(std::move(edits.shaders));
             replay.setResourcePatches(std::move(edits.resources));
         }
-        stage = "prepare_execution";
+        advanceStage("prepare_execution");
         if (streamEnd)
             replay.prepareFrame(bool(capture), measureFrame, measureDraws);
         else
             replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
-        stage = "initialize_transfers";
+        advanceStage("initialize_transfers");
         replay.initializeTransfers();
-        stage = "start_analysis_capture";
+        advanceStage("start_analysis_capture");
         if (capture)
             capture->start(device.device(), "FloraGPA independent DX12 replay");
-        stage = "replay_execution";
+        advanceStage("replay_execution");
         if (streamEnd)
             replay.replayFrame(bool(capture));
         else
@@ -263,10 +269,10 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         if (measureDraws) report["draw_timings"] = replay.drawTimingsResult();
         if (options.isSet("measure-event") || measureFrame)
             report["performance"] = replay.performanceResult();
-        stage = "finish_analysis_capture";
+        advanceStage("finish_analysis_capture");
         if (capture)
             report["rdc_capture"] = QString::fromStdWString(capture->finish().wstring()).toStdString();
-        stage = buffer ? "buffer_readback" : "texture_readback";
+        advanceStage(buffer ? "buffer_readback" : "texture_readback");
         if (buffer) {
             const auto bytes = replay.inspectBuffer(creation, offset, length,
                 std::filesystem::path(output.filePath("buffer.bin").toStdWString()));
@@ -341,6 +347,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         report["image_available"] = false;
         report["image_status"] = "Replay failed; any partial artifacts are not a completed result";
     }
+    report["latency_ms"][stage] = stageTimer.nsecsElapsed() / 1e6;
     report["device"] = deviceOwner ? deviceOwner->information() : nlohmann::json();
     report["native_replay"] = replayOwner ? replayOwner->information() : nlohmann::json();
     try {

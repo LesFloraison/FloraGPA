@@ -69,7 +69,7 @@ std::vector<DrawResourceBinding> dx12DrawResources(const IReplaySession &session
                      details.at("store_byte_offset").dump();
         try {
             if (ref.value("mapping_status", "") != "capture_resource_marker")
-                throw std::runtime_error("Resource has no verified captured lifetime");
+                throw std::runtime_error(ref.value("reason", "Resource has no verified captured lifetime"));
             b.image.resource = identity(ref.at("resource_creation"));
             const auto resource = session.resource(b.image.resource);
             if (resource.capturedObject != identity(ref.at("resource_object")))

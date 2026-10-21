@@ -6215,6 +6215,67 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto output = qEnvironmentVariable("FLORA_RESOURCE_OUTPUT");
         if (!output.isEmpty()) { QVERIFY(QDir().mkpath(output)); QVERIFY(window.grab().save(output + "/strict-refusal.png")); }
     }
+    void resourceNavigationBenchmark() {
+        using Json = nlohmann::json;
+        const auto output = qEnvironmentVariable("FLORA_RESOURCE_BENCHMARK");
+        if (output.isEmpty()) QSKIP("Set FLORA_RESOURCE_BENCHMARK and execution list for measured navigation");
+        const auto executions = qEnvironmentVariable("FLORA_RESOURCE_EXECUTIONS").split(',', Qt::SkipEmptyParts);
+        QVERIFY(executions.size() >= 20);
+        MainWindow window; window.resize(1700, 1000); window.show();
+        window.findChild<Dx12PipelineView *>()->setBackendPath(qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY"), false);
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR") + '/' +
+            qEnvironmentVariable("FLORA_RESOURCE_CAPTURE", "bf1_2025_12_10__14_29_55.gpa_frame"));
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        window.findChild<QSpinBox *>("dx12AllocationMiB")->setValue(12288);
+        if (qEnvironmentVariableIsSet("FLORA_RESOURCE_ISOLATE"))
+            window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        auto browser = window.findChild<ResourceBrowser *>("drawResourceBrowser");
+        auto image = window.findChild<ImageView *>("frameOutput");
+        auto status = window.findChild<QLabel *>("resourceStatus");
+        auto log = window.findChild<QPlainTextEdit *>("taskLog");
+        auto bufferStatus = window.findChild<QLabel *>("bufferLabel");
+        const auto contentReady = [&] {
+            const auto selected = browser->selected();
+            return selected && (selected->texture ? !image->image().isNull() : bufferStatus->text().contains("bytes"));
+        };
+        Json rows = Json::array();
+        const auto save = [&] {
+            QFile f(output); if (f.open(QIODevice::WriteOnly))
+                f.write(QByteArray::fromStdString(Json{{"samples", rows}, {"log", log->toPlainText().toStdString()},
+                    {"captures", window.property("resourceCaptureCount").toUInt()},
+                    {"full_frame_ready", window.property("analysisFrameReady").toBool()}}.dump(2)));
+        };
+        for (qsizetype i = 0; i < executions.size(); ++i) {
+            const auto captures = window.property("resourceCaptureCount").toUInt();
+            const auto previousContext = browser->contextKey();
+            QElapsedTimer timer; timer.start();
+            locate->setText(executions[i]); QTest::keyClick(locate, Qt::Key_Return);
+            QTRY_VERIFY_WITH_TIMEOUT((browser->contextKey() != previousContext && !browser->bindings().empty()) ||
+                status->text().contains("retry"), 240000);
+            const auto listMs = timer.elapsed();
+            QElapsedTimer deadline; deadline.start();
+            while (!contentReady() && !status->text().contains("retry") && deadline.elapsed() < 240000)
+                QTest::qWait(10);
+            rows.push_back({{"execution", executions[i].toStdString()}, {"list_ms", listMs},
+                {"preview_ms", timer.elapsed()}, {"content_ready", contentReady()}, {"image", !image->image().isNull()},
+                {"new_captures", window.property("resourceCaptureCount").toUInt() - captures},
+                {"status", status->text().toStdString()}});
+            save();
+            QVERIFY2(contentReady(), qPrintable(status->text() + '\n' + log->toPlainText().right(3000)));
+            qInfo() << executions[i] << "list ms" << listMs << "preview ms" << timer.elapsed();
+            if (i == 0 && !qEnvironmentVariableIsSet("FLORA_DISABLE_FRAME_REUSE")) {
+                QElapsedTimer preparation; preparation.start();
+                while (!window.property("analysisFrameReady").toBool() && preparation.elapsed() < 300000)
+                    QTest::qWait(100);
+                save();
+                QVERIFY2(window.property("analysisFrameReady").toBool(), qPrintable(log->toPlainText().right(3000)));
+            } else if (i > 1 && window.property("analysisFrameReady").toBool())
+                QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
+        }
+    }
     void automaticResourceWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty()) QSKIP("Set original capture directory for automatic resource acceptance");
@@ -6236,6 +6297,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QElapsedTimer elapsed; elapsed.start();
         QTRY_VERIFY_WITH_TIMEOUT(!browser->bindings().empty() || status->text().contains("retry"), 240000);
         qInfo() << "Inventory ms" << elapsed.elapsed() << status->text();
+        QTRY_VERIFY_WITH_TIMEOUT(browser->selected().has_value() || status->text().contains("retry"), 240000);
         QVERIFY2(!browser->bindings().empty(), qPrintable(status->text()));
         const auto primary = browser->selected(); QVERIFY(primary);
         auto bufferStatus = window.findChild<QLabel *>("bufferLabel"); QVERIFY(bufferStatus);
@@ -6268,6 +6330,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             report.write(QByteArray::fromStdString(drawResourceInventory(browser->bindings(), execution.toULongLong()).dump(2)));
         }
         const auto rows = browser->bindings();
+        QImage acceptedInput;
         const auto firstInput = std::find_if(rows.begin(), rows.end(), [](const auto &b) {
             return b.texture && b.role == ResourceRole::Input && b.error.empty();
         });
@@ -6278,6 +6341,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QVERIFY2(!image->image().isNull(), qPrintable(status->text()));
             QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 1);
             qInfo() << "Input image ms" << elapsed.elapsed();
+            acceptedInput = image->image();
             if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/input.png"));
         }
         if (primary->texture && firstInput != rows.end()) {
@@ -6288,9 +6352,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
             QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
             qInfo() << "Warm output ms" << elapsed.elapsed() << "recaptures" << captures;
+            if (!qEnvironmentVariableIsSet("FLORA_DISABLE_FAST_PREVIEW")) {
+                QVERIFY(window.property("resourceCacheHits").toUInt() > 0);
+                QVERIFY(elapsed.elapsed() < 100);
+            }
             QVERIFY(browser->select(firstInput->key, true));
-            QVERIFY(image->image().isNull());
-            QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+            if (image->image().isNull()) QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+            else QCOMPARE(image->image(), acceptedInput);
             QVERIFY(browser->select(primary->key, true));
             auto boundary = window.findChild<QComboBox *>("outputBoundary");
             boundary->setCurrentIndex(1); boundary->setCurrentIndex(2);
@@ -6308,7 +6376,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
             for (int i = 0; i < tabs->count(); ++i) if (tabs->tabText(i) == "Shader") other = tabs->widget(i);
             QVERIFY(other);
             QVERIFY(browser->select(firstInput->key, true));
-            QTRY_VERIFY_WITH_TIMEOUT(window.busy(), 10000);
+            if (image->image().isNull()) QTRY_VERIFY_WITH_TIMEOUT(window.busy(), 10000);
             tabs->setCurrentWidget(other);
             QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 240000);
             QCOMPARE(tabs->currentWidget(), other);

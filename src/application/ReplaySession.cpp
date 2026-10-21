@@ -8,6 +8,7 @@
 #include "dx12/QueueDependencyIndex.h"
 #include "dx12/NativeCommands.h"
 #include "dx12/BackBufferIndex.h"
+#include "dx12/CpuBindings.h"
 #include <QUuid>
 #include <sstream>
 #include <iomanip>
@@ -81,6 +82,9 @@ class Dx12Session final : public IReplaySession {
     nlohmann::json outputSuggestion_;
     mutable std::mutex contentMutex_;
     mutable std::string contentHash_;
+    mutable std::mutex bindingsMutex_;
+    mutable std::shared_ptr<const dx12::CpuBindings> bindings_;
+    mutable bool bindingsAttempted_ = false;
     std::map<uint64_t, std::vector<Id>> signatures_;
     std::vector<Id> ids_;
     std::vector<Id> resources_;
@@ -193,6 +197,16 @@ class Dx12Session final : public IReplaySession {
         }
     }
     ReplayBackend backend() const override { return ReplayBackend::Dx12; }
+    void prepareCpuBindings(const CancelCheck &cancelled) const override {
+        { std::lock_guard lock(bindingsMutex_); if (bindingsAttempted_) return; bindingsAttempted_ = true; }
+        auto index = std::make_shared<dx12::CpuBindings>(directory_, submissions_, cancelled);
+        std::lock_guard lock(bindingsMutex_); bindings_ = std::move(index);
+    }
+    nlohmann::json cpuBindings(Id execution) const override {
+        std::shared_ptr<const dx12::CpuBindings> index;
+        { std::lock_guard lock(bindingsMutex_); index = bindings_; }
+        return index ? index->snapshot(execution) : nlohmann::json();
+    }
     nlohmann::json captureIdentity(const CancelCheck &cancelled = {}) const override {
         std::lock_guard lock(contentMutex_);
         checkCancellation(cancelled);

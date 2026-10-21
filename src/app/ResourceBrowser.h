@@ -38,6 +38,6 @@ class ResourceBrowser final : public QWidget {
     std::vector<DrawResourceBinding> bindings_;
     std::map<std::string, QTreeWidgetItem *> items_;
     std::set<std::string> done_, pending_;
-    QCache<QString, QImage> cache_{128 * 1024}; // KiB, decoded image cost.
+    QCache<QString, QImage> cache_{16 * 1024}; // KiB, decoded image cost.
 };
 } // namespace flora

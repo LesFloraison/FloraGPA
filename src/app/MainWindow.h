@@ -122,7 +122,19 @@ class MainWindow final : public QMainWindow {
     nlohmann::json dx12ResourceRequest_;
     nlohmann::json dx12RestoredResources_;
     bool dx12ContentPending_ = false;
-    std::map<QString, nlohmann::json> dx12PipelineCache_;
+    QCache<QString, nlohmann::json> dx12PipelineCache_{64 * 1024}; // KiB, conservative JSON DOM estimate.
+    struct CachedResourcePreview {
+        PreparedImage image;
+        nlohmann::json report, job;
+        std::shared_ptr<QTemporaryDir> output;
+        std::weak_ptr<QTemporaryDir> capture;
+    };
+    QCache<QString, CachedResourcePreview> dx12PreviewCache_{240 * 1024}; // Remaining 16 MiB is thumbnails.
+    std::shared_ptr<std::atomic_bool> cpuBindingsCancel_;
+    QString dx12CpuInventoryKey_;
+    bool showCachedDx12Preview(const nlohmann::json &, const QString &);
+    void showCpuBindings(const QString &);
+    void prepareCpuBindings();
     struct ResourceArtifact { QByteArray bytes; PreparedImage image; };
     std::vector<ResourceArtifact> resourceArtifacts_;
     bool resourceArtifactsReady_ = false;

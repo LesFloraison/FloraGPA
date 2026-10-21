@@ -49,7 +49,8 @@ void MainWindow::invalidateDx12Output() {
                               (process_.state() != QProcess::NotRunning || artifactJob_);
     if (!retainTiming) ++revision_;
     rdcService_.cancelSelection();
-    if (!retainTiming && (process_.state() != QProcess::NotRunning || artifactJob_))
+    if (artifactJob_ && artifactJob_->kind == "resource-validation") artifactJob_->cancelled.store(true);
+    else if (!retainTiming && (process_.state() != QProcess::NotRunning || artifactJob_))
         cancel();
     image_->setImage({});
     pixelLabel_->clear();

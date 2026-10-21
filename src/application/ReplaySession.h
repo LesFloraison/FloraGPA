@@ -66,6 +66,8 @@ class IReplaySession {
     virtual uint64_t executionCount() const { return 0; }
     virtual SessionEvent executionEvent(Id id) const { return event(id); }
     virtual std::vector<Id> referencedObjects(Id) const { return {}; }
+    virtual void prepareCpuBindings(const CancelCheck & = {}) const {}
+    virtual nlohmann::json cpuBindings(Id) const { return nullptr; }
     virtual std::span<const Id> resources() const = 0;
     virtual SessionResource resource(Id id) const = 0;
     virtual nlohmann::json resourceDetails(Id id) const = 0;

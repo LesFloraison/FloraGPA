@@ -13,6 +13,7 @@
 #include <QJsonDocument>
 #include <QSaveFile>
 #include <QFileInfo>
+#include <QElapsedTimer>
 #include <QPlainTextEdit>
 #include <QSignalBlocker>
 #include <QStatusBar>
@@ -23,6 +24,12 @@
 namespace flora {
 namespace {
 using Json = nlohmann::json;
+bool sameLibraryFile(const QString &stamp, const QString &path) {
+    if (stamp.isEmpty()) return true;
+    const QFileInfo file(path);
+    return stamp == file.canonicalFilePath() + ':' + QString::number(file.size()) + ':' +
+        QString::number(file.lastModified().toMSecsSinceEpoch());
+}
 uint64_t decimal(const Json &j) { return std::stoull(j.get<std::string>()); }
 QString artifact(const QString &directory, const Json &name) {
     const auto file = QString::fromStdString(name.get<std::string>());
@@ -47,6 +54,68 @@ bool MainWindow::resourceBrowseBusy() const {
     if (runningKind_ == "analysis-frame-capture") return true;
     return runningAnalysis_ == RdcAnalysis::Resources &&
            (runningKind_ == "history" || runningKind_ == "history-capture" || runningKind_ == "resource-validation");
+}
+void MainWindow::prepareCpuBindings() {
+    if (!session_ || session_->backend() != ReplayBackend::Dx12) return;
+    const auto session = session_;
+    const auto token = std::make_shared<std::atomic_bool>(false); cpuBindingsCancel_ = token;
+    auto watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher, session, token] {
+        const auto error = watcher->result(); watcher->deleteLater();
+        if (session != session_ || token->load()) return;
+        if (!error.isEmpty()) log_->appendPlainText("CPU binding index unavailable: " + error);
+        else QTimer::singleShot(0, this, &MainWindow::pumpDx12Resources);
+    });
+    watcher->setFuture(QtConcurrent::run([session, token] {
+        try { session->prepareCpuBindings([token] { return token->load(); }); return QString{}; }
+        catch (const std::exception &e) { return QString::fromUtf8(e.what()); }
+    }));
+}
+void MainWindow::showCpuBindings(const QString &context) {
+    if (context.isEmpty() || dx12InventoryKey_ == context || resourceScope_->currentIndex() != 0 ||
+        (dx12CpuInventoryKey_ == context && resourceBrowser_->contextKey() == context)) return;
+    try {
+        QElapsedTimer timer; timer.start();
+        const auto key = context + ":cpu";
+        auto cached = dx12PipelineCache_.object(key);
+        auto snapshot = cached ? *cached : session_->cpuBindings(*selection_.execution);
+        if (snapshot.is_null()) return;
+        if (!cached) {
+            const auto cost = int(std::max<size_t>(1, snapshot.dump().size() * 4 / 1024));
+            dx12PipelineCache_.insert(key, new Json(snapshot), cost);
+        }
+        resourceBrowser_->setContext(context, dx12DrawResources(*session_, *selection_.execution, snapshot), *selection_.execution);
+        resourceBrowser_->setToolTip("CPU binding snapshot. GPU-generated and unresolved bindings remain pending; replay observation follows.");
+        dx12CpuInventoryKey_ = context;
+        resourceStatus_->setText("Bindings ready (CPU) · GPU resource previews pending");
+        setProperty("cpuBindingPublishMs", timer.elapsed());
+    } catch (const std::exception &e) {
+        dx12CpuInventoryKey_ = context;
+        log_->appendPlainText("CPU binding snapshot pending: " + QString::fromUtf8(e.what()));
+    }
+}
+bool MainWindow::showCachedDx12Preview(const Json &request, const QString &context) {
+    if (!sameLibraryFile(rdcLibraryStamp_, dx12Pipeline_->backendPath())) {
+        emit dx12Pipeline_->backendChanged();
+        return false;
+    }
+    const auto key = context + (selection_.before ? ":before:" : ":after:") + QString::fromStdString(request.dump());
+    const auto cached = dx12PreviewCache_.object(key);
+    if (qEnvironmentVariableIsSet("FLORA_RESOURCE_TRACE")) qInfo().noquote() << "preview cache lookup" << bool(cached) << key;
+    if (!cached) return false;
+    const auto capture = cached->capture.lock();
+    if (!capture) { dx12PreviewCache_.remove(key); return false; }
+    outputReport_ = cached->report; dx12OutputReadJob_ = cached->job;
+    outputDir_ = cached->output; dx12OutputCapture_ = capture;
+    image_->setPreparedImage(cached->image);
+    exportAction_->setEnabled(true); outputStorageAction_->setEnabled(true);
+    resourceImagePending_ = false; resourceImageContext_ = context;
+    displayedOutputGeneration_ = outputGeneration_; dx12ContentPending_ = false;
+    imageLabel_->setText(QString("DX12 creation %1 · %2 execution %3 · cached preview")
+        .arg(selection_.resource).arg(selection_.before ? "Before" : "After").arg(*selection_.execution));
+    resourceStatus_->setText("Bindings and preview ready · cache hit");
+    setProperty("resourceCacheHits", property("resourceCacheHits").toUInt() + 1);
+    return true;
 }
 QString MainWindow::analysisFrameKey() const {
     if (qEnvironmentVariableIsSet("FLORA_DISABLE_FRAME_REUSE") || rdcLibraryStamp_.isEmpty()) return {};
@@ -262,6 +331,7 @@ void MainWindow::selectDx12Binding(const DrawResourceBinding &binding) {
         resourceImages_->setCurrentWidget(bufferPane_);
     }
     restoreDx12ResourceSettings();
+    if (binding.texture && showCachedDx12Preview(dx12ResourceReadRequest(false), historyContextKey(true))) return;
     resourceStatus_->setText(QString("%1 %2%3 · Loading…").arg(QString::fromStdString(binding.stage),
         QString::fromStdString(binding.kind)).arg(binding.slot));
     resourceTimer_.start();
@@ -317,6 +387,10 @@ Json MainWindow::dx12ResourceReadRequest(bool thumbnail, const DrawResourceBindi
     return request;
 }
 void MainWindow::pumpDx12Resources() {
+    if (!sameLibraryFile(rdcLibraryStamp_, dx12Pipeline_->backendPath())) {
+        emit dx12Pipeline_->backendChanged();
+        return;
+    }
     if (!selection_.execution) {
         resourceBrowser_->clear("Select a submitted command instance");
         resourceStatus_->setText("Recorded commands may be submitted more than once. Select a submitted draw instance to inspect resources.");
@@ -324,8 +398,9 @@ void MainWindow::pumpDx12Resources() {
     }
     if (boundary_->currentIndex() == 0 ||
         centerTabs_->currentWidget() != resourceWorkspace_ || loadCancel_) return;
-    if (busy()) { resourceTimer_.start(); return; }
     const auto context = historyContextKey(true);
+    showCpuBindings(context);
+    if (busy()) { resourceTimer_.start(); return; }
     if (context.isEmpty()) {
         auto selected = selection_; selected.resource = 0; selected.before = false;
         const auto capability = session_->capability(ReplayFeature::Replay, selected);
@@ -346,10 +421,10 @@ void MainWindow::pumpDx12Resources() {
                 resourceBrowser_->clear(QString::fromStdString(capability.reason));
                 dx12FailedKey_ = context; return;
             }
-            if (auto cached = dx12PipelineCache_.find(context); cached != dx12PipelineCache_.end()) {
+            if (auto cached = dx12PipelineCache_.object(context)) {
                 runningAnalysis_ = RdcAnalysis::Resources;
                 historyRequestId_ = revision_;
-                finishDx12Resources(cached->second);
+                finishDx12Resources(*cached);
                 return;
             }
             dx12ResourceRequest_ = {{"action", "pipeline"}, {"execution", std::to_string(*selection_.execution)},
@@ -401,8 +476,13 @@ bool MainWindow::finishDx12Resources(const Json &result) {
         const auto bindings = dx12DrawResources(*session_, *selection_.execution, result);
         dx12InventoryKey_ = context;
         dx12Pipeline_->finish(dx12Pipeline_->requestId(), result);
-        dx12PipelineCache_[context] = result;
-        while (dx12PipelineCache_.size() > 8) dx12PipelineCache_.erase(dx12PipelineCache_.begin());
+        const auto cost = int(std::max<size_t>(1, result.dump().size() * 4 / 1024));
+        // A cache hit may pass a reference owned by this cache. Copy before replacement.
+        auto stored = new Json(result);
+        dx12PipelineCache_.insert(context, stored, cost);
+        // CPU and observed bindings share a selection identity, but the observed
+        // descriptors must replace the provisional rows (including view formats).
+        resourceBrowser_->clear();
         resourceBrowser_->setContext(context, bindings, *selection_.execution);
         resourceBrowser_->setToolTip("Partial RenderDoc bindings; unaccessed descriptor entries are not enumerated. Bindings do not prove GPU accesses.");
         std::optional<DrawResourceBinding> next;
@@ -540,6 +620,11 @@ bool MainWindow::finishDx12Resources(const Json &result) {
                 dx12OutputCapture_ = historyCaptures_.at(historyKey_).directory;
                 outputReport_ = {{"backend", "dx12"}, {"output_display", display}};
                 outputDir_ = std::move(jobDir_);
+                const auto cacheKey = context + (selection_.before ? ":before:" : ":after:") + QString::fromStdString(request.dump());
+                const auto &prepared = resourceArtifacts_.at(i).image;
+                const auto cost = int(std::max<qsizetype>(1, (prepared.original.sizeInBytes() + prepared.display.sizeInBytes() + 1023) / 1024));
+                dx12PreviewCache_.insert(cacheKey, new CachedResourcePreview{prepared, outputReport_, dx12OutputReadJob_, outputDir_, dx12OutputCapture_}, cost);
+                if (qEnvironmentVariableIsSet("FLORA_RESOURCE_TRACE")) qInfo().noquote() << "preview cache store" << cost << cacheKey;
                 if (selectedBinding_ && request.at("mip") == selectedBinding_->image.mip &&
                     request.at("layer") == selectedBinding_->image.layer && request.at("slice") == selectedBinding_->image.slice &&
                     request.at("sample") == UINT32_MAX && request.at("channel") == "RGBA" &&

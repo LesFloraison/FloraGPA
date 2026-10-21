@@ -187,6 +187,8 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             dx12PipelineCache_.clear(); dx12ContentPending_ = false;
             dx12RestoredResources_ = nullptr;
             setProperty("resourceCaptureCount", 0u);
+            setProperty("resourceCacheHits", 0u);
+            setProperty("analysisFrameReady", false);
             { const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false); }
             dx12PixelTarget_.reset();
             selection_.session = session_->identity();
@@ -314,6 +316,7 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             updateStatistics();
             setBusy(false);
             emit captureLoaded();
+            if (!frame_) prepareCpuBindings();
             auto timingSelection = selection_;
             timingSelection.frameEnd = true;
             timingSelection.before = false;
@@ -422,6 +425,7 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    if (cpuBindingsCancel_) cpuBindingsCancel_->store(true);
     rdcService_.close();
     if (experimentCancel_) experimentCancel_->store(true);
     if (exportCancel_)
@@ -566,7 +570,7 @@ void MainWindow::buildUi() {
         analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
     collectAction_->setObjectName("collectGpuMetrics");
     cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, [this] {
-        cancel(); resourceTimer_.stop();
+        cancel(); resourceTimer_.stop(); analysisFrameTimer_.stop();
         dx12ContentPending_ = false; dx12FailedKey_ = historyContextKey(true);
     });
     cancelAction_->setObjectName("cancelReplay");
@@ -1439,6 +1443,8 @@ void MainWindow::buildUi() {
     leftTabs_->insertTab(1, history_, "Pixel History");
     dx12Pipeline_ = new Dx12PipelineView;
     connect(dx12Pipeline_, &Dx12PipelineView::backendChanged, this, [this] {
+        rdcService_.close(); rdcLibraryStamp_.clear(); rdcLibraryHash_.clear();
+        dx12PreviewCache_.clear(); dx12CpuInventoryKey_.clear();
         dx12PipelineCache_.clear(); dx12InventoryKey_.clear();
         historyCaptures_.clear(); historyCacheOrder_.clear();
         invalidateDx12Output();
@@ -2238,6 +2244,8 @@ void MainWindow::startHistoryWorker() {
     }
 }
 void MainWindow::openCapture(const QString &path) {
+    if (cpuBindingsCancel_) cpuBindingsCancel_->store(true);
+    dx12PreviewCache_.clear(); dx12CpuInventoryKey_.clear();
     analysisFrameTimer_.stop();
     analysisFrameFailed_.clear(); analysisFrameFallback_.clear();
     if (projectDirty_) {
@@ -2712,6 +2720,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             historyCaptures_[analysisFrameContext_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), path};
             historyCacheOrder_.removeAll(analysisFrameContext_); historyCacheOrder_.append(analysisFrameContext_);
             historyKey_ = analysisFrameContext_; trimAnalysisCaptures();
+            setProperty("analysisFrameReady", true);
             statusBar()->showMessage("Reusable analysis frame ready", 2000);
             emit taskFinished(true);
             return;
@@ -3009,6 +3018,7 @@ void MainWindow::locateEvent(Id id) {
 void MainWindow::selectEvent(Id id) {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
         if (commands_->rowOf(id) < 0) return;
+        if (selectedEvent_ == id && selection_.execution.has_value() == commands_->executionView()) return;
         selectedEvent_ = id;
         selection_.event = commands_->executionView() ? session_->executionEvent(id).sourceRecord.value() : id;
         selection_.execution = commands_->executionView() ? std::optional<Id>(id) : std::nullopt;
@@ -3022,6 +3032,12 @@ void MainWindow::selectEvent(Id id) {
         resourceTimer_.start();
         selectionLabel_->setText(QString(commands_->executionView() ? "Execution instance %1 — not replayed" : "Stream record %1").arg(id));
         inspectEvent(id);
+        // Metadata and cached images are CPU work; debounce only new GPU requests.
+        if (selection_.execution && centerTabs_->currentWidget() == resourceWorkspace_) {
+            const auto context = historyContextKey(true);
+            showCpuBindings(context);
+            if (dx12PipelineCache_.contains(context)) QTimer::singleShot(0, this, &MainWindow::pumpDx12Resources);
+        }
         return;
     }
     if (!frame_ || selectedEvent_ == id)

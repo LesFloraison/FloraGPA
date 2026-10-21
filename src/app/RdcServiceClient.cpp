@@ -107,7 +107,12 @@ void RdcServiceClient::read() {
             if (response.at("schema") != 1 || response.at("generation") != std::to_string(generation_))
                 throw std::runtime_error("Analysis response generation mismatch");
             if (response.at("command") == "open" && !response.at("ok").get<bool>()) {
-                failed(QString::fromStdString(response.value("error", "Cannot open analysis session"))); return;
+                // A reported controller/DLL/allocation failure is deterministic.
+                // Only a crashed or unresponsive service gets an automatic restart.
+                const auto error = QString::fromStdString(response.value("error", "Cannot open analysis session"));
+                stopProcess(); key_.clear(); busy_ = false;
+                const auto callback = std::move(completed_); if (callback) callback(1, error, false);
+                return;
             }
             if (response.at("command") != "execute" || response.at("id") != std::to_string(requestId_)) continue;
             timeout_.stop(); busy_ = false;

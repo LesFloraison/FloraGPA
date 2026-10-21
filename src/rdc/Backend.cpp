@@ -186,6 +186,7 @@ class Session {
     std::unique_ptr<IReplayController, Shutdown> controller;
     std::shared_ptr<Events> events;
     Json roots, mapping, analysisBoundaries;
+    std::unique_ptr<flora::ResourceWorkspaceIndex> resourceIndex;
     std::optional<uint32_t> currentEvent;
     double openMilliseconds{};
     uint64_t requests{};
@@ -1864,7 +1865,8 @@ static Json executeRdcJob(const Json &job, Session *retained) {
                                      "stencil disabled, one mip/layer/sample/node and legacy depth states");
     }
     if (action == "resource-workspace") {
-        result.update(readResourceWorkspace(controller, job, queryPolicy));
+        if (!session.resourceIndex) session.resourceIndex = std::make_unique<ResourceWorkspaceIndex>(controller);
+        result.update(readResourceWorkspace(controller, job, queryPolicy, session.resourceIndex.get()));
         result["eid"] = eid;
         return complete();
     }

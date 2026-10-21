@@ -1,6 +1,7 @@
 """Compare isolated and retained RDC requests; writes only a new evidence directory."""
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import statistics
@@ -66,7 +67,7 @@ def main():
                 print(f'{i + 1}/{args.count}: {elapsed:.1f} ms', flush=True)
             ordered = sorted(row['elapsed_ms'] for row in rows)
             summary = dict(mode='resident' if process else 'isolated', open_ms=open_ms, samples=rows,
-                p50_ms=statistics.median(ordered), p95_ms=ordered[min(len(ordered)-1, int(len(ordered)*0.95))])
+                p50_ms=statistics.median(ordered), p95_ms=ordered[max(0, math.ceil(len(ordered)*0.95)-1)])
             (args.out / 'summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
         finally:
             if process:

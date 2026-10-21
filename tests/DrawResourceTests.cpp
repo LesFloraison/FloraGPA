@@ -1,6 +1,7 @@
 #include "DepthStencilCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
+#include "app/OutputStorageExport.h"
 #include "app/PixelHistoryView.h"
 #include "application/DrawResources.h"
 #include "application/FrameOutput.h"
@@ -333,6 +334,20 @@ class DrawResourceTests final : public QObject {
             QVERIFY(!rows[8].contains("image"));
             QVERIFY(!QFile::exists(dir + "/read/resource-8.png"));
             QCOMPARE(rows[8].at("sha256"), rows[0].at("sha256"));
+            auto exportJob = job;
+            exportJob["resource_requests"] = Json::array({storage});
+            exportJob["experiment_key"] = "immutable-export-context";
+            exportJob["capture_identity"] = "oracle-lifetime";
+            Json exportDisplay{{"resource", storage.at("creation")}, {"execution", job.at("execution")},
+                               {"boundary", boundary}, {"experiment_key", "immutable-export-context"}};
+            exportDeferredRdcStorage(exportJob, QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe",
+                                     dir + "/export.bin", exportDisplay);
+            QCOMPARE(read(dir + "/export.bin"), read(dir + "/read/" + QString::fromStdString(rows[8].at("file"))));
+            const auto exported = Json::parse(read(dir + "/export.bin.json").toStdString());
+            QCOMPARE(exported.at("storage_sha256"), rows[8].at("sha256"));
+            QCOMPARE(exported.at("boundary"), Json(boundary));
+            QCOMPARE(exported.at("resource"), storage.at("creation"));
+            QCOMPARE(exported.at("experiment_key"), Json("immutable-export-context"));
             auto reuse = job; reuse["capture"] = full.toStdString(); reuse["analysis_frame"] = true;
             reuse["out"] = (dir + "/reuse").toStdString();
             const auto reuseReport = Json::parse(read(runRdcAnalysis(reuse,
