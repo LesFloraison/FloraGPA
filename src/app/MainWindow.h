@@ -356,6 +356,8 @@ class MainWindow final : public QMainWindow {
     QAction *outputStorageAction_;
     std::shared_ptr<QTemporaryDir> outputDir_;
     nlohmann::json outputReport_;
+    nlohmann::json dx12OutputReadJob_;
+    std::shared_ptr<QTemporaryDir> dx12OutputCapture_;
     uint64_t outputGeneration_ = 0, displayedOutputGeneration_ = 0;
     QProgressBar *progress_;
     QAction *openAction_, *replayAction_, *collectAction_, *cancelAction_, *exportAction_;

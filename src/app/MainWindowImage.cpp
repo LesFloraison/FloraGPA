@@ -52,6 +52,7 @@ void MainWindow::invalidateDx12Output() {
     pixelLabel_->clear();
     outputReport_ = nullptr;
     outputDir_.reset();
+    dx12OutputReadJob_ = nullptr; dx12OutputCapture_.reset();
     exportAction_->setEnabled(false);
     outputStorageAction_->setEnabled(false);
     imageLabel_->setText(boundary_->currentIndex() == 0

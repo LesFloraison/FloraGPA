@@ -20,7 +20,8 @@ class ResourceBrowser final : public QWidget {
     std::optional<DrawResourceBinding> selected() const;
     bool select(const std::string &key, bool notify = false);
     void clearSelection();
-    nlohmann::json nextPreviews(int boundary = -1);
+    nlohmann::json nextPreviews(int boundary = -1, size_t limit = 16);
+    void reusePreview(const DrawResourceBinding &, const QImage &);
     void acceptPreviews(const QString &key, ThumbnailOutput result);
     void failPreviews(const QString &key, const QString &error);
   signals:

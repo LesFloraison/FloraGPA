@@ -62,6 +62,14 @@ void validateDx12ResourceRequest(const nlohmann::json &request) {
     const auto &d = request.at("resource_description");
     const bool buffer = request.at("buffer").get<bool>();
     request.at("thumbnail").get<bool>();
+    const auto output = request.value("output", std::string("legacy"));
+    if (output != "legacy" && output != "thumbnail" && output != "preview" && output != "storage")
+        throw std::runtime_error("Unknown resource output type");
+    if (output != "legacy" && ((output == "thumbnail") != request.at("thumbnail").get<bool>() ||
+        (buffer && output != "storage"))) throw std::runtime_error("Inconsistent resource output type");
+    if (output == "thumbnail" && (request.value("channel", "RGBA") != "RGBA" ||
+        request.value("low", 0.) != 0. || request.value("high", 1.) != 1. || request.value("plane", "color") == "stencil"))
+        throw std::runtime_error("Thumbnail requires default display parameters");
     if (buffer != (integer(d.at("Dimension")) == 1))
         throw std::runtime_error("Resource kind does not match its captured description");
     if (buffer) {

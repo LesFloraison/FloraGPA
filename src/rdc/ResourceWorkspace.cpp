@@ -5,6 +5,8 @@
 #include <QDir>
 #include <QImage>
 #include <QSaveFile>
+#include <QElapsedTimer>
+#include <memory>
 #include <charconv>
 #include <cmath>
 
@@ -46,6 +48,11 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
         }
         Json result{{"request", request}};
         try {
+            QElapsedTimer elapsed; elapsed.start();
+            const auto output = request.value("output", std::string("legacy"));
+            const bool thumbnail = request.value("thumbnail", false);
+            const bool storage = output == "legacy" ? !thumbnail : output == "storage";
+            const bool display = output != "storage";
             const auto object = number(request.at("object")), creation = number(request.at("creation"));
             if (!object || !creation) throw std::runtime_error("Missing resource lifetime");
             if (!queryPolicy.is_null()) {
@@ -107,9 +114,34 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     params.comp.whitePoint <= params.comp.blackPoint)
                     throw std::runtime_error("Invalid display range");
                 const auto png = directory.filePath(stem + ".png");
+                QImage image;
+                if (display && output == "thumbnail" && !qEnvironmentVariableIsSet("FLORA_DISABLE_FAST_PREVIEW")) {
+                    // Render directly into a bounded GPU target: never export a full-sized PNG.
+                    const auto size = QSize(int(std::max(1u, t.width >> mip)), int(std::max(1u, t.height >> mip)))
+                                          .scaled(96, 96, Qt::KeepAspectRatio);
+                    auto destroy = [](IReplayOutput *p) { if (p) p->Shutdown(); };
+                    std::unique_ptr<IReplayOutput, decltype(destroy)> target(
+                        controller.CreateOutput(CreateHeadlessWindowingData(size.width(), size.height()), ReplayOutputType::Texture), destroy);
+                    if (!target) throw std::runtime_error("Cannot allocate thumbnail output");
+                    TextureDisplay view;
+                    view.resourceId = id; view.typeCast = params.typeCast;
+                    view.subresource = Subresource(mip, t.dimension == 3 ? slice : layer, sample);
+                    view.scale = -1.f; view.linearDisplayAsGamma = false;
+                    view.rangeMin = params.comp.blackPoint; view.rangeMax = params.comp.whitePoint;
+                    if (plane == "depth") view.green = view.blue = false;
+                    target->SetTextureDisplay(view); target->Display();
+                    const auto rgb = target->ReadbackOutputTexture();
+                    if (rgb.size() != size_t(size.width()) * size.height() * 3)
+                        throw std::runtime_error("Incomplete thumbnail readback");
+                    image = QImage(rgb.data(), size.width(), size.height(), size.width() * 3, QImage::Format_RGB888).copy();
+                    QSaveFile file(png);
+                    if (!file.open(QIODevice::WriteOnly) || !image.save(&file, "PNG") || !file.commit())
+                        throw std::runtime_error("Cannot publish thumbnail");
+                    result["display_path"] = "bounded_gpu_thumbnail";
+                } else if (display) {
                 const auto status = controller.SaveTexture(params, png.toStdString().c_str());
                 if (status.code != ResultCode::Succeeded) throw std::runtime_error("RenderDoc could not display this texture view");
-                QImage image(png);
+                image = QImage(png);
                 if (image.isNull()) throw std::runtime_error("Texture display image is missing");
                 // Integer RG/R textures have no alpha component. SaveTexture can
                 // export its implicit alpha value 1 as byte 1 instead of opaque
@@ -128,6 +160,9 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                         if (!output.open(QIODevice::WriteOnly) || !image.save(&output, "PNG") || !output.commit())
                             throw std::runtime_error("Cannot publish RGB display");
                     }
+                }
+                }
+                if (storage) {
                     // Preserve API-provided storage separately from the display transform.
                     // For a resolved display, the raw artifact is explicitly sample zero.
                     const auto bytes = controller.GetTextureData(id, Subresource(mip, layer, sample == UINT32_MAX ? 0 : sample));
@@ -142,9 +177,13 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     result["storage_scope"] = "RenderDoc selected mip/array layer; all volume slices and packed depth/stencil components; resolve display exports raw sample zero";
                     result["storage_description"] = rdcTextureReadbackDescription(t, Subresource(mip, layer, sample == UINT32_MAX ? 0 : sample));
                 }
-                result["image"] = (stem + ".png").toStdString();
-                result["width"] = image.width(); result["height"] = image.height();
+                if (display) {
+                    result["image"] = (stem + ".png").toStdString();
+                    result["width"] = image.width(); result["height"] = image.height();
+                }
             }
+            result["read_ms"] = elapsed.elapsed();
+            result["storage_read"] = storage || request.value("buffer", false);
         } catch (const std::exception &e) { result["error"] = e.what(); }
         shared[cacheKey] = result;
         results.push_back(std::move(result));

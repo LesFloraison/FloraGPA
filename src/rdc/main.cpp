@@ -63,6 +63,8 @@ static int executeJob(const nlohmann::json &job, flora::RdcReplaySession *sessio
     }
     result["loaded_modules"] = modules;
     if (identity) result["request_identity"] = flora::replayIdentityJson(*identity);
+    for (const auto key : {"experiment_key", "capture_identity"})
+        if (job.contains(key)) result[key] = job.at(key);
     const bool evaluated = result.value("ok", false);
     if (evaluated) {
         Json forbidden = Json::array();

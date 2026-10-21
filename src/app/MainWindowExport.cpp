@@ -57,12 +57,21 @@ void MainWindow::startExport(const QString &progress, const QString &complete,
 void MainWindow::exportOutputStorage() {
     if (!outputDir_ || !outputStorageAction_->isEnabled() || exportCancel_) return;
     const auto directory = outputDir_;
+    const auto readJob = dx12OutputReadJob_;
+    const auto capture = dx12OutputCapture_;
+    const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe";
     const auto display = outputReport_.is_object() ? outputReport_.value("output_display", nlohmann::json())
                                                   : nlohmann::json();
     const auto path = QFileDialog::getSaveFileName(this, "Export Output Storage", "output.bin", "Binary data (*.bin)");
     if (path.isEmpty() || exportCancel_) return;
-    startExport("Exporting output storage…", "Output storage exported", [directory, display, path](const CancelCheck &cancelled) {
-        exportOutputStorageFiles(directory->filePath("result"), path, display, cancelled);
+    const bool deferred = !display.contains("storage_bytes") && readJob.is_object();
+    if (deferred) {
+        if (busy() && !resourceBrowseBusy()) { statusBar()->showMessage("Wait for the current GPU task before exporting storage"); return; }
+        cancel(); // Release the resident controller before the isolated immutable export.
+    }
+    startExport("Exporting output storage…", "Output storage exported", [directory, display, path, readJob, capture, worker, deferred](const CancelCheck &cancelled) {
+        if (deferred) exportDeferredRdcStorage(readJob, worker, path, display, cancelled);
+        else exportOutputStorageFiles(directory->filePath("result"), path, display, cancelled);
     });
 }
 void MainWindow::exportBuffer() {

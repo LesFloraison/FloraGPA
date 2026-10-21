@@ -8,4 +8,6 @@ namespace flora {
 // committed. The two final renames are not an atomic filesystem transaction.
 void exportOutputStorageFiles(const QString &directory, const QString &destination,
                               const nlohmann::json &display, const CancelCheck &cancelled = {});
+void exportDeferredRdcStorage(nlohmann::json job, const QString &worker, const QString &destination,
+                              nlohmann::json display, const CancelCheck &cancelled = {});
 }

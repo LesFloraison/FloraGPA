@@ -131,12 +131,14 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     centerTabs_->insertTab(0, resourceWorkspace_, "Resources");
     centerTabs_->setCurrentWidget(resourceWorkspace_);
     resourceTimer_.setSingleShot(true);
-    resourceTimer_.setInterval(200);
+    resourceTimer_.setInterval(100);
     connect(&resourceTimer_, &QTimer::timeout, this, &MainWindow::pumpResourceJobs);
     connect(resourceBrowser_, &ResourceBrowser::bindingSelected, this, &MainWindow::selectDrawResource);
     connect(resourceBrowser_, &ResourceBrowser::previewsNeeded, this, [this] { resourceTimer_.start(); });
     connect(centerTabs_, &QTabWidget::currentChanged, this, [this] { resourceTimer_.start(); });
-    connect(this, &MainWindow::taskFinished, this, [this](bool) { resourceTimer_.start(); });
+    connect(this, &MainWindow::taskFinished, this, [this](bool) {
+        QTimer::singleShot(0, this, &MainWindow::pumpResourceJobs);
+    });
     connect(settings, &QAction::toggled, coverage_, &QWidget::setVisible);
     connect(historyPick_, &QAction::toggled, this, [this](bool enabled) {
         image_->setPixelPicking(enabled);

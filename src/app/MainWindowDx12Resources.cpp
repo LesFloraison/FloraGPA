@@ -225,6 +225,8 @@ Json MainWindow::dx12ResourceReadRequest(bool thumbnail, const DrawResourceBindi
     Json request{{"creation", std::to_string(creation)}, {"object", std::to_string(resource.capturedObject)},
                  {"buffer", buffer}, {"thumbnail", thumbnail}, {"key", binding ? binding->key : "selected"},
                  {"resource_description", d}};
+    request["output"] = qEnvironmentVariableIsSet("FLORA_DISABLE_FAST_PREVIEW") ? "legacy" :
+        buffer ? "storage" : thumbnail ? "thumbnail" : "preview";
     const auto *view = binding ? binding : (selectedBinding_ ? &*selectedBinding_ : nullptr);
     if (buffer) {
         bool valid{};
@@ -312,8 +314,8 @@ void MainWindow::pumpDx12Resources() {
                 before = resourceImages_->currentWidget() == bufferPane_ ? bufferBoundary_->currentIndex() == 1 :
                                                                            boundary_->currentIndex() == 1;
             } else {
-                auto previews = resourceBrowser_->nextPreviews(1);
-                if (previews.at("previews").empty()) { previews = resourceBrowser_->nextPreviews(0); before = true; }
+                auto previews = resourceBrowser_->nextPreviews(1, 1);
+                if (previews.at("previews").empty()) { previews = resourceBrowser_->nextPreviews(0, 1); before = true; }
                 for (const auto &key : previews.at("previews"))
                     for (const auto &binding : resourceBrowser_->bindings())
                         if (binding.key == key.get<std::string>()) requests.push_back(dx12ResourceReadRequest(true, &binding));
@@ -362,7 +364,7 @@ bool MainWindow::finishDx12Resources(const Json &result) {
             dx12ContentPending_ = false;
             resourceStatus_->setText("No readable bindings · partial RenderDoc descriptor coverage");
         }
-        resourceTimer_.start();
+        QTimer::singleShot(0, this, &MainWindow::pumpDx12Resources);
         return true;
     }
     const auto &requests = historyRequest_.at("resource_requests");
@@ -410,7 +412,9 @@ bool MainWindow::finishDx12Resources(const Json &result) {
                     if (r.at("request") != request) throw std::runtime_error("Resource result request mismatch");
                     ResourceArtifact prepared;
                     if (!r.contains("error")) {
-                        if (!request.at("thumbnail").get<bool>()) prepared.bytes = readBytes(directory, r);
+                        if (r.contains("file")) prepared.bytes = readBytes(directory, r);
+                        else if (request.at("buffer") == true || request.value("output", "legacy") == "legacy")
+                            if (request.at("thumbnail") != true) throw std::runtime_error("Missing resource storage");
                         if (r.contains("image")) {
                             QImage image(artifact(directory, r.at("image")));
                             if (image.isNull() || image.width() != r.at("width").get<int>() ||
@@ -461,22 +465,34 @@ bool MainWindow::finishDx12Resources(const Json &result) {
             } else {
                 Json display = request;
                 const auto desc = Json::parse(session_->resource(selection_.resource).summary);
-                display.update({{"storage_bytes", bytes.size()}, {"storage_sha256", r.at("sha256")},
-                    {"execution", std::to_string(*selection_.execution)}, {"boundary", result.at("boundary")},
+                display.update({{"execution", std::to_string(*selection_.execution)}, {"boundary", result.at("boundary")},
                     {"creation_record", std::to_string(selection_.resource)},
                     {"width", r.at("width")}, {"height", r.at("height")}, {"dimension", desc.at("Dimension")},
                     {"samples", desc.at("SampleCount")}, {"plane", request.at("plane") == "stencil" ? 1 : 0},
-                    {"backend", "dx12"}, {"source", "renderdoc_gpu_readback"}, {"storage_scope", r.at("storage_scope")},
-                    {"storage_description", r.at("storage_description")},
+                    {"backend", "dx12"}, {"source", "renderdoc_gpu_readback"},
                     {"experiment_key", historyRequest_.at("experiment_key")}});
+                if (r.contains("file")) {
+                display.update({{"storage_bytes", bytes.size()}, {"storage_sha256", r.at("sha256")},
+                    {"storage_scope", r.at("storage_scope")}, {"storage_description", r.at("storage_description")}});
                 if (!QFile::rename(artifact(directory, r.at("file")), QDir(directory).filePath("output_storage.bin")))
                     throw std::runtime_error("Cannot retain resource storage");
                 const auto metadata = QByteArray::fromStdString(display.dump(2) + "\n");
                 QSaveFile file(QDir(directory).filePath("output_storage.json"));
                 if (!file.open(QIODevice::WriteOnly) || file.write(metadata) != metadata.size() || !file.commit())
                     throw std::runtime_error("Cannot retain resource metadata");
+                }
+                dx12OutputReadJob_ = historyRequest_;
+                auto storageRequest = request; storageRequest["output"] = "storage";
+                dx12OutputReadJob_["resource_requests"] = Json::array({storageRequest});
+                dx12OutputCapture_ = historyCaptures_.at(historyKey_).directory;
                 outputReport_ = {{"backend", "dx12"}, {"output_display", display}};
                 outputDir_ = std::move(jobDir_);
+                if (selectedBinding_ && request.at("mip") == selectedBinding_->image.mip &&
+                    request.at("layer") == selectedBinding_->image.layer && request.at("slice") == selectedBinding_->image.slice &&
+                    request.at("sample") == UINT32_MAX && request.at("channel") == "RGBA" &&
+                    request.at("low") == 0 && request.at("high") == 1 &&
+                    request.at("plane") == (selectedBinding_->kind == "DSV" ? "depth" : "color"))
+                    resourceBrowser_->reusePreview(*selectedBinding_, resourceArtifacts_.at(i).image.display);
                 image_->setPreparedImage(std::move(resourceArtifacts_.at(i).image));
                 imageLabel_->setText(QString("DX12 creation %1 · %2 execution %3 · Mip %4 Layer %5 · %6")
                     .arg(selection_.resource).arg(QString::fromStdString(result.at("boundary"))).arg(*selection_.execution)
@@ -492,7 +508,7 @@ bool MainWindow::finishDx12Resources(const Json &result) {
         }
     }
     if (hasThumbnails) resourceBrowser_->acceptPreviews(context, std::move(thumbnails));
-    resourceTimer_.start();
+    QTimer::singleShot(0, this, &MainWindow::pumpDx12Resources);
     return true;
 }
 }

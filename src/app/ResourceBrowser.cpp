@@ -171,14 +171,22 @@ void ResourceBrowser::showCached() {
             done_.insert(b.key);
         }
 }
-Json ResourceBrowser::nextPreviews(int boundary) {
+void ResourceBrowser::reusePreview(const DrawResourceBinding &binding, const QImage &image) {
+    if (image.isNull() || !items_.contains(binding.key)) return;
+    auto thumbnailImage = image.scaled(96, 96, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+                     .convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    const auto cost = int(std::max<qsizetype>(1, (thumbnailImage.sizeInBytes() + 1023) / 1024));
+    cache_.insert(cacheKey(binding), new QImage(std::move(thumbnailImage)), cost);
+    showCached();
+}
+Json ResourceBrowser::nextPreviews(int boundary, size_t limit) {
     showCached();
     Json keys = Json::array();
     if (!pending_.empty() || !isVisible())
         return {{"previews", keys}};
     auto add = [&](const DrawResourceBinding &b) {
         if (boundary >= 0 && (b.image.boundary == ImageBoundary::Before ? 0 : 1) != boundary) return;
-        if (keys.size() >= 16 || !b.texture || !b.error.empty() || done_.contains(b.key) ||
+        if (keys.size() >= std::min(size_t(16), limit) || !b.texture || !b.error.empty() || done_.contains(b.key) ||
             pending_.contains(b.key))
             return;
         keys.push_back(b.key);

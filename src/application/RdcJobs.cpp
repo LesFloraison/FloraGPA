@@ -1,6 +1,7 @@
 #include "RdcJobs.h"
 #include "RdcEvents.h"
 #include "DrawResources.h"
+#include "core/Frame.h"
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -245,7 +246,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     job["action"] = action;
     return job;
 }
-QString runRdcAnalysis(const Json &job, const QString &worker, double timeoutSeconds) {
+QString runRdcAnalysis(const Json &job, const QString &worker, double timeoutSeconds, const std::function<bool()> &cancelled) {
     if (!std::isfinite(timeoutSeconds) || timeoutSeconds <= 0 || timeoutSeconds > double(INT_MAX) / 1000)
         throw std::runtime_error(
             "Timeout must be positive finite seconds within the millisecond timer range");
@@ -289,9 +290,12 @@ QString runRdcAnalysis(const Json &job, const QString &worker, double timeoutSec
     else if (!isolated)
         error = "Cannot isolate native analysis worker";
     else {
-        const auto left = (std::max)(qint64(0), qint64(milliseconds) - timer.elapsed());
-        if (process.state() != QProcess::NotRunning && !process.waitForFinished(int(left)))
-            error = "RenderDoc analysis timed out";
+        while (process.state() != QProcess::NotRunning) {
+            if (cancelled && cancelled()) { error = "Analysis cancelled"; break; }
+            const auto left = qint64(milliseconds) - timer.elapsed();
+            if (left <= 0) { error = "RenderDoc analysis timed out"; break; }
+            process.waitForFinished(int(std::min(qint64(100), left)));
+        }
     }
     if (!error.isEmpty()) {
         TerminateJobObject(isolation.handle, 1);
@@ -301,6 +305,7 @@ QString runRdcAnalysis(const Json &job, const QString &worker, double timeoutSec
     writeNew(QDir(output).filePath("job.json"), bytes);
     writeNew(QDir(output).filePath("worker.log"),
              process.readAllStandardOutput() + '\n' + process.readAllStandardError());
+    checkCancellation(cancelled);
     if (!error.isEmpty())
         throw std::runtime_error(error.toStdString());
     QFile report(QDir(output).filePath("result.json"));

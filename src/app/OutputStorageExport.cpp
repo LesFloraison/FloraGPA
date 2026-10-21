@@ -1,4 +1,6 @@
 #include "OutputStorageExport.h"
+#include "application/RdcJobs.h"
+#include <QTemporaryDir>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
@@ -14,6 +16,36 @@ QString identity(const QString &path) {
     const auto canonical = info.canonicalFilePath();
     return QDir::cleanPath(canonical.isEmpty() ? info.absoluteFilePath() : canonical).toCaseFolded();
 }
+}
+void exportDeferredRdcStorage(nlohmann::json job, const QString &worker, const QString &destination,
+                              nlohmann::json display, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    QTemporaryDir temporary(QDir::tempPath() + "/FloraGPA-storage-XXXXXX");
+    if (!temporary.isValid()) throw std::runtime_error("Cannot stage storage export");
+    const auto directory = temporary.filePath("result");
+    job["out"] = directory.toStdString();
+    QFile report(runRdcAnalysis(job, worker, 180, cancelled));
+    if (!report.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing storage report");
+    const auto result = nlohmann::json::parse(report.readAll().toStdString());
+    for (const auto key : {"execution", "boundary", "experiment_key", "capture_identity", "request_identity"})
+        if (job.contains(key) && result.at(key) != job.at(key)) throw std::runtime_error("Storage export identity changed");
+    const auto &rows = result.at("resource_results");
+    if (rows.size() != 1 || rows[0].at("request") != job.at("resource_requests")[0])
+        throw std::runtime_error("Storage export target changed");
+    const auto &r = rows[0];
+    if (r.contains("error")) throw std::runtime_error(r.at("error").get<std::string>());
+    const auto name = QString::fromStdString(r.at("file"));
+    if (name != "resource-0.bin") throw std::runtime_error("Invalid storage artifact");
+    display.update({{"storage_bytes", std::stoull(r.at("bytes").get<std::string>())},
+        {"storage_sha256", r.at("sha256")}, {"storage_scope", r.at("storage_scope")},
+        {"storage_description", r.at("storage_description")}});
+    if (!QFile::rename(QDir(directory).filePath(name), QDir(directory).filePath("output_storage.bin")))
+        throw std::runtime_error("Cannot stage raw storage");
+    QSaveFile metadata(QDir(directory).filePath("output_storage.json"));
+    const auto bytes = QByteArray::fromStdString(display.dump(2) + "\n");
+    if (!metadata.open(QIODevice::WriteOnly) || metadata.write(bytes) != bytes.size() || !metadata.commit())
+        throw std::runtime_error("Cannot stage storage metadata");
+    exportOutputStorageFiles(directory, destination, display, cancelled);
 }
 void exportOutputStorageFiles(const QString &directory, const QString &destination,
                               const nlohmann::json &display, const CancelCheck &cancelled) {

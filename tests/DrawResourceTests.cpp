@@ -290,12 +290,15 @@ class DrawResourceTests final : public QObject {
             auto stencil = depth; stencil["key"] = "stencil"; stencil["plane"] = "stencil";
             auto thumbnail = color; thumbnail["thumbnail"] = true; thumbnail["key"] = "thumbnail";
             auto duplicate = thumbnail; duplicate["key"] = "another-slot";
+            auto fast = thumbnail; fast["key"] = "fast"; fast["output"] = "thumbnail";
+            auto preview = color; preview["key"] = "display"; preview["output"] = "preview";
+            auto storage = color; storage["key"] = "storage"; storage["output"] = "storage";
             Json buffer{{"creation", "18446744073709551615"}, {"object", "9007199254740995"},
                         {"resource_description", {{"Dimension", 1}, {"Width", "256"}}},
                         {"key", "buffer"}, {"buffer", true}, {"thumbnail", false}, {"offset", "4"}, {"length", "8"}};
             auto job = prepareRdcJob(capture, "resource-workspace", dir + "/read", library,
                 {{"execution", "9007199254740999"}, {"boundary", boundary},
-                 {"resource_requests", Json::array({color, depth, stencil, buffer, thumbnail, duplicate})}});
+                 {"resource_requests", Json::array({color, depth, stencil, buffer, thumbnail, duplicate, fast, preview, storage})}});
             const auto jobPath = dir + "/job.json";
             { QFile output(jobPath); QVERIFY(output.open(QIODevice::WriteOnly)); output.write(QByteArray::fromStdString(job.dump(2))); }
             run("FloraGPA.Rdc.exe", {"--job", jobPath});
@@ -317,6 +320,16 @@ class DrawResourceTests final : public QObject {
             QCOMPARE(rows[4].at("image"), rows[5].at("image")); // Duplicate bindings share the batch read.
             QVERIFY(image(4).width() <= 96 && image(4).height() <= 96);
             QVERIFY(rows[0].contains("storage_description"));
+            QCOMPARE(rows[6].at("display_path"), Json("bounded_gpu_thumbnail"));
+            QVERIFY(image(6).width() <= 96 && image(6).height() <= 96);
+            QVERIFY(!rows[6].contains("file"));
+            QCOMPARE(image(7), image(0));
+            QVERIFY(!rows[7].contains("file"));
+            QCOMPARE(rows[7].at("storage_read"), Json(false));
+            QVERIFY(!QFile::exists(dir + "/read/resource-7.bin"));
+            QVERIFY(!rows[8].contains("image"));
+            QVERIFY(!QFile::exists(dir + "/read/resource-8.png"));
+            QCOMPARE(rows[8].at("sha256"), rows[0].at("sha256"));
             qInfo() << boundary << "color/depth/stencil/buffer and mip 1 array 1 verified";
         }
     }
