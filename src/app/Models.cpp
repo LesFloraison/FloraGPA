@@ -6,6 +6,20 @@
 #include <climits>
 
 namespace flora {
+namespace {
+QString apiCallLabel(const std::string &name) {
+    // Strip only known COM interface prefixes; keep free functions and unknown names intact.
+    static const QRegularExpression interfacePrefix(
+        "^(?:ID3D12(?:GraphicsCommandList|CommandList|CommandQueue|CommandAllocator|"
+        "DeviceFactory|DeviceChild|Device|DescriptorHeap|RootSignature|PipelineLibrary|"
+        "PipelineState|SDKConfiguration|Resource|Fence|Heap|Object)|"
+        "IDXGI(?:SwapChain|Factory|Adapter)|IUnknown)[0-9]*(?:::)?(?=[A-Z])");
+    auto label = QString::fromStdString(name);
+    const auto match = interfacePrefix.match(label);
+    if (match.hasMatch()) label.remove(0, match.capturedLength());
+    return label;
+}
+}
 QVariant GeometryModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= rows_.size() || index.column() >= columns_.size() ||
         role != Qt::DisplayRole)
@@ -141,11 +155,11 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
         if (role == Qt::UserRole + 2) return e.work;
         if (role == Qt::UserRole + 3 && e.thread) return QVariant::fromValue<qulonglong>(*e.thread);
         if (role == Qt::UserRole + 4 && e.queue) return QVariant::fromValue<qulonglong>(*e.queue);
-        if (role == Qt::ToolTipRole) return QString::fromStdString(e.summary);
+        if (role == Qt::ToolTipRole) return QString::fromStdString(e.name + "\n" + e.summary);
         if (role == Qt::ForegroundRole && e.work) return QColor("#a6dffa");
         if (role != Qt::DisplayRole) return {};
         return index.column() == 0 ? QString::number(e.id) :
-               QString::fromStdString(index.column() == 1 ? e.name : e.summary);
+               index.column() == 1 ? apiCallLabel(e.name) : QString::fromStdString(e.summary);
     }
     if (!index.isValid() || index.row() >= int(ids_.size()) || !frame_)
         return {};
@@ -158,9 +172,16 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::UserRole + 2) return isDraw(e.type);
     if (role == Qt::ForegroundRole && kind_ == Kind::Commands && isDraw(e.type))
         return QColor("#a6dffa");
-    if (role == Qt::ToolTipRole)
-        return (debugNames(id).isEmpty() ? QString{} : debugNames(id) + '\n') +
-               QString("ID %1 · type 0x%2 · %3 bytes").arg(id).arg(e.type, 0, 16).arg(e.size);
+    if (role == Qt::ToolTipRole) {
+        auto details = (debugNames(id).isEmpty() ? QString{} : debugNames(id) + '\n') +
+            QString("ID %1 · type 0x%2 · %3 bytes").arg(id).arg(e.type, 0, 16).arg(e.size);
+        if (kind_ == Kind::Commands) {
+            details.prepend(QString::fromStdString(commandName(e.type)) + '\n');
+            const auto args = data(this->index(index.row(), 2), Qt::DisplayRole).toString();
+            if (!args.isEmpty()) details += '\n' + args;
+        }
+        return details;
+    }
     if (role != Qt::DisplayRole)
         return {};
     if (index.column() == 0)
@@ -170,11 +191,6 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
             QString::fromStdString(kind_ == Kind::Commands ? commandName(e.type) : resourceName(e.type));
         if (kind_ == Kind::Resources && !debugNames(id).isEmpty())
             name += " · " + debugNames(id);
-        if (kind_ == Kind::Commands && isDraw(e.type)) {
-            auto args = data(this->index(index.row(), 2), Qt::DisplayRole).toString();
-            if (!args.isEmpty())
-                name += "  " + args;
-        }
         return name;
     }
     try {
@@ -204,9 +220,11 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     return {};
 }
 QVariant CaptureModel::headerData(int n, Qt::Orientation orientation, int role) const {
+    if (orientation == Qt::Horizontal && n == 0 && role == Qt::ToolTipRole)
+        return executions_ ? "Execution ID" : "ID";
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
         return {};
-    return QStringList{executions_ ? "Execution ID" : "ID", kind_ == Kind::Commands ? "API call" : "Resource",
+    return QStringList{"ID", kind_ == Kind::Commands ? "API call" : "Resource",
                        kind_ == Kind::Commands ? "Arguments" : "Size"}
         .value(n);
 }

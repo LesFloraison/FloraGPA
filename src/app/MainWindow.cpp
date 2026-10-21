@@ -75,9 +75,11 @@
 #include <QStandardPaths>
 #include <QStandardItemModel>
 #include <QStatusBar>
+#include <QScreen>
 #include <QStyle>
 #include <QTabWidget>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrentRun>
 #include <d3dcompiler.h>
@@ -209,8 +211,14 @@ MainWindow::MainWindow() : loader_(this) {
             updateExperimentActions();
             if (frame_) commands_->setFrame(frame_, std::move(loaded.queries), std::move(loaded.search));
             else commands_->setSession(session_);
-            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+            // setSession resets the model even when the combo already shows this domain.
+            commands_->setExecutionView(!frame_);
+            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(frame_ ? 0 : 1);
             findChild<QComboBox *>("apiEventDomain")->setEnabled(!frame_);
+            findChild<QComboBox *>("apiKinds")->setCurrentIndex(0);
+            findChild<QLineEdit *>("apiSearch")->clear();
+            findChild<QLineEdit *>("apiLocate")->clear();
+            findChild<QWidget *>("apiAdvancedFilters")->hide();
             findChild<QLineEdit *>("apiThreadFilter")->clear();
             findChild<QLineEdit *>("apiThreadFilter")->setEnabled(!frame_);
             findChild<QLineEdit *>("apiQueueFilter")->clear();
@@ -220,7 +228,7 @@ MainWindow::MainWindow() : loader_(this) {
             findChild<QLineEdit *>("apiResourceFilter")->setPlaceholderText(frame_ ? "Referenced resource ID…" : "Captured resource object (partial decoding)…");
             findChild<QComboBox *>("resourceKinds")->setCurrentIndex(0);
             findChild<QComboBox *>("resourceKinds")->setEnabled(true);
-            apiView_->setColumnHidden(2, bool(frame_));
+            apiView_->setColumnHidden(2, true);
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
             updateProfileContext();
@@ -669,8 +677,33 @@ void MainWindow::buildUi() {
     });
     leftTabs_ = new QTabWidget;
     leftTabs_->setDocumentMode(true);
-    auto apiPane = filtered(apiView_, commandFilter_, apiKinds);
-    apiPane->findChild<QLineEdit *>()->setObjectName("apiSearch");
+    auto apiPane = new QWidget;
+    auto apiLayout = new QVBoxLayout(apiPane);
+    apiLayout->setContentsMargins(6, 6, 6, 0);
+    apiLayout->setSpacing(5);
+    auto searchRow = new QHBoxLayout;
+    searchRow->setSpacing(4);
+    auto apiSearch = new QLineEdit;
+    apiSearch->setObjectName("apiSearch");
+    apiSearch->setPlaceholderText("Filter API calls…");
+    apiSearch->setClearButtonEnabled(true);
+    connect(apiSearch, &QLineEdit::textChanged, commandFilter_,
+            [this](const QString &text) { commandFilter_->setFilterFixedString(text); });
+    searchRow->addWidget(apiSearch, 1);
+    auto filtersButton = new QToolButton;
+    filtersButton->setObjectName("apiFiltersButton");
+    filtersButton->setText("Filters");
+    filtersButton->setAccessibleName("Advanced API filters");
+    searchRow->addWidget(filtersButton);
+    apiLayout->addLayout(searchRow);
+    apiLayout->addWidget(apiView_, 1);
+    auto advanced = new QFrame(apiPane, Qt::Popup);
+    advanced->setObjectName("apiAdvancedFilters");
+    advanced->setFrameShape(QFrame::StyledPanel);
+    auto advancedLayout = new QFormLayout(advanced);
+    advancedLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    advancedLayout->addRow(new QLabel("Advanced filters"));
+    advancedLayout->addRow("Show", apiKinds);
     auto eventDomain = new QComboBox;
     eventDomain->setObjectName("apiEventDomain");
     eventDomain->addItems({"Recorded API calls", "Submitted command instances"});
@@ -682,7 +715,7 @@ void MainWindow::buildUi() {
         properties_->clear();
         selectionLabel_->setText(value ? "Submitted instances — not replayed" : "Recorded API calls");
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(2, eventDomain);
+    advancedLayout->addRow("Events", eventDomain);
     auto referenceFilter = new QLineEdit;
     referenceFilter->setObjectName("apiResourceFilter");
     referenceFilter->setPlaceholderText("Referenced resource ID…");
@@ -698,7 +731,7 @@ void MainWindow::buildUi() {
         commandFilter_->referencedResource = value.isEmpty() ? std::nullopt : std::optional<Id>(id);
         commandFilter_->refresh();
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(3, referenceFilter);
+    advancedLayout->addRow("Resource", referenceFilter);
     auto threadFilter = new QLineEdit;
     threadFilter->setObjectName("apiThreadFilter");
     threadFilter->setPlaceholderText("Thread ID…");
@@ -711,7 +744,7 @@ void MainWindow::buildUi() {
         commandFilter_->thread = value.isEmpty() ? std::nullopt : std::optional<uint64_t>(id);
         commandFilter_->refresh();
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(4, threadFilter);
+    advancedLayout->addRow("Thread", threadFilter);
     auto queueFilter = new QLineEdit;
     queueFilter->setObjectName("apiQueueFilter");
     queueFilter->setPlaceholderText("Queue object…");
@@ -723,17 +756,67 @@ void MainWindow::buildUi() {
         commandFilter_->queue = value.isEmpty() ? std::nullopt : std::optional<uint64_t>(id);
         commandFilter_->refresh();
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(5, queueFilter);
+    advancedLayout->addRow("Queue", queueFilter);
     auto locate = new QLineEdit;
     locate->setObjectName("apiLocate");
     locate->setPlaceholderText("Locate event ID (Enter)…");
-    connect(locate, &QLineEdit::returnPressed, this, [this, locate] {
+    connect(locate, &QLineEdit::returnPressed, this, [this, locate, advanced] {
         bool valid = false;
         const auto id = locate->text().toULongLong(&valid);
-        if (valid && !locate->text().startsWith('-') && commands_->rowOf(id) >= 0) locateEvent(id);
+        if (valid && !locate->text().startsWith('-') && commands_->rowOf(id) >= 0) {
+            advanced->hide();
+            locateEvent(id);
+        }
         else statusBar()->showMessage("Event ID was not found in this capture.");
     });
-    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(6, locate);
+    advancedLayout->addRow("Go to", locate);
+    auto resetFilters = new QPushButton("Reset filters");
+    resetFilters->setObjectName("apiResetFilters");
+    advancedLayout->addRow(resetFilters);
+    connect(resetFilters, &QPushButton::clicked, this, [this, apiKinds, eventDomain, referenceFilter, threadFilter, queueFilter] {
+        apiKinds->setCurrentIndex(0);
+        eventDomain->setCurrentIndex(session_ && !frame_ ? 1 : 0);
+        referenceFilter->clear(); threadFilter->clear(); queueFilter->clear();
+    });
+    const auto updateFilterSummary = [apiKinds, eventDomain, referenceFilter, threadFilter, queueFilter, filtersButton] {
+        const auto count = int(apiKinds->currentIndex() != 0) +
+            int(eventDomain->isEnabled() && eventDomain->currentIndex() != 1) +
+            int(!referenceFilter->text().isEmpty()) + int(!threadFilter->text().isEmpty()) +
+            int(!queueFilter->text().isEmpty());
+        filtersButton->setText(count ? QString("Filters (%1)").arg(count) : "Filters");
+        QStringList details{apiKinds->currentText(), eventDomain->currentText()};
+        for (auto field : {referenceFilter, threadFilter, queueFilter})
+            if (!field->text().isEmpty()) details << field->placeholderText() + " " + field->text();
+        filtersButton->setToolTip("Advanced filters\n" + details.join('\n') + "\nGo to event: Ctrl+G");
+    };
+    connect(apiKinds, &QComboBox::currentIndexChanged, this, updateFilterSummary);
+    connect(eventDomain, &QComboBox::currentIndexChanged, this, updateFilterSummary);
+    for (auto field : {referenceFilter, threadFilter, queueFilter})
+        connect(field, &QLineEdit::textChanged, this, updateFilterSummary);
+    connect(this, &MainWindow::captureLoaded, this, updateFilterSummary);
+    eventDomain->setEnabled(false);
+    updateFilterSummary();
+    const auto showAdvanced = [advanced, filtersButton] {
+        advanced->adjustSize();
+        auto position = filtersButton->mapToGlobal(QPoint(filtersButton->width() - advanced->width(), filtersButton->height()));
+        const auto area = filtersButton->screen()->availableGeometry();
+        position.setX(qBound(area.left(), position.x(), qMax(area.left(), area.right() - advanced->width() + 1)));
+        position.setY(qBound(area.top(), position.y(), qMax(area.top(), area.bottom() - advanced->height() + 1)));
+        advanced->move(position);
+        advanced->show();
+    };
+    connect(filtersButton, &QToolButton::clicked, this, [showAdvanced, apiKinds] {
+        showAdvanced();
+        apiKinds->setFocus();
+    });
+    auto locateAction = new QAction("Go to API event…", this);
+    locateAction->setShortcut(QKeySequence("Ctrl+G"));
+    addAction(locateAction);
+    connect(locateAction, &QAction::triggered, this, [this, apiPane, showAdvanced, locate] {
+        leftTabs_->setCurrentWidget(apiPane);
+        showAdvanced();
+        locate->setFocus(); locate->selectAll();
+    });
     leftTabs_->addTab(apiPane, "API Log");
     allResourcesPane_ = filtered(resourceView_, resourceFilter_, resourceKinds);
     statistics_ = tree({"Statistic", "Value"});

@@ -36,9 +36,11 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QSignalSpy>
 #include <QStatusBar>
 #include <QTemporaryDir>
+#include <QToolButton>
 #include <QtTest>
 #define NOMINMAX
 #include <Windows.h>
@@ -5083,6 +5085,19 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),1,10000);
         QVERIFY(!window.busy());
         auto view=window.findChild<QTableView *>("apiLog");QVERIFY(view);
+        auto domain=window.findChild<QComboBox *>("apiEventDomain");QVERIFY(domain);
+        QCOMPARE(domain->currentIndex(),1);
+        auto proxy=qobject_cast<QSortFilterProxyModel *>(view->model());QVERIFY(proxy);
+        auto model=dynamic_cast<CaptureModel *>(proxy->sourceModel());
+        QVERIFY(model); QVERIFY(model->executionView());
+        auto advanced=window.findChild<QWidget *>("apiAdvancedFilters");QVERIFY(advanced);
+        QVERIFY(!advanced->isVisible());
+        auto filters=window.findChild<QToolButton *>("apiFiltersButton");QVERIFY(filters);
+        QCOMPARE(filters->text(),QString("Filters"));
+        // This fixture contains recorded draws but no submissions.
+        QCOMPARE(view->model()->rowCount(),0);
+        domain->setCurrentIndex(0);
+        QCOMPARE(filters->text(),QString("Filters (1)"));
         QCOMPARE(view->model()->rowCount(),2);
         auto search=window.findChild<QLineEdit *>("apiSearch");QVERIFY(search);
         search->setText("DrawIndexedInstanced");QCOMPARE(view->model()->rowCount(),2);
@@ -5095,8 +5110,15 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         auto thread=window.findChild<QLineEdit *>("apiThreadFilter");QVERIFY(thread);
         thread->setText("8");QCOMPARE(view->model()->rowCount(),0);
         thread->setText("7");QCOMPARE(view->model()->rowCount(),2);
+        window.findChild<QPushButton *>("apiResetFilters")->click();
+        QCOMPARE(domain->currentIndex(),1);
+        QVERIFY(thread->text().isEmpty());
+        QCOMPARE(filters->text(),QString("Filters"));
         window.openCapture(path);QTRY_COMPARE_WITH_TIMEOUT(loaded.count(),2,10000);
         QVERIFY(!window.busy());
+        QCOMPARE(domain->currentIndex(),1);
+        QVERIFY(model->executionView());
+        QCOMPARE(view->model()->rowCount(),0);
     }
     void selectedReplayWorkspace() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
