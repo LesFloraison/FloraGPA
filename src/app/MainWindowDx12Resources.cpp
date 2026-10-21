@@ -12,6 +12,8 @@
 #include <QRegularExpression>
 #include <QJsonDocument>
 #include <QSaveFile>
+#include <QFileInfo>
+#include <QPlainTextEdit>
 #include <QSignalBlocker>
 #include <QStatusBar>
 #include <QTabWidget>
@@ -42,8 +44,55 @@ QByteArray readBytes(const QString &directory, const Json &result) {
 }
 }
 bool MainWindow::resourceBrowseBusy() const {
+    if (runningKind_ == "analysis-frame-capture") return true;
     return runningAnalysis_ == RdcAnalysis::Resources &&
            (runningKind_ == "history" || runningKind_ == "history-capture" || runningKind_ == "resource-validation");
+}
+QString MainWindow::analysisFrameKey() const {
+    if (qEnvironmentVariableIsSet("FLORA_DISABLE_FRAME_REUSE") || rdcLibraryStamp_.isEmpty()) return {};
+    const auto context = historyContextKey(true, true);
+    if (context.isEmpty()) return {};
+    return context + ":analysis-v2:" + rdcLibraryStamp_ + ':' + QString::fromLatin1(rdcLibraryHash_);
+}
+void MainWindow::trimAnalysisCaptures() {
+    constexpr qint64 budget = 8LL * 1024 * 1024 * 1024;
+    qint64 bytes{};
+    for (const auto &[key, capture] : historyCaptures_) bytes += QFileInfo(capture.path).size();
+    for (const auto &key : QStringList(historyCacheOrder_)) {
+        if (bytes <= budget) break;
+        if (key == historyKey_) continue; // The controller's capture stays pinned until switched.
+        if (const auto found = historyCaptures_.find(key); found != historyCaptures_.end()) {
+            bytes -= QFileInfo(found->second.path).size(); historyCaptures_.erase(found);
+        }
+        historyCacheOrder_.removeAll(key);
+    }
+}
+void MainWindow::prepareAnalysisFrame() {
+    if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || dx12ContentPending_ ||
+        centerTabs_->currentWidget() != resourceWorkspace_) return;
+    const auto key = analysisFrameKey();
+    if (key.isEmpty() || historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
+    try {
+        const auto submissions = session_->submissionDetails();
+        std::set<std::string> queues;
+        for (const auto &list : submissions.at("lists")) queues.insert(list.at("queue").get<std::string>());
+        if (queues.size() != 1) {
+            analysisFrameFailed_.insert(key);
+            log_->appendPlainText("Analysis reuse fallback: multiple or unresolved queues require exact prefix capture.");
+            return;
+        }
+        analysisFrameContext_ = key;
+        const auto library = dx12Pipeline_->backendPath();
+        startWorker({"replay", capturePath_, "--renderdoc", library, "--max-bytes",
+                     QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)}, false);
+        if (process_.state() == QProcess::NotRunning) throw std::runtime_error("Cannot start analysis frame preparation");
+        runningKind_ = "analysis-frame-capture";
+        setProperty("resourceCaptureCount", property("resourceCaptureCount").toUInt() + 1);
+        setBusy(true);
+        statusBar()->showMessage("Preparing reusable analysis frame…");
+    } catch (const std::exception &e) {
+        analysisFrameFailed_.insert(key); log_->appendPlainText(QString::fromUtf8(e.what()));
+    }
 }
 void MainWindow::showBufferWorkspace() {
     resourceImages_->setCurrentWidget(bufferPane_);
@@ -320,11 +369,15 @@ void MainWindow::pumpDx12Resources() {
                     for (const auto &binding : resourceBrowser_->bindings())
                         if (binding.key == key.get<std::string>()) requests.push_back(dx12ResourceReadRequest(true, &binding));
             }
-            if (requests.empty()) return;
+            if (requests.empty()) {
+                if (!analysisFrameTimer_.isActive()) analysisFrameTimer_.start();
+                return;
+            }
             dx12ResourceRequest_ = {{"action", "resource-workspace"}, {"execution", std::to_string(*selection_.execution)},
                 {"boundary", before ? "before" : "after"}, {"resource_requests", requests},
                 {"isolate_missing_queries", selection_.isolateMissingQueries}};
         }
+        analysisFrameTimer_.stop();
         readRdcAnalysis(nullptr, RdcAnalysis::Resources);
     } catch (const std::exception &e) {
         dx12FailedKey_ = context; dx12ContentPending_ = false;

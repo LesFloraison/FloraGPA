@@ -185,7 +185,7 @@ class Session {
   public:
     std::unique_ptr<IReplayController, Shutdown> controller;
     std::shared_ptr<Events> events;
-    Json roots, mapping;
+    Json roots, mapping, analysisBoundaries;
     std::optional<uint32_t> currentEvent;
     double openMilliseconds{};
     uint64_t requests{};
@@ -1565,6 +1565,18 @@ static Json executeRdcJob(const Json &job, Session *retained) {
     if (frameEndHistory && !dx12) throw std::runtime_error("Frame-end history requires a native DX12 capture");
     if (!queryPolicy.is_null() && !dx12) throw std::runtime_error("Query isolation requires a DX12 capture");
     auto mapping = session.mapping;
+    if (job.value("analysis_frame", false)) {
+        if (!dx12 || frameEnd.is_null()) throw std::runtime_error("Analysis reuse requires a verified full-frame capture");
+        if (session.analysisBoundaries.is_null()) {
+            std::set<std::string> queues;
+            for (const auto &[execution, command] : mapping.at("execution_commands").items())
+                queues.insert(command.at("queue").get<std::string>());
+            if (queues.size() > 1) throw std::runtime_error("Multi-queue analysis reuse requires prefix fallback");
+            session.analysisBoundaries = indexRdcAnalysisBoundaries(roots);
+        }
+        auto selection = job; selection["boundary"] = job.value("boundary", "after");
+        selectRdcAnalysisBoundary(session.analysisBoundaries, selection);
+    }
     if (frameEndHistory) {
         const auto endEvent = frameEnd.at("event_id").get<uint32_t>();
         for (const auto &[execution, command] : mapping.at("execution_commands").items())
@@ -1790,7 +1802,8 @@ static Json executeRdcJob(const Json &job, Session *retained) {
     uint32_t eid = index(job, "eid");
     if (action == "resource-workspace") {
         if (!dx12) throw std::runtime_error("Resource workspace requires DX12");
-        const auto boundary = readRdcResourceBoundary(roots, job);
+        const auto boundary = job.value("analysis_frame", false) ?
+            selectRdcAnalysisBoundary(session.analysisBoundaries, job) : readRdcResourceBoundary(roots, job);
         eid = boundary.at("event_id").get<uint32_t>();
         result["resource_boundary"] = boundary;
     } else if (frameEndHistory) {

@@ -758,6 +758,18 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             require(original.records[native.recorded] == id, "Native recording order mismatch");
             const auto executionId = native.instance.firstExecution + native.recorded;
             const bool disabled = s.disabledExecutions.contains(executionId);
+            const auto markBoundary = [&](const char *boundary) {
+                if (!analysisMarkers || !frame->streamEnd || !streamPacketWork(p.type)) return;
+                const auto &instance = native.instance;
+                const json identity{{"schema", 2}, {"execution", std::to_string(executionId)},
+                    {"record", std::to_string(id)}, {"submission", std::to_string(instance.submission)},
+                    {"queue", std::to_string(instance.queue)}, {"list", std::to_string(instance.list)},
+                    {"generation", std::to_string(original.generation)}, {"ordinal", std::to_string(instance.ordinal)},
+                    {"boundary", boundary}, {"isolate_missing_queries", s.isolateMissingQueries}};
+                const auto marker = "Flora DX12 analysis boundary v2 " + identity.dump();
+                native.list->SetMarker(1, marker.c_str(), UINT(marker.size() + 1));
+            };
+            markBoundary("before");
             if (s.uavBarriersBefore.contains(executionId)) {
                 // A sibling marker keeps synthetic synchronization outside the
                 // captured event's API range and original execution identity.
@@ -809,6 +821,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             if (timedDraw) native.drawTimings->end(native.list.Get());
             if (measured) frame->performance->end(native.list.Get());
             s.recordExecutionPatches(native.list.Get(), executionId, id, native.states);
+            markBoundary("after");
             if (++native.recorded == native.count) {
                 if (native.drawTimings) native.drawTimings->resolve(native.list.Get());
                 if (native.statistics) native.statistics->end(native.list.Get());

@@ -24,6 +24,25 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void analysisBoundaryPairs() {
+        auto marker = [](unsigned eid, const char *side, const char *execution = "7", const char *queue = "9") {
+            return node(eid, "Flora DX12 analysis boundary v2 " + Json({{"schema", 2}, {"execution", execution},
+                {"record", "10"}, {"submission", "20"}, {"queue", queue}, {"list", "3"}, {"generation", "1"},
+                {"ordinal", "0"}, {"boundary", side}, {"isolate_missing_queries", false}}).dump(), 0x20);
+        };
+        const auto roots = Json::array({marker(3, "before"), node(4, "generated action 0", 2),
+            node(8, "generated action 1", 2), marker(12, "after"), marker(19, "before", "8"), marker(25, "after", "8")});
+        const auto index = indexRdcAnalysisBoundaries(roots);
+        QCOMPARE(selectRdcAnalysisBoundary(index, {{"execution", "7"}, {"boundary", "before"}}).at("event_id"), Json(3));
+        QCOMPARE(selectRdcAnalysisBoundary(index, {{"execution", "7"}, {"boundary", "after"}}).at("event_id"), Json(12));
+        QCOMPARE(selectRdcAnalysisBoundary(index, {{"execution", "8"}, {"boundary", "before"}}).at("event_id"), Json(19));
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(Json::array({marker(3, "before")})));
+        auto duplicate = roots; duplicate.push_back(marker(27, "after", "8"));
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(duplicate));
+        auto multiQueue = roots; multiQueue.push_back(marker(30, "before", "9", "4")); multiQueue.push_back(marker(34, "after", "9", "4"));
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(multiQueue));
+        QVERIFY_THROWS_EXCEPTION(std::exception, selectRdcAnalysisBoundary(index, {{"execution", "7"}, {"boundary", "after"}, {"isolate_missing_queries", true}}));
+    }
     void frameEndCaptureBoundary() {
         const Json boundary{{"schema", 1}, {"scope", "frame_stream"},
             {"last_record", "18446744073709551615"}, {"last_execution", "9007199254740993"},

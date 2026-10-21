@@ -2140,6 +2140,13 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             historyContextKey(resources || resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
                               frameEndHistory) + ':' + library + ':' + QString::fromLatin1(rdcLibraryHash_);
         if (resources && historyRequest_.value("boundary", "") == "before") historyKey_ += ":before";
+        const auto fullFrameKey = dx12 && (resources || pipeline) ? analysisFrameKey() : QString{};
+        const auto fallbackKey = fullFrameKey + ':' + QString::number(selection_.execution.value_or(0));
+        if (!fullFrameKey.isEmpty() && historyCaptures_.contains(fullFrameKey) &&
+            !analysisFrameFallback_.contains(fallbackKey)) {
+            historyKey_ = fullFrameKey;
+            historyRequest_["analysis_frame"] = true;
+        }
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -2231,6 +2238,8 @@ void MainWindow::startHistoryWorker() {
     }
 }
 void MainWindow::openCapture(const QString &path) {
+    analysisFrameTimer_.stop();
+    analysisFrameFailed_.clear(); analysisFrameFallback_.clear();
     if (projectDirty_) {
         auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
                                             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -2308,7 +2317,9 @@ void MainWindow::replay(bool timings) {
             resourceTimer_.stop();
             startWorker({"replay", capturePath_, "--measure-draws", "--max-bytes",
                          QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)}, true);
-            if (process_.state() != QProcess::NotRunning) runningKind_ = "draw-timings";
+            if (process_.state() != QProcess::NotRunning) {
+                runningKind_ = "draw-timings"; runningDrawTimingContext_ = drawTimingContext();
+            }
             return;
         }
         const auto outputSelection = outputReplaySelection();
@@ -2693,6 +2704,18 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                                       .arg(experiment["applied_events"].toArray().size())
                                       .arg(experiment["pending_events"].toArray().size()));
         }
+        if (runningKind_ == "analysis-frame-capture") {
+            requireDx12QueryPolicyReport(result.replayReport, selection_.isolateMissingQueries);
+            requireDx12ReplayBoundary(result.replayReport, session_->executionCount(), false, true, session_->events().back());
+            const auto path = report_["rdc_capture"].toString();
+            if (path.isEmpty() || !QFileInfo::exists(path)) throw std::runtime_error("Analysis frame capture is missing");
+            historyCaptures_[analysisFrameContext_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), path};
+            historyCacheOrder_.removeAll(analysisFrameContext_); historyCacheOrder_.append(analysisFrameContext_);
+            historyKey_ = analysisFrameContext_; trimAnalysisCaptures();
+            statusBar()->showMessage("Reusable analysis frame ready", 2000);
+            emit taskFinished(true);
+            return;
+        }
         if (runningKind_ == "history-capture") {
             if (session_ && session_->backend() == ReplayBackend::Dx12) {
                 const bool frameEndHistory = historyRequest_.value("frame_end", false);
@@ -2707,8 +2730,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             historyCaptures_[historyKey_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), historyRdc_};
             historyCacheOrder_.removeAll(historyKey_);
             historyCacheOrder_.append(historyKey_);
-            while (historyCacheOrder_.size() > 4)
-                historyCaptures_.erase(historyCacheOrder_.takeFirst());
+            trimAnalysisCaptures();
             startHistoryWorker();
             return;
         }
@@ -2911,6 +2933,19 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
     }
 }
 void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
+    if (runningKind_ == "analysis-frame-capture") {
+        if (!cancelled) analysisFrameFailed_.insert(analysisFrameContext_);
+        log_->appendPlainText("Analysis frame preparation: " + error);
+        emit taskFinished(false); return;
+    }
+    if (runningKind_ == "history" && historyRequest_.value("analysis_frame", false) &&
+        runningRevision_ == revision_ && !cancelled) {
+        analysisFrameFallback_.insert(historyKey_ + ':' + QString::number(selection_.execution.value_or(0)));
+        log_->appendPlainText("Analysis reuse fallback: " + error);
+        rdcService_.close(); dx12ContentPending_ = true;
+        dx12InventoryKey_.clear(); dx12FailedKey_.clear();
+        emit taskFinished(false); return;
+    }
     const auto message = error.toStdString();
     if (runningKind_ == "draw-resources") {
         resourceBrowser_->failPreviews(runningResourceKey_, cancelled ? "Selection changed" : error);

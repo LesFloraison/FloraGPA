@@ -244,6 +244,13 @@ class MainWindow final : public QMainWindow {
     };
     std::map<QString, HistoryCapture> historyCaptures_;
     QStringList historyCacheOrder_;
+    QTimer analysisFrameTimer_;
+    QString analysisFrameContext_;
+    QString runningDrawTimingContext_; // Whole-frame timing survives selection-only changes.
+    QSet<QString> analysisFrameFailed_, analysisFrameFallback_;
+    QString analysisFrameKey() const;
+    void prepareAnalysisFrame();
+    void trimAnalysisCaptures();
     std::array<CheckpointView *, 3> checkpoints_{};
     CheckpointView *runningCheckpoint_ = nullptr;
     bool runningCheckpointCatalog_ = true;

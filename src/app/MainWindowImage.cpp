@@ -27,6 +27,7 @@ ReplaySelection MainWindow::outputReplaySelection() const {
     return output;
 }
 void MainWindow::invalidateDx12Output() {
+    analysisFrameTimer_.stop();
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
     if (!dx12TimingContext_.isEmpty() && dx12TimingContext_ != drawTimingContext()) {
@@ -44,9 +45,11 @@ void MainWindow::invalidateDx12Output() {
     bufferTimer_.stop();
     bufferModel_->setBytes({}); displayedBuffer_ = 0; bufferLabel_->clear(); clearBufferDetails();
     replayTimer_.stop();
-    ++revision_;
+    const bool retainTiming = runningKind_ == "draw-timings" && runningDrawTimingContext_ == drawTimingContext() &&
+                              (process_.state() != QProcess::NotRunning || artifactJob_);
+    if (!retainTiming) ++revision_;
     rdcService_.cancelSelection();
-    if (process_.state() != QProcess::NotRunning || artifactJob_)
+    if (!retainTiming && (process_.state() != QProcess::NotRunning || artifactJob_))
         cancel();
     image_->setImage({});
     pixelLabel_->clear();

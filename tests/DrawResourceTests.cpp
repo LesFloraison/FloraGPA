@@ -271,6 +271,9 @@ class DrawResourceTests final : public QObject {
             QFile input(file); if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing oracle artifact");
             return input.readAll();
         };
+        QVERIFY(QDir().mkpath(root + "/full"));
+        run("FloraResourceWorkspaceFixture.exe", {library, root + "/full/oracle", "full"});
+        const auto full = root + "/full/" + QDir(root + "/full").entryList({"*.rdc"}, QDir::Files).front();
         for (const auto boundary : {"before", "after"}) {
             const auto dir = root + "/" + boundary; QVERIFY(QDir().mkpath(dir));
             run("FloraResourceWorkspaceFixture.exe", {library, dir + "/oracle", boundary});
@@ -330,6 +333,16 @@ class DrawResourceTests final : public QObject {
             QVERIFY(!rows[8].contains("image"));
             QVERIFY(!QFile::exists(dir + "/read/resource-8.png"));
             QCOMPARE(rows[8].at("sha256"), rows[0].at("sha256"));
+            auto reuse = job; reuse["capture"] = full.toStdString(); reuse["analysis_frame"] = true;
+            reuse["out"] = (dir + "/reuse").toStdString();
+            const auto reuseReport = Json::parse(read(runRdcAnalysis(reuse,
+                QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", 120)).toStdString());
+            const auto &reused = reuseReport.at("resource_results");
+            for (size_t i = 0; i < rows.size(); ++i) {
+                QVERIFY2(!reused[i].contains("error"), reused[i].dump().c_str());
+                if (rows[i].contains("sha256")) QCOMPARE(reused[i].at("sha256"), rows[i].at("sha256"));
+                if (rows[i].contains("image")) QCOMPARE(QImage(dir + "/reuse/" + QString::fromStdString(reused[i].at("image"))), image(i));
+            }
             qInfo() << boundary << "color/depth/stencil/buffer and mip 1 array 1 verified";
         }
     }

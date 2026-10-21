@@ -125,12 +125,14 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length" && key != "frame_end" && key != "frame_end_record" &&
+        if (!job.contains(key) && key != "analysis_frame" && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length" && key != "frame_end" && key != "frame_end_record" &&
             !(action == "resource-workspace" && (key == "boundary" || key == "resource_requests")))
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
     rdcReplayOptimisation(job);
+    if (job.contains("analysis_frame") && (!job.at("analysis_frame").is_boolean() ||
+        (action != "pipeline" && action != "resource-workspace"))) throw std::runtime_error("Invalid analysis frame request");
     if (action == "resource-workspace") {
         decimalIdentity(job.at("execution"), "execution");
         if (job.at("boundary") != "before" && job.at("boundary") != "after")

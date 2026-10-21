@@ -17,7 +17,7 @@ static void check(HRESULT hr) {
 int main(int argc, char **argv) try {
     if (argc != 4) throw std::runtime_error("Expected RenderDoc DLL, capture prefix, before|after");
     const std::string boundary = argv[3];
-    if (boundary != "before" && boundary != "after") throw std::runtime_error("Invalid boundary");
+    if (boundary != "before" && boundary != "after" && boundary != "full") throw std::runtime_error("Invalid boundary");
     const auto library = LoadLibraryA(argv[1]);
     const auto getApi = library ? reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(library, "RENDERDOC_GetAPI")) : nullptr;
     RENDERDOC_API_1_6_0 *api{};
@@ -91,11 +91,22 @@ int main(int argc, char **argv) try {
         queue->ExecuteCommandLists(1, lists); wait();
     };
     write(false);
+    if (boundary == "full") {
+        const auto mark = [&](const char *side) {
+            const auto name = std::string("Flora DX12 analysis boundary v2 {\"schema\":2,\"execution\":\"9007199254740999\",\"record\":\"7\",\"submission\":\"8\",\"queue\":\"9\",\"list\":\"10\",\"generation\":\"1\",\"ordinal\":\"0\",\"isolate_missing_queries\":false,\"boundary\":\"") + side + "\"}";
+            queue->SetMarker(1, name.c_str(), UINT(name.size() + 1));
+        };
+        mark("before"); write(true); mark("after");
+        write(true, true);
+        const std::string end = "Flora DX12 frame end v1 {\"schema\":1,\"scope\":\"frame_stream\",\"last_execution\":\"9007199254740999\",\"last_record\":\"99\",\"missing_query_policy\":\"fail\"}";
+        queue->SetMarker(1, end.c_str(), UINT(end.size() + 1));
+    } else {
     if (boundary == "after") write(true);
     const auto marker = "Flora DX12 resource boundary v1 {\"schema\":1,\"execution\":\"9007199254740999\","
         "\"boundary\":\"" + boundary + "\",\"isolate_missing_queries\":false}";
     queue->SetMarker(1, marker.c_str(), UINT(marker.size() + 1));
     write(true, true);
+    }
     if (!api->EndFrameCapture(device.Get(), nullptr)) throw std::runtime_error("Capture failed");
     CloseHandle(completed);
     return 0;

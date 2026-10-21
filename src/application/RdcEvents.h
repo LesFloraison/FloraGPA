@@ -2,6 +2,8 @@
 #include <nlohmann/json.hpp>
 #include <string_view>
 namespace flora {
+nlohmann::json indexRdcAnalysisBoundaries(const nlohmann::json &roots);
+nlohmann::json selectRdcAnalysisBoundary(const nlohmann::json &index, const nlohmann::json &job);
 inline bool rdcShaderDebugAction(std::string_view action) {
     return action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
 }

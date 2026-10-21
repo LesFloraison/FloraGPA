@@ -514,6 +514,55 @@ std::string rdcResourceBoundaryMarker(const Json &b) {
         throw std::runtime_error("Invalid resource capture boundary");
     return "Flora DX12 resource boundary v1 " + b.dump();
 }
+Json indexRdcAnalysisBoundaries(const Json &roots) {
+    constexpr std::string_view prefix = "Flora DX12 analysis boundary v2 ";
+    Json index = Json::object();
+    std::set<std::string> queues;
+    size_t visited{};
+    std::function<void(const Json &, unsigned)> walk = [&](const Json &nodes, unsigned depth) {
+        if (!nodes.is_array() || depth > 128) throw std::runtime_error("Invalid analysis boundary tree");
+        for (const auto &node : nodes) {
+            if (++visited > 1000000) throw std::runtime_error("Analysis boundary action limit exceeded");
+            const auto name = node.at("customName").get<std::string>();
+            if (name.starts_with("Flora DX12 analysis boundary")) {
+                if (!name.starts_with(prefix) || name.size() > 4096) throw std::runtime_error("Unknown analysis boundary schema");
+                const auto b = Json::parse(name.substr(prefix.size()));
+                if (b.at("schema") != 2 || (b.at("boundary") != "before" && b.at("boundary") != "after"))
+                    throw std::runtime_error("Invalid analysis boundary");
+                for (const auto field : {"execution", "record", "submission", "queue", "list", "generation"})
+                    if (!policyNumber(b.at(field))) throw std::runtime_error("Missing analysis execution identity");
+                policyNumber(b.at("ordinal")); b.at("isolate_missing_queries").get<bool>();
+                const auto execution = b.at("execution").get<std::string>(), side = b.at("boundary").get<std::string>();
+                const auto eid = node.at("eventId").get<uint64_t>();
+                if (!eid || eid > UINT32_MAX || index[execution].contains(side))
+                    throw std::runtime_error("Ambiguous analysis execution boundary");
+                index[execution][side] = {{"event_id", eid}, {"boundary", b}};
+                queues.insert(b.at("queue").get<std::string>());
+            }
+            walk(node.at("children"), depth + 1);
+        }
+    };
+    walk(roots, 0);
+    // Independent queue prefixes do not establish one resource observation order.
+    if (queues.size() > 1) throw std::runtime_error("Analysis reuse requires a verified single-queue observation order");
+    for (auto &[execution, pair] : index.items()) {
+        if (!pair.contains("before") || !pair.contains("after") ||
+            pair["before"]["event_id"].get<uint32_t>() >= pair["after"]["event_id"].get<uint32_t>())
+            throw std::runtime_error("Incomplete analysis boundary pair");
+        auto before = pair["before"]["boundary"], after = pair["after"]["boundary"];
+        before.erase("boundary"); after.erase("boundary");
+        if (before != after) throw std::runtime_error("Analysis boundary execution identity changed");
+    }
+    return index;
+}
+Json selectRdcAnalysisBoundary(const Json &index, const Json &job) {
+    const auto execution = job.at("execution").get<std::string>();
+    if (!index.contains(execution)) throw std::runtime_error("No exact analysis boundary; prefix recapture required");
+    const auto selected = index.at(execution).at(job.at("boundary").get<std::string>());
+    if (selected.at("boundary").at("isolate_missing_queries") != job.value("isolate_missing_queries", false))
+        throw std::runtime_error("Analysis boundary query policy mismatch");
+    return selected;
+}
 Json readRdcResourceBoundary(const Json &roots, const Json &job) {
     constexpr std::string_view prefix = "Flora DX12 resource boundary v1 ";
     Json result;

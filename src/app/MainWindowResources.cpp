@@ -132,6 +132,9 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     centerTabs_->setCurrentWidget(resourceWorkspace_);
     resourceTimer_.setSingleShot(true);
     resourceTimer_.setInterval(100);
+    analysisFrameTimer_.setSingleShot(true);
+    analysisFrameTimer_.setInterval(1000);
+    connect(&analysisFrameTimer_, &QTimer::timeout, this, &MainWindow::prepareAnalysisFrame);
     connect(&resourceTimer_, &QTimer::timeout, this, &MainWindow::pumpResourceJobs);
     connect(resourceBrowser_, &ResourceBrowser::bindingSelected, this, &MainWindow::selectDrawResource);
     connect(resourceBrowser_, &ResourceBrowser::previewsNeeded, this, [this] { resourceTimer_.start(); });
