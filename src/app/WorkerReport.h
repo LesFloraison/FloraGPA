@@ -6,8 +6,11 @@
 #include <QString>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <QJsonArray>
 
 namespace flora {
+class IReplaySession;
+QJsonArray dx12DrawTimingRows(const nlohmann::json &, const IReplaySession &, bool isolateMissingQueries);
 // Null project means no experiment was sent with this DX12 replay request.
 void requireDx12ExperimentReport(const nlohmann::json &report, const nlohmann::json &project);
 void requireDx12QueryPolicyReport(const nlohmann::json &report, bool isolateMissingQueries);

@@ -29,6 +29,11 @@ ReplaySelection MainWindow::outputReplaySelection() const {
 void MainWindow::invalidateDx12Output() {
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
+    if (!dx12TimingContext_.isEmpty() && dx12TimingContext_ != drawTimingContext()) {
+        chart_->clear();
+        chart_->setToolTip("Replay context changed; collect GPU metrics again.");
+        dx12TimingContext_.clear();
+    }
     dx12PixelTarget_.reset();
     resourceBrowser_->failPreviews(resourceBrowser_->contextKey(), "Selection changed");
     if (boundary_->currentIndex() == 0) historyPick_->setChecked(false);

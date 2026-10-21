@@ -12,6 +12,71 @@ void check(HRESULT status, const char *operation) {
     }
 }
 } // namespace
+NativeDrawTimings::NativeDrawTimings(ID3D12Device *device, D3D12_COMMAND_LIST_TYPE type, size_t capacity)
+    : type_(type) {
+    if (!capacity || capacity > 4000000 ||
+        (type != D3D12_COMMAND_LIST_TYPE_DIRECT && type != D3D12_COMMAND_LIST_TYPE_COMPUTE))
+        throw std::runtime_error("Invalid draw timestamp batch capacity or list type");
+    capacity_ = UINT(capacity);
+    D3D12_QUERY_HEAP_DESC query{};
+    query.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+    query.Count = capacity_ * 2;
+    check(device->CreateQueryHeap(&query, IID_PPV_ARGS(&timestamps_)), "Create draw timestamp batch");
+    D3D12_HEAP_PROPERTIES heap{};
+    heap.Type = D3D12_HEAP_TYPE_READBACK;
+    heap.CreationNodeMask = heap.VisibleNodeMask = 1;
+    D3D12_RESOURCE_DESC desc{};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Width = uint64_t(capacity_) * 16;
+    desc.Height = desc.DepthOrArraySize = desc.MipLevels = desc.SampleDesc.Count = 1;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST,
+        nullptr, IID_PPV_ARGS(&readback_)), "Create draw timestamp readback");
+}
+void NativeDrawTimings::begin(ID3D12GraphicsCommandList *list, nlohmann::json identity) {
+    if (open_ || resolved_ || count_ >= capacity_ || list->GetType() != type_)
+        throw std::runtime_error("Invalid draw timestamp begin");
+    entries_.push_back(std::move(identity));
+    list->EndQuery(timestamps_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, count_ * 2);
+    open_ = true;
+}
+void NativeDrawTimings::end(ID3D12GraphicsCommandList *list) {
+    if (!open_ || resolved_ || list->GetType() != type_)
+        throw std::runtime_error("Invalid draw timestamp end");
+    list->EndQuery(timestamps_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, count_ * 2 + 1);
+    open_ = false;
+    ++count_;
+}
+void NativeDrawTimings::resolve(ID3D12GraphicsCommandList *list) {
+    if (open_ || resolved_ || count_ != capacity_ || list->GetType() != type_)
+        throw std::runtime_error("Incomplete draw timestamp batch");
+    list->ResolveQueryData(timestamps_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, count_ * 2, readback_.Get(), 0);
+    resolved_ = true;
+}
+nlohmann::json NativeDrawTimings::result(ID3D12CommandQueue *queue) const {
+    if (!resolved_ || queue->GetDesc().Type != type_)
+        throw std::runtime_error("Draw timestamp batch is not resolved on the expected queue");
+    uint64_t frequency{};
+    check(queue->GetTimestampFrequency(&frequency), "Get draw timestamp frequency");
+    if (!frequency) throw std::runtime_error("Draw timestamp frequency is zero");
+    std::vector<uint64_t> ticks(size_t(count_) * 2);
+    D3D12_RANGE range{0, ticks.size() * sizeof(uint64_t)};
+    void *mapped{};
+    check(readback_->Map(0, &range, &mapped), "Map draw timestamp results");
+    memcpy(ticks.data(), mapped, range.End);
+    D3D12_RANGE noWrite{};
+    readback_->Unmap(0, &noWrite);
+    auto rows = entries_;
+    for (size_t i = 0; i < rows.size(); ++i) {
+        if (ticks[2 * i + 1] < ticks[2 * i] || (i && ticks[2 * i] < ticks[2 * i - 1]))
+            throw std::runtime_error("Non-monotonic draw timestamps within a submitted list");
+        rows[i].update({{"timestamp_begin", std::to_string(ticks[2 * i])},
+            {"timestamp_end", std::to_string(ticks[2 * i + 1])},
+            {"timestamp_frequency_hz", std::to_string(frequency)}, {"queue_type", uint32_t(type_)},
+            {"duration_seconds", double(ticks[2 * i + 1] - ticks[2 * i]) / double(frequency)}});
+    }
+    return rows;
+}
 NativePerformance::NativePerformance(ID3D12Device *device, D3D12_COMMAND_LIST_TYPE type) : type_(type) {
     if (type != D3D12_COMMAND_LIST_TYPE_DIRECT && type != D3D12_COMMAND_LIST_TYPE_COMPUTE)
         throw std::runtime_error("Performance queries currently require a direct or compute list");

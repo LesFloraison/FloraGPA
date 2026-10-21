@@ -1,4 +1,7 @@
 #include "WorkerReport.h"
+#include "application/ReplaySession.h"
+#include <charconv>
+#include <cmath>
 #include <QBuffer>
 #include <QDir>
 #include <QFile>
@@ -10,6 +13,65 @@
 #include <set>
 
 namespace flora {
+QJsonArray dx12DrawTimingRows(const nlohmann::json &report, const IReplaySession &session, bool isolated) {
+    using Json = nlohmann::json;
+    if (session.backend() != ReplayBackend::Dx12 || session.events().empty())
+        throw std::runtime_error("Draw timings require a DX12 capture");
+    requireDx12ReplayBoundary(report, session.executionCount(), false, true, session.events().back());
+    requireDx12QueryPolicyReport(report, isolated);
+    const auto &profile = report.at("draw_timings");
+    const auto initialization = session.information().at("initialization_records").get<uint64_t>();
+    const auto number = [](const Json &value) {
+        const auto text = value.get<std::string>(); uint64_t result{};
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+        if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || std::to_string(result) != text)
+            throw std::runtime_error("Invalid draw timing integer");
+        return result;
+    };
+    if (profile.at("source") != "native_d3d12_queries" || profile.at("scope") != "frame_stream_gpu_work" ||
+        profile.at("frame_complete") != false || profile.at("sample_count") != 1 || profile.at("warmup_count") != 0 ||
+        profile.at("stable_power_state") != false || profile.at("query_outputs_incomplete") != isolated ||
+        profile.at("missing_query_policy") != (isolated ? "isolate_readback_outputs" : "fail") ||
+        number(profile.at("last_record")) != session.events().back() ||
+        number(profile.at("last_execution")) != session.executionCount() ||
+        number(profile.at("initialization_records")) != initialization)
+        throw std::runtime_error("Draw timing scope does not match the current capture");
+    const auto &events = profile.at("events");
+    if (!events.is_array() || events.size() != number(profile.at("expected_count")) ||
+        events.size() != number(profile.at("measured_count")))
+        throw std::runtime_error("Incomplete draw timing coverage");
+    QJsonArray result;
+    size_t rowIndex{};
+    std::map<std::pair<uint64_t, uint64_t>, uint64_t> previousEnds;
+    for (uint64_t id = 1; id <= session.executionCount(); ++id) {
+        const auto event = session.executionEvent(id);
+        if (!event.work || event.submission.value_or(0) <= initialization) continue;
+        if (rowIndex == events.size()) throw std::runtime_error("Missing submitted GPU work timing");
+        const auto &row = events.at(rowIndex++);
+        const auto details = session.executionDetails(id);
+        if (number(row.at("execution")) != id || number(row.at("source_record")) != event.sourceRecord ||
+            number(row.at("queue")) != event.queue || number(row.at("submission")) != event.submission ||
+            number(row.at("command_list")) != event.commandList || row.at("generation") != details.at("recording_generation") ||
+            row.at("list_ordinal") != details.at("list_ordinal") || row.at("command") != event.name ||
+            !row.at("disabled").is_boolean() || row.at("indirect") != (event.name == "ID3D12GraphicsCommandListExecuteIndirect") ||
+            (row.at("queue_type") != 0 && row.at("queue_type") != 2))
+            throw std::runtime_error("Draw timing execution identity mismatch");
+        const auto begin = number(row.at("timestamp_begin")), end = number(row.at("timestamp_end"));
+        const auto frequency = number(row.at("timestamp_frequency_hz"));
+        auto &previous = previousEnds[{*event.submission, number(row.at("list_ordinal"))}];
+        if (!frequency || end < begin || begin < previous) throw std::runtime_error("Invalid draw timestamp interval");
+        previous = end;
+        const auto seconds = double(end - begin) / double(frequency);
+        if (!row.at("duration_seconds").is_number() || !std::isfinite(seconds) ||
+            row.at("duration_seconds").get<double>() != seconds)
+            throw std::runtime_error("Draw timing duration does not match native ticks");
+        result.append(QJsonObject{{"event", QString::number(id)}, {"microseconds", seconds * 1000000.0},
+            {"command", QString::fromStdString(event.name)}, {"queue", QString::number(*event.queue)},
+            {"disabled", row.at("disabled").get<bool>()}});
+    }
+    if (rowIndex != events.size()) throw std::runtime_error("Unexpected draw timing rows");
+    return result;
+}
 void requireDx12ReplayBoundary(const nlohmann::json &report, uint64_t execution, bool before,
                               bool frameEnd, uint64_t finalRecord) {
     const auto scope = frameEnd ? "frame_stream" : "selected_execution";

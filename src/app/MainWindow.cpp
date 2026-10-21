@@ -142,7 +142,7 @@ QString hex(Bytes bytes, size_t limit = 256) {
             .toHex(' '));
 }
 } // namespace
-MainWindow::MainWindow() : loader_(this) {
+MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(collectOnOpen) {
     loader_.setObjectName("captureLoader");
     buildUi();
     installToolButtonConnectionGuard(this);
@@ -314,8 +314,15 @@ MainWindow::MainWindow() : loader_(this) {
             updateStatistics();
             setBusy(false);
             emit captureLoaded();
-            if (frame_) replay();
-            else statusBar()->showMessage("DX12 API inspection ready; resource restoration and replay are incomplete.");
+            auto timingSelection = selection_;
+            timingSelection.frameEnd = true;
+            timingSelection.before = false;
+            timingSelection.resource = 0;
+            if (collectOnOpen_ && (frame_ || session_->capability(ReplayFeature::Performance, timingSelection).supported()))
+                replay(true);
+            else if (frame_) replay();
+            else statusBar()->showMessage(collectOnOpen_ ? "Capture ready · GPU timing unavailable for this capture"
+                                                       : "DX12 API inspection ready; resource restoration and replay are incomplete.");
         } catch (const std::exception &e) {
             setBusy(false);
             showError(QString::fromUtf8(e.what()));
@@ -556,6 +563,7 @@ void MainWindow::buildUi() {
     replayAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     collectAction_ =
         analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
+    collectAction_->setObjectName("collectGpuMetrics");
     cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, [this] {
         cancel(); resourceTimer_.stop();
         dx12ContentPending_ = false; dx12FailedKey_ = historyContextKey(true);
@@ -624,7 +632,13 @@ void MainWindow::buildUi() {
     chartLayout->addWidget(controls);
     chart_ = new EventChart;
     chartLayout->addWidget(chart_);
-    connect(chart_, &EventChart::eventSelected, this, &MainWindow::selectEvent);
+    chart_->setObjectName("gpuTimeChart");
+    connect(chart_, &EventChart::eventSelected, this, [this](qulonglong id) {
+        if (busy()) return;
+        if (session_ && session_->backend() == ReplayBackend::Dx12)
+            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        locateEvent(id);
+    });
     auto vertical = new QSplitter(Qt::Vertical);
     vertical->setHandleWidth(4);
     vertical->addWidget(chartPane);
@@ -1869,7 +1883,14 @@ void MainWindow::setBusy(bool busy) {
         session_ && session_->backend() == ReplayBackend::Dx12
             ? QString::fromStdString(session_->capability(ReplayFeature::Replay, outputSelection).reason)
             : QString{});
-    collectAction_->setEnabled(!busy && bool(frame_));
+    auto timingSelection = selection_;
+    timingSelection.frameEnd = true;
+    timingSelection.before = false;
+    timingSelection.resource = 0;
+    const bool dx12Timings = dx12 && session_->capability(ReplayFeature::Performance, timingSelection).supported();
+    collectAction_->setEnabled(!busy && (bool(frame_) || dx12Timings));
+    collectAction_->setToolTip(dx12 ? "Measure each submitted Draw/Dispatch and whole ExecuteIndirect in one replay. Click a bar to inspect its execution."
+                                   : "Collect GPU metrics");
     cancelAction_->setEnabled((busy || (resourceBrowseBusy() && this->busy())) && (!loadCancel_ || !loadCancel_->load()) &&
                               (!experimentCancel_ || !experimentCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
@@ -2253,7 +2274,18 @@ void MainWindow::replay(bool timings) {
             resourceBrowser_->clear("Refreshing bound resources…");
             dx12InventoryKey_.clear(); queueDx12ResourceRead(); return;
         }
-        if(timings) { showError("DX12 workspace performance analysis is not yet available"); return; }
+        if (timings) {
+            auto selected = selection_; selected.frameEnd = true; selected.before = false; selected.resource = 0;
+            const auto capability = session_->capability(ReplayFeature::Performance, selected);
+            if (!capability.supported()) { showError(QString::fromStdString(capability.reason)); return; }
+            chart_->clear();
+            chart_->setToolTip("Measuring GPU work…");
+            resourceTimer_.stop();
+            startWorker({"replay", capturePath_, "--measure-draws", "--max-bytes",
+                         QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024)}, true);
+            if (process_.state() != QProcess::NotRunning) runningKind_ = "draw-timings";
+            return;
+        }
         const auto outputSelection = outputReplaySelection();
         const auto capability=session_->capability(ReplayFeature::Replay,outputSelection);
         if(!capability.supported()) {
@@ -2301,6 +2333,11 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
         scheduledMetrics_->finish(serial, {{"error", e.what()}});
         showError(e.what());
     }
+}
+QString MainWindow::drawTimingContext() const {
+    if (!session_ || session_->backend() != ReplayBackend::Dx12) return {};
+    return QString::fromStdString(session_->identity()) + ':' + QString::number(selection_.isolateMissingQueries) + ':' +
+        (experiment_ ? QString::fromStdString(experiment_->document().dump()) : QString{});
 }
 ReplayRequestIdentity MainWindow::currentWorkerIdentity() const {
     // revision_ also changes for selection/cancellation, so it is deliberately
@@ -2399,7 +2436,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); return; }
         args << "--preview-request" << path;
     }
-    if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
+    if ((args.first() == "replay" && !args.contains("--renderdoc") && !args.contains("--measure-draws")) || args.first() == "texture") invalidateResourceImage();
     if (!session_ || session_->backend()!=ReplayBackend::Dx12) args << replayAdapterArguments(*adapter_, args.first());
     try {
         beginWorkerIdentity();
@@ -2589,11 +2626,23 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
         }
         report_ = std::move(result.report);
         if (session_ && session_->backend() == ReplayBackend::Dx12 &&
-            (runningKind_ == "replay" || runningKind_ == "buffer" || runningKind_ == "history-capture" || runningKind_ == "native-counters"))
+            (runningKind_ == "replay" || runningKind_ == "buffer" || runningKind_ == "history-capture" || runningKind_ == "native-counters" || runningKind_ == "draw-timings"))
             requireDx12QueryPolicyReport(result.replayReport, selection_.isolateMissingQueries);
         if (session_ && session_->backend() == ReplayBackend::Dx12)
             requireDx12ExperimentReport(result.replayReport,
                 experiment_ && !experiment_->document().at("history").empty() ? experiment_->document() : nlohmann::json());
+        if (runningKind_ == "draw-timings") {
+            const auto rows = dx12DrawTimingRows(result.replayReport, *session_, selection_.isolateMissingQueries);
+            chart_->setTimings(rows);
+            chart_->setToolTip("Measured replay · one sample · queue-local GPU times\nDraw/Dispatch and whole ExecuteIndirect; initialization excluded.\nInstrumented timings are not original-application frame time.");
+            dx12TimingContext_ = drawTimingContext();
+            selectionLabel_->setText(QString("%1 GPU commands · measured replay%2").arg(rows.size())
+                .arg(selection_.isolateMissingQueries ? " · incomplete queries" : ""));
+            statusBar()->showMessage(QString("GPU timings ready · %1 commands · click a bar to inspect").arg(rows.size()));
+            jobDir_.reset();
+            emit taskFinished(true);
+            return;
+        }
         if (runningKind_ == "native-counters") {
             result.replayReport["request_identity"] = replayIdentityJson(runningIdentity_);
             result.replayReport["capture_identity"] = {{"kind", "runtime_session"}, {"value", session_->identity()}, {"backend", "dx12"}};

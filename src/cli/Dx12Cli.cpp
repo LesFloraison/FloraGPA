@@ -105,6 +105,9 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     };
     const bool streamEnd = !options.isSet("event") && !buffer;
     const bool measureFrame = options.isSet("measure-frame");
+    const bool measureDraws = options.isSet("measure-draws");
+    if (measureDraws && (!streamEnd || measureFrame || options.isSet("measure-event") || options.isSet("renderdoc")))
+        throw std::runtime_error("--measure-draws requires exclusive full-stream native replay");
     if (measureFrame && (!streamEnd || options.isSet("measure-event") || options.isSet("renderdoc")))
         throw std::runtime_error("--measure-frame requires full-stream replay without --event, --measure-event or --renderdoc");
     if (buffer && !options.isSet("event"))
@@ -127,7 +130,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
     } else if (options.isSet("subresource"))
         throw std::runtime_error("DX12 subresource requires --id <resource creation record>");
     const auto suggestedOutput = session.outputSuggestion();
-    const bool useSuggestion = streamEnd && !options.isSet("id") && !options.isSet("renderdoc") && !measureFrame &&
+    const bool useSuggestion = streamEnd && !options.isSet("id") && !options.isSet("renderdoc") && !measureFrame && !measureDraws &&
                                suggestedOutput.value("status", "") == "suggested";
     if (useSuggestion) {
         creation = std::stoull(suggestedOutput.at("resource").get<std::string>());
@@ -243,7 +246,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         }
         stage = "prepare_execution";
         if (streamEnd)
-            replay.prepareFrame(bool(capture), measureFrame);
+            replay.prepareFrame(bool(capture), measureFrame, measureDraws);
         else
             replay.prepareExecution(execution, !options.isSet("before"), bool(capture), options.isSet("measure-event"));
         stage = "initialize_transfers";
@@ -257,6 +260,7 @@ int replayDx12(const IReplaySession &session, const QString &path, const QComman
         else
             replay.replayTo(execution, !options.isSet("before"), bool(capture));
         report["frame_stream_end_reached"] = streamEnd;
+        if (measureDraws) report["draw_timings"] = replay.drawTimingsResult();
         if (options.isSet("measure-event") || measureFrame)
             report["performance"] = replay.performanceResult();
         stage = "finish_analysis_capture";
@@ -376,7 +380,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         allowed.insert("filter");
     if (command == "shader") allowed.insert({"id", "pipeline-stage", "experiment", "dxcompiler"});
     if (command == "replay")
-        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "measure-frame", "experiment", "disable"});
+        allowed.insert({"event", "before", "id", "subresource", "max-bytes", "renderdoc", "debug-device", "measure-event", "measure-frame", "measure-draws", "experiment", "disable"});
     if (command == "buffer")
         allowed.insert({"event", "before", "id", "offset", "length", "max-bytes", "debug-device", "experiment", "disable", "no-buffer-csv"});
     if (command == "replay" || command == "buffer") allowed.insert({"uav-barrier-before", "isolate-missing-queries"});

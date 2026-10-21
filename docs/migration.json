@@ -1223,6 +1223,7 @@
         "tests/GpuProfileTests.cpp",
         "tools/validate_gpu_profile_port.py",
         "tools/validate_gpu_profile_cli.py",
+        "docs/DX12_REPLAY.md: DX12 full-stream per-work timestamp extension validated on BF1 with 3374 submitted work instances and Qt chart navigation. Single instrumented sample only; indirect children, original concurrency/timing and full image fidelity are not established. BF1 exact-image comparison remains non-identical, including repeated uninstrumented controls.",
         "Packaged comparison: 232 cases, including 26 hardware/WARP GPU cases; exact storage, counts, saved experiment provenance, edited DrawAuto, native-tick arithmetic and complete CSV exports. Thirteen CLI cases, four golden/negative controls and nine runtime audits pass."
       ]
     },

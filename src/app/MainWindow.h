@@ -48,7 +48,7 @@ class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
-    explicit MainWindow();
+    explicit MainWindow(bool collectOnOpen = false);
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
@@ -394,7 +394,10 @@ class MainWindow final : public QMainWindow {
     Id selectedEvent_ = 0, selectedResource_ = 0;
     std::optional<unsigned> selectedShaderStage_;
     bool runningTimings_ = false;
+    QString dx12TimingContext_;
+    QString drawTimingContext() const;
     QJsonObject report_;
     QByteArray defaultDockState_;
+    bool collectOnOpen_ = false;
 };
 } // namespace flora

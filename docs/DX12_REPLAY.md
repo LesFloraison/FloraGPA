@@ -11030,3 +11030,94 @@ The isolated analysis backend now accepts native DX12 captures and execution
 identities. Selected replay/readback, VS debugging and Replay Mesh are connected
 to the workspace. Pixel History has a verified partial D16 path; full history,
 performance and experiment integration remain unfinished.
+
+## Full-stream per-work GPU Time chart (2026-10-21)
+
+The top **Collect GPU Metrics** action now supports native DX12 replay. It measures
+each submitted DrawInstanced, DrawIndexedInstanced, Dispatch and ExecuteIndirect
+invocation in the frame portion of the stream. Initialization submissions are
+excluded. Repeated submissions of the same recorded list have separate query
+storage and execution identities. ExecuteIndirect is one aggregate interval;
+its generated child draws are not separately measured.
+
+`NativeDrawTimings` brackets work with D3D12 timestamp queries, resolves a batch
+at the end of each submitted list and reads it only after full-stream queue drain.
+It does not add a CPU wait per draw. Integer ticks are subtracted before conversion
+using the owning queue's frequency. Unsupported query/list combinations and
+incomplete batches fail explicitly. Native queries are separate from captured
+queries, including when incomplete-query isolation is explicitly enabled.
+
+CLI equivalent:
+
+```text
+FloraGPA.Cli.exe replay <capture> --measure-draws --max-bytes 8589934592 --out <directory>
+```
+
+`--measure-draws` requires full-stream native replay and cannot be combined with
+`--event`, `--before`, `--measure-event`, `--measure-frame` or `--renderdoc`.
+An explicit `--id` may request an independent final-resource readback.
+The `draw_timings` report retains exact decimal-string timestamps, frequency,
+execution, source record, submission, queue, list generation and ordinal.
+The UI checks every expected work instance and the drained stream boundary before
+showing microsecond bars. Hover reports the interval and queue; clicking a bar
+switches to submitted instances, clears conflicting filters and locates the event.
+Event selection retains timings; capture, experiment and query-policy changes
+invalidate them. Worker request identity prevents stale results from publishing.
+
+BF1 `bf1_2025_12_10__14_29_55.gpa_frame`, RTX 3060, Release validation:
+
+- All 3,374 expected work instances measured: 691 DrawInstanced, 2,415
+  DrawIndexedInstanced, 246 Dispatch and 22 ExecuteIndirect. Replay reaches record
+  418061 / execution 54186. D3D12 debug-layer error count is zero.
+- CPU report validation covers repeated-list identity, counters above 2^63 with
+  small intervals, missing/duplicate rows, reversed ticks, mismatched durations,
+  unfinished queue work, lossy numeric counters, scope and isolation mismatches.
+- The opt-in `bf1DrawTimingsWorkspace` Qt test validates full coverage, bar-to-API
+  navigation from a conflicting filter/domain, preservation on event selection
+  and invalidation on query-policy change. Enable with
+  `FLORA_DX12_DRAW_TIMING_CAPTURE=<capture>`.
+- Release build and six serial CTests pass: `dx12_session`, `dx12_visibility`,
+  `experiment_report`, `gpu_profile`, `ui` and `worker_report`. Optional external
+  capture tests retain their skip conditions; the BF1 workspace test above ran
+  separately with the explicit capture path.
+- Final resource 11395 readback is 1920 x 1009. Exact golden equality is **not
+  established**: instrumented versus uninstrumented debug replay differs at
+  6,004 pixels (maximum channel delta 9). Two uninstrumented runs with identical
+  options differ at 8,479 pixels (maximum delta 10). The prior retained image
+  also differs. These controls establish repeat variability, not its cause or
+  proof that instrumentation never changes output. No tolerance gate is substituted.
+
+Local logs, full reports, raw image comparisons and UI evidence are retained in
+`artifacts/dx12-draw-timings-20261021/` (not committed). Timings are one instrumented
+replay sample with no warmup or stabilized clocks. Queue-local sums are not frame
+wall time, captured-application time or FPS; zero-duration samples remain zero.
+Copies, clears, barriers and helper commands are outside this per-draw chart.
+This extends the DX11 GPU-profile UI; it does not establish DX12 repeated-sampling
+parity, original concurrency, vendor counters or complete frame fidelity.
+
+### GPU Time chart wheel navigation
+
+The main plot uses the wheel to zoom at the pointer, by 1.25x per wheel notch.
+The visible range is limited to 20 timing events through the full frame; smaller
+datasets remain fully visible. The lower full-frame overview uses the wheel to
+pan left (up) or right (down), by 10% of the visible count, rounded to the nearest
+event with a minimum of one. Left-dragging inside its outlined range also pans
+the view without changing its width; dragging outside the range does not start
+navigation. Panning clamps at the frame edges and stops on release or loss of
+mouse capture. Data replacement and resizing cancel any active drag.
+The Y axis automatically follows the visible maximum; the overview keeps its
+full-frame scale. Only main-plot clicks select events. Wheel navigation never
+starts replay. Resizing preserves the range; replacing or clearing data resets it.
+
+`event_chart` tests cover limits, pointer anchoring, sparse large event IDs,
+selection/tooltip mapping, automatic Y scaling, high-resolution input and empty
+or small datasets. The BF1 workspace acceptance also exercises both wheel regions
+and verifies that no selection or additional replay completion is emitted.
+The desktop GUI automatically collects timings after opening a supported capture,
+including Open Capture, drag/drop and command-line opens. DX11 and DX12 use the
+same capture-loaded policy; `--collect` remains accepted for compatibility and
+does not cause a second collection. Unsupported captures remain available for
+inspection. Collection failure or cancellation does not automatically retry.
+Embedded/test MainWindow hosts retain explicit control through `collectOnOpen`.
+Wheel-navigation evidence is in `artifacts/chart-wheel-20261021/`; drag and default
+collection acceptance is in `artifacts/chart-drag-auto-20261021/`.

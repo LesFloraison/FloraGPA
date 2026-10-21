@@ -77,28 +77,45 @@ class EventChart final : public QWidget {
   public:
     explicit EventChart(QWidget *parent = nullptr);
     void setTimings(const QJsonArray &values);
+    qsizetype timingCount() const { return values_.size(); }
+    qsizetype visibleBegin() const { return first_; }
+    qsizetype visibleCount() const { return count_; }
+    double visibleMaximumUs() const;
     void setSelection(Id id) {
         selected_ = id;
         update();
     }
-    void clear() {
-        values_.clear();
-        update();
-    }
+    void clear() { setTimings({}); }
   signals:
     void eventSelected(qulonglong id);
 
   protected:
+    bool event(QEvent *) override;
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
+    void wheelEvent(QWheelEvent *) override;
 
   private:
+    QRectF plotRect() const;
+    QRectF overviewRect() const;
+    QRectF overviewWindowRect() const;
+    void endOverviewDrag();
+    qsizetype rowAt(QPointF position) const;
     struct Value {
         Id id;
         double us;
+        QString command, queue;
+        bool disabled = false;
     };
     QVector<Value> values_;
     Id selected_ = 0;
+    qsizetype first_ = 0, count_ = 0;
+    double wheelRemainder_ = 0;
+    bool wheelInOverview_ = false;
+    bool draggingOverview_ = false;
+    double dragStartX_ = 0;
+    qsizetype dragStartFirst_ = 0;
 };
 } // namespace flora

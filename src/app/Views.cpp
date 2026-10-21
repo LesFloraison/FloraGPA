@@ -280,17 +280,80 @@ EventChart::EventChart(QWidget *parent) : QWidget(parent) {
     setMouseTracking(true);
 }
 void EventChart::setTimings(const QJsonArray &rows) {
+    endOverviewDrag();
     values_.clear();
     for (auto row : rows) {
         auto obj = row.toObject();
-        values_.append({obj["event"].toString().toULongLong(), obj["microseconds"].toDouble()});
+        values_.append({obj["event"].toString().toULongLong(), obj["microseconds"].toDouble(),
+                        obj["command"].toString(), obj["queue"].toString(), obj["disabled"].toBool()});
     }
+    first_ = 0;
+    count_ = values_.size();
+    wheelRemainder_ = 0;
+    QToolTip::hideText();
+    update();
+}
+QRectF EventChart::plotRect() const { return {48, 18, double(std::max(1, width() - 70)), double(std::max(1, height() - 76))}; }
+QRectF EventChart::overviewRect() const {
+    const auto plot = plotRect();
+    return {plot.left(), plot.bottom() + 29, plot.width(), 27};
+}
+QRectF EventChart::overviewWindowRect() const {
+    if (values_.empty()) return {};
+    const auto overview = overviewRect();
+    const auto step = overview.width() / values_.size();
+    return {overview.left() + first_ * step, overview.top(), count_ * step, overview.height()};
+}
+void EventChart::endOverviewDrag() {
+    draggingOverview_ = false;
+    unsetCursor();
+}
+bool EventChart::event(QEvent *e) {
+    if (e->type() == QEvent::UngrabMouse || e->type() == QEvent::WindowDeactivate ||
+        e->type() == QEvent::Hide || e->type() == QEvent::Resize)
+        endOverviewDrag();
+    if (e->type() == QEvent::Leave && !draggingOverview_) unsetCursor();
+    return QWidget::event(e);
+}
+qsizetype EventChart::rowAt(QPointF position) const {
+    const auto plot = plotRect();
+    if (!count_ || !plot.contains(position)) return -1;
+    return first_ + std::clamp(qsizetype((position.x() - plot.left()) / plot.width() * count_), qsizetype(0), count_ - 1);
+}
+double EventChart::visibleMaximumUs() const {
+    double maximum = 1;
+    for (qsizetype i = first_; i < first_ + count_; ++i) maximum = std::max(maximum, values_[i].us);
+    return maximum * 1.08;
+}
+void EventChart::wheelEvent(QWheelEvent *e) {
+    if (draggingOverview_) { e->accept(); return; }
+    const bool overview = overviewRect().contains(e->position());
+    if (!count_ || (!overview && !plotRect().contains(e->position()))) { e->ignore(); return; }
+    e->accept();
+    if (overview != wheelInOverview_) wheelRemainder_ = 0;
+    wheelInOverview_ = overview;
+    // Accumulate high-resolution wheel input; a touchpad step is 40 logical pixels.
+    wheelRemainder_ += !e->pixelDelta().isNull() ? e->pixelDelta().y() / 40.0 : e->angleDelta().y() / 120.0;
+    const auto steps = int(std::clamp(std::trunc(wheelRemainder_), -100.0, 100.0));
+    wheelRemainder_ -= steps;
+    if (!steps) return;
+    if (overview) {
+        const auto distance = std::max<qsizetype>(1, qsizetype(std::llround(count_ * 0.1)));
+        first_ = std::clamp(first_ - steps * distance, qsizetype(0), values_.size() - count_);
+    } else {
+        const auto anchor = (e->position().x() - plotRect().left()) / plotRect().width();
+        const auto next = qsizetype(std::llround(std::clamp(count_ / std::pow(1.25, steps),
+            double(std::min<qsizetype>(20, values_.size())), double(values_.size()))));
+        first_ = std::clamp(qsizetype(std::llround(first_ + anchor * (count_ - next))), qsizetype(0), values_.size() - next);
+        count_ = next;
+    }
+    QToolTip::hideText();
     update();
 }
 void EventChart::paintEvent(QPaintEvent *) {
     QPainter p(this);
     p.fillRect(rect(), QColor("#303c48"));
-    const QRectF plot(48, 18, width() - 70, height() - 76);
+    const auto plot = plotRect();
     p.setPen(QColor("#526271"));
     p.drawLine(plot.bottomLeft(), plot.bottomRight());
     p.drawLine(plot.topLeft(), plot.bottomLeft());
@@ -299,10 +362,7 @@ void EventChart::paintEvent(QPaintEvent *) {
         p.drawText(plot, Qt::AlignCenter, "GPU Time Elapsed   —");
         return;
     }
-    double maximum = 1;
-    for (auto &value : values_)
-        maximum = std::max(maximum, value.us);
-    maximum *= 1.08;
+    const double maximum = visibleMaximumUs();
     p.setFont(QFont("Segoe UI", 8));
     for (int i = 0; i < 5; ++i) {
         double y = plot.bottom() - plot.height() * i / 4;
@@ -310,43 +370,81 @@ void EventChart::paintEvent(QPaintEvent *) {
         p.drawLine(QPointF(plot.left(), y), QPointF(plot.right(), y));
         p.setPen(QColor("#97a9ba"));
         p.drawText(QRectF(0, y - 8, 41, 16), Qt::AlignRight | Qt::AlignVCenter,
-                   QString::number(maximum * i / 4, 'f', 0));
+                   QString::number(maximum * i / 4, 'f', maximum < 10 ? 2 : 0));
     }
-    auto step = plot.width() / values_.size();
-    for (qsizetype i = 0; i < values_.size(); ++i) {
+    const auto step = plot.width() / count_;
+    const auto labelStride = std::max<qsizetype>(1, qsizetype(std::ceil(80.0 / step)));
+    for (qsizetype i = first_; i < first_ + count_; ++i) {
         auto &v = values_[i];
         auto height = plot.height() * v.us / maximum;
-        auto x = plot.left() + i * step;
-        p.fillRect(QRectF(x + 0.5, plot.bottom() - height, std::max(0.6, step - 1.5), height),
+        auto x = plot.left() + (i - first_) * step;
+        p.fillRect(QRectF(x, plot.bottom() - height, step > 2 ? step - 1 : step, height),
                    QColor(v.id == selected_ ? "#e6f6ff" : "#73cefa"));
-        p.fillRect(QRectF(x, plot.bottom() + 31, std::max(0.6, step - 1), std::max(1.0, 23 * v.us / maximum)),
-                   QColor("#67b9e2"));
-        if (i % std::max<qsizetype>(1, values_.size() / 22) == 0) {
+        if ((i - first_) % labelStride == 0) {
             p.setPen(QColor("#9ab0c3"));
-            p.drawText(QRectF(x - 18, plot.bottom() + 3, step + 36, 18), Qt::AlignCenter,
+            p.drawText(QRectF(x - 32, plot.bottom() + 3, 64, 18), Qt::AlignCenter,
                        QString::number(v.id));
         }
     }
-    p.setPen(QColor("#86a1b4"));
-    p.drawRect(QRectF(plot.left(), plot.bottom() + 29, plot.width(), 27));
+    const auto overview = overviewRect();
+    double fullMaximum = 1;
+    for (const auto &v : values_) fullMaximum = std::max(fullMaximum, v.us);
+    const auto overviewStep = overview.width() / values_.size();
+    for (qsizetype i = 0; i < values_.size(); ++i) {
+        const auto h = (overview.height() - 2) * values_[i].us / (fullMaximum * 1.08);
+        p.fillRect(QRectF(overview.left() + i * overviewStep, overview.bottom() - 1 - h, overviewStep, h), QColor("#67b9e2"));
+    }
+    p.setPen(QColor("#526271"));
+    p.drawRect(overview);
+    const auto range = overviewWindowRect();
+    p.fillRect(range, QColor(150, 190, 215, 30));
+    p.setPen(QColor("#b1c9db"));
+    p.drawRect(range);
     p.drawText(5, 13, "µs");
 }
 void EventChart::mousePressEvent(QMouseEvent *e) {
-    if (values_.empty() || e->position().x() < 48 || e->position().x() > width() - 22)
+    if (e->button() == Qt::LeftButton && count_ < values_.size() && overviewWindowRect().contains(e->position())) {
+        draggingOverview_ = true;
+        dragStartX_ = e->position().x();
+        dragStartFirst_ = first_;
+        wheelRemainder_ = 0;
+        setCursor(Qt::ClosedHandCursor);
+        QToolTip::hideText();
+        e->accept();
         return;
-    auto row = std::clamp(int((e->position().x() - 48) / (width() - 70) * values_.size()), 0,
-                          int(values_.size()) - 1);
+    }
+    const auto row = rowAt(e->position());
+    if (row < 0 || e->button() != Qt::LeftButton) return;
     selected_ = values_[row].id;
     update();
     emit eventSelected(selected_);
 }
-void EventChart::mouseMoveEvent(QMouseEvent *e) {
-    if (values_.empty() || e->position().x() < 48 || e->position().x() > width() - 22)
+void EventChart::mouseReleaseEvent(QMouseEvent *e) {
+    if (e->button() == Qt::LeftButton && draggingOverview_) {
+        endOverviewDrag();
+        e->accept();
         return;
-    auto row = std::clamp(int((e->position().x() - 48) / (width() - 70) * values_.size()), 0,
-                          int(values_.size()) - 1);
+    }
+    QWidget::mouseReleaseEvent(e);
+}
+void EventChart::mouseMoveEvent(QMouseEvent *e) {
+    if (draggingOverview_) {
+        if (!(e->buttons() & Qt::LeftButton)) { endOverviewDrag(); return; }
+        const auto offset = (e->position().x() - dragStartX_) / overviewRect().width() * values_.size();
+        first_ = qsizetype(std::llround(std::clamp(dragStartFirst_ + offset, 0.0, double(values_.size() - count_))));
+        update();
+        e->accept();
+        return;
+    }
+    if (count_ < values_.size() && overviewWindowRect().contains(e->position())) setCursor(Qt::OpenHandCursor);
+    else unsetCursor();
+    const auto row = rowAt(e->position());
+    if (row < 0) { QToolTip::hideText(); return; }
     auto &value = values_[row];
     QToolTip::showText(e->globalPosition().toPoint(),
-                       QString("Event %1 · %2 µs").arg(value.id).arg(value.us, 0, 'f', 3), this);
+                       QString("Event %1 · %2 µs%3%4%5").arg(value.id).arg(value.us, 0, 'f', 3)
+                           .arg(value.command.isEmpty() ? QString{} : '\n' + value.command)
+                           .arg(value.queue.isEmpty() ? QString{} : "\nQueue " + value.queue + " · measured replay")
+                           .arg(value.disabled ? "\nDisabled work · empty query bracket" : ""), this);
 }
 } // namespace flora

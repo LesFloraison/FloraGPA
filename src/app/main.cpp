@@ -18,11 +18,11 @@ int main(int argc, char **argv) {
     p.addVersionOption();
     p.addPositionalArgument("capture", "Capture to open", "[capture]");
     p.addOption({"screenshot", "Save this application's rendered window after replay", "path"});
-    p.addOption({"collect", "Collect GPU timestamps after loading"});
+    p.addOption({"collect", "Collect GPU timestamps after loading (enabled by default)"});
     p.addOption({"decompiler", "Optional shader decompiler/assembler executable", "path"});
     p.addOption({"size", "Window size for layout verification", "widthxheight"});
     p.process(app);
-    flora::MainWindow window;
+    flora::MainWindow window(true);
     if (p.isSet("decompiler"))
         window.setShaderTool(p.value("decompiler"));
     if (p.isSet("size")) {
@@ -36,16 +36,10 @@ int main(int argc, char **argv) {
         window.resize(w, h);
     }
     window.show();
-    bool collecting = false;
     QObject::connect(&window, &flora::MainWindow::taskFinished, &window, [&](bool success) {
         if (!success) {
             if (p.isSet("screenshot"))
                 app.exit(1);
-            return;
-        }
-        if (p.isSet("collect") && !collecting) {
-            collecting = true;
-            QTimer::singleShot(0, &window, [&] { window.replay(true); });
             return;
         }
         if (p.isSet("screenshot"))

@@ -129,6 +129,8 @@ struct NativeReplay::Impl {
             SubmittedList instance;
             size_t timelineEntry{};
             std::unique_ptr<NativePerformance> statistics;
+            std::unique_ptr<NativeDrawTimings> drawTimings;
+            size_t drawCount{};
         };
         using Key = std::pair<size_t, size_t>;
         std::map<Key, Recording> recordings;
@@ -140,6 +142,7 @@ struct NativeReplay::Impl {
         json queryPolicy;
         std::string queryPolicyMarker;
         bool measure{};
+        bool measureDraws{};
         std::unique_ptr<NativePerformance> performance;
         std::unique_ptr<NativeTimeline> timeline;
         std::vector<CpuWait> cpuWaits;
@@ -546,10 +549,10 @@ void NativeReplay::initializeTransfers() {
 void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysisMarkers, bool performance) {
     prepare(execution, after, analysisMarkers, performance, false);
 }
-void NativeReplay::prepareFrame(bool analysisMarkers, bool performance) {
-    prepare(impl_->index.executionCount(), true, analysisMarkers, performance, true);
+void NativeReplay::prepareFrame(bool analysisMarkers, bool performance, bool drawTimings) {
+    prepare(impl_->index.executionCount(), true, analysisMarkers, performance, true, drawTimings);
 }
-void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers, bool performance, bool streamEnd) {
+void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers, bool performance, bool streamEnd, bool drawTimings) {
     auto &s = *impl_;
     require(!s.frameAttempted && !s.frame, "Execution plan is already prepared or attempted");
     const auto target = s.index.execution(execution);
@@ -645,6 +648,9 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
     require(!performance || streamEnd || !s.disabledExecutions.contains(execution), "Selected execution is disabled by the experiment");
     require(!performance || !analysisMarkers, "Native performance queries cannot be combined with RenderDoc capture");
     frame->measure = performance;
+    require(!drawTimings || (streamEnd && after && !analysisMarkers && !performance),
+            "Draw timings require exclusive full-stream native replay");
+    frame->measureDraws = drawTimings;
     frame->commands =
         std::make_unique<NativeCommands>(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
     frame->commands->pipelines().setShaderReplacements(s.shaderReplacements);
@@ -675,6 +681,10 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
         auto &native = recordings.try_emplace(key).first->second;
         native.count = count;
         native.instance = instance;
+        if (drawTimings)
+            for (size_t i = 0; i < count; ++i)
+                if (streamPacketWork(s.directory.packets().at(size_t(original.records[i] - 1)).type))
+                    ++native.drawCount;
         instances.emplace(std::pair{instance.submission, instance.ordinal}, key);
     }
     for (const auto &[key, native] : recordings)
@@ -718,6 +728,8 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                                                        native.allocator.Get(), initial,
                                                        IID_PPV_ARGS(&native.list)),
                   "Create frame command list");
+            if (native.drawCount)
+                native.drawTimings = std::make_unique<NativeDrawTimings>(s.device.device(), type, native.drawCount);
             if (frame->timeline) {
                 const auto &instance = native.instance;
                 native.timelineEntry = frame->timeline->begin(native.list.Get(),
@@ -772,6 +784,13 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             const bool measured = frame->measure && !frame->streamEnd &&
                                   native.instance.firstExecution + native.recorded == frame->execution;
             if (measured) frame->performance->begin(native.list.Get());
+            const bool timedDraw = native.drawTimings && streamPacketWork(p.type);
+            if (timedDraw) native.drawTimings->begin(native.list.Get(),
+                {{"execution", std::to_string(executionId)}, {"source_record", std::to_string(id)},
+                 {"submission", std::to_string(native.instance.submission)}, {"queue", std::to_string(native.instance.queue)},
+                 {"command_list", std::to_string(original.list)}, {"generation", std::to_string(original.generation)},
+                 {"list_ordinal", std::to_string(native.instance.ordinal)}, {"command", streamPacketName(p.type)},
+                 {"disabled", disabled}, {"indirect", p.type == 0x1ae3ccddf9f8cULL}});
             if (disabled) {
                 // Validate the signature even when suppressing indirect work.
                 // Unsupported state-bearing signatures must not silently pass.
@@ -787,9 +806,11 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             }
             if (analysisMarkers)
                 native.list->EndEvent();
+            if (timedDraw) native.drawTimings->end(native.list.Get());
             if (measured) frame->performance->end(native.list.Get());
             s.recordExecutionPatches(native.list.Get(), executionId, id, native.states);
             if (++native.recorded == native.count) {
+                if (native.drawTimings) native.drawTimings->resolve(native.list.Get());
                 if (native.statistics) native.statistics->end(native.list.Get());
                 if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
                 check(native.list->Close(), "Close frame execution prefix");
@@ -1630,6 +1651,32 @@ json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::fil
         {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
         {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.frame->streamEnd ? "frame_end" : s.boundaryAfter ? "after" : "before"},
         {"file", output.filename().string()}, {"image", imageFile}, {"display_interpretation",displayInterpretation}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
+}
+json NativeReplay::drawTimingsResult() const {
+    auto &s = *impl_;
+    require(s.boundaryReached && s.boundaryAfter && s.frame && s.frame->streamEnd && s.frame->measureDraws,
+            "Draw timings require completed full-stream replay");
+    auto rows = json::array();
+    size_t expected{};
+    for (const auto &[key, recording] : s.frame->recordings) {
+        expected += recording.drawCount;
+        if (recording.drawTimings)
+            for (auto &row : recording.drawTimings->result(s.queue(recording.instance.queue))) rows.push_back(std::move(row));
+    }
+    require(rows.size() == expected, "Missing draw timestamp measurements");
+    std::sort(rows.begin(), rows.end(), [](const json &a, const json &b) { return value(a, "execution") < value(b, "execution"); });
+    return {{"source", "native_d3d12_queries"}, {"scope", "frame_stream_gpu_work"},
+        {"last_record", std::to_string(s.frame->lastRecord)}, {"last_execution", std::to_string(s.selectedExecution)},
+        {"initialization_records", std::to_string(s.directory.initializationCount())},
+        {"expected_count", std::to_string(expected)}, {"measured_count", std::to_string(rows.size())},
+        {"sample_count", 1}, {"warmup_count", 0}, {"stable_power_state", false}, {"frame_complete", false},
+        {"missing_query_policy", s.isolateMissingQueries ? "isolate_readback_outputs" : "fail"},
+        {"query_outputs_incomplete", s.isolateMissingQueries}, {"events", std::move(rows)},
+        {"limitations", {"One instrumented replay sample; clocks are not stabilized. Not original-application timing.",
+            "Draw/Dispatch and whole ExecuteIndirect invocations only; initialization submissions and helper commands are excluded.",
+            "Queue-local bottom-of-pipe timestamp brackets include instrumentation effects; sums are not frame wall time.",
+            "Indirect child draws are not individually measured. Disabled work measures the empty instrumented bracket.",
+            "Original frame fidelity remains unverified."}}};
 }
 json NativeReplay::performanceResult() const {
     auto &s = *impl_;

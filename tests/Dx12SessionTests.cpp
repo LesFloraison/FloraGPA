@@ -41,6 +41,7 @@
 #include <QStatusBar>
 #include <QTemporaryDir>
 #include <QToolButton>
+#include <QWheelEvent>
 #include <QtTest>
 #define NOMINMAX
 #include <Windows.h>
@@ -116,6 +117,124 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(bytes["restored"], bytes["baseline"]);
     }
   private slots:
+    void drawTimingReportValidation() {
+        using Json = nlohmann::json;
+        QTemporaryDir temp; const auto path = fixture(temp);
+        QByteArray packets; uint64_t timestamp{};
+        const auto packet = [&](uint64_t type, const QByteArray &payload) {
+            qword(packets, type); qword(packets, ++timestamp); qword(packets, 0); qword(packets, payload.size()); packets += payload;
+        };
+        const uint64_t list = UINT64_MAX - 2, queue = UINT64_MAX - 3;
+        QByteArray reset; qword(reset, list); qword(reset, 17); qword(reset, 0); dword(reset, 0);
+        packet(0x1ae3c721c351aULL, reset);
+        QByteArray draw; qword(draw, list); dword(draw, 3); dword(draw, 1); dword(draw, 0); dword(draw, 0);
+        packet(0x1ae3c190d8b1eULL, draw);
+        QByteArray close; qword(close, list); dword(close, 0); packet(0x1ae3cd6acf667ULL, close);
+        QByteArray submit; qword(submit, queue); dword(submit, 2); submit.append(char(1)); qword(submit, 2);
+        qword(submit, list); qword(submit, list); packet(0x125482975df48ULL, submit);
+        write(path + "/thread-7-0", packets);
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        QCOMPARE(session->executionCount(), 2ULL);
+        const auto last = std::to_string(session->events().back());
+        auto rows = Json::array();
+        // Large counters with small intervals catch loss of precision through JSON doubles.
+        const uint64_t begin = (1ULL << 63) + 97;
+        for (Id id : {1ULL, 2ULL}) {
+            const auto detail = session->executionDetails(id);
+            rows.push_back({{"execution", std::to_string(id)}, {"source_record", detail.at("source_record")},
+                {"queue", std::to_string(queue)}, {"submission", detail.at("submission_record")},
+                {"command_list", std::to_string(list)}, {"generation", detail.at("recording_generation")},
+                {"list_ordinal", detail.at("list_ordinal")}, {"command", "ID3D12GraphicsCommandListDrawInstanced"},
+                {"queue_type", 0}, {"disabled", false}, {"indirect", false},
+                {"timestamp_begin", std::to_string(begin)}, {"timestamp_end", std::to_string(begin + 1000 * id)},
+                {"timestamp_frequency_hz", "1000000000"}, {"duration_seconds", double(1000 * id) / 1000000000.0}});
+        }
+        Json report{{"backend", "dx12"}, {"completed", true}, {"frame_complete", false},
+            {"replay_scope", "frame_stream"}, {"execution", "2"}, {"value_time", "frame_end"},
+            {"frame_stream_end_reached", true}, {"missing_query_policy", "fail"},
+            {"native_replay", {{"execution_boundary_reached", true}, {"selected_execution", "2"}, {"boundary", "after"},
+                {"frame_stream_end_reached", true}, {"last_record", last}, {"planned_last_record", last},
+                {"missing_query_policy", "fail"}, {"frame_queue_schedule", {{"pending_queue_operations", "0"}}}}},
+            {"draw_timings", {{"source", "native_d3d12_queries"}, {"scope", "frame_stream_gpu_work"},
+                {"frame_complete", false}, {"sample_count", 1}, {"warmup_count", 0}, {"stable_power_state", false},
+                {"query_outputs_incomplete", false}, {"missing_query_policy", "fail"}, {"last_record", last},
+                {"last_execution", "2"}, {"initialization_records", std::to_string(session->information().at("initialization_records").get<uint64_t>())},
+                {"expected_count", "2"}, {"measured_count", "2"}, {"events", rows}}}};
+        const auto values = dx12DrawTimingRows(report, *session, false);
+        QCOMPARE(values.size(), 2); QCOMPARE(values[0].toObject()["microseconds"].toDouble(), 1.0);
+        QCOMPARE(values[1].toObject()["microseconds"].toDouble(), 2.0);
+        QCOMPARE(values[1].toObject()["event"].toString(), QString("2"));
+        for (const auto mutation : {"missing", "duplicate", "ticks", "duration", "identity", "boundary", "precision", "scope"}) {
+            auto invalid = report;
+            auto &profile = invalid["draw_timings"]; auto &row = profile["events"][1];
+            if (QString(mutation) == "missing") { profile["events"].erase(1); profile["expected_count"] = "1"; profile["measured_count"] = "1"; }
+            else if (QString(mutation) == "duplicate") row = profile["events"][0];
+            else if (QString(mutation) == "ticks") row["timestamp_end"] = std::to_string(begin - 1);
+            else if (QString(mutation) == "duration") row["duration_seconds"] = 1.0;
+            else if (QString(mutation) == "identity") row["source_record"] = "1";
+            else if (QString(mutation) == "boundary") invalid["native_replay"]["frame_queue_schedule"]["pending_queue_operations"] = "1";
+            else if (QString(mutation) == "precision") row["timestamp_begin"] = double(begin);
+            else profile["scope"] = "selected_execution";
+            QVERIFY_EXCEPTION_THROWN(dx12DrawTimingRows(invalid, *session, false), std::exception);
+        }
+        QVERIFY_EXCEPTION_THROWN(dx12DrawTimingRows(report, *session, true), std::exception);
+    }
+    void bf1DrawTimingsWorkspace() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_DRAW_TIMING_CAPTURE");
+        if (path.isEmpty()) QSKIP("Set FLORA_DX12_DRAW_TIMING_CAPTURE for full-frame GPU timing acceptance");
+        MainWindow window(true); window.resize(1600, 950); window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(path); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty() && !window.busy(), 180000);
+        QCOMPARE(done.count(), 1);
+        QVERIFY2(done.last()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto chart = window.findChild<EventChart *>("gpuTimeChart"); QVERIFY(chart); QVERIFY(chart->timingCount() > 0);
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        Id first{}; qsizetype expected{};
+        const auto initialization = session->information().at("initialization_records").get<uint64_t>();
+        for (Id id = 1; id <= session->executionCount(); ++id) {
+            const auto event = session->executionEvent(id);
+            if (event.work && event.submission.value_or(0) > initialization) { ++expected; if (!first) first = id; }
+        }
+        QCOMPARE(chart->timingCount(), expected);
+        const auto wheel = [&](QPointF position, int delta) {
+            QWheelEvent event(position, chart->mapToGlobal(position.toPoint()), {}, {0, delta},
+                Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
+            QApplication::sendEvent(chart, &event);
+        };
+        const auto finishedCount = done.count();
+        QSignalSpy selected(chart, &EventChart::eventSelected);
+        wheel({chart->width() / 2.0, 40}, 12000);
+        QCOMPARE(chart->visibleCount(), 20);
+        wheel({chart->width() / 2.0, chart->height() - 16.0}, -12000);
+        QVERIFY(chart->visibleBegin() > 0);
+        QCOMPARE(chart->visibleCount(), 20);
+        const auto beforeDrag = chart->visibleBegin();
+        const auto overviewWidth = chart->width() - 70.0;
+        const QPointF dragStart(48 + (beforeDrag + 10) * overviewWidth / expected, chart->height() - 16.0);
+        QTest::mousePress(chart, Qt::LeftButton, Qt::NoModifier, dragStart.toPoint());
+        const auto dragEnd = dragStart + QPointF(overviewWidth / 10, 0);
+        QMouseEvent drag(QEvent::MouseMove, dragEnd, chart->mapToGlobal(dragEnd), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(chart, &drag);
+        QTest::mouseRelease(chart, Qt::LeftButton, Qt::NoModifier, dragEnd.toPoint());
+        QVERIFY(chart->visibleBegin() > beforeDrag); QCOMPARE(chart->visibleCount(), 20);
+        QTest::qWait(300);
+        QVERIFY(!window.busy()); QCOMPARE(done.count(), finishedCount); QVERIFY(selected.empty());
+        const auto screenshot = qEnvironmentVariable("FLORA_DX12_UI_SCREENSHOT");
+        if (!screenshot.isEmpty()) QVERIFY(window.grab().save(screenshot));
+        wheel({chart->width() / 2.0, 40}, -12000);
+        QCOMPARE(chart->visibleBegin(), 0); QCOMPARE(chart->visibleCount(), expected);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(0);
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        QTest::mouseClick(chart, Qt::LeftButton, Qt::NoModifier, QPoint(48, 40));
+        QCOMPARE(window.findChild<QComboBox *>("apiEventDomain")->currentIndex(), 1);
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(), first);
+        QCOMPARE(chart->timingCount(), expected);
+        window.findChild<QAction *>("cancelReplay")->trigger(); QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 10000);
+        window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        QCOMPARE(chart->timingCount(), 0);
+        window.findChild<QAction *>("cancelReplay")->trigger();
+    }
     void pipelineShaderNavigation() {
         using Json = nlohmann::json;
         Dx12PipelineView view;

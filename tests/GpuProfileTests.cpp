@@ -2,6 +2,7 @@
 #include "app/Appearance.h"
 #include "app/GpuProfileView.h"
 #include "app/MainWindow.h"
+#include "app/Views.h"
 #include "application/GpuProfile.h"
 #include <QAction>
 #include <QApplication>
@@ -192,13 +193,15 @@ class GpuProfileTests final : public QObject {
         QTemporaryDir dir;
         const auto path = dir.filePath("fixture.gpa_frame");
         testing::depthStencilCapture().save(path);
-        MainWindow window;
+        MainWindow window(true);
         window.resize(1500, 950);
         window.show();
         QSignalSpy done(&window, &MainWindow::taskFinished);
         window.openCapture(path);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QCOMPARE(done.count(), 1);
         QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(window.findChild<EventChart *>("gpuTimeChart")->timingCount() > 0);
         auto view = window.findChild<GpuProfileView *>();
         QVERIFY(view);
         window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(view);
