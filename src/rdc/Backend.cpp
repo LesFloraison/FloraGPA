@@ -20,6 +20,7 @@
 #include <QCryptographicHash>
 #include <QFile>
 #include <QSaveFile>
+#include <QElapsedTimer>
 #define NOMINMAX
 #include <Windows.h>
 
@@ -40,7 +41,7 @@ namespace {
 pRENDERDOC_AllocArrayMem allocate{};
 pRENDERDOC_FreeArrayMem release{};
 HMODULE library{};
-bool used{};
+
 template <typename T> T symbol(const char *name) {
     const auto result = GetProcAddress(library, name);
     if (!result)
@@ -154,6 +155,7 @@ void checked(ResultDetails status) {
                                      ? text(*status.internal_msg)
                                      : "RenderDoc error " + std::to_string(uint32_t(status.code)));
 }
+struct Events;
 class Session {
     bool initialized_{};
     QString failureLog_;
@@ -182,6 +184,18 @@ class Session {
 
   public:
     std::unique_ptr<IReplayController, Shutdown> controller;
+    std::shared_ptr<Events> events;
+    Json roots, mapping;
+    std::optional<uint32_t> currentEvent;
+    double openMilliseconds{};
+    uint64_t requests{};
+    std::function<bool()> cancelled;
+    void checkCancelled() const {
+        if (cancelled && cancelled()) throw std::runtime_error("Analysis request cancelled");
+    }
+    void destination(const Json &job) {
+        failureLog_ = QString::fromStdString(job.at("out").get<std::string>()) + "/backend-diagnostic.log";
+    }
     std::string version, commit;
     Json dxcRuntime;
     uint32_t d16HistoryPatch{};
@@ -239,12 +253,10 @@ class Session {
     DotCounter packedStores{};
     DotCounter preparedComputeConsumed{};
     explicit Session(const Json &job) {
-        failureLog_ = QString::fromStdString(job.at("out").get<std::string>()) + "/backend-diagnostic.log";
-        if (used)
-            throw std::runtime_error("Only one RenderDoc job is allowed per process");
-        used = true;
+        QElapsedTimer opening; opening.start();
+        destination(job);
         const auto chosen = std::filesystem::canonical(path(job.at("renderdoc")));
-        library = LoadLibraryExW(chosen.c_str(), nullptr,
+        if (!library) library = LoadLibraryExW(chosen.c_str(), nullptr,
                                  LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
         if (!library)
             throw std::runtime_error("Cannot load selected RenderDoc replay library");
@@ -446,6 +458,7 @@ class Session {
             checked(opened.first);
             if (!controller)
                 throw std::runtime_error("RenderDoc did not create a replay controller");
+            openMilliseconds = opening.nsecsElapsed() / 1e6;
             const auto api = controller->GetAPIProperties().pipelineType;
             if (api == GraphicsAPI::D3D12) {
                 const bool patterns = job.value("discard_patterns", false);
@@ -1451,7 +1464,9 @@ extern "C" void *__cdecl RENDERDOC_AllocArrayMem(uint64_t size) { return allocat
 
 namespace flora {
 Json rdcLoadedModules() { return processModules(); }
-Json runRdcJob(const Json &job) {
+static Json executeRdcJob(const Json &job, Session *retained) {
+    QElapsedTimer elapsed; elapsed.start();
+    double indexMs{}, eventMs{};
     const auto action = job.at("action").get<std::string>();
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
@@ -1504,7 +1519,11 @@ Json runRdcJob(const Json &job) {
             coordinates(job, "thread");
         }
     }
-    Session session(job);
+    auto owner = retained ? std::unique_ptr<Session>{} : std::make_unique<Session>(job);
+    auto &session = retained ? *retained : *owner;
+    session.destination(job);
+    session.checkCancelled();
+    ++session.requests;
     auto &controller = *session.controller;
     const auto properties = controller.GetAPIProperties();
     const bool dx12 = properties.pipelineType == GraphicsAPI::D3D12;
@@ -1528,8 +1547,16 @@ Json runRdcJob(const Json &job) {
     constexpr const char *vendorNames[]{"Unknown",     "ARM",      "AMD",    "Broadcom",
                                         "Imagination", "Intel",    "NVIDIA", "Qualcomm",
                                         "Verisilicon", "Software", "Samsung"};
-    Events events;
-    const auto roots = events.walk(controller.GetRootActions(), controller.GetStructuredFile());
+    QElapsedTimer indexing; indexing.start();
+    if (!session.events) {
+        session.events = std::make_shared<Events>();
+        session.roots = session.events->walk(controller.GetRootActions(), controller.GetStructuredFile());
+        session.mapping = dx12 ? indexDx12RdcEvents(session.roots, session.events->native)
+                               : indexRdcEvents(session.roots, session.events->native);
+    }
+    auto &events = *session.events;
+    const auto &roots = session.roots;
+    indexMs = indexing.nsecsElapsed() / 1e6;
     const auto queryPolicy = readRdcQueryIsolation(roots);
     requireRdcQueryIsolation(queryPolicy, job);
     const auto frameEnd = readRdcFrameEnd(roots);
@@ -1537,7 +1564,7 @@ Json runRdcJob(const Json &job) {
     const bool frameEndHistory = job.value("frame_end", false);
     if (frameEndHistory && !dx12) throw std::runtime_error("Frame-end history requires a native DX12 capture");
     if (!queryPolicy.is_null() && !dx12) throw std::runtime_error("Query isolation requires a DX12 capture");
-    auto mapping = dx12 ? indexDx12RdcEvents(roots, events.native) : indexRdcEvents(roots, events.native);
+    auto mapping = session.mapping;
     if (frameEndHistory) {
         const auto endEvent = frameEnd.at("event_id").get<uint32_t>();
         for (const auto &[execution, command] : mapping.at("execution_commands").items())
@@ -1593,6 +1620,10 @@ Json runRdcJob(const Json &job) {
     if (!queryPolicy.is_null()) result["frame_complete"] = false;
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
+        session.checkCancelled();
+        result["latency"] = {{"open_capture_ms", session.requests == 1 ? session.openMilliseconds : 0.0},
+            {"index_ms", indexMs}, {"set_event_ms", eventMs}, {"request_ms", elapsed.nsecsElapsed() / 1e6},
+            {"session_requests", session.requests}, {"open_capture_count", 1}};
         if (dx12 && session.discardPatternsSkipped) {
             result["replay_policy"]["discard_pattern_fills_skipped"] = std::to_string(session.discardPatternsSkipped());
             result["replay_policy"]["discard_scope"] = "Captured discard commands/barriers are preserved. Skipped fills are additional diagnostic writes across this analysis request, not recovered historical contents. Discarded values remain undefined.";
@@ -1806,7 +1837,15 @@ Json runRdcJob(const Json &job) {
             prepared = session.prepareCompute(&controller, eid);
         if (prepared > 2) throw std::runtime_error("Invalid compute preparation response");
         session.computePrepared = prepared == 1;
-        if (!prepared) controller.SetFrameEvent(eid, true);
+        session.checkCancelled();
+        QElapsedTimer replaying; replaying.start();
+        if (!prepared && (!retained || session.currentEvent != eid)) {
+            session.currentEvent.reset();
+            controller.SetFrameEvent(eid, false);
+            session.currentEvent = eid;
+        }
+        eventMs = replaying.nsecsElapsed() / 1e6;
+        session.checkCancelled();
         if (session.depthRoundtripCopies && session.depthRoundtripCopies() == 0)
             throw std::runtime_error("Depth roundtrip was not applied: select a read-only D32 direct Draw (patch v2) or depth-writing D32S8 Draw with "
                                      "stencil disabled, one mip/layer/sample/node and legacy depth states");
@@ -2698,4 +2737,32 @@ Json runRdcJob(const Json &job) {
             result["resource_name"] = text(r.name);
     return complete();
 }
+namespace {
+Json sessionConfiguration(const Json &job) {
+    Json key = Json::object();
+    for (const auto *field : {"capture", "renderdoc", "replay_optimisation", "api_validation",
+             "discard_patterns", "isolate_missing_queries", "experiment_key"})
+        key[field] = job.value(field, Json());
+    return key;
+}
+}
+struct RdcReplaySession::Impl {
+    Json configuration;
+    Session session;
+    explicit Impl(const Json &job) : configuration(sessionConfiguration(job)), session(job) {}
+};
+RdcReplaySession::RdcReplaySession(const Json &job) : impl_(std::make_unique<Impl>(job)) {}
+RdcReplaySession::~RdcReplaySession() = default;
+Json RdcReplaySession::execute(const Json &job, const std::function<bool()> &cancelled) {
+    static const std::set<std::string> actions{"pipeline", "resource-workspace", "buffer", "texture", "inventory"};
+    if (!actions.contains(job.at("action").get<std::string>()))
+        throw std::runtime_error("This analysis requires an isolated one-shot worker");
+    if (sessionConfiguration(job) != impl_->configuration)
+        throw std::runtime_error("Analysis session configuration changed; reopen required");
+    for (const auto *flag : {"readonly_depth_snapshot", "depth_roundtrip", "dxil_fast_contraction", "pixel_history_reference"})
+        if (job.value(flag, false)) throw std::runtime_error("Diagnostic replay requires an isolated worker");
+    impl_->session.cancelled = cancelled;
+    return executeRdcJob(job, &impl_->session);
+}
+Json runRdcJob(const Json &job) { return executeRdcJob(job, nullptr); }
 } // namespace flora

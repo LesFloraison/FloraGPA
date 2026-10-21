@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QStackedWidget>
 #include "ResourceBrowser.h"
+#include "RdcServiceClient.h"
 #include <atomic>
 #include <functional>
 
@@ -57,7 +58,7 @@ class MainWindow final : public QMainWindow {
     void replaceDx12Shader(Id pipeline, const std::string &stage, const QString &bytecodePath);
     void patchDx12Resource(Id submission, Id resource, uint64_t offset, uint32_t subresource,
                            bool texture, const QString &dataPath, Id afterExecution = 0);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_); }
+    bool busy() const { return rdcService_.busy() || process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -141,6 +142,10 @@ class MainWindow final : public QMainWindow {
     QAction *coverageToggle_ = nullptr, *historyPick_ = nullptr;
     QLabel *resourceStatus_ = nullptr;
     QTimer resourceTimer_;
+    RdcServiceClient rdcService_{this};
+    bool rdcServiceFallback_ = false;
+    QString rdcLibraryStamp_;
+    QByteArray rdcLibraryHash_;
     QString runningResourceKey_, coverageKey_;
     nlohmann::json previewRequest_, pendingPixel_;
     std::optional<DrawResourceBinding> selectedBinding_;

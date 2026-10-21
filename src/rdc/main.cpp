@@ -1,5 +1,6 @@
 #include "Assets.h"
 #include "Backend.h"
+#include "Service.h"
 #include "application/ReplayRequest.h"
 #include "application/RdcEvents.h"
 #include "application/DrawResources.h"
@@ -16,21 +17,13 @@
 
 extern "C" __declspec(dllexport) void __cdecl renderdoc__replay__marker() {}
 
-int main(int argc, char **argv) {
-    QCoreApplication app(argc, argv);
+static int executeJob(const nlohmann::json &job, flora::RdcReplaySession *session,
+                      const std::function<bool()> &cancelled) {
     using Json = nlohmann::json;
     Json result{{"ok", false}};
     QString output;
     std::optional<flora::ReplayRequestIdentity> identity;
     try {
-        const auto args = app.arguments();
-        if (args.size() != 3 || args[1] != "--job")
-            throw std::runtime_error("Expected --job <JSON file>");
-        QFile file(args[2]);
-        if (!file.open(QIODevice::ReadOnly) || file.size() > 1048576)
-            throw std::runtime_error("Cannot read bounded RenderDoc job");
-        const auto bytes = file.readAll();
-        const auto job = Json::parse(bytes.begin(), bytes.end());
         if (job.contains("request_identity")) identity = flora::parseReplayIdentity(job.at("request_identity"));
         const auto destination = QString::fromStdString(job.at("out").get<std::string>());
         if (destination.isEmpty())
@@ -53,7 +46,7 @@ int main(int argc, char **argv) {
             job.at("action") != "postmesh" &&
             !flora::rdcShaderDebugAction(job.at("action").get<std::string>()))
             throw std::runtime_error("Unsupported query-isolated analysis");
-        result = flora::runRdcJob(job);
+        result = session ? session->execute(job, cancelled) : flora::runRdcJob(job);
     } catch (const std::exception &e) {
         result["error"] = e.what();
         fprintf(stderr, "%s\n", e.what());
@@ -109,4 +102,17 @@ int main(int argc, char **argv) {
             return 2;
     }
     return result.value("ok", false) ? 0 : 1;
+}
+
+int main(int argc, char **argv) {
+    QCoreApplication app(argc, argv);
+    const auto args = app.arguments();
+    if (args.size() == 2 && args[1] == "--serve") return flora::serveRdc(executeJob);
+    try {
+        if (args.size() != 3 || args[1] != "--job") throw std::runtime_error("Expected --job <JSON file> or --serve");
+        QFile file(args[2]);
+        if (!file.open(QIODevice::ReadOnly) || file.size() > 1048576) throw std::runtime_error("Cannot read bounded RenderDoc job");
+        const auto bytes = file.readAll();
+        return executeJob(nlohmann::json::parse(bytes.begin(), bytes.end()), nullptr, {});
+    } catch (const std::exception &e) { fprintf(stderr, "%s\n", e.what()); return 1; }
 }

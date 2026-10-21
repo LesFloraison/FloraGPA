@@ -45,6 +45,7 @@ void MainWindow::invalidateDx12Output() {
     bufferModel_->setBytes({}); displayedBuffer_ = 0; bufferLabel_->clear(); clearBufferDetails();
     replayTimer_.stop();
     ++revision_;
+    rdcService_.cancelSelection();
     if (process_.state() != QProcess::NotRunning || artifactJob_)
         cancel();
     image_->setImage({});

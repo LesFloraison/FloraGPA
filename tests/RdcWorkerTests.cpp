@@ -30,6 +30,37 @@ class RdcWorkerTests : public QObject {
         return p.exitStatus() == QProcess::NormalExit ? p.exitCode() : -2;
     }
   private slots:
+    void serviceProtocol() {
+        QProcess p;
+        p.start(worker(), {"--serve"});
+        QVERIFY(p.waitForStarted(10000));
+        QByteArray responses;
+        auto transact = [&](const QJsonObject &request) {
+            const auto bytes = QJsonDocument(request).toJson(QJsonDocument::Compact) + '\n';
+            if (p.write(bytes) != bytes.size()) return QJsonObject{};
+            p.waitForBytesWritten(10000);
+            QElapsedTimer timer; timer.start();
+            while (!responses.contains('\n') && timer.elapsed() < 10000) {
+                p.waitForReadyRead(100);
+                responses += p.readAllStandardOutput();
+            }
+            const auto end = responses.indexOf('\n');
+            if (end < 0) return QJsonObject{};
+            const auto result = QJsonDocument::fromJson(responses.left(end)).object();
+            responses.remove(0, end + 1); return result;
+        };
+        const auto closed = transact({{"schema", 1}, {"id", "1"}, {"generation", "1"}, {"command", "close"}});
+        QVERIFY(closed["ok"].toBool());
+        QCOMPARE(closed["open_capture_count"].toInteger(), 0);
+        const auto missing = transact({{"schema", 1}, {"id", "2"}, {"generation", "2"}, {"command", "execute"}, {"job", QJsonObject{}}});
+        QVERIFY(!missing["ok"].toBool());
+        QVERIFY(missing["error"].toString().contains("generation"));
+        const auto cancelled = transact({{"schema", 1}, {"id", "3"}, {"generation", "2"}, {"command", "cancel"}, {"through", "2"}});
+        QVERIFY(cancelled["ok"].toBool());
+        p.write("{\"schema\":1,\"id\":\"4\",\"generation\":\"2\",\"command\":\"shutdown\"}\n");
+        QVERIFY(p.waitForFinished(10000));
+        QCOMPARE(p.exitCode(), 0);
+    }
     void invalidJob_data() {
         QTest::addColumn<QJsonObject>("job");
         QTest::addColumn<QString>("error");

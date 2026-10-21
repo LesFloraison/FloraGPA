@@ -422,6 +422,7 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    rdcService_.close();
     if (experimentCancel_) experimentCancel_->store(true);
     if (exportCancel_)
         exportCancel_->store(true);
@@ -2124,15 +2125,20 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         QFile file(library);
         if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Select an installed RenderDoc 1.45 library");
-        QCryptographicHash digest(QCryptographicHash::Sha256);
-        if (!digest.addData(&file))
-            throw std::runtime_error("Cannot read RenderDoc library identity");
+        const QFileInfo libraryInfo(file);
+        const auto stamp = library + ':' + QString::number(libraryInfo.size()) + ':' +
+                           QString::number(libraryInfo.lastModified().toMSecsSinceEpoch());
+        if (stamp != rdcLibraryStamp_) {
+            QCryptographicHash digest(QCryptographicHash::Sha256);
+            if (!digest.addData(&file)) throw std::runtime_error("Cannot read RenderDoc library identity");
+            rdcLibraryHash_ = digest.result().toHex(); rdcLibraryStamp_ = stamp;
+        }
         historyRequest_["renderdoc"] = library.toStdString();
         const bool frameEndHistory = (kind == RdcAnalysis::History || kind == RdcAnalysis::ResourceHistory) &&
                                      historyRequest_.value("frame_end", false);
         historyKey_ =
             historyContextKey(resources || resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
-                              frameEndHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+                              frameEndHistory) + ':' + library + ':' + QString::fromLatin1(rdcLibraryHash_);
         if (resources && historyRequest_.value("boundary", "") == "before") historyKey_ += ":before";
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
@@ -2204,7 +2210,25 @@ void MainWindow::startHistoryWorker() {
                              : runningDebug_                             ? "Reading shader trace…"
                                                                          : "Reading pixel history…");
     timeout_.start(180000);
-    process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
+    if ((runningAnalysis_ == RdcAnalysis::Resources || runningAnalysis_ == RdcAnalysis::Pipeline) &&
+        !rdcServiceFallback_ && !qEnvironmentVariableIsSet("FLORA_DISABLE_RDC_SERVICE")) {
+        timeout_.stop();
+        rdcService_.submit(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", historyKey_, historyRequest_,
+            [this, path](int code, QString error, bool fallback) {
+                if (fallback && runningRevision_ == revision_ && runningIdentity_ == currentWorkerIdentity()) {
+                    rdcServiceFallback_ = true;
+                    log_->appendPlainText("Resident analysis failed; using isolated worker. " + error);
+                    timeout_.start(180000);
+                    process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
+                    return;
+                }
+                errorText_ = error;
+                finishWorker(code, QProcess::NormalExit);
+            });
+    } else {
+        rdcService_.close();
+        process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
+    }
 }
 void MainWindow::openCapture(const QString &path) {
     if (projectDirty_) {
@@ -2217,6 +2241,7 @@ void MainWindow::openCapture(const QString &path) {
         return;
     cancel();
     replayTimer_.stop();
+    rdcService_.close(); rdcServiceFallback_ = false;
     pendingPath_ = path;
     auto token = std::make_shared<std::atomic_bool>(false);
     loadCancel_ = token;
@@ -2351,6 +2376,7 @@ void MainWindow::beginWorkerIdentity() {
     runningIdentity_ = currentWorkerIdentity();
 }
 void MainWindow::startWorker(QStringList args, bool timings) {
+    rdcService_.close();
     if (process_.state() != QProcess::NotRunning || artifactJob_)
         return;
     if (session_ && session_->backend() == ReplayBackend::Dx12 && selection_.isolateMissingQueries &&
@@ -2461,6 +2487,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    rdcService_.close();
     if (experimentCancel_) {
         experimentCancel_->store(true);
         cancelAction_->setEnabled(false);
