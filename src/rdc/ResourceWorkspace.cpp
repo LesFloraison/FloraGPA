@@ -135,7 +135,9 @@ Json readResourceWorkspace(IReplayController &controller, const Json &job, const
                     TextureDisplay view;
                     view.resourceId = id; view.typeCast = params.typeCast;
                     view.subresource = Subresource(mip, t.dimension == 3 ? slice : layer, sample);
-                    view.scale = -1.f; view.linearDisplayAsGamma = false;
+                    // Headless outputs use an sRGB target. Compensate for its
+                    // encoding so UNorm/depth thumbnails match SaveTexture PNGs.
+                    view.scale = -1.f; view.linearDisplayAsGamma = true;
                     view.rangeMin = params.comp.blackPoint; view.rangeMax = params.comp.whitePoint;
                     if (plane == "depth") view.green = view.blue = false;
                     target->SetTextureDisplay(view); target->Display();

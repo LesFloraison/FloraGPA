@@ -131,7 +131,7 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     centerTabs_->insertTab(0, resourceWorkspace_, "Resources");
     centerTabs_->setCurrentWidget(resourceWorkspace_);
     resourceTimer_.setSingleShot(true);
-    resourceTimer_.setInterval(100);
+    resourceTimer_.setInterval(200);
     analysisFrameTimer_.setSingleShot(true);
     analysisFrameTimer_.setInterval(1000);
     connect(&analysisFrameTimer_, &QTimer::timeout, this, &MainWindow::prepareAnalysisFrame);
@@ -140,7 +140,9 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     connect(resourceBrowser_, &ResourceBrowser::previewsNeeded, this, [this] { resourceTimer_.start(); });
     connect(centerTabs_, &QTabWidget::currentChanged, this, [this] { resourceTimer_.start(); });
     connect(this, &MainWindow::taskFinished, this, [this](bool) {
-        QTimer::singleShot(0, this, &MainWindow::pumpResourceJobs);
+        if (session_ && session_->backend() == ReplayBackend::Dx12)
+            QTimer::singleShot(0, this, &MainWindow::pumpResourceJobs);
+        else resourceTimer_.start();
     });
     connect(settings, &QAction::toggled, coverage_, &QWidget::setVisible);
     connect(historyPick_, &QAction::toggled, this, [this](bool enabled) {

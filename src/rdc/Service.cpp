@@ -2,6 +2,7 @@
 #include "Backend.h"
 #include <atomic>
 #include <charconv>
+#include <chrono>
 #include <condition_variable>
 #include <cstdio>
 #include <deque>
@@ -12,6 +13,9 @@
 namespace flora {
 namespace {
 using Json = nlohmann::json;
+double millisecondsNow() {
+    return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count();
+}
 uint64_t serial(const Json &j) {
     const auto text = j.get<std::string>(); uint64_t value{};
     const auto [end, ec] = std::from_chars(text.data(), text.data() + text.size(), value);
@@ -45,6 +49,7 @@ int serveRdc(const RdcJobRunner &run) {
             }
             Json response{{"schema", 1}, {"id", message.at("id")}, {"generation", message.at("generation")},
                           {"command", message.at("command")}, {"ok", false}};
+            response["queue_ms"] = millisecondsNow() - message.at("queued_ms").get<double>();
             QElapsedTimer timer; timer.start();
             try {
                 const auto id = serial(message.at("id"));
@@ -59,7 +64,9 @@ int serveRdc(const RdcJobRunner &run) {
                     if (!session || generation != message.at("generation").get<std::string>())
                         throw std::runtime_error("Analysis session generation mismatch");
                     if (cancelled()) throw std::runtime_error("Analysis request cancelled");
-                    const auto code = run(message.at("job"), session.get(), cancelled);
+                    auto job = message.at("job");
+                    job["analysis_queue_ms"] = response.at("queue_ms");
+                    const auto code = run(job, session.get(), cancelled);
                     response["exit_code"] = code;
                     if (code) throw std::runtime_error("Analysis request failed; inspect result.json");
                 } else if (command == "close") {
@@ -95,6 +102,7 @@ int serveRdc(const RdcJobRunner &run) {
             {
                 const std::lock_guard lock(mutex);
                 if (messages.size() >= 8) throw std::runtime_error("Analysis queue limit exceeded");
+                message["queued_ms"] = millisecondsNow();
                 messages.push_back(std::move(message));
             }
             ready.notify_one();

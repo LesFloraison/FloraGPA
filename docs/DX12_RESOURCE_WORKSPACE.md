@@ -174,3 +174,215 @@ build/vs2022/Release/FloraRdcJobTests.exe
 # FLORA_RESOURCE_CAPTURE, FLORA_RESOURCE_EXECUTION, FLORA_RESOURCE_OUTPUT.
 build/vs2022/Release/FloraDx12SessionTests.exe automaticResourceWorkspace
 ```
+
+## Retained analysis and CPU bindings (2026-10-22)
+
+Resource browsing now has separate capture-context and selection lifetimes.
+The GUI owns one isolated `FloraGPA.Rdc --serve` process; its single worker
+thread owns the replay controller, execution index and resource catalog.
+Ordinary selection cancellation discards obsolete results without unloading
+the controller. Native capture, Pixel History and Shader Debug still use
+isolated workers. Opening another capture or changing replay context releases
+the controller. A crash/timeout permits one restart, then one-shot fallback;
+a reported controller allocation/open failure does not trigger retry loops.
+
+The schema-1 JSON-lines protocol accepts `open`, `execute`, `cancel`, `close`
+and `shutdown`; string serials and generations preserve 64-bit identities.
+Stdout carries protocol messages, stderr carries diagnostics, and result
+artifacts remain in request-owned temporary directories. The original `--job`
+interface and its default `legacy` output remain supported.
+
+The workspace explicitly requests `thumbnail`, `preview` or `storage` output.
+Thumbnails render into a headless target bounded to 96 x 96, including extreme
+aspect ratios; they do not first export a full-sized image. Display previews
+do not call raw texture storage readback. Raw export snapshots the resource,
+execution, boundary, capture and experiment identity, then reads storage in an
+isolated worker and validates byte count, SHA-256 and sidecar metadata.
+
+Navigation uses a 100 ms debounce for new GPU work. Cached content and CPU
+binding metadata can publish immediately. Pipeline completion schedules the
+selected resource without a second debounce. Visible thumbnails are executed
+one at a time, with the selected preview taking priority; an eligible selected
+display image also supplies its thumbnail. CPU rows are replaced by observed
+GPU rows even when their selection context is unchanged.
+Immediate completion scheduling is restricted to DX12. DX11 retains its
+existing 200 ms resource scheduler so background thumbnail work does not
+preempt History/Checkpoint actions immediately after a foreground task.
+
+After foreground work and visible thumbnails finish, one idle second allows
+a full-frame analysis capture. Its key excludes the selected DC. Version-2
+Before/After markers carry execution, source record, submission, queue, list,
+recording generation and ordinal. Before is an explicit marker, not `eid-1`.
+Missing/ambiguous pairs, unsupported queue order or failed preparation use the
+original exact-prefix path. A failed context is not retried automatically.
+Only one replay controller is active; switching captures first releases it.
+Background GPU work waits for automatic draw timing collection and can be
+preempted by foreground selection.
+
+The CPU binding index uses the existing recipe decoders, submission index,
+address index and root-signature deserializer without creating GPU resources.
+Sparse per-slot histories restore command-list state by recording generation.
+RTV/DSV descriptors are consumed at recording time; shader-visible descriptors
+are resolved at submission time. Descriptor copies preserve source provenance,
+and resource/heap creation identities distinguish reused addresses. Unresolved
+or GPU-generated state remains pending. Direct Draw and Dispatch queries use
+their respective graphics/compute binding scopes; indirect operation scope
+remains pending until replay confirms it. CPU bindings describe potential
+bindings, not measured shader accesses or original-frame fidelity.
+
+Display caches use 240 MiB for prepared images and 16 MiB for thumbnails.
+Serialized binding snapshots use a 64 MiB metadata-cache budget. The separate
+CPU index also has a conservative 64 MiB accounting guard. Disk analysis
+captures use an 8 GiB LRU with the active capture pinned. Content keys retain
+execution, lifetime, boundary, subresource, view/display parameters and replay
+context; no unproven cross-DC content equality is assumed.
+
+Internal regression switches are `FLORA_DISABLE_RDC_SERVICE`,
+`FLORA_DISABLE_FAST_PREVIEW` and `FLORA_DISABLE_FRAME_REUSE` (presence disables
+the corresponding path). `FLORA_RESOURCE_TRACE` records preview-cache keys.
+Backend result telemetry includes capture open, index, event positioning,
+queue, request, display conversion, storage read and byte counts. Native reports
+include per-stage `latency_ms`. GUI diagnostic properties expose capture
+count, cache hits and CPU binding publication time.
+
+The independent D3D12 fixture compares prefix and full-frame Before/After
+color, depth, stencil, buffer, mip/array, four-sample MSAA, R32_UINT and 3D
+slice data, including raw hashes and display equality. It also verifies
+preview-only requests, bounded thumbnails and deferred exports. The headless
+thumbnail target's sRGB encoding is compensated so its displayed UNorm/depth
+values match the saved preview. CPU tests cover repeated submissions, descriptor
+rewrites, recording generations and resource identity reuse. Real-frame CPU
+index tests sample 20 Draw executions from each of BF1, Talos and Hellblade2.
+These checks do not establish all GPU formats or alias/multi-queue combinations;
+unsupported reuse remains on the exact-prefix path. The expanded deterministic
+oracle is preserved under `artifacts/dx12-final-format-oracle-3`.
+
+### Measured navigation and recovery evidence
+
+The BF1 GUI comparison uses the same 21 selections (one cold selection followed
+by 20 measured switches, including returning to the first DC). The compatibility
+baseline disables retained sessions, fast previews and full-frame reuse; CPU
+metadata indexing remains enabled in both modes, so its list latency is not an
+old-GUI baseline. Percentiles use nearest rank and include the first controller
+open on the prepared full frame.
+
+| BF1 measurement | Compatibility path | Optimized path |
+| --- | ---: | ---: |
+| Cold first-content | 12,003 ms | 11,614 ms |
+| Post-cold first-content p50 | 27,110 ms | 958 ms |
+| Post-cold first-content p95 | 31,497 ms | 1,234 ms |
+| Native captures across all selections | 21 | 2 |
+
+This is a 96.1% reduction in post-cold p95 for this supported sample. All 20
+switches after full-frame preparation added zero native captures. Optimized
+binding-list publication p95 was 25 ms. Some DCs select a buffer first, so
+"first content" includes a populated buffer view as well as texture images.
+Local evidence is `artifacts/dx12-final-bf1-navigation/navigation.json` and
+`artifacts/dx12-navigation-bf1-baseline.json`.
+
+Talos has multiple frame queues and deliberately uses exact-prefix fallback.
+Of 21 attempted selections, 17 loaded successfully in both modes. For the 16
+successful post-cold samples, p95 changed from 11,893 ms to 9,132 ms (23.2%).
+Failures at executions 14303, 15746, 17477 and 17832 are preserved in both
+reports and excluded from content percentiles. They fail native prefix Close
+with `0x80004005`; execution 14303 also reproduces with the pre-change
+`ec6cb45` portable worker. These failures are not optimization passes.
+Talos uses the explicit query-isolation policy for this comparison; strict
+missing-query mode was separately checked to show CPU bindings without
+submitting resource-capture GPU work. Evidence is under
+`artifacts/dx12-matrix-20261022/talos-{optimized,baseline}` and
+`build/resource-strict-cpu-acceptance.log`.
+
+Hellblade2 also uses the multi-queue fallback. Both modes attempted 21
+selections, with 17 successes and the same four prefix-Close failures
+(executions 12653, 12948, 26534 and 26829). Successful post-cold p50 changed
+from 39,369.5 ms to 29,859 ms, while p95 changed only from 64,319 ms to
+63,292 ms (1.6%). Native capture attempts were 25 and 24 respectively.
+This sample does not meet the 70% first-preview reduction target: repeated
+native prefix capture still dominates its long tail. Its cold first-content
+times were 17,739 and 20,204 ms; no cold-start improvement is claimed.
+Evidence is under `artifacts/dx12-matrix-20261022/hellblade2-{optimized,baseline}`.
+
+CPU snapshot querying was measured independently from GUI publication. The
+final 20-Draw-per-frame run recorded p95 of 4.25 ms (BF1), 0.21 ms (Talos) and
+2.63 ms (Hellblade2), after index builds of 144, 26 and 161 ms respectively.
+See `build/resource-cpu-final.log`; this is CPU query time, not end-to-end DC
+preview latency.
+
+The retained real-capture sequence (pipeline, buffer, display preview,
+thumbnail) records one `OpenCapture`, no raw storage file for either image
+request, and a thumbnail bounded to 96 x 96. Its evidence is
+`artifacts/dx12-resident-sequence-final/summary.json`. Service-client tests
+exercise process reuse, two failed crash/protocol attempts followed by legacy
+fallback, no retry for reported open/allocation failure, stale callback
+suppression and process termination after explicit close. They do not wait
+out the production 180-second timeout.
+
+The final BF1 workspace interaction test records 20 cached input/output
+selection pairs at p95 5 ms, with both images checked against their previously
+accepted contents. `build/resource-final-cache-acceptance.log` also covers
+thumbnail publication, resource/boundary navigation and stale-result handling.
+The automatic-timing ordering test reaches the GPU timing chart in 8,987 ms
+from opening BF1, while CPU navigation is active. Until timing data is
+published it asserts zero resource-capture attempts and no resource image;
+CPU bindings are available. This is open-to-chart time, not an isolated GPU
+query duration. See `build/resource-final-timing-order.log`.
+
+`tools/benchmark_dx12_navigation.py` reproduces GUI measurements with explicit
+capture, library, execution list and query policy, and writes separate raw
+navigation, test-log and summary files. `--baseline` selects the compatibility
+path; `--require-reuse` makes unsupported preparation a test failure. Use a
+fresh `--out` directory for each run and run GPU comparisons sequentially.
+
+### Final Release regression and portable verification
+
+The Release build and final package completed successfully. The full CTest run
+covered 159 targets in 887.21 seconds (`build/resource-complete-regression.log`):
+156 passed, two reproduced baseline failures, and the recovery target was
+stopped for diagnosis. Its fault-worker fixture lacked the replay identity
+envelope already required by the pre-change GUI, so intended artifact-failure
+cases never reached artifact validation. The fixture now echoes that envelope;
+separate missing/invalid-identity cases still verify rejection. Production
+identity validation was not weakened.
+
+After rebuilding, the complete recovery target passed all 123 QtTest cases,
+with zero failures or skips, in 232.434 seconds
+(`build/resource-recovery-final.log`). An intermediate run encountered child
+process startup failures; the isolated reproducer and subsequent full rerun
+passed, and the failed log is retained as
+`build/resource-final-recovery-regression.log`. Combining the full suite and
+this targeted retest gives 157 passing CTest targets and two baseline failures:
+`replay_debug_model` (the existing `typedInstructionWatchLifetime` assertion)
+and `class_linkage` (NVIDIA `nvGetCompilerInterface` crash). This is not a claim
+that a single full-suite invocation passed. Optional real-capture cases skipped
+inside otherwise passing targets are not used as optimization evidence.
+
+DX11 History and Checkpoint regressions passed after restricting immediate
+resource scheduling to DX12 (`build/resource-dx11-scheduling-tests.log`). The
+final backend-switch test also passed, checking DX11 image/geometry results,
+DX12 capture switching, execution/source-record domains and stale selections
+(`build/resource-final-backend-switch.log`). Its event-count assertion now
+uses the selected domain's session count instead of a historical hardcoded
+record-count threshold.
+
+The final portable directory is
+`out/FloraGPA-dx12-resources-20261022-final`, with pinned RenderDoc, DXC and Qt
+dependencies. Minimal Windows-only PATH checks passed GUI `--version`, CLI
+`--help`, BF1 native replay, the retained analysis sequence, and GUI opening
+through automatic GPU timing publication. The GUI screenshot was visually
+inspected. Packaged pipeline, buffer, preview and thumbnail requests shared
+one `OpenCapture`; both image requests omitted raw-storage reads and files.
+Evidence is retained in:
+
+- `build/resource-final-package.log` and `build/resource-portable-startup.json`
+- `artifacts/dx12-portable-resident-final/summary.json`
+- `artifacts/dx12-portable-smoke-summary.json`
+- `artifacts/dx12-portable-gui-final.png`
+- `artifacts/dx12-portable-modules-final.json`
+
+The module verifier checked four successful native/analysis process snapshots:
+dependencies came from the package, Windows or the capture's Agility SDK,
+with no external GPA/Python runtime. This is a portable smoke test on the
+development machine, not clean-machine certification or a lifetime DLL trace.
+The package's `build-info.json` identifies the final source commit and hashes
+the shipped application executables.

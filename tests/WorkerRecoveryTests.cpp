@@ -35,6 +35,8 @@ class WorkerRecoveryTests final : public QObject {
             QTest::newRow(mode) << QString(mode);
         for (const auto mode : {"image-resource-missing", "image-resource-unknown", "image-resource-kind"})
             QTest::newRow(mode) << QString(mode);
+        for (const auto mode : {"identity-missing", "identity-invalid"})
+            QTest::newRow(mode) << QString(mode);
         for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid", "image-async-cancel", "image-async-switch", "image-async-close", "image-async-destroy", "image-async-success"})
             QTest::newRow(mode) << QString(mode);
         for (auto mode : {"buffer-valid", "buffer-short", "buffer-hash", "buffer-resource", "buffer-range",
@@ -102,7 +104,7 @@ class WorkerRecoveryTests final : public QObject {
                               mode.startsWith("payload-") ? "exercisePayloadRecovery" :
                               mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery";
         child.start(executable, {exercise, "-o", log + ",txt"});
-        QVERIFY(child.waitForStarted());
+        QVERIFY2(child.waitForStarted(), qPrintable(child.errorString()));
         const auto cleanup = qScopeGuard([&] { if (child.state() != QProcess::NotRunning) { child.kill(); child.waitForFinished(); } });
         QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 240000);
         QFile file(log); QVERIFY(file.open(QIODevice::ReadOnly));
@@ -291,6 +293,7 @@ class WorkerRecoveryTests final : public QObject {
         QCOMPARE(window.capturePath(), path);
         const auto error = window.statusBar()->currentMessage();
         QVERIFY(!error.isEmpty());
+        if (mode.startsWith("identity-")) QVERIFY2(error.contains("identity", Qt::CaseInsensitive), qPrintable(error));
         if (mode == "stderr-tail") QCOMPARE(error, QString("Fault sentinel without newline"));
         if (mode == "stderr-lines") QCOMPARE(error, QString("Fault sentinel with newline"));
         if (mode == "timeout") {

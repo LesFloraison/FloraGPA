@@ -1565,7 +1565,11 @@ static Json executeRdcJob(const Json &job, Session *retained) {
     const bool frameEndHistory = job.value("frame_end", false);
     if (frameEndHistory && !dx12) throw std::runtime_error("Frame-end history requires a native DX12 capture");
     if (!queryPolicy.is_null() && !dx12) throw std::runtime_error("Query isolation requires a DX12 capture");
-    auto mapping = session.mapping;
+    // Resource History annotates isolated query resolves. Browsing only reads
+    // the retained index and must not copy the entire frame for each thumbnail.
+    Json requestMapping;
+    if (action == "resource-history" && !queryPolicy.is_null()) requestMapping = session.mapping;
+    auto &mapping = requestMapping.is_null() ? session.mapping : requestMapping;
     if (job.value("analysis_frame", false)) {
         if (!dx12 || frameEnd.is_null()) throw std::runtime_error("Analysis reuse requires a verified full-frame capture");
         if (session.analysisBoundaries.is_null()) {
@@ -1635,6 +1639,7 @@ static Json executeRdcJob(const Json &job, Session *retained) {
     auto complete = [&] {
         session.checkCancelled();
         result["latency"] = {{"open_capture_ms", session.requests == 1 ? session.openMilliseconds : 0.0},
+            {"queue_ms", job.value("analysis_queue_ms", 0.0)},
             {"index_ms", indexMs}, {"set_event_ms", eventMs}, {"request_ms", elapsed.nsecsElapsed() / 1e6},
             {"session_requests", session.requests}, {"open_capture_count", 1}};
         if (dx12 && session.discardPatternsSkipped) {
@@ -1724,8 +1729,17 @@ static Json executeRdcJob(const Json &job, Session *retained) {
                     "Pixel History describes this replay's selected texture; its values and test results "
                     "do not establish complete original-frame fidelity.");
             }
-            result["execution_map"] = mapping["execution_map"];
-            result["record_executions"] = mapping["record_executions"];
+            const bool compact = retained && (action == "pipeline" || action == "resource-workspace");
+            if (compact) {
+                const auto selected = job.at("execution").get<std::string>();
+                result["execution_map"] = Json::object();
+                if (mapping.at("execution_map").contains(selected))
+                    result["execution_map"][selected] = mapping.at("execution_map").at(selected);
+                result["mapping_scope"] = "selected_execution; full index retained by analysis session";
+            } else {
+                result["execution_map"] = mapping["execution_map"];
+                result["record_executions"] = mapping["record_executions"];
+            }
             result["execution"] = job.value("execution", Json(nullptr));
             result.erase("gpa_event");
         }

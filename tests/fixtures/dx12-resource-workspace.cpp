@@ -57,15 +57,25 @@ int main(int argc, char **argv) try {
     td.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; td.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
     auto depth = resource(td, D3D12_RESOURCE_STATE_DEPTH_WRITE,
         L"Flora DX12 resource 9007199254740994 creation 18446744073709551614");
+    td.Format = DXGI_FORMAT_R8G8B8A8_UNORM; td.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+    td.SampleDesc.Count = 4;
+    auto multisample = resource(td, D3D12_RESOURCE_STATE_RENDER_TARGET,
+        L"Flora DX12 resource 9007199254740996 creation 18446744073709551610");
+    td.SampleDesc.Count = 1; td.Format = DXGI_FORMAT_R32_UINT;
+    auto integer = resource(td, D3D12_RESOURCE_STATE_RENDER_TARGET,
+        L"Flora DX12 resource 9007199254740997 creation 18446744073709551611");
+    td.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D; td.DepthOrArraySize = 4; td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    auto volume = resource(td, D3D12_RESOURCE_STATE_RENDER_TARGET,
+        L"Flora DX12 resource 9007199254740998 creation 18446744073709551612");
     D3D12_RESOURCE_DESC bd{}; bd.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
     bd.Width = 256; bd.Height = bd.DepthOrArraySize = bd.MipLevels = 1; bd.SampleDesc.Count = 1;
     bd.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     auto buffer = resource(bd, D3D12_RESOURCE_STATE_COPY_DEST,
         L"Flora DX12 resource 9007199254740995 creation 18446744073709551615");
     auto upload = resource(bd, D3D12_RESOURCE_STATE_GENERIC_READ, L"Fixture upload", true);
-    D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 1;
+    D3D12_DESCRIPTOR_HEAP_DESC hd{}; hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 4;
     ComPtr<ID3D12DescriptorHeap> rtvs; check(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&rtvs)));
-    hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+    hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV; hd.NumDescriptors = 1;
     ComPtr<ID3D12DescriptorHeap> dsvs; check(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&dsvs)));
     D3D12_RENDER_TARGET_VIEW_DESC view{}; view.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
@@ -73,6 +83,12 @@ int main(int argc, char **argv) try {
     const auto rtv = rtvs->GetCPUDescriptorHandleForHeapStart(), dsv = dsvs->GetCPUDescriptorHandleForHeapStart();
     device->CreateRenderTargetView(color.Get(), &view, rtv);
     device->CreateDepthStencilView(depth.Get(), nullptr, dsv);
+    const auto increment = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    const D3D12_CPU_DESCRIPTOR_HANDLE msRtv{rtv.ptr + increment}, intRtv{rtv.ptr + 2 * increment}, volumeRtv{rtv.ptr + 3 * increment};
+    device->CreateRenderTargetView(multisample.Get(), nullptr, msRtv);
+    device->CreateRenderTargetView(integer.Get(), nullptr, intRtv);
+    view = {}; view.Format = DXGI_FORMAT_R8G8B8A8_UNORM; view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
+    view.Texture3D.WSize = 4; device->CreateRenderTargetView(volume.Get(), &view, volumeRtv);
     auto write = [&](bool after, bool poison = false) {
         uint32_t *mapped{}; D3D12_RANGE read{};
         check(upload->Map(0, &read, reinterpret_cast<void **>(&mapped)));
@@ -84,6 +100,10 @@ int main(int argc, char **argv) try {
         check(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list)));
         const float rgba[]{poison ? 1.f : after ? .75f : .25f, .5f, .75f, 1.f};
         list->ClearRenderTargetView(rtv, rgba, 0, nullptr);
+        list->ClearRenderTargetView(msRtv, rgba, 0, nullptr);
+        list->ClearRenderTargetView(volumeRtv, rgba, 0, nullptr);
+        const float uintColor[]{poison ? 99.f : after ? 42.f : 7.f, 0, 0, 0};
+        list->ClearRenderTargetView(intRtv, uintColor, 0, nullptr);
         list->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
             poison ? 1.f : after ? .75f : .25f, poison ? 255 : after ? 201 : 37, 0, nullptr);
         list->CopyBufferRegion(buffer.Get(), 0, upload.Get(), 0, 256);

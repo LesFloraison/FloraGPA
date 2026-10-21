@@ -4,6 +4,7 @@
 #include <QAction>
 #include <QCryptographicHash>
 #include <QDir>
+#include <QDirIterator>
 #include <QDialog>
 #include <QFile>
 #include <QDialogButtonBox>
@@ -71,8 +72,12 @@ void MainWindow::prepareCpuBindings() {
         catch (const std::exception &e) { return QString::fromUtf8(e.what()); }
     }));
 }
-void MainWindow::showCpuBindings(const QString &context) {
-    if (context.isEmpty() || dx12InventoryKey_ == context || resourceScope_->currentIndex() != 0 ||
+void MainWindow::showCpuBindings(const QString &requestedContext) {
+    // Static metadata remains useful even when missing queries or unsupported
+    // GPU work prevent building a replay-capability context.
+    const auto context = requestedContext.isEmpty() ? "cpu:" + QString::number(*selection_.execution) + ':' +
+        QString::fromLatin1(QCryptographicHash::hash(drawTimingContext().toUtf8(), QCryptographicHash::Sha256).toHex()) : requestedContext;
+    if (dx12InventoryKey_ == context || resourceScope_->currentIndex() != 0 ||
         (dx12CpuInventoryKey_ == context && resourceBrowser_->contextKey() == context)) return;
     try {
         QElapsedTimer timer; timer.start();
@@ -95,6 +100,7 @@ void MainWindow::showCpuBindings(const QString &context) {
     }
 }
 bool MainWindow::showCachedDx12Preview(const Json &request, const QString &context) {
+    QElapsedTimer publication; publication.start();
     if (!sameLibraryFile(rdcLibraryStamp_, dx12Pipeline_->backendPath())) {
         emit dx12Pipeline_->backendChanged();
         return false;
@@ -115,6 +121,7 @@ bool MainWindow::showCachedDx12Preview(const Json &request, const QString &conte
         .arg(selection_.resource).arg(selection_.before ? "Before" : "After").arg(*selection_.execution));
     resourceStatus_->setText("Bindings and preview ready · cache hit");
     setProperty("resourceCacheHits", property("resourceCacheHits").toUInt() + 1);
+    setProperty("resourceUiPublishMs", publication.nsecsElapsed() / 1e6);
     return true;
 }
 QString MainWindow::analysisFrameKey() const {
@@ -126,27 +133,48 @@ QString MainWindow::analysisFrameKey() const {
 void MainWindow::trimAnalysisCaptures() {
     constexpr qint64 budget = 8LL * 1024 * 1024 * 1024;
     qint64 bytes{};
-    for (const auto &[key, capture] : historyCaptures_) bytes += QFileInfo(capture.path).size();
+    std::map<QString, qint64> sizes;
+    for (const auto &[key, capture] : historyCaptures_) {
+        qint64 size{};
+        QDirIterator files(capture.directory->path(), QDir::Files, QDirIterator::Subdirectories);
+        while (files.hasNext()) { files.next(); size += files.fileInfo().size(); }
+        sizes[key] = std::max(size, QFileInfo(capture.path).size());
+        bytes += sizes.at(key);
+    }
     for (const auto &key : QStringList(historyCacheOrder_)) {
         if (bytes <= budget) break;
         if (key == historyKey_) continue; // The controller's capture stays pinned until switched.
         if (const auto found = historyCaptures_.find(key); found != historyCaptures_.end()) {
-            bytes -= QFileInfo(found->second.path).size(); historyCaptures_.erase(found);
+            bytes -= sizes.at(key); historyCaptures_.erase(found);
         }
         historyCacheOrder_.removeAll(key);
     }
 }
 void MainWindow::prepareAnalysisFrame() {
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || dx12ContentPending_ ||
-        centerTabs_->currentWidget() != resourceWorkspace_) return;
+        centerTabs_->currentWidget() != resourceWorkspace_) {
+        setProperty("analysisFrameState", "foreground_pending"); return;
+    }
     const auto key = analysisFrameKey();
-    if (key.isEmpty() || historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
+    if (key.isEmpty()) {
+        auto selected = selection_; selected.frameEnd = true; selected.before = false; selected.resource = 0;
+        setProperty("analysisFrameState", "unavailable: " + QString::fromStdString(session_->capability(ReplayFeature::Replay, selected).reason));
+        return;
+    }
+    if (historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
+    setProperty("analysisFrameState", "preparing");
     try {
         const auto submissions = session_->submissionDetails();
+        const auto initialization = session_->information().at("initialization_records").get<uint64_t>();
         std::set<std::string> queues;
-        for (const auto &list : submissions.at("lists")) queues.insert(list.at("queue").get<std::string>());
+        // Initialization uploads have already completed before capture begins.
+        // Their helper queues do not contribute to the observed frame order.
+        for (const auto &list : submissions.at("lists"))
+            if (decimal(list.at("submission_record")) > initialization)
+                queues.insert(list.at("queue").get<std::string>());
         if (queues.size() != 1) {
             analysisFrameFailed_.insert(key);
+            setProperty("analysisFrameState", "unsupported_frame_queue_order");
             log_->appendPlainText("Analysis reuse fallback: multiple or unresolved queues require exact prefix capture.");
             return;
         }
@@ -160,6 +188,7 @@ void MainWindow::prepareAnalysisFrame() {
         setBusy(true);
         statusBar()->showMessage("Preparing reusable analysis frame…");
     } catch (const std::exception &e) {
+        setProperty("analysisFrameState", "failed: " + QString::fromUtf8(e.what()));
         analysisFrameFailed_.insert(key); log_->appendPlainText(QString::fromUtf8(e.what()));
     }
 }
@@ -406,8 +435,9 @@ void MainWindow::pumpDx12Resources() {
         const auto capability = session_->capability(ReplayFeature::Replay, selected);
         const auto reason = capability.supported() ? QString("Selected execution is disabled by the experiment") :
             QString::fromStdString(capability.reason);
-        resourceBrowser_->clear(reason);
-        resourceStatus_->setText(reason + " · Refresh to retry");
+        const bool cpuReady = !resourceBrowser_->bindings().empty() && resourceBrowser_->contextKey() == dx12CpuInventoryKey_;
+        if (!cpuReady) resourceBrowser_->clear(reason);
+        resourceStatus_->setText((cpuReady ? "CPU bindings ready · GPU preview unavailable: " : "") + reason + " · Refresh to retry");
         dx12ContentPending_ = false;
         return;
     }
@@ -418,7 +448,9 @@ void MainWindow::pumpDx12Resources() {
             auto selection = selection_; selection.resource = 0;
             const auto capability = session_->capability(ReplayFeature::PipelineInspection, selection);
             if (!capability.supported()) {
-                resourceBrowser_->clear(QString::fromStdString(capability.reason));
+                if (resourceBrowser_->contextKey() != dx12CpuInventoryKey_)
+                    resourceBrowser_->clear(QString::fromStdString(capability.reason));
+                resourceStatus_->setText(QString::fromStdString(capability.reason) + " · Refresh to retry");
                 dx12FailedKey_ = context; return;
             }
             if (auto cached = dx12PipelineCache_.object(context)) {
@@ -445,6 +477,9 @@ void MainWindow::pumpDx12Resources() {
                         if (binding.key == key.get<std::string>()) requests.push_back(dx12ResourceReadRequest(true, &binding));
             }
             if (requests.empty()) {
+                const auto key = analysisFrameKey();
+                if (historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
+                setProperty("analysisFrameState", "idle_timer");
                 if (!analysisFrameTimer_.isActive()) analysisFrameTimer_.start();
                 return;
             }
@@ -456,11 +491,12 @@ void MainWindow::pumpDx12Resources() {
         readRdcAnalysis(nullptr, RdcAnalysis::Resources);
     } catch (const std::exception &e) {
         dx12FailedKey_ = context; dx12ContentPending_ = false;
-        resourceStatus_->setText(QString::fromUtf8(e.what()));
+        resourceStatus_->setText(QString::fromUtf8(e.what()) + " · Refresh to retry");
         resourceBrowser_->failPreviews(context, QString::fromUtf8(e.what()));
     }
 }
 bool MainWindow::finishDx12Resources(const Json &result) {
+    QElapsedTimer publication; publication.start();
     const auto context = historyContextKey(true);
     if (runningResourceKey_ != context || context.isEmpty() || historyRequestId_ != revision_) return false;
     if (!result.value("ok", false)) {
@@ -646,6 +682,7 @@ bool MainWindow::finishDx12Resources(const Json &result) {
         }
     }
     if (hasThumbnails) resourceBrowser_->acceptPreviews(context, std::move(thumbnails));
+    setProperty("resourceUiPublishMs", publication.nsecsElapsed() / 1e6);
     QTimer::singleShot(0, this, &MainWindow::pumpDx12Resources);
     return true;
 }

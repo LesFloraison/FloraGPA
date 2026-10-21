@@ -8,13 +8,26 @@ int wmain(int argc, wchar_t **argv) {
     char setting[64]{};
     GetEnvironmentVariableA("FLORA_FAULT_MODE", setting, DWORD(sizeof setting));
     const std::string mode = setting;
-    std::filesystem::path out;
-    for (int i = 1; i + 1 < argc; ++i) if (std::wstring(argv[i]) == L"--out") out = argv[i + 1];
+    std::filesystem::path out, identity;
+    for (int i = 1; i + 1 < argc; ++i) {
+        if (std::wstring(argv[i]) == L"--out") out = argv[i + 1];
+        if (std::wstring(argv[i]) == L"--replay-identity") identity = argv[i + 1];
+    }
     if (mode == "stderr-tail") { std::cerr << R"({"error":"Fault sentinel without newline"})"; return 23; }
     if (mode == "stderr-lines") { std::cerr << "progress replay 1 2\n" << R"({"error":"Fault sentinel with newline"})" << "\n"; return 24; }
     if (mode == "crash") { TerminateProcess(GetCurrentProcess(), 0xc0000005); return 99; }
     if (mode == "timeout" || mode == "cancel") { Sleep(INFINITE); return 99; }
     if (out.empty()) return 98;
+    if (mode != "no-output") {
+        std::filesystem::create_directories(out);
+        if (mode == "identity-missing") return 0;
+        if (mode == "identity-invalid") {
+            std::ofstream(out / "response-identity.json") << "{}"; return 0;
+        }
+        // A successful transport must carry the real worker's identity envelope
+        // before the deliberately faulty payload reaches artifact validation.
+        if (!identity.empty()) std::filesystem::copy_file(identity, out / "response-identity.json");
+    }
     if (mode.starts_with("geometry-export-") || mode.starts_with("image-") || mode.starts_with("buffer-") || mode.starts_with("report-") || mode.starts_with("payload-") ||
         mode.starts_with("coverage-") || mode.starts_with("quad-") || mode.starts_with("thumbnail-") || mode.starts_with("catalog-") || mode.starts_with("export-")) {
         wchar_t root[32768]{};

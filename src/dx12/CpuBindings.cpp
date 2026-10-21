@@ -157,7 +157,8 @@ struct CpuBindings::Impl {
                 try { auto &heap = heaps.at(creation(heapObjects, object, id));
                     (type == 0x15a3eb3b8e877ULL ? heap.cpu : heap.gpu) = address;
                 } catch (const std::exception &) {}
-            } else if (type == 0x26000000000000ULL) {
+            } else if (type == 0x14538e8691d1cULL || type == 0x1e650e8691d1cULL ||
+                       type == 0x15a3ee8691d1cULL || type == 0x12949e8691d1cULL) {
                 Reader r(payload(id)); const auto object = r.read<uint64_t>();
                 if (r.read<uint32_t>() == 0) for (const auto *objects : {&heapObjects, &resourceObjects, &roots}) {
                     const auto found = objects->find(object); if (found == objects->end()) continue;
@@ -228,6 +229,9 @@ struct CpuBindings::Impl {
                     for (uint32_t i = first; i < first + count; ++i) { changes[*recording]["VB/" + std::to_string(i)].push_back(id); charge(16); }
                     break;
                 }
+                default:
+                    if ((type >> 32) == 0x1ae3c && streamPacketName(type).starts_with("Unknown")) key = "unknown-state";
+                    break;
                 }
                 if (!key.empty()) { changes[*recording][key].push_back(id); charge(32); }
             }
@@ -296,6 +300,10 @@ struct CpuBindings::Impl {
 };
 Json CpuBindings::Impl::snapshot(uint64_t execution) const {
     const auto e = submissions.execution(execution);
+    const auto workType = directory.packets().at(size_t(e.record - 1)).type;
+    require(streamPacketWork(workType),
+            "CPU binding snapshots require a Draw, Dispatch or indirect execution");
+    const bool compute = workType == 0x1ae3cef0e6c17ULL, indirect = workType == 0x1ae3ccddf9f8cULL;
     const auto recording = submissions.recordingForRecord(e.record);
     require(recording && e.recordingComplete, "CPU bindings require a complete recording generation");
     Json rows = Json::array(), gaps = Json::array();
@@ -305,10 +313,12 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
     auto last = [&](const std::string &key) {
         const auto it = state.find(key); return it == state.end() ? uint64_t(0) : previous(it->second, e.record);
     };
+    const auto unknownState = last("unknown-state"), indirectRecord = last("indirect");
     auto row = [&](const std::string &stage, const std::string &binding, const std::string &kind,
                    uint32_t slot, uint32_t space, auto read) {
         Json details, ref;
         try {
+            require(!indirect, "Indirect operation binding scope requires replay confirmation");
             ref = read(details);
             if (ref.value("mapping_status", "") == "capture_resource_marker")
                 require(creation(resourceObjects, std::stoull(ref.at("resource_object").get<std::string>()), e.submission) ==
@@ -322,7 +332,7 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
         details["cpu_binding_status"] = ref.value("mapping_status", "") == "capture_resource_marker" ? "captured" : "pending";
         rows.push_back({{"section", stage}, {"binding", binding}, {"resource", ref}, {"details", details}});
     };
-    if (const auto id = last("OM")) {
+    if (const auto id = compute ? 0 : last("OM")) {
         Reader r(payload(id)); r.skip(8); const auto count = r.read<uint32_t>();
         require(count <= 8, "Invalid RTV binding count");
         std::vector<uint64_t> handles;
@@ -331,20 +341,26 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
         const auto contiguous = r.read<BOOL>(); const auto depth = r.flag() ? r.read<uint64_t>() : 0; r.end();
         require(handles.size() == (contiguous && count ? 1 : count), "Incomplete RTV handles");
         for (uint32_t i = 0; i < count; ++i) row("OM", "RTV " + std::to_string(i), "RTV", i, 0, [&](Json &details) {
+            require(id > unknownState, "Unknown command may have changed output bindings");
             auto slot = resolve(handles[contiguous ? 0 : i], id, false); if (contiguous) slot.second += i;
             require(slot.second < heaps.at(slot.first).recipe.description.NumDescriptors, "RTV range exceeds heap");
             return describe(*view(slot, id, true), details);
         });
-        if (depth) row("OM", "DSV", "DSV", 0, 0, [&](Json &details) { return describe(*view(resolve(depth, id, false), id, true), details); });
+        if (depth) row("OM", "DSV", "DSV", 0, 0, [&](Json &details) {
+            require(id > unknownState, "Unknown command may have changed depth binding");
+            return describe(*view(resolve(depth, id, false), id, true), details);
+        });
     }
-    if (const auto id = last("IB")) row("IA", "Index buffer", "IB", 0, 0, [&](Json &details) {
+    if (const auto id = compute ? 0 : last("IB")) row("IA", "Index buffer", "IB", 0, 0, [&](Json &details) {
+        require(id > std::max(indirectRecord, unknownState), "Index binding may be GPU-generated; pending replay confirmation");
         Reader r(payload(id)); r.skip(8);
         if (!r.flag()) return Json{{"mapping_status", "unbound"}};
         const auto buffer = r.read<D3D12_INDEX_BUFFER_VIEW>(); r.end();
         return bufferReference(buffer.BufferLocation, id, buffer.SizeInBytes, details);
     });
-    for (uint32_t i = 0; i < 32; ++i) if (const auto id = last("VB/" + std::to_string(i)))
+    for (uint32_t i = 0; !compute && i < 32; ++i) if (const auto id = last("VB/" + std::to_string(i)))
         row("IA", "VB " + std::to_string(i), "VB", i, 0, [&](Json &details) {
+            require(id > std::max(indirectRecord, unknownState), "Vertex binding may be GPU-generated; pending replay confirmation");
             Reader r(payload(id)); r.skip(8); const auto start = r.read<uint32_t>(), count = r.read<uint32_t>();
             require(r.flag() && r.read<uint64_t>() == count && i >= start && i - start < count, "Incomplete vertex buffers");
             r.skip(size_t(i - start) * sizeof(D3D12_VERTEX_BUFFER_VIEW)); const auto b = r.read<D3D12_VERTEX_BUFFER_VIEW>();
@@ -352,7 +368,7 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
             return bufferReference(b.BufferLocation, id, b.SizeInBytes, details);
         });
     std::set<uint64_t> boundHeaps;
-    const auto heapRecord = last("heaps"), indirectRecord = last("indirect");
+    const auto heapRecord = last("heaps");
     if (heapRecord) {
         Reader r(payload(heapRecord)); r.skip(8); const auto count = r.read<uint32_t>();
         require(count <= 2 && r.flag() && r.read<uint64_t>() == count, "Invalid bound heaps");
@@ -360,8 +376,10 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
         r.end();
     }
     for (const std::string stage : {"G", "C"}) {
+        if (!indirect && (stage == "C") != compute) continue;
         const auto rootRecord = last(stage + "/root"); if (!rootRecord) continue;
         try {
+            require(rootRecord > unknownState, "Unknown command may have changed root signature");
             Reader r(payload(rootRecord)); r.skip(8); const auto object = r.read<uint64_t>(); r.end();
             if (!object) continue;
             const auto recipe = decodeRootSignature(payload(creation(roots, object, rootRecord)));
@@ -407,6 +425,7 @@ Json CpuBindings::Impl::snapshot(uint64_t execution) const {
                             std::string(kind) + " " + std::to_string(range.BaseShaderRegister + i), kind, range.BaseShaderRegister + i, range.RegisterSpace,
                             [&](Json &details) {
                                 require(argRecord >= heapRecord, "Descriptor heaps changed after root table binding");
+                                require(heapRecord > unknownState, "Unknown command may have changed descriptor heaps");
                                 const auto slot = resolve(argument(), e.submission, true);
                                 const auto &heap = heaps.at(slot.first);
                                 require(creation(heapObjects, heap.recipe.object, heapRecord) == slot.first,

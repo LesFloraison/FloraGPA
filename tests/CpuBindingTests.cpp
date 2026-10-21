@@ -94,7 +94,7 @@ class CpuBindingTests : public QObject {
         };
         D3D12_DESCRIPTOR_RANGE1 range{D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_NONE, 0};
         D3D12_ROOT_PARAMETER1 param{}; param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-        param.DescriptorTable = {1, &range}; param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        param.DescriptorTable = {1, &range}; param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         D3D12_VERSIONED_ROOT_SIGNATURE_DESC desc{}; desc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1; desc.Desc_1_1 = {1, &param, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_NONE};
         Microsoft::WRL::ComPtr<ID3DBlob> blob, errors;
         QVERIFY(SUCCEEDED(D3D12SerializeVersionedRootSignature(&desc, &blob, &errors)));
@@ -110,10 +110,15 @@ class CpuBindingTests : public QObject {
         QByteArray heaps; qword(heaps, 40); dword(heaps, 1); heaps.append(char(1)); qword(heaps, 1); qword(heaps, 51); packet(0x1ae3c4254a275ULL, heaps);
         QByteArray bindRoot; qword(bindRoot, 40); qword(bindRoot, 60); packet(0x1ae3c6959946eULL, bindRoot);
         QByteArray table; qword(table, 40); dword(table, 0); qword(table, 0x4000); packet(0x1ae3c0857cd39ULL, table);
-        om(); const auto originalDraw = draw(); close();
+        packet(0x1ae3c9fea880cULL, bindRoot); packet(0x1ae3cbf4ff4b7ULL, table);
+        om(); const auto originalDraw = draw();
+        QByteArray dispatch; qword(dispatch, 40); dword(dispatch, 1); dword(dispatch, 1); dword(dispatch, 1);
+        const auto originalDispatch = packet(0x1ae3cef0e6c17ULL, dispatch); close();
         view(200, false); view(200, true); submit();
         view(100, true); submit(); // Same source recording, different descriptor execution state.
         reset(); om(); const auto nextDraw = draw(); close(); submit();
+        QByteArray release; qword(release, 200); dword(release, 0); packet(0x14538e8691d1cULL, release);
+        reset(); om(); const auto releasedDraw = draw(); close(); submit();
         const auto reused = resource(100); view(100, false); reset(); om(); const auto reusedDraw = draw(); close(); submit();
         save(path + "/thread-1-0", packets);
         dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString())); dx12::SubmissionIndex submissions(directory);
@@ -122,11 +127,19 @@ class CpuBindingTests : public QObject {
         for (uint64_t i = 1; i <= submissions.executionCount(); ++i) {
             const auto event = submissions.execution(i);
             if (event.record == originalDraw) original.push_back(index.snapshot(i));
+            if (event.record == originalDispatch) {
+                const auto rows = index.snapshot(i).at("pipeline_rows");
+                QCOMPARE(rows.size(), size_t(1)); QCOMPARE(rows[0].at("section"), Json("CS"));
+            }
             if (event.record == nextDraw) QCOMPARE(index.snapshot(i).at("pipeline_rows")[0].at("resource").at("resource_creation"), Json(std::to_string(b)));
             if (event.record == reusedDraw) QCOMPARE(index.snapshot(i).at("pipeline_rows")[0].at("resource").at("resource_creation"), Json(std::to_string(reused)));
+            if (event.record == releasedDraw) QCOMPARE(index.snapshot(i).at("pipeline_rows")[0].at("resource").at("mapping_status"), Json("pending_cpu_binding"));
         }
         QCOMPARE(original.size(), size_t(2));
-        for (const auto &snapshot : original) QCOMPARE(snapshot.at("pipeline_rows")[0].at("resource").at("resource_creation"), Json(std::to_string(a)));
+        for (const auto &snapshot : original) {
+            QCOMPARE(snapshot.at("pipeline_rows").size(), size_t(2));
+            QCOMPARE(snapshot.at("pipeline_rows")[0].at("resource").at("resource_creation"), Json(std::to_string(a)));
+        }
         QCOMPARE(original[0].at("pipeline_rows")[1].at("resource").at("resource_creation"), Json(std::to_string(b)));
         QCOMPARE(original[1].at("pipeline_rows")[1].at("resource").at("resource_creation"), Json(std::to_string(a)));
     }

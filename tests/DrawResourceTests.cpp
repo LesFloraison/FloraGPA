@@ -300,9 +300,28 @@ class DrawResourceTests final : public QObject {
             Json buffer{{"creation", "18446744073709551615"}, {"object", "9007199254740995"},
                         {"resource_description", {{"Dimension", 1}, {"Width", "256"}}},
                         {"key", "buffer"}, {"buffer", true}, {"thumbnail", false}, {"offset", "4"}, {"length", "8"}};
+            auto msaa = color; msaa["creation"] = "18446744073709551610"; msaa["object"] = "9007199254740996";
+            msaa["key"] = "msaa"; msaa["mip"] = msaa["layer"] = 0;
+            msaa["resource_description"] = {{"Dimension", 3}, {"Width", "8"}, {"Height", 8}, {"MipLevels", 1},
+                {"DepthOrArraySize", 1}, {"SampleCount", 4}, {"Format", 28}};
+            auto integer = msaa; integer["creation"] = "18446744073709551611"; integer["object"] = "9007199254740997";
+            integer["key"] = "uint"; integer["high"] = 255.; integer["component_type"] = 4;
+            integer["resource_description"]["SampleCount"] = 1; integer["resource_description"]["Format"] = 42;
+            auto volume = msaa; volume["creation"] = "18446744073709551612"; volume["object"] = "9007199254740998";
+            volume["key"] = "volume"; volume["slice"] = 2;
+            volume["resource_description"]["Dimension"] = 4; volume["resource_description"]["DepthOrArraySize"] = 4;
+            volume["resource_description"]["SampleCount"] = 1;
+            auto requests = Json::array({color, depth, stencil, buffer, thumbnail, duplicate, fast, preview, storage, msaa, integer, volume});
+            for (auto request : {msaa, integer, volume}) {
+                request["key"] = request.at("key").get<std::string>() + "-fast";
+                request["high"] = 1.;
+                request["output"] = "thumbnail"; request["thumbnail"] = true; requests.push_back(request);
+            }
+            auto depthFast = depth; depthFast["key"] = "depth-fast";
+            depthFast["output"] = "thumbnail"; depthFast["thumbnail"] = true; requests.push_back(depthFast);
             auto job = prepareRdcJob(capture, "resource-workspace", dir + "/read", library,
                 {{"execution", "9007199254740999"}, {"boundary", boundary},
-                 {"resource_requests", Json::array({color, depth, stencil, buffer, thumbnail, duplicate, fast, preview, storage})}});
+                 {"resource_requests", requests}});
             const auto jobPath = dir + "/job.json";
             { QFile output(jobPath); QVERIFY(output.open(QIODevice::WriteOnly)); output.write(QByteArray::fromStdString(job.dump(2))); }
             run("FloraGPA.Rdc.exe", {"--job", jobPath});
@@ -334,6 +353,15 @@ class DrawResourceTests final : public QObject {
             QVERIFY(!rows[8].contains("image"));
             QVERIFY(!QFile::exists(dir + "/read/resource-8.png"));
             QCOMPARE(rows[8].at("sha256"), rows[0].at("sha256"));
+            for (const auto i : {9, 11}) QVERIFY(std::abs(image(i).pixelColor(0, 0).red() - (after ? 191 : 64)) <= 1);
+            const auto uintRaw = read(dir + "/read/" + QString::fromStdString(rows[10].at("file")));
+            uint32_t uintValue{}; memcpy(&uintValue, uintRaw.constData(), 4); QCOMPARE(uintValue, after ? 42u : 7u);
+            for (const auto i : {12, 13, 14, 15}) {
+                QCOMPARE(rows[i].at("storage_read"), Json(false)); QVERIFY(!rows[i].contains("file"));
+                QVERIFY(image(i).width() <= 96 && image(i).height() <= 96);
+            }
+            for (const auto i : {6, 12, 14, 15})
+                QVERIFY(std::abs(image(i).pixelColor(image(i).width() / 2, image(i).height() / 2).red() - (after ? 191 : 64)) <= 1);
             auto exportJob = job;
             exportJob["resource_requests"] = Json::array({storage});
             exportJob["experiment_key"] = "immutable-export-context";
@@ -358,7 +386,7 @@ class DrawResourceTests final : public QObject {
                 if (rows[i].contains("sha256")) QCOMPARE(reused[i].at("sha256"), rows[i].at("sha256"));
                 if (rows[i].contains("image")) QCOMPARE(QImage(dir + "/reuse/" + QString::fromStdString(reused[i].at("image"))), image(i));
             }
-            qInfo() << boundary << "color/depth/stencil/buffer and mip 1 array 1 verified";
+            qInfo() << boundary << "color/depth/stencil/buffer, mip/array, MSAA, integer and 3D slice verified";
         }
     }
     void rangesBuffersAndNoRt() {

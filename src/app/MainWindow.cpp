@@ -315,6 +315,7 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             }
             updateStatistics();
             setBusy(false);
+            resourceTimer_.setInterval(session_->backend() == ReplayBackend::Dx12 ? 100 : 200);
             emit captureLoaded();
             if (!frame_) prepareCpuBindings();
             auto timingSelection = selection_;
@@ -2148,8 +2149,11 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         if (resources && historyRequest_.value("boundary", "") == "before") historyKey_ += ":before";
         const auto fullFrameKey = dx12 && (resources || pipeline) ? analysisFrameKey() : QString{};
         const auto fallbackKey = fullFrameKey + ':' + QString::number(selection_.execution.value_or(0));
+        const bool globalResource = resources && resourceScope_->currentIndex() != 0;
+        if (globalResource && !fullFrameKey.isEmpty() && historyCaptures_.contains(fullFrameKey))
+            log_->appendPlainText("Analysis reuse fallback: global resource selection requires exact prefix lifetime validation.");
         if (!fullFrameKey.isEmpty() && historyCaptures_.contains(fullFrameKey) &&
-            !analysisFrameFallback_.contains(fallbackKey)) {
+            !globalResource && !analysisFrameFallback_.contains(fallbackKey)) {
             historyKey_ = fullFrameKey;
             historyRequest_["analysis_frame"] = true;
         }
@@ -2721,6 +2725,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             historyCacheOrder_.removeAll(analysisFrameContext_); historyCacheOrder_.append(analysisFrameContext_);
             historyKey_ = analysisFrameContext_; trimAnalysisCaptures();
             setProperty("analysisFrameReady", true);
+            setProperty("analysisFrameState", "ready");
             statusBar()->showMessage("Reusable analysis frame ready", 2000);
             emit taskFinished(true);
             return;
@@ -2944,6 +2949,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
 void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
     if (runningKind_ == "analysis-frame-capture") {
         if (!cancelled) analysisFrameFailed_.insert(analysisFrameContext_);
+        setProperty("analysisFrameState", "failed: " + error);
         log_->appendPlainText("Analysis frame preparation: " + error);
         emit taskFinished(false); return;
     }
