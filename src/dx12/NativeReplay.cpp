@@ -1377,6 +1377,11 @@ void NativeReplay::replay(uint64_t execution, bool after, bool analysisMarkers, 
     const auto validation = s.device.information();
     require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
     s.boundaryReached = true;
+    if (!streamEnd && analysisMarkers) {
+        const auto marker = rdcResourceBoundaryMarker({{"schema", 1}, {"execution", std::to_string(execution)},
+            {"boundary", after ? "after" : "before"}, {"isolate_missing_queries", s.isolateMissingQueries}});
+        s.queue(target.queue)->SetMarker(1, marker.c_str(), UINT(marker.size() + 1));
+    }
     if (streamEnd && analysisMarkers) {
         const auto marker = rdcFrameEndMarker({{"schema", 1}, {"scope", "frame_stream"},
             {"last_record", std::to_string(s.frame->lastRecord)}, {"last_execution", std::to_string(execution)},

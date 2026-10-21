@@ -47,6 +47,7 @@ QString ResourceBrowser::cacheKey(const DrawResourceBinding &b) const {
     identity.erase("key");
     identity.erase("stage");
     identity.erase("slot");
+    if (identity.contains("native")) identity["native"].erase("binding_details");
     return contextKey_ + ':' + QString::fromStdString(identity.dump());
 }
 void ResourceBrowser::clear(const QString &message) {
@@ -70,13 +71,17 @@ void ResourceBrowser::setContext(const QString &key, std::vector<DrawResourceBin
     QSignalBlocker block(tree_);
     const auto inventory = drawResourceInventory(bindings_, event);
     const auto &c = inventory.at("counts");
-    summary_->setText(QString("%1 textures · %2 bindings\n%3 RTs · %4 depth · %5 UAVs")
+    summary_->setText(QString("%1 input textures · %2 bindings\n%3 RTs · %4 depth · %5 UAVs")
                           .arg(c.at("input_textures").get<unsigned>())
-                          .arg(c.at("input_bindings").get<unsigned>())
+                          .arg(bindings_.size())
                           .arg(c.at("rtv").get<unsigned>())
                           .arg(c.at("dsv").get<unsigned>())
                           .arg(c.at("uav").get<unsigned>()));
     summary_->setToolTip("Effective bound resources. Bindings do not prove sampling or writes.");
+    if (std::any_of(bindings_.begin(), bindings_.end(), [](const auto &b) { return !b.native.is_null(); })) {
+        summary_->setText(summary_->text() + "\nPartial descriptors · potential bindings");
+        summary_->setToolTip("RenderDoc enumerates reflected/observed descriptor entries. Uncovered heap entries are not listed. A binding does not prove a GPU read or write.");
+    }
     auto outputs = new QTreeWidgetItem(tree_, {"Outputs · After draw"});
     auto inputs = new QTreeWidgetItem(tree_, {"Inputs · Before draw"});
     auto buffers = new QTreeWidgetItem(inputs, {"Buffers"});
@@ -92,6 +97,28 @@ void ResourceBrowser::setContext(const QString &key, std::vector<DrawResourceBin
                            .arg(id);
         if (b.texture)
             text += QString("\n%1 × %2\n%3").arg(b.width).arg(b.height).arg(formatLabel(b.image.format));
+        if (!b.native.is_null()) {
+            const auto &details = b.native.at("binding_details");
+            if (details.contains("reflection_binding") && !details.at("reflection_binding").is_null()) {
+                const auto &ref = details.at("reflection_binding");
+                text += QString("\nSpace %1 · Element %2").arg(ref.at("space").get<uint32_t>())
+                    .arg(details.value("array_element", 0u));
+            }
+            const auto &descriptor = b.native.at("descriptor");
+            if (b.texture && descriptor.contains("format")) {
+                const auto &format = descriptor.at("format");
+                static const QStringList types{"Typeless", "Float", "UNorm", "SNorm", "UInt", "SInt",
+                                                "UScaled", "SScaled", "Depth", "sRGB"};
+                const auto type = format.value("component_type_enum", 0u);
+                text += "\nView: " + types.value(int(type), "Unknown");
+                if (format.value("srgb", false) && type != 9) text += " sRGB";
+                text += QString(" · M%1 L%2").arg(b.image.mip).arg(b.image.layer);
+            } else if (!b.texture && descriptor.contains("byte_size")) {
+                text += QString("\nOffset %1 · %2 B")
+                    .arg(QString::fromStdString(descriptor.value("byte_offset", "0")),
+                         QString::fromStdString(descriptor.at("byte_size").get<std::string>()));
+            }
+        }
         auto item = new QTreeWidgetItem(
             b.role == ResourceRole::Input ? (b.texture || !b.error.empty() ? inputs : buffers) : outputs,
             {text});
@@ -140,15 +167,17 @@ void ResourceBrowser::showCached() {
     for (const auto &b : bindings_)
         if (auto cached = cache_.object(cacheKey(b))) {
             items_.at(b.key)->setIcon(0, QPixmap::fromImage(*cached, Qt::NoFormatConversion));
+            items_.at(b.key)->setData(0, Qt::UserRole + 1, "ready");
             done_.insert(b.key);
         }
 }
-Json ResourceBrowser::nextPreviews() {
+Json ResourceBrowser::nextPreviews(int boundary) {
     showCached();
     Json keys = Json::array();
     if (!pending_.empty() || !isVisible())
         return {{"previews", keys}};
     auto add = [&](const DrawResourceBinding &b) {
+        if (boundary >= 0 && (b.image.boundary == ImageBoundary::Before ? 0 : 1) != boundary) return;
         if (keys.size() >= 16 || !b.texture || !b.error.empty() || done_.contains(b.key) ||
             pending_.contains(b.key))
             return;
@@ -201,6 +230,7 @@ void ResourceBrowser::acceptPreviews(const QString &key, ThumbnailOutput result)
     }
     for (auto &item : ready) {
         item.item->setIcon(0, item.icon); item.item->setToolTip(0, item.tooltip);
+        item.item->setData(0, Qt::UserRole + 1, item.image.isNull() ? "unavailable" : "ready");
         if (!item.image.isNull()) {
             const int cost = int(std::max<qsizetype>(1, (item.image.sizeInBytes() + 1023) / 1024));
             cache_.insert(item.cacheKey, new QImage(std::move(item.image)), cost);

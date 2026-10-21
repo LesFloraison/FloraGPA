@@ -1,5 +1,9 @@
 # Draw resources workspace
 
+The [2026-10-21 unified workspace](DX12_RESOURCE_WORKSPACE.md) adds DX12 automatic
+binding/content inspection, embeds the global catalogue and buffer viewer, and
+supersedes this historical record's separate catalogue/manual DX12 behavior.
+
 > Historical batch record. Results, package paths, module counts and remaining-work
 > statements below describe this batch. See [current status](CURRENT_STATUS.md)
 > for present support and [the documentation index](README.md) for navigation.

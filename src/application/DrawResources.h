@@ -23,7 +23,21 @@ struct DrawResourceBinding {
     ResourceImageSelection image;
     bool texture{};
     uint32_t width{}, height{}, samples{}, mipEnd{}, layerEnd{}, sliceEnd{};
+    // Backend-specific, checked resource lifetime and descriptor identity.
+    nlohmann::json native;
 };
+class IReplaySession;
+std::vector<DrawResourceBinding> dx12DrawResources(const IReplaySession &, Id execution,
+                                                  const nlohmann::json &pipeline);
+struct Dx12TextureRange {
+    uint32_t mips{}, layers{}, depth{}, planes{}, samples{}, format{};
+    uint32_t count() const;
+    uint32_t index(uint32_t mip, uint32_t layer, uint32_t plane) const;
+};
+Dx12TextureRange dx12TextureRange(const nlohmann::json &descriptor);
+// Validate a resource-workspace request before starting any GPU work. The worker
+// subsequently checks the captured lifetime and RenderDoc's actual description.
+void validateDx12ResourceRequest(const nlohmann::json &request);
 std::vector<DrawResourceBinding> drawResources(const Frame &frame, Id event,
                                                const ReplayOptions &options = {});
 nlohmann::json drawResourceJson(const DrawResourceBinding &binding);

@@ -30,8 +30,11 @@ void MainWindow::invalidateDx12Output() {
     if (!session_ || session_->backend() != ReplayBackend::Dx12)
         return;
     dx12PixelTarget_.reset();
+    resourceBrowser_->failPreviews(resourceBrowser_->contextKey(), "Selection changed");
     if (boundary_->currentIndex() == 0) historyPick_->setChecked(false);
-    selection_.mip = selection_.layer = selection_.sample = 0;
+    selection_.mip = uint32_t(dx12Mip_->value());
+    selection_.layer = uint32_t(dx12Layer_->value());
+    selection_.sample = dx12Sample_->value() < 0 ? 0u : uint32_t(dx12Sample_->value());
     selection_.before = boundary_->currentIndex() == 1;
     bufferTimer_.stop();
     bufferModel_->setBytes({}); displayedBuffer_ = 0; bufferLabel_->clear(); clearBufferDetails();
@@ -47,10 +50,13 @@ void MainWindow::invalidateDx12Output() {
     outputStorageAction_->setEnabled(false);
     imageLabel_->setText(boundary_->currentIndex() == 0
                             ? "Frame end · Select a texture creation for output, then press Replay"
-                            : "Select an execution instance and optional texture creation, then press Replay");
+                            : "Loading selected execution resources…");
     if (selection_.isolateMissingQueries)
         imageLabel_->setText("Incomplete query outputs · " + imageLabel_->text());
     setBusy(busy());
+    dx12FailedKey_.clear();
+    dx12ContentPending_ = true;
+    resourceTimer_.start();
 }
 void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id creation, Id object,
                                        uint32_t x, uint32_t y, uint32_t mip, uint32_t layer, uint32_t sample) {
@@ -66,13 +72,14 @@ void MainWindow::selectDx12TexturePixel(const QString &context, Id execution, Id
         if (boundary_->currentIndex() == 0) boundary_->setCurrentIndex(2);
         inspectResource(creation);
         { const QSignalBlocker block(dx12Subresource_); dx12Subresource_->setValue(int(subresource)); }
+        configureDx12Texture();
         selection_.mip = mip; selection_.layer = layer; selection_.sample = sample;
         dx12PixelTarget_ = Dx12PixelTarget{context, execution, creation, x, y, mip, layer, subresource, selection_.before};
         history_->selectPixel(object, int(x), int(y), int(mip), int(layer), 0);
         centerTabs_->setCurrentIndex(0);
-        imageLabel_->setText(QString("Creation %1 · Mip %2 layer %3 · Pixel (%4, %5) selected; press Replay")
+        imageLabel_->setText(QString("Creation %1 · Mip %2 layer %3 · Pixel (%4, %5) · Loading…")
                                 .arg(creation).arg(mip).arg(layer).arg(x).arg(y));
-        statusBar()->showMessage("Texture pixel selected; Replay reads it at the current execution boundary", 7000);
+        statusBar()->showMessage("Reading selected texture at the current execution boundary", 7000);
     } catch (const std::exception &error) {
         showError(QString::fromUtf8(error.what()));
     }

@@ -140,6 +140,7 @@ void Dx12PipelineView::setBackendPath(const QString &path, bool persist) {
         QSettings().setValue("analysis/renderdoc", path);
     backend_->setToolTip(path);
     invalidate();
+    emit backendChanged();
 }
 void Dx12PipelineView::setWorkerBusy(bool busy) {
     busy_ = busy;

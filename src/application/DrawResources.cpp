@@ -113,7 +113,7 @@ std::vector<DrawResourceBinding> drawResources(const Frame &capture, Id event, c
 }
 Json drawResourceJson(const DrawResourceBinding &b) {
     const auto &s = b.image;
-    return {{"key", b.key},
+    Json result{{"key", b.key},
             {"role", b.role == ResourceRole::Input ? "input" : "output"},
             {"kind", b.kind},
             {"stage", b.stage},
@@ -135,9 +135,17 @@ Json drawResourceJson(const DrawResourceBinding &b) {
             {"layer_end", b.layerEnd},
             {"slice_end", b.sliceEnd},
             {"error", b.error}};
+    if (!b.native.is_null()) {
+        result["native"] = b.native;
+        result["event"] = std::to_string(s.event);
+        result["resource"] = std::to_string(s.resource);
+        result["view"] = std::to_string(s.view);
+    }
+    return result;
 }
 Json drawResourceInventory(const std::vector<DrawResourceBinding> &bindings, Id event) {
     Json rows = Json::array();
+    const bool dx12 = std::any_of(bindings.begin(), bindings.end(), [](const auto &b) { return !b.native.is_null(); });
     std::set<Id> textures;
     unsigned inputs = 0, rt = 0, ds = 0, uav = 0;
     for (const auto &b : bindings) {
@@ -152,7 +160,7 @@ Json drawResourceInventory(const std::vector<DrawResourceBinding> &bindings, Id 
         uav += b.kind == "UAV";
     }
     return {{"completed", true},
-            {"event", event},
+            {"event", dx12 ? Json(std::to_string(event)) : Json(event)},
             {"bindings", rows},
             {"counts",
              {{"input_textures", textures.size()},
@@ -160,8 +168,9 @@ Json drawResourceInventory(const std::vector<DrawResourceBinding> &bindings, Id 
               {"rtv", rt},
               {"dsv", ds},
               {"uav", uav}}},
-            {"source", "effective_capture_bindings"},
-            {"note", "Bound resources; bindings do not prove sampling or writes."}};
+            {"source", dx12 ? "partial_renderdoc_bindings" : "effective_capture_bindings"},
+            {"note", dx12 ? "Potential bindings; unenumerated descriptor entries are not covered. Bindings do not prove GPU accesses."
+                           : "Bound resources; bindings do not prove sampling or writes."}};
 }
 Json exportDrawResources(const Frame &frame, Id event, ReplayOptions options, const Json &request,
                          const std::filesystem::path &directory) {

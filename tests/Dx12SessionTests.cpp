@@ -6017,6 +6017,194 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
                        QCryptographicHash::Sha256)
                        .toHex();
     }
+    void legacyResourceSettings() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set captures for DX12 resource project migration");
+        const auto capture = root + "/Talos_2026_10_18__00_55_08.gpa_frame";
+        const auto session = openReplaySession(std::filesystem::path(capture.toStdWString()));
+        QTemporaryDir temporary;
+        Experiment project(*session);
+        project.save(temporary.filePath("legacy.json"), {{"dx12", {
+            {"schema", 1}, {"domain", "execution_instance"}, {"event", "12675"},
+            {"resource_creation", "167081"}, {"boundary", "2"}, {"subresource", "4"},
+            {"allocation_mib", "12288"}, {"missing_query_policy", "fail"}}}});
+        MainWindow window; QSignalSpy loaded(&window, &MainWindow::captureLoaded), restored(&window, &MainWindow::experimentFinished);
+        window.openCapture(capture); QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        window.openDx12Experiment(temporary.filePath("legacy.json"));
+        QTRY_COMPARE_WITH_TIMEOUT(restored.count(), 1, 60000);
+        QVERIFY(restored.takeFirst()[0].toBool());
+        window.findChild<QAction *>("cancelReplay")->trigger();
+        QCOMPARE(window.findChild<QSpinBox *>("dx12Subresource")->value(), 0);
+        QCOMPARE(window.findChild<QComboBox *>("resourceScope")->currentIndex(), 1);
+        window.findChild<QComboBox *>("bufferMode")->setCurrentIndex(1);
+        window.findChild<QComboBox *>("outputChannel")->setCurrentText("R");
+        window.findChild<QAction *>("cancelReplay")->trigger();
+        QVERIFY(window.saveDx12Experiment(temporary.filePath("current.json")));
+        window.findChild<QComboBox *>("bufferMode")->setCurrentIndex(0);
+        window.openDx12Experiment(temporary.filePath("current.json"));
+        QTRY_COMPARE_WITH_TIMEOUT(restored.count(), 1, 60000);
+        QVERIFY(restored.takeFirst()[0].toBool());
+        window.findChild<QAction *>("cancelReplay")->trigger();
+        QCOMPARE(window.findChild<QComboBox *>("bufferMode")->currentIndex(), 1);
+        QCOMPARE(window.findChild<QComboBox *>("outputChannel")->currentText(), QString("R"));
+        QCOMPARE(window.findChild<QSpinBox *>("dx12Subresource")->value(), 0);
+    }
+    void automaticResourceRejection() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set captures for strict missing-query rejection");
+        MainWindow window; window.show();
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("19408"); QTest::keyClick(locate, Qt::Key_Return);
+        auto status = window.findChild<QLabel *>("resourceStatus");
+        QTRY_VERIFY_WITH_TIMEOUT(status->text().contains("retry"), 5000);
+        QVERIFY(!window.findChild<QCheckBox *>("dx12QueryIsolation")->isChecked());
+        QVERIFY(window.findChild<ResourceBrowser *>()->bindings().empty());
+        QVERIFY(window.findChild<ImageView *>("frameOutput")->image().isNull());
+        QCOMPARE(window.property("resourceCaptureCount").toUInt(), 0u);
+        const auto reason = status->text(); qInfo() << "Strict refusal:" << reason;
+        QTest::qWait(500);
+        QCOMPARE(status->text(), reason); QVERIFY(!window.busy());
+        window.findChild<QAction *>("refreshResources")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(status->text(), reason, 5000);
+        QCOMPARE(window.property("resourceCaptureCount").toUInt(), 0u);
+        const auto output = qEnvironmentVariable("FLORA_RESOURCE_OUTPUT");
+        if (!output.isEmpty()) { QVERIFY(QDir().mkpath(output)); QVERIFY(window.grab().save(output + "/strict-refusal.png")); }
+    }
+    void automaticResourceWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set original capture directory for automatic resource acceptance");
+        const auto capture = qEnvironmentVariable("FLORA_RESOURCE_CAPTURE", "bf1_2025_12_10__14_29_55.gpa_frame");
+        const auto execution = qEnvironmentVariable("FLORA_RESOURCE_EXECUTION", "53533");
+        MainWindow window; window.resize(1700, 1000); window.show();
+        if (const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY"); !library.isEmpty())
+            window.findChild<Dx12PipelineView *>()->setBackendPath(library, false);
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(root + "/" + capture);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        window.findChild<QSpinBox *>("dx12AllocationMiB")->setValue(12288);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText(execution); QTest::keyClick(locate, Qt::Key_Return);
+        auto browser = window.findChild<ResourceBrowser *>("drawResourceBrowser");
+        auto image = window.findChild<ImageView *>("frameOutput");
+        auto status = window.findChild<QLabel *>("resourceStatus");
+        QElapsedTimer elapsed; elapsed.start();
+        QTRY_VERIFY_WITH_TIMEOUT(!browser->bindings().empty() || status->text().contains("retry"), 240000);
+        qInfo() << "Inventory ms" << elapsed.elapsed() << status->text();
+        QVERIFY2(!browser->bindings().empty(), qPrintable(status->text()));
+        const auto primary = browser->selected(); QVERIFY(primary);
+        auto bufferStatus = window.findChild<QLabel *>("bufferLabel"); QVERIFY(bufferStatus);
+        QTRY_VERIFY_WITH_TIMEOUT((primary->texture ? !image->image().isNull() : bufferStatus->text().contains("bytes")) ||
+                                 status->text().contains("retry"), 240000);
+        QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+        qInfo() << "Cold image ms" << elapsed.elapsed() << image->image().size();
+        qInfo() << "Recaptures" << window.property("resourceCaptureCount");
+        if (primary->texture && primary->image.format == 17) // DXGI_FORMAT_R32G32_UINT has no alpha.
+            QCOMPARE(image->image().pixelColor(0, 0).alpha(), 255);
+        if (primary->texture) {
+            const auto thumbnailState = [&] {
+                auto tree = browser->findChild<QTreeWidget *>("drawResources");
+                for (QTreeWidgetItemIterator it(tree); *it; ++it)
+                    if ((*it)->data(0, Qt::UserRole).toString() == QString::fromStdString(primary->key))
+                        return (*it)->data(0, Qt::UserRole + 1).toString();
+                return QString{};
+            };
+            QTRY_VERIFY_WITH_TIMEOUT(!thumbnailState().isEmpty() || status->text().contains("retry"), 240000);
+            QCOMPARE(thumbnailState(), QString("ready"));
+            qInfo() << "Selected thumbnail ready ms" << elapsed.elapsed();
+        }
+        const auto output = qEnvironmentVariable("FLORA_RESOURCE_OUTPUT");
+        if (!output.isEmpty()) {
+            QVERIFY(QDir().mkpath(output));
+            QVERIFY(window.grab().save(output + "/automatic.png"));
+            if (primary->texture) QVERIFY(image->image().save(output + "/selected.png"));
+            QFile report(output + "/bindings.json");
+            QVERIFY(report.open(QIODevice::WriteOnly));
+            report.write(QByteArray::fromStdString(drawResourceInventory(browser->bindings(), execution.toULongLong()).dump(2)));
+        }
+        const auto rows = browser->bindings();
+        const auto firstInput = std::find_if(rows.begin(), rows.end(), [](const auto &b) {
+            return b.texture && b.role == ResourceRole::Input && b.error.empty();
+        });
+        if (firstInput != rows.end()) {
+            elapsed.restart();
+            QVERIFY(browser->select(firstInput->key, true));
+            QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull() || status->text().contains("retry"), 240000);
+            QVERIFY2(!image->image().isNull(), qPrintable(status->text()));
+            QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 1);
+            qInfo() << "Input image ms" << elapsed.elapsed();
+            if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/input.png"));
+        }
+        if (primary->texture && firstInput != rows.end()) {
+            const auto captures = window.property("resourceCaptureCount").toUInt();
+            elapsed.restart();
+            QVERIFY(browser->select(primary->key, true));
+            QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull() || status->text().contains("retry"), 240000);
+            QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+            QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
+            qInfo() << "Warm output ms" << elapsed.elapsed() << "recaptures" << captures;
+            QVERIFY(browser->select(firstInput->key, true));
+            QVERIFY(image->image().isNull());
+            QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+            QVERIFY(browser->select(primary->key, true));
+            auto boundary = window.findChild<QComboBox *>("outputBoundary");
+            boundary->setCurrentIndex(1); boundary->setCurrentIndex(2);
+            auto raw = window.findChild<QSpinBox *>("dx12Subresource");
+            if (raw->maximum() == 0) {
+                raw->setValue(4);
+                QCOMPARE(raw->value(), 0);
+            }
+            QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull() || status->text().contains("retry"), 240000);
+            QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+            QCOMPARE(browser->selected()->key, primary->key);
+            QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
+            auto tabs = window.findChild<QTabWidget *>("analysisTabs");
+            QWidget *other = nullptr;
+            for (int i = 0; i < tabs->count(); ++i) if (tabs->tabText(i) == "Shader") other = tabs->widget(i);
+            QVERIFY(other);
+            QVERIFY(browser->select(firstInput->key, true));
+            QTRY_VERIFY_WITH_TIMEOUT(window.busy(), 10000);
+            tabs->setCurrentWidget(other);
+            QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 240000);
+            QCOMPARE(tabs->currentWidget(), other);
+            tabs->setCurrentWidget(window.findChild<QWidget *>("resourceWorkspace"));
+        }
+        const auto depth = std::find_if(rows.begin(), rows.end(), [](const auto &b) { return b.kind == "DSV" && b.error.empty(); });
+        if (depth != rows.end()) {
+            QVERIFY(browser->select(depth->key, true));
+            QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull() || status->text().contains("retry"), 240000);
+            QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+            if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/depth.png"));
+            auto plane = window.findChild<QComboBox *>("dx12Plane");
+            if (plane->findData("stencil") >= 0) {
+                plane->setCurrentIndex(plane->findData("stencil"));
+                QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull() || status->text().contains("retry"), 240000);
+                QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+                if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/stencil.png"));
+            }
+        }
+        auto buffer = std::find_if(rows.begin(), rows.end(), [](const auto &b) { return !b.texture && b.error.empty(); });
+        if (buffer != rows.end()) {
+            QVERIFY(browser->select(buffer->key, true));
+            auto label = window.findChild<QLabel *>("bufferLabel");
+            QTRY_VERIFY_WITH_TIMEOUT((label && label->text().contains("bytes")) || status->text().contains("retry"), 240000);
+            QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+            if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/buffer.png"));
+            auto bufferBoundary = window.findChild<QComboBox *>("bufferBoundary");
+            bufferBoundary->setCurrentIndex(1); bufferBoundary->setCurrentIndex(2);
+            QVERIFY(label->text().isEmpty());
+            QVERIFY(!window.findChild<QAction *>("exportBuffer")->isEnabled());
+            QTRY_VERIFY_WITH_TIMEOUT(label->text().contains("after execution") || status->text().contains("retry"), 240000);
+            QVERIFY2(!status->text().contains("retry"), qPrintable(status->text()));
+            QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 2);
+            QVERIFY(window.findChild<QAction *>("exportBuffer")->isEnabled());
+        }
+        window.findChild<QAction *>("cancelReplay")->trigger();
+    }
     void colorHistoryPixelDebugWorkspace() {
         try {
             const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

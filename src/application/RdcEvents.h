@@ -21,6 +21,8 @@ void requireRdcQueryIsolation(const nlohmann::json &policy, const nlohmann::json
 std::string rdcFrameEndMarker(const nlohmann::json &boundary);
 nlohmann::json readRdcFrameEnd(const nlohmann::json &roots);
 void requireRdcFrameEnd(const nlohmann::json &marker, const nlohmann::json &job);
+std::string rdcResourceBoundaryMarker(const nlohmann::json &boundary);
+nlohmann::json readRdcResourceBoundary(const nlohmann::json &roots, const nlohmann::json &job);
 // Verifies every emitted partial resolve against the isolated capture policy.
 // operations are ordered captured destination ranges, each with its eventId.
 void verifyRdcQueryResolveExpansion(const nlohmann::json &command, const nlohmann::json &entry,

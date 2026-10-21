@@ -9,6 +9,7 @@
 #include "Invocation.h"
 #include "InputMesh.h"
 #include "PipelineState.h"
+#include "ResourceWorkspace.h"
 #include "application/RdcEvents.h"
 #include "application/RdcJobs.h"
 #include "application/ReplayMesh.h"
@@ -1454,7 +1455,7 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const auto optimisation = rdcReplayOptimisation(job);
     if (action == "buffer") rdcBufferRange(job);
-    if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" &&
+    if (job.value("isolate_missing_queries", false) && action != "inventory" && action != "texture" && action != "resource-workspace" &&
         !((action == "pipeline" || action == "postmesh" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
         !((action == "resource-history" || action == "history") && job.contains("execution") && job.contains("resource_creation") &&
           !job.value("resource", Json()).is_null()))
@@ -1471,7 +1472,7 @@ Json runRdcJob(const Json &job) {
     if (job.value("dxil_fast_contraction", false) && (!debugging || !job.contains("execution")))
         throw std::runtime_error("Fast contraction requires a DX12 shader-debug request");
     if (action != "history" && action != "events" && action != "counters" && action != "counter-catalog" && action != "inventory" &&
-        action != "texture" && action != "buffer" && action != "resource-history" && action != "postmesh" && action != "pipeline" && !debugging)
+        action != "texture" && action != "buffer" && action != "resource-history" && action != "postmesh" && action != "pipeline" && action != "resource-workspace" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
     if (job.contains("counter_ids") && (action != "counters" || job.at("counter_ids").is_null()))
         throw std::runtime_error("Counter IDs require a counters request");
@@ -1756,7 +1757,12 @@ Json runRdcJob(const Json &job) {
     if (job.contains("indirect_action") && (!dx12 || gpa.is_null()))
         throw std::runtime_error("Indirect action selection requires a DX12 execution");
     uint32_t eid = index(job, "eid");
-    if (frameEndHistory) {
+    if (action == "resource-workspace") {
+        if (!dx12) throw std::runtime_error("Resource workspace requires DX12");
+        const auto boundary = readRdcResourceBoundary(roots, job);
+        eid = boundary.at("event_id").get<uint32_t>();
+        result["resource_boundary"] = boundary;
+    } else if (frameEndHistory) {
         eid = frameEnd.at("event_id").get<uint32_t>();
     } else if (dx12 && !gpa.is_null()) {
         const auto execution=std::to_string(number(gpa));
@@ -1804,6 +1810,11 @@ Json runRdcJob(const Json &job) {
         if (session.depthRoundtripCopies && session.depthRoundtripCopies() == 0)
             throw std::runtime_error("Depth roundtrip was not applied: select a read-only D32 direct Draw (patch v2) or depth-writing D32S8 Draw with "
                                      "stencil disabled, one mip/layer/sample/node and legacy depth states");
+    }
+    if (action == "resource-workspace") {
+        result.update(readResourceWorkspace(controller, job, queryPolicy));
+        result["eid"] = eid;
+        return complete();
     }
     if (action == "pipeline") {
         const auto *selected = findAction(controller.GetRootActions(), eid);

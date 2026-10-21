@@ -10,6 +10,7 @@ chronology remains in Chinese.
 |---|---|
 | Build, package and start | [Project README](../README.md#build) |
 | Replay, inspect and edit | [Usage guide](USAGE.md) |
+| Automatically inspect DX11/DX12 draw bindings in one Resources workspace | [Unified resource workspace](DX12_RESOURCE_WORKSPACE.md) |
 | Keep direct resource, binding, project and displayed-image identity consistent | [Resource selection acceptance](RESOURCE_SELECTION_IDENTITY.md) |
 | Preserve the requested export while a file chooser processes a capture switch | [Export asset ownership](EXPORT_ASSET_OWNERSHIP.md) |
 | Encode display images and copy texture assets in cancellable background jobs | [Background image exports](IMAGE_EXPORT_ACCEPTANCE.md) |

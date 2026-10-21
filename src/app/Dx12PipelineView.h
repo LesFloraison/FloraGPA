@@ -22,6 +22,7 @@ class Dx12PipelineView final : public QWidget {
     void exportResult(const QString &path) const;
   signals:
     void readRequested();
+    void backendChanged();
     void cancelRequested();
     void resourceRequested(qulonglong creation);
     void creationRequested(qulonglong record);

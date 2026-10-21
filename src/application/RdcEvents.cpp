@@ -508,6 +508,40 @@ Json readRdcQueryIsolation(const Json &roots) {
     };
     walk(roots, 0); return result;
 }
+std::string rdcResourceBoundaryMarker(const Json &b) {
+    if (b.at("schema") != 1 || !policyNumber(b.at("execution")) ||
+        (b.at("boundary") != "before" && b.at("boundary") != "after"))
+        throw std::runtime_error("Invalid resource capture boundary");
+    return "Flora DX12 resource boundary v1 " + b.dump();
+}
+Json readRdcResourceBoundary(const Json &roots, const Json &job) {
+    constexpr std::string_view prefix = "Flora DX12 resource boundary v1 ";
+    Json result;
+    size_t visited{};
+    std::function<void(const Json &, unsigned)> walk = [&](const Json &nodes, unsigned depth) {
+        if (!nodes.is_array() || depth > 128) throw std::runtime_error("Invalid resource boundary tree");
+        for (const auto &node : nodes) {
+            if (++visited > 1000000) throw std::runtime_error("Resource boundary action limit exceeded");
+            const auto name = node.at("customName").get<std::string>();
+            if (name.starts_with("Flora DX12 resource boundary")) {
+                if (!result.is_null() || !name.starts_with(prefix) || name.size() > 4096)
+                    throw std::runtime_error("Ambiguous resource boundary marker");
+                const auto b = Json::parse(name.substr(prefix.size()));
+                rdcResourceBoundaryMarker(b);
+                const auto eid = node.at("eventId").get<uint64_t>();
+                if (!eid || eid > UINT32_MAX || b.at("execution") != job.at("execution") ||
+                    b.at("boundary") != job.at("boundary") ||
+                    b.at("isolate_missing_queries") != job.value("isolate_missing_queries", false))
+                    throw std::runtime_error("Resource capture boundary does not match request");
+                result = {{"event_id", eid}, {"boundary", b}};
+            }
+            walk(node.at("children"), depth + 1);
+        }
+    };
+    walk(roots, 0);
+    if (result.is_null()) throw std::runtime_error("Resource capture boundary marker is missing; recapture required");
+    return result;
+}
 void requireRdcQueryIsolation(const Json &policy, const Json &job) {
     const bool requested = job.value("isolate_missing_queries", false);
     if (job.contains("request_identity") && parseReplayIdentity(job.at("request_identity")).isolateMissingQueries != requested)
@@ -526,7 +560,7 @@ void requireRdcQueryIsolation(const Json &policy, const Json &job) {
     if ((action == "pipeline" || action == "postmesh" || rdcShaderDebugAction(action)) &&
         (!job.contains("execution") || !policyNumber(job.at("execution"))))
         throw std::runtime_error("Isolated execution analysis requires an explicit nonzero DX12 execution");
-    if (action != "inventory" && action != "texture" && action != "pipeline" && action != "history" &&
+    if (action != "inventory" && action != "texture" && action != "pipeline" && action != "history" && action != "resource-workspace" &&
         action != "postmesh" && !rdcShaderDebugAction(action))
         throw std::runtime_error("Unsupported analysis of isolated query replay");
     // Query readbacks remain excluded as a whole: later completed writes must

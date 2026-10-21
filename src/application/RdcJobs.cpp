@@ -1,5 +1,6 @@
 #include "RdcJobs.h"
 #include "RdcEvents.h"
+#include "DrawResources.h"
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -95,7 +96,7 @@ uint32_t rdcReplayOptimisation(const Json &job) {
 Json prepareRdcJob(const QString &capture, const std::string &action, const QString &output,
                    const QString &library, const Json &options) {
     static const std::set<std::string> actions{"inventory",    "postmesh",     "history",  "debug-pixel",
-                                               "debug-vertex", "debug-thread", "counters", "counter-catalog", "texture", "buffer", "resource-history", "pipeline"};
+                                               "debug-vertex", "debug-thread", "counters", "counter-catalog", "texture", "buffer", "resource-history", "pipeline", "resource-workspace"};
     if (!actions.contains(action))
         throw std::runtime_error("Unknown RDC analysis action");
     Json job{{"gpa_event", nullptr},
@@ -123,11 +124,21 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!options.is_object())
         throw std::runtime_error("RDC options must be an object");
     for (const auto &[key, value] : options.items()) {
-        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length" && key != "frame_end" && key != "frame_end_record")
+        if (!job.contains(key) && key != "execution" && key != "resource_creation" && key != "primitive" && key != "indirect_action" && key != "attribute" && key != "counter_ids" && key != "offset" && key != "length" && key != "frame_end" && key != "frame_end_record" &&
+            !(action == "resource-workspace" && (key == "boundary" || key == "resource_requests")))
             throw std::runtime_error("Unknown RDC option: " + key);
         job[key] = value;
     }
     rdcReplayOptimisation(job);
+    if (action == "resource-workspace") {
+        decimalIdentity(job.at("execution"), "execution");
+        if (job.at("boundary") != "before" && job.at("boundary") != "after")
+            throw std::runtime_error("Resource workspace requires an exact before/after boundary");
+        const auto &requests = job.at("resource_requests");
+        if (!requests.is_array() || requests.empty() || requests.size() > 16)
+            throw std::runtime_error("Resource workspace requires 1 to 16 requests");
+        for (const auto &request : requests) validateDx12ResourceRequest(request);
+    }
     if (job.contains("frame_end") && !job.at("frame_end").is_boolean())
         throw std::runtime_error("Frame-end selection must be a boolean");
     if (job.value("frame_end", false)) {
@@ -162,7 +173,7 @@ Json prepareRdcJob(const QString &capture, const std::string &action, const QStr
     if (!job["api_validation"].is_boolean())
         throw std::runtime_error("API validation must be a boolean");
     if (!job.at("isolate_missing_queries").is_boolean() ||
-        (job.at("isolate_missing_queries").get<bool>() && action != "inventory" && action != "texture" &&
+        (job.at("isolate_missing_queries").get<bool>() && action != "inventory" && action != "texture" && action != "resource-workspace" &&
          !((action == "pipeline" || action == "postmesh" || rdcShaderDebugAction(action)) && job.contains("execution") && !job.at("execution").is_null()) &&
          !((action == "resource-history" || action == "history") && job.contains("execution") && job.contains("resource_creation") &&
            !job.value("resource", Json()).is_null())))

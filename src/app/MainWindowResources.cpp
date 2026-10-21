@@ -1,9 +1,11 @@
 #include "CoverageView.h"
 #include "MainWindow.h"
 #include "PixelHistoryView.h"
+#include "Dx12PipelineView.h"
 #include <QAction>
 #include <QFile>
 #include <QFileInfo>
+#include <QFileDialog>
 #include <QSignalBlocker>
 #include <QSplitter>
 #include <QStatusBar>
@@ -48,6 +50,28 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
     auto bar = new QToolBar;
+    resourceScope_ = new QComboBox;
+    resourceScope_->setObjectName("resourceScope");
+    resourceScope_->addItems({"Current Draw", "All resources"});
+    bar->addWidget(resourceScope_);
+    auto retry = bar->addAction("Refresh");
+    retry->setObjectName("refreshResources");
+    auto backend = bar->addAction("RenderDoc…");
+    backend->setObjectName("resourceAnalysisBackend");
+    connect(backend, &QAction::triggered, this, [this] {
+        const auto path = QFileDialog::getOpenFileName(this, "Select compatible RenderDoc 1.45",
+            dx12Pipeline_->backendPath(), "RenderDoc (renderdoc.dll)");
+        if (!path.isEmpty()) dx12Pipeline_->setBackendPath(path);
+    });
+    connect(retry, &QAction::triggered, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) {
+            dx12FailedKey_.clear(); dx12InventoryKey_.clear(); dx12PipelineCache_.clear();
+            historyCaptures_.clear(); historyCacheOrder_.clear();
+            resourceBrowser_->clear("Refreshing bound resources…");
+            invalidateDx12Output();
+        } else updateResourceContext(true);
+        resourceTimer_.start();
+    });
     auto final = bar->addAction("Final Frame");
     final->setObjectName("finalFrame");
     coverageToggle_ = bar->addAction("Coverage");
@@ -71,12 +95,29 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     resourceBrowser_ = new ResourceBrowser;
     resourceBrowser_->setMinimumWidth(175);
     resourceBrowser_->setMaximumWidth(420);
-    split->addWidget(resourceBrowser_);
+    resourceLists_ = new QStackedWidget;
+    resourceLists_->addWidget(resourceBrowser_);
+    resourceLists_->addWidget(allResourcesPane_);
+    resourceLists_->setMinimumWidth(175);
+    resourceLists_->setMaximumWidth(420);
+    split->addWidget(resourceLists_);
+    connect(resourceScope_, &QComboBox::currentIndexChanged, this, [this](int mode) {
+        resourceLists_->setCurrentIndex(mode);
+        if (!mode) {
+            if (session_ && session_->backend() == ReplayBackend::Dx12) {
+                dx12InventoryKey_.clear();
+                if (selection_.execution && boundary_->currentIndex() == 0) boundary_->setCurrentIndex(2);
+            }
+            updateResourceContext(true);
+        }
+    });
     centerTabs_->removeTab(centerTabs_->indexOf(output));
     centerTabs_->removeTab(centerTabs_->indexOf(texturePane_));
     resourceImages_ = new QStackedWidget;
     resourceImages_->addWidget(output);
     resourceImages_->addWidget(texturePane_);
+    centerTabs_->removeTab(centerTabs_->indexOf(bufferPane_));
+    resourceImages_->addWidget(bufferPane_);
     split->addWidget(resourceImages_);
     split->setStretchFactor(0, 0);
     split->setStretchFactor(1, 1);
@@ -137,6 +178,16 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     connect(final, &QAction::triggered, this, [this] {
         clearResourceBinding();
         selectedResource_ = 0;
+        if (session_ && session_->backend() == ReplayBackend::Dx12) {
+            const auto suggestion = session_->outputSuggestion();
+            if (suggestion.value("status", "") == "suggested") {
+                selection_.resource = std::stoull(suggestion.at("resource").get<std::string>());
+                selectedResource_ = selection_.resource;
+                configureDx12Texture();
+            }
+            resourceBrowser_->clear("Frame end output");
+            dx12InventoryKey_.clear(); dx12ContentPending_ = false;
+        }
         resourceStatus_->setText("Final frame");
         resourceImages_->setCurrentIndex(0);
         {
@@ -156,6 +207,7 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
     });
     for (auto combo : {boundary_, outputTarget_})
         connect(combo, &QComboBox::currentIndexChanged, this, [this] {
+            if (session_ && session_->backend() == ReplayBackend::Dx12) return;
             if (!textureMode()) {
                 clearResourceBinding();
                 selectedResource_ = 0;
@@ -184,6 +236,10 @@ void MainWindow::invalidateResourceImage() {
 void MainWindow::updateResourceContext(bool chooseDefault) {
     if (!resourceBrowser_)
         return;
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        resourceTimer_.start();
+        return;
+    }
     if (!frame_ || !selectedEvent_ || !isDraw(frame_->entry(selectedEvent_).type)) {
         resourceBrowser_->clear();
         selectedBinding_.reset();
@@ -216,7 +272,10 @@ void MainWindow::updateResourceContext(bool chooseDefault) {
     if (!chooseDefault)
         return;
     std::optional<DrawResourceBinding> next;
-    for (auto kind : {"RTV", "DSV", "SRV"}) {
+    if (selectedBinding_) for (const auto &binding : resourceBrowser_->bindings())
+        if (binding.key == selectedBinding_->key && binding.error.empty()) next = binding;
+    for (auto kind : {"RTV", "DSV", "SRV", "UAV"}) {
+        if (next) break;
         for (const auto &b : resourceBrowser_->bindings())
             if (b.kind == kind && b.texture && b.error.empty()) {
                 next = b;
@@ -225,6 +284,8 @@ void MainWindow::updateResourceContext(bool chooseDefault) {
         if (next)
             break;
     }
+    if (!next) for (const auto &binding : resourceBrowser_->bindings())
+        if (binding.error.empty()) { next = binding; break; }
     if (next)
         selectDrawResource(QString::fromStdString(next->key));
     else {
@@ -233,7 +294,7 @@ void MainWindow::updateResourceContext(bool chooseDefault) {
     }
 }
 void MainWindow::selectDrawResource(const QString &key) {
-    if (!frame_)
+    if (!session_)
         return;
     const auto &rows = resourceBrowser_->bindings();
     const auto found =
@@ -241,6 +302,10 @@ void MainWindow::selectDrawResource(const QString &key) {
     if (found == rows.end())
         return;
     const auto binding = *found;
+    if (session_->backend() == ReplayBackend::Dx12) {
+        selectDx12Binding(binding);
+        return;
+    }
     resourceBrowser_->select(binding.key);
     cancel();
     invalidateResourceImage();
@@ -260,6 +325,8 @@ void MainWindow::selectDrawResource(const QString &key) {
         return;
     }
     if (!binding.texture) {
+        { QSignalBlocker block(bufferBoundary_);
+          bufferBoundary_->setCurrentIndex(binding.image.boundary == ImageBoundary::Before ? 1 : 2); }
         resourceStatus_->setText(QString("%1 %2%3 · Resource %4")
                                      .arg(QString::fromStdString(binding.stage), QString::fromStdString(binding.kind))
                                      .arg(binding.slot).arg(binding.image.resource));
@@ -310,6 +377,10 @@ void MainWindow::selectDrawResource(const QString &key) {
     resourceTimer_.start();
 }
 void MainWindow::pumpResourceJobs() {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        pumpDx12Resources();
+        return;
+    }
     if (!frame_ || !resourceBrowser_)
         return;
     if (busy()) {

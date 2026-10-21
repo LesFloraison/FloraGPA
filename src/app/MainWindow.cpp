@@ -73,6 +73,7 @@
 #include <QSettings>
 #include <QSplitter>
 #include <QStandardPaths>
+#include <QStandardItemModel>
 #include <QStatusBar>
 #include <QStyle>
 #include <QTabWidget>
@@ -180,6 +181,10 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(loaded.error.toStdString());
             session_ = std::move(loaded.session);
             selection_ = {};
+            dx12InventoryKey_.clear(); dx12FailedKey_.clear(); dx12PreferredBinding_.clear();
+            dx12PipelineCache_.clear(); dx12ContentPending_ = false;
+            dx12RestoredResources_ = nullptr;
+            setProperty("resourceCaptureCount", 0u);
             { const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false); }
             dx12PixelTarget_.reset();
             selection_.session = session_->identity();
@@ -214,7 +219,7 @@ MainWindow::MainWindow() : loader_(this) {
             findChild<QLineEdit *>("apiResourceFilter")->setEnabled(true);
             findChild<QLineEdit *>("apiResourceFilter")->setPlaceholderText(frame_ ? "Referenced resource ID…" : "Captured resource object (partial decoding)…");
             findChild<QComboBox *>("resourceKinds")->setCurrentIndex(0);
-            findChild<QComboBox *>("resourceKinds")->setEnabled(bool(frame_));
+            findChild<QComboBox *>("resourceKinds")->setEnabled(true);
             apiView_->setColumnHidden(2, bool(frame_));
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
@@ -543,7 +548,10 @@ void MainWindow::buildUi() {
     replayAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     collectAction_ =
         analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
-    cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, &MainWindow::cancel);
+    cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, [this] {
+        cancel(); resourceTimer_.stop();
+        dx12ContentPending_ = false; dx12FailedKey_ = historyContextKey(true);
+    });
     cancelAction_->setObjectName("cancelReplay");
     cancelAction_->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     cancelAction_->setEnabled(false);
@@ -580,7 +588,7 @@ void MainWindow::buildUi() {
     adapter_ = new QComboBox;
     adapter_->setObjectName("replayAdapter");
     populateReplayAdapters(*adapter_);
-    bar->addWidget(adapter_);
+    bar->addWidget(adapter_)->setObjectName("dx11ReplayAdapter");
     auto central = new QWidget;
     auto root = new QVBoxLayout(central);
     root->setContentsMargins(0, 0, 0, 0);
@@ -727,7 +735,7 @@ void MainWindow::buildUi() {
     });
     static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(6, locate);
     leftTabs_->addTab(apiPane, "API Log");
-    leftTabs_->addTab(filtered(resourceView_, resourceFilter_, resourceKinds), "Resources");
+    allResourcesPane_ = filtered(resourceView_, resourceFilter_, resourceKinds);
     statistics_ = tree({"Statistic", "Value"});
     leftTabs_->addTab(statistics_, "Statistics");
     auto left = new QDockWidget("Frame", workspace_);
@@ -774,27 +782,53 @@ void MainWindow::buildUi() {
     outputSample_->setToolTip("MSAA sample index; Resolve averages samples");
     imageBar->addWidget(outputSample_)->setObjectName("dx11OutputSample");
     auto dx12Controls = new QWidget;
-    auto dx12Layout = new QHBoxLayout(dx12Controls);
+    auto dx12Rows = new QVBoxLayout(dx12Controls);
+    dx12Rows->setContentsMargins(0,0,0,0);
+    auto dx12Layout = new QHBoxLayout;
+    auto dx12Options = new QHBoxLayout;
+    dx12Rows->addLayout(dx12Layout);
+    dx12Rows->addLayout(dx12Options);
     dx12Layout->setContentsMargins(0,0,0,0);
     auto dx12Label=new QLabel("DX12"); dx12Label->setToolTip("Automatic hardware adapter; the output tooltip reports the actual device and SDK");
     dx12Layout->addWidget(dx12Label);
+    dx12Mip_ = new QSpinBox; dx12Mip_->setObjectName("dx12Mip"); dx12Mip_->setPrefix("Mip ");
+    dx12Layer_ = new QSpinBox; dx12Layer_->setObjectName("dx12Layer"); dx12Layer_->setPrefix("Layer ");
+    dx12Slice_ = new QSpinBox; dx12Slice_->setObjectName("dx12Slice"); dx12Slice_->setPrefix("Slice ");
+    dx12Sample_ = new QSpinBox; dx12Sample_->setObjectName("dx12Sample"); dx12Sample_->setPrefix("Sample ");
+    dx12Sample_->setRange(-1, 0); dx12Sample_->setSpecialValueText("Resolve"); dx12Sample_->setValue(-1);
+    dx12Plane_ = new QComboBox; dx12Plane_->setObjectName("dx12Plane"); dx12Plane_->addItem("Color", "color");
+    for (auto spin : {dx12Mip_, dx12Layer_, dx12Slice_, dx12Sample_}) dx12Layout->addWidget(spin);
+    dx12Layout->addWidget(dx12Plane_);
     dx12Subresource_ = new QSpinBox;
     dx12Subresource_->setObjectName("dx12Subresource");
     dx12Subresource_->setRange(0,INT_MAX); dx12Subresource_->setPrefix("Subresource ");
     dx12Subresource_->setToolTip("D3D12 subresource index of the selected resource creation; depth is displayed as normalized grayscale");
-    dx12Layout->addWidget(dx12Subresource_);
+    dx12Options->addWidget(dx12Subresource_);
+    dx12Subresource_->hide();
+    auto advancedSubresource = new QCheckBox("Index");
+    advancedSubresource->setObjectName("dx12AdvancedSubresource");
+    dx12Options->addWidget(advancedSubresource);
+    connect(advancedSubresource, &QCheckBox::toggled, dx12Subresource_, &QWidget::setVisible);
     dx12Budget_ = new QSpinBox;
     dx12Budget_->setObjectName("dx12AllocationMiB"); dx12Budget_->setRange(64,131072);
     dx12Budget_->setValue(4096); dx12Budget_->setPrefix("Budget "); dx12Budget_->setSuffix(" MiB");
     dx12Budget_->setToolTip("Maximum native resource and readback allocation; requests exceeding this budget fail explicitly");
-    dx12Layout->addWidget(dx12Budget_);
+    dx12Options->addWidget(dx12Budget_);
     dx12QueryIsolation_ = new QCheckBox("Isolate missing queries");
     dx12QueryIsolation_->setObjectName("dx12QueryIsolation");
     dx12QueryIsolation_->setToolTip("Incomplete replay: leave missing query outputs unavailable and reject dependent reads. "
         "Supported analysis and modification overlays retain this limitation; performance uses native instrumentation. "
         "The selected mode is saved in DX12 experiment projects.");
-    dx12Layout->addWidget(dx12QueryIsolation_);
-    dx12Controls_ = imageBar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
+    dx12Options->addWidget(dx12QueryIsolation_);
+    dx12Layout->addStretch();
+    dx12Options->addStretch();
+    // Use a dedicated row: a toolbar overflow menu cannot expose embedded spin boxes.
+    auto dx12Bar = new QToolBar;
+    dx12Controls_ = dx12Bar->addWidget(dx12Controls); dx12Controls_->setVisible(false);
+    connect(dx12Controls_, &QAction::visibleChanged, dx12Bar, [this, dx12Bar] {
+        dx12Bar->setVisible(dx12Controls_->isVisible());
+    });
+    dx12Bar->hide();
     imageBar->addSeparator();
     channels_ = new QComboBox;
     channels_->addItems({"RGB", "RGBA", "R", "G", "B", "A"});
@@ -822,6 +856,7 @@ void MainWindow::buildUi() {
     imageLabel_->setObjectName("frameOutputLabel");
     displayBar->addWidget(imageLabel_);
     outputLayout->addWidget(imageBar);
+    outputLayout->addWidget(dx12Bar);
     outputLayout->addWidget(displayBar);
     image_ = new ImageView;
     image_->setObjectName("frameOutput");
@@ -1078,6 +1113,7 @@ void MainWindow::buildUi() {
     bufferEditAction_->setEnabled(false);
     bufferImportAction_->setEnabled(false);
     bufferLabel_ = new QLabel;
+    bufferLabel_->setObjectName("bufferLabel");
     bufferLayout->addWidget(bufferBar);
     bufferLayout->addWidget(bufferLabel_);
     auto bufferTabs = new QTabWidget;
@@ -1126,9 +1162,20 @@ void MainWindow::buildUi() {
     connect(constants_, &QTreeWidget::itemDoubleClicked, this, [this] { editConstant(); });
     centerTabs_->addTab(bufferPane_, "Buffer");
     connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] {
-        if (session_ && session_->backend() == ReplayBackend::Dx12) { invalidateDx12Output(); return; }
+        if (session_ && session_->backend() == ReplayBackend::Dx12) {
+            const QSignalBlocker imageBoundary(boundary_), bufferBoundary(bufferBoundary_);
+            if (bufferBoundary_->currentIndex() == 0) bufferBoundary_->setCurrentIndex(2);
+            boundary_->setCurrentIndex(bufferBoundary_->currentIndex());
+            invalidateDx12Output(); return;
+        }
         clearBufferDetails();
         bufferTimer_.start();
+    });
+    connect(bufferOffset_, &QLineEdit::editingFinished, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) queueDx12ResourceRead();
+    });
+    connect(bufferLength_, &QLineEdit::editingFinished, this, [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) queueDx12ResourceRead();
     });
     connect(bufferMode_, &QComboBox::currentIndexChanged, this, [this](int mode) {
         bufferModel_->setWords(mode == 1);
@@ -1293,6 +1340,11 @@ void MainWindow::buildUi() {
     history_ = new PixelHistoryView;
     leftTabs_->insertTab(1, history_, "Pixel History");
     dx12Pipeline_ = new Dx12PipelineView;
+    connect(dx12Pipeline_, &Dx12PipelineView::backendChanged, this, [this] {
+        dx12PipelineCache_.clear(); dx12InventoryKey_.clear();
+        historyCaptures_.clear(); historyCacheOrder_.clear();
+        invalidateDx12Output();
+    });
     pipelineTabs->addTab(dx12Pipeline_, "DX12 Bindings");
     connect(dx12Pipeline_, &Dx12PipelineView::readRequested, this,
             [this] { readRdcAnalysis(nullptr, RdcAnalysis::Pipeline); });
@@ -1522,6 +1574,7 @@ void MainWindow::buildUi() {
     connect(image_, &ImageView::zoomChanged, this,
             [this](int percent) { zoomLabel_->setText(QString("%1%").arg(percent)); });
     auto outputChanged = [this] {
+        if (session_ && session_->backend() == ReplayBackend::Dx12) { invalidateDx12Output(); return; }
         if (!frame_)
             return;
         ++revision_;
@@ -1556,7 +1609,24 @@ void MainWindow::buildUi() {
             replayTimer_.start();
         }
     });
-    connect(dx12Subresource_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
+    connect(dx12Subresource_, &QSpinBox::valueChanged, this, [this] {
+        configureDx12Texture();
+        invalidateDx12Output();
+    });
+    auto dx12ViewChanged = [this] {
+        if (!session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.resource) return;
+        try {
+            const auto range = dx12TextureRange(nlohmann::json::parse(session_->resource(selection_.resource).summary));
+            const auto index = range.index(uint32_t(dx12Mip_->value()), uint32_t(dx12Layer_->value()),
+                                          dx12Plane_->currentData() == "stencil" ? 1u : 0u);
+            { QSignalBlocker block(dx12Subresource_); dx12Subresource_->setValue(int(index)); }
+            configureDx12Texture();
+            invalidateDx12Output();
+        } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
+    };
+    for (auto spin : {dx12Mip_, dx12Layer_, dx12Slice_, dx12Sample_})
+        connect(spin, &QSpinBox::valueChanged, this, dx12ViewChanged);
+    connect(dx12Plane_, &QComboBox::currentIndexChanged, this, dx12ViewChanged);
     connect(dx12Budget_, &QSpinBox::valueChanged, this, [this] { invalidateDx12Output(); });
     connect(dx12QueryIsolation_, &QCheckBox::toggled, this, [this](bool enabled) {
         if (!session_ || session_->backend() != ReplayBackend::Dx12) return;
@@ -1630,7 +1700,8 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || bool(experimentCancel_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || (bool(artifactJob_) && !resourceBrowseBusy()) || bool(exportCancel_) || bool(experimentCancel_) ||
+           (busy && runningKind_ != "draw-resources" && !resourceBrowseBusy());
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1686,15 +1757,19 @@ void MainWindow::setBusy(bool busy) {
     findChild<QAction *>("openDx12Directory")->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     const bool dx12 = session_ && session_->backend()==ReplayBackend::Dx12;
+    if (auto model = qobject_cast<QStandardItemModel *>(bufferBoundary_->model()))
+        model->item(0)->setEnabled(!dx12);
+    findChild<QAction *>("dx11ReplayAdapter")->setVisible(!dx12);
     const auto outputSelection = outputReplaySelection();
     replayAction_->setEnabled(!busy && (bool(frame_) || (dx12 && session_->capability(ReplayFeature::Replay,outputSelection).supported())));
     boundary_->setItemText(0, dx12 ? "Frame end" : "Final");
     dx12Controls_->setVisible(dx12);
-    resourceBrowser_->setVisible(!dx12);
+    findChild<QAction *>("resourceAnalysisBackend")->setVisible(dx12);
     for (const auto name : {"dx11OutputTarget", "dx11OutputLayer", "dx11OutputSample"})
         findChild<QAction *>(name)->setVisible(!dx12);
     for (const auto name : {"finalFrame", "toggleResourceCoverage", "resourceCoverageSettings"})
         findChild<QAction *>(name)->setEnabled(!busy && bool(frame_));
+    findChild<QAction *>("finalFrame")->setEnabled(!busy && bool(session_));
     historyPick_->setEnabled(
         !busy && (bool(frame_) || (dx12 && !outputReport_.is_null() && !image_->image().isNull() &&
                                   session_->capability(ReplayFeature::PixelHistory, outputSelection).supported())));
@@ -1706,13 +1781,13 @@ void MainWindow::setBusy(bool busy) {
     dx12QueryIsolation_->setEnabled(dx12 && !busy);
     for (QWidget *control : std::initializer_list<QWidget *>{
              adapter_, outputTarget_, outputLayer_, outputSample_, channels_, outputLow_, outputHigh_})
-        control->setEnabled(!busy && !dx12);
+        control->setEnabled(!busy && (!dx12 || control == channels_ || control == outputLow_ || control == outputHigh_));
     replayAction_->setToolTip(
         session_ && session_->backend() == ReplayBackend::Dx12
             ? QString::fromStdString(session_->capability(ReplayFeature::Replay, outputSelection).reason)
             : QString{});
     collectAction_->setEnabled(!busy && bool(frame_));
-    cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
+    cancelAction_->setEnabled((busy || (resourceBrowseBusy() && this->busy())) && (!loadCancel_ || !loadCancel_->load()) &&
                               (!experimentCancel_ || !experimentCancel_->load()) &&
                               (!artifactJob_ || !artifactJob_->cancelled.load()));
     progress_->setVisible(busy);
@@ -1847,6 +1922,7 @@ QString MainWindow::historyContextKey(bool allowQueryIsolation, bool frameEnd) c
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
 bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
+    if (runningAnalysis_ == RdcAnalysis::Resources) return finishDx12Resources(result);
     if (runningAnalysis_ == RdcAnalysis::Pipeline) {
         if (historyRequestId_ != dx12Pipeline_->requestId())
             return false;
@@ -1883,7 +1959,7 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
-    if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline &&
+    if (selection_.isolateMissingQueries && !view && kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline && kind != RdcAnalysis::Resources &&
         kind != RdcAnalysis::History && kind != RdcAnalysis::Mesh &&
         !(kind == RdcAnalysis::Counters && rdcCounters_->nativeMode())) {
         showError("Query-isolated analysis requires native instrumentation for performance measurements"); return;
@@ -1908,7 +1984,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         return;
     }
     if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History &&
-        kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline && kind != RdcAnalysis::Counters)
+        kind != RdcAnalysis::ResourceHistory && kind != RdcAnalysis::Pipeline && kind != RdcAnalysis::Counters && kind != RdcAnalysis::Resources)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
@@ -1920,20 +1996,21 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
     const bool resourceHistory = kind == RdcAnalysis::ResourceHistory;
     const bool pipeline = kind == RdcAnalysis::Pipeline;
-    historyRequestId_ = pipeline ? dx12Pipeline_->requestId()
+    const bool resources = kind == RdcAnalysis::Resources;
+    historyRequestId_ = resources ? revision_ : pipeline ? dx12Pipeline_->requestId()
                         : resourceHistory ? resourceHistory_->requestId()
                         : mesh       ? replayMesh_->requestId()
                         : counters ? rdcCounters_->requestId()
                         : view     ? view->requestId()
                                    : history_->requestId();
     try {
-        historyRequest_ = pipeline ? dx12Pipeline_->request()
+        historyRequest_ = resources ? dx12ResourceRequest_ : pipeline ? dx12Pipeline_->request()
                           : resourceHistory ? resourceHistory_->request()
                           : mesh       ? replayMesh_->request()
                           : counters ? rdcCounters_->request()
                           : view     ? view->request()
                                      : history_->request();
-        const auto library = QFileInfo(pipeline ? dx12Pipeline_->backendPath()
+        const auto library = QFileInfo((pipeline || resources) ? dx12Pipeline_->backendPath()
                                        : resourceHistory ? resourceHistory_->backendPath()
                                        : mesh       ? replayMesh_->backendPath()
                                        : counters ? rdcCounters_->backendPath()
@@ -1950,8 +2027,9 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         const bool frameEndHistory = (kind == RdcAnalysis::History || kind == RdcAnalysis::ResourceHistory) &&
                                      historyRequest_.value("frame_end", false);
         historyKey_ =
-            historyContextKey(resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
+            historyContextKey(resources || resourceHistory || pipeline || view || mesh || kind == RdcAnalysis::History,
                               frameEndHistory) + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+        if (resources && historyRequest_.value("boundary", "") == "before") historyKey_ += ":before";
         historyRequest_["experiment_key"] = historyKey_.toStdString();
         historyRequest_["frame_sha256"] = frame_ ? nlohmann::json(frame_->sha256()) : nlohmann::json(nullptr);
         if (dx12)
@@ -1968,11 +2046,14 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
             if (dx12) {
                 if (!frameEndHistory) args << "--event" << QString::number(*selection_.execution);
                 args << "--max-bytes" << QString::number(uint64_t(dx12Budget_->value()) * 1024 * 1024);
+                if (resources && historyRequest_.value("boundary", "") == "before") args << "--before";
             }
             startWorker(args, false);
             if (process_.state() == QProcess::NotRunning)
                 throw std::runtime_error("Cannot start independent recapture");
             runningKind_ = "history-capture";
+            if (resources) setProperty("resourceCaptureCount", property("resourceCaptureCount").toUInt() + 1);
+            if (resources) setBusy(true);
             statusBar()->showMessage("Capturing analysis frame…");
         }
     } catch (const std::exception &e) {
@@ -2013,6 +2094,7 @@ void MainWindow::startHistoryWorker() {
     setBusy(true);
     statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
                              : runningAnalysis_ == RdcAnalysis::Pipeline ? "Reading DX12 pipeline bindings…"
+                             : runningAnalysis_ == RdcAnalysis::Resources ? "Reading draw resources…"
                              : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Reading resource history…"
                              : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
                              : runningDebug_                             ? "Reading shader trace…"
@@ -2082,6 +2164,12 @@ void MainWindow::replay(bool timings) {
         return;
     }
     if (session_->backend()==ReplayBackend::Dx12) {
+        if (!timings && selection_.execution && boundary_->currentIndex() != 0 &&
+            centerTabs_->currentWidget() == resourceWorkspace_) {
+            historyCaptures_.clear(); historyCacheOrder_.clear(); dx12PipelineCache_.clear();
+            resourceBrowser_->clear("Refreshing bound resources…");
+            dx12InventoryKey_.clear(); queueDx12ResourceRead(); return;
+        }
         if(timings) { showError("DX12 workspace performance analysis is not yet available"); return; }
         const auto outputSelection = outputReplaySelection();
         const auto capability=session_->capability(ReplayFeature::Replay,outputSelection);
@@ -2154,7 +2242,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             ((runningAnalysis_ == RdcAnalysis::ResourceHistory && historyRequest_.value("action", "") == "resource-history") ||
              (runningAnalysis_ == RdcAnalysis::History && historyRequest_.value("action", "") == "history") ||
              (runningAnalysis_ == RdcAnalysis::Mesh && historyRequest_.value("action", "") == "postmesh") ||
-             (runningAnalysis_ == RdcAnalysis::Pipeline && historyRequest_.value("action", "") == "pipeline") ||
+             ((runningAnalysis_ == RdcAnalysis::Pipeline || runningAnalysis_ == RdcAnalysis::Resources) &&
+              (historyRequest_.value("action", "") == "pipeline" || historyRequest_.value("action", "") == "resource-workspace")) ||
              (runningAnalysis_ == RdcAnalysis::Debug && runningDebug_ &&
               rdcShaderDebugAction(historyRequest_.value("action", "")))) &&
             historyRequest_.value("isolate_missing_queries", false) &&
@@ -2384,6 +2473,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             const bool accepted = finishRdcAnalysis(result);
             statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
                                                  : runningAnalysis_ == RdcAnalysis::Pipeline ? "DX12 pipeline bindings ready"
+                                                 : runningAnalysis_ == RdcAnalysis::Resources ? "Draw resources received"
                                                  : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Resource history ready"
                                                  : runningAnalysis_ == RdcAnalysis::Counters
                                                      ? "Replay metrics ready"
@@ -2449,7 +2539,8 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                 const bool frameEndHistory = historyRequest_.value("frame_end", false);
                 requireDx12ReplayBoundary(result.replayReport,
                     frameEndHistory ? session_->executionCount() : selection_.execution.value_or(0),
-                    false, frameEndHistory, session_->events().back());
+                    runningAnalysis_ == RdcAnalysis::Resources && historyRequest_.value("boundary", "") == "before",
+                    frameEndHistory, session_->events().back());
             }
             historyRdc_ = report_["rdc_capture"].toString();
             if (historyRdc_.isEmpty() || !QFileInfo::exists(historyRdc_))
@@ -2729,6 +2820,12 @@ void MainWindow::selectEvent(Id id) {
         selection_.execution = commands_->executionView() ? std::optional<Id>(id) : std::nullopt;
         if (boundary_->currentIndex()==0) { QSignalBlocker blocker(boundary_); boundary_->setCurrentIndex(2); }
         invalidateDx12Output();
+        if (selectedBinding_) dx12PreferredBinding_ = QString::fromStdString(selectedBinding_->key);
+        selectedBinding_.reset();
+        resourceBrowser_->clear("Loading bound resources…");
+        dx12InventoryKey_.clear();
+        resourceScope_->setCurrentIndex(0);
+        resourceTimer_.start();
         selectionLabel_->setText(QString(commands_->executionView() ? "Execution instance %1 — not replayed" : "Stream record %1").arg(id));
         inspectEvent(id);
         return;
@@ -2737,6 +2834,7 @@ void MainWindow::selectEvent(Id id) {
         return;
     selectedEvent_ = id;
     selection_.event = id;
+    { QSignalBlocker block(resourceScope_); resourceScope_->setCurrentIndex(0); resourceLists_->setCurrentIndex(0); }
     updateCheckpointContext();
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
@@ -2969,15 +3067,20 @@ void MainWindow::inspectResource(Id id) {
                 it.value().is_string() ? it.value().get<std::string>() : it.value().dump())});
         selection_.resource = id;
         selectedResource_ = id;
+        if (!resourceSelecting_) { clearResourceBinding(); resourceScope_->setCurrentIndex(1); }
         invalidateDx12Output();
         const auto descriptor = nlohmann::json::parse(session_->resource(id).summary);
         if (descriptor.at("Dimension") == 1) {
             const QSignalBlocker blocker(bufferBoundary_);
-            if (!bufferBoundary_->currentIndex()) bufferBoundary_->setCurrentIndex(2);
+            bufferBoundary_->setCurrentIndex(boundary_->currentIndex() == 1 ? 1 : 2);
             bufferLength_->setText(QString::number(std::min<uint64_t>(256, std::stoull(descriptor.at("Width").get<std::string>()))));
             bufferOffset_->setText("0");
-            bufferLabel_->setText("DX12 buffer · Select an execution and byte range, then Read (up to 256 MiB)");
-            centerTabs_->setCurrentWidget(bufferPane_);
+            bufferLabel_->setText("DX12 buffer · Loading selected range…");
+            showBufferWorkspace();
+        } else {
+            configureDx12Texture();
+            resourceImages_->setCurrentIndex(0);
+            centerTabs_->setCurrentWidget(resourceWorkspace_);
         }
         resourceStatus_->setText(QString("DX12 resource creation %1 · %2").arg(id).arg(QString::fromStdString(session_->capability(ReplayFeature::Replay,outputReplaySelection()).reason)));
         properties("DX12 resource creation", values);
@@ -3000,6 +3103,16 @@ void MainWindow::inspectResource(Id id) {
         selectedResource_ = id;
         if (!resourceSelecting_) {
             clearResourceBinding();
+            resourceScope_->setCurrentIndex(1);
+            // The global catalogue keeps the active execution boundary, without
+            // assigning any of this resource's possibly different bound views.
+            if (selectedEvent_) {
+                const int activeBoundary = resourceImages_->currentWidget() == bufferPane_ ? bufferBoundary_->currentIndex() :
+                    textureMode() ? textureBoundary_->currentIndex() : boundary_->currentIndex();
+                const QSignalBlocker texture(textureBoundary_), buffer(bufferBoundary_);
+                textureBoundary_->setCurrentIndex(activeBoundary);
+                bufferBoundary_->setCurrentIndex(activeBoundary);
+            }
             resourceStatus_->setText(QString("Resource %1").arg(id));
         }
         updateExperimentActions();
@@ -3165,7 +3278,7 @@ void MainWindow::inspectResource(Id id) {
             bufferLength_->clear();
             bufferModel_->setBytes({});
             displayedBuffer_ = 0;
-            centerTabs_->setCurrentWidget(bufferPane_);
+            showBufferWorkspace();
             replayTimer_.stop();
             if (resource.data || bufferBoundary_->currentIndex() != 0) {
                 bufferLabel_->clear();
@@ -3429,6 +3542,9 @@ void MainWindow::previewTexture() {
 }
 void MainWindow::previewBuffer() {
     if (session_ && session_->backend() == ReplayBackend::Dx12) {
+        if (resourceImages_->currentWidget() == bufferPane_ && selection_.execution) {
+            queueDx12ResourceRead(); return;
+        }
         if (busy() || !selection_.resource || !selection_.execution) return;
         try {
             if (!bufferBoundary_->currentIndex()) throw std::runtime_error("DX12 buffer readback requires Before event or After event");
@@ -3509,20 +3625,23 @@ void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
     const bool dx12 = session_ && session_->backend() == ReplayBackend::Dx12;
-    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !busy());
-    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !busy() && selection_.execution && selection_.resource);
-    undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !busy()));
+    const bool blocking = busy() && !resourceBrowseBusy();
+    if (auto exportBuffer = findChild<QAction *>("exportBuffer"))
+        exportBuffer->setEnabled(displayedBuffer_ && !exportCancel_);
+    findChild<QAction *>("replaceDx12Shader")->setEnabled(dx12 && !blocking);
+    findChild<QAction *>("patchDx12Resource")->setEnabled(dx12 && !blocking && selection_.execution && selection_.resource);
+    undoAction_->setEnabled(experiment_ && experiment_->canUndo() && (!dx12 || !blocking));
     if (dx12) {
-        findChild<QAction *>("openExperiment")->setEnabled(!busy());
+        findChild<QAction *>("openExperiment")->setEnabled(!blocking);
         findChild<QAction *>("saveExperiment")->setEnabled(!busy() && bool(experiment_));
     } else {
         findChild<QAction *>("openExperiment")->setEnabled(bool(frame_));
         findChild<QAction *>("saveExperiment")->setEnabled(bool(experiment_));
     }
-    redoAction_->setEnabled(experiment_ && experiment_->canRedo() && (!dx12 || !busy()));
+    redoAction_->setEnabled(experiment_ && experiment_->canRedo() && (!dx12 || !blocking));
     const auto type = frame_ && selectedEvent_ ? frame_->entry(selectedEvent_).type : 0;
     bool editable = isDraw(uint16_t(type)) || isWritableCommand(uint16_t(type));
-    if (dx12) editable = !busy() && session_->capability(ReplayFeature::Experiments, selection_).supported();
+    if (dx12) editable = !blocking && session_->capability(ReplayFeature::Experiments, selection_).supported();
     auto uavBarrier = findChild<QAction *>("insertDx12UavBarrier");
     uavBarrier->setEnabled(dx12 && editable);
     uavBarrier->setText(dx12 && selection_.execution && experiment_ && experiment_->uavBarrierBefore(*selection_.execution)
@@ -3547,8 +3666,9 @@ void MainWindow::updateExperimentActions() {
         srvAction_->setEnabled(isDraw(uint16_t(type)));
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
-    const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
-                                frame_->entry(selectedResource_).type == 0x83;
+    const bool bufferEditable = dx12 ? (!blocking && selection_.execution && selectedResource_ &&
+        resourceImages_->currentWidget() == bufferPane_ && displayedBuffer_ == selectedResource_) :
+        isDraw(uint16_t(type)) && selectedResource_ && frame_ && frame_->entry(selectedResource_).type == 0x83;
     if (bufferEditAction_)
         bufferEditAction_->setEnabled(bufferEditable);
     if (bufferImportAction_)
@@ -3639,7 +3759,7 @@ void MainWindow::experimentChanged() {
             textureTimer_.start();
             return;
         }
-        if (type == 0x83 && centerTabs_->currentWidget() == bufferPane_) {
+        if (type == 0x83 && resourceImages_->currentWidget() == bufferPane_) {
             replayTimer_.stop();
             bufferTimer_.start();
             return;
@@ -4000,6 +4120,7 @@ void MainWindow::editTexture(bool output) {
     }
 }
 void MainWindow::editBuffer(bool importFile) {
+    if (session_ && session_->backend() == ReplayBackend::Dx12) { editDx12Buffer(importFile); return; }
     if (!frame_ || !experiment_ || !selectedEvent_ || !selectedResource_)
         return;
     try {

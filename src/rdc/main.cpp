@@ -2,6 +2,7 @@
 #include "Backend.h"
 #include "application/ReplayRequest.h"
 #include "application/RdcEvents.h"
+#include "application/DrawResources.h"
 #include <optional>
 #include <QCoreApplication>
 #include <QDir>
@@ -41,7 +42,13 @@ int main(int argc, char **argv) {
         if (!QDir().mkpath(destination))
             throw std::runtime_error("Cannot create output directory");
         output = destination;
-        if (identity && identity->isolateMissingQueries && job.at("action") != "inventory" && job.at("action") != "texture" &&
+        if (job.at("action") == "resource-workspace") {
+            const auto &requests = job.at("resource_requests");
+            if (!requests.is_array() || requests.empty() || requests.size() > 16)
+                throw std::runtime_error("Resource workspace requires 1 to 16 requests");
+            for (const auto &request : requests) flora::validateDx12ResourceRequest(request);
+        }
+        if (identity && identity->isolateMissingQueries && job.at("action") != "inventory" && job.at("action") != "texture" && job.at("action") != "resource-workspace" &&
             job.at("action") != "resource-history" && job.at("action") != "history" && job.at("action") != "pipeline" &&
             job.at("action") != "postmesh" &&
             !flora::rdcShaderDebugAction(job.at("action").get<std::string>()))

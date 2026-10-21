@@ -17,6 +17,7 @@ struct ExperimentUi {
     bool execution{};
     int boundary{}, subresource{}, budget{};
     bool isolateMissingQueries{};
+    nlohmann::json resources;
 };
 ExperimentUi readUi(const nlohmann::json &ui, const IReplaySession &session) {
     const auto number = [&](const char *key, uint64_t limit) {
@@ -43,6 +44,16 @@ ExperimentUi readUi(const nlohmann::json &ui, const IReplaySession &session) {
         else (void)session.event(result.event);
     }
     if (result.resource) (void)session.resource(result.resource);
+    result.resources = ui.value("resources", nlohmann::json());
+    if (!result.resources.is_null()) {
+        const auto &r = result.resources;
+        if (!r.is_object()) throw std::runtime_error("Invalid resource workspace settings");
+        for (const auto key : {"scope", "boundary", "sample", "slice", "buffer_mode"})
+            if (r.contains(key) && (!r.at(key).is_number_integer() || r.at(key).get<int64_t>() < -1 ||
+                r.at(key).get<int64_t>() > INT_MAX)) throw std::runtime_error("Invalid resource workspace coordinate");
+        for (const auto key : {"creation", "binding", "channel", "low", "high", "buffer_offset", "buffer_length"})
+            if (r.contains(key) && !r.at(key).is_string()) throw std::runtime_error("Invalid resource workspace setting");
+    }
     return result;
 }
 struct ExperimentResult {
@@ -55,6 +66,19 @@ struct ExperimentResult {
 void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::pair<Id, bool>> edit,
                                       std::optional<Dx12ShaderImport> shader, std::optional<Dx12ResourceImport> resource,
                                       std::optional<std::pair<Id, bool>> barrier) {
+    if (busy() && resourceBrowseBusy()) {
+        cancel();
+        resourceTimer_.stop();
+        const auto cancelledRevision = revision_;
+        const auto completion = std::make_shared<QMetaObject::Connection>();
+        *completion = connect(this, &MainWindow::taskFinished, this,
+            [this, completion, cancelledRevision, path, edit, shader, resource, barrier](bool) {
+                disconnect(*completion);
+                if (revision_ == cancelledRevision)
+                    prepareDx12Experiment(path, edit, shader, resource, barrier);
+            });
+        return;
+    }
     if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
     const auto session = session_;
     const auto revision = revision_;
@@ -101,8 +125,19 @@ void MainWindow::prepareDx12Experiment(const QString &path, std::optional<std::p
                 inspectResource(ui.resource);
             }
             boundary_->setCurrentIndex(ui.boundary);
-            dx12Subresource_->setValue(ui.subresource);
+            {
+                const QSignalBlocker subresourceBlock(dx12Subresource_);
+                dx12Subresource_->setRange(0, INT_MAX);
+                dx12Subresource_->setValue(ui.subresource);
+            }
+            configureDx12Texture();
             dx12Budget_->setValue(ui.budget);
+            if (!ui.resources.is_null()) {
+                dx12RestoredResources_ = ui.resources;
+                dx12PreferredBinding_ = QString::fromStdString(ui.resources.value("binding", ""));
+                resourceScope_->setCurrentIndex(ui.resources.value("scope", 1) == 0 ? 0 : 1);
+                if (resourceScope_->currentIndex() == 1) restoreDx12ResourceSettings();
+            }
         }
         if (!path.isEmpty()) projectPath_ = path;
         experimentChanged();
@@ -158,7 +193,7 @@ void MainWindow::patchDx12Resource(Id submission, Id resource, uint64_t offset, 
     if (!dataPath.isEmpty()) prepareDx12Experiment({}, {}, {}, Dx12ResourceImport{submission, resource, offset, subresource, texture, dataPath, afterExecution});
 }
 void MainWindow::importDx12Resource() {
-    if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.execution || !selection_.resource) return;
+    if ((busy() && !resourceBrowseBusy()) || !session_ || session_->backend() != ReplayBackend::Dx12 || !selection_.execution || !selection_.resource) return;
     try {
         const auto event = session_->executionEvent(*selection_.execution);
         if (!event.submission) throw std::runtime_error("Select a submitted execution instance");
@@ -191,7 +226,7 @@ void MainWindow::importDx12Resource() {
     } catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); }
 }
 void MainWindow::importDx12Shader() {
-    if (busy() || !session_ || session_->backend() != ReplayBackend::Dx12) return;
+    if ((busy() && !resourceBrowseBusy()) || !session_ || session_->backend() != ReplayBackend::Dx12) return;
     bool accepted{};
     const auto text = QInputDialog::getText(this, "Replace Pipeline Shader",
         "PSO creation record ID (applies to every use of this pipeline):", QLineEdit::Normal,
@@ -225,6 +260,13 @@ bool MainWindow::saveDx12Experiment(const QString &path) {
                       {"subresource", std::to_string(dx12Subresource_->value())},
                       {"allocation_mib", std::to_string(dx12Budget_->value())},
                       {"missing_query_policy", selection_.isolateMissingQueries ? "isolate_readback_outputs" : "fail"}};
+        ui["dx12"]["resources"] = {
+            {"creation", std::to_string(selection_.resource)}, {"scope", resourceScope_->currentIndex()},
+            {"binding", selectedBinding_ ? selectedBinding_->key : std::string()},
+            {"boundary", boundary_->currentIndex()}, {"slice", dx12Slice_->value()}, {"sample", dx12Sample_->value()},
+            {"channel", channels_->currentText().toStdString()}, {"low", outputLow_->text().toStdString()},
+            {"high", outputHigh_->text().toStdString()}, {"buffer_offset", bufferOffset_->text().toStdString()},
+            {"buffer_length", bufferLength_->text().toStdString()}, {"buffer_mode", bufferMode_->currentIndex()}};
         (void)readUi(ui.at("dx12"), *session_);
         experiment_->save(path, ui);
         projectPath_ = path; projectDirty_ = false; setWindowModified(false);

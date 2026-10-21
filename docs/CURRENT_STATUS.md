@@ -1,5 +1,11 @@
 # Current capabilities and compatibility
 
+**2026-10-21 resource browsing increment:** [Unified Resources](DX12_RESOURCE_WORKSPACE.md)
+reuses the central workspace for DX11/DX12 and moves the global catalogue and
+buffer viewer into it. DX12 submitted Draw/Dispatch selections automatically
+read partial RenderDoc bindings and exact Before/After resource contents.
+This increment does not claim full descriptor coverage or broader replay fidelity.
+
 Reviewed **2026-10-10**. The project is freezing the [v0.1 stable baseline](RELEASE_V0.1.md)
 from replay implementation `3186c82`. The v0.1 portable distribution now includes
 the pinned official RenderDoc 1.45 backend with automatic GUI/CLI discovery;

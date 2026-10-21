@@ -4,10 +4,14 @@
 #include "app/PixelHistoryView.h"
 #include "application/DrawResources.h"
 #include "application/FrameOutput.h"
+#include "application/RdcEvents.h"
+#include "application/RdcJobs.h"
+#include "application/ReplaySession.h"
 #include <QAction>
 #include <QImage>
 #include <QLabel>
 #include <QSettings>
+#include <QProcess>
 #include <QSignalSpy>
 #include <QTabWidget>
 #include <QTemporaryDir>
@@ -17,6 +21,24 @@ using namespace flora;
 using namespace flora::testing;
 using Json = nlohmann::json;
 namespace {
+class ResourceSession final : public IReplaySession {
+  public:
+    std::map<Id, SessionResource> objects;
+    ReplayBackend backend() const override { return ReplayBackend::Dx12; }
+    const std::string &identity() const override { static const std::string id = "fixture"; return id; }
+    const std::filesystem::path &path() const override { static const std::filesystem::path p; return p; }
+    Json information() const override { return {}; }
+    std::span<const Id> events() const override { return {}; }
+    SessionEvent event(Id) const override { return {}; }
+    Json eventDetails(Id) const override { return {}; }
+    std::string argumentText(Id) const override { return {}; }
+    Json executionDetails(Id) const override { return {}; }
+    Json submissionDetails() const override { return {}; }
+    std::span<const Id> resources() const override { return {}; }
+    SessionResource resource(Id id) const override { return objects.at(id); }
+    Json resourceDetails(Id) const override { return {}; }
+    SessionCapability capability(ReplayFeature, const ReplaySelection &) const override { return {}; }
+};
 Capture fixture(bool sparse = false) {
     auto c = depthStencilCapture();
     c.add(99, 5, 0x8c, statePack(Id(0), Id(0), Id(20), 28u, 4u, 0u, 1u, 0u, 0u));
@@ -86,6 +108,217 @@ class DrawResourceTests final : public QObject {
         QVERIFY_EXCEPTION_THROWN(
             exportDrawResources(frame, 1000, {}, {{"previews", {"unknown"}}}, dir.path().toStdWString()),
             std::exception);
+    }
+    void dx12SubresourceRanges() {
+        Json d{{"Dimension", 3}, {"Width", "512"}, {"Height", 256}, {"MipLevels", 3},
+               {"DepthOrArraySize", 2}, {"SampleCount", 1}, {"Format", 45}};
+        auto r = dx12TextureRange(d);
+        QCOMPARE(r.count(), 12u);
+        QCOMPARE(r.index(2, 1, 1), 11u);
+        QVERIFY_EXCEPTION_THROWN(r.index(3, 0, 0), std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(r.index(0, 2, 0), std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(r.index(0, 0, 2), std::runtime_error);
+        d["Dimension"] = 4; d["DepthOrArraySize"] = 16; d["Format"] = 28;
+        r = dx12TextureRange(d);
+        QCOMPARE(r.layers, 1u); QCOMPARE(r.depth, 16u); QCOMPARE(r.count(), 3u);
+        QVERIFY_EXCEPTION_THROWN(r.index(0, 1, 0), std::runtime_error);
+        d["Dimension"] = 3; d["MipLevels"] = 1; d["DepthOrArraySize"] = 1;
+        r = dx12TextureRange(d); QCOMPARE(r.count(), 1u);
+        QVERIFY_EXCEPTION_THROWN(r.index(4, 0, 0), std::runtime_error);
+        d["MipLevels"] = 0; QCOMPARE(dx12TextureRange(d).mips, 10u);
+        d["Width"] = "512bad"; QVERIFY_EXCEPTION_THROWN(dx12TextureRange(d), std::runtime_error);
+    }
+    void dx12ResourceBoundaryIdentity() {
+        const Json b{{"schema", 1}, {"execution", "18446744073709551615"}, {"boundary", "before"},
+                     {"isolate_missing_queries", false}};
+        const Json node{{"customName", rdcResourceBoundaryMarker(b)}, {"eventId", uint32_t(19)},
+                        {"children", Json::array()}};
+        const Json job{{"execution", b.at("execution")}, {"boundary", "before"}, {"isolate_missing_queries", false}};
+        const auto result = readRdcResourceBoundary(Json::array({node}), job);
+        QCOMPARE(result.at("event_id"), Json(19));
+        auto wrong = job; wrong["boundary"] = "after";
+        QVERIFY_EXCEPTION_THROWN(readRdcResourceBoundary(Json::array({node}), wrong), std::runtime_error);
+        wrong = job; wrong["execution"] = "9007199254740993";
+        QVERIFY_EXCEPTION_THROWN(readRdcResourceBoundary(Json::array({node}), wrong), std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(readRdcResourceBoundary(Json::array({node, node}), job), std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(readRdcResourceBoundary(Json::array(), job), std::runtime_error);
+    }
+    void dx12CorruptResourceRequests() {
+        Json d{{"Dimension", 3}, {"Width", "512"}, {"Height", 256}, {"MipLevels", 3},
+               {"DepthOrArraySize", 2}, {"SampleCount", 1}, {"Format", 45}};
+        Json request{{"resource_description", d}, {"creation", "18446744073709551615"},
+                     {"object", "9007199254740993"}, {"buffer", false}, {"thumbnail", false},
+                     {"mip", 1}, {"layer", 1}, {"slice", 0}, {"sample", UINT32_MAX},
+                     {"plane", "stencil"}, {"channel", "RGBA"}, {"low", 0.}, {"high", 255.}};
+        validateDx12ResourceRequest(request);
+        for (const auto &invalid : {Json(-1), Json(0.5), Json(uint64_t(UINT32_MAX) + 1), Json("1"), Json(4)}) {
+            auto bad = request; bad["mip"] = invalid;
+            QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        }
+        auto bad = request; bad["object"] = 9007199254740993ULL;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        bad = request; bad["resource_description"]["Format"] = 40;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        bad = request; bad["sample"] = 1;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        bad = request; bad["resource_description"]["SampleCount"] = 4;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception); // MSAA cannot have mip chains.
+        bad["resource_description"]["MipLevels"] = 1; bad["mip"] = 0; bad["sample"] = 3;
+        validateDx12ResourceRequest(bad);
+        bad["sample"] = 4;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        bad = request; bad["view_range"] = {{"mip_first", 2}, {"mip_end", 3},
+            {"layer_first", 0}, {"layer_end", 2}, {"slice_first", 0}, {"slice_end", 1}};
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(bad), std::exception);
+        request["resource_description"]["Dimension"] = 4; request["resource_description"]["DepthOrArraySize"] = 8;
+        request["resource_description"]["Format"] = 28; request["plane"] = "color";
+        request["layer"] = 0; request["slice"] = 3;
+        validateDx12ResourceRequest(request); // Slice 3 is in mip 1, not array layer 3.
+        request["slice"] = 4;
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(request), std::exception);
+        request = {{"resource_description", {{"Dimension", 1}, {"Width", "1024"}}},
+                   {"creation", "1"}, {"object", "2"}, {"buffer", true}, {"thumbnail", false},
+                   {"offset", "1023"}, {"length", "1"}};
+        validateDx12ResourceRequest(request);
+        request["length"] = "2";
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(request), std::exception);
+        request["offset"] = "18446744073709551615";
+        QVERIFY_EXCEPTION_THROWN(validateDx12ResourceRequest(request), std::exception);
+    }
+    void dx12BindingIdentityAndViews() {
+        ResourceSession session;
+        constexpr Id creation = UINT64_MAX, object = 9007199254740993ULL, execution = UINT64_MAX - 2;
+        Json desc{{"Dimension", 3}, {"Width", "128"}, {"Height", 64}, {"MipLevels", 3},
+                  {"DepthOrArraySize", 4}, {"SampleCount", 1}, {"Format", 28}};
+        session.objects[creation] = {creation, object, "Texture", desc.dump()};
+        session.objects[4] = {4, 44, "Buffer", Json{{"Dimension", 1}, {"Width", "1024"}}.dump()};
+        Json ref{{"mapping_status", "capture_resource_marker"}, {"resource_creation", std::to_string(creation)},
+                 {"resource_object", std::to_string(object)}};
+        Json view{{"first_mip", 1}, {"mip_count", 2}, {"first_slice", 2}, {"slice_count", 1}};
+        Json rows = Json::array({
+            {{"section", "OM"}, {"binding", "RTV 0"}, {"resource", ref}, {"details", view}},
+            {{"section", "OM"}, {"binding", "RTV 3"}, {"resource", ref}, {"details", view}},
+            {{"section", "PS"}, {"binding", "texture[3]"}, {"resource", ref},
+             {"details", {{"array_element", 3}, {"reflection_binding", {{"register", 7}, {"space", 2}}},
+                          {"descriptor", view}}}}});
+        rows[2]["details"]["descriptor"]["category"] = "SRV";
+        auto alias = rows[2]; alias["details"]["array_element"] = 4; rows.push_back(alias);
+        auto invalid = rows[0]; invalid["binding"] = "RTV 1";
+        invalid["resource"]["resource_object"] = "9007199254740994"; rows.push_back(invalid);
+        invalid = rows[0]; invalid["binding"] = "RTV 2"; invalid["resource"]["mapping_status"] = "unmapped";
+        rows.push_back(invalid);
+        for (const auto kind : {"CBV", "SRV", "UAV", "VB", "IB"}) {
+            auto row = rows[2]; row["resource"] = {{"mapping_status", "capture_resource_marker"},
+                {"resource_creation", "4"}, {"resource_object", "44"}};
+            row["details"]["descriptor"] = {{"category", kind}, {"byte_offset", "128"}, {"byte_size", "256"}};
+            if (std::string(kind) == "VB" || std::string(kind) == "IB") {
+                row["section"] = "IA"; row["binding"] = std::string(kind) == "VB" ? "VB 2" : "Index buffer";
+                row["details"] = row.at("details").at("descriptor");
+            }
+            rows.push_back(row);
+        }
+        const auto bindings = dx12DrawResources(session, execution, {{"pipeline_rows", rows}});
+        QCOMPARE(bindings.size(), size_t(11));
+        QCOMPARE(bindings[0].image.resource, creation);
+        QCOMPARE(bindings[0].image.mip, 1u); QCOMPARE(bindings[0].image.layer, 2u);
+        QCOMPARE(bindings[0].mipEnd, 3u); QCOMPARE(bindings[0].layerEnd, 3u);
+        QCOMPARE(bindings[1].slot, 3u);
+        QVERIFY(bindings[2].key != bindings[3].key);
+        QCOMPARE(bindings[2].slot, 7u);
+        QCOMPARE(bindings[2].image.boundary, ImageBoundary::Before);
+        QVERIFY(!bindings[4].error.empty()); QVERIFY(!bindings[5].error.empty());
+        QCOMPARE(bindings[8].image.boundary, ImageBoundary::After);
+        for (size_t i = 6; i < bindings.size(); ++i) { QVERIFY(!bindings[i].texture); QVERIFY(bindings[i].error.empty()); }
+        const auto exported = drawResourceJson(bindings.front());
+        QCOMPARE(exported.at("resource"), Json(std::to_string(creation)));
+        QCOMPARE(exported.at("event"), Json(std::to_string(execution)));
+        const auto repeated = dx12DrawResources(session, execution - 1, {{"pipeline_rows", rows}});
+        QCOMPARE(repeated.front().image.event, execution - 1);
+        QVERIFY(drawResourceJson(repeated.front()) != exported);
+        desc["Format"] = 19; session.objects[creation].summary = desc.dump();
+        const auto depthViews = dx12DrawResources(session, execution, {{"pipeline_rows", Json::array({rows[2]})}});
+        QVERIFY(depthViews.front().error.find("SRV plane") != std::string::npos);
+    }
+    void unifiedResourceEntry() {
+        MainWindow window;
+        auto center = window.findChild<QTabWidget *>("analysisTabs");
+        QVERIFY(center);
+        int resources = 0;
+        for (auto tabs : window.findChildren<QTabWidget *>())
+            for (int i = 0; i < tabs->count(); ++i) resources += tabs->tabText(i) == "Resources";
+        QCOMPARE(resources, 1);
+        auto scope = window.findChild<QComboBox *>("resourceScope");
+        QVERIFY(scope); QCOMPARE(scope->count(), 2);
+        auto global = window.findChild<QTableView *>("resources");
+        QVERIFY(global);
+        auto workspace = window.findChild<QWidget *>("resourceWorkspace");
+        QVERIFY(workspace->isAncestorOf(global));
+        QVERIFY(workspace->isAncestorOf(window.findChild<QLineEdit *>("bufferOffset")));
+    }
+    void dx12KnownBoundaryValues() {
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (library.isEmpty()) QSKIP("Set a compatible RenderDoc library for the independent DX12 oracle");
+        QTemporaryDir temp;
+        const auto root = qEnvironmentVariable("FLORA_RESOURCE_FIXTURE_OUTPUT", temp.path());
+        QVERIFY(QDir().mkpath(root));
+        const auto run = [&](const QString &exe, const QStringList &args) {
+            QProcess process; process.start(QCoreApplication::applicationDirPath() + "/" + exe, args);
+            if (!process.waitForStarted() || !process.waitForFinished(120000) || process.exitCode() ||
+                process.exitStatus() != QProcess::NormalExit)
+                throw std::runtime_error(process.readAllStandardError().toStdString());
+        };
+        const auto read = [](const QString &file) {
+            QFile input(file); if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing oracle artifact");
+            return input.readAll();
+        };
+        for (const auto boundary : {"before", "after"}) {
+            const auto dir = root + "/" + boundary; QVERIFY(QDir().mkpath(dir));
+            run("FloraResourceWorkspaceFixture.exe", {library, dir + "/oracle", boundary});
+            const auto captures = QDir(dir).entryList({"*.rdc"}, QDir::Files);
+            QCOMPARE(captures.size(), 1);
+            const auto capture = dir + "/" + captures.front();
+            Json description{{"Dimension", 3}, {"Width", "16"}, {"Height", 16}, {"MipLevels", 2},
+                             {"DepthOrArraySize", 2}, {"SampleCount", 1}, {"Format", 28}};
+            Json color{{"creation", "18446744073709551613"}, {"object", "9007199254740993"},
+                       {"resource_description", description}, {"buffer", false}, {"thumbnail", false},
+                       {"key", "color"}, {"mip", 1}, {"layer", 1}, {"slice", 0}, {"sample", UINT32_MAX},
+                       {"plane", "color"}, {"channel", "RGBA"}, {"low", 0.}, {"high", 1.}};
+            auto depth = color; depth["creation"] = "18446744073709551614"; depth["object"] = "9007199254740994";
+            depth["key"] = "depth"; depth["plane"] = "depth"; depth["mip"] = 0; depth["layer"] = 0;
+            depth["resource_description"] = {{"Dimension", 3}, {"Width", "8"}, {"Height", 8}, {"MipLevels", 1},
+                                            {"DepthOrArraySize", 1}, {"SampleCount", 1}, {"Format", 45}};
+            auto stencil = depth; stencil["key"] = "stencil"; stencil["plane"] = "stencil";
+            auto thumbnail = color; thumbnail["thumbnail"] = true; thumbnail["key"] = "thumbnail";
+            auto duplicate = thumbnail; duplicate["key"] = "another-slot";
+            Json buffer{{"creation", "18446744073709551615"}, {"object", "9007199254740995"},
+                        {"resource_description", {{"Dimension", 1}, {"Width", "256"}}},
+                        {"key", "buffer"}, {"buffer", true}, {"thumbnail", false}, {"offset", "4"}, {"length", "8"}};
+            auto job = prepareRdcJob(capture, "resource-workspace", dir + "/read", library,
+                {{"execution", "9007199254740999"}, {"boundary", boundary},
+                 {"resource_requests", Json::array({color, depth, stencil, buffer, thumbnail, duplicate})}});
+            const auto jobPath = dir + "/job.json";
+            { QFile output(jobPath); QVERIFY(output.open(QIODevice::WriteOnly)); output.write(QByteArray::fromStdString(job.dump(2))); }
+            run("FloraGPA.Rdc.exe", {"--job", jobPath});
+            const auto result = Json::parse(read(dir + "/read/result.json").toStdString());
+            QVERIFY2(result.at("ok").get<bool>(), result.dump().c_str());
+            QCOMPARE(result.at("execution"), Json("9007199254740999"));
+            const auto &rows = result.at("resource_results");
+            const bool after = std::string(boundary) == "after";
+            for (const auto &row : rows) QVERIFY2(!row.contains("error"), row.dump().c_str());
+            const auto image = [&](size_t i) { return QImage(dir + "/read/" + QString::fromStdString(rows[i].at("image"))); };
+            QCOMPARE(image(0).size(), QSize(8, 8));
+            QVERIFY(std::abs(image(0).pixelColor(0, 0).red() - (after ? 191 : 64)) <= 1);
+            QVERIFY(std::abs(image(1).pixelColor(0, 0).red() - (after ? 191 : 64)) <= 1);
+            QVERIFY2(std::abs(image(2).pixelColor(0, 0).red() - (after ? 201 : 37)) <= 1,
+                     qPrintable(QString("Stencil display = %1").arg(image(2).pixelColor(0, 0).red())));
+            const auto raw = read(dir + "/read/" + QString::fromStdString(rows[3].at("file")));
+            QCOMPARE(raw.size(), 8); uint32_t value{}; memcpy(&value, raw.constData(), 4);
+            QCOMPARE(value, after ? 42u : 7u);
+            QCOMPARE(rows[4].at("image"), rows[5].at("image")); // Duplicate bindings share the batch read.
+            QVERIFY(image(4).width() <= 96 && image(4).height() <= 96);
+            QVERIFY(rows[0].contains("storage_description"));
+            qInfo() << boundary << "color/depth/stencil/buffer and mip 1 array 1 verified";
+        }
     }
     void rangesBuffersAndNoRt() {
         QTemporaryDir dir;
@@ -349,11 +582,10 @@ class DrawResourceTests final : public QObject {
         auto status = window.findChild<QLabel *>("resourceStatus");
         QVERIFY(status->text().contains("Texture 20"));
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
-        QVERIFY(!tasks.takeLast()[0].toBool());
-        const auto failure = window.findChild<QPlainTextEdit *>("taskLog")->toPlainText();
-        QVERIFY2(failure.contains("Texture has no captured initial bytes; select an event"), qPrintable(failure));
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(window.findChild<QComboBox *>("textureBoundary")->currentIndex(), 2);
         tasks.clear();
-        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(1);
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
         QVERIFY(tasks.takeLast()[0].toBool());
         QVERIFY(!browser->selected());

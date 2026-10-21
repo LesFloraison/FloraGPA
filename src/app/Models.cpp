@@ -127,6 +127,11 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
         if (kind_ == Kind::Resources) {
             const auto r = session_->resource(ids_[index.row()]);
             if (role == Qt::UserRole) return QVariant::fromValue<qulonglong>(r.id);
+            if (role == Qt::UserRole + 1) {
+                const auto desc = nlohmann::json::parse(r.summary);
+                const auto dimension = desc.value("Dimension", 0u);
+                return dimension == 1 ? 0x83u : dimension >= 2 && dimension <= 4 ? 0x82u + dimension : 0u;
+            }
             if (role == Qt::ToolTipRole) return QString::fromStdString("Captured object " + std::to_string(r.capturedObject) + " | " + r.summary);
             if (role != Qt::DisplayRole) return {};
             return index.column() == 0 ? QString::number(r.id) : QString::fromStdString(index.column() == 1 ? r.name : r.summary);
