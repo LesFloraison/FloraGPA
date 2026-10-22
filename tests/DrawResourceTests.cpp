@@ -18,6 +18,7 @@
 #include <QTemporaryDir>
 #include <QTreeWidgetItemIterator>
 #include <QtTest>
+#include <set>
 using namespace flora;
 using namespace flora::testing;
 using Json = nlohmann::json;
@@ -255,6 +256,155 @@ class DrawResourceTests final : public QObject {
         auto workspace = window.findChild<QWidget *>("resourceWorkspace");
         QVERIFY(workspace->isAncestorOf(global));
         QVERIFY(workspace->isAncestorOf(window.findChild<QLineEdit *>("bufferOffset")));
+    }
+    void dx12RealAnalysisBoundaries() {
+        const auto capture = qEnvironmentVariable("FLORA_MULTIQUEUE_REAL_CAPTURE");
+        const auto root = qEnvironmentVariable("FLORA_MULTIQUEUE_REAL_OUTPUT");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (capture.isEmpty() || root.isEmpty() || library.isEmpty()) QSKIP("Set real capture, output and RenderDoc for boundary comparison");
+        const auto captureCache = qEnvironmentVariable("FLORA_MULTIQUEUE_REAL_CAPTURE_CACHE");
+        QVERIFY(!QFileInfo::exists(root)); QVERIFY(QDir().mkpath(root));
+        const auto session = openReplaySession(capture.toStdWString());
+        const bool isolate = qEnvironmentVariableIsSet("FLORA_RESOURCE_ISOLATE");
+        const auto executable = QCoreApplication::applicationDirPath();
+        const auto read = [](const QString &path) {
+            QFile f(path); if (!f.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing real-boundary artifact");
+            return f.readAll();
+        };
+        auto recapture = [&](const QString &name, const QString &execution = {}, bool before = false) {
+            if (!captureCache.isEmpty()) {
+                const auto cached = captureCache + '/' + name;
+                const auto files = QDir(cached).entryList({"*.rdc"}, QDir::Files);
+                if (files.size() == 1 && QFileInfo::exists(cached + "/report.json")) {
+                    const auto report = Json::parse(read(cached + "/report.json").toStdString());
+                    if (!report.value("completed", false) ||
+                        (!execution.isEmpty() && (report.at("execution") != execution.toStdString() ||
+                            report.at("value_time") != (before ? "before_event" : "after_event"))))
+                        throw std::runtime_error("Cached oracle capture has the wrong boundary");
+                    return cached + '/' + files.front();
+                }
+            }
+            const auto out = root + '/' + name;
+            QStringList args{"replay", capture, "--renderdoc", library, "--max-bytes", "12884901888", "--out", out};
+            if (!execution.isEmpty()) args << "--event" << execution;
+            if (before) args << "--before";
+            if (isolate) args << "--isolate-missing-queries";
+            QProcess p; p.setStandardErrorFile(root + '/' + name + ".stderr.txt");
+            p.start(executable + "/FloraGPA.Worker.exe", args);
+            if (!p.waitForStarted() || !p.waitForFinished(240000) || p.exitCode())
+                throw std::runtime_error("Native boundary capture failed: " + name.toStdString());
+            const auto files = QDir(out).entryList({"*.rdc"}, QDir::Files);
+            if (files.size() != 1) throw std::runtime_error("Missing unique boundary RDC");
+            return out + '/' + files.front();
+        };
+        const auto full = recapture("full");
+        auto analyze = [&](const QString &rdc, const QString &out, const QString &execution, const char *action, Json extra) {
+            extra["execution"] = execution.toStdString(); extra["isolate_missing_queries"] = isolate;
+            auto job = prepareRdcJob(rdc, action, root + '/' + out, library, extra);
+            return Json::parse(read(runRdcAnalysis(job, executable + "/FloraGPA.Rdc.exe", 240)).toStdString());
+        };
+        Json evidence = Json::array();
+        for (const auto &execution : qEnvironmentVariable("FLORA_RESOURCE_EXECUTIONS").split(',', Qt::SkipEmptyParts)) {
+            const auto pipeline = analyze(full, execution + "-pipeline", execution, "pipeline", {{"analysis_frame", true}});
+            const auto bindings = dx12DrawResources(*session, execution.toULongLong(), pipeline);
+            Json requests = Json::array(); std::set<std::string> categories;
+            for (const auto &b : bindings) {
+                if (!b.error.empty()) continue;
+                const auto category = b.texture ? b.kind : "buffer";
+                if (categories.contains(category) || requests.size() >= 5) continue;
+                categories.insert(category);
+                const auto resource = session->resource(b.image.resource);
+                const auto description = Json::parse(resource.summary);
+                Json request{{"key", b.key}, {"creation", std::to_string(b.image.resource)}, {"object", std::to_string(resource.capturedObject)},
+                    {"buffer", !b.texture}, {"thumbnail", false}, {"resource_description", description}};
+                if (b.texture) {
+                    request.update({{"mip", b.image.mip}, {"layer", b.image.layer}, {"slice", b.image.slice},
+                        {"sample", UINT32_MAX}, {"plane", b.kind == "DSV" ? "depth" : "color"},
+                        {"channel", "RGBA"}, {"low", 0.}, {"high", 1.}});
+                } else {
+                    const auto &d = b.native.at("descriptor");
+                    const auto offset = std::stoull(d.value("byte_offset", "0"));
+                    const auto width = std::stoull(description.at("Width").get<std::string>());
+                    if (offset >= width) continue;
+                    request["offset"] = std::to_string(offset); request["length"] = std::to_string(std::min(256ULL, width - offset));
+                }
+                requests.push_back(request);
+            }
+            QVERIFY(!requests.empty());
+            for (const auto side : {"before", "after"}) {
+                const auto name = execution + '-' + side;
+                const auto prefix = recapture(name, execution, std::string(side) == "before");
+                if (std::string(side) == "after") {
+                    const auto observed = analyze(prefix, name + "-pipeline", execution, "pipeline", Json::object());
+                    auto identities = [](const std::vector<DrawResourceBinding> &rows) {
+                        std::multiset<std::string> result;
+                        for (const auto &row : rows) if (row.error.empty())
+                            result.insert(Json({row.stage, row.kind, row.slot, row.image.resource, row.image.format,
+                                row.image.mip, row.image.layer, row.image.slice, row.mipEnd, row.layerEnd, row.sliceEnd}).dump());
+                        return result;
+                    };
+                    QCOMPARE(identities(bindings), identities(dx12DrawResources(*session, execution.toULongLong(), observed)));
+                }
+                const Json selection{{"boundary", side}, {"resource_requests", requests}};
+                const auto old = analyze(prefix, name + "-old", execution, "resource-workspace", selection);
+                auto reuse = selection; reuse["analysis_frame"] = true;
+                const auto current = analyze(full, name + "-new", execution, "resource-workspace", reuse);
+                const auto &a = old.at("resource_results"), &b = current.at("resource_results");
+                QCOMPARE(a.size(), b.size());
+                for (size_t i = 0; i < a.size(); ++i) {
+                    QVERIFY2(!a[i].contains("error"), a[i].dump().c_str()); QVERIFY2(!b[i].contains("error"), b[i].dump().c_str());
+                    const bool equal = a[i].at("sha256") == b[i].at("sha256");
+                    evidence.push_back({{"execution", execution.toStdString()}, {"boundary", side}, {"request", requests[i]},
+                        {"prefix_sha256", a[i].at("sha256")}, {"reuse_sha256", b[i].at("sha256")}, {"equal", equal}});
+                    QFile report(root + "/comparison.json"); QVERIFY(report.open(QIODevice::WriteOnly));
+                    report.write(QByteArray::fromStdString(evidence.dump(2))); report.close();
+                    if (!equal) QTest::qFail((name.toStdString() + " " + requests[i].dump()).c_str(), __FILE__, __LINE__);
+                    if (a[i].contains("image") &&
+                        QImage(root + '/' + name + "-old/" + QString::fromStdString(a[i].at("image"))) !=
+                        QImage(root + '/' + name + "-new/" + QString::fromStdString(b[i].at("image"))))
+                        QTest::qFail((name.toStdString() + " preview differs: " + requests[i].at("key").get<std::string>()).c_str(), __FILE__, __LINE__);
+                }
+            }
+        }
+        QVERIFY(!evidence.empty());
+    }
+    void dx12MultiQueueBoundaryValues() {
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (library.isEmpty()) QSKIP("Set RenderDoc for the direct multi-queue oracle");
+        QTemporaryDir temp;
+        const auto root = qEnvironmentVariable("FLORA_MULTIQUEUE_FIXTURE_OUTPUT", temp.path());
+        const auto read = [](const QString &path) {
+            QFile f(path); if (!f.open(QIODevice::ReadOnly)) throw std::runtime_error("Missing multi-queue artifact");
+            return f.readAll();
+        };
+        QString full;
+        for (const auto mode : {"full", "before", "after"}) {
+            const auto dir = root + '/' + mode; QVERIFY(QDir().mkpath(dir));
+            QProcess fixture;
+            fixture.start(QCoreApplication::applicationDirPath() + "/FloraMultiQueueBoundaryFixture.exe", {library, dir + "/oracle", mode});
+            QVERIFY(fixture.waitForStarted()); QVERIFY(fixture.waitForFinished(120000));
+            QVERIFY2(fixture.exitCode() == 0, fixture.readAllStandardError().constData());
+            const auto files = QDir(dir).entryList({"*.rdc"}, QDir::Files); QCOMPARE(files.size(), 1);
+            const auto capture = dir + '/' + files.front();
+            if (std::string(mode) == "full") { full = capture; continue; }
+            auto job = prepareRdcJob(capture, "resource-workspace", dir + "/prefix", library,
+                {{"execution", "2"}, {"boundary", mode}, {"resource_requests", Json::array({
+                    {{"creation", "88"}, {"object", "77"}, {"key", "buffer"}, {"buffer", true},
+                     {"thumbnail", false}, {"offset", "0"}, {"length", "256"},
+                     {"resource_description", {{"Dimension", 1}, {"Width", "256"}}}}})}});
+            const auto prefix = Json::parse(read(runRdcAnalysis(job, QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", 120)).toStdString());
+            job["capture"] = full.toStdString(); job["analysis_frame"] = true; job["out"] = (dir + "/reuse").toStdString();
+            const auto reused = Json::parse(read(runRdcAnalysis(job, QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", 120)).toStdString());
+            const auto &a = prefix.at("resource_results").front(), &b = reused.at("resource_results").front();
+            QVERIFY2(!a.contains("error"), a.dump().c_str()); QVERIFY2(!b.contains("error"), b.dump().c_str());
+            QCOMPARE(a.at("sha256"), b.at("sha256"));
+            const auto bytes = read(dir + "/reuse/" + QString::fromStdString(b.at("file")));
+            QCOMPARE(bytes.size(), 256);
+            for (int i = 0; i < bytes.size(); i += 4) {
+                uint32_t word{}; memcpy(&word, bytes.constData() + i, 4);
+                QCOMPARE(word, std::string(mode) == "before" ? 7u : 42u);
+            }
+        }
     }
     void dx12KnownBoundaryValues() {
         const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");

@@ -52,7 +52,7 @@ QByteArray readBytes(const QString &directory, const Json &result) {
 }
 }
 bool MainWindow::resourceBrowseBusy() const {
-    if (runningKind_ == "analysis-frame-capture") return true;
+    if (runningKind_ == "analysis-frame-capture" || runningKind_ == "analysis-frame-warmup") return true;
     return runningAnalysis_ == RdcAnalysis::Resources &&
            (runningKind_ == "history" || runningKind_ == "history-capture" || runningKind_ == "resource-validation");
 }
@@ -161,23 +161,17 @@ void MainWindow::prepareAnalysisFrame() {
         setProperty("analysisFrameState", "unavailable: " + QString::fromStdString(session_->capability(ReplayFeature::Replay, selected).reason));
         return;
     }
-    if (historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
-    setProperty("analysisFrameState", "preparing");
+    if (analysisFrameFailed_.contains(key)) return;
     try {
-        const auto submissions = session_->submissionDetails();
-        const auto initialization = session_->information().at("initialization_records").get<uint64_t>();
-        std::set<std::string> queues;
-        // Initialization uploads have already completed before capture begins.
-        // Their helper queues do not contribute to the observed frame order.
-        for (const auto &list : submissions.at("lists"))
-            if (decimal(list.at("submission_record")) > initialization)
-                queues.insert(list.at("queue").get<std::string>());
-        if (queues.size() != 1) {
-            analysisFrameFailed_.insert(key);
-            setProperty("analysisFrameState", "unsupported_frame_queue_order");
-            log_->appendPlainText("Analysis reuse fallback: multiple or unresolved queues require exact prefix capture.");
+        if (historyCaptures_.contains(key)) {
+            if (analysisFrameContext_ != key || !property("analysisFrameReady").toBool()) warmAnalysisFrame();
             return;
         }
+        setProperty("analysisFrameState", "preparing");
+        setProperty("analysisFrameReady", false);
+        setProperty("analysisFrameWarmupComplete", false);
+        // Queue count alone says nothing about prefix equivalence. The native
+        // dependency plan and RDC execution-boundary certificate qualify each DC.
         analysisFrameContext_ = key;
         const auto library = dx12Pipeline_->backendPath();
         startWorker({"replay", capturePath_, "--renderdoc", library, "--max-bytes",
@@ -191,6 +185,34 @@ void MainWindow::prepareAnalysisFrame() {
         setProperty("analysisFrameState", "failed: " + QString::fromUtf8(e.what()));
         analysisFrameFailed_.insert(key); log_->appendPlainText(QString::fromUtf8(e.what()));
     }
+}
+void MainWindow::warmAnalysisFrame() {
+    // Readiness includes OpenCapture, boundary certification and first event
+    // replay. Otherwise the first foreground navigation pays all three costs.
+    const auto key = analysisFrameKey();
+    const auto capture = historyCaptures_.find(key);
+    if (capture == historyCaptures_.end() || !selection_.execution) return;
+    analysisFrameContext_ = key;
+    setProperty("analysisFrameReady", false);
+    setProperty("analysisFrameWarmupComplete", false);
+    if (rdcServiceFallback_ || qEnvironmentVariableIsSet("FLORA_DISABLE_RDC_SERVICE")) {
+        setProperty("analysisFrameReady", true);
+        setProperty("analysisFrameState", "captured (isolated analysis)");
+        return;
+    }
+    historyKey_ = key; historyRdc_ = capture->second.path;
+    historyRequest_ = {{"action", "pipeline"}, {"execution", std::to_string(*selection_.execution)},
+        {"analysis_frame", true}, {"isolate_missing_queries", selection_.isolateMissingQueries},
+        {"renderdoc", dx12Pipeline_->backendPath().toStdString()}, {"frame_sha256", nullptr},
+        {"experiment_key", key.toStdString()},
+        {"capture_identity", {{"kind", "runtime_session"}, {"value", session_->identity()}, {"backend", "dx12"}}}};
+    runningAnalysis_ = RdcAnalysis::Resources;
+    historyRequestId_ = revision_;
+    setProperty("analysisFrameState", "opening controller");
+    startHistoryWorker();
+    runningKind_ = "analysis-frame-warmup";
+    setBusy(true);
+    statusBar()->showMessage("Opening reusable analysis controller…");
 }
 void MainWindow::showBufferWorkspace() {
     resourceImages_->setCurrentWidget(bufferPane_);
@@ -478,7 +500,8 @@ void MainWindow::pumpDx12Resources() {
             }
             if (requests.empty()) {
                 const auto key = analysisFrameKey();
-                if (historyCaptures_.contains(key) || analysisFrameFailed_.contains(key)) return;
+                if ((historyCaptures_.contains(key) && analysisFrameContext_ == key && property("analysisFrameReady").toBool()) ||
+                    analysisFrameFailed_.contains(key)) return;
                 setProperty("analysisFrameState", "idle_timer");
                 if (!analysisFrameTimer_.isActive()) analysisFrameTimer_.start();
                 return;

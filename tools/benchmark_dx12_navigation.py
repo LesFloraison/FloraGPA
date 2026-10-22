@@ -2,8 +2,9 @@
 
 The compatibility baseline disables resident replay, fast previews and full-frame
 reuse. CPU metadata remains enabled, so compare content latency, not old GUI list
-latency. The first sample is cold; later samples include the first controller open
-on the prepared frame. Record that sample separately when interpreting warm data.
+latency. The first sample is cold; preparation_ms includes background capture,
+controller opening and boundary indexing. Every later selection is measured,
+including the first selection after readiness, without removing its latency.
 """
 import argparse
 import json
@@ -29,9 +30,12 @@ def main():
     parser.add_argument("--executions", required=True, help="At least 20 comma-separated execution IDs")
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument("--disable-frame-reuse", action="store_true", help="Keep retained sessions/fast previews but force the previous per-DC capture path")
     parser.add_argument("--isolate-queries", action="store_true")
     parser.add_argument("--require-reuse", action="store_true", help="Fail if this supported sample cannot prepare a reusable frame")
     args = parser.parse_args()
+    if args.require_reuse and (args.baseline or args.disable_frame_reuse):
+        parser.error("--require-reuse cannot be combined with a path that disables frame reuse")
     args.out.mkdir(parents=True, exist_ok=False)
     env = os.environ.copy()
     for key in ("FLORA_DISABLE_RDC_SERVICE", "FLORA_DISABLE_FAST_PREVIEW", "FLORA_DISABLE_FRAME_REUSE",
@@ -47,6 +51,8 @@ def main():
     if args.baseline:
         for key in ("FLORA_DISABLE_RDC_SERVICE", "FLORA_DISABLE_FAST_PREVIEW", "FLORA_DISABLE_FRAME_REUSE"):
             env[key] = "1"
+    if args.disable_frame_reuse:
+        env["FLORA_DISABLE_FRAME_REUSE"] = "1"
     if args.isolate_queries:
         env["FLORA_RESOURCE_ISOLATE"] = "1"
     if args.require_reuse:
@@ -59,12 +65,15 @@ def main():
     report = json.loads(evidence.read_text(encoding="utf-8")) if evidence.exists() else {}
     rows = report.get("samples", [])
     summary = dict(capture=args.capture, compatibility_baseline=args.baseline,
+                   frame_reuse_disabled=args.disable_frame_reuse or args.baseline,
                    query_policy="isolate_readback_outputs" if args.isolate_queries else "strict",
                    exit_code=result.returncode, cold=rows[0] if rows else None,
                    prepared_content=distribution([r["preview_ms"] for r in rows[1:] if r.get("content_ready")]),
                    prepared_lists=distribution([r["list_ms"] for r in rows[1:]]),
                    captures=report.get("captures"), full_frame_ready=report.get("full_frame_ready"))
     summary["preparation_state"] = report.get("preparation_state")
+    summary["preparation_ms"] = report.get("preparation_ms")
+    summary["controller_warm"] = report.get("controller_warm")
     summary["attempted"] = len(rows)
     summary["failed_samples"] = [r for r in rows if not r.get("content_ready")]
     (args.out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")

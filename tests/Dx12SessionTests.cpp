@@ -6241,6 +6241,53 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto output = qEnvironmentVariable("FLORA_RESOURCE_OUTPUT");
         if (!output.isEmpty()) { QVERIFY(QDir().mkpath(output)); QVERIFY(window.grab().save(output + "/strict-refusal.png")); }
     }
+    void analysisWarmupPreemption_data() {
+        QTest::addColumn<bool>("explicitCancel");
+        QTest::newRow("selection-change") << false;
+        QTest::newRow("explicit-cancel") << true;
+    }
+    void analysisWarmupPreemption() {
+        QFETCH(bool, explicitCancel);
+        const auto capture = qEnvironmentVariable("FLORA_WARMUP_TEST_CAPTURE");
+        if (capture.isEmpty()) QSKIP("Set Talos capture and RenderDoc for controller warm-up preemption");
+        MainWindow window; window.resize(1700, 1000); window.show();
+        window.findChild<Dx12PipelineView *>()->setBackendPath(qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY"), false);
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded);
+        window.openCapture(capture);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 60000);
+        window.findChild<QSpinBox *>("dx12AllocationMiB")->setValue(12288);
+        window.findChild<QCheckBox *>("dx12QueryIsolation")->setChecked(true);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        const auto select = [&](const char *id) { locate->setText(id); QTest::keyClick(locate, Qt::Key_Return); };
+        select("12675");
+        QTRY_COMPARE_WITH_TIMEOUT(window.property("analysisFrameState").toString(), QString("opening controller"), 180000);
+        QVERIFY(window.busy());
+        QVERIFY(!window.property("analysisFrameReady").toBool());
+        const auto captures = window.property("resourceCaptureCount").toUInt();
+        if (explicitCancel) {
+            window.findChild<QAction *>("cancelReplay")->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 10000);
+            QTest::qWait(1500); // Exceed the idle delay: explicit stop must stay stopped.
+            QVERIFY(!window.busy());
+            QVERIFY(!window.property("analysisFrameWarmupComplete").toBool());
+        } else {
+            select("16201"); select("12675");
+            // The in-flight call may finish, but its stale result cannot publish.
+            // Idle preparation can reuse the same RDC without another native capture.
+            QTRY_VERIFY_WITH_TIMEOUT(window.property("analysisFrameWarmupComplete").toBool(), 180000);
+            QVERIFY(window.property("analysisFrameReady").toBool());
+        }
+        QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
+        auto image = window.findChild<ImageView *>("frameOutput");
+        select("16201");
+        QVERIFY(image->image().isNull());
+        QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull(), 180000);
+        QVERIFY(window.findChild<QLabel *>("frameOutputLabel")->text().contains("16201"));
+        QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
+        window.findChild<QAction *>("cancelReplay")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 10000);
+    }
     void resourceNavigationBenchmark() {
         using Json = nlohmann::json;
         const auto output = qEnvironmentVariable("FLORA_RESOURCE_BENCHMARK");
@@ -6270,10 +6317,13 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
         const auto unavailable = [&] { return status->text().contains("retry") || status->text().contains("No readable bindings"); };
         Json rows = Json::array();
         bool preparationAttempted = false;
+        qint64 preparationMs = -1;
         const auto save = [&] {
             QFile f(output); if (f.open(QIODevice::WriteOnly))
                 f.write(QByteArray::fromStdString(Json{{"samples", rows}, {"log", log->toPlainText().toStdString()},
                     {"captures", window.property("resourceCaptureCount").toUInt()},
+                    {"preparation_ms", preparationMs},
+                    {"controller_warm", window.property("analysisFrameWarmupComplete").toBool()},
                     {"preparation_state", window.property("analysisFrameState").toString().toStdString()},
                     {"busy", window.busy()},
                     {"full_frame_ready", window.property("analysisFrameReady").toBool()}}.dump(2)));
@@ -6307,11 +6357,15 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex, uint3 pixel : SV_
                     const auto state = window.property("analysisFrameState").toString();
                     if (state.startsWith("unsupported") || state.startsWith("unavailable") || state.startsWith("failed")) break;
                 }
+                preparationMs = preparation.elapsed();
                 save();
-                if (qEnvironmentVariableIsSet("FLORA_REQUIRE_FRAME_REUSE"))
+                if (qEnvironmentVariableIsSet("FLORA_REQUIRE_FRAME_REUSE")) {
                     QVERIFY2(window.property("analysisFrameReady").toBool(), qPrintable(log->toPlainText().right(3000)));
+                    QVERIFY(window.property("analysisFrameWarmupComplete").toBool());
+                    QVERIFY(!window.busy());
+                }
                 else qInfo() << "Analysis preparation" << window.property("analysisFrameState");
-            } else if (i > 1 && window.property("analysisFrameReady").toBool())
+            } else if (i > 0 && window.property("analysisFrameReady").toBool())
                 QCOMPARE(window.property("resourceCaptureCount").toUInt(), captures);
         }
     }

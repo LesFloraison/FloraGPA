@@ -24,6 +24,48 @@ Json node(unsigned id, std::string name, unsigned flags, Json children = Json::a
 class RdcTests : public QObject {
     Q_OBJECT
   private slots:
+    void multiQueuePrefixCertificate() {
+        Json roots = Json::array(), mapping{{"execution_commands", Json::object()}};
+        for (unsigned i = 1; i <= 4; ++i) {
+            const auto execution = std::to_string(i), queue = std::to_string(i % 2 + 1);
+            Json identity{{"schema", 3}, {"execution", execution}, {"record", "10"},
+                {"submission", std::to_string(20 + i)}, {"queue", queue}, {"list", "3"},
+                {"generation", "1"}, {"ordinal", "0"}, {"isolate_missing_queries", false},
+                {"first_execution", "1"}, {"last_execution", "4"}, {"prefix_dependency_closed", true}};
+            for (const auto side : {"before", "after"}) {
+                identity["boundary"] = side;
+                roots.push_back(node(i * 10 + (std::string(side) == "before" ? 0 : 8),
+                    "Flora DX12 analysis boundary v3 " + identity.dump(), 0x20));
+            }
+            // One recorded source can execute repeatedly on different submissions;
+            // an indirect invocation can expand to several real actions.
+            mapping["execution_commands"][execution] = {{"execution", execution}, {"source_record", "10"},
+                {"submission", std::to_string(20 + i)}, {"queue", queue}, {"list", "3"}, {"generation", "1"},
+                {"list_ordinal", "0"}, {"marker_eids", Json::array({i * 10 + 1})},
+                {"event_ids", Json::array({i * 10 + 2, i * 10 + 5})}, {"api_event_ids", Json::array({i * 10 + 3})}};
+        }
+        const auto index = indexRdcAnalysisBoundaries(roots, mapping);
+        QCOMPARE(selectRdcAnalysisBoundary(index, {{"execution", "2"}, {"boundary", "before"}})["event_id"], Json(20));
+        QCOMPARE(selectRdcAnalysisBoundary(index, {{"execution", "2"}, {"boundary", "after"}})["event_id"], Json(28));
+        auto reordered = mapping;
+        reordered["execution_commands"]["1"]["event_ids"] = Json::array({25});
+        const auto gaps = indexRdcAnalysisBoundaries(roots, reordered);
+        QVERIFY_THROWS_EXCEPTION(std::exception, selectRdcAnalysisBoundary(gaps, {{"execution", "2"}, {"boundary", "before"}}));
+        QVERIFY(!gaps["3"].contains("reuse_error")); // Reject affected prefixes, not the whole frame.
+        auto missing = mapping; missing["execution_commands"].erase("2");
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(roots, missing));
+        auto identity = mapping; identity["execution_commands"]["2"]["queue"] = "99";
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(roots, identity));
+        auto forward = roots;
+        for (auto &n : forward) {
+            auto name = n["customName"].get<std::string>();
+            const auto at = name.find("\"prefix_dependency_closed\":true");
+            name.replace(at, std::string("\"prefix_dependency_closed\":true").size(), "\"prefix_dependency_closed\":false");
+            n["customName"] = name;
+        }
+        const auto blocked = indexRdcAnalysisBoundaries(forward, mapping);
+        QVERIFY_THROWS_EXCEPTION(std::exception, selectRdcAnalysisBoundary(blocked, {{"execution", "2"}, {"boundary", "after"}}));
+    }
     void analysisBoundaryPairs() {
         auto marker = [](unsigned eid, const char *side, const char *execution = "7", const char *queue = "9") {
             return node(eid, "Flora DX12 analysis boundary v2 " + Json({{"schema", 2}, {"execution", execution},
@@ -41,6 +83,10 @@ class RdcTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(duplicate));
         auto multiQueue = roots; multiQueue.push_back(marker(30, "before", "9", "4")); multiQueue.push_back(marker(34, "after", "9", "4"));
         QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(multiQueue));
+        // A copy-only queue has no work-boundary marker, but still disqualifies
+        // a legacy frame without a dependency certificate.
+        const Json copyQueue{{"execution_commands", {{"1", {{"queue", "4"}}}}}};
+        QVERIFY_THROWS_EXCEPTION(std::exception, indexRdcAnalysisBoundaries(roots, copyQueue));
         QVERIFY_THROWS_EXCEPTION(std::exception, selectRdcAnalysisBoundary(index, {{"execution", "7"}, {"boundary", "after"}, {"isolate_missing_queries", true}}));
     }
     void frameEndCaptureBoundary() {

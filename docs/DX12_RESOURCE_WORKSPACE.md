@@ -386,3 +386,223 @@ with no external GPA/Python runtime. This is a portable smoke test on the
 development machine, not clean-machine certification or a lifetime DLL trace.
 The package's `build-info.json` identifies the final source commit and hashes
 the shipped application executables.
+
+## Multi-queue prefix reuse (2026-10-23)
+
+The previous queue-count guards rejected every Talos and Hellblade2 full-frame
+analysis capture. Retaining a controller therefore only helped reads within
+one prefix: changing DC still recreated the native device/resources, replayed
+initialization, captured a new prefix, and opened that new RDC. This repeated
+work dominated navigation latency. The guards have been replaced by per-execution
+prefix qualification; the native queue scheduler and its Fence semantics are
+unchanged.
+
+New full-frame captures emit version-3 Before/After markers. In addition to the
+existing execution/source/submission/queue/list/generation/ordinal identity,
+they record the first and last frame executions and whether every queue
+operation through the selected submission has all required producers inside
+that CPU prefix. An unresolved dependency still prevents native frame capture.
+A dependency on a later CPU producer disqualifies that particular prefix.
+
+The retained analysis controller validates the certificate once when indexing:
+
+- Every execution in the declared frame range must have exactly one execution
+  marker; missing/duplicate commands or inconsistent identities reject reuse.
+- Each selected Before/After pair must bracket all actual actions of its
+  invocation, including expanded indirect actions and experiment work.
+- Every earlier execution must finish before Before, and every later execution
+  must start after After. Prefix maxima and suffix minima over numeric execution
+  IDs make these checks independent of JSON key order and avoid per-click scans.
+- A reordered or dependency-open prefix falls back individually to the old
+  exact-prefix path. The failure reason is reported in the task log.
+
+The pinned RenderDoc D3D12 replay implementation waits for idle on queue
+changes (`Serialise_ExecuteCommandLists`), so qualifying the observed command
+prefix does not rely on inventing a GPU order from CPU timestamps. This is
+equivalence to FloraGPA's existing replay observation boundary, not proof that
+an originally racing application had a deterministic cross-queue result.
+Resource lifetimes, query-isolation policy, experiment identity and the global
+resource lifetime fallback retain their existing checks.
+
+Version-2 markers retain the old single-queue restriction, counting copy-only
+queues from the complete execution index as well as queues with work markers.
+Before continues to select an explicit marker, never `eid - 1`. Only one
+controller is active, automatic GPU timings still run first, and full-frame
+preparation remains cancellable background work. `FLORA_DISABLE_FRAME_REUSE`
+continues to select the previous per-DC path for comparison.
+
+Preparation now includes opening the retained controller, validating/indexing
+the boundary certificate, and replaying the selected pipeline before publishing
+`analysisFrameReady`. The first implementation only prepared the RDC file:
+Talos's first subsequent click still took 3.373 seconds, reducing the improvement
+to 64.06% on the 16 mutually successful samples. Moving this real work into idle
+preparation removes that hidden first-click cost. `preparation_ms` reports the
+entire wait separately; the benchmark still includes the first subsequent click.
+The warm-up publishes no resource image or binding rows. Selection cancellation
+invalidates its result while preserving the service, and idle work can resume
+on the same capture. Explicit cancellation closes the service and prevents
+idle preparation from automatically restarting in that context; foreground
+navigation can still reuse its saved capture. The optional
+`analysisWarmupPreemption` GUI test interrupts controller opening with rapid
+navigation and requires recovery without another native capture.
+
+The new `dx12MultiQueueBoundaryValues` test uses an independent D3D12 fixture
+with Copy -> Direct -> Copy queues, captured Fence dependencies, and a later
+poison write. Prefix and reused Before/After reads must match every raw buffer
+word (7 before, 42 after; never the later 99). Mapping tests cover repeated
+source records, expanded actions, reordering, missing commands, wrong identities,
+forward dependencies, and legacy captures with a copy-only second queue.
+
+`dx12RealAnalysisBoundaries` adds optional reproducible real-frame comparison.
+Set `FLORA_MULTIQUEUE_REAL_CAPTURE`, `FLORA_MULTIQUEUE_REAL_OUTPUT`,
+`FLORA_RENDERDOC_LIBRARY` and comma-separated `FLORA_RESOURCE_EXECUTIONS`;
+Talos also needs `FLORA_RESOURCE_ISOLATE=1`. It creates one full capture and
+independent Before/After prefix captures, compares known binding identities and
+view ranges after each DC, and compares raw SHA-256 and displayed pixels for
+representative bound resource categories. Each run requires a fresh output
+directory and preserves reports, jobs, RDCs and `comparison.json`.
+`FLORA_MULTIQUEUE_REAL_CAPTURE_CACHE` can explicitly reuse completed diagnostic
+captures when repeating comparisons; boundary identities are checked first.
+Mismatches still fail the test, but subsequent resources and the other boundary
+are checked so one mismatch cannot hide remaining results.
+
+### Real boundary evidence and an unstable output
+
+Talos executions 12675, 16201 and 19408 passed 14 representative resource/side
+comparisons, including raw SHA-256 and preview equality. Their observed binding
+identities and view ranges also matched the prefix path. Evidence is
+`artifacts/multiqueue-talos-boundaries-1` and
+`build/multiqueue-talos-boundaries-1.log`.
+
+Hellblade2 executions 9731 and 22736 passed 14 resource/side comparisons and
+binding comparisons. At execution 37090, input buffer 537415 and texture 505987
+remain byte-exact, but output texture 544605 differs at both Before and After.
+The strict comparison test remains failed for that output; no tolerance,
+hash exclusion or shader/scheduling change was introduced to make it pass.
+The original failure and completed late-boundary comparison are preserved in
+`artifacts/multiqueue-hellblade-boundaries-1` and
+`artifacts/multiqueue-hellblade-late-boundaries-2`.
+
+To distinguish boundary errors from same-path variation, the *same prefix RDC*
+was replayed three times, navigating away and back between reads. Texture
+544605 produced three different hashes while the two input hashes remained
+unchanged. Repeating the same experiment with the full RDC also changed that
+output on every replay. Before-side prefix-to-prefix pairs differ at
+5,476–6,767 of 2,304,000 pixels; the nine cross-path pairs differ at
+4,804–6,484 pixels. These finite observations establish same-path instability,
+not a numeric acceptance tolerance or proof that every cross-path difference
+has the same cause. The existing upstream Hellblade probe/allocation studies
+in `DX12_REPLAY.md` also document order-dependent replay data, but this change
+does not modify those shaders or claim full original-GPA fidelity.
+
+Before stability evidence is `artifacts/multiqueue-hellblade-repeat-1`, including
+raw files, hashes and `variation.json`. The reusable diagnostic
+`tools/compare_rdc_replay_stability.py` accepts saved prefix/reuse jobs and a
+different navigation execution, saves all samples, and reports stability per
+resource. An unstable output is explicitly unverified for cross-path byte
+equality; successful navigation timings do not count as its correctness pass.
+The public diagnostic was also run on the After jobs, with the same result:
+both input resources are stable, while every prefix and reused output hash
+changes. See `artifacts/multiqueue-hellblade-after-stability/summary.json`.
+This leaves 18 byte-exact Hellblade resource/side comparisons and two unstable
+output comparisons across the three selected DCs; all three After binding
+identity/view comparisons passed.
+
+The final direct multi-queue and format fixture run passed all four QtTest
+cases (including setup/cleanup), without skips, in 22.211 seconds:
+`build/multiqueue-final-oracles.log`. The event/certificate suite passed all
+13 cases in `build/multiqueue-final-events-tests.log`.
+
+The final GUI warm-up preemption, explicit-stop and automatic-timing-priority
+run passed all three checks (5 QtTest cases including setup/cleanup, no skips,
+44.711 seconds) in `build/multiqueue-final-scheduling.log`. During the timing test, CPU navigation
+and binding indexing remained available while resource capture count stayed
+zero until the timing chart was populated.
+
+### Final navigation measurements
+
+The comparison baseline disables **only** frame reuse, retaining the resident
+service and fast preview path. Each sample uses the same 21-execution sequence
+(20 selections plus a return), query policy and machine. Cold selection is
+reported separately. Four existing prefix `Close` failures per capture are
+listed explicitly and excluded from paired latency statistics, leaving 16
+mutually successful post-cold samples. No slow successful sample is removed.
+Percentiles use nearest rank; with 16 samples p95 is the maximum.
+
+| Capture | Prefix p50 / p95 | Reuse p50 / p95, same 16 samples | p95 reduction |
+| --- | --- | --- | --- |
+| Talos, query isolation | 8,128 / 9,385 ms | 561 / 802 ms | 91.45% |
+| Hellblade2, strict queries | 33,992.5 / 74,903 ms | 1,088 / 1,425 ms | 98.10% |
+
+Both optimized runs completed all 21 selections with images and no failures.
+Across all 20 post-cold selections, Talos preview p50/p95 is 507/767 ms and
+binding-list p95 is 5 ms; Hellblade2 preview p50/p95 is 1,088/1,272 ms and
+binding-list p95 is 19 ms. Native capture attempts dropped from 24 in each prefix run
+to 2 for Talos and 3 for Hellblade2, with **zero additional captures on every
+selection after readiness**, including the first one. These capture totals
+include initial exact-boundary captures and background full-frame preparation;
+the old totals also include the four failed prefix attempts.
+
+Cold first previews still cost 6,573 ms (Talos) and 14,513 ms (Hellblade2).
+Subsequent idle preparation cost another 9,251 ms and 48,501 ms respectively,
+including remaining visible thumbnails, the idle delay, full capture, controller
+opening and indexing. This work is reported, not hidden in an excluded click;
+the optimization targets navigation after preparation and does not claim a
+70% cold-start improvement. Automatic timing collection is measured separately.
+
+Evidence: `artifacts/multiqueue-final-20261023/{talos,hellblade2}-prefix`
+and `artifacts/multiqueue-release-20261023/{talos,hellblade2}`. Each optimized
+directory contains the full selection log, summary and paired comparison.
+The four prefix failures per capture remain failures, even though the reused
+path can display those selections; display success alone does not establish
+their raw-byte correctness.
+
+BF1 regression also completed all 21 selections, including buffer selections:
+post-cold content p50/p95 1,086.5/1,249 ms, binding-list p95 27 ms, two total
+captures and none after preparation. Its first content took 13,752 ms and
+background preparation 21,306 ms. See `artifacts/multiqueue-release-20261023/bf1`.
+
+### Release regression and portable validation
+
+The final Release build succeeded (`build/multiqueue-release-final-build.log`).
+The complete serial CTest run finished in 737.18 seconds: **157/159 targets
+passed**, with the two existing failures retained:
+
+- `replay_debug_model`: `typedInstructionWatchLifetime`, expected watch status
+  `unavailable` at `ReplayDebugModelTests.cpp:202`.
+- `class_linkage`: `emptyFunctionTable` crashes with `0xc0000005` near
+  `nvGetCompilerInterface`, matching the previous driver-side failure signature.
+
+See `build/multiqueue-release-regression.log` and its JUnit XML. The recovery
+target passed all 123 cases (239.047 seconds); resource browsing passed 18 cases
+with two optional real-capture cases skipped. Skips are not acceptance evidence:
+the separately run real-frame comparisons above retain the Hellblade output
+failures. No new regression failure was observed.
+
+The portable directory is `out/FloraGPA-multiqueue-20261023-release`. Its four
+application executables match the final Release hashes. With PATH reduced to
+Windows directories, GUI version/CLI startup, Talos full native capture, four
+cross-DC Before/After resident reads, and Hellblade2 draw timing replay passed.
+All four resident reads kept `OpenCapture` count at one; texture previews read
+no raw storage. BF1 GUI startup and automatic timing completed, with the
+1600x950 screenshot visually checked in
+`artifacts/multiqueue-portable-20261023/gui-bf1.png`.
+
+One configuration limitation was retained explicitly: Hellblade2 GUI startup
+with the default **4 GiB native allocation budget** fails automatic timing at
+creation 521408 (536,870,912 bytes requested after 4,118,872,064 allocated).
+The same packaged worker succeeds at **12 GiB**, the budget used for all three
+navigation runs. For this sample, set the Resources `Budget` control to
+**12288 MiB** and collect GPU metrics again. The default was not silently
+raised; this native allocation budget is not a hard RenderDoc VRAM limit.
+The failed default-budget check is preserved in
+`build/multiqueue-portable-hellblade-default.log`, and the successful timing
+report is under `artifacts/multiqueue-portable-20261023/hellblade-timings`.
+
+Module verification accepted six successful native/analysis snapshots, using
+only the package, Windows and each capture's Agility SDK, with no external
+GPA/Python runtime. Evidence is `modules-talos.json`, `modules-hellblade.json`
+and `resident-summary.json` in the same artifact directory. This is a smoke
+test on the development machine with a restricted PATH, not clean-machine
+certification. The package includes this report and a source-commit/executable
+hash manifest in `build-info.json`.

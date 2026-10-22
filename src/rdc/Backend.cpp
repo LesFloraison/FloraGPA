@@ -1573,11 +1573,7 @@ static Json executeRdcJob(const Json &job, Session *retained) {
     if (job.value("analysis_frame", false)) {
         if (!dx12 || frameEnd.is_null()) throw std::runtime_error("Analysis reuse requires a verified full-frame capture");
         if (session.analysisBoundaries.is_null()) {
-            std::set<std::string> queues;
-            for (const auto &[execution, command] : mapping.at("execution_commands").items())
-                queues.insert(command.at("queue").get<std::string>());
-            if (queues.size() > 1) throw std::runtime_error("Multi-queue analysis reuse requires prefix fallback");
-            session.analysisBoundaries = indexRdcAnalysisBoundaries(roots);
+            session.analysisBoundaries = indexRdcAnalysisBoundaries(roots, mapping);
         }
         auto selection = job; selection["boundary"] = job.value("boundary", "after");
         selectRdcAnalysisBoundary(session.analysisBoundaries, selection);

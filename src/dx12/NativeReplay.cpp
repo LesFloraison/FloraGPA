@@ -138,6 +138,8 @@ struct NativeReplay::Impl {
         std::map<uint64_t, std::vector<Key>> starts;
         uint64_t execution{}, lastRecord{};
         bool after{}, markers{}, streamEnd{};
+        uint64_t analysisFirstExecution{}, analysisLastExecution{};
+        std::map<uint64_t, bool> analysisPrefixClosed;
         json presents = json::array();
         json queryPolicy;
         std::string queryPolicyMarker;
@@ -575,6 +577,24 @@ void NativeReplay::prepare(uint64_t execution, bool after, bool analysisMarkers,
     frame->queueDependencies = dependencies.information();
     require(frame->queueDependencies.at("unresolved_queue_operations") == "0",
             "Frame queue dependencies are missing, ambiguous or cyclic; inspect command-lists queue_dependencies");
+    // A prefix is independently replayable only if every queue operation in it
+    // has its producers inside that same CPU prefix. This certifies membership,
+    // not a GPU total order; the reader also checks actual captured event order.
+    uint64_t requiredRecord{};
+    auto operation = dependencies.frameOperations().begin();
+    for (const auto &instance : s.index.lists()) {
+        if (instance.submission <= s.directory.initializationCount()) continue;
+        while (operation != dependencies.frameOperations().end() && operation->record <= instance.submission) {
+            for (const auto predecessor : operation->predecessors)
+                requiredRecord = std::max(requiredRecord, predecessor);
+            ++operation;
+        }
+        frame->analysisPrefixClosed[instance.submission] = requiredRecord <= instance.submission;
+        if (instance.count) {
+            if (!frame->analysisFirstExecution) frame->analysisFirstExecution = instance.firstExecution;
+            frame->analysisLastExecution = instance.firstExecution + instance.count - 1;
+        }
+    }
     for (const auto &operation : dependencies.frameOperations()) {
         checkCancellation(s.cancelled);
         frame->queueOperations.try_emplace(operation.record);
@@ -761,12 +781,15 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
             const auto markBoundary = [&](const char *boundary) {
                 if (!analysisMarkers || !frame->streamEnd || !streamPacketWork(p.type)) return;
                 const auto &instance = native.instance;
-                const json identity{{"schema", 2}, {"execution", std::to_string(executionId)},
+                const json identity{{"schema", 3}, {"execution", std::to_string(executionId)},
                     {"record", std::to_string(id)}, {"submission", std::to_string(instance.submission)},
                     {"queue", std::to_string(instance.queue)}, {"list", std::to_string(instance.list)},
                     {"generation", std::to_string(original.generation)}, {"ordinal", std::to_string(instance.ordinal)},
-                    {"boundary", boundary}, {"isolate_missing_queries", s.isolateMissingQueries}};
-                const auto marker = "Flora DX12 analysis boundary v2 " + identity.dump();
+                    {"boundary", boundary}, {"isolate_missing_queries", s.isolateMissingQueries},
+                    {"first_execution", std::to_string(frame->analysisFirstExecution)},
+                    {"last_execution", std::to_string(frame->analysisLastExecution)},
+                    {"prefix_dependency_closed", frame->analysisPrefixClosed.at(instance.submission)}};
+                const auto marker = "Flora DX12 analysis boundary v3 " + identity.dump();
                 native.list->SetMarker(1, marker.c_str(), UINT(marker.size() + 1));
             };
             markBoundary("before");

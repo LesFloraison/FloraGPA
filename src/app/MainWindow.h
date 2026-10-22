@@ -262,6 +262,7 @@ class MainWindow final : public QMainWindow {
     QSet<QString> analysisFrameFailed_, analysisFrameFallback_;
     QString analysisFrameKey() const;
     void prepareAnalysisFrame();
+    void warmAnalysisFrame();
     void trimAnalysisCaptures();
     std::array<CheckpointView *, 3> checkpoints_{};
     CheckpointView *runningCheckpoint_ = nullptr;

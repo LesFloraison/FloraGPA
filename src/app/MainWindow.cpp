@@ -189,6 +189,7 @@ MainWindow::MainWindow(bool collectOnOpen) : loader_(this), collectOnOpen_(colle
             setProperty("resourceCaptureCount", 0u);
             setProperty("resourceCacheHits", 0u);
             setProperty("analysisFrameReady", false);
+            setProperty("analysisFrameWarmupComplete", false);
             { const QSignalBlocker block(dx12QueryIsolation_); dx12QueryIsolation_->setChecked(false); }
             dx12PixelTarget_.reset();
             selection_.session = session_->identity();
@@ -2232,7 +2233,8 @@ void MainWindow::startHistoryWorker() {
         timeout_.stop();
         rdcService_.submit(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", historyKey_, historyRequest_,
             [this, path](int code, QString error, bool fallback) {
-                if (fallback && runningRevision_ == revision_ && runningIdentity_ == currentWorkerIdentity()) {
+                if (fallback && runningKind_ != "analysis-frame-warmup" &&
+                    runningRevision_ == revision_ && runningIdentity_ == currentWorkerIdentity()) {
                     rdcServiceFallback_ = true;
                     log_->appendPlainText("Resident analysis failed; using isolated worker. " + error);
                     timeout_.start(180000);
@@ -2510,6 +2512,12 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    if (runningKind_ == "analysis-frame-warmup" && rdcService_.busy()) {
+        // An explicit stop must not be undone by the resource idle timer.
+        // Foreground navigation can still reuse the saved capture normally.
+        analysisFrameFailed_.insert(historyKey_);
+        setProperty("analysisFrameState", "cancelled");
+    }
     rdcService_.close();
     if (experimentCancel_) {
         experimentCancel_->store(true);
@@ -2578,6 +2586,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_ || runningIdentity_ != currentWorkerIdentity()) {
+        if (runningKind_ == "analysis-frame-warmup")
+            setProperty("analysisFrameState", "foreground_pending");
         const char *reason = workerTimedOut_ ? "Worker timed out." : "Cancelled";
         if (runningKind_ == "draw-resources") {
             resourceBrowser_->failPreviews(runningResourceKey_, workerTimedOut_ ? reason : "Selection changed");
@@ -2628,12 +2638,22 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(accepted);
             return;
         }
-        if (runningKind_ == "history") {
+        if (runningKind_ == "history" || runningKind_ == "analysis-frame-warmup") {
             QFile file(jobDir_->path() + "/result/result.json");
             if (!file.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Analysis result is missing");
             const auto bytes = file.readAll();
             auto result = nlohmann::json::parse(bytes.begin(), bytes.end());
+            if (runningKind_ == "analysis-frame-warmup") {
+                if (!result.value("ok", false) || historyKey_ != analysisFrameKey())
+                    throw std::runtime_error("Analysis warm-up context changed or failed");
+                setProperty("analysisFrameReady", true);
+                setProperty("analysisFrameState", "ready");
+                setProperty("analysisFrameWarmupComplete", true);
+                statusBar()->showMessage("Reusable analysis frame ready", 2000);
+                emit taskFinished(true);
+                return;
+            }
             result["capture"] = historyRdc_.toStdString();
             result["frame_sha256"] = historyRequest_.at("frame_sha256");
             if (historyRequest_.contains("capture_identity"))
@@ -2724,9 +2744,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             historyCaptures_[analysisFrameContext_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), path};
             historyCacheOrder_.removeAll(analysisFrameContext_); historyCacheOrder_.append(analysisFrameContext_);
             historyKey_ = analysisFrameContext_; trimAnalysisCaptures();
-            setProperty("analysisFrameReady", true);
-            setProperty("analysisFrameState", "ready");
-            statusBar()->showMessage("Reusable analysis frame ready", 2000);
+            warmAnalysisFrame();
             emit taskFinished(true);
             return;
         }
@@ -2947,6 +2965,14 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
     }
 }
 void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
+    if (runningKind_ == "analysis-frame-warmup") {
+        if (!cancelled) analysisFrameFailed_.insert(historyKey_);
+        setProperty("analysisFrameState", "failed: " + error);
+        log_->appendPlainText("Analysis controller preparation: " + error);
+        // Foreground requests retain boundary validation and prefix fallback.
+        rdcService_.close();
+        emit taskFinished(false); return;
+    }
     if (runningKind_ == "analysis-frame-capture") {
         if (!cancelled) analysisFrameFailed_.insert(analysisFrameContext_);
         setProperty("analysisFrameState", "failed: " + error);

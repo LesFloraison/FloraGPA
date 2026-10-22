@@ -1,5 +1,6 @@
 #include "RdcEvents.h"
 #include "ReplayRequest.h"
+#include <algorithm>
 #include <charconv>
 #include <functional>
 #include <map>
@@ -514,8 +515,9 @@ std::string rdcResourceBoundaryMarker(const Json &b) {
         throw std::runtime_error("Invalid resource capture boundary");
     return "Flora DX12 resource boundary v1 " + b.dump();
 }
-Json indexRdcAnalysisBoundaries(const Json &roots) {
-    constexpr std::string_view prefix = "Flora DX12 analysis boundary v2 ";
+Json indexRdcAnalysisBoundaries(const Json &roots, const Json &mapping) {
+    constexpr std::string_view v2 = "Flora DX12 analysis boundary v2 ";
+    constexpr std::string_view v3 = "Flora DX12 analysis boundary v3 ";
     Json index = Json::object();
     std::set<std::string> queues;
     size_t visited{};
@@ -525,9 +527,10 @@ Json indexRdcAnalysisBoundaries(const Json &roots) {
             if (++visited > 1000000) throw std::runtime_error("Analysis boundary action limit exceeded");
             const auto name = node.at("customName").get<std::string>();
             if (name.starts_with("Flora DX12 analysis boundary")) {
+                const auto prefix = name.starts_with(v3) ? v3 : v2;
                 if (!name.starts_with(prefix) || name.size() > 4096) throw std::runtime_error("Unknown analysis boundary schema");
                 const auto b = Json::parse(name.substr(prefix.size()));
-                if (b.at("schema") != 2 || (b.at("boundary") != "before" && b.at("boundary") != "after"))
+                if (b.at("schema") != (prefix == v3 ? 3 : 2) || (b.at("boundary") != "before" && b.at("boundary") != "after"))
                     throw std::runtime_error("Invalid analysis boundary");
                 for (const auto field : {"execution", "record", "submission", "queue", "list", "generation"})
                     if (!policyNumber(b.at(field))) throw std::runtime_error("Missing analysis execution identity");
@@ -543,8 +546,44 @@ Json indexRdcAnalysisBoundaries(const Json &roots) {
         }
     };
     walk(roots, 0);
-    // Independent queue prefixes do not establish one resource observation order.
-    if (queues.size() > 1) throw std::runtime_error("Analysis reuse requires a verified single-queue observation order");
+    // Legacy markers have no dependency certificate. Keep their single-queue
+    // contract, including standalone captures made by older versions.
+    bool certified = false;
+    for (const auto &pair : index)
+        for (const auto &side : pair) certified |= side.at("boundary").at("schema") == 3;
+    if (!mapping.is_null())
+        for (const auto &command : mapping.at("execution_commands"))
+            queues.insert(command.at("queue").get<std::string>());
+    if (queues.size() > 1 && !certified)
+        throw std::runtime_error("Multi-queue reuse requires version-3 prefix certification");
+    struct Span { const Json *command{}; uint32_t begin{}, end{}, preceding{}, following = UINT32_MAX; };
+    std::map<uint64_t, Span> spans;
+    if (certified) {
+        if (mapping.is_null()) throw std::runtime_error("Analysis certificate requires the complete execution index");
+        for (const auto &[key, command] : mapping.at("execution_commands").items()) {
+            const auto &markers = command.at("marker_eids");
+            if (markers.size() != 1) throw std::runtime_error("Analysis execution marker is missing or duplicated");
+            const auto start = markers.front().get<uint32_t>();
+            if (!start) throw std::runtime_error("Invalid analysis execution event");
+            auto end = start;
+            for (const auto field : {"event_ids", "api_event_ids"})
+                for (const auto &event : command.at(field)) {
+                    const auto eid = event.get<uint32_t>();
+                    if (eid <= start) throw std::runtime_error("Analysis command escapes its execution marker");
+                    end = std::max(end, eid);
+                }
+            if (!spans.emplace(std::stoull(key), Span{&command, start, end}).second)
+                throw std::runtime_error("Duplicate analysis execution identity");
+        }
+        if (spans.empty()) throw std::runtime_error("Empty analysis execution certificate");
+        uint32_t preceding{}, following = UINT32_MAX;
+        for (auto &[id, span] : spans) { span.preceding = preceding; preceding = std::max(preceding, span.end); }
+        for (auto it = spans.rbegin(); it != spans.rend(); ++it) {
+            it->second.following = following; following = std::min(following, it->second.begin);
+        }
+        if (spans.rbegin()->first - spans.begin()->first != spans.size() - 1)
+            throw std::runtime_error("Analysis execution certificate has missing commands");
+    }
     for (auto &[execution, pair] : index.items()) {
         if (!pair.contains("before") || !pair.contains("after") ||
             pair["before"]["event_id"].get<uint32_t>() >= pair["after"]["event_id"].get<uint32_t>())
@@ -552,12 +591,36 @@ Json indexRdcAnalysisBoundaries(const Json &roots) {
         auto before = pair["before"]["boundary"], after = pair["after"]["boundary"];
         before.erase("boundary"); after.erase("boundary");
         if (before != after) throw std::runtime_error("Analysis boundary execution identity changed");
+        if (certified) {
+            if (before.at("schema") != 3 ||
+                !policyNumber(before.at("first_execution")) || !policyNumber(before.at("last_execution")) ||
+                std::stoull(before.at("first_execution").get<std::string>()) != spans.begin()->first ||
+                std::stoull(before.at("last_execution").get<std::string>()) != spans.rbegin()->first)
+                throw std::runtime_error("Analysis boundary frame coverage mismatch");
+            const auto found = spans.find(std::stoull(execution));
+            if (found == spans.end()) throw std::runtime_error("Analysis boundary has no execution");
+            const auto &span = found->second;
+            constexpr std::pair<const char *, const char *> fields[]{
+                {"execution", "execution"}, {"record", "source_record"}, {"submission", "submission"},
+                {"queue", "queue"}, {"list", "list"}, {"generation", "generation"}, {"ordinal", "list_ordinal"}};
+            for (const auto &[boundaryField, commandField] : fields)
+                if (before.at(boundaryField) != span.command->at(commandField))
+                    throw std::runtime_error("Analysis boundary does not match captured command identity");
+            const auto first = pair["before"]["event_id"].get<uint32_t>();
+            const auto last = pair["after"]["event_id"].get<uint32_t>();
+            if (!before.at("prefix_dependency_closed").get<bool>())
+                pair["reuse_error"] = "Queue prefix requires a producer beyond the selected submission";
+            else if (!(span.preceding < first && first < span.begin && span.end < last && last < span.following))
+                pair["reuse_error"] = "Captured queue order does not match the selected execution prefix";
+        }
     }
     return index;
 }
 Json selectRdcAnalysisBoundary(const Json &index, const Json &job) {
     const auto execution = job.at("execution").get<std::string>();
     if (!index.contains(execution)) throw std::runtime_error("No exact analysis boundary; prefix recapture required");
+    if (index.at(execution).contains("reuse_error"))
+        throw std::runtime_error(index.at(execution).at("reuse_error").get<std::string>() + "; prefix recapture required");
     const auto selected = index.at(execution).at(job.at("boundary").get<std::string>());
     if (selected.at("boundary").at("isolate_missing_queries") != job.value("isolate_missing_queries", false))
         throw std::runtime_error("Analysis boundary query policy mismatch");
