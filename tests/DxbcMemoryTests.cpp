@@ -1,4 +1,5 @@
 #include "application/DxbcExecution.h"
+#include "application/DxbcGpuMemory.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -52,6 +53,7 @@ std::string shaderSource(bool structured) {
 struct Device {
     Com<ID3D11Device> device;
     Com<ID3D11DeviceContext> context;
+    Com<ID3D11Buffer> sentinel;
     explicit Device(uint32_t vendor) {
         Com<IDXGIAdapter1> selected;
         if (vendor) {
@@ -78,6 +80,12 @@ struct Device {
                                 nullptr, D3D11_CREATE_DEVICE_DEBUG, &level, 1, D3D11_SDK_VERSION, &device,
                                 nullptr, &context),
               "Create memory probe device");
+        const std::array<uint32_t, 4> marker{17, 23, 41, 59};
+        const D3D11_BUFFER_DESC markerDesc{16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+        const D3D11_SUBRESOURCE_DATA markerData{marker.data(), 0, 0};
+        check(device->CreateBuffer(&markerDesc, &markerData, &sentinel), "Create reference context sentinel");
+        auto *bound = sentinel.Get();
+        context->CSSetConstantBuffers(13, 1, &bound);
         Com<IDXGIDevice> dxgiDevice;
         Com<IDXGIAdapter> adapter;
         DXGI_ADAPTER_DESC description{};
@@ -175,22 +183,26 @@ class DxbcMemoryTests final : public QObject {
         QTest::addColumn<bool>("structured");
         QTest::addColumn<uint32_t>("variant");
         QTest::addColumn<uint32_t>("unbound");
+        QTest::addColumn<bool>("assistAll");
         for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
             for (bool structured : {false, true})
                 for (uint32_t variant : {0u, 1u, 2u, 3u, 4u})
                     for (uint32_t unbound : {0u, 1u, 2u, 3u})
-                        QTest::newRow(qPrintable(QString("%1-%2-%3-%4")
-                                                     .arg(vendor)
-                                                     .arg(structured ? "structured" : "raw")
-                                                     .arg(variant)
-                                                     .arg(unbound)))
-                            << vendor << structured << variant << unbound;
+                        for (bool assistAll : {false, true})
+                            QTest::newRow(qPrintable(QString("%1-%2-%3-%4")
+                                                         .arg(vendor)
+                                                         .arg(structured ? "structured" : "raw")
+                                                         .arg(variant)
+                                                         .arg(unbound) +
+                                                     (assistAll ? "-gpu" : "-boundary")))
+                                << vendor << structured << variant << unbound << assistAll;
     }
     void hardware() {
         QFETCH(uint32_t, vendor);
         QFETCH(bool, structured);
         QFETCH(uint32_t, variant);
         QFETCH(uint32_t, unbound);
+        QFETCH(bool, assistAll);
         try {
             const auto shader = compileHlsl(shaderSource(structured), "cs_5_0").bytecode;
             const auto input = bytes(structured ? 120 : 128, 19), output = bytes(structured ? 120 : 128, 73);
@@ -216,24 +228,37 @@ class DxbcMemoryTests final : public QObject {
             if (unbound & 2)
                 targetView = {};
             Inputs inputs;
+            Device device(vendor);
+            const auto assist = std::make_shared<GpuMemory>(device.device.Get(), vendor == 0);
+            qInfo().noquote() << QString::fromStdString(assist->identity().dump());
             inputs.constantBuffers[0] = {Value::known(params)};
             inputs.memory = std::make_shared<Memory>(
                 std::map<uint64_t, Buffer>{{1, Buffer::known(input)}, {2, Buffer::known(output)}},
-                std::map<Register, BufferView>{{{7, {0}}, sourceView}, {{30, {0}}, targetView}});
+                std::map<Register, BufferView>{{{7, {0}}, sourceView}, {{30, {0}}, targetView}},
+                256 * 1024 * 1024, 16 * 1024 * 1024, assist, assistAll);
             Program code(shader);
             Lane lane(code, inputs);
             const auto steps = execute(lane);
-            Device device(vendor);
+            Com<ID3D11Buffer> stillBound;
+            device.context->CSGetConstantBuffers(13, 1, &stillBound);
+            QCOMPARE(stillBound.Get(), device.sentinel.Get());
+            QCOMPARE(uint64_t(std::count_if(steps.begin(), steps.end(),
+                                            [](const Step &step) { return step.memoryGpuAssisted; })),
+                     assist->operations());
             const auto gpu = device.run(shader, structured, unbound, params, input, output);
             const auto &actual = inputs.memory->buffers().at(2);
-            qInfo().noquote() << QString::fromStdString(nlohmann::json({{"vendor", vendor},
-                                                                        {"structured", structured},
-                                                                        {"variant", variant},
-                                                                        {"unbound", unbound},
-                                                                        {"params", params},
-                                                                        {"cpu", actual.bytes},
-                                                                        {"gpu", gpu}})
-                                                            .dump());
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"vendor", vendor},
+                                {"structured", structured},
+                                {"variant", variant},
+                                {"unbound", unbound},
+                                {"assistAll", assistAll},
+                                {"gpu_operations", assist->operations()},
+                                {"assistance", assist->identity()},
+                                {"params", params},
+                                {"cpu", actual.bytes},
+                                {"gpu", gpu}})
+                    .dump());
             QCOMPARE(actual.bytes, gpu);
             QVERIFY(std::all_of(actual.valid.begin(), actual.valid.end(), [](uint8_t v) { return v == 1; }));
             QCOMPARE(inputs.memory->buffers().at(1).bytes, input);
@@ -344,6 +369,41 @@ class DxbcMemoryTests final : public QObject {
         Lane invalidMask(mask, raw);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, invalidMask.step());
         QCOMPARE(raw.memory->buffers().at(1).bytes, initial.bytes);
+    }
+    void gpuCancellationAndRecovery() {
+        Device device(0);
+        int checks = 0;
+        const auto assist =
+            std::make_shared<GpuMemory>(device.device.Get(), true, [&] { return ++checks == 3; });
+        const auto initial = Buffer::known(bytes(64, 31));
+        const auto makeMemory = [&](const std::shared_ptr<GpuMemory> &gpu) {
+            return std::make_shared<Memory>(std::map<uint64_t, Buffer>{{1, initial}},
+                                            std::map<Register, BufferView>{{{30, {0}}, {1, 0, 64, 0}}}, 64,
+                                            64, gpu, true);
+        };
+        Inputs inputs;
+        inputs.memory = makeMemory(assist);
+        auto code = program({op(157, {reg(30, 0)}), op(166, {reg(30, 0), imm(0), imm(42)}), op(62)});
+        Lane lane(code, inputs);
+        QVERIFY_THROWS_EXCEPTION(std::exception, lane.step());
+        QCOMPARE(checks, 3);
+        QCOMPARE(assist->operations(), uint64_t(0));
+        QCOMPARE(inputs.memory->buffers().at(1).bytes, initial.bytes);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+        QCOMPARE(inputs.memory->buffers().at(1).bytes, initial.bytes);
+        const auto replacement = std::make_shared<GpuMemory>(device.device.Get(), true);
+        inputs.memory = makeMemory(replacement);
+        Lane recovered(code, inputs);
+        const auto steps = execute(recovered);
+        QVERIFY(steps[0].memoryGpuAssisted);
+        QCOMPARE(replacement->operations(), uint64_t(1));
+        uint32_t first = 0;
+        std::memcpy(&first, inputs.memory->buffers().at(1).bytes.data(), 4);
+        QCOMPARE(first, 42u);
+        Com<ID3D11Buffer> stillBound;
+        device.context->CSGetConstantBuffers(13, 1, &stillBound);
+        QCOMPARE(stillBound.Get(), device.sentinel.Get());
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, GpuMemory(device.device.Get(), true, {}, 0));
     }
 };
 QTEST_GUILESS_MAIN(DxbcMemoryTests)

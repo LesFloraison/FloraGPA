@@ -1,4 +1,5 @@
 #include "DxbcExecution.h"
+#include "DxbcGpuMemory.h"
 #include <algorithm>
 #include <bit>
 #include <cstring>
@@ -22,8 +23,9 @@ Buffer Buffer::known(std::vector<uint8_t> bytes) {
     return result;
 }
 Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views, uint64_t maxBytes,
-               uint64_t maxChangeBytes)
-    : buffers_(std::move(buffers)), views_(std::move(views)), maxChangeBytes_(maxChangeBytes) {
+               uint64_t maxChangeBytes, std::shared_ptr<GpuMemory> gpu, bool assistAll)
+    : buffers_(std::move(buffers)), views_(std::move(views)), maxChangeBytes_(maxChangeBytes),
+      gpu_(std::move(gpu)), assistAll_(assistAll) {
     if (!maxBytes || maxChangeBytes < 16)
         fail("Invalid DXBC memory budget");
     uint64_t total = 0;
@@ -52,7 +54,8 @@ Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView
 }
 const std::map<uint64_t, Buffer> &Memory::buffers() const { return buffers_; }
 Value Memory::load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
-                   const std::array<uint32_t, 4> &swizzle, uint32_t mask) const {
+                   const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex,
+                   bool literalOffset, bool &assisted) const {
     validateBinding(binding);
     const auto found = views_.find(binding);
     if (found == views_.end())
@@ -68,12 +71,18 @@ Value Memory::load(const Register &binding, bool structured, uint32_t index, uin
         for (uint32_t c = 0; c < 4; ++c)
             if ((mask & (1u << c)) && !inRange(uint64_t(offset) + swizzle[c] * 4, 4, view.stride))
                 return {}; // Undefined field addressing must not become a known zero.
-        if (index >= view.size / view.stride)
-            return Value::known({});
     }
-    Value result;
     const auto &buffer = buffers_.at(*view.resource);
     const auto base = structured ? uint64_t(index) * view.stride + offset : uint64_t(offset);
+    if (gpu_ && (assistAll_ || base + view.offset + 16 > uint64_t(UINT32_MAX))) {
+        const auto value =
+            gpu_->load(buffer, view, binding.kind, index, offset, swizzle, mask, literalIndex, literalOffset);
+        assisted = true;
+        return value;
+    }
+    if (structured && index >= view.size / view.stride)
+        return Value::known({});
+    Value result;
     for (uint32_t c = 0; c < 4; ++c) {
         if (!(mask & (1u << c)))
             continue;
@@ -91,7 +100,8 @@ Value Memory::load(const Register &binding, bool structured, uint32_t index, uin
     return result;
 }
 std::vector<MemoryChange> Memory::store(const Register &binding, bool structured, uint32_t index,
-                                        uint32_t offset, const Value &value, uint32_t mask) const {
+                                        uint32_t offset, const Value &value, uint32_t mask, bool literalIndex,
+                                        bool literalOffset, bool &assisted) const {
     validateBinding(binding);
     if (binding.kind != 30 || (mask != 1 && mask != 3 && mask != 7 && mask != 15))
         fail("Invalid DXBC buffer store destination");
@@ -109,17 +119,52 @@ std::vector<MemoryChange> Memory::store(const Register &binding, bool structured
     bool undefined = false;
     if (structured) {
         undefined = !inRange(offset, count, view.stride);
-        if (!undefined && index >= view.size / view.stride)
-            return {};
     }
     const uint64_t base = structured ? uint64_t(index) * view.stride + offset : uint64_t(offset);
+    const auto &buffer = buffers_.at(*view.resource);
+    if (!undefined && gpu_ && (assistAll_ || base + view.offset + count > uint64_t(UINT32_MAX))) {
+        const bool unknown = (value.valid & mask) != mask;
+        if (unknown && buffer.bytes.size() > maxChangeBytes_)
+            fail("DXBC memory change budget exceeded");
+        const auto after = gpu_->store(buffer, view, index, offset, value, mask, literalIndex, literalOffset);
+        if (unknown) {
+            assisted = true;
+            return {{*view.resource, 0, buffer.bytes, after, buffer.valid,
+                     std::vector<uint8_t>(buffer.bytes.size(), 0)}};
+        }
+        std::vector<MemoryChange> changes;
+        uint64_t changed = 0;
+        for (size_t i = 0; i < after.size();) {
+            if (after[i] == buffer.bytes[i]) {
+                ++i;
+                continue;
+            }
+            const auto begin = i++;
+            while (i < after.size() && after[i] != buffer.bytes[i])
+                ++i;
+            changed += i - begin;
+            if (changed > maxChangeBytes_ || changes.size() >= 4096)
+                fail("DXBC memory change budget exceeded");
+            MemoryChange change{*view.resource,
+                                begin,
+                                {buffer.bytes.begin() + begin, buffer.bytes.begin() + i},
+                                {after.begin() + begin, after.begin() + i},
+                                {buffer.valid.begin() + begin, buffer.valid.begin() + i},
+                                {}};
+            change.afterValid = change.beforeValid;
+            changes.push_back(std::move(change));
+        }
+        assisted = true;
+        return changes;
+    }
+    if (structured && !undefined && index >= view.size / view.stride)
+        return {};
     if (!undefined && base >= view.size)
         return {};
     const auto bytes = undefined ? view.size : std::min(uint64_t(count), view.size - base);
     if (bytes > maxChangeBytes_)
         fail("DXBC memory change budget exceeded");
     const auto absolute = size_t(view.offset + (undefined ? 0 : base));
-    const auto &buffer = buffers_.at(*view.resource);
     MemoryChange change{*view.resource,
                         absolute,
                         {buffer.bytes.begin() + absolute, buffer.bytes.begin() + absolute + bytes},

@@ -36,9 +36,10 @@ It is not connected to production debug actions. Existing debug/checkpoint paths
 remain available. GPA's concrete debugger-engine object remains unresolved.
 
 Follow-up: private raw/structured buffer loads and stores are now implemented as
-described in `DX11_DXBC_MEMORY_RESEARCH.md`. Typed resources and GPU-assisted
-boundary behavior remain unfinished; this does not change the original execution
-probe's acceptance status or replace its retained evidence.
+described in `DX11_DXBC_MEMORY_RESEARCH.md`. Typed resources remain unfinished. The subsequent
+`DX11_DXBC_GPU_MEMORY_RESEARCH.md` closes the six CS buffer probe differences with
+same-adapter GPU assistance; it does not change this scalar/control probe's
+acceptance status or replace its retained evidence.
 
 ## Independent probes and corrections
 

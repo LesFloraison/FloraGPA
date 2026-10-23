@@ -634,19 +634,22 @@ Step Lane::step() {
             if (resource.components != 2 || resource.mode != 0 || !s.inputs.memory)
                 fail("Unavailable or invalid DXBC memory store");
             const auto value = s.source(args.back(), false);
-            result.memoryChanges = s.inputs.memory->store(binding, structured, indexValue.bits[0],
-                                                          offsetValue.bits[0], value, resource.mask);
+            result.memoryChanges =
+                s.inputs.memory->store(binding, structured, indexValue.bits[0], offsetValue.bits[0], value,
+                                       resource.mask, structured && args[1].kind == 4,
+                                       args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted);
         } else {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
                 (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
                 fail("Invalid DXBC buffer load destination");
             const auto target = s.address(destination);
-            const auto value =
-                s.inputs.memory
-                    ? s.inputs.memory->load(binding, structured, indexValue.bits[0], offsetValue.bits[0],
-                                            resource.select, destination.mask)
-                    : Value{};
+            const auto value = s.inputs.memory
+                                   ? s.inputs.memory->load(
+                                         binding, structured, indexValue.bits[0], offsetValue.bits[0],
+                                         resource.select, destination.mask, structured && args[1].kind == 4,
+                                         args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted)
+                                   : Value{};
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
                 auto after = before;

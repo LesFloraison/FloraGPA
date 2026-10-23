@@ -36,22 +36,28 @@ struct MemoryChange {
     uint64_t resource, offset;
     std::vector<uint8_t> before, after, beforeValid, afterValid;
 };
+class GpuMemory;
 class Memory {
     std::map<uint64_t, Buffer> buffers_;
     std::map<Register, BufferView> views_;
     uint64_t maxChangeBytes_;
+    std::shared_ptr<GpuMemory> gpu_;
+    bool assistAll_;
     friend class Lane;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
-               const std::array<uint32_t, 4> &swizzle, uint32_t mask) const;
+               const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex, bool literalOffset,
+               bool &assisted) const;
     std::vector<MemoryChange> store(const Register &binding, bool structured, uint32_t index, uint32_t offset,
-                                    const Value &value, uint32_t mask) const;
+                                    const Value &value, uint32_t mask, bool literalIndex, bool literalOffset,
+                                    bool &assisted) const;
     void commit(const std::vector<MemoryChange> &changes);
 
   public:
     // This is private diagnostic storage, never a mapping of replay GPU memory.
     // Lanes may share it only under an external serial execution scheduler.
     Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views,
-           uint64_t maxBytes = 256 * 1024 * 1024, uint64_t maxChangeBytes = 16 * 1024 * 1024);
+           uint64_t maxBytes = 256 * 1024 * 1024, uint64_t maxChangeBytes = 16 * 1024 * 1024,
+           std::shared_ptr<GpuMemory> gpu = {}, bool assistAll = false);
     const std::map<uint64_t, Buffer> &buffers() const;
 };
 struct Inputs {
@@ -73,6 +79,7 @@ struct Step {
     std::vector<Change> changes;
     bool discarded = false;
     std::vector<MemoryChange> memoryChanges;
+    bool memoryGpuAssisted = false;
 };
 struct ProgramData;
 class Program {

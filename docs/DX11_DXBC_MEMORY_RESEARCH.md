@@ -1,9 +1,14 @@
 # Native DXBC buffer execution checkpoint
 
-Date: 2026-10-24. P6 remains unfinished. The new buffer conformance suite reports
+Date: 2026-10-24. P6 remains unfinished. At this CPU-only checkpoint the buffer suite reported
 119 passing, 6 failing and zero skipped cases. The pre-existing scalar/control
 suite still reports 357 passing, 17 failing and zero skipped cases. Both strict
 CTest entries remain enabled. No production debugger has switched to this core.
+
+Follow-up: `DX11_DXBC_GPU_MEMORY_RESEARCH.md` records the same-adapter private GPU
+assist that resolves these six buffer differences without relaxing assertions.
+Its expanded suite passes 246 cases. The CPU-only checkpoint and evidence below
+remain preserved; the separate scalar/control failures and full P6 gate are open.
 
 ## Private memory model
 

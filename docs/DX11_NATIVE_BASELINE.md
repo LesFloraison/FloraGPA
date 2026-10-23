@@ -510,6 +510,13 @@ was rebuilt and repeated after this extension: its 357 passes and 17 failures
 are unchanged. Neither suite's strict assertions were relaxed. See
 `DX11_DXBC_MEMORY_RESEARCH.md` for exact reproduction and retained evidence.
 
+The subsequent same-adapter GPU assist resolves all six buffer differences with
+the original exact assertions. The expanded buffer suite passes 246 cases with
+no failures/skips, covering boundary-only and all-accesses modes plus cancellation
+and helper recreation. The scalar/control regression remains 357 passes and 17
+failures. Original CPU-only evidence is retained; see
+`DX11_DXBC_GPU_MEMORY_RESEARCH.md`. This does not close full P6 or release acceptance.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
