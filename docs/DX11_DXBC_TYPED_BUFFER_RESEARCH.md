@@ -4,6 +4,10 @@ Date: 2026-10-24. This P6 checkpoint executes CS typed buffer loads and stores
 against private native snapshots. It does not replace production debug actions,
 establish complete shader execution, or close the RenderDoc removal gate.
 
+This document records the original CS checkpoint using `dxbc-gpu/3`. The later
+VS SRV-load extension and `dxbc-gpu/4` evidence are documented separately in
+`DX11_DXBC_TYPED_VERTEX_RESEARCH.md`; this checkpoint's original results remain intact.
+
 ## Representation and execution
 
 `BufferView::format` retains a native DXGI typed-buffer format. Zero continues to

@@ -371,7 +371,7 @@ comparisons include backing bytes outside the selected view. See
 `DX11_DXBC_GPU_MEMORY_RESEARCH.md` for provenance, bounds and remaining limits.
 This CS feature-level-11.0 evidence is not full stage or feature-level parity.
 The shared private device helper is now named `GpuOperations`, with backend
-identity `dxbc-gpu/3`; instruction and buffer passes retain separate trace flags.
+identity `dxbc-gpu/4`; instruction and buffer passes retain separate trace flags.
 The new `Group` core executes complete declared CS thread groups with private
 raw/structured groupshared storage, 32-bit memory atomics and dynamic barrier
 rendezvous. Its explicit `serial-round-robin/1` schedule is simulated, not recovered
@@ -395,6 +395,10 @@ snapshots retain native format and subrange identity. The independent CPU execut
 preserves per-component validity, full backing storage and reversible writes,
 including writes whose bytes do not change. See `DX11_DXBC_TYPED_BUFFER_RESEARCH.md`
 for the exact tested formats, operand forms and remaining stage restrictions.
+VS typed SRV loads now use a native VS plus Stream Output on the isolated adapter,
+preserving the executing stage instead of using CS results. The 580-case VS suite
+passes, including 576 exact hardware comparisons and validity/lifecycle checks.
+See `DX11_DXBC_TYPED_VERTEX_RESEARCH.md` for stage/model limits and trace evidence.
 Typed textures and GPU sampling assistance, complete vertex/pixel input
 extraction, quad/helper execution, full CS group/cross-group semantics,
 source/GUI integration and full parity remain required P6 work.

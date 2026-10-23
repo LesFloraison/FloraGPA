@@ -559,6 +559,14 @@ external-register fixture failure is retained and corrected with a legal constan
 buffer input, without weakening byte assertions. See
 `DX11_DXBC_TYPED_BUFFER_RESEARCH.md` for formats, validity, limits and evidence.
 
+The VS typed-load extension passes 580 cases, including 576 exact native VS
+comparisons across WARP, NVIDIA and Intel. The existing 1214-case focused regression
+also passes after rebuilding with `dxbc-gpu/4`; the combined result is 1794 passes,
+zero failures and zero skips. Native VS plus Stream Output preserves shader stage,
+view ranges, raw bits, validity and reference bindings. See
+`DX11_DXBC_TYPED_VERTEX_RESEARCH.md`; real vertex invocation selection and full
+production debugger parity are still required.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
