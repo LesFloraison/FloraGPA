@@ -1,4 +1,6 @@
 #include "RdcAnalyzeCli.h"
+#include "NativeAnalyzeCli.h"
+#include "application/NativeAnalysisJobs.h"
 #include "BufferCsv.h"
 #include "application/Annotations.h"
 #include "application/DrawResources.h"
@@ -84,6 +86,11 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     app.setApplicationName("FloraGPA.Cli");
     app.setApplicationVersion("0.1.0");
+    if (app.arguments().size() == 5 && app.arguments()[1] == "--native-analysis-job" &&
+        app.arguments()[3] == "--ready-file")
+        return nativeAnalysisWorker(app.arguments()[2], app.arguments()[4]);
+    if (app.arguments().size() > 1 && app.arguments()[1] == "analyze")
+        return nativeAnalyzeCli(app.arguments().mid(1));
     if (app.arguments().size() > 1 && app.arguments()[1] == "rdc-analyze")
         return rdcAnalyzeCli(app.arguments().mid(1));
     QCommandLineParser p;
@@ -91,7 +98,7 @@ int main(int argc, char **argv) {
     p.addHelpOption();
     p.addVersionOption();
     p.addPositionalArgument(
-        "command", "validate-frame | inventory | commands | command-state | contexts | command-lists | initialization-graph | replay | draw-resources | shader | "
+        "command", "analyze | validate-frame | inventory | commands | command-state | contexts | command-lists | initialization-graph | replay | draw-resources | shader | "
                    "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
