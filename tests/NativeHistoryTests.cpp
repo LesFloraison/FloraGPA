@@ -95,6 +95,8 @@ class NativeHistoryTests final : public QObject {
         s.mip = s.layer = s.x = 1;
         const auto result = collectNativeEventHistory(replay, s);
         QCOMPARE(result.at("records").size(), size_t(8));
+        QCOMPARE(result.at("point_readback_count"), result.at("readback_count"));
+        QCOMPARE(result.at("readback_bytes"), Json(result.at("readback_count").get<uint64_t>() * 4));
         QCOMPARE(row(result, 100).at("before").at("available"), Json(false));
         QCOMPARE(row(result, 100).at("after").at("bytes"), Json("000000ff"));
         QCOMPARE(row(result, 110).at("pixel_storage_changed"), Json(true));
@@ -149,6 +151,7 @@ class NativeHistoryTests final : public QObject {
         Replay depth(frame, options(vendor));
         const auto history = collectNativeEventHistory(depth, s);
         QCOMPARE(history.at("records").size(), size_t(3));
+        QCOMPARE(history.at("point_readback_count"), Json(0));
         QVERIFY(row(history, 810).at("after").at("available").get<bool>());
     }
     void multisampleAndResolve_data() { devices(); }
@@ -167,6 +170,7 @@ class NativeHistoryTests final : public QObject {
         s.y = 2;
         const auto result = collectNativeEventHistory(replay, s);
         QCOMPARE(result.at("records").size(), size_t(1));
+        QCOMPARE(result.at("point_readback_count"), Json(0));
         QCOMPARE(row(result, 110).at("after").at("bytes"), Json("20000000030000010000000001000000"));
         Replay clean(frame, options(vendor));
         clean.run();
@@ -432,6 +436,99 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(rectangles.readTexture(10), clean.readTexture(10));
         QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
         QVERIFY2(deviceErrors(rectangles).empty(), deviceErrors(rectangles).c_str());
+    }
+    void narrowStorageFormats_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<uint32_t>("dimension");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (uint32_t dimension : {2u, 3u, 4u})
+                for (uint32_t format : {3u, 10u, 27u, 41u, 49u, 61u})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(dimension).arg(format)))
+                        << vendor << format << dimension;
+    }
+    void narrowStorageFormats() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, format);
+        QFETCH(uint32_t, dimension);
+        Resource resource;
+        resource.id = 10;
+        resource.type = uint16_t(dimension + 0x82);
+        if (dimension == 2)
+            resource.desc = {7, 3, 2, format, 0, 8, 0, 0};
+        else if (dimension == 3)
+            resource.desc = {7, 5, 3, 2, format, 1, 0, 0, 8, 0, 0};
+        else
+            resource.desc = {7, 5, 4, 3, format, 0, 8, 0, 0};
+        const auto subs = textureSubresources(resource);
+        std::vector<uint8_t> expected(size_t(subs.back().offset + subs.back().size));
+        for (size_t i = 0; i < expected.size(); ++i)
+            expected[i] = uint8_t(i * 53 + 19);
+        if (format == 41) {
+            for (size_t i = 0; i < expected.size(); i += 4)
+                put(expected, i, i % 8 ? 0x80000000u : 0x7fc01234u);
+        }
+        Capture c;
+        c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        auto descriptor = statePack(Id(0), Id(0));
+        for (const auto value : resource.desc)
+            append(descriptor, value);
+        append(descriptor, Id(20));
+        c.add(10, 5, resource.type, descriptor);
+        auto data = statePack(uint32_t(expected.size()));
+        data.insert(data.end(), expected.begin(), expected.end());
+        c.add(20, 9, 1, data);
+        QTemporaryDir directory;
+        const auto path = directory.filePath("point.gpa_frame");
+        c.save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(vendor));
+        const auto bytes = pitches(1, 1, format).first;
+        QCOMPARE(replay.readTexture(10), expected);
+        for (const auto &sub : subs) {
+            const auto x = sub.width - 1, y = sub.height - 1, z = sub.depth - 1;
+            const auto offset = sub.offset + z * sub.slicePitch + y * uint64_t(sub.rowPitch) + x * bytes;
+            const auto point = replay.readTexturePoint(10, x, y, z, sub.mip, sub.layer);
+            QVERIFY(point);
+            QCOMPARE(*point, (std::vector<uint8_t>(expected.begin() + size_t(offset),
+                                                   expected.begin() + size_t(offset) + bytes)));
+        }
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, replay.readTexturePoint(10, 7, 0, 0, 0, 0));
+        QCOMPARE(replay.readTexture(10), expected);
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+    }
+    void groupedStorageRetainsBlockScope_data() { devices(); }
+    void groupedStorageRetainsBlockScope() {
+        QFETCH(uint32_t, vendor);
+        Capture c;
+        c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        c.add(10, 5, 0x85, statePack(Id(0), Id(0), 8u, 8u, 1u, 1u, 71u, 1u, 0u, 0u, 8u, 0u, 0u, Id(30)));
+        c.add(11, 5, 0x85, statePack(Id(0), Id(0), 8u, 8u, 1u, 1u, 71u, 1u, 0u, 0u, 8u, 0u, 0u, Id(31)));
+        auto blank = statePack(32u);
+        blank.resize(36);
+        c.add(30, 9, 1, blank);
+        for (size_t i = 4; i < blank.size(); ++i)
+            blank[i] = uint8_t(i - 4);
+        c.add(31, 9, 1, blank);
+        for (Id event : {100u, 110u})
+            c.add(event, 7, 0x3e, statePack(Id(0), Id(1), Id(10), Id(11)));
+        QTemporaryDir directory;
+        const auto path = directory.filePath("compressed.gpa_frame");
+        c.save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(vendor));
+        NativeHistorySelection s;
+        s.resource = 10;
+        s.x = s.y = 7;
+        const auto history = collectNativeEventHistory(replay, s);
+        QCOMPARE(history.at("records").size(), size_t(2));
+        QCOMPARE(history.at("point_readback_count"), Json(0));
+        QCOMPARE(row(history, 100).at("after").at("bytes"), Json("18191a1b1c1d1e1f"));
+        QCOMPARE(row(history, 100).at("after").at("encoding"), Json("compressed_4x4_block"));
+        QVERIFY(row(history, 110).at("pixel_storage_changed").is_null());
+        QCOMPARE(row(history, 110).at("storage_changed"), Json(false));
+        QCOMPARE(replay.readTexture(10), (std::vector<uint8_t>(blank.begin() + 4, blank.end())));
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
     }
     void workerRequest() {
         QTemporaryDir directory;

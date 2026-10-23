@@ -17,7 +17,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
-| P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker prototype tested on three adapters and real-capture prefixes; decoded values, full matrix and efficient readback remain open |
+| P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker prototype and narrow ordinary-texture readback; decoded values, full matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Pending |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
@@ -309,9 +309,21 @@ adapter, timeout, cancellation and module snapshot. Readbacks are bounded to
 256 MiB each by default and results to 100,000 records; overruns fail, never return
 truncated success. Cancellation is checked at replay/readback boundaries. These
 limits do not guarantee aggregate traffic, latency or peak auxiliary GPU memory.
-Current readback copies complete resource storage, which is especially expensive
-for large render targets. A narrow GPU readback implementation and broader format,
-alias/lifetime, sparse Map, deferred-context and workflow validation remain open.
+Ordinary single-sample color storage uses a one-texel GPU copy and a reusable
+staging resource. Source format and texture dimension are retained; source
+mip/layer/slice coordinates are explicit. The copy temporarily disables predication
+and preserves affected output bindings, including WARP's array-mip workaround.
+Raw NaN and negative-zero bit patterns are not interpreted or converted.
+
+Depth/stencil, MSAA, compressed, packed and planar layouts keep the complete
+storage reader. This respects the whole-subresource requirement for depth and
+MSAA in the [D3D11 CopySubresourceRegion contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copysubresourceregion).
+No failed copy is silently retried with another device. Result snapshots expose
+`readback_scope`, and totals include `point_readback_count` and packed bytes copied
+to CPU output; these are not measured PCIe traffic or physical allocation sizes.
+Unsupported storage formats still fail explicitly; this is not full format parity.
+Special-format optimization and broader format, alias/lifetime, sparse Map,
+deferred-context and workflow validation remain open.
 Existing replay rejection of unproven rectangle/array-view combinations is retained.
 
 See `DX11_NATIVE_BASELINE.md` for tests, real-capture checkpoints, traffic and exact

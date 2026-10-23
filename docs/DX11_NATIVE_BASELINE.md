@@ -338,6 +338,44 @@ CTest output is retained in `native-history-tests.log` and
 `build/vs2022/native-history-Release.txt`. The independent prefix probe requires a
 frozen FloraGPA executable only, never RenderDoc or original GPA.
 
+### Narrow-readback follow-up
+
+The ordinary single-sample color path now uses a cached one-texel staging resource.
+Depth/MSAA and grouped storage keep the complete-storage reader. The follow-up
+suite passed **88 history cases and 40 native-analysis cases**, zero failures or
+skips (8.09 s and 14.91 s respectively). The added 54 format/dimension/adapter cases
+check 1D, 2D and 3D mip/layer/slice edge coordinates, 8/16/32/64/128-bit storage,
+typeless RGBA, NaN payloads and negative zero against independently generated
+initial bytes and complete native reads. Three additional BC1 cases retain block
+identity and unknown per-pixel changes. D3D11 validation queues have no error or
+corruption messages in these paths.
+
+All **98 event records** from the three real captures match the saved pre-optimization
+results exactly, including before/after bytes and unknown fields. The comparison
+removes only the newly added `readback_scope` metadata; it does not mask value,
+identity, validity or coverage differences. All nine frozen-main prefix checkpoints
+also pass again. Evidence is under `history-point-validation/`.
+
+| Resource | Packed CPU bytes, before / after | Worker time, before / after | Peak working set MiB, before / after | CLI wall seconds, before / after |
+| --- | --- | --- | --- | --- |
+| GF2 80 | 2,123,366,400 / 576 | 1.320 / 0.316 s | 276.05 / 235.16 | 2.218 / 1.250 |
+| BF1 23209 | 14,680,064 / 14 | 1.387 / 1.954 s | 1733.26 / 1729.59 | 11.047 / 16.094 |
+| Helldivers 99 | 9,699,328 / 148 | 1.387 / 2.670 s | 1702.85 / 1695.86 | 11.109 / 20.812 |
+
+Packed CPU bytes are logical copied payload, not a measurement of physical GPU
+allocation or PCIe traffic. GF2 improves in this run, but BF1/Helldivers wall and
+Worker times increased despite lower readback volume. These measurements are
+retained as an unresolved performance finding, not discarded or declared a passing
+performance gate. Large-frame hashing/startup and replay variance still require a
+controlled performance comparison before P8 acceptance.
+
+Two subsequent serial runs retained identical contexts and all event records.
+BF1 wall times were 12.344/13.297 s (Worker 1.671/1.457 s); Helldivers wall times
+were 11.672/12.609 s (Worker 1.476/1.544 s). The initial slowdown is therefore not
+stable at its first magnitude, but these runs still do not establish a controlled
+non-regression result. `history-point-repeat/performance.json` retains all four
+measurements, with full native results in the adjacent run directories.
+
 ## Reproduction and evidence
 
 ```powershell
@@ -381,6 +419,14 @@ python tools/validate_native_history.py --cli build/vs2022/Release/FloraGPA.Cli.
   --case D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame 23209 512 512 `
   --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 99 128 128 `
   --out artifacts/dx11-native/history-prefix-validation-new
+python tools/validate_native_history.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
+  --baseline-cli build/dx11-native-baseline/Release/FloraGPA.Cli.exe `
+  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --case D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame 80 1280 720 `
+  --case D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame 23209 512 512 `
+  --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 99 128 128 `
+  --reference-history artifacts/dx11-native/history-prefix-validation `
+  --out artifacts/dx11-native/history-point-validation-new
 ```
 
 Raw build/CTest logs, JUnit output and original reports remain under ignored

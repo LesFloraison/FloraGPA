@@ -47,6 +47,8 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--qt-bin", type=Path, required=True)
     parser.add_argument("--gpu-vendor", default="0x10de")
+    parser.add_argument("--reference-history", type=Path,
+                        help="Optional prior run directory for strict event-record comparison")
     parser.add_argument("--timeout", type=float, default=180)
     args = parser.parse_args()
     if args.out.exists() and any(args.out.iterdir()):
@@ -95,7 +97,27 @@ def main():
                     raise AssertionError("Event snapshot claims fragment evidence")
             row.update(frame_sha256=result["context"]["frame_sha256"], context=result["context"],
                        execution=result["execution"], records=len(records),
-                       readback_count=history["readback_count"], readback_bytes=history["readback_bytes"])
+                       readback_count=history["readback_count"], readback_bytes=history["readback_bytes"],
+                       point_readback_count=history.get("point_readback_count", 0))
+            if args.reference_history:
+                reference_path = args.reference_history / str(index) / "native/result.json"
+                reference = load(reference_path)
+                if reference["context"]["frame_sha256"] != result["context"]["frame_sha256"]:
+                    raise AssertionError("Reference history belongs to another frame")
+                if reference["context"]["adapter"] != result["context"]["adapter"]:
+                    raise AssertionError("Reference history uses another adapter or driver")
+                if reference["context"]["experiment_sha256"] != result["context"]["experiment_sha256"]:
+                    raise AssertionError("Reference history uses another experiment")
+                for key in ("resource", "x", "y", "slice", "mip", "layer", "sample"):
+                    if reference["data"]["selection"][key] != history["selection"][key]:
+                        raise AssertionError("Reference history uses another texel selection")
+                normalized = json.loads(json.dumps(records))
+                previous = reference["data"]["records"]
+                for record in normalized + previous:
+                    for boundary in ("before", "after"):
+                        record[boundary].pop("readback_scope", None)
+                row["reference_records_equal"] = normalized == previous
+                row["reference_result_sha256"] = digest(reference_path)
             # Prefix replay uses the frozen executable and never executes the history collector.
             for position in sorted({0, len(records) // 2, len(records) - 1}):
                 record = records[position]
@@ -115,7 +137,8 @@ def main():
                 row["comparisons"].append({"event": int(event), "native": value["bytes"],
                                            "prefix": expected, "equal": value["bytes"] == expected,
                                            "prefix_wall_seconds": wall, "prefix_storage_sha256": digest(target / "texture.bin")})
-            row["ok"] = all(item["equal"] for item in row["comparisons"])
+            row["ok"] = (all(item["equal"] for item in row["comparisons"])
+                         and row.get("reference_records_equal", True))
         except Exception as error:
             row["error"] = str(error)
         (args.out / "validation.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

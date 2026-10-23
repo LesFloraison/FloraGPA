@@ -202,6 +202,8 @@ class Replay {
     void requireCreatedCounter(Id view) const;
     std::vector<Id> ignoredMsaaInitial_;
     std::vector<std::pair<Id, DiscardRecord>> discardHistory_;
+    Com<ID3D11Resource> pointReadbackStaging_;
+    uint32_t pointReadbackFormat_{}, pointReadbackDimension_{};
     std::vector<PlanarWrite> planarWrites_;
     std::vector<Id> appliedExperimentEvents_;
     // Keep edited extension states alive while their native identities are registered.
@@ -373,6 +375,9 @@ class Replay {
                                 std::optional<uint32_t> typedFormat = {});
     std::vector<uint8_t> readBuffer(Id id);
     std::vector<uint8_t> readTexture(Id id);
+    // Nullopt retains the complete-storage path for MSAA, depth and grouped formats.
+    std::optional<std::vector<uint8_t>> readTexturePoint(Id id, uint32_t x, uint32_t y, uint32_t slice,
+                                                       uint32_t mip, uint32_t layer);
     MsaaStorage readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat);
     uint32_t readCounter(Id view);
     struct PredicateResult {

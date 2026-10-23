@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "scope": "narrow_event_history_readback",
+  "complete_release_acceptance": false,
+  "source_report": "artifacts\\dx11-native\\history-point-validation\\validation.json",
+  "source_report_sha256": "f1cffa71a31ec925ab6c461b287366a2340d9f406dfa04e3fe3dfe6cd891a44b",
+  "cli_sha256": "444caadd760768eda3718e924bba3f5f4b7c4990ebf2432a02843cefd36fa6f0",
+  "baseline_cli_sha256": "70e098eb36e5e81e3a744c5f723aed87bcf8f71b062335a0485ece520d757815",
+  "cases": [
+    {
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "resource": 80,
+      "x": 1280,
+      "y": 720,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "records": 72,
+      "readback_count": 144,
+      "point_readback_count": 144,
+      "readback_bytes": 576,
+      "wall_seconds": 1.25,
+      "reference_records_equal": true,
+      "reference_result_sha256": "6d70a53e3111020278f6ea051faa3d9fb83aa54f3f9693f7f55f7829e32f09a6",
+      "comparisons": [
+        {
+          "event": 79,
+          "native": "000000ff",
+          "prefix": "000000ff",
+          "equal": true,
+          "prefix_wall_seconds": 0.6400000000139698,
+          "prefix_storage_sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+        },
+        {
+          "event": 879,
+          "native": "302e30a9",
+          "prefix": "302e30a9",
+          "equal": true,
+          "prefix_wall_seconds": 0.625,
+          "prefix_storage_sha256": "f8e6e7fbccad4d6d90ec3421636c3e73e189f970fb90c521fc39a4fdfd48df9d"
+        },
+        {
+          "event": 1455,
+          "native": "302e30a9",
+          "prefix": "302e30a9",
+          "equal": true,
+          "prefix_wall_seconds": 0.6570000000065193,
+          "prefix_storage_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+        }
+      ],
+      "ok": true,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 316,
+      "peak_working_set_bytes": 246587392
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "resource": 23209,
+      "x": 512,
+      "y": 512,
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "records": 7,
+      "readback_count": 14,
+      "point_readback_count": 14,
+      "readback_bytes": 14,
+      "wall_seconds": 16.09399999998277,
+      "reference_records_equal": true,
+      "reference_result_sha256": "361df2fddcfc7b14b914fd32d1aa7d498036ab2389ad0b1a4e7b972c921fd203",
+      "comparisons": [
+        {
+          "event": 23208,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "prefix_wall_seconds": 1.625,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        },
+        {
+          "event": 24115,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "prefix_wall_seconds": 1.827999999979511,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        },
+        {
+          "event": 25204,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "prefix_wall_seconds": 1.7820000000065193,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        }
+      ],
+      "ok": true,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 1954,
+      "peak_working_set_bytes": 1813606400
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "resource": 99,
+      "x": 128,
+      "y": 128,
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "records": 19,
+      "readback_count": 37,
+      "point_readback_count": 37,
+      "readback_bytes": 148,
+      "wall_seconds": 20.81200000003446,
+      "reference_records_equal": true,
+      "reference_result_sha256": "a3a931ec388b723798c2e2aa255e5ed51599d571c8833daa88c25d508a85cba4",
+      "comparisons": [
+        {
+          "event": 98,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "prefix_wall_seconds": 0.6560000000172295,
+          "prefix_storage_sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+        },
+        {
+          "event": 516,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "prefix_wall_seconds": 0.7969999999622814,
+          "prefix_storage_sha256": "a84ec18ccdea166c43978ecc017d59decb0e777314465f4b8515562490aab630"
+        },
+        {
+          "event": 2083,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "prefix_wall_seconds": 1.2190000000409782,
+          "prefix_storage_sha256": "e4873d7cde1d83f28d9c41ad07a6609d1762a3b4a1d6cb9db4ac7a57bc8bedb3"
+        }
+      ],
+      "ok": true,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 2670,
+      "peak_working_set_bytes": 1778237440
+    }
+  ],
+  "tests": [
+    {
+      "path": "artifacts\\dx11-native\\history-point-tests.txt",
+      "sha256": "59da9c418d654a9c067c17db66008a4ba0e31d83127191837f233b5eafbf0a79",
+      "totals": [
+        "Totals: 88 passed, 0 failed, 0 skipped, 0 blacklisted, 8027ms"
+      ]
+    },
+    {
+      "path": "artifacts\\dx11-native\\history-point-analysis-tests.txt",
+      "sha256": "3888a64f41877526b4d930f6ec11384bdbdf972f6e9cb5f0e515c14f8be0c8e5",
+      "totals": [
+        "Totals: 40 passed, 0 failed, 0 skipped, 0 blacklisted, 14868ms"
+      ]
+    }
+  ],
+  "performance_repeat": {
+    "path": "artifacts\\dx11-native\\history-point-repeat\\performance.json",
+    "sha256": "2b94cbca6d64ce572ff55b95de0c988c7d1593e929ff462e830129807e682b1c",
+    "runs": [
+      {
+        "repeat": 0,
+        "case": 1,
+        "wall_seconds": 12.344000000040978,
+        "worker_elapsed_ms": 1671,
+        "peak_working_set_bytes": 1814011904,
+        "records_equal": true,
+        "context_equal": true
+      },
+      {
+        "repeat": 0,
+        "case": 2,
+        "wall_seconds": 11.671999999962281,
+        "worker_elapsed_ms": 1476,
+        "peak_working_set_bytes": 1783918592,
+        "records_equal": true,
+        "context_equal": true
+      },
+      {
+        "repeat": 1,
+        "case": 1,
+        "wall_seconds": 13.297000000020489,
+        "worker_elapsed_ms": 1457,
+        "peak_working_set_bytes": 1815031808,
+        "records_equal": true,
+        "context_equal": true
+      },
+      {
+        "repeat": 1,
+        "case": 2,
+        "wall_seconds": 12.60899999999674,
+        "worker_elapsed_ms": 1544,
+        "peak_working_set_bytes": 1792520192,
+        "records_equal": true,
+        "context_equal": true
+      }
+    ],
+    "controlled_performance_gate_passed": false
+  }
+}

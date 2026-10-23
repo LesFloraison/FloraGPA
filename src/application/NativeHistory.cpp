@@ -276,7 +276,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
     const auto selected = cell(resource, s);
     const auto maps = auditMapRecords(replay.frame(), cancelled);
     Json records = Json::array(), pending = nullptr;
-    uint64_t reads = 0, bytesRead = 0;
+    uint64_t reads = 0, bytesRead = 0, pointReads = 0;
     auto snapshot = [&](const auto &objects) -> Json {
         checkCancellation(cancelled);
         if (!objects.contains(s.resource))
@@ -284,17 +284,24 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
         auto storageResource = resource;
         std::vector<uint8_t> bytes;
         bool canonicalX = false;
+        bool point = false;
         if (info.samples > 1) {
             auto data = replay.readMsaa(s.resource, s.sample,
                                         s.typedFormat.value_or(defaultTextureFormat(info.format)));
             bytes = std::move(data.bytes);
             storageResource = std::move(data.resource);
             canonicalX = data.canonicalX;
+        } else if (auto narrow = replay.readTexturePoint(s.resource, s.x, s.y, s.slice, s.mip, s.layer)) {
+            bytes = std::move(*narrow);
+            point = true;
+            ++pointReads;
         } else
             bytes = replay.readTexture(s.resource);
         if (bytes.size() > s.maxReadbackBytes)
             throw std::runtime_error("Native history output exceeds its storage budget");
-        const auto location = cell(storageResource, s);
+        auto location = cell(storageResource, s);
+        if (point)
+            location.offset = 0;
         if (location.offset > bytes.size() || location.bytes > bytes.size() - location.offset)
             throw std::runtime_error("Native history storage is incomplete");
         auto value = hex(Bytes(bytes).subspan(size_t(location.offset), location.bytes));
@@ -310,6 +317,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                 {"defined", nullptr},
                 {"format", textureInfo(storageResource).format},
                 {"encoding", location.encoding},
+                {"readback_scope", point ? "single_texel" : "complete_storage"},
                 {"exact_pixel_storage", location.exactPixel},
                 {"bytes", value},
                 {"canonical_unused_x", canonicalX},
@@ -406,6 +414,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
             {"records", std::move(records)},
             {"replay_count", 1},
             {"readback_count", reads},
+            {"point_readback_count", pointReads},
             {"readback_bytes", bytesRead},
             {"fragment_history_available", false},
             {"notes",
