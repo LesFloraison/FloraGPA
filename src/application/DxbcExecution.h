@@ -58,8 +58,8 @@ class Memory {
     std::shared_ptr<GpuOperations> gpu_;
     bool assistAll_;
     friend class Lane;
-    Value loadTyped(const Register &, uint32_t index, uint32_t returns, const std::array<uint32_t, 4> &,
-                    uint32_t mask, bool literal, bool &assisted) const;
+    Value loadTyped(uint32_t stage, const Register &, uint32_t index, uint32_t returns,
+                    const std::array<uint32_t, 4> &, uint32_t mask, bool literal, bool &assisted) const;
     std::vector<MemoryChange> storeTyped(const Register &, uint32_t index, uint32_t returns, const Value &,
                                          bool literal, bool &assisted) const;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,

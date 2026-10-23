@@ -736,8 +736,8 @@ Step Lane::step() {
     } else if (op == 45 || op == 163 || op == 164) {
         const bool store = op == 164;
         const auto &resource = store ? args[0] : args[2];
-        if (p.stage != 5)
-            fail("Native typed buffer instruction assistance currently requires CS execution");
+        if (p.stage != 5 && !(p.stage == 1 && op == 45))
+            fail("Native typed buffer assistance requires CS execution or a VS SRV load");
         if (instruction.words[0] & (1u << 13))
             fail("Unexpected saturation on a typed buffer instruction");
         if (resource.modifier || resource.kind != (op == 45 ? 7u : 30u))
@@ -761,12 +761,12 @@ Step Lane::step() {
                 (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
                 fail("Invalid DXBC typed load destination");
             const auto target = s.address(destination);
-            const auto value =
-                s.inputs.memory
-                    ? s.inputs.memory->loadTyped(binding, address.bits[0], declaration->second.second,
-                                                 resource.select, destination.mask, args[1].kind == 4,
-                                                 result.memoryGpuAssisted)
-                    : Value{};
+            const auto value = s.inputs.memory
+                                   ? s.inputs.memory->loadTyped(p.stage, binding, address.bits[0],
+                                                                declaration->second.second, resource.select,
+                                                                destination.mask, args[1].kind == 4,
+                                                                result.memoryGpuAssisted)
+                                   : Value{};
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
                 auto after = before;

@@ -79,6 +79,17 @@ Words typedKernel(bool store, uint32_t kind, uint32_t mask, uint32_t swizzle, ui
     std::memcpy(result.data(), bytes.data(), bytes.size());
     return result;
 }
+Words typedVertexKernel(uint32_t mask, uint32_t swizzle, uint32_t index, bool literal, uint32_t returns) {
+    const Words address = literal ? immediate(index) : Words{0x20800a, 0, 0};
+    const auto code =
+        writeDxbcProgram({{0x10050, 0},
+                          {row(89, {{0x208e46, 0, 1}}), row(88 | 0x800, {dest(7, 0), {returns}}),
+                           row(101, {dest(2, 0)}), row(54, {dest(2, 0), immediate(0)}),
+                           row(45, {dest(2, 0, mask), address, source(7, 0, swizzle)}), row(62, {})}});
+    Words result(code.size() / 4);
+    std::memcpy(result.data(), code.data(), code.size());
+    return result;
+}
 } // namespace
 struct GpuOperations::State {
     Com<ID3D11Device> device;
@@ -95,7 +106,8 @@ struct GpuOperations::State {
     uint32_t timeoutMs;
     uint64_t count = 0;
     bool failed = false, warp = false, debug = false;
-    Value vertex(const Words &words, const std::vector<Value> &constants) {
+    Value vertex(const Words &words, const std::vector<Value> &constants,
+                 ID3D11ShaderResourceView *resource = nullptr) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -143,6 +155,7 @@ struct GpuOperations::State {
             const UINT offset = 0;
             context->VSSetShader(found->second.vertex.Get(), nullptr, 0);
             context->VSSetConstantBuffers(0, 1, &constant);
+            context->VSSetShaderResources(0, 1, &resource);
             context->GSSetShader(found->second.stream.Get(), nullptr, 0);
             context->SOSetTargets(1, &target, &offset);
             context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -183,6 +196,44 @@ struct GpuOperations::State {
             }
             ++count;
             return result;
+        } catch (...) {
+            context->ClearState();
+            failed = true;
+            throw;
+        }
+    }
+    Value typedVertex(const Buffer &buffer, const BufferView &view, uint32_t index, uint32_t returns,
+                      uint32_t swizzle, uint32_t mask, bool literal) {
+        checkCancellation(cancelled);
+        if (failed)
+            throw std::runtime_error("Recreate the native memory assist after a failed operation");
+        const auto format = typedBufferFormat(view.format);
+        if (!format || !view.resource || !view.size || buffer.bytes.empty() ||
+            buffer.bytes.size() > 256ull * 1024 * 1024 || view.offset > buffer.bytes.size() ||
+            view.size > buffer.bytes.size() - view.offset || view.offset % format->bytes ||
+            view.size % format->bytes)
+            throw std::runtime_error("Invalid native vertex buffer storage or view");
+        try {
+            UINT support = 0;
+            check(device->CheckFormatSupport(DXGI_FORMAT(view.format), &support),
+                  "Check vertex buffer format support");
+            constexpr auto required = D3D11_FORMAT_SUPPORT_BUFFER | D3D11_FORMAT_SUPPORT_SHADER_LOAD;
+            if ((support & required) != required)
+                throw std::runtime_error("Selected device does not support this vertex buffer format");
+            const D3D11_BUFFER_DESC desc{
+                UINT(buffer.bytes.size()), D3D11_USAGE_IMMUTABLE, D3D11_BIND_SHADER_RESOURCE, 0, 0, 0};
+            const D3D11_SUBRESOURCE_DATA initial{buffer.bytes.data(), 0, 0};
+            Com<ID3D11Buffer> resource;
+            check(device->CreateBuffer(&desc, &initial, &resource), "Create private vertex buffer snapshot");
+            D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
+            srv.Format = DXGI_FORMAT(view.format);
+            srv.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+            srv.Buffer = {UINT(view.offset / format->bytes), UINT(view.size / format->bytes)};
+            Com<ID3D11ShaderResourceView> native;
+            check(device->CreateShaderResourceView(resource.Get(), &srv, &native),
+                  "Create private vertex buffer view");
+            return vertex(typedVertexKernel(mask, swizzle, index, literal, returns),
+                          {Value::known({index, 0, 0, 0})}, native.Get());
         } catch (...) {
             context->ClearState();
             failed = true;
@@ -384,15 +435,19 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/3"}};
+            {"backend", "dxbc-gpu/4"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
-Value GpuOperations::loadTyped(const Buffer &buffer, const BufferView &view, uint32_t kind, uint32_t index,
-                               uint32_t returns, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                               bool literal) {
+Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t kind,
+                               uint32_t index, uint32_t returns, const std::array<uint32_t, 4> &swizzle,
+                               uint32_t mask, bool literal) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (c * 2);
+    if (stage == 1 && kind == 7)
+        return state_->typedVertex(buffer, view, index, returns, selection, mask, literal);
+    if (stage != 5)
+        throw std::runtime_error("Unsupported native typed buffer shader stage");
     const auto bytes =
         state_->execute(buffer, view, false, kind, index, 0, {}, mask, selection, literal, false, returns);
     Value result;

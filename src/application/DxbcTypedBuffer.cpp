@@ -35,7 +35,7 @@ TypedBufferFormat validate(const BufferView &view, uint32_t returns) {
     return *format;
 }
 } // namespace
-Value Memory::loadTyped(const Register &binding, uint32_t index, uint32_t returns,
+Value Memory::loadTyped(uint32_t stage, const Register &binding, uint32_t index, uint32_t returns,
                         const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literal,
                         bool &assisted) const {
     const auto found = views_.find(binding);
@@ -48,7 +48,7 @@ Value Memory::loadTyped(const Register &binding, uint32_t index, uint32_t return
     if (!gpu_)
         throw std::runtime_error("DXBC typed buffer access requires native GPU assistance");
     const auto &buffer = buffers_.at(*view.resource);
-    auto result = gpu_->loadTyped(buffer, view, binding.kind, index, returns, swizzle, mask, literal);
+    auto result = gpu_->loadTyped(stage, buffer, view, binding.kind, index, returns, swizzle, mask, literal);
     assisted = true;
     const auto offset = uint64_t(index) * format.bytes;
     if (offset >= view.size) {
