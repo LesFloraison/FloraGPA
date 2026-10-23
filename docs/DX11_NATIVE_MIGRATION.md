@@ -17,7 +17,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
-| P4 | Event history including writes without changed values | Pending |
+| P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker prototype tested on three adapters and real-capture prefixes; decoded values, full matrix and efficient readback remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Pending |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
@@ -274,6 +274,48 @@ VS instance selection with nonzero start instance, DS/GS output, DrawAuto's orig
 SO cursor count, artifact corruption detection, stale request rejection and byte
 ownership. Passing those tests does not close the gaps above or authorize removal
 of the legacy mesh backend.
+
+## Event-storage history milestone
+
+```text
+FloraGPA.Cli analyze frame.gpa_frame history --history-scope events --resource 80 --x 1280 --y 720 --gpu-vendor 0x10de --out history
+```
+
+This explicit scope exposes schema-1 `pixel_event_history` with GPA identities.
+Calling `history` without the scope still fails until fragment-history parity is
+implemented. The existing Pixel History GUI remains available on its original
+backend; this milestone does not replace or reduce its successful capabilities.
+
+One complete replay records selected mip/layer/slice/sample storage before and
+after candidate writes. CPU Map/Update, Clear, Copy, Resolve, GenerateMips and
+supported Discard commands use addressed regions. Draw/Dispatch use actual native
+RTV/DSV/UAV bindings after experiment edits, with potential coverage. Disabled or
+suppressed commands are marked unexecuted; an unchanged value never proves that
+a GPU write did not execute. GPU execution, coverage, fragment identity, shader
+outputs and failure reasons remain unknown. CPU writes with captured overlapping
+bytes retain execution evidence even when the stored value is unchanged.
+
+Records are explicitly `event_snapshot`, never fragments. Missing initial objects
+remain unavailable without premature materialization. Discarded snapshots have
+unavailable storage and false definedness. Other readbacks retain unknown
+definedness: stored bytes alone cannot establish initialization or full coverage.
+BC blocks, packed pixel groups and planar luma/shared chroma retain raw storage
+without claiming an individual pixel change. Decoded color/depth/stencil are null
+in this milestone. A typed format selects the MSAA hardware read path; ordinary
+single-sample snapshots retain the resource's raw storage format.
+
+The Worker keeps the existing immutable request/context, artifact hashes, explicit
+adapter, timeout, cancellation and module snapshot. Readbacks are bounded to
+256 MiB each by default and results to 100,000 records; overruns fail, never return
+truncated success. Cancellation is checked at replay/readback boundaries. These
+limits do not guarantee aggregate traffic, latency or peak auxiliary GPU memory.
+Current readback copies complete resource storage, which is especially expensive
+for large render targets. A narrow GPU readback implementation and broader format,
+alias/lifetime, sparse Map, deferred-context and workflow validation remain open.
+Existing replay rejection of unproven rectangle/array-view combinations is retained.
+
+See `DX11_NATIVE_BASELINE.md` for tests, real-capture checkpoints, traffic and exact
+reproduction commands. P4 and P5 are not closed by this event-storage milestone.
 
 ## Delivery constraints
 

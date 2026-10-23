@@ -5,6 +5,7 @@
 #include "GpuStatistics.h"
 #include "NativeArtifacts.h"
 #include "NativeCounters.h"
+#include "NativeHistory.h"
 #include "PostTransform.h"
 #include "TextureInspector.h"
 #include <Psapi.h>
@@ -89,7 +90,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"texture", {"gpa_event", "resource", "mip", "layer", "slice", "sample", "typed_format"}},
         {"mesh", {"gpa_event", "stage", "stream", "instance", "max_bytes"}},
         {"counters", {"gpa_event", "start_event", "end_event"}},
-        {"history", {"resource", "x", "y", "mip", "layer", "sample"}},
+        {"history",
+         {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
+          "max_bytes", "max_records"}},
         {"debug-vertex", {"gpa_event", "instance", "vertex", "index"}},
         {"debug-pixel", {"gpa_event", "x", "y", "sample"}},
         {"debug-thread", {"gpa_event", "group", "thread"}}};
@@ -109,7 +112,10 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         } else {
             if (!selected->second.contains(key))
                 throw std::invalid_argument("Unsupported " + action + " option: " + key);
-            if (key == "stage") {
+            if (key == "history_scope") {
+                if (value != "events")
+                    throw std::invalid_argument("Native history currently requires explicit events scope");
+            } else if (key == "stage") {
                 if (value != "vs" && value != "vs-index" && value != "vs-inputs" && value != "ds" &&
                     value != "gs" && value != "hs" && value != "final")
                     throw std::invalid_argument(
@@ -123,7 +129,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
                 const bool wide = key == "resource" || key == "gpa_event" || key == "start_event" ||
                                   key == "end_event" || key == "max_bytes";
                 number(value, wide ? UINT64_MAX : UINT32_MAX, key);
-                if (wide && value == 0)
+                if ((wide || key == "max_records") && value == 0)
                     throw std::invalid_argument("Analysis identifier or limit must be nonzero: " + key);
             }
         }
@@ -177,7 +183,8 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
         throw std::invalid_argument("Unsupported native analysis request version");
     const auto request = nativeAnalysisRequest(job.at("action"), job.at("options"));
     // Reserved actions fail explicitly until their parity gates pass. Never switch backend implicitly.
-    if (request.action == "history" || request.action.starts_with("debug-"))
+    if ((request.action == "history" && !request.options.contains("history_scope")) ||
+        request.action.starts_with("debug-"))
         throw std::runtime_error("Native " + request.action +
                                  " is not implemented; migration parity gate remains open");
     const auto &selection = request.options;
@@ -270,7 +277,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
         if (job.contains("expected_adapter") && job.at("expected_adapter") != context.at("adapter"))
             throw std::runtime_error("Actual analysis adapter differs from the requested context");
         // Unpositioned texture inspection means capture-initial data, matching the existing inspector.
-        if (!allCounters && (request.action != "texture" || options.until))
+        if (!allCounters && request.action != "history" && (request.action != "texture" || options.until))
             replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); });
         if (request.action == "counters") {
             if (allCounters) {
@@ -280,6 +287,21 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                 data = gpuStatisticsReport(replay);
                 exportGpuStatistics(data, output.toStdWString());
             }
+        } else if (request.action == "history") {
+            NativeHistorySelection inspect;
+            inspect.resource = selection.at("resource").get<Id>();
+            inspect.x = selection.value("x", 0u);
+            inspect.y = selection.value("y", 0u);
+            inspect.slice = selection.value("slice", 0u);
+            inspect.mip = selection.value("mip", 0u);
+            inspect.layer = selection.value("layer", 0u);
+            inspect.sample = selection.value("sample", 0u);
+            inspect.maxReadbackBytes = selection.value("max_bytes", inspect.maxReadbackBytes);
+            inspect.maxRecords = selection.value("max_records", inspect.maxRecords);
+            if (selection.contains("typed_format"))
+                inspect.typedFormat = selection.at("typed_format").get<uint32_t>();
+            data = collectNativeEventHistory(replay, inspect, cancelled);
+            save(directory.filePath("history.json"), data);
         } else if (request.action == "texture") {
             TextureInspectionOptions inspect;
             inspect.mip = selection.value("mip", 0u);

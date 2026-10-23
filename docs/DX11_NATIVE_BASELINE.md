@@ -288,6 +288,56 @@ Evidence under `artifacts/dx11-native/`: `native-counter-batch-build.log`,
 Initial UI/build evidence remains in `native-counter-ui-*`. The comparison tool
 reads saved reports only and does not require or launch an external backend.
 
+## Event-storage history validation
+
+The new `native_history` suite uses generated captures on WARP, NVIDIA and Intel.
+The final focused run passed 31 history cases and 40 existing native-analysis
+cases with zero failures or skips (4.32 s and 15.66 s CTest times respectively).
+It verifies exact raw texels, unchanged CPU/GPU write records, mip/array boundaries,
+translated copy regions, ClearView rectangles, depth snapshots, MSAA sample/layer
+selection, Resolve, full Map writes, compute UAV writes, mip generation, ordinary
+2D discard rectangles and whole-view discard. Draws rejected by depth or predicate
+remain potential submissions with unknown fragment/failure information. Full final
+resource bytes, command counts, predicates and hidden UAV counters are compared
+with clean replay where defined. Experiment output edits are observed after binding.
+Disabled/suppressed draws, budget/bounds errors, cancellation followed by retry,
+worker artifact identity and absence of external replay modules are covered.
+
+The fixtures use D3D11 debug devices. Relevant copy/MSAA/dispatch/predicate/mip
+paths additionally inspect the validation queue for corruption/error messages.
+Enabling debug devices exposed an invalid test assumption: bytes from an unrelated
+discarded subresource had been compared before redefinition. The fixture now clears
+that subresource before the complete exact comparison; it still asserts unknown
+storage at the discard boundary. No production assertion, golden or skip was weakened.
+The initial failure log is retained as `history-debug-undefined-initial.txt`.
+
+`validate_native_history.py` independently runs frozen-main `texture-storage`
+prefix replays at the first, middle and last selected history records. It checks
+frame/artifact hashes, native adapter identity, event-only provenance and loaded
+modules. All nine sampled raw texel comparisons passed on NVIDIA:
+
+| Capture / resource / pixel | History records | Exact sampled events | Readbacks | Total packed bytes read | CLI wall time |
+| --- | --- | --- | --- | --- | --- |
+| GF2 / 80 / (1280,720) | 72 | 79, 879, 1455 | 144 | 2,123,366,400 | 2.218 s |
+| BF1 / 23209 / (512,512) | 7 | 23208, 24115, 25204 | 14 | 14,680,064 | 11.047 s |
+| Helldivers / 99 / (128,128) | 19 | 98, 516, 2083 | 37 | 9,699,328 | 11.109 s |
+
+The BF1 and Helldivers sampled texels are zero; those checkpoints validate addressed
+storage but do not establish nonzero fragment output or broad draw coverage. GF2
+includes a nonzero post-draw texel. All selected resources use single-sample mip 0,
+layer 0. These focused comparisons are not full history parity or P8 performance
+acceptance. Frame hashing contributes substantially to BF1/Helldivers wall time.
+GF2's complete-resource copies transfer over 2 GB for one selected texel, leaving a
+concrete readback optimization requirement. Final module snapshots contain neither
+RenderDoc nor GPA private modules; transient-module/package audits remain pending.
+
+Raw reports and prefix storage are under ignored
+`artifacts/dx11-native/history-prefix-validation/`; `validation.json` retains frame,
+executable and prefix-storage hashes, actual adapter, peak working set and timings.
+CTest output is retained in `native-history-tests.log` and
+`build/vs2022/native-history-Release.txt`. The independent prefix probe requires a
+frozen FloraGPA executable only, never RenderDoc or original GPA.
+
 ## Reproduction and evidence
 
 ```powershell
@@ -321,6 +371,16 @@ python tools/compare_native_counter_reports.py `
   --native artifacts/dx11-native/counter-batch-repeat/gf2/native/result.json `
   --reference artifacts/dx11-native/gf2-counter-cutover/baseline/result.json `
   --out artifacts/dx11-native/gf2-counter-comparison-new.json
+cmake --build build/vs2022 --config Release --target FloraNativeHistoryTests FloraNativeAnalysisTests FloraGPA.Cli
+ctest --test-dir build/vs2022 -C Release -j 1 --timeout 180 `
+  -R '^(native_history|native_analysis)$' --output-on-failure
+python tools/validate_native_history.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
+  --baseline-cli build/dx11-native-baseline/Release/FloraGPA.Cli.exe `
+  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --case D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame 80 1280 720 `
+  --case D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame 23209 512 512 `
+  --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 99 128 128 `
+  --out artifacts/dx11-native/history-prefix-validation-new
 ```
 
 Raw build/CTest logs, JUnit output and original reports remain under ignored
