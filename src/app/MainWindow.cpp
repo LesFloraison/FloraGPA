@@ -251,7 +251,7 @@ MainWindow::MainWindow() : loader_(this) {
             updateStatistics();
             setBusy(false);
             emit captureLoaded();
-            replay();
+            replay(true);
         } catch (const std::exception &e) {
             setBusy(false);
             showError(QString::fromUtf8(e.what()));

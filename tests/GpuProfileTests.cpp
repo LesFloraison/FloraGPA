@@ -2,6 +2,7 @@
 #include "app/Appearance.h"
 #include "app/GpuProfileView.h"
 #include "app/MainWindow.h"
+#include "app/Views.h"
 #include "application/GpuProfile.h"
 #include <QAction>
 #include <QApplication>
@@ -187,6 +188,25 @@ class GpuProfileTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, gpuProfileSelection(frame, req));
         req.includeWrites = true;
         QCOMPARE(gpuProfileSelection(frame, req).events, (std::vector<Id>{800, 810}));
+    }
+    void automaticTimingsOnEveryOpen() {
+        QTemporaryDir dir;
+        MainWindow window;
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        const auto chart = window.findChild<EventChart *>();
+        QVERIFY(chart);
+        for (const auto name : {"first.gpa_frame", "second.gpa_frame"}) {
+            const auto path = dir.filePath(name);
+            testing::depthStencilCapture().save(path);
+            done.clear();
+            window.openCapture(path);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QCOMPARE(done.count(), 1);
+            QVERIFY2(done.first()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            QVERIFY(chart->timingCount() > 0);
+            QCOMPARE(chart->visibleBegin(), 0);
+            QCOMPARE(chart->visibleCount(), chart->timingCount());
+        }
     }
     void workerUiTimelineAndExport() {
         QTemporaryDir dir;
