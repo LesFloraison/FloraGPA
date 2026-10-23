@@ -575,6 +575,15 @@ in 431.61 seconds. The prior unsupported-PS test now requires exact successful P
 output and unknown-value propagation. See `DX11_DXBC_TYPED_PIXEL_RESEARCH.md` for
 scope and evidence; captured pixel inputs, quads and full debugger parity remain open.
 
+The texture-input extension passes 76 cases, including 72 hardware observations
+across WARP, NVIDIA and Intel. Its six-suite focused regression passes 679 cases
+without failures/skips in 173.01 seconds; selected generated texture-creation tests
+add seven passes. Real GF2, BF1 and Helldivers input observations preserve texture
+storage and view identity without executing those shaders. The initial fixture and
+implicit-mip probe failures remain in the evidence ledger. See
+`DX11_DXBC_TEXTURE_INPUT_RESEARCH.md`; texture instructions, sampling, multisample
+storage and production debugger integration remain open.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

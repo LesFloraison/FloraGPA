@@ -31,6 +31,7 @@ class Snapshot {
     std::map<uint64_t, Buffer> buffers;
     std::map<Register, BufferView> views;
     std::map<uint64_t, Counter> counters;
+    std::shared_ptr<TextureInputs> textures = std::make_shared<TextureInputs>();
     InputSnapshot result;
     Id objectId(IUnknown *object, uint16_t type) const {
         if (!object)
@@ -67,6 +68,134 @@ class Snapshot {
         if (bytes.size() != descriptor.ByteWidth)
             throw std::runtime_error("DXBC input readback size changed");
         return buffers.emplace(id, Buffer::known(std::move(bytes))).first->second;
+    }
+    void textureView(Register binding, ID3D11View *native, Id id) {
+        Com<ID3D11Resource> resource;
+        native->GetResource(&resource);
+        if (identity(resource.Get()).Get() != identity(objects.at(id).Get()).Get())
+            throw std::runtime_error("DXBC texture storage disagrees with its GPA identity");
+        auto &view = textures->views[binding];
+        view.resource = id;
+        auto descriptor = [&](const auto &desc) {
+            view.format = desc.Format;
+            view.dimension = desc.ViewDimension;
+            view.nativeDescriptor.resize(sizeof desc / sizeof(uint32_t));
+            std::memcpy(view.nativeDescriptor.data(), &desc, sizeof desc);
+        };
+        if (binding.kind == 7) {
+            Com<ID3D11ShaderResourceView> srv;
+            check(native->QueryInterface(IID_PPV_ARGS(&srv)), "Read native texture SRV");
+            D3D11_SHADER_RESOURCE_VIEW_DESC d{};
+            srv->GetDesc(&d);
+            descriptor(d);
+            switch (d.ViewDimension) {
+            case D3D11_SRV_DIMENSION_TEXTURE1D:
+            case D3D11_SRV_DIMENSION_TEXTURE2D:
+            case D3D11_SRV_DIMENSION_TEXTURE3D:
+            case D3D11_SRV_DIMENSION_TEXTURECUBE:
+                view.firstMip = d.Texture1D.MostDetailedMip;
+                view.mipCount = d.Texture1D.MipLevels;
+                if (d.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBE)
+                    view.layerCount = 6;
+                break;
+            case D3D11_SRV_DIMENSION_TEXTURE1DARRAY:
+            case D3D11_SRV_DIMENSION_TEXTURE2DARRAY:
+            case D3D11_SRV_DIMENSION_TEXTURECUBEARRAY:
+                view.firstMip = d.Texture1DArray.MostDetailedMip;
+                view.mipCount = d.Texture1DArray.MipLevels;
+                view.firstLayer = d.Texture1DArray.FirstArraySlice;
+                view.layerCount = d.Texture1DArray.ArraySize;
+                if (d.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBEARRAY) {
+                    if (view.layerCount > UINT32_MAX / 6)
+                        throw std::runtime_error("Native cube array size overflow");
+                    view.layerCount *= 6;
+                }
+                break;
+            case D3D11_SRV_DIMENSION_TEXTURE2DMS:
+                break;
+            case D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY:
+                view.firstLayer = d.Texture2DMSArray.FirstArraySlice;
+                view.layerCount = d.Texture2DMSArray.ArraySize;
+                break;
+            default:
+                throw std::runtime_error("Unsupported native texture SRV dimension");
+            }
+            Com<ID3D11ShaderResourceView1> srv1;
+            if (SUCCEEDED(srv.As(&srv1))) {
+                D3D11_SHADER_RESOURCE_VIEW_DESC1 d1{};
+                srv1->GetDesc1(&d1);
+                if (d.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+                    view.planeSlice = d1.Texture2D.PlaneSlice;
+                else if (d.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2DARRAY)
+                    view.planeSlice = d1.Texture2DArray.PlaneSlice;
+            }
+        } else {
+            Com<ID3D11UnorderedAccessView> uav;
+            check(native->QueryInterface(IID_PPV_ARGS(&uav)), "Read native texture UAV");
+            D3D11_UNORDERED_ACCESS_VIEW_DESC d{};
+            uav->GetDesc(&d);
+            descriptor(d);
+            view.firstMip = d.Texture1D.MipSlice;
+            switch (d.ViewDimension) {
+            case D3D11_UAV_DIMENSION_TEXTURE1D:
+            case D3D11_UAV_DIMENSION_TEXTURE2D:
+                break;
+            case D3D11_UAV_DIMENSION_TEXTURE1DARRAY:
+            case D3D11_UAV_DIMENSION_TEXTURE2DARRAY:
+                view.firstLayer = d.Texture1DArray.FirstArraySlice;
+                view.layerCount = d.Texture1DArray.ArraySize;
+                break;
+            case D3D11_UAV_DIMENSION_TEXTURE3D:
+                view.depthSlices = {{d.Texture3D.FirstWSlice, d.Texture3D.WSize}};
+                break;
+            default:
+                throw std::runtime_error("Unsupported native texture UAV dimension");
+            }
+            Com<ID3D11UnorderedAccessView1> uav1;
+            if (SUCCEEDED(uav.As(&uav1))) {
+                D3D11_UNORDERED_ACCESS_VIEW_DESC1 d1{};
+                uav1->GetDesc1(&d1);
+                if (d.ViewDimension == D3D11_UAV_DIMENSION_TEXTURE2D)
+                    view.planeSlice = d1.Texture2D.PlaneSlice;
+                else if (d.ViewDimension == D3D11_UAV_DIMENSION_TEXTURE2DARRAY)
+                    view.planeSlice = d1.Texture2DArray.PlaneSlice;
+            }
+        }
+        result.bindings[binding].format = view.format;
+        Com<ID3D11Texture2D> texture2d;
+        if (SUCCEEDED(resource.As(&texture2d))) {
+            D3D11_TEXTURE2D_DESC d{};
+            texture2d->GetDesc(&d);
+            if (d.SampleDesc.Count != 1) {
+                result.unavailable[binding] = "Multisampled texture storage observation is unavailable";
+                return;
+            }
+        }
+        auto found = textures->resources.find(id);
+        if (found == textures->resources.end()) {
+            auto observed = replay.observeTextureStorage(id, budget - used, cancelled);
+            used += observed.bytes.size();
+            TextureInput input;
+            input.resource = std::move(observed.resource);
+            input.storage = Buffer::known(std::move(observed.bytes));
+            input.minLod = observed.minLod;
+            input.subresources = textureSubresources(input.resource);
+            found = textures->resources.emplace(id, std::move(input)).first;
+        }
+        const auto info = textureInfo(found->second.resource);
+        auto range = [](uint32_t first, uint32_t &count, uint32_t total) {
+            if (first >= total)
+                throw std::runtime_error("Native texture view starts outside its storage");
+            if (count == UINT32_MAX)
+                count = total - first;
+            if (!count || count > total - first)
+                throw std::runtime_error("Native texture view exceeds its storage");
+        };
+        range(view.firstMip, view.mipCount, info.mips);
+        range(view.firstLayer, view.layerCount, info.layers);
+        if (view.depthSlices)
+            range((*view.depthSlices)[0], (*view.depthSlices)[1], std::max(1u, info.depth >> view.firstMip));
+        result.bindings[binding].size = found->second.storage.bytes.size();
     }
     template <class Shader>
     void shader(ID3D11DeviceContext *context,
@@ -136,6 +265,7 @@ class Snapshot {
               uint32_t first, uint32_t count, uint32_t flags, bool experimental) {
         if (!native) {
             views[binding] = {};
+            textures->views[binding] = {};
             result.bindings[binding] = {};
             return;
         }
@@ -147,7 +277,7 @@ class Snapshot {
         metadata.experimentalView = experimental;
         metadata.resource = objectId(resource.Get(), 0);
         if (FAILED(resource.As(&buffer)) || (dimension != 1 && !(binding.kind == 7 && dimension == 11))) {
-            result.unavailable[binding] = "Texture inputs require native texture execution";
+            textureView(binding, native, metadata.resource);
             return;
         }
         metadata.resource = objectId(buffer.Get(), 0x83);
@@ -293,17 +423,18 @@ class Snapshot {
         result.inputs.memory =
             std::make_shared<Memory>(std::move(buffers), std::move(views), budget, 16 * 1024 * 1024,
                                      std::move(gpu), false, std::move(counters));
+        result.inputs.textures = std::move(textures);
         return std::move(result);
     }
 };
 } // namespace
-InputSnapshot snapshotBufferInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
-                                   const CancelCheck &cancelled) {
+InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                     const CancelCheck &cancelled) {
     checkCancellation(cancelled);
     const auto id = replay.options().until;
     if (stage >= 6 || !maxBytes || !id || !replay.options().before || !replay.options().prepareBeforeDraw ||
         !isDraw(replay.frame().entry(id).type))
-        throw std::runtime_error("DXBC buffer inputs require a prepared before-work replay boundary");
+        throw std::runtime_error("DXBC resource inputs require a prepared before-work replay boundary");
     const bool compute = replay.frame().entry(id).type == 0x35 || replay.frame().entry(id).type == 0x36;
     if (compute != (stage == 5))
         throw std::runtime_error("DXBC input stage disagrees with the selected work event");
@@ -327,5 +458,9 @@ InputSnapshot snapshotBufferInputs(Replay &replay, unsigned stage, uint64_t maxB
     result->adapterVendor = adapter.VendorId;
     result->adapterDevice = adapter.DeviceId;
     return std::move(*result);
+}
+InputSnapshot snapshotBufferInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                   const CancelCheck &cancelled) {
+    return snapshotResourceInputs(replay, stage, maxBytes, cancelled);
 }
 } // namespace flora::dxbc_exec

@@ -101,6 +101,11 @@ struct MsaaStorage {
     std::string mode;
     bool integerBits = false, depthStencil = false, canonicalX = false;
 };
+struct NativeTextureStorage {
+    Resource resource;
+    std::vector<uint8_t> bytes;
+    float minLod = 0;
+};
 struct PlanarWrite {
     Id event{}, resource{};
     uint32_t subresource{}, format{}, mapType{};
@@ -149,7 +154,8 @@ class Replay {
     std::optional<NativeStatistics> measurementResult_;
     uint64_t generation_{};
     PredicateBinding measuredPredicate_;
-    std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource);
+    std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource,
+                                            const CancelCheck &cancelled = {});
     MsaaStorage readMsaaStorage(ID3D11Resource *source, const Resource &resource,
                                 std::optional<uint32_t> sample, uint32_t typedFormat);
     Com<ID3D11Resource> createEditTexture(const Resource &resource, std::optional<Bytes> data = {});
@@ -178,7 +184,10 @@ class Replay {
     std::optional<QueryCompletionAudit> queryCompletionAudit_;
     std::optional<std::set<Id>> eventEndObservations_;
     QueryCompletionAudit unresolvedQueryCompletions_;
-    struct OrdinaryCompletion { Id end{}; Com<ID3D11Query> query; };
+    struct OrdinaryCompletion {
+        Id end{};
+        Com<ID3D11Query> query;
+    };
     std::map<Id, OrdinaryCompletion> ordinaryCompletions_;
     std::set<Id> unissuedPredicates_;
     std::set<Id> baselinePredicates_;
@@ -375,9 +384,10 @@ class Replay {
                                 std::optional<uint32_t> typedFormat = {});
     std::vector<uint8_t> readBuffer(Id id);
     std::vector<uint8_t> readTexture(Id id);
+    NativeTextureStorage observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled = {});
     // Nullopt retains the complete-storage path for MSAA, depth and grouped formats.
     std::optional<std::vector<uint8_t>> readTexturePoint(Id id, uint32_t x, uint32_t y, uint32_t slice,
-                                                       uint32_t mip, uint32_t layer);
+                                                         uint32_t mip, uint32_t layer);
     MsaaStorage readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat);
     uint32_t readCounter(Id view);
     struct PredicateResult {

@@ -67,7 +67,48 @@ std::vector<uint8_t> Replay::readTexture(Id id) {
     const auto resource = frame_.resource(id);
     return readTextureStorage(get<ID3D11Resource>(id), resource);
 }
-std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Resource &resource) {
+NativeTextureStorage Replay::observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    auto *source = get<ID3D11Resource>(id);
+    NativeTextureStorage result;
+    result.resource = frame_.resource(id);
+    D3D11_RESOURCE_DIMENSION dimension{};
+    source->GetType(&dimension);
+    auto describe = [&]<class T, class D>(uint16_t type) {
+        Com<T> texture;
+        check(source->QueryInterface(IID_PPV_ARGS(&texture)), "Observe native texture type");
+        D desc{};
+        texture->GetDesc(&desc);
+        result.resource.type = type;
+        result.resource.desc.resize(sizeof desc / sizeof(uint32_t));
+        std::memcpy(result.resource.desc.data(), &desc, sizeof desc);
+    };
+    if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE1D)
+        describe.operator()<ID3D11Texture1D, D3D11_TEXTURE1D_DESC>(0x84);
+    else if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE2D)
+        describe.operator()<ID3D11Texture2D, D3D11_TEXTURE2D_DESC>(0x85);
+    else if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE3D)
+        describe.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(0x86);
+    else
+        throw std::runtime_error("Native texture observation requires a texture resource");
+    if (textureInfo(result.resource).samples != 1)
+        throw std::runtime_error("Native texture observation requires non-MSAA storage");
+    const auto layout = textureSubresources(result.resource);
+    const auto size = layout.back().offset + layout.back().size;
+    if (!maxBytes || size > maxBytes)
+        throw std::runtime_error("Native texture observation byte budget exceeded");
+    requireResourceLod(id);
+    if (hasResourceLodClamp(result.resource))
+        result.minLod = context_->GetResourceMinLOD(source);
+    result.bytes = readTextureStorage(source, result.resource, cancelled);
+    checkCancellation(cancelled);
+    if (result.bytes.size() != size)
+        throw std::runtime_error("Native texture observation size changed");
+    return result;
+}
+std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Resource &resource,
+                                                const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     requireResourceLod(resource.id);
     // D3D11 functional spec 5.8.7: resource MinLOD affects shader SRV accesses,
     // not resource copies. Copy all stored mips without resetting the clamp;
@@ -109,6 +150,7 @@ std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Re
     std::vector<uint8_t> result;
     for (uint32_t layer = 0; layer < info.layers; ++layer)
         for (uint32_t mip = 0; mip < info.mips; ++mip) {
+            checkCancellation(cancelled);
             auto [row, rows] =
                 pitches(std::max(1u, info.width >> mip), std::max(1u, info.height >> mip), info.format);
             const auto depth = std::max(1u, info.depth >> mip);
@@ -132,6 +174,7 @@ std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Re
                                     size_t(y) * mapped.RowPitch,
                                 row);
             context_->Unmap(staging.Get(), sub);
+            checkCancellation(cancelled);
         }
     return result;
 }

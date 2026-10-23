@@ -408,6 +408,15 @@ Typed textures and GPU sampling assistance, complete vertex/pixel input
 extraction, quad/helper execution, full CS group/cross-group semantics,
 source/GUI integration and full parity remain required P6 work.
 
+Native texture inputs now accompany buffer observations in the same scoped event
+snapshot. The 76-case texture suite covers packed mip/layer/depth storage, native
+SRV/UAV ranges, alias deduplication, input/output edits, fractional MinLOD and
+restoration after budget failure or cancellation across WARP, NVIDIA and Intel.
+Real GF2, BF1 and Helldivers inputs have also been observed. See
+`DX11_DXBC_TEXTURE_INPUT_RESEARCH.md` for exact scope and evidence. MSAA storage,
+texture instruction execution, sampling and production debugger cutover remain
+pending; input observation alone does not satisfy those gates.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable

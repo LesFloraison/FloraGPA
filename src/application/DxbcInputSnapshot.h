@@ -1,5 +1,6 @@
 #pragma once
 #include "DxbcExecution.h"
+#include "DxbcTextureInputs.h"
 
 namespace flora {
 class Replay;
@@ -22,12 +23,14 @@ struct InputSnapshot {
     std::map<Register, InputBinding> bindings;
     std::map<Register, std::string> unavailable;
     std::map<uint64_t, std::string> unavailableCounters;
-    static constexpr const char *source = "independent-replay-buffer-inputs/2";
+    static constexpr const char *source = "independent-replay-resource-inputs/3";
 };
 // Runs a before-event replay and copies the selected stage's actual bindings
-// inside its experiment scope. Buffer bytes are observations of this replay,
+// inside its experiment scope. Resource bytes are observations of this replay,
 // not proof of original-capture initialization or defined shader behavior.
 InputSnapshot snapshotBufferInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
                                    const CancelCheck &cancelled = {});
+InputSnapshot snapshotResourceInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
+                                     const CancelCheck &cancelled = {});
 } // namespace dxbc_exec
 } // namespace flora

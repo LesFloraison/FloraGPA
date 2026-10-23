@@ -396,7 +396,13 @@ class DxbcInputSnapshotTests final : public QObject {
             QCOMPARE(snapshot.bindings.at({7, {0}}).resource, Id(texture ? 40 : 4));
             QCOMPARE(snapshot.bindings.at({7, {0}}).view, Id(6));
             if (texture) {
-                QVERIFY(!snapshot.unavailable.at({7, {0}}).empty());
+                QVERIFY(!snapshot.unavailable.contains({7, {0}}));
+                QVERIFY(snapshot.inputs.textures);
+                QCOMPARE(snapshot.inputs.textures->views.at({7, {0}}).resource, std::optional<uint64_t>(40));
+                QCOMPARE(snapshot.inputs.textures->resources.at(40).storage.bytes.size(), size_t(4));
+                // Observed bytes do not establish initialization, and texture execution remains unsupported.
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(snapshot));
+                QVERIFY(!snapshot.inputs.textures->views.at({7, {1}}).resource);
             } else {
                 QVERIFY(!snapshot.unavailable.contains({7, {0}}));
                 QCOMPARE(snapshot.bindings.at({7, {0}}).format, uint32_t(DXGI_FORMAT_R32_UINT));

@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
                      "<report.json>\n";
         return 2;
     }
-    Json report{{"schema", 1},
-                {"scope", "native_dxbc_buffer_input_observation"},
+    Json report{{"schema", 2},
+                {"scope", "native_dxbc_resource_input_observation"},
                 {"complete_release_acceptance", false},
                 {"shader_execution_performed", false},
                 {"capture", args[1].toStdString()}};
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
         if (vendor)
             options.vendor = uint32_t(vendor);
         Replay replay(frame, options);
-        const auto snapshot = dxbc_exec::snapshotBufferInputs(replay, unsigned(stage));
+        const auto snapshot = dxbc_exec::snapshotResourceInputs(replay, unsigned(stage));
         report["source"] = dxbc_exec::InputSnapshot::source;
         report["frame_sha256"] = snapshot.frameSha256;
         report["shader"] = snapshot.shader;
@@ -90,6 +90,53 @@ int main(int argc, char **argv) {
                  {"validity_sha256", hash(buffer.valid)},
                  {"known_bytes", std::count(buffer.valid.begin(), buffer.valid.end(), uint8_t(1))}});
         report["counters"] = Json::array();
+        report["textures"] = Json::array();
+        report["texture_views"] = Json::array();
+        for (const auto &[id, texture] : snapshot.inputs.textures->resources) {
+            Json item{{"resource", id},
+                      {"type", texture.resource.type},
+                      {"descriptor", texture.resource.desc},
+                      {"min_lod", texture.minLod},
+                      {"bytes", texture.storage.bytes.size()},
+                      {"sha256", hash(texture.storage.bytes)},
+                      {"validity_sha256", hash(texture.storage.valid)},
+                      {"known_bytes",
+                       std::count(texture.storage.valid.begin(), texture.storage.valid.end(), uint8_t(1))},
+                      {"subresources", Json::array()}};
+            for (const auto &sub : texture.subresources)
+                item["subresources"].push_back({{"mip", sub.mip},
+                                                {"layer", sub.layer},
+                                                {"width", sub.width},
+                                                {"height", sub.height},
+                                                {"depth", sub.depth},
+                                                {"offset", sub.offset},
+                                                {"size", sub.size},
+                                                {"row_pitch", sub.rowPitch},
+                                                {"slice_pitch", sub.slicePitch}});
+            report["textures"].push_back(item);
+        }
+        for (const auto &[reg, view] : snapshot.inputs.textures->views) {
+            if (!view.resource)
+                continue;
+            Json item{{"kind", reg.kind},
+                      {"slot", reg.indices.at(0)},
+                      {"resource", *view.resource},
+                      {"format", view.format},
+                      {"dimension", view.dimension},
+                      {"first_mip", view.firstMip},
+                      {"mip_count", view.mipCount},
+                      {"first_layer", view.firstLayer},
+                      {"layer_count", view.layerCount},
+                      {"native_descriptor", view.nativeDescriptor},
+                      {"plane_slice", nullptr},
+                      {"depth_slices", nullptr},
+                      {"storage_available", snapshot.inputs.textures->resources.contains(*view.resource)}};
+            if (view.planeSlice)
+                item["plane_slice"] = *view.planeSlice;
+            if (view.depthSlices)
+                item["depth_slices"] = *view.depthSlices;
+            report["texture_views"].push_back(item);
+        }
         for (const auto &[id, counter] : snapshot.inputs.memory->counters()) {
             Json item{{"view", id},
                       {"kind", counter.kind == dxbc_exec::CounterKind::Ordered ? "ordered" : "append"},

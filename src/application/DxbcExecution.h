@@ -50,6 +50,7 @@ struct MemoryChange {
     std::vector<uint8_t> before, after, beforeValid, afterValid;
 };
 class GpuOperations;
+struct TextureInputs;
 class Memory {
     std::map<uint64_t, Buffer> buffers_;
     std::map<Register, BufferView> views_;
@@ -95,6 +96,7 @@ struct Inputs {
     std::shared_ptr<Memory> memory;
     std::shared_ptr<GpuOperations> gpu;
     std::shared_ptr<Memory> sharedMemory;
+    std::shared_ptr<TextureInputs> textures;
 };
 struct Change {
     Register destination;
