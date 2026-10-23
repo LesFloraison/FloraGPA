@@ -79,6 +79,66 @@ layout remain unresolved. Next probes must follow host propagation across player
 API/shim boundaries and observe writes to the live host field. Shader Profiler
 and request dispatch are not substituted for this missing evidence.
 
+### Independent dispatch and lifecycle probe
+
+On 2026-10-24, `tools/probe_original_debugger_host.py` independently loaded the
+hash-pinned player in a bounded child process using only Python's standard library.
+It opened each unchanged original capture, replayed it, submitted an unobserved
+control request followed by an observed request, replayed again, and closed it.
+The observer forwards the actual request virtual call to RVA `0x902b0` unchanged;
+it neither installs an engine nor replaces its return value. Its temporary vtable
+slot is restored before cleanup. The product does not contain this probe or load
+the private player.
+
+| Capture | Raw selection word 1 | Observed request executions | Engine at entry/return | Result callbacks, control/observed | Open, both replays, requests, close |
+| --- | --- | --- | --- | --- | --- |
+| GF2 | 113 | 1 | null / null | 0 / 0 | Succeeded |
+| BF1 | 876 | 1 | null / null | 0 / 0 | Succeeded |
+| Helldivers | 200 | 1 | null / null | 0 / 0 | Succeeded |
+
+These observations hold both with initial playbacks/query-manager creation
+disabled and with their original defaults retained. Both configurations set
+`single-threaded=true` so the request completes synchronously. Adapter selection
+is the original player's default with an undefined GpuId; these runs do not
+certify a particular product adapter. All observed requests return byte 1 from
+the virtual executor and status 0 from the public-facing wrapper, with no error
+or result callback. Every sampled lifecycle boundary has a null engine. The
+before/after ordinary replays succeed, but this probe does not compare their
+framebuffer pixels or certify full replay-state equality.
+
+The request layout and call chain are now supported by both decoded instructions
+and actual forwarding observation:
+
+- Wrapper `0x88950` calls enqueue `0x93cb0` with the manager at `host+0xf8`.
+- Enqueue allocates 0x60 bytes; writes vtable `0x183198`, version at `+0x10`,
+  callback context at `+0x18`, eight raw uint32 selection words at `+0x20`, result
+  callback at `+0x40`, and a copied uint32 vector at `+0x48`. It stores the error
+  callback at `+0x8`. The selection words are not presented as recovered shader
+  configuration fields; their complete semantics remain open.
+- With the single-threaded flag, `0x93f10` calls executor `0x8e0d0`; its virtual
+  call at `0x8e124` reaches the actual observed debugger request. The manager's
+  `+0x98` owner equals the host global in all three captures.
+- Protocol handler `0xab500` passes callbacks `0xb0bc0` and `0xade30` through
+  the same wrapper. Result payload decoding is not recovered by this probe.
+- Host getter `0x89420` returns the global directly. Its three references belong
+  to window-message handling (`0x15790`, two calls) and a stop path (`0x5c460`);
+  none of these newly inspected paths assigns a debugger object.
+
+Runtime evidence is in `artifacts/dx11-native/debugger-probes-controlled/` and
+`debugger-probes-default/`; each report records the capture/player/probe hashes,
+module snapshots, raw selection words, callback counts, restoration and original
+file hashes after execution. The committed compact ledger is
+`docs/research/dx11-debugger-dispatch-evidence.json`. Fresh static evidence is in
+`artifacts/dx11-native/research-followup-verified/`.
+
+**Limits:** these are sampled boundaries, not a write watchpoint. They do not
+exclude a transient assignment between samples, another initialization route,
+an external module or a different GPA version. The request's null-engine branch
+returns before checking the remaining shader-selection semantics, so these runs
+are not valid VS/PS/CS trace tests. A successful request status is demonstrably
+insufficient evidence of an operational debugger. P1's constructor/vtable/module
+gate and P6's independent execution implementation remain open.
+
 ## Reproduction
 
 `tools/ghidra/Invoke-Dx11Research.ps1` checks the exact binary hashes before and
@@ -104,3 +164,28 @@ resource-analysis warning is retained in the log and does not establish anything
 about the recovered code. Both program analyses/imports and requested function
 exports completed. Raw evidence is in `artifacts/dx11-native/research/`.
 Independent runtime GPA probes remain required before P1 is declared complete.
+
+The extended wrapper also exports host-global references, factory/handle tables
+and the debugger protocol chain. Exported-entry references in Ghidra's external
+address space are retained without treating them as image RVAs. Completion markers
+and post-script error checks reject truncated output even when headless Ghidra
+returns exit code zero.
+The complete extended export recipe succeeded, including 28 candidate functions
+in the displacement scan; these candidates still require host-provenance analysis.
+Hashes are preserved in `docs/research/dx11-gpa-followup-evidence-sha256.json`.
+A negative check using an empty, zero-exit exporter and a stale completion marker
+was rejected. A 1 ms probe deadline was separately recorded as timed out, with no
+claim of completed runtime evidence. These checks are retained under
+`artifacts/dx11-native/research-wrapper-negative/` and `debugger-probe-deadline/`.
+
+```powershell
+python tools/probe_original_debugger_host.py `
+  D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame `
+  --event 113 --original-initialization `
+  --out artifacts/dx11-native/debugger-probe-new
+```
+
+Use a new output directory for each run. Omit `--original-initialization` to
+reproduce the control that disables first playbacks and the GT query manager.
+The parent enforces a 120-second process deadline by default. A timed-out or failed
+child is recorded as such and must not be treated as completed evidence.

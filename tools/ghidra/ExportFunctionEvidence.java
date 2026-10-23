@@ -25,9 +25,12 @@ public class ExportFunctionEvidence extends GhidraScript {
                 }
                 out.println("FUNCTION RVA 0x" + Long.toHexString(function.getEntryPoint().subtract(base)) +
                     " " + function.getName(true));
-                for (var reference : getReferencesTo(function.getEntryPoint()))
-                    out.println("XREF RVA 0x" + Long.toHexString(reference.getFromAddress().subtract(base)) +
+                for (var reference : getReferencesTo(function.getEntryPoint())) {
+                    var from = reference.getFromAddress();
+                    out.println("XREF " + (from.getAddressSpace().equals(base.getAddressSpace()) ?
+                        "RVA 0x" + Long.toHexString(from.subtract(base)) : from.toString()) +
                         " " + reference.getReferenceType());
+                }
                 var instructions = currentProgram.getListing().getInstructions(function.getBody(), true);
                 while (instructions.hasNext()) {
                     var instruction = instructions.next();
@@ -39,6 +42,7 @@ public class ExportFunctionEvidence extends GhidraScript {
                 out.println(result.decompileCompleted() ? result.getDecompiledFunction().getC() :
                     result.getErrorMessage());
             }
+            out.println("COMPLETE " + (args.length - 1));
         } finally {
             decompiler.dispose();
         }

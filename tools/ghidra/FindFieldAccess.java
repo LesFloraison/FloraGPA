@@ -44,6 +44,7 @@ public class FindFieldAccess extends GhidraScript {
                 out.println(result.decompileCompleted() ? result.getDecompiledFunction().getC() :
                     result.getErrorMessage());
             }
+            out.println("COMPLETE " + functions.size());
         } finally {
             decompiler.dispose();
         }

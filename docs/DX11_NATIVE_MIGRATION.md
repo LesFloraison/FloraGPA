@@ -14,7 +14,7 @@ VS/PS/CS debugger or fragment history implementation.
 | Stage | Gate | Current evidence |
 | --- | --- | --- |
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
-| P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; debugger implementation not resolved |
+| P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Pending |

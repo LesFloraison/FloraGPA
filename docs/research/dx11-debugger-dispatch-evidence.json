@@ -1,0 +1,630 @@
+{
+  "schema": "FloraGPA debugger dispatch evidence 1",
+  "date": "2026-10-24",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "image_base": "0x180000000",
+  "field_write_watch": false,
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "scope": "Sampled lifecycle and forwarded synchronous request boundaries only; no exclusion of transient or alternate-route assignments",
+  "runs": [
+    {
+      "capture": "gf2",
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-controlled/gf2/dispatch.json",
+      "report_sha256": "238e1a90bf59aac255733308ad699a1f515c4fa168c96b665bdb363fdc39a6e7",
+      "process_sha256": "556f255196955ef58a80d87ca0ec0e6c4524058b8b046df33e2147998d5c014b",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 76
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                113,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    },
+    {
+      "capture": "bf1",
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-controlled/bf1/dispatch.json",
+      "report_sha256": "807de04bc52466266c17f86ae7ee7504322d8223ae93087eca297c6c87318c32",
+      "process_sha256": "58483c23f2878338b3ade1340315332d4d5b3b1ff8506ce1364b2eae8fea5649",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 74
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                876,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    },
+    {
+      "capture": "helldivers",
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-controlled/helldivers/dispatch.json",
+      "report_sha256": "85da84e4087d7a107d36dc799831feda2972db18bcb3247ddf78233ad4ba6740",
+      "process_sha256": "8ac8fcb40a6223b3f17bc593783fac55c374909588bc529d24c0277ea2c03cc7",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 74
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                200,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    },
+    {
+      "capture": "gf2",
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-default/gf2/dispatch.json",
+      "report_sha256": "b57d9cb4d3ae59e9eef7aec8ca34fae27b188d0881031d9a98834c73d84d2e0f",
+      "process_sha256": "4fe53396b613ab6f9dcde424cee456d977c3044941a8244011de171e6b889678",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 76
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 76
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                113,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    },
+    {
+      "capture": "bf1",
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-default/bf1/dispatch.json",
+      "report_sha256": "7b3c339a6fb100a326b5af95cd57d67fd71db10f17e5fb76d872801e5b276e4f",
+      "process_sha256": "e2dae77bbf88e6cb7989fa194f7d9fee77f98b20dcb4523d640bac102835d998",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 74
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                876,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    },
+    {
+      "capture": "helldivers",
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "report_path": "artifacts/dx11-native/debugger-probes-default/helldivers/dispatch.json",
+      "report_sha256": "c8a5350b75c3b3f7e6dffbae470bd926dcbee55d2fdf3591246234a66e5e4640",
+      "process_sha256": "1f8c2a603bb49e476843ece5aa905b8ff7c4e3d2d712c63131b842b6c213eee7",
+      "source_sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137",
+      "sampled_engines": [
+        {
+          "label": "loaded",
+          "engine": "0x0",
+          "module_count": 44
+        },
+        {
+          "label": "opened",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_control_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "after_observed_request",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "replayed_after_requests",
+          "engine": "0x0",
+          "module_count": 74
+        },
+        {
+          "label": "closed",
+          "engine": "0x0",
+          "module_count": 74
+        }
+      ],
+      "requests": [
+        {
+          "observed": false,
+          "result_callbacks": [],
+          "execution": [],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        },
+        {
+          "observed": true,
+          "result_callbacks": [],
+          "execution": [
+            {
+              "request_vtable_rva": "0x183198",
+              "host_matches_global": true,
+              "engine_before": "0x0",
+              "version": 0,
+              "selection": [
+                0,
+                200,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returned": 1,
+              "engine_after": "0x0"
+            }
+          ],
+          "status": 0,
+          "error": "0x0",
+          "observer_restored": true
+        }
+      ],
+      "playbacks": [
+        {
+          "label": "before_requests",
+          "status": 0,
+          "error": "0x0"
+        },
+        {
+          "label": "after_requests",
+          "status": 0,
+          "error": "0x0"
+        }
+      ],
+      "completed": true,
+      "closed": true,
+      "player_unchanged": true,
+      "capture_unchanged": true
+    }
+  ]
+}
