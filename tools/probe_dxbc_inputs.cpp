@@ -77,6 +77,7 @@ int main(int argc, char **argv) {
                                               {"offset", binding.offset},
                                               {"size", binding.size},
                                               {"stride", binding.stride},
+                                              {"format", binding.format},
                                               {"experimental_view", binding.experimentalView}});
         for (const auto &[reg, reason] : snapshot.unavailable)
             report["unavailable"].push_back(

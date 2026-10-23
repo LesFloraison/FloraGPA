@@ -9,6 +9,10 @@ class GpuOperations {
     std::unique_ptr<State> state_;
     friend class Memory;
     friend class Lane;
+    Value loadTyped(const Buffer &, const BufferView &, uint32_t kind, uint32_t index, uint32_t returns,
+                    const std::array<uint32_t, 4> &, uint32_t mask, bool literal);
+    std::vector<uint8_t> storeTyped(const Buffer &, const BufferView &, uint32_t index, uint32_t returns,
+                                    const Value &, bool literal);
     std::vector<Value> instruction(uint32_t stage, const Instruction &, const std::vector<Register> &,
                                    const std::vector<uint32_t> &, const std::vector<Value> &,
                                    const std::vector<Value> &);

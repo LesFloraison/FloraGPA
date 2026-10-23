@@ -32,6 +32,7 @@ struct BufferView {
     uint64_t offset = 0, size = 0;
     uint32_t stride = 0;             // Zero for raw views, structure size otherwise.
     std::optional<uint64_t> counter; // View identity, independent of backing resource identity.
+    uint32_t format = 0;             // A native typed buffer format; zero for raw/structured views.
     auto operator<=>(const BufferView &) const = default;
 };
 enum class CounterKind { Ordered, Append };
@@ -57,6 +58,10 @@ class Memory {
     std::shared_ptr<GpuOperations> gpu_;
     bool assistAll_;
     friend class Lane;
+    Value loadTyped(const Register &, uint32_t index, uint32_t returns, const std::array<uint32_t, 4> &,
+                    uint32_t mask, bool literal, bool &assisted) const;
+    std::vector<MemoryChange> storeTyped(const Register &, uint32_t index, uint32_t returns, const Value &,
+                                         bool literal, bool &assisted) const;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex, bool literalOffset,
                bool &assisted) const;

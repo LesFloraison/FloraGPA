@@ -7,6 +7,7 @@ namespace dxbc_exec {
 struct InputBinding {
     uint64_t resource = 0, view = 0, offset = 0, size = 0;
     uint32_t stride = 0;
+    uint32_t format = 0;
     bool experimentalView = false;
 };
 struct InputSnapshot {
@@ -21,7 +22,7 @@ struct InputSnapshot {
     std::map<Register, InputBinding> bindings;
     std::map<Register, std::string> unavailable;
     std::map<uint64_t, std::string> unavailableCounters;
-    static constexpr const char *source = "independent-replay-buffer-inputs/1";
+    static constexpr const char *source = "independent-replay-buffer-inputs/2";
 };
 // Runs a before-event replay and copies the selected stage's actual bindings
 // inside its experiment scope. Buffer bytes are observations of this replay,

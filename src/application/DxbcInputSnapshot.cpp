@@ -1,4 +1,6 @@
 #include "DxbcInputSnapshot.h"
+#include "DxbcGpuOperations.h"
+#include "DxbcTypedBuffer.h"
 #include "core/UavCounters.h"
 #include "replay/Replay.h"
 #include <algorithm>
@@ -154,17 +156,20 @@ class Snapshot {
         const bool raw = format == DXGI_FORMAT_R32_TYPELESS && (flags & 1);
         const bool structured =
             format == DXGI_FORMAT_UNKNOWN && (desc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
-        if (!raw && !structured) {
-            result.unavailable[binding] = "Typed buffer inputs require typed resource execution";
+        const auto typed = typedBufferFormat(format);
+        if (!raw && !structured && !typed) {
+            result.unavailable[binding] = "Unsupported typed buffer storage format";
             return;
         }
+        metadata.format = typed ? format : 0;
         metadata.stride = structured ? desc.StructureByteStride : 0;
-        const auto element = raw ? 4u : metadata.stride;
+        const auto element = typed ? typed->bytes : raw ? 4u : metadata.stride;
         metadata.offset = uint64_t(first) * element;
         metadata.size = uint64_t(count) * element;
         if (!element || metadata.offset > desc.ByteWidth || metadata.size > desc.ByteWidth - metadata.offset)
             throw std::runtime_error("Native DXBC buffer view exceeds its storage");
         BufferView storage{metadata.resource, metadata.offset, metadata.size, metadata.stride};
+        storage.format = metadata.format;
         if (binding.kind == 30 && (flags & (D3D11_BUFFER_UAV_FLAG_APPEND | D3D11_BUFFER_UAV_FLAG_COUNTER))) {
             storage.counter = viewId;
             if (!counters.contains(viewId)) {
@@ -282,9 +287,12 @@ class Snapshot {
         constants(context);
         resources(context);
         checkCancellation(cancelled);
+        std::shared_ptr<GpuOperations> gpu;
+        if (std::any_of(views.begin(), views.end(), [](const auto &item) { return item.second.format != 0; }))
+            gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), replay.options().warp, cancelled);
         result.inputs.memory =
-            std::make_shared<Memory>(std::move(buffers), std::move(views), budget, 16 * 1024 * 1024, nullptr,
-                                     false, std::move(counters));
+            std::make_shared<Memory>(std::move(buffers), std::move(views), budget, 16 * 1024 * 1024,
+                                     std::move(gpu), false, std::move(counters));
         return std::move(result);
     }
 };

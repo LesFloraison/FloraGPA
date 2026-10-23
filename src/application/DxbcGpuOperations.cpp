@@ -1,5 +1,6 @@
 #include "DxbcGpuOperations.h"
 #include "DxbcCheckpointModel.h"
+#include "DxbcTypedBuffer.h"
 #include "HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -57,6 +58,25 @@ Words kernel(bool store, uint32_t stride, uint32_t kind, uint32_t mask, uint32_t
     const auto code = writeDxbcProgram({{0x50050, 0}, rows});
     Words result(code.size() / 4);
     std::memcpy(result.data(), code.data(), code.size());
+    return result;
+}
+Words typedKernel(bool store, uint32_t kind, uint32_t mask, uint32_t swizzle, uint32_t index, bool literal,
+                  uint32_t returns) {
+    std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
+                            row((kind == 7 ? 88u : 156u) | 0x800, {dest(kind, 0), {returns}})};
+    const Words element = literal ? immediate(index) : Words{0x20800a, 0, 0};
+    if (store)
+        rows.push_back(row(164, {dest(30, 0), element, {0x208e46, 0, 1}}));
+    else {
+        rows.push_back(row(158, {dest(30, 1), {16}}));
+        rows.push_back(row(54, {dest(0, 0), immediate(0)}));
+        rows.push_back(row(kind == 7 ? 45u : 163u, {dest(0, 0, mask), element, source(kind, 0, swizzle)}));
+        rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}));
+    }
+    rows.push_back(row(62, {}));
+    const auto bytes = writeDxbcProgram({{0x50050, 0}, rows});
+    Words result(bytes.size() / 4);
+    std::memcpy(result.data(), bytes.data(), bytes.size());
     return result;
 }
 } // namespace
@@ -171,18 +191,40 @@ struct GpuOperations::State {
     }
     std::vector<uint8_t> execute(const Buffer &buffer, const BufferView &view, bool store, uint32_t kind,
                                  uint32_t index, uint32_t offset, const Value &value, uint32_t mask,
-                                 uint32_t swizzle, bool literalIndex, bool literalOffset) {
+                                 uint32_t swizzle, bool literalIndex, bool literalOffset,
+                                 uint32_t returns = 0) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native memory assist after a failed operation");
-        if (buffer.bytes.empty() || buffer.bytes.size() > 256ull * 1024 * 1024 || buffer.bytes.size() % 4 ||
-            !view.resource || !view.size || view.offset > buffer.bytes.size() ||
-            view.size > buffer.bytes.size() - view.offset ||
+        const auto typed = typedBufferFormat(view.format);
+        if (buffer.bytes.empty() || buffer.bytes.size() > 256ull * 1024 * 1024 ||
+            (!typed && buffer.bytes.size() % 4) || !view.resource || !view.size ||
+            view.offset > buffer.bytes.size() || view.size > buffer.bytes.size() - view.offset ||
             (view.stride && (buffer.bytes.size() % view.stride || view.offset % view.stride)))
             throw std::runtime_error("Invalid native memory assist storage or view");
         try {
-            const auto words =
-                kernel(store, view.stride, kind, mask, swizzle, index, offset, literalIndex, literalOffset);
+            if (typed) {
+                UINT support = 0;
+                check(device->CheckFormatSupport(DXGI_FORMAT(view.format), &support),
+                      "Check typed buffer format support");
+                const UINT required = D3D11_FORMAT_SUPPORT_BUFFER |
+                                      (kind == 7 ? D3D11_FORMAT_SUPPORT_SHADER_LOAD
+                                                 : D3D11_FORMAT_SUPPORT_TYPED_UNORDERED_ACCESS_VIEW);
+                if ((support & required) != required)
+                    throw std::runtime_error("Selected device does not support this typed buffer view");
+                if (kind == 30) {
+                    D3D11_FEATURE_DATA_FORMAT_SUPPORT2 info{DXGI_FORMAT(view.format), 0};
+                    const auto hr =
+                        device->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2, &info, sizeof info);
+                    const auto flag =
+                        store ? D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE : D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD;
+                    if (FAILED(hr) || !(info.OutFormatSupport2 & flag))
+                        throw std::runtime_error("Selected device does not support this typed UAV operation");
+                }
+            }
+            const auto words = typed ? typedKernel(store, kind, mask, swizzle, index, literalIndex, returns)
+                                     : kernel(store, view.stride, kind, mask, swizzle, index, offset,
+                                              literalIndex, literalOffset);
             auto found = shaders.find(words);
             if (found == shaders.end()) {
                 if (shaders.size() >= 256)
@@ -199,29 +241,34 @@ struct GpuOperations::State {
                                    D3D11_USAGE_DEFAULT,
                                    UINT(kind == 7 ? D3D11_BIND_SHADER_RESOURCE : D3D11_BIND_UNORDERED_ACCESS),
                                    0,
-                                   UINT(view.stride ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED
-                                                    : D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS),
+                                   UINT(typed         ? 0
+                                        : view.stride ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED
+                                                      : D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS),
                                    view.stride};
             D3D11_SUBRESOURCE_DATA initial{buffer.bytes.data(), 0, 0};
             Com<ID3D11Buffer> resource, output, staging, constants;
             check(device->CreateBuffer(&desc, &initial, &resource), "Create private native buffer snapshot");
-            const UINT unit = view.stride ? view.stride : 4;
+            const UINT unit = typed ? typed->bytes : view.stride ? view.stride : 4;
             Com<ID3D11ShaderResourceView> srv;
             Com<ID3D11UnorderedAccessView> uav, resultView;
             if (kind == 7) {
                 D3D11_SHADER_RESOURCE_VIEW_DESC v{};
-                v.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
-                v.Format = view.stride ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS;
+                v.ViewDimension = typed ? D3D11_SRV_DIMENSION_BUFFER : D3D11_SRV_DIMENSION_BUFFEREX;
+                v.Format = typed         ? DXGI_FORMAT(view.format)
+                           : view.stride ? DXGI_FORMAT_UNKNOWN
+                                         : DXGI_FORMAT_R32_TYPELESS;
                 v.BufferEx = {UINT(view.offset / unit), UINT(view.size / unit),
-                              view.stride ? 0u : D3D11_BUFFEREX_SRV_FLAG_RAW};
+                              typed || view.stride ? 0u : D3D11_BUFFEREX_SRV_FLAG_RAW};
                 check(device->CreateShaderResourceView(resource.Get(), &v, &srv),
                       "Create private native buffer SRV");
             } else {
                 D3D11_UNORDERED_ACCESS_VIEW_DESC v{};
                 v.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-                v.Format = view.stride ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS;
+                v.Format = typed         ? DXGI_FORMAT(view.format)
+                           : view.stride ? DXGI_FORMAT_UNKNOWN
+                                         : DXGI_FORMAT_R32_TYPELESS;
                 v.Buffer = {UINT(view.offset / unit), UINT(view.size / unit),
-                            view.stride ? 0u : D3D11_BUFFER_UAV_FLAG_RAW};
+                            typed || view.stride ? 0u : D3D11_BUFFER_UAV_FLAG_RAW};
                 check(device->CreateUnorderedAccessView(resource.Get(), &v, &uav),
                       "Create private native buffer UAV");
             }
@@ -337,9 +384,25 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/2"}};
+            {"backend", "dxbc-gpu/3"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
+Value GpuOperations::loadTyped(const Buffer &buffer, const BufferView &view, uint32_t kind, uint32_t index,
+                               uint32_t returns, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                               bool literal) {
+    uint32_t selection = 0;
+    for (unsigned c = 0; c < 4; ++c)
+        selection |= swizzle[c] << (c * 2);
+    const auto bytes =
+        state_->execute(buffer, view, false, kind, index, 0, {}, mask, selection, literal, false, returns);
+    Value result;
+    std::memcpy(result.bits.data(), bytes.data(), 16);
+    return result;
+}
+std::vector<uint8_t> GpuOperations::storeTyped(const Buffer &buffer, const BufferView &view, uint32_t index,
+                                               uint32_t returns, const Value &value, bool literal) {
+    return state_->execute(buffer, view, true, 30, index, 0, value, 15, 0xe4, literal, false, returns);
+}
 std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction &instruction,
                                               const std::vector<Register> &targets,
                                               const std::vector<uint32_t> &masks,

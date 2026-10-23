@@ -395,7 +395,21 @@ class DxbcInputSnapshotTests final : public QObject {
             const auto snapshot = snapshotBufferInputs(replay, 5);
             QCOMPARE(snapshot.bindings.at({7, {0}}).resource, Id(texture ? 40 : 4));
             QCOMPARE(snapshot.bindings.at({7, {0}}).view, Id(6));
-            QVERIFY(!snapshot.unavailable.at({7, {0}}).empty());
+            if (texture) {
+                QVERIFY(!snapshot.unavailable.at({7, {0}}).empty());
+            } else {
+                QVERIFY(!snapshot.unavailable.contains({7, {0}}));
+                QCOMPARE(snapshot.bindings.at({7, {0}}).format, uint32_t(DXGI_FORMAT_R32_UINT));
+                execute(snapshot);
+                const auto &bytes = snapshot.inputs.memory->buffers().at(7).bytes;
+                QCOMPARE(Reader(bytes).read<uint32_t>(), 7u);
+                auto configuration = options(0);
+                configuration.before = false;
+                Replay reference(frame, configuration);
+                reference.run();
+                QCOMPARE(bytes, reference.readBuffer(7));
+                validate(reference);
+            }
             QCOMPARE(snapshot.bindings.at({7, {1}}).resource, Id(0));
             QVERIFY(!snapshot.unavailable.contains({7, {1}}));
             validate(replay);

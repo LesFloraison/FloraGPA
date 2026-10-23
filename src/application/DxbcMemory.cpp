@@ -1,5 +1,6 @@
 #include "DxbcExecution.h"
 #include "DxbcGpuOperations.h"
+#include "DxbcTypedBuffer.h"
 #include <algorithm>
 #include <bit>
 #include <cstring>
@@ -43,8 +44,14 @@ Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView
     std::map<uint64_t, BufferView> counterViews;
     for (const auto &[binding, view] : views_) {
         validateBinding(binding);
-        if ((view.offset | view.size | view.stride) & 3 ||
-            view.stride > (binding.kind == 31 ? 32768u : 2048u) || (view.stride && view.size % view.stride))
+        if (view.format) {
+            const auto format = typedBufferFormat(view.format);
+            if (!format || binding.kind == 31 || view.stride || view.counter || view.offset % format->bytes ||
+                view.size % format->bytes)
+                fail("Invalid DXBC typed buffer view");
+        } else if ((view.offset | view.size | view.stride) & 3 ||
+                   view.stride > (binding.kind == 31 ? 32768u : 2048u) ||
+                   (view.stride && view.size % view.stride))
             fail("Invalid DXBC buffer view alignment or stride");
         if (view.counter) {
             if (binding.kind != 30 || !view.resource || !view.stride || !counters_.contains(*view.counter))
@@ -126,6 +133,8 @@ Value Memory::load(const Register &binding, bool structured, uint32_t index, uin
     const auto &view = found->second;
     if (!view.resource)
         return Value::known({});
+    if (view.format)
+        fail("Raw or structured load cannot access a typed DXBC view");
     if (structured != bool(view.stride))
         fail("DXBC load disagrees with the buffer view kind");
     if (offset & 3)
@@ -178,6 +187,8 @@ std::vector<MemoryChange> Memory::store(const Register &binding, bool structured
     if (!view.resource)
         return {};
     if (structured != bool(view.stride))
+        fail("DXBC store disagrees with the buffer view kind");
+    if (view.format)
         fail("DXBC store disagrees with the buffer view kind");
     if (offset & 3)
         fail("Unaligned DXBC buffer store is not supported");

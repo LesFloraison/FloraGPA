@@ -283,6 +283,7 @@ struct ProgramData {
     std::map<uint32_t, uint32_t> defaults;
     std::vector<Value> immediate;
     std::map<Register, uint32_t> bufferStrides;
+    std::map<Register, std::pair<uint32_t, uint32_t>> typedResources;
     std::map<Register, bool> orderedCounters;
     std::map<Register, uint32_t> counterOpcodes;
     std::array<uint32_t, 3> groupSize{};
@@ -332,6 +333,19 @@ Program::Program(Bytes dxbc) {
                 args.push_back(operand(words, pos));
             if (pos != words.size())
                 fail("DXBC execution instruction operand tail");
+        } else if (op == 88 || op == 156) {
+            size_t pos = 1;
+            const auto arg = operand(words, pos);
+            const auto returns = words.at(pos++);
+            const auto kind = op == 88 ? 7u : 30u, dimension = (words[0] >> 11) & 31;
+            if (pos != words.size() || arg.kind != kind || arg.modifier || arg.indices.size() != 1 ||
+                arg.indices[0].relative || arg.indices[0].base >= (kind == 7 ? 128u : 64u))
+                fail("Invalid DXBC typed resource declaration");
+            if (data->bufferStrides.contains(Register{kind, {uint32_t(arg.indices[0].base)}}) ||
+                !data->typedResources
+                     .emplace(Register{kind, {uint32_t(arg.indices[0].base)}}, std::pair{dimension, returns})
+                     .second)
+                fail("Duplicate DXBC typed resource declaration");
         } else if (op == 157 || op == 158 || op == 161 || op == 162) {
             size_t pos = 1;
             const auto arg = operand(words, pos);
@@ -341,6 +355,7 @@ Program::Program(Bytes dxbc) {
             if (pos != words.size() || arg.kind != kind || arg.indices.size() != 1 ||
                 arg.indices[0].relative || arg.indices[0].base >= (kind == 7 ? 128u : 64u) ||
                 (structured && (!stride || stride > 2048 || (stride & 3))) ||
+                data->typedResources.contains(Register{kind, {uint32_t(arg.indices[0].base)}}) ||
                 !data->bufferStrides.emplace(Register{kind, {uint32_t(arg.indices[0].base)}}, stride).second)
                 fail("Invalid DXBC buffer declaration");
             if (op == 158)
@@ -717,6 +732,52 @@ Step Lane::step() {
         if (condition(0)) {
             done = true;
             result.discarded = true;
+        }
+    } else if (op == 45 || op == 163 || op == 164) {
+        const bool store = op == 164;
+        const auto &resource = store ? args[0] : args[2];
+        if (p.stage != 5)
+            fail("Native typed buffer instruction assistance currently requires CS execution");
+        if (instruction.words[0] & (1u << 13))
+            fail("Unexpected saturation on a typed buffer instruction");
+        if (resource.modifier || resource.kind != (op == 45 ? 7u : 30u))
+            fail("Invalid DXBC typed resource operand");
+        const auto binding = s.address(resource);
+        const auto declaration = p.typedResources.find(binding);
+        if (declaration == p.typedResources.end() || declaration->second.first != 1)
+            fail("Native typed execution requires a typed buffer declaration");
+        const auto address = s.source(args[1], true);
+        if (!(address.valid & 1))
+            fail("Unknown DXBC typed buffer address");
+        if (store) {
+            if (resource.components != 2 || resource.mode != 0 || resource.mask != 15 || !s.inputs.memory)
+                fail("DXBC typed stores require a complete xyzw destination and a snapshot");
+            result.memoryChanges = s.inputs.memory->storeTyped(
+                binding, address.bits[0], declaration->second.second, s.source(args[2], false),
+                args[1].kind == 4, result.memoryGpuAssisted);
+        } else {
+            const auto &destination = args[0];
+            if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+                fail("Invalid DXBC typed load destination");
+            const auto target = s.address(destination);
+            const auto value =
+                s.inputs.memory
+                    ? s.inputs.memory->loadTyped(binding, address.bits[0], declaration->second.second,
+                                                 resource.select, destination.mask, args[1].kind == 4,
+                                                 result.memoryGpuAssisted)
+                    : Value{};
+            if (s.inBounds(target)) {
+                const auto before = s.value(target);
+                auto after = before;
+                for (unsigned c = 0; c < 4; ++c)
+                    if ((destination.mask & (1u << c)) &&
+                        (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                        after.bits[c] = value.bits[c];
+                        after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
+                    }
+                result.changes.push_back({target, before, after});
+            }
         }
     } else if (op >= 165 && op <= 168) {
         const bool store = op == 166 || op == 168, structured = op >= 167;
