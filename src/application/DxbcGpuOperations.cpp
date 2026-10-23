@@ -79,10 +79,11 @@ Words typedKernel(bool store, uint32_t kind, uint32_t mask, uint32_t swizzle, ui
     std::memcpy(result.data(), bytes.data(), bytes.size());
     return result;
 }
-Words typedVertexKernel(uint32_t mask, uint32_t swizzle, uint32_t index, bool literal, uint32_t returns) {
+Words typedGraphicsKernel(uint32_t stage, uint32_t mask, uint32_t swizzle, uint32_t index, bool literal,
+                          uint32_t returns) {
     const Words address = literal ? immediate(index) : Words{0x20800a, 0, 0};
     const auto code =
-        writeDxbcProgram({{0x10050, 0},
+        writeDxbcProgram({{(stage << 16) | 0x50, 0},
                           {row(89, {{0x208e46, 0, 1}}), row(88 | 0x800, {dest(7, 0), {returns}}),
                            row(101, {dest(2, 0)}), row(54, {dest(2, 0), immediate(0)}),
                            row(45, {dest(2, 0, mask), address, source(7, 0, swizzle)}), row(62, {})}});
@@ -100,6 +101,9 @@ struct GpuOperations::State {
         Com<ID3D11GeometryShader> stream;
     };
     std::map<Words, VertexOperation> vertexShaders;
+    std::map<Words, Com<ID3D11PixelShader>> pixelShaders;
+    Com<ID3D11VertexShader> pixelVertex;
+    Com<ID3D11RasterizerState> pixelRasterizer;
     DXGI_ADAPTER_DESC description{};
     LARGE_INTEGER driver{};
     CancelCheck cancelled;
@@ -202,8 +206,144 @@ struct GpuOperations::State {
             throw;
         }
     }
-    Value typedVertex(const Buffer &buffer, const BufferView &view, uint32_t index, uint32_t returns,
-                      uint32_t swizzle, uint32_t mask, bool literal) {
+    Value pixel(const Words &words, uint32_t index, ID3D11ShaderResourceView *resource) {
+        checkCancellation(cancelled);
+        if (failed)
+            throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+        try {
+            if (!pixelVertex) {
+                const auto code =
+                    compileHlsl(
+                        "float4 main(uint id:SV_VertexID):SV_Position{float2 uv=float2((id<<1)&2,id&2);"
+                        "return float4(uv*float2(2,-2)+float2(-1,1),0,1);}",
+                        "vs_5_0")
+                        .bytecode;
+                check(device->CreateVertexShader(code.data(), code.size(), nullptr, &pixelVertex),
+                      "Create native pixel assist vertex shader");
+                D3D11_RASTERIZER_DESC desc{};
+                desc.FillMode = D3D11_FILL_SOLID;
+                desc.CullMode = D3D11_CULL_NONE;
+                desc.DepthClipEnable = true;
+                check(device->CreateRasterizerState(&desc, &pixelRasterizer),
+                      "Create native pixel rasterizer");
+            }
+            auto found = pixelShaders.find(words);
+            if (found == pixelShaders.end()) {
+                if (pixelShaders.size() >= 256)
+                    pixelShaders.clear();
+                auto parts =
+                    readDxbcParts(compileHlsl("uint4 main():SV_Target0{return 0;}", "ps_5_0").bytecode);
+                std::erase_if(parts, [](const auto &part) {
+                    return part.first == 0x58454853 || part.first == 0x52444853 || part.first == 0x54415453;
+                });
+                std::vector<uint8_t> bytes(words.size() * 4);
+                std::memcpy(bytes.data(), words.data(), bytes.size());
+                parts.emplace_back(0x58454853, std::move(bytes));
+                const auto code = makeDxbc(parts);
+                Com<ID3D11PixelShader> shader;
+                check(device->CreatePixelShader(code.data(), code.size(), nullptr, &shader),
+                      "Create native pixel operation");
+                found = pixelShaders.emplace(words, std::move(shader)).first;
+            }
+            const std::array<uint32_t, 4> values{index, 0, 0, 0};
+            const D3D11_BUFFER_DESC cbDesc{16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            const D3D11_SUBRESOURCE_DATA initial{values.data(), 0, 0};
+            Com<ID3D11Buffer> constants;
+            check(device->CreateBuffer(&cbDesc, &initial, &constants), "Create native pixel constants");
+            D3D11_TEXTURE2D_DESC desc{1,
+                                      1,
+                                      1,
+                                      1,
+                                      DXGI_FORMAT_R32G32B32A32_UINT,
+                                      {1, 0},
+                                      D3D11_USAGE_DEFAULT,
+                                      D3D11_BIND_RENDER_TARGET,
+                                      0,
+                                      0};
+            Com<ID3D11Texture2D> output, staging;
+            check(device->CreateTexture2D(&desc, nullptr, &output), "Create native pixel output");
+            desc.Usage = D3D11_USAGE_STAGING;
+            desc.BindFlags = 0;
+            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            check(device->CreateTexture2D(&desc, nullptr, &staging), "Create native pixel readback");
+            Com<ID3D11RenderTargetView> target;
+            check(device->CreateRenderTargetView(output.Get(), nullptr, &target),
+                  "Create native pixel target");
+            const D3D11_QUERY_DESC queryDesc{D3D11_QUERY_OCCLUSION, 0};
+            Com<ID3D11Query> coverage;
+            check(device->CreateQuery(&queryDesc, &coverage), "Create native pixel coverage query");
+            auto *cb = constants.Get();
+            auto *rtv = target.Get();
+            const D3D11_VIEWPORT viewport{0, 0, 1, 1, 0, 1};
+            context->VSSetShader(pixelVertex.Get(), nullptr, 0);
+            context->PSSetShader(found->second.Get(), nullptr, 0);
+            context->PSSetConstantBuffers(0, 1, &cb);
+            context->PSSetShaderResources(0, 1, &resource);
+            context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            context->RSSetState(pixelRasterizer.Get());
+            context->RSSetViewports(1, &viewport);
+            context->OMSetRenderTargets(1, &rtv, nullptr);
+            context->Begin(coverage.Get());
+            context->Draw(3, 0);
+            context->End(coverage.Get());
+            context->ClearState();
+            context->CopyResource(staging.Get(), output.Get());
+            context->Flush();
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            for (;;) {
+                checkCancellation(cancelled);
+                const auto hr =
+                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                if (hr == S_OK)
+                    break;
+                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
+                    check(hr, "Read native pixel result");
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error("Native pixel operation timed out");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            Value result;
+            std::memcpy(result.bits.data(), mapped.pData, 16);
+            context->Unmap(staging.Get(), 0);
+            UINT64 samples = 0;
+            for (;;) {
+                checkCancellation(cancelled);
+                const auto hr = context->GetData(coverage.Get(), &samples, sizeof samples,
+                                                 D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                if (hr == S_OK)
+                    break;
+                check(hr, "Read native pixel coverage");
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error("Native pixel coverage timed out");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            if (samples != 1)
+                throw std::runtime_error("Native pixel assist did not cover exactly one sample");
+            if (debug) {
+                Com<ID3D11InfoQueue> queue;
+                check(device.As(&queue), "Read native pixel validation queue");
+                for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                    SIZE_T size = 0;
+                    check(queue->GetMessage(i, nullptr, &size), "Read pixel validation size");
+                    std::vector<uint8_t> bytes(size);
+                    auto *message = reinterpret_cast<D3D11_MESSAGE *>(bytes.data());
+                    check(queue->GetMessage(i, message, &size), "Read pixel validation message");
+                    if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+                        throw std::runtime_error(message->pDescription);
+                }
+                queue->ClearStoredMessages();
+            }
+            ++count;
+            return result;
+        } catch (...) {
+            context->ClearState();
+            failed = true;
+            throw;
+        }
+    }
+    Value typedGraphics(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t index,
+                        uint32_t returns, uint32_t swizzle, uint32_t mask, bool literal) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native memory assist after a failed operation");
@@ -212,28 +352,31 @@ struct GpuOperations::State {
             buffer.bytes.size() > 256ull * 1024 * 1024 || view.offset > buffer.bytes.size() ||
             view.size > buffer.bytes.size() - view.offset || view.offset % format->bytes ||
             view.size % format->bytes)
-            throw std::runtime_error("Invalid native vertex buffer storage or view");
+            throw std::runtime_error("Invalid native graphics buffer storage or view");
         try {
             UINT support = 0;
             check(device->CheckFormatSupport(DXGI_FORMAT(view.format), &support),
-                  "Check vertex buffer format support");
+                  "Check graphics buffer format support");
             constexpr auto required = D3D11_FORMAT_SUPPORT_BUFFER | D3D11_FORMAT_SUPPORT_SHADER_LOAD;
             if ((support & required) != required)
-                throw std::runtime_error("Selected device does not support this vertex buffer format");
+                throw std::runtime_error("Selected device does not support this graphics buffer format");
             const D3D11_BUFFER_DESC desc{
                 UINT(buffer.bytes.size()), D3D11_USAGE_IMMUTABLE, D3D11_BIND_SHADER_RESOURCE, 0, 0, 0};
             const D3D11_SUBRESOURCE_DATA initial{buffer.bytes.data(), 0, 0};
             Com<ID3D11Buffer> resource;
-            check(device->CreateBuffer(&desc, &initial, &resource), "Create private vertex buffer snapshot");
+            check(device->CreateBuffer(&desc, &initial, &resource),
+                  "Create private graphics buffer snapshot");
             D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
             srv.Format = DXGI_FORMAT(view.format);
             srv.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
             srv.Buffer = {UINT(view.offset / format->bytes), UINT(view.size / format->bytes)};
             Com<ID3D11ShaderResourceView> native;
             check(device->CreateShaderResourceView(resource.Get(), &srv, &native),
-                  "Create private vertex buffer view");
-            return vertex(typedVertexKernel(mask, swizzle, index, literal, returns),
-                          {Value::known({index, 0, 0, 0})}, native.Get());
+                  "Create private graphics buffer view");
+            const auto words = typedGraphicsKernel(stage, mask, swizzle, index, literal, returns);
+            if (stage == 0)
+                return pixel(words, index, native.Get());
+            return vertex(words, {Value::known({index, 0, 0, 0})}, native.Get());
         } catch (...) {
             context->ClearState();
             failed = true;
@@ -435,7 +578,7 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/4"}};
+            {"backend", "dxbc-gpu/5"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t kind,
@@ -444,8 +587,8 @@ Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const Buffe
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (c * 2);
-    if (stage == 1 && kind == 7)
-        return state_->typedVertex(buffer, view, index, returns, selection, mask, literal);
+    if ((stage == 0 || stage == 1) && kind == 7)
+        return state_->typedGraphics(stage, buffer, view, index, returns, selection, mask, literal);
     if (stage != 5)
         throw std::runtime_error("Unsupported native typed buffer shader stage");
     const auto bytes =

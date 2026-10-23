@@ -736,8 +736,8 @@ Step Lane::step() {
     } else if (op == 45 || op == 163 || op == 164) {
         const bool store = op == 164;
         const auto &resource = store ? args[0] : args[2];
-        if (p.stage != 5 && !(p.stage == 1 && op == 45))
-            fail("Native typed buffer assistance requires CS execution or a VS SRV load");
+        if (p.stage != 5 && !((p.stage == 0 || p.stage == 1) && op == 45))
+            fail("Native typed buffer assistance requires CS execution or a VS/PS SRV load");
         if (instruction.words[0] & (1u << 13))
             fail("Unexpected saturation on a typed buffer instruction");
         if (resource.modifier || resource.kind != (op == 45 ? 7u : 30u))

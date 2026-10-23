@@ -319,6 +319,11 @@ if(BUILD_TESTING)
   add_executable(FloraDxbcInputSnapshotTests tests/DxbcInputSnapshotTests.cpp)
   add_executable(FloraDxbcTypedBufferTests tests/DxbcTypedBufferTests.cpp)
   add_executable(FloraDxbcTypedVertexTests tests/DxbcTypedVertexTests.cpp)
+  add_executable(FloraDxbcTypedPixelTests tests/DxbcTypedPixelTests.cpp)
+  target_link_libraries(FloraDxbcTypedPixelTests PRIVATE FloraExperiment Qt6::Test)
+  add_test(NAME dxbc_typed_pixel COMMAND FloraDxbcTypedPixelTests -o "${CMAKE_BINARY_DIR}/dxbc-typed-pixel-$<CONFIG>.txt,txt")
+  set_tests_properties(dxbc_typed_pixel PROPERTIES RUN_SERIAL TRUE TIMEOUT 600
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   target_link_libraries(FloraDxbcTypedVertexTests PRIVATE FloraExperiment Qt6::Test)
   add_test(NAME dxbc_typed_vertex COMMAND FloraDxbcTypedVertexTests -o "${CMAKE_BINARY_DIR}/dxbc-typed-vertex-$<CONFIG>.txt,txt")
   set_tests_properties(dxbc_typed_vertex PROPERTIES RUN_SERIAL TRUE TIMEOUT 600

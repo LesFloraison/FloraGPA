@@ -276,9 +276,12 @@ class DxbcTypedVertexTests final : public QObject {
             QCOMPARE(input.memory->buffers().at(1).bytes, bytes.bytes);
             QCOMPARE(input.memory->buffers().at(1).valid, bytes.valid);
             Program pixel(shader(2, 0, false, false, "ps_5_0"));
-            Lane unsupported(pixel, input);
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(unsupported));
-            QCOMPARE(gpu->operations(), uint64_t(1));
+            Lane fragment(pixel, input);
+            execute(fragment);
+            QCOMPARE(fragment.value({2, {0}}).valid, uint8_t(11));
+            QCOMPARE(fragment.value({2, {0}}).bits,
+                     (std::array<uint32_t, 4>{0x80000000, 0x7fc12345, 0x80000001, 1}));
+            QCOMPARE(gpu->operations(), uint64_t(2));
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
