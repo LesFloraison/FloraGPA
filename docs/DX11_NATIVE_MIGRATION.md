@@ -372,9 +372,16 @@ comparisons include backing bytes outside the selected view. See
 This CS feature-level-11.0 evidence is not full stage or feature-level parity.
 The shared private device helper is now named `GpuOperations`, with backend
 identity `dxbc-gpu/2`; instruction and buffer passes retain separate trace flags.
-Typed resources and GPU sampling
-assistance, actual input extraction, quad/helper execution, CS group
-semantics, source/GUI integration and full parity remain required P6 work.
+The new `Group` core executes complete declared CS thread groups with private
+raw/structured groupshared storage, 32-bit memory atomics and dynamic barrier
+rendezvous. Its explicit `serial-round-robin/1` schedule is simulated, not recovered
+from the captured GPU. Thirty hardware cases across WARP, NVIDIA and Intel plus
+eight setup/CPU validation cases pass; atomic tickets use permutation constraints
+and all other deterministic bytes use exact comparison. See
+`DX11_DXBC_GROUP_RESEARCH.md` for validity, cancellation, trace reversal and limits.
+Typed resources and GPU sampling assistance, hidden UAV counters, actual input
+extraction, quad/helper execution, full CS group/cross-group semantics,
+source/GUI integration and full parity remain required P6 work.
 
 ## Delivery constraints
 

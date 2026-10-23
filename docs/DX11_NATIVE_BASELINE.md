@@ -526,6 +526,14 @@ lifecycle failure is retained in the evidence rather than reclassified as a
 baseline exception. See `DX11_DXBC_GPU_INSTRUCTION_RESEARCH.md` for stage/model
 limits and hashes. Neither suite is a complete real-capture debugger acceptance.
 
+The cooperative CS group checkpoint adds 38 passing cases, including 30 hardware
+cases across WARP, NVIDIA and Intel. The final serial run also retains all 375
+execution and 246 buffer passes, with no failures or skips (101.00 s combined).
+Group probes cover shared layouts, all 19 implemented memory-atomic opcodes,
+dynamic barriers and system identities. Atomic ticket ordering is explicitly
+simulated and checked by constraints; original GPU scheduling is not recovered.
+See `DX11_DXBC_GROUP_RESEARCH.md` for precise scope and preserved evidence.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

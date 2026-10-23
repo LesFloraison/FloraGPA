@@ -283,6 +283,8 @@ struct ProgramData {
     std::map<uint32_t, uint32_t> defaults;
     std::vector<Value> immediate;
     std::map<Register, uint32_t> bufferStrides;
+    std::array<uint32_t, 3> groupSize{};
+    std::map<uint32_t, SharedDeclaration> shared;
 };
 Program::Program(Bytes dxbc) {
     if (dxbc.size() > 64 * 1024 * 1024)
@@ -304,7 +306,7 @@ Program::Program(Bytes dxbc) {
         fail("Native DXBC execution requires a VS/PS/CS SM4.0, SM4.1 or SM5.0 program");
     uint32_t offset = 2;
     bool executable = false, temps = false;
-    uint64_t arrayElements = 0;
+    uint64_t arrayElements = 0, sharedBytes = 0;
     for (const auto &words : code->instructions) {
         const auto op = words[0] & 2047;
         const bool decl = declaration(op);
@@ -339,6 +341,26 @@ Program::Program(Bytes dxbc) {
                 (structured && (!stride || stride > 2048 || (stride & 3))) ||
                 !data->bufferStrides.emplace(Register{kind, {uint32_t(arg.indices[0].base)}}, stride).second)
                 fail("Invalid DXBC buffer declaration");
+        } else if (op == 155) {
+            if (data->stage != 5 || data->groupSize[0] || words.size() != 4 || !words[1] || !words[2] ||
+                !words[3] || words[1] > 1024 || words[2] > 1024 || words[3] > 64 ||
+                uint64_t(words[1]) * words[2] * words[3] > 1024)
+                fail("Invalid DXBC thread group dimensions");
+            data->groupSize = {words[1], words[2], words[3]};
+        } else if (op == 159 || op == 160) {
+            size_t pos = 1;
+            const auto arg = operand(words, pos);
+            const auto stride = op == 160 ? words.at(pos++) : 0u;
+            const uint64_t size = uint64_t(words.at(pos++)) * (stride ? stride : 1u);
+            if (data->stage != 5 || pos != words.size() || arg.kind != 31 || arg.indices.size() != 1 ||
+                arg.indices[0].relative || arg.indices[0].base > UINT32_MAX || !size || (size & 3) ||
+                (op == 160 && (!stride || stride > 2048 || (stride & 3))) || size > 32768 - sharedBytes ||
+                !data->shared
+                     .emplace(uint32_t(arg.indices[0].base), SharedDeclaration{uint32_t(size), stride})
+                     .second)
+                fail("Invalid DXBC shared memory declaration");
+            sharedBytes += size;
+            data->bufferStrides.emplace(Register{31, {uint32_t(arg.indices[0].base)}}, stride);
         } else if (op == 104) {
             if (temps || words.size() != 2 || words[1] > 4096)
                 fail("Invalid DXBC temporary declaration");
@@ -443,6 +465,8 @@ Program::Program(Bytes dxbc) {
 }
 const std::vector<Instruction> &Program::instructions() const { return data_->instructions; }
 uint32_t Program::stage() const { return data_->stage; }
+std::array<uint32_t, 3> Program::threadGroupSize() const { return data_->groupSize; }
+const std::map<uint32_t, SharedDeclaration> &Program::sharedDeclarations() const { return data_->shared; }
 
 struct Lane::State {
     std::shared_ptr<const ProgramData> program;
@@ -451,7 +475,9 @@ struct Lane::State {
     std::vector<uint32_t> calls;
     uint32_t pc;
     uint64_t sequence = 0, maxSteps;
-    bool done = false;
+    bool done = false, waiting = false;
+    std::vector<std::pair<uint32_t, uint64_t>> loops;
+    std::vector<size_t> callLoopDepths;
     bool inBounds(const Register &reg) const {
         if (reg.kind == 0)
             return reg.indices.size() == 1 && reg.indices[0] < program->temps;
@@ -545,12 +571,16 @@ Lane::Lane(const Program &program, Inputs inputs, uint64_t maxSteps) {
 }
 Lane::~Lane() = default;
 bool Lane::finished() const { return state_->done; }
+bool Lane::blocked() const { return state_->waiting; }
+void Lane::releaseBarrier() { state_->waiting = false; }
 Value Lane::value(const Register &reg) const { return state_->value(reg); }
 const std::map<Register, Value> &Lane::registers() const { return state_->registers; }
 Step Lane::step() {
     auto &s = *state_;
     if (s.done)
         fail("DXBC lane has already finished");
+    if (s.waiting)
+        fail("DXBC lane is waiting for its thread group");
     if (s.sequence >= s.maxSteps)
         fail("DXBC execution step budget exceeded");
     const auto &p = *s.program;
@@ -560,6 +590,8 @@ Step Lane::step() {
     Step result{s.sequence, s.pc, instruction.wordOffset, {}, s.calls, {}, false};
     uint32_t next = s.pc + 1;
     auto calls = s.calls;
+    auto loops = s.loops;
+    auto callLoopDepths = s.callLoopDepths;
     bool done = false;
     const auto condition = [&](size_t index) {
         const auto value = s.source(args.at(index), true);
@@ -567,14 +599,30 @@ Step Lane::step() {
             fail("Unknown DXBC control condition");
         return (value.bits[0] != 0) == bool(instruction.words[0] & (1u << 18));
     };
-    if (op == 31) {
+    if (op == 190) {
+        result.syncFlags = instruction.words[0] & 0x7800;
+        if (!(result.syncFlags & 0x7000) || (result.syncFlags & 0x6000) == 0x6000 ||
+            (p.stage != 5 && result.syncFlags != 0x4000))
+            fail("Invalid DXBC synchronization flags for this stage");
+        result.syncLoopIterations = loops;
+    } else if (op == 48) {
+        loops.emplace_back(s.pc, 0);
+    } else if (op == 31) {
         if (!condition(0))
             next = p.jump[s.pc];
-    } else if (op == 18 || op == 22)
+    } else if (op == 18)
         next = p.jump[s.pc];
-    else if (op == 2 || op == 3) {
-        if (op == 2 || condition(0))
+    else if (op == 22) {
+        if (loops.empty() || p.jump[s.pc] != loops.back().first + 1)
+            fail("Invalid DXBC dynamic loop state");
+        ++loops.back().second;
+        next = p.jump[s.pc];
+    } else if (op == 2 || op == 3) {
+        if (op == 2 || condition(0)) {
             next = p.breakTarget[s.pc];
+            if (!loops.empty() && p.jump[loops.back().first] == next)
+                loops.pop_back();
+        }
     } else if (op == 7 || op == 8) {
         if (op == 7 || condition(0))
             next = p.continueTarget[s.pc];
@@ -589,11 +637,14 @@ Step Lane::step() {
                 next = found->second;
         }
     } else if (op == 4 || op == 5) {
-        if ((op == 4 || condition(0)) && calls.size() < 32) {
+        if (op == 4 || condition(0)) {
+            if (calls.size() >= 32)
+                fail("DXBC call stack budget exceeded");
             const auto target = s.address(args.back());
             if (target.kind != 10 || target.indices.size() != 1 || !p.labels.contains(target.indices[0]))
                 fail("Invalid DXBC call target");
             calls.push_back(next);
+            callLoopDepths.push_back(loops.size());
             next = p.labels.at(target.indices[0]);
         }
     } else if (op == 62 || op == 63) {
@@ -603,6 +654,8 @@ Step Lane::step() {
             else {
                 next = calls.back();
                 calls.pop_back();
+                loops.resize(callLoopDepths.back());
+                callLoopDepths.pop_back();
             }
         }
     } else if (op == 13) {
@@ -615,42 +668,45 @@ Step Lane::step() {
         if (instruction.words[0] & (1u << 13))
             fail("Unexpected saturation on a DXBC memory instruction");
         const auto &resource = store ? args[0] : args.back();
-        if (resource.modifier || (resource.kind != 7 && resource.kind != 30))
+        if (resource.modifier || (resource.kind != 7 && resource.kind != 30 && resource.kind != 31))
             fail("Unsupported DXBC memory operand");
+        const auto memory = resource.kind == 31 ? s.inputs.sharedMemory : s.inputs.memory;
         const auto binding = s.address(resource);
         const auto declaration = p.bufferStrides.find(binding);
         if (declaration == p.bufferStrides.end() || structured != bool(declaration->second))
             fail("DXBC memory instruction disagrees with its declaration");
-        if (s.inputs.memory) {
-            const auto view = s.inputs.memory->views_.find(binding);
-            if (view != s.inputs.memory->views_.end() && view->second.resource &&
+        if (memory) {
+            const auto view = memory->views_.find(binding);
+            if (view != memory->views_.end() && view->second.resource &&
                 view->second.stride != declaration->second)
                 fail("DXBC buffer declaration disagrees with captured stride");
+            if (binding.kind == 31 && view != memory->views_.end() && view->second.resource &&
+                view->second.size != p.shared.at(binding.indices[0]).bytes)
+                fail("DXBC shared memory size disagrees with its declaration");
         }
         const auto indexValue = structured ? s.source(args[1], true) : Value::known({});
         const auto offsetValue = s.source(args[structured ? 2 : 1], true);
         if (!(indexValue.valid & offsetValue.valid & 1))
             fail("Unknown DXBC memory address");
         if (store) {
-            if (resource.components != 2 || resource.mode != 0 || !s.inputs.memory)
+            if (resource.components != 2 || resource.mode != 0 || !memory)
                 fail("Unavailable or invalid DXBC memory store");
             const auto value = s.source(args.back(), false);
-            result.memoryChanges =
-                s.inputs.memory->store(binding, structured, indexValue.bits[0], offsetValue.bits[0], value,
-                                       resource.mask, structured && args[1].kind == 4,
-                                       args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted);
+            auto &changes = resource.kind == 31 ? result.sharedMemoryChanges : result.memoryChanges;
+            changes = memory->store(binding, structured, indexValue.bits[0], offsetValue.bits[0], value,
+                                    resource.mask, structured && args[1].kind == 4,
+                                    args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted);
         } else {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
                 (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
                 fail("Invalid DXBC buffer load destination");
             const auto target = s.address(destination);
-            const auto value = s.inputs.memory
-                                   ? s.inputs.memory->load(
-                                         binding, structured, indexValue.bits[0], offsetValue.bits[0],
-                                         resource.select, destination.mask, structured && args[1].kind == 4,
-                                         args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted)
-                                   : Value{};
+            const auto value =
+                memory ? memory->load(binding, structured, indexValue.bits[0], offsetValue.bits[0],
+                                      resource.select, destination.mask, structured && args[1].kind == 4,
+                                      args[structured ? 2 : 1].kind == 4, result.memoryGpuAssisted)
+                       : Value{};
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
                 auto after = before;
@@ -663,6 +719,54 @@ Step Lane::step() {
                 result.changes.push_back({target, before, after});
             }
         }
+    } else if ((op >= 169 && op <= 177) || (op >= 180 && op <= 189)) {
+        const bool returned = op >= 180, compare = op == 172 || op == 185;
+        const size_t first = returned ? 1 : 0;
+        const auto &resource = args[first];
+        if (resource.modifier || (resource.kind != 30 && resource.kind != 31))
+            fail("Invalid DXBC atomic resource");
+        const auto binding = s.address(resource);
+        const auto declaration = p.bufferStrides.find(binding);
+        if (declaration == p.bufferStrides.end())
+            fail("Missing DXBC atomic buffer declaration");
+        const auto memory = resource.kind == 31 ? s.inputs.sharedMemory : s.inputs.memory;
+        if (!memory)
+            fail("Unavailable DXBC atomic memory");
+        const auto view = memory->views_.find(binding);
+        if (view != memory->views_.end() && view->second.resource &&
+            view->second.stride != declaration->second)
+            fail("DXBC atomic declaration disagrees with captured stride");
+        if (binding.kind == 31 && view != memory->views_.end() && view->second.resource &&
+            view->second.size != p.shared.at(binding.indices[0]).bytes)
+            fail("DXBC atomic shared memory size disagrees with its declaration");
+        const auto address = s.source(args[first + 1], true);
+        const bool structured = declaration->second != 0;
+        if ((address.valid & (structured ? 3 : 1)) != (structured ? 3 : 1))
+            fail("Unknown DXBC atomic address");
+        const auto value = s.source(args.back(), true);
+        const auto comparison = compare ? s.source(args[first + 2], true) : Value{};
+        const auto [old, changes] = memory->atomic(binding, op, structured ? address.bits[0] : 0,
+                                                   address.bits[structured ? 1 : 0], value, comparison);
+        (resource.kind == 31 ? result.sharedMemoryChanges : result.memoryChanges) = changes;
+        if (returned && args[0].kind != 13) {
+            const auto &destination = args[0];
+            if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+                std::popcount(destination.mask) != 1 ||
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+                fail("Invalid DXBC atomic result destination");
+            const auto target = s.address(destination);
+            if (s.inBounds(target)) {
+                const auto component = uint32_t(std::countr_zero(destination.mask));
+                if (target.kind == 3 && component >= p.arrays.at(target.indices[0]).second)
+                    fail("DXBC atomic destination exceeds its register components");
+                const auto before = s.value(target);
+                auto after = before;
+                after.bits[component] = old.bits[0];
+                after.valid = uint8_t((after.valid & ~destination.mask) | ((old.valid & 1) << component));
+                result.changes.push_back({target, before, after});
+            }
+        }
+        result.atomic = true;
     } else if (op == 6 || op == 10 || op == 21 || op == 23 || op == 44 || op == 48 || op == 58) {
         // Structural instructions remain visible in the trace.
     } else {
@@ -799,9 +903,14 @@ Step Lane::step() {
         s.registers[change.destination] = change.after;
     if (!result.memoryChanges.empty())
         s.inputs.memory->commit(result.memoryChanges);
+    if (!result.sharedMemoryChanges.empty())
+        s.inputs.sharedMemory->commit(result.sharedMemoryChanges);
     s.calls = std::move(calls);
+    s.loops = std::move(loops);
+    s.callLoopDepths = std::move(callLoopDepths);
     s.pc = next;
     s.done = done;
+    s.waiting = (result.syncFlags & 0x800) != 0;
     ++s.sequence;
     if (!done)
         result.nextInstruction = next;

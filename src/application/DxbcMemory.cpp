@@ -8,8 +8,8 @@ namespace flora::dxbc_exec {
 namespace {
 [[noreturn]] void fail(const char *message) { throw std::runtime_error(message); }
 void validateBinding(const Register &binding) {
-    if (binding.indices.size() != 1 || (binding.kind != 7 && binding.kind != 30) ||
-        binding.indices[0] >= (binding.kind == 7 ? 128u : 64u))
+    if (binding.indices.size() != 1 || (binding.kind != 7 && binding.kind != 30 && binding.kind != 31) ||
+        (binding.kind != 31 && binding.indices[0] >= (binding.kind == 7 ? 128u : 64u)))
         fail("Invalid DXBC buffer binding");
 }
 bool inRange(uint64_t offset, uint64_t count, uint64_t size) {
@@ -43,6 +43,8 @@ Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView
             (view.stride && view.size % view.stride))
             fail("Invalid DXBC buffer view alignment or stride");
         if (!view.resource) {
+            if (binding.kind == 31)
+                fail("DXBC shared memory cannot be an unbound view");
             if (view.offset || view.size)
                 fail("Unbound DXBC view has a storage range");
             continue;
@@ -67,28 +69,31 @@ Value Memory::load(const Register &binding, bool structured, uint32_t index, uin
         fail("DXBC load disagrees with the buffer view kind");
     if (offset & 3)
         fail("Unaligned DXBC buffer load is not supported");
-    if (structured) {
+    if (structured && binding.kind != 31) {
         for (uint32_t c = 0; c < 4; ++c)
             if ((mask & (1u << c)) && !inRange(uint64_t(offset) + swizzle[c] * 4, 4, view.stride))
                 return {}; // Undefined field addressing must not become a known zero.
     }
     const auto &buffer = buffers_.at(*view.resource);
     const auto base = structured ? uint64_t(index) * view.stride + offset : uint64_t(offset);
-    if (gpu_ && (assistAll_ || base + view.offset + 16 > uint64_t(UINT32_MAX))) {
+    if (binding.kind != 31 && gpu_ && (assistAll_ || base + view.offset + 16 > uint64_t(UINT32_MAX))) {
         const auto value =
             gpu_->load(buffer, view, binding.kind, index, offset, swizzle, mask, literalIndex, literalOffset);
         assisted = true;
         return value;
     }
     if (structured && index >= view.size / view.stride)
-        return Value::known({});
+        return binding.kind == 31 ? Value{} : Value::known({});
     Value result;
     for (uint32_t c = 0; c < 4; ++c) {
         if (!(mask & (1u << c)))
             continue;
+        if (binding.kind == 31 && structured && !inRange(uint64_t(offset) + swizzle[c] * 4, 4, view.stride))
+            continue;
         const auto relative = base + swizzle[c] * 4;
         if (!inRange(relative, 4, view.size)) {
-            result.valid |= uint8_t(1u << c);
+            if (binding.kind != 31)
+                result.valid |= uint8_t(1u << c);
             continue;
         }
         const auto absolute = size_t(view.offset + relative);
@@ -103,7 +108,7 @@ std::vector<MemoryChange> Memory::store(const Register &binding, bool structured
                                         uint32_t offset, const Value &value, uint32_t mask, bool literalIndex,
                                         bool literalOffset, bool &assisted) const {
     validateBinding(binding);
-    if (binding.kind != 30 || (mask != 1 && mask != 3 && mask != 7 && mask != 15))
+    if ((binding.kind != 30 && binding.kind != 31) || (mask != 1 && mask != 3 && mask != 7 && mask != 15))
         fail("Invalid DXBC buffer store destination");
     const auto found = views_.find(binding);
     if (found == views_.end())
@@ -121,8 +126,13 @@ std::vector<MemoryChange> Memory::store(const Register &binding, bool structured
         undefined = !inRange(offset, count, view.stride);
     }
     const uint64_t base = structured ? uint64_t(index) * view.stride + offset : uint64_t(offset);
+    if (binding.kind == 31 && !inRange(base, count, view.size))
+        undefined = true;
+    if (binding.kind == 31 && undefined)
+        return invalidateShared();
     const auto &buffer = buffers_.at(*view.resource);
-    if (!undefined && gpu_ && (assistAll_ || base + view.offset + count > uint64_t(UINT32_MAX))) {
+    if (!undefined && binding.kind != 31 && gpu_ &&
+        (assistAll_ || base + view.offset + count > uint64_t(UINT32_MAX))) {
         const bool unknown = (value.valid & mask) != mask;
         if (unknown && buffer.bytes.size() > maxChangeBytes_)
             fail("DXBC memory change budget exceeded");
@@ -179,6 +189,129 @@ std::vector<MemoryChange> Memory::store(const Register &binding, bool structured
             change.afterValid[i] = uint8_t((value.valid >> (i / 4)) & 1);
     }
     return {std::move(change)};
+}
+std::vector<MemoryChange> Memory::invalidateShared() const {
+    std::map<uint64_t, bool> resources;
+    for (const auto &[binding, view] : views_)
+        if (binding.kind == 31 && view.resource)
+            resources[*view.resource] = true;
+    uint64_t bytes = 0;
+    std::vector<MemoryChange> changes;
+    for (const auto &[id, unused] : resources) {
+        const auto &buffer = buffers_.at(id);
+        bytes += buffer.bytes.size();
+        if (bytes > maxChangeBytes_)
+            fail("DXBC shared memory change budget exceeded");
+        changes.push_back(
+            {id, 0, buffer.bytes, buffer.bytes, buffer.valid, std::vector<uint8_t>(buffer.bytes.size(), 0)});
+    }
+    return changes;
+}
+std::pair<Value, std::vector<MemoryChange>> Memory::atomic(const Register &binding, uint32_t opcode,
+                                                           uint32_t index, uint32_t offset,
+                                                           const Value &value,
+                                                           const Value &comparison) const {
+    validateBinding(binding);
+    if (binding.kind != 30 && binding.kind != 31)
+        fail("Invalid DXBC atomic binding");
+    const auto found = views_.find(binding);
+    if (found == views_.end())
+        fail("Unavailable DXBC atomic binding");
+    const auto &view = found->second;
+    if (!view.resource)
+        return {};
+    if (offset & 3)
+        fail("Unaligned DXBC atomic address");
+    const auto base = view.stride ? uint64_t(index) * view.stride + offset : uint64_t(offset);
+    const bool undefined = (view.stride && !inRange(offset, 4, view.stride)) ||
+                           (binding.kind == 31 && !inRange(base, 4, view.size));
+    const auto &buffer = buffers_.at(*view.resource);
+    if (undefined) {
+        if (binding.kind == 31)
+            return {{}, invalidateShared()};
+        if (view.size > maxChangeBytes_)
+            fail("DXBC atomic change budget exceeded");
+        MemoryChange change{
+            *view.resource,
+            view.offset,
+            {buffer.bytes.begin() + view.offset, buffer.bytes.begin() + view.offset + view.size},
+            {},
+            {buffer.valid.begin() + view.offset, buffer.valid.begin() + view.offset + view.size},
+            {}};
+        change.after = change.before;
+        change.afterValid.assign(size_t(view.size), 0);
+        return {{}, {std::move(change)}};
+    }
+    if (!inRange(base, 4, view.size))
+        return {};
+    const auto absolute = size_t(view.offset + base);
+    Value old;
+    std::memcpy(&old.bits[0], buffer.bytes.data() + absolute, 4);
+    old.valid = std::all_of(buffer.valid.begin() + absolute, buffer.valid.begin() + absolute + 4,
+                            [](uint8_t bit) { return bit != 0; })
+                    ? 1
+                    : 0;
+    const auto a = old.bits[0], b = value.bits[0];
+    uint32_t after = a;
+    bool known = (old.valid & value.valid & 1) != 0;
+    switch (opcode) {
+    case 169:
+    case 181:
+        after = a & b;
+        break;
+    case 170:
+    case 182:
+        after = a | b;
+        break;
+    case 171:
+    case 183:
+        after = a ^ b;
+        break;
+    case 173:
+    case 180:
+        after = a + b;
+        break;
+    case 174:
+    case 186:
+        after = std::bit_cast<int32_t>(a) > std::bit_cast<int32_t>(b) ? a : b;
+        break;
+    case 175:
+    case 187:
+        after = std::bit_cast<int32_t>(a) < std::bit_cast<int32_t>(b) ? a : b;
+        break;
+    case 176:
+    case 188:
+        after = std::max(a, b);
+        break;
+    case 177:
+    case 189:
+        after = std::min(a, b);
+        break;
+    case 184:
+        after = b;
+        known = (value.valid & 1) != 0;
+        break;
+    case 172:
+    case 185:
+        if ((old.valid & comparison.valid & 1) != 0) {
+            if (a != comparison.bits[0])
+                return {old, {}};
+            after = b;
+            known = (value.valid & 1) != 0;
+        } else
+            known = false;
+        break;
+    default:
+        fail("Unsupported DXBC atomic operation");
+    }
+    MemoryChange change{*view.resource,
+                        absolute,
+                        {buffer.bytes.begin() + absolute, buffer.bytes.begin() + absolute + 4},
+                        std::vector<uint8_t>(4),
+                        {buffer.valid.begin() + absolute, buffer.valid.begin() + absolute + 4},
+                        std::vector<uint8_t>(4, uint8_t(known))};
+    std::memcpy(change.after.data(), &after, 4);
+    return {old, {std::move(change)}};
 }
 void Memory::commit(const std::vector<MemoryChange> &changes) {
     for (const auto &change : changes) {

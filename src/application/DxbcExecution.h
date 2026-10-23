@@ -51,6 +51,10 @@ class Memory {
                                     const Value &value, uint32_t mask, bool literalIndex, bool literalOffset,
                                     bool &assisted) const;
     void commit(const std::vector<MemoryChange> &changes);
+    std::vector<MemoryChange> invalidateShared() const;
+    std::pair<Value, std::vector<MemoryChange>> atomic(const Register &, uint32_t opcode, uint32_t index,
+                                                       uint32_t offset, const Value &value,
+                                                       const Value &comparison) const;
 
   public:
     // This is private diagnostic storage, never a mapping of replay GPU memory.
@@ -67,6 +71,7 @@ struct Inputs {
     std::map<uint32_t, std::vector<Value>> constantBuffers;
     std::shared_ptr<Memory> memory;
     std::shared_ptr<GpuOperations> gpu;
+    std::shared_ptr<Memory> sharedMemory;
 };
 struct Change {
     Register destination;
@@ -82,6 +87,13 @@ struct Step {
     std::vector<MemoryChange> memoryChanges;
     bool memoryGpuAssisted = false;
     bool instructionGpuAssisted = false;
+    std::vector<MemoryChange> sharedMemoryChanges;
+    uint32_t syncFlags = 0;
+    std::vector<std::pair<uint32_t, uint64_t>> syncLoopIterations;
+    bool atomic = false;
+};
+struct SharedDeclaration {
+    uint32_t bytes = 0, stride = 0;
 };
 struct ProgramData;
 class Program {
@@ -92,19 +104,46 @@ class Program {
     explicit Program(Bytes dxbc);
     const std::vector<Instruction> &instructions() const;
     uint32_t stage() const;
+    std::array<uint32_t, 3> threadGroupSize() const;
+    const std::map<uint32_t, SharedDeclaration> &sharedDeclarations() const;
 };
 class Lane {
     struct State;
     std::unique_ptr<State> state_;
+    friend class Group;
+    void releaseBarrier();
 
   public:
     Lane(const Program &program, Inputs inputs, uint64_t maxSteps = 1000000);
     ~Lane();
     bool finished() const;
+    bool blocked() const;
     Value value(const Register &reg) const;
     const std::map<Register, Value> &registers() const;
     // One instruction at a time: the caller owns trace storage and cancellation.
     // Unsupported semantics or unknown control/address inputs fail explicitly.
     Step step();
+};
+struct GroupStep {
+    uint64_t sequence, barrierEpoch;
+    uint32_t lane;
+    Step step;
+    bool releasedBarrier = false;
+};
+class Group {
+    struct State;
+    std::unique_ptr<State> state_;
+
+  public:
+    // One deterministic legal serialization, not the captured GPU schedule.
+    // Shared storage starts unknown and is private to this group instance.
+    Group(const Program &, Inputs, std::array<uint32_t, 3> groupId = {}, uint64_t maxSteps = 1000000,
+          CancelCheck cancelled = {});
+    ~Group();
+    bool finished() const;
+    GroupStep step();
+    const Lane &lane(uint32_t index) const;
+    const Memory &sharedMemory() const;
+    static constexpr const char *executionModel = "serial-round-robin/1";
 };
 } // namespace flora::dxbc_exec
