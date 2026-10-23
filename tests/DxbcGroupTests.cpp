@@ -445,6 +445,13 @@ class DxbcGroupTests final : public QObject {
         QVERIFY(!lane.finished());
     }
     void sharedBoundsAreNotZero() {
+        auto maximum =
+            raw({op(160, {reg(31, 0), {32768}, {1}}), op(168, {reg(31, 0, 1), imm(0), imm(32764), imm(29)}),
+                 op(167, {reg(0, 0, 1), imm(0), imm(32764), {0x11f006, 0}}), op(62)});
+        Group largestStructure(maximum, {});
+        execute(largestStructure);
+        QCOMPARE(largestStructure.lane(0).value({0, {0}}).bits[0], 29u);
+        QCOMPARE(largestStructure.lane(0).value({0, {0}}).valid, uint8_t(1));
         for (bool structured : {false, true}) {
             Inputs inputs;
             auto data = Buffer::known(std::vector<uint8_t>(32, 0x42));

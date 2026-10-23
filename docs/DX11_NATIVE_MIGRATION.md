@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, private buffer operations and same-adapter GPU boundary assistance added; buffer suite passes 246 cases, while 17 scalar/control differences and full debugger/thread parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, private buffers, GPU assistance, cooperative CS groups and hidden counters tested; production debugger integration and full semantic parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -379,7 +379,13 @@ from the captured GPU. Thirty hardware cases across WARP, NVIDIA and Intel plus
 eight setup/CPU validation cases pass; atomic tickets use permutation constraints
 and all other deterministic bytes use exact comparison. See
 `DX11_DXBC_GROUP_RESEARCH.md` for validity, cancellation, trace reversal and limits.
-Typed resources and GPU sampling assistance, hidden UAV counters, actual input
+Hidden counter allocation/consumption now uses private per-view state and reversible
+counter changes. Native replay supplies typed counter snapshots with scoped event
+overrides and explicit unavailable values. Forty counter cases pass, including
+thirty GPU cases across WARP, NVIDIA and Intel, plus snapshot restoration and
+cancellation checks. See `DX11_DXBC_COUNTER_RESEARCH.md` for Append identity limits
+and the distinction between simulated and captured ordering.
+Typed resources and GPU sampling assistance, complete actual input
 extraction, quad/helper execution, full CS group/cross-group semantics,
 source/GUI integration and full parity remain required P6 work.
 

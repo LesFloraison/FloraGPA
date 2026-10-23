@@ -534,6 +534,14 @@ dynamic barriers and system identities. Atomic ticket ordering is explicitly
 simulated and checked by constraints; original GPU scheduling is not recovered.
 See `DX11_DXBC_GROUP_RESEARCH.md` for precise scope and preserved evidence.
 
+The hidden-counter checkpoint adds 40 passing cases, including 30 GPU cases across
+the same three adapters. It validates private allocation/consumption, counter wrap,
+view identity, snapshot unknowns and scoped restoration. A 32 KiB structured TGSM
+boundary probe extends the existing group suite. See `DX11_DXBC_COUNTER_RESEARCH.md`
+and its evidence ledger; no prior failure or skip category was expanded.
+The final serial regression retains all 699 counter/group/execution/buffer passes
+with zero failures/skips in 107.88 seconds.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

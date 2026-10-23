@@ -23,11 +23,14 @@ Buffer Buffer::known(std::vector<uint8_t> bytes) {
     return result;
 }
 Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views, uint64_t maxBytes,
-               uint64_t maxChangeBytes, std::shared_ptr<GpuOperations> gpu, bool assistAll)
-    : buffers_(std::move(buffers)), views_(std::move(views)), maxChangeBytes_(maxChangeBytes),
-      gpu_(std::move(gpu)), assistAll_(assistAll) {
+               uint64_t maxChangeBytes, std::shared_ptr<GpuOperations> gpu, bool assistAll,
+               std::map<uint64_t, Counter> counters)
+    : buffers_(std::move(buffers)), views_(std::move(views)), counters_(std::move(counters)),
+      maxChangeBytes_(maxChangeBytes), gpu_(std::move(gpu)), assistAll_(assistAll) {
     if (!maxBytes || maxChangeBytes < 16)
         fail("Invalid DXBC memory budget");
+    if (counters_.size() > 64)
+        fail("DXBC counter snapshot budget exceeded");
     uint64_t total = 0;
     for (const auto &[id, buffer] : buffers_) {
         if (!inRange(total, buffer.bytes.size(), maxBytes))
@@ -37,11 +40,19 @@ Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView
             std::any_of(buffer.valid.begin(), buffer.valid.end(), [](uint8_t v) { return v > 1; }))
             fail("Invalid DXBC memory validity");
     }
+    std::map<uint64_t, BufferView> counterViews;
     for (const auto &[binding, view] : views_) {
         validateBinding(binding);
-        if ((view.offset | view.size | view.stride) & 3 || view.stride > 2048 ||
-            (view.stride && view.size % view.stride))
+        if ((view.offset | view.size | view.stride) & 3 ||
+            view.stride > (binding.kind == 31 ? 32768u : 2048u) || (view.stride && view.size % view.stride))
             fail("Invalid DXBC buffer view alignment or stride");
+        if (view.counter) {
+            if (binding.kind != 30 || !view.resource || !view.stride || !counters_.contains(*view.counter))
+                fail("Invalid DXBC counter view snapshot");
+            const auto [found, inserted] = counterViews.emplace(*view.counter, view);
+            if (!inserted && found->second != view)
+                fail("Conflicting DXBC counter view aliases");
+        }
         if (!view.resource) {
             if (binding.kind == 31)
                 fail("DXBC shared memory cannot be an unbound view");
@@ -53,8 +64,58 @@ Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView
         if (found == buffers_.end() || !inRange(view.offset, view.size, found->second.bytes.size()))
             fail("DXBC view exceeds its private resource snapshot");
     }
+    for (const auto &[id, view] : counterViews) {
+        const auto &counter = counters_.at(id);
+        if (counter.kind != CounterKind::Ordered && counter.kind != CounterKind::Append)
+            fail("Invalid DXBC counter kind");
+        if (counter.kind == CounterKind::Append) {
+            const auto defined =
+                counter.value ? std::min(uint64_t(*counter.value) * view.stride, view.size) : 0;
+            auto &valid = buffers_.at(*view.resource).valid;
+            std::fill(valid.begin() + view.offset + defined, valid.begin() + view.offset + view.size, 0);
+        }
+    }
 }
 const std::map<uint64_t, Buffer> &Memory::buffers() const { return buffers_; }
+const std::map<uint64_t, Counter> &Memory::counters() const { return counters_; }
+std::pair<Value, std::optional<CounterChange>> Memory::counter(const Register &binding, bool consume) const {
+    validateBinding(binding);
+    const auto found = views_.find(binding);
+    if (binding.kind != 30 || found == views_.end())
+        fail("Unavailable DXBC hidden counter binding");
+    const auto &view = found->second;
+    if (!view.resource)
+        return {};
+    if (!view.counter || !view.stride)
+        fail("DXBC view has no hidden counter");
+    const auto before = counters_.at(*view.counter);
+    auto after = before;
+    Value value;
+    if (before.value) {
+        after.value = consume ? *before.value - 1u : *before.value + 1u;
+        value.bits[0] = consume ? *after.value : *before.value;
+        value.valid = 1;
+    }
+    return {value, CounterChange{*view.counter, before, after}};
+}
+std::vector<MemoryChange> Memory::invalidateAppend(const Register &binding, uint32_t index) const {
+    const auto &view = views_.at(binding);
+    const auto offset = uint64_t(index) * view.stride;
+    if (!inRange(offset, view.stride, view.size))
+        return {};
+    if (view.stride > maxChangeBytes_)
+        fail("DXBC append change budget exceeded");
+    const auto &buffer = buffers_.at(*view.resource);
+    const auto absolute = view.offset + offset;
+    MemoryChange change{*view.resource,
+                        absolute,
+                        {buffer.bytes.begin() + absolute, buffer.bytes.begin() + absolute + view.stride},
+                        {},
+                        {buffer.valid.begin() + absolute, buffer.valid.begin() + absolute + view.stride},
+                        std::vector<uint8_t>(view.stride, 0)};
+    change.after = change.before;
+    return {std::move(change)};
+}
 Value Memory::load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
                    const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex,
                    bool literalOffset, bool &assisted) const {
@@ -319,5 +380,9 @@ void Memory::commit(const std::vector<MemoryChange> &changes) {
         std::copy(change.after.begin(), change.after.end(), buffer.bytes.begin() + change.offset);
         std::copy(change.afterValid.begin(), change.afterValid.end(), buffer.valid.begin() + change.offset);
     }
+}
+void Memory::commitCounters(const std::vector<CounterChange> &changes) {
+    for (const auto &change : changes)
+        counters_.at(change.view) = change.after;
 }
 } // namespace flora::dxbc_exec

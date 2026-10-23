@@ -30,7 +30,19 @@ struct BufferView {
     // views mean that binding information was not captured.
     std::optional<uint64_t> resource;
     uint64_t offset = 0, size = 0;
-    uint32_t stride = 0; // Zero for raw views, structure size otherwise.
+    uint32_t stride = 0;             // Zero for raw views, structure size otherwise.
+    std::optional<uint64_t> counter; // View identity, independent of backing resource identity.
+    auto operator<=>(const BufferView &) const = default;
+};
+enum class CounterKind { Ordered, Append };
+struct Counter {
+    CounterKind kind = CounterKind::Ordered;
+    std::optional<uint32_t> value;
+    auto operator<=>(const Counter &) const = default;
+};
+struct CounterChange {
+    uint64_t view;
+    Counter before, after;
 };
 struct MemoryChange {
     uint64_t resource, offset;
@@ -40,6 +52,7 @@ class GpuOperations;
 class Memory {
     std::map<uint64_t, Buffer> buffers_;
     std::map<Register, BufferView> views_;
+    std::map<uint64_t, Counter> counters_;
     uint64_t maxChangeBytes_;
     std::shared_ptr<GpuOperations> gpu_;
     bool assistAll_;
@@ -51,6 +64,9 @@ class Memory {
                                     const Value &value, uint32_t mask, bool literalIndex, bool literalOffset,
                                     bool &assisted) const;
     void commit(const std::vector<MemoryChange> &changes);
+    void commitCounters(const std::vector<CounterChange> &changes);
+    std::pair<Value, std::optional<CounterChange>> counter(const Register &, bool consume) const;
+    std::vector<MemoryChange> invalidateAppend(const Register &, uint32_t index) const;
     std::vector<MemoryChange> invalidateShared() const;
     std::pair<Value, std::vector<MemoryChange>> atomic(const Register &, uint32_t opcode, uint32_t index,
                                                        uint32_t offset, const Value &value,
@@ -61,8 +77,10 @@ class Memory {
     // Lanes may share it only under an external serial execution scheduler.
     Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views,
            uint64_t maxBytes = 256 * 1024 * 1024, uint64_t maxChangeBytes = 16 * 1024 * 1024,
-           std::shared_ptr<GpuOperations> gpu = {}, bool assistAll = false);
+           std::shared_ptr<GpuOperations> gpu = {}, bool assistAll = false,
+           std::map<uint64_t, Counter> counters = {});
     const std::map<uint64_t, Buffer> &buffers() const;
+    const std::map<uint64_t, Counter> &counters() const;
 };
 struct Inputs {
     // Missing inputs and missing bindings remain unknown. Present constant
@@ -91,6 +109,7 @@ struct Step {
     uint32_t syncFlags = 0;
     std::vector<std::pair<uint32_t, uint64_t>> syncLoopIterations;
     bool atomic = false;
+    std::vector<CounterChange> counterChanges;
 };
 struct SharedDeclaration {
     uint32_t bytes = 0, stride = 0;

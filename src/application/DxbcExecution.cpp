@@ -283,6 +283,8 @@ struct ProgramData {
     std::map<uint32_t, uint32_t> defaults;
     std::vector<Value> immediate;
     std::map<Register, uint32_t> bufferStrides;
+    std::map<Register, bool> orderedCounters;
+    std::map<Register, uint32_t> counterOpcodes;
     std::array<uint32_t, 3> groupSize{};
     std::map<uint32_t, SharedDeclaration> shared;
 };
@@ -341,6 +343,8 @@ Program::Program(Bytes dxbc) {
                 (structured && (!stride || stride > 2048 || (stride & 3))) ||
                 !data->bufferStrides.emplace(Register{kind, {uint32_t(arg.indices[0].base)}}, stride).second)
                 fail("Invalid DXBC buffer declaration");
+            if (op == 158)
+                data->orderedCounters[{kind, {uint32_t(arg.indices[0].base)}}] = (words[0] & 0x800000) != 0;
         } else if (op == 155) {
             if (data->stage != 5 || data->groupSize[0] || words.size() != 4 || !words[1] || !words[2] ||
                 !words[3] || words[1] > 1024 || words[2] > 1024 || words[3] > 64 ||
@@ -354,7 +358,7 @@ Program::Program(Bytes dxbc) {
             const uint64_t size = uint64_t(words.at(pos++)) * (stride ? stride : 1u);
             if (data->stage != 5 || pos != words.size() || arg.kind != 31 || arg.indices.size() != 1 ||
                 arg.indices[0].relative || arg.indices[0].base > UINT32_MAX || !size || (size & 3) ||
-                (op == 160 && (!stride || stride > 2048 || (stride & 3))) || size > 32768 - sharedBytes ||
+                (op == 160 && (!stride || stride > 32768 || (stride & 3))) || size > 32768 - sharedBytes ||
                 !data->shared
                      .emplace(uint32_t(arg.indices[0].base), SharedDeclaration{uint32_t(size), stride})
                      .second)
@@ -386,6 +390,21 @@ Program::Program(Bytes dxbc) {
         ++data->first;
     if (data->first == data->instructions.size())
         fail("DXBC execution program has no executable instructions");
+    for (size_t i = data->first; i < data->instructions.size(); ++i) {
+        const auto op = data->instructions[i].opcode;
+        if (op != 178 && op != 179)
+            continue;
+        const auto &arg = data->operands[i].at(1);
+        if (arg.kind != 30 || arg.modifier || arg.indices.size() != 1 || arg.indices[0].relative ||
+            arg.indices[0].base >= 64)
+            fail("Invalid DXBC hidden counter operand");
+        const Register binding{30, {uint32_t(arg.indices[0].base)}};
+        if (!data->orderedCounters.contains(binding))
+            fail("Hidden DXBC counter requires a structured UAV declaration");
+        const auto [found, inserted] = data->counterOpcodes.emplace(binding, op);
+        if (!inserted && found->second != op)
+            fail("DXBC shader mixes allocation and consumption on one UAV");
+    }
     const auto size = uint32_t(data->instructions.size());
     data->jump.assign(size, absent);
     data->breakTarget.assign(size, absent);
@@ -478,6 +497,7 @@ struct Lane::State {
     bool done = false, waiting = false;
     std::vector<std::pair<uint32_t, uint64_t>> loops;
     std::vector<size_t> callLoopDepths;
+    std::map<uint64_t, std::set<uint32_t>> appendIndices;
     bool inBounds(const Register &reg) const {
         if (reg.kind == 0)
             return reg.indices.size() == 1 && reg.indices[0] < program->temps;
@@ -564,6 +584,27 @@ Lane::Lane(const Program &program, Inputs inputs, uint64_t maxSteps) {
             reg.indices.size() > 3 || value.valid > 15)
             fail("Invalid DXBC execution input register");
     }
+    if (inputs.memory) {
+        std::map<uint64_t, uint32_t> operations;
+        for (const auto &[binding, ordered] : program.data_->orderedCounters) {
+            const auto view = inputs.memory->views_.find(binding);
+            if (view == inputs.memory->views_.end() || !view->second.resource)
+                continue;
+            const auto operation = program.data_->counterOpcodes.find(binding);
+            if (ordered || operation != program.data_->counterOpcodes.end()) {
+                if (!view->second.counter || inputs.memory->counters_.at(*view->second.counter).kind !=
+                                                 (ordered ? CounterKind::Ordered : CounterKind::Append))
+                    fail("DXBC counter declaration disagrees with the bound view kind");
+            } else if (view->second.counter &&
+                       inputs.memory->counters_.at(*view->second.counter).kind == CounterKind::Append)
+                fail("An APPEND view requires allocation or consumption instructions");
+            if (operation != program.data_->counterOpcodes.end()) {
+                const auto [found, inserted] = operations.emplace(*view->second.counter, operation->second);
+                if (!inserted && found->second != operation->second)
+                    fail("DXBC shader mixes allocation and consumption through view aliases");
+            }
+        }
+    }
     state_ = std::make_unique<State>(
         State{program.data_, std::move(inputs), {}, {}, program.data_->first, 0, maxSteps});
     state_->registers = state_->inputs.registers;
@@ -592,12 +633,26 @@ Step Lane::step() {
     auto calls = s.calls;
     auto loops = s.loops;
     auto callLoopDepths = s.callLoopDepths;
+    std::optional<std::pair<uint64_t, uint32_t>> appendIndex;
     bool done = false;
     const auto condition = [&](size_t index) {
         const auto value = s.source(args.at(index), true);
         if (!(value.valid & 1))
             fail("Unknown DXBC control condition");
         return (value.bits[0] != 0) == bool(instruction.words[0] & (1u << 18));
+    };
+    const auto authorizeAppend = [&](const Register &binding, uint32_t index) {
+        if (binding.kind != 30 || !s.inputs.memory)
+            return;
+        const auto view = s.inputs.memory->views_.find(binding);
+        if (view == s.inputs.memory->views_.end() || !view->second.counter)
+            return;
+        const auto id = *view->second.counter;
+        if (s.inputs.memory->counters_.at(id).kind == CounterKind::Append) {
+            const auto allowed = s.appendIndices.find(id);
+            if (allowed == s.appendIndices.end() || !allowed->second.contains(index))
+                fail("Undefined APPEND address outside this invocation's allocation or consumption");
+        }
     };
     if (op == 190) {
         result.syncFlags = instruction.words[0] & 0x7800;
@@ -688,6 +743,7 @@ Step Lane::step() {
         const auto offsetValue = s.source(args[structured ? 2 : 1], true);
         if (!(indexValue.valid & offsetValue.valid & 1))
             fail("Unknown DXBC memory address");
+        authorizeAppend(binding, indexValue.bits[0]);
         if (store) {
             if (resource.components != 2 || resource.mode != 0 || !memory)
                 fail("Unavailable or invalid DXBC memory store");
@@ -719,6 +775,41 @@ Step Lane::step() {
                 result.changes.push_back({target, before, after});
             }
         }
+    } else if (op == 178 || op == 179) {
+        if (!s.inputs.memory)
+            fail("Unavailable DXBC hidden counter snapshot");
+        const auto binding = s.address(args[1]);
+        const auto &destination = args[0];
+        if (destination.modifier ||
+            (destination.kind != 13 &&
+             (destination.components != 2 || destination.mode != 0 || std::popcount(destination.mask) != 1 ||
+              (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))))
+            fail("Invalid DXBC hidden counter result destination");
+        const auto target = s.address(destination);
+        const auto view = s.inputs.memory->views_.find(binding);
+        if (view != s.inputs.memory->views_.end() && view->second.resource &&
+            view->second.stride != p.bufferStrides.at(binding))
+            fail("DXBC hidden counter stride disagrees with its declaration");
+        const auto [value, change] = s.inputs.memory->counter(binding, op == 179);
+        if (change) {
+            result.counterChanges.push_back(*change);
+            if (change->before.kind == CounterKind::Append && (value.valid & 1)) {
+                appendIndex = {{change->view, value.bits[0]}};
+                if (op == 178)
+                    result.memoryChanges = s.inputs.memory->invalidateAppend(binding, value.bits[0]);
+            }
+        }
+        if (target.kind != 13 && s.inBounds(target)) {
+            const auto component = uint32_t(std::countr_zero(destination.mask));
+            if (target.kind == 3 && component >= p.arrays.at(target.indices[0]).second)
+                fail("DXBC hidden counter destination exceeds its register components");
+            const auto before = s.value(target);
+            auto after = before;
+            after.bits[component] = value.bits[0];
+            after.valid = uint8_t((after.valid & ~destination.mask) | ((value.valid & 1) << component));
+            result.changes.push_back({target, before, after});
+        }
+        result.atomic = true;
     } else if ((op >= 169 && op <= 177) || (op >= 180 && op <= 189)) {
         const bool returned = op >= 180, compare = op == 172 || op == 185;
         const size_t first = returned ? 1 : 0;
@@ -743,6 +834,7 @@ Step Lane::step() {
         const bool structured = declaration->second != 0;
         if ((address.valid & (structured ? 3 : 1)) != (structured ? 3 : 1))
             fail("Unknown DXBC atomic address");
+        authorizeAppend(binding, structured ? address.bits[0] : 0);
         const auto value = s.source(args.back(), true);
         const auto comparison = compare ? s.source(args[first + 2], true) : Value{};
         const auto [old, changes] = memory->atomic(binding, op, structured ? address.bits[0] : 0,
@@ -899,12 +991,16 @@ Step Lane::step() {
     if (!done && next >= p.instructions.size())
         fail("DXBC execution fell off the program without ret");
     // Commit only after the complete instruction has validated and computed.
+    if (appendIndex)
+        s.appendIndices[appendIndex->first].insert(appendIndex->second);
     for (const auto &change : result.changes)
         s.registers[change.destination] = change.after;
     if (!result.memoryChanges.empty())
         s.inputs.memory->commit(result.memoryChanges);
     if (!result.sharedMemoryChanges.empty())
         s.inputs.sharedMemory->commit(result.sharedMemoryChanges);
+    if (!result.counterChanges.empty())
+        s.inputs.memory->commitCounters(result.counterChanges);
     s.calls = std::move(calls);
     s.loops = std::move(loops);
     s.callLoopDepths = std::move(callLoopDepths);
