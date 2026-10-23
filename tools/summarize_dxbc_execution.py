@@ -11,7 +11,13 @@ def identity(path):
     return {"path": path.as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
-def summarize(path):
+def comparison_key(item):
+    return tuple(item.get(key) for key in
+                 ("vendor", "opcode", "output", "aliased", "structured", "variant", "unbound")) + (
+                     tuple(item.get("params", [])),)
+
+
+def summarize(path, previous_failures=()):
     contents = path.read_text(encoding="utf-8-sig")
     totals = re.search(r"Totals: (\d+) passed, (\d+) failed, (\d+) skipped", contents)
     if totals is None:
@@ -27,6 +33,8 @@ def summarize(path):
             item["case"] = re.search(r"(?:rawInstructions|hardware)\(([^)]+)\)", line).group(1)
             observations.append(item)
     mismatches = [item for item in observations if item["cpu"] != item["gpu"]]
+    assistance = {json.dumps(item["assistance"], sort_keys=True): item["assistance"]
+                  for item in observations if "assistance" in item}
     return {
         **identity(path),
         "passed": int(totals[1]),
@@ -36,6 +44,14 @@ def summarize(path):
         "adapters": list(adapters.values()),
         "raw_comparisons": len(observations),
         "mismatches": mismatches,
+        "assistance_identities": list(assistance.values()),
+        "gpu_operation_counts": {
+            mode: sum(item.get("gpu_operations", 0) for item in observations
+                      if item.get("assistAll") is all_accesses)
+            for mode, all_accesses in (("boundary", False), ("all_accesses", True))
+        },
+        "resolved_cases": [item["case"] for item in observations
+                           if item["cpu"] == item["gpu"] and comparison_key(item) in previous_failures],
         "same_operation_other_forms": [
             item
             for item in observations
@@ -56,7 +72,11 @@ def main():
     parser.add_argument("--scope", default="native_dxbc_execution_core_research")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    reports = [summarize(path) for path in args.log]
+    reports, previous_failures = [], set()
+    for path in args.log:
+        report = summarize(path, previous_failures)
+        reports.append(report)
+        previous_failures.update(comparison_key(item) for item in report["mismatches"])
     result = {
         "schema": 1,
         "scope": args.scope,
