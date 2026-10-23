@@ -220,6 +220,11 @@ class PostTransformTests final : public QObject {
         state.geometryTable = "patch_constants";
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryTable,
                  std::string("patch_constants"));
+        state.geometryStage = "vs-inputs";
+        state.geometryTable = "input_references";
+        const auto inputState = replayUiState(frame, replayUiDocument(frame, state));
+        QCOMPARE(inputState.geometryStage, std::string("vs-inputs"));
+        QCOMPARE(inputState.geometryTable, std::string("input_references"));
         for (const auto *invalid : {"-1", "4294967296", "x", "1.2", "+1"}) {
             state.geometryInstance = invalid;
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayUiDocument(frame, state));
@@ -730,6 +735,22 @@ class PostTransformTests final : public QObject {
         for (const auto *file : {"geometry.json", "vertices.bin", "vertices.csv", "geometry.obj",
                                  "unique_vertices.bin", "unique_vertices.csv", "references.csv"})
             QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-1/" + file));
+        stage->setCurrentIndex(stage->findData("vs-inputs"));
+        QVERIFY(!window.findChild<QSpinBox *>("geometryStream")->isEnabled());
+        tasks.clear();
+        window.findChild<QAction *>("inspectGeometry")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QVERIFY(choice->isEnabled());
+        choice->setCurrentIndex(choice->findData("input_references"));
+        QCOMPARE(table->model()->rowCount(), 3);
+        QCOMPARE(table->model()->headerData(1, Qt::Horizontal).toString(), QString("input_reference"));
+        for (int row = 0; row < 3; ++row)
+            QCOMPARE(table->model()->index(row, 1).data().toString(), QString::number(row));
+        choice->setCurrentIndex(choice->findData("unique_vertices"));
+        QCOMPARE(table->model()->rowCount(), 3);
+        if (!evidence.isEmpty())
+            QVERIFY(window.grab().save(evidence + "/vs-inputs.png"));
         stage->setCurrentIndex(0);
         QCOMPARE(table->model()->rowCount(), 0);
         QVERIFY(!window.findChild<QLineEdit *>("geometryInstance")->isEnabled());

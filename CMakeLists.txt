@@ -309,6 +309,12 @@ if(BUILD_TESTING)
   add_test(NAME native_analysis COMMAND FloraNativeAnalysisTests -o "${CMAKE_BINARY_DIR}/native-analysis-$<CONFIG>.txt,txt")
   set_tests_properties(native_analysis PROPERTIES RUN_SERIAL TRUE TIMEOUT 180
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
+  add_executable(FloraNativeVertexInputsTests tests/NativeVertexInputsTests.cpp)
+  target_link_libraries(FloraNativeVertexInputsTests PRIVATE FloraExperiment Qt6::Test)
+  add_dependencies(FloraNativeVertexInputsTests FloraGPA.Worker)
+  add_test(NAME native_vertex_inputs COMMAND FloraNativeVertexInputsTests -o "${CMAKE_BINARY_DIR}/native-vertex-inputs-$<CONFIG>.txt,txt")
+  set_tests_properties(native_vertex_inputs PROPERTIES RUN_SERIAL TRUE TIMEOUT 180
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
 endif()
 if(FLORA_BUILD_GUI)
   find_package(Qt6 6.11 REQUIRED COMPONENTS Widgets Concurrent)

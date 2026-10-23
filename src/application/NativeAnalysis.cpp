@@ -110,9 +110,10 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             if (!selected->second.contains(key))
                 throw std::invalid_argument("Unsupported " + action + " option: " + key);
             if (key == "stage") {
-                if (value != "vs" && value != "vs-index" && value != "ds" && value != "gs" && value != "hs" &&
-                    value != "final")
-                    throw std::invalid_argument("Mesh stage must be vs, vs-index, ds, gs, hs or final");
+                if (value != "vs" && value != "vs-index" && value != "vs-inputs" && value != "ds" &&
+                    value != "gs" && value != "hs" && value != "final")
+                    throw std::invalid_argument(
+                        "Mesh stage must be vs, vs-index, vs-inputs, ds, gs, hs or final");
             } else if (key == "group" || key == "thread") {
                 if (!value.is_array() || value.size() != 3)
                     throw std::invalid_argument("Expected three coordinates: " + key);

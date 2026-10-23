@@ -7,6 +7,7 @@
 #include "DxbcInspection.h"
 #include "DxbcOutputLog.h"
 #include "EventDescription.h"
+#include "Geometry.h"
 #include "InvocationSelector.h"
 #include "OutputLogGeometry.h"
 #include "ShaderInspector.h"
@@ -35,16 +36,17 @@ Json postTransformLayout(Bytes bytecode, uint32_t stream) {
     uint32_t stride = 0, entries = 0;
     bool found = false;
     for (const auto &[tag, data] : readDxbcParts(bytecode)) {
-        if (tag != 0x4e47534f && tag != 0x3547534f)
+        if (tag != 0x4e47534f && tag != 0x3547534f && tag != 0x3147534f)
             continue;
         if (found)
             throw std::runtime_error("Conflicting output signatures");
         found = true;
-        const bool streamed = tag == 0x3547534f;
+        const bool precision = tag == 0x3147534f;
+        const bool streamed = tag == 0x3547534f || precision;
         Reader header(data);
         const auto count = header.read<uint32_t>();
         header.skip(4);
-        const size_t rowSize = streamed ? 28 : 24;
+        const size_t rowSize = precision ? 32 : streamed ? 28 : 24;
         if (count > 256 || uint64_t(count) * rowSize > header.remaining())
             throw std::runtime_error("Output signature bounds");
         for (uint32_t i = 0; i < count; ++i) {
@@ -53,6 +55,8 @@ Json postTransformLayout(Bytes bytecode, uint32_t stream) {
             const auto name = row.read<uint32_t>(), index = row.read<uint32_t>(),
                        system = row.read<uint32_t>(), type = row.read<uint32_t>(), reg = row.read<uint32_t>();
             const auto mask = row.read<uint8_t>(), used = row.read<uint8_t>();
+            row.skip(2);
+            const auto minimumPrecision = precision ? row.read<uint32_t>() : 0u;
             if (name >= data.size() || outputStream > 3)
                 throw std::runtime_error("Invalid output signature");
             auto end = std::find(data.begin() + name, data.end(), uint8_t(0));
@@ -87,6 +91,8 @@ Json postTransformLayout(Bytes bytecode, uint32_t stream) {
                        {"component_count", components.size()}};
             if (streamed)
                 field["stream"] = outputStream;
+            if (precision)
+                field["minimum_precision"] = minimumPrecision;
             fields.push_back(field);
             stride += uint32_t(components.size()) * 4;
         }
@@ -247,9 +253,9 @@ class PostTransformCapture {
     }
     PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false,
                                   Bytes overrideCode = {}, const std::function<void()> &configure = {}) {
-        const auto requested = options.stage == "hs"         ? "ds"
-                               : options.stage == "vs-index" ? "vs"
-                                                             : options.stage;
+        const auto requested = options.stage == "hs"                                         ? "ds"
+                               : options.stage == "vs-index" || options.stage == "vs-inputs" ? "vs"
+                                                                                             : options.stage;
         const auto stage = requested == "final" ? (state.stages[3].shader   ? "gs"
                                                    : state.stages[2].shader ? "ds"
                                                                             : "vs")
@@ -268,8 +274,10 @@ class PostTransformCapture {
         auto description = postTransformLayout(bytes, options.stream);
         auto fields = description.at("attributes");
         const auto stride = description.at("stride").get<uint32_t>();
-        const auto topology =
-            requested == "vs" && state.topology >= 33 && state.topology <= 64 ? 1u : state.topology;
+        const auto topology = options.stage == "vs-inputs" ||
+                                      (requested == "vs" && state.topology >= 33 && state.topology <= 64)
+                                  ? 1u
+                                  : state.topology;
         uint32_t factor = 0;
         if (executableGs)
             factor = streamOutputTopologies(bytes)[options.stream];
@@ -467,6 +475,120 @@ class PostTransformCapture {
               "Re-execution on private UAV snapshots does not guarantee repeated atomic return ordering "
               "across invocations."}}};
         return {std::move(report), std::move(raw), {}};
+    }
+
+    PostTransformGeometry captureInputs(const Event &event, const State &state) {
+        if (options.stream)
+            throw std::runtime_error("VS input replay only supports stream zero");
+        Event direct;
+        Json parameters, indirect;
+        drawParameters(event, direct, parameters, indirect);
+        const bool indexed = parameters.contains("index_count");
+        const auto count = parameters.value(indexed ? "index_count" : "vertex_count", 0u);
+        const auto instances = parameters.value("instance_count", 1u);
+        if (options.instance && *options.instance >= instances)
+            throw std::runtime_error("VS input instance is outside the original draw");
+        const auto stride = postTransformLayout(code(state.stages[0].shader), 0).at("stride").get<uint32_t>();
+        if (uint64_t(count) > options.maxBytes / stride ||
+            (instances && uint64_t(count) > options.maxBytes / stride / instances))
+            throw std::runtime_error("VS input references exceed the inspection byte limit");
+        Json references = Json::array();
+        std::vector<uint32_t> referenceSlots, vertices;
+        if (indexed) {
+            const auto width = state.ibFormat == 57 ? 2u : state.ibFormat == 42 ? 4u : 0u;
+            if (!width)
+                throw std::runtime_error("VS input replay requires a supported index format");
+            const auto data = r.readBuffer(state.ib);
+            const auto offset =
+                uint64_t(state.ibOffset) + uint64_t(parameters.at("start_index").get<uint32_t>()) * width;
+            const auto size = uint64_t(count) * width;
+            if (offset > data.size() || size > data.size() - offset)
+                throw std::runtime_error("VS input index range exceeds the current buffer");
+            Reader input(Bytes(data).subspan(size_t(offset), size_t(size)));
+            for (uint32_t i = 0; i < count; ++i) {
+                const auto vertex = width == 2 ? uint32_t(input.read<uint16_t>()) : input.read<uint32_t>();
+                // D3D11 cut indices are orthogonal to topology, including point lists.
+                if (vertex == (width == 2 ? 0xffffu : UINT32_MAX)) {
+                    references.push_back(nullptr);
+                    continue;
+                }
+                references.push_back(vertex);
+                referenceSlots.push_back(i);
+                vertices.push_back(vertex);
+            }
+        } else {
+            for (uint32_t i = 0; i < count; ++i) {
+                references.push_back(i);
+                referenceSlots.push_back(i);
+                vertices.push_back(i);
+            }
+        }
+        // Submit the original draw: input offsets, system IDs, indirect arguments and predicates
+        // remain native. Only topology and downstream stages change for this diagnostic replay.
+        auto result = capture(event, state);
+        auto &report = result.report;
+        const auto captured = report.at("vertices").get<uint64_t>();
+        const auto expected = uint64_t(vertices.size()) * instances;
+        if (captured && captured != expected)
+            throw std::runtime_error("VS point output does not match the original input reference count");
+        const auto base = indexed ? parameters.at("base_vertex").get<int64_t>()
+                                  : parameters.at("start_vertex").get<int64_t>();
+        Json rowReferences = Json::array();
+        const auto fullHash = sha256(result.bytes);
+        if (captured) {
+            for (uint32_t instance = 0; instance < instances; ++instance) {
+                if (options.instance && instance != *options.instance)
+                    continue;
+                for (size_t i = 0; i < vertices.size(); ++i) {
+                    result.identities.push_back({instance, int64_t(vertices[i]) + base, vertices[i]});
+                    rowReferences.push_back(referenceSlots[i]);
+                }
+            }
+            if (options.instance) {
+                const auto begin = uint64_t(*options.instance) * vertices.size() * stride;
+                const auto end = begin + uint64_t(vertices.size()) * stride;
+                result.bytes = std::vector<uint8_t>(result.bytes.begin() + begin, result.bytes.begin() + end);
+            }
+        }
+        if (options.instance)
+            report["instance_selection"] = {{"instance", *options.instance},
+                                            {"instance_count", instances},
+                                            {"strategy", "native_point_order"},
+                                            {"vertex_count", result.identities.size()},
+                                            {"original_parameters", parameters},
+                                            {"indirect_arguments", indirect},
+                                            {"full_capture", {{"vertices", captured}, {"sha256", fullHash}}},
+                                            {"system_ids_rewritten", false},
+                                            {"input_offsets_rewritten", false}};
+        report.update(
+            Json{{"requested_stage", "vs-inputs"},
+                 {"geometry_stage", "vertex_input_replay"},
+                 {"primitive_scope", "inspection_points"},
+                 {"adjacency_vertices_omitted", false},
+                 {"patch_control_points", state.topology >= 33 && state.topology <= 64},
+                 {"vertices", result.identities.size()},
+                 {"primitives", result.identities.size()},
+                 {"sha256", sha256(result.bytes)},
+                 {"vertex_identity",
+                  {{"source", "native_point_order_and_input_references"},
+                   {"indexed", indexed},
+                   {"original_parameters", parameters},
+                   {"indirect_arguments", indirect},
+                   {"shader_rewritten", false},
+                   {"original_shader_sha256", sha256(code(state.stages[0].shader))}}},
+                 {"input_assembly",
+                  {{"references", references},
+                   {"row_references", rowReferences},
+                   {"instance_count", instances},
+                   {"index_cut", indexed},
+                   {"captured_references", captured}}},
+                 {"limits",
+                  {"VS inputs are re-executed as points; these are not original invocation records.",
+                   "Original topology is used only to reconstruct preview primitives; tail and adjacency "
+                   "references remain available.",
+                   "Private UAV replay preserves resources but does not promise original atomic return "
+                   "ordering or vertex cache reuse."}}});
+        return result;
     }
 
     PostTransformGeometry captureIdentities(const Event &event, const State &state) {
@@ -1173,8 +1295,8 @@ class PostTransformCapture {
     }
     PostTransformGeometry run(Id id) {
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
-            options.stage != "gs" && options.stage != "vs-index" && options.stage != "hs" &&
-            !isOutputLogStage(options.stage))
+            options.stage != "gs" && options.stage != "vs-index" && options.stage != "vs-inputs" &&
+            options.stage != "hs" && !isOutputLogStage(options.stage))
             throw std::runtime_error("Requested geometry stage has not yet been migrated");
         if (options.stream > 3)
             throw std::runtime_error("Geometry output stream must be 0..3");
@@ -1192,11 +1314,12 @@ class PostTransformCapture {
                 result = outputLogGeometry(inspectionEvent(r.frame_, id), std::move(captured.metadata),
                                            std::move(captured.bytes));
             } else
-                result = options.stage == "hs"         ? captureHull(event, state)
+                result = options.stage == "vs-inputs"  ? captureInputs(event, state)
+                         : options.stage == "hs"       ? captureHull(event, state)
                          : options.stage == "vs-index" ? captureIdentities(event, state)
                                                        : capture(event, state);
             if (options.instance && options.stage != "hs" && options.stage != "vs-index" &&
-                !isOutputLogStage(options.stage))
+                options.stage != "vs-inputs" && !isOutputLogStage(options.stage))
                 selectInstance(result, event, state);
         });
         result.report["event"] = inspectionEvent(r.frame_, id);
@@ -1204,7 +1327,7 @@ class PostTransformCapture {
         for (auto key : {"vertex_references", "obj_vertices", "obj_faces", "obj_lines", "obj_points",
                          "obj_unavailable_reason"})
             result.report[key] = presentation.at(key);
-        if (options.stage == "vs-index") {
+        if (options.stage == "vs-index" || options.stage == "vs-inputs") {
             for (auto key : {"unique_vertices", "unique_identities", "conflicting_identities"})
                 result.report[key] = presentation.at(key);
             result.report["tables"] = {
@@ -1216,6 +1339,10 @@ class PostTransformCapture {
                 {"references", {{"file", "references.csv"}, {"rows", result.identities.size()}}},
                 {"expanded_vertices",
                  {{"file", "vertices.csv"}, {"binary", "vertices.bin"}, {"rows", result.identities.size()}}}};
+            if (options.stage == "vs-inputs")
+                result.report["tables"]["input_references"] = {
+                    {"file", "input_references.csv"},
+                    {"rows", presentation.at("tables").at("input_references").at("rows").size()}};
         }
         return result;
     }
@@ -1305,9 +1432,56 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
                 positions.push_back({double(p[0]) / p[3], double(p[1]) / p[3], double(p[2]) / p[3]});
         }
     }
+    Json inputReferences = nullptr;
+    if (report.contains("input_assembly")) {
+        const auto &assembly = report.at("input_assembly");
+        const auto &references = assembly.at("references"), &rowReferences = assembly.at("row_references");
+        if (!references.is_array() || !rowReferences.is_array() || rowReferences.size() != count ||
+            geometry.identities.size() != count || factor != 1)
+            throw std::runtime_error("VS input reference storage mismatch");
+        inputReferences = {{"columns", {"instance", "input_reference", "vertex_id", "cut", "output_vertex"}},
+                           {"rows", Json::array()}};
+        size_t row = 0;
+        std::optional<uint32_t> previous;
+        while (row < count) {
+            const auto firstRow = row;
+            const auto instance = geometry.identities[row].instance;
+            if (instance >= assembly.at("instance_count").get<uint32_t>() ||
+                (previous && instance <= *previous))
+                throw std::runtime_error("VS input instance ordering mismatch");
+            previous = instance;
+            std::vector<int64_t> stream;
+            for (size_t slot = 0; slot < references.size(); ++slot) {
+                if (references[slot].is_null()) {
+                    stream.push_back(0);
+                    inputReferences["rows"].push_back({instance, slot, nullptr, true, nullptr});
+                    continue;
+                }
+                if (row >= count || rowReferences[row] != slot ||
+                    geometry.identities[row].instance != instance ||
+                    references[slot] != geometry.identities[row].vertexId)
+                    throw std::runtime_error("VS input reference identity mismatch");
+                inputReferences["rows"].push_back({instance, slot, references[slot], false, row});
+                stream.push_back(int64_t(++row));
+            }
+            if (row == firstRow)
+                throw std::runtime_error("VS input references contain no output rows");
+            if (reason.is_null()) {
+                const auto topology = report.at("input_topology").get<uint32_t>();
+                const auto primitives =
+                    meshPrimitives(stream, topology >= 33 && topology <= 64 ? 1 : topology);
+                for (const auto &value : primitives.at("faces"))
+                    faces.push_back(value);
+                for (const auto &value : primitives.at("lines"))
+                    lines.push_back(value);
+                for (const auto &value : primitives.at("points"))
+                    points.push_back(value);
+            }
+        }
+    }
     if (!reason.is_null())
         positions.clear();
-    else
+    else if (inputReferences.is_null())
         for (uint64_t first = 0; first < count; first += factor) {
             if (factor == 1)
                 points.push_back(first + 1);
@@ -1326,6 +1500,8 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
                 {"obj_unavailable_reason", reason},
                 {"tables", {{"expanded_vertices", table}}},
                 {"mesh", {{"positions", positions}, {"faces", faces}, {"lines", lines}, {"points", points}}}};
+    if (!inputReferences.is_null())
+        result["tables"]["input_references"] = inputReferences;
     if (report.contains("vertex_identity")) {
         if (geometry.identities.size() != count)
             throw std::runtime_error("VS identity row count mismatch");
@@ -1369,7 +1545,7 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
     return result;
 }
 static void visitPostTransformFiles(const PostTransformGeometry &geometry,
-                                   const std::function<void(const QString &, const QByteArray &)> &save);
+                                    const std::function<void(const QString &, const QByteArray &)> &save);
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory) {
     if (geometry.report.value("requested_stage", std::string{}) == "hs") {
         exportHull(geometry, directory);
@@ -1389,12 +1565,11 @@ void exportPostTransform(const PostTransformGeometry &geometry, const std::files
         if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
             throw std::runtime_error("Cannot save post-transform export");
     });
-    if (!hasObj && QFile::exists(root + "/geometry.obj") &&
-        !QFile::remove(root + "/geometry.obj"))
+    if (!hasObj && QFile::exists(root + "/geometry.obj") && !QFile::remove(root + "/geometry.obj"))
         throw std::runtime_error("Cannot remove obsolete post-transform OBJ");
 }
 static void visitPostTransformFiles(const PostTransformGeometry &geometry,
-                                   const std::function<void(const QString &, const QByteArray &)> &save) {
+                                    const std::function<void(const QString &, const QByteArray &)> &save) {
     const auto requestedStage = geometry.report.value("requested_stage", std::string{});
     if (requestedStage == "hs" || isOutputLogStage(requestedStage))
         throw std::runtime_error("Assembled mesh exports cannot represent hull phases or invocation logs");
@@ -1422,7 +1597,9 @@ static void visitPostTransformFiles(const PostTransformGeometry &geometry,
         append(row);
     save("vertices.csv", csv);
     if (geometry.report.contains("vertex_identity")) {
-        for (const char *name : {"unique_vertices", "references"}) {
+        for (const char *name : {"unique_vertices", "references", "input_references"}) {
+            if (!tables.at("tables").contains(name))
+                continue;
             csv.clear();
             const auto &selected = tables.at("tables").at(name);
             append(selected.at("columns"));
@@ -1465,9 +1642,8 @@ static void visitPostTransformFiles(const PostTransformGeometry &geometry,
 }
 QMap<QString, QByteArray> postTransformFiles(const PostTransformGeometry &geometry) {
     QMap<QString, QByteArray> files;
-    visitPostTransformFiles(geometry, [&](const QString &name, const QByteArray &bytes) {
-        files.insert(name, bytes);
-    });
+    visitPostTransformFiles(geometry,
+                            [&](const QString &name, const QByteArray &bytes) { files.insert(name, bytes); });
     return files;
 }
 } // namespace flora

@@ -125,10 +125,63 @@ in `native-mesh-tests.txt`: a first fixture expectation incorrectly assumed thre
 DrawAuto vertices rather than the six specified by its two original GS draws.
 The existing fixture and baseline assertions were not changed.
 
-The incomplete-tail and UAV-dependent instance cases expose open native coverage
-gaps. Tests of their current behavior are diagnostic evidence, not a lowered
+The older assembled path's incomplete-tail and UAV-dependent instance cases expose
+native coverage gaps. Tests of their current behavior are diagnostic evidence, not a lowered
 acceptance gate. Replay Mesh GUI cutover remains blocked until baseline parity is
 demonstrated for those cases and the rest of the matrix.
+
+## Complete VS input replay validation
+
+On 2026-10-24, `native_vertex_inputs` passed **54 cases, zero failures and zero
+skips** in 8.348 seconds. Its 48 input rows cover 16 scenarios on WARP, NVIDIA
+and Intel: incomplete tails, four adjacency topologies, patch control points,
+instancing, indexed reuse, negative base vertex, 16/32-bit cuts in list/strip/point
+topologies, direct and indirect draws, a full 128-component signature, and OSG1
+minimum-precision outputs. Shader-emitted VertexID/InstanceID and raw output bits
+are checked against the independently constructed input sequence. OSG1 fields are
+also compared with Windows shader reflection.
+
+Three state-safety rows cover private VS UAV writes and hidden counters, original
+SO bytes/cursors, DrawAuto, enabled/disabled predication, repeated diagnostics and
+failure restoration. Subsequent original draws are compared with clean replay.
+The Worker/export case checks canonical tables, binary data and original-reference
+CSV. The existing native analysis suite passed 39 cases in 17.049 seconds, and the
+extended PostTransform suite passed 13 cases in 16.660 seconds, including saved
+selection and the GUI reference table. All **106 cases passed without skips**;
+the three serial CTest executables took 42.28 seconds. Existing assertions and
+goldens were retained. This is focused validation, not the full release matrix.
+
+Selected real draws were replayed serially on NVIDIA using the reproducible
+`validate_native_vertex_inputs.py` diagnostic:
+
+| Capture / GPA event / instance | References / unique outputs | Reference mode | Exact comparisons | Input replay wall time / peak working set | Reference wall time |
+| --- | --- | --- | --- | --- | --- |
+| GF2 / 113 / 0 | 6 / 4 | vs-index | Bytes, identities, attributes, source context | 1.531 s / 232.02 MiB | 1.484 s |
+| BF1 / 876 / 0 | 19290 / 3312 | vs-index | Bytes, identities, attributes, source context | 11.938 s / 1702.77 MiB | 12.094 s |
+| Helldivers / 200 / 0 | 1164 / 834 | vs | Bytes, attributes, source context; identities not compared | 11.657 s / 1648.05 MiB | 10.781 s |
+
+These compare two native diagnostic modes, not an independent RenderDoc/GPA
+oracle. All result artifacts pass size/hash verification, and loaded-module
+snapshots contain neither RenderDoc nor private GPA DLLs. This still does not
+replace the final transient-module/package audit. Wall times include frame hashing
+and Worker startup; no performance acceptance is inferred from one measurement.
+
+The first Helldivers attempt failed because VS resource 153 uses an OSG1 output
+signature, which the old parser did not accept. Its DXBC SHA-256 is
+`fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16`.
+OSG1 support was added and checked with the independent reflection/GPU fixture
+before rerunning. The assembled identity-instrumentation path still requires a
+legacy signature, so the Helldivers command explicitly selects `--reference-stage
+vs`. This is not an implicit fallback; real-capture identity parity remains open.
+
+Evidence under `artifacts/dx11-native/`: `vertex-input-build-final.log`,
+`vertex-input-validation.log`, `vertex-input-validation.xml`,
+`vertex-input-real-final/comparison.json`,
+`vertex-input-helldivers-final/comparison.json`, and the inspected GUI screenshot
+`vertex-input-ui/vs-inputs.png`. The initial Helldivers failure is retained in
+`vertex-input-real/comparison.json`, with shader/state exports in
+`helldivers-vs-153/` and `helldivers-state-200/`. Detailed current QtTest logs are
+`build/vs2022/{native-analysis,native-vertex-inputs,post-transform}-Release.txt`.
 
 ## Reproduction and evidence
 
@@ -139,15 +192,23 @@ cmake -S artifacts/dx11-native/baseline-src -B build/dx11-native-baseline `
   -DFLORA_TEST_CAPTURE_DIR=D:/CDXrepo/captures
 cmake --build build/dx11-native-baseline --config Release --parallel 8
 ctest --test-dir build/dx11-native-baseline -C Release -j 1 --timeout 300 --output-on-failure
-cmake --build build/vs2022 --config Release --target FloraNativeAnalysisTests FloraPostTransformTests
+cmake --build build/vs2022 --config Release --target FloraNativeAnalysisTests FloraNativeVertexInputsTests FloraPostTransformTests
 ctest --test-dir build/vs2022 -C Release -j 1 --timeout 180 `
-  -R '^(native_analysis|post_transform)$' --output-on-failure
+  -R '^(native_analysis|native_vertex_inputs|post_transform)$' --output-on-failure
 python tools/validate_native_analysis.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
   --baseline-cli build/dx11-native-baseline/Release/FloraGPA.Cli.exe `
   --capture D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame `
   --capture D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame `
   --capture D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame `
   --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/dx11-native/inventory-validation-new
+python tools/validate_native_vertex_inputs.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
+  --case D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame 113 `
+  --case D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame 876 `
+  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/dx11-native/vertex-input-validation-new
+python tools/validate_native_vertex_inputs.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
+  --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 200 `
+  --reference-stage vs --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --out artifacts/dx11-native/vertex-input-helldivers-new
 ```
 
 Raw build/CTest logs, JUnit output and original reports remain under ignored

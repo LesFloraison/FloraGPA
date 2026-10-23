@@ -1001,7 +1001,8 @@ void MainWindow::buildUi() {
          {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
           std::pair{"HS output", "hs"}, std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"},
           std::pair{"VS identities", "vs-index"}, std::pair{"VS writes", "vs-writes"},
-          std::pair{"DS writes", "ds-writes"}, std::pair{"GS emissions", "gs-emits"}})
+          std::pair{"DS writes", "ds-writes"}, std::pair{"GS emissions", "gs-emits"},
+          std::pair{"VS input replay", "vs-inputs"}})
         geometryStage_->addItem(label, value);
     geometrySource->addWidget(geometryStage_);
     geometryStream_ = new QSpinBox;
@@ -1047,6 +1048,7 @@ void MainWindow::buildUi() {
     connect(geometryStage_, &QComboBox::currentIndexChanged, this, [this, clearGeometry] {
         const bool post = geometryStage_->currentData() != "ia";
         const auto selected = geometryStage_->currentData().toString();
+        const bool inputs = selected == "vs-inputs";
         const bool hull = selected == "hs";
         const bool writes = selected == "vs-writes" || selected == "ds-writes" || hull;
         {
@@ -1055,20 +1057,23 @@ void MainWindow::buildUi() {
             geometryTable_->addItem(hull                     ? "Control points"
                                     : writes                 ? "Invocation records"
                                     : selected == "gs-emits" ? "Emission records"
+                                    : inputs                 ? "Input replay vertices"
                                                              : "Expanded vertices",
                                     "expanded_vertices");
             if (hull)
                 geometryTable_->addItem("Patch constants", "patch_constants");
-            else if (!post || selected == "vs-index") {
+            else if (!post || selected == "vs-index" || inputs) {
                 geometryTable_->addItem("Unique vertices", "unique_vertices");
                 geometryTable_->addItem("Index mapping", "references");
+                if (inputs)
+                    geometryTable_->addItem("Original references and cuts", "input_references");
             }
         }
         mesh_->setVisible(!writes);
-        geometryTable_->setEnabled(!busy() && (!post || selected == "vs-index" || hull));
-        if (writes)
+        geometryTable_->setEnabled(!busy() && (!post || selected == "vs-index" || inputs || hull));
+        if (writes || inputs)
             geometryStream_->setValue(0);
-        geometryStream_->setEnabled(!busy() && post && !writes);
+        geometryStream_->setEnabled(!busy() && post && !writes && !inputs);
         geometryInstance_->setEnabled(!busy() && post);
         clearGeometry();
     });
@@ -1408,10 +1413,12 @@ void MainWindow::setBusy(bool busy) {
     geometryStage_->setEnabled(!busy);
     geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
                                          geometryStage_->currentData() == "vs-index" ||
+                                         geometryStage_->currentData() == "vs-inputs" ||
                                          geometryStage_->currentData() == "hs"));
     geometryStream_->setEnabled(
         !busy && geometryStage_->currentData() != "ia" && geometryStage_->currentData() != "vs-writes" &&
-        geometryStage_->currentData() != "ds-writes" && geometryStage_->currentData() != "hs");
+        geometryStage_->currentData() != "ds-writes" && geometryStage_->currentData() != "hs" &&
+        geometryStage_->currentData() != "vs-inputs");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
@@ -3924,7 +3931,7 @@ void MainWindow::openExperiment() {
         geometryInstance_->setText(QString::fromStdString(settings.geometryInstance));
         geometryTable_->setCurrentIndex(
             (settings.geometryStage == "ia" || settings.geometryStage == "vs-index" ||
-             settings.geometryStage == "hs")
+             settings.geometryStage == "vs-inputs" || settings.geometryStage == "hs")
                 ? geometryTable_->findData(QString::fromStdString(settings.geometryTable))
                 : 0);
         if (settings.event)

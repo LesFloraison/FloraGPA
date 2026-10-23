@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
     p.addOption({"quad-target", "Quad target: auto, depth or rt0..rt7", "target", "auto"});
     p.addOption({"quad-layer", "Absolute target layer, volume slice or viewport array index", "index"});
     p.addOption({"geometry-stage",
-                 "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-writes, ds-writes, gs-emits", "stage",
+                 "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-inputs, vs-writes, ds-writes, gs-emits", "stage",
                  "final"});
     p.addOption({"stream", "Post-transform SO stream 0..3", "index", "0"});
     p.addOption({"instance", "Zero-based instance within the original draw", "index"});

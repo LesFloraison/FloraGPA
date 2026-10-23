@@ -135,6 +135,7 @@ FloraGPA.Cli analyze frame.gpa_frame counters --gpa-event 1000 --out counters
 FloraGPA.Cli analyze frame.gpa_frame texture --resource 20 --gpa-event 2000 --out texture
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs --out mesh
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-index --instance 0 --out mesh-identities
+FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-inputs --instance 0 --out mesh-inputs
 ```
 
 The native entry point never recaptures to RDC or selects an external replay
@@ -179,22 +180,60 @@ It owns verified bytes independently of the worker directory and does not use
 RenderDoc resource IDs, topology enums or mesh layouts. Hull phase exports retain
 their existing separate representation; they are not coerced into assembled meshes.
 
+### Complete VS input references
+
+`vs-inputs` replays the original draw as points with the original VS and input
+bindings. It does not patch shader bytecode or reserve output registers/UAV slots.
+The original index buffer, offsets, base vertex, instance parameters, indirect
+arguments and predicate remain native. Stream-output order is checked against the
+input reference count; the shader's actual VertexID/InstanceID outputs provide an
+independent check in the synthetic tests. Original resource contents, hidden UAV
+counters and SO cursors are restored before the diagnostic returns.
+
+The point capture retains incomplete tails and adjacency helper references. Cut
+indices remain explicit null entries in the original reference sequence; they do
+not receive fabricated output rows. The original topology reconstructs preview
+faces/lines separately from the captured points. `input_references.csv` maps each
+instance/reference, including cuts, to its output row. Inspection point counts
+are explicitly distinguished from original primitive counts. These are replayed
+VS values, not records of the original hardware invocation/cache schedule, and
+atomic return ordering is not promised to repeat.
+
+The Geometry/Independent view exposes **VS input replay**, with expanded/unique
+vertices, index mapping, original references/cuts and instance selection. Project
+settings round-trip this stage/table selection. This still uses the existing
+native geometry Worker route; unified analysis scheduling and Replay Mesh tab
+cutover remain separate work.
+
+OSG1 output signatures now retain stream and minimum-precision metadata. The
+parser is checked against `ID3D11ShaderReflection::GetOutputParameterDesc`, and
+minimum-precision outputs are tested through native SO on all three adapters.
+No conversion to a legacy signature or signature-carrier instrumentation is needed
+for this VS path.
+
+The implementation follows the point-list/null-GS SO use case and topology-independent
+index cut semantics in the [D3D11 functional specification, sections 8.11 and 14.3](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm).
+Signature metadata is independently checked using the documented
+[D3D11 signature reflection descriptor](https://learn.microsoft.com/en-us/windows/win32/api/d3d11shader/ns-d3d11shader-d3d11_signature_parameter_desc).
+
 ### Mesh cutover gaps
 
 The Replay Mesh GUI remains on its existing path until its successful baseline
 coverage is preserved. The following are explicit P3 blockers, not exemptions:
 
-- Primitive assembly can omit adjacency helper vertices and incomplete tail
-  references. The new four-input triangle fixture demonstrates three captured
-  references on WARP, NVIDIA and Intel; it does not certify complete VS output.
+- The older assembled `vs-index` mode still omits adjacency helpers and incomplete
+  tails. `vs-inputs` now preserves them in the three-adapter matrix, including full
+  signatures and indirect draws. Full baseline mesh parity still needs the remaining
+  real-capture, format and workflow comparisons before default cutover.
 - Per-instance HS/DS/GS boundaries with UAV access remain unverified. The current
   native implementation rejects that selection. Tests check both this rejection
   and successful all-instance DS capture, separately from a pure-shader DS
   instance-selection fixture. They do not establish equivalence to baseline
   Replay Mesh for the rejected selection.
-- Identity instrumentation still requires available signature components and
-  supported bytecode signatures. Indirect draws, nonzero SO streams, adjacency,
-  deferred contexts and real-capture mesh parity need the remaining matrix work.
+- The new VS input path removes the free-signature-component requirement and
+  supports OSG1. Other instrumented stages retain their separate restrictions.
+  Nonzero GS SO streams, deferred contexts and complete real-capture mesh parity
+  still need the remaining matrix work.
 
 The three-adapter tests preserve indexed reference reuse with nonzero base vertex,
 VS instance selection with nonzero start instance, DS/GS output, DrawAuto's original

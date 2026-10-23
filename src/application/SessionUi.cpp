@@ -11,12 +11,14 @@ const std::map<std::string, std::string> geometryStages{{"final", "最终"},
                                                         {"ds", "DS"},
                                                         {"gs", "GS"},
                                                         {"vs-index", "VS索引"},
+                                                        {"vs-inputs", "VS input replay"},
                                                         {"vs-writes", "VS写入"},
                                                         {"ds-writes", "DS写入"},
                                                         {"gs-emits", "GS发射"}};
 const std::map<std::string, std::string> geometryTables{{"expanded_vertices", "逐次引用"},
                                                         {"unique_vertices", "唯一顶点"},
                                                         {"references", "索引映射"},
+                                                        {"input_references", "Original references and cuts"},
                                                         {"patch_constants", "patch_constants"}};
 std::string text(const Json &object, const char *key, const char *fallback) {
     if (!object.contains(key))
