@@ -1,0 +1,1366 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_execution_core_research",
+  "complete_release_acceptance": false,
+  "latest_run_passed": false,
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.h",
+      "sha256": "b42194ab14be671c2956bdca40f681399d3433865a8ba38f22352a945cc17f8e"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "eebfeb8d5615df85b2c666c29ba88c79874cef08de1f3f46493a6d7227ef8634"
+    },
+    {
+      "path": "tests/DxbcExecutionTests.cpp",
+      "sha256": "fcb1b3c11af39bede7bc10c9717cf483d31f977ba527a5eba5158fcc65044a23"
+    },
+    {
+      "path": "tools/summarize_dxbc_execution.py",
+      "sha256": "6f0462ea026e6438e82fe462bb5138de2d917cde8ba3f1fd88d997256c0181d5"
+    },
+    {
+      "path": "build/vs2022/Release/D3DCompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    }
+  ],
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-first-150.txt",
+      "sha256": "0a0dfe5745a8bc1b1f80bad9180c06a478e36b31c17fd30b59dbde1e2d8c91f4",
+      "passed": 150,
+      "failed": 0,
+      "skipped": 0,
+      "failure_cases": [],
+      "adapters": [],
+      "raw_comparisons": 0,
+      "mismatches": [],
+      "same_operation_other_forms": []
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-raw-initial.txt",
+      "sha256": "65c1abc327f160452a51a8b2e46beffc5766542247880bedcfa9d2fff21f9365",
+      "passed": 187,
+      "failed": 14,
+      "skipped": 0,
+      "failure_cases": [
+        "DxbcExecutionTests::rawInstructions(0-28) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(0-130) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(0-142) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-130) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-142) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-38) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-81) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-130) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-132) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-142) Compared values are not the same"
+      ],
+      "adapters": [],
+      "raw_comparisons": 0,
+      "mismatches": [],
+      "same_operation_other_forms": []
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-dynamic-initial.txt",
+      "sha256": "3c8c23a6b37f6add4b0f584c66e02a83dc6ae0a00ef2f446bdb579bfae29833c",
+      "passed": 277,
+      "failed": 5,
+      "skipped": 0,
+      "failure_cases": [
+        "DxbcExecutionTests::rawInstructions(0-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-literal-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-literal-0) Compared values are not the same"
+      ],
+      "adapters": [],
+      "raw_comparisons": 132,
+      "mismatches": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-literal-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-literal-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-literal-0"
+        }
+      ],
+      "same_operation_other_forms": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-cb-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "dynamic": true,
+          "gpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-cb-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-cb-0"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-validated-probes.txt",
+      "sha256": "b8a91051474b28f5db596ff48ec75523ce395ecc519eb1836aeb1e5fd33a0dc0",
+      "passed": 279,
+      "failed": 5,
+      "skipped": 0,
+      "failure_cases": [
+        "DxbcExecutionTests::rawInstructions(0-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-literal-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-literal-0) Compared values are not the same"
+      ],
+      "adapters": [
+        {
+          "adapter": "Microsoft Basic Render Driver",
+          "device_id": 140,
+          "driver_version": 2814751477605871,
+          "luid_high": 0,
+          "luid_low": 73789,
+          "vendor_id": 5140
+        },
+        {
+          "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device_id": 11352,
+          "driver_version": 9007199255791310,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "vendor_id": 4318
+        },
+        {
+          "adapter": "Intel(R) Graphics",
+          "device_id": 32103,
+          "driver_version": 9007199261368954,
+          "luid_high": 0,
+          "luid_low": 73907,
+          "vendor_id": 32902
+        }
+      ],
+      "raw_comparisons": 132,
+      "mismatches": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-literal-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-literal-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": false,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-literal-0"
+        }
+      ],
+      "same_operation_other_forms": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-cb-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "dynamic": true,
+          "gpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-cb-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "dynamic": true,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-cb-0"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-three-forms.txt",
+      "sha256": "10701ce3a566f3ec73ce68a781305277020e1c3c6479b5015c209407c5e32c44",
+      "passed": 340,
+      "failed": 10,
+      "skipped": 0,
+      "failure_cases": [
+        "DxbcExecutionTests::rawInstructions(0-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(0-28-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-literal-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-scalar-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-scalar-0) Compared values are not the same"
+      ],
+      "adapters": [
+        {
+          "adapter": "Microsoft Basic Render Driver",
+          "device_id": 140,
+          "driver_version": 2814751477605871,
+          "luid_high": 0,
+          "luid_low": 73789,
+          "vendor_id": 5140
+        },
+        {
+          "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device_id": 11352,
+          "driver_version": 9007199255791310,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "vendor_id": 4318
+        },
+        {
+          "adapter": "Intel(R) Graphics",
+          "device_id": 32103,
+          "driver_version": 9007199261368954,
+          "luid_high": 0,
+          "luid_low": 73907,
+          "vendor_id": 32902
+        }
+      ],
+      "raw_comparisons": 198,
+      "mismatches": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-scalar-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-literal-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-scalar-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-literal-1"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-scalar-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-scalar-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-literal-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-scalar-0"
+        }
+      ],
+      "same_operation_other_forms": [
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-cb-0"
+        },
+        {
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 1,
+          "gpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-cb-1"
+        },
+        {
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-cb-0"
+        },
+        {
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-cb-0"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-execution-alias-final.txt",
+      "sha256": "699021de65fbcbc98646f79d9869ee9cfc34dbf37d11332b312beb76a5681372",
+      "passed": 357,
+      "failed": 17,
+      "skipped": 0,
+      "failure_cases": [
+        "DxbcExecutionTests::rawInstructions(0-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(0-28-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-131-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-literal-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-scalar-1) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-27-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-literal-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-28-scalar-0) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(4318-133-literal-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-38-literal-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-38-cb-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-81-literal-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-81-cb-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-132-literal-alias) Compared values are not the same",
+        "DxbcExecutionTests::rawInstructions(32902-132-cb-alias) Compared values are not the same"
+      ],
+      "adapters": [
+        {
+          "adapter": "Microsoft Basic Render Driver",
+          "device_id": 140,
+          "driver_version": 2814751477605871,
+          "luid_high": 0,
+          "luid_low": 73789,
+          "vendor_id": 5140
+        },
+        {
+          "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device_id": 11352,
+          "driver_version": 9007199255791310,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "vendor_id": 4318
+        },
+        {
+          "adapter": "Intel(R) Graphics",
+          "device_id": 32103,
+          "driver_version": 9007199261368954,
+          "luid_high": 0,
+          "luid_low": 73907,
+          "vendor_id": 32902
+        }
+      ],
+      "raw_comparisons": 222,
+      "mismatches": [
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-literal-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            4294967294
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-scalar-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-literal-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-scalar-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-literal-1"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-scalar-1"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-literal-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-scalar-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 0,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-literal-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 2,
+          "gpu": [
+            0,
+            0,
+            0,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-scalar-0"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            4294967293,
+            2147483645,
+            0,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            4294967293,
+            2147483645,
+            0,
+            1
+          ],
+          "opcode": 133,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-133-literal-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            4294967295,
+            4294967294,
+            268435456,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            2,
+            0,
+            268435456,
+            0
+          ],
+          "opcode": 38,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-38-literal-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            4294967295,
+            4294967294,
+            268435456,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            2,
+            0,
+            268435456,
+            0
+          ],
+          "opcode": 38,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-38-cb-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            1,
+            1,
+            268435456,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            1,
+            1,
+            4294967294,
+            2147483648
+          ],
+          "opcode": 81,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-81-literal-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            1,
+            1,
+            268435456,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            1,
+            1,
+            4294967294,
+            2147483648
+          ],
+          "opcode": 81,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-81-cb-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            1,
+            2147483651,
+            0,
+            0
+          ],
+          "form": 0,
+          "gpu": [
+            1,
+            2147483651,
+            1,
+            0
+          ],
+          "opcode": 132,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-132-literal-alias"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            1,
+            2147483651,
+            0,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            1,
+            2147483651,
+            1,
+            0
+          ],
+          "opcode": 132,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-132-cb-alias"
+        }
+      ],
+      "same_operation_other_forms": [
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 0,
+          "case": "0-28-cb-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "form": 1,
+          "gpu": [
+            2147483648,
+            864026624,
+            947896320,
+            1199562752
+          ],
+          "opcode": 131,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-131-cb-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opcode": 133,
+          "output": 1,
+          "vendor": 4318,
+          "case": "4318-133-cb-1"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            2147483648,
+            2147483647,
+            2147483647
+          ],
+          "opcode": 27,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-27-cb-0"
+        },
+        {
+          "aliased": false,
+          "cpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "form": 1,
+          "gpu": [
+            0,
+            0,
+            4294967295,
+            2147483648
+          ],
+          "opcode": 28,
+          "output": 0,
+          "vendor": 32902,
+          "case": "32902-28-cb-0"
+        },
+        {
+          "aliased": true,
+          "cpu": [
+            4294967293,
+            2147483645,
+            0,
+            0
+          ],
+          "form": 1,
+          "gpu": [
+            4294967293,
+            2147483645,
+            0,
+            0
+          ],
+          "opcode": 133,
+          "output": 0,
+          "vendor": 4318,
+          "case": "4318-133-cb-alias"
+        }
+      ]
+    }
+  ]
+}
