@@ -4,6 +4,10 @@ Date: 2026-10-24. This P6 checkpoint extends the independent executor's typed
 buffer SRV loads to the vertex stage. It does not replace production debugger
 actions or establish vertex invocation extraction from real captures.
 
+This document records the original `dxbc-gpu/4` checkpoint, including its explicit
+PS rejection. The subsequent `dxbc-gpu/5` implementation supports PS SRV loads;
+see `DX11_DXBC_TYPED_PIXEL_RESEARCH.md`. Original evidence remains unchanged.
+
 ## Native stage and storage
 
 The executor now passes the executing shader stage through typed memory access.

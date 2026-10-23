@@ -567,6 +567,14 @@ view ranges, raw bits, validity and reference bindings. See
 `DX11_DXBC_TYPED_VERTEX_RESEARCH.md`; real vertex invocation selection and full
 production debugger parity are still required.
 
+The PS typed-load extension passes 580 cases, including 576 exact native PS
+comparisons across the same three adapters. Its private integer target and coverage
+query verify a single covered sample without consuming application UAV slots.
+The serial eight-suite regression passes all 2374 cases, with no failures or skips
+in 431.61 seconds. The prior unsupported-PS test now requires exact successful PS
+output and unknown-value propagation. See `DX11_DXBC_TYPED_PIXEL_RESEARCH.md` for
+scope and evidence; captured pixel inputs, quads and full debugger parity remain open.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
