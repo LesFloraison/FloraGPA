@@ -21,5 +21,8 @@ struct TextureInputs {
     std::map<uint64_t, TextureInput> resources;
     // Native D3D11 SRV/UAV dimensions; missing resource storage stays unavailable.
     std::map<Register, TextureInputView> views;
+    Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,
+               const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
+               GpuOperations *, bool &assisted) const;
 };
 } // namespace flora::dxbc_exec

@@ -418,8 +418,10 @@ class Snapshot {
         resources(context);
         checkCancellation(cancelled);
         std::shared_ptr<GpuOperations> gpu;
-        if (std::any_of(views.begin(), views.end(), [](const auto &item) { return item.second.format != 0; }))
+        if ((!textures->resources.empty() && replay.featureLevel() >= D3D_FEATURE_LEVEL_11_0) ||
+            std::any_of(views.begin(), views.end(), [](const auto &item) { return item.second.format != 0; }))
             gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), replay.options().warp, cancelled);
+        result.inputs.gpu = gpu;
         result.inputs.memory =
             std::make_shared<Memory>(std::move(buffers), std::move(views), budget, 16 * 1024 * 1024,
                                      std::move(gpu), false, std::move(counters));

@@ -2,6 +2,7 @@
 #include "DxbcCheckpointModel.h"
 #include "DxbcGpuOperations.h"
 #include "DxbcOperandArities.h"
+#include "DxbcTextureInputs.h"
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -744,10 +745,13 @@ Step Lane::step() {
             fail("Invalid DXBC typed resource operand");
         const auto binding = s.address(resource);
         const auto declaration = p.typedResources.find(binding);
-        if (declaration == p.typedResources.end() || declaration->second.first != 1)
-            fail("Native typed execution requires a typed buffer declaration");
+        if (declaration == p.typedResources.end())
+            fail("Native typed execution requires a resource declaration");
+        const auto dimension = declaration->second.first;
+        if (dimension != 1 && op != 45)
+            fail("Native typed UAV execution currently requires a buffer declaration");
         const auto address = s.source(args[1], true);
-        if (!(address.valid & 1))
+        if (dimension == 1 && !(address.valid & 1))
             fail("Unknown DXBC typed buffer address");
         if (store) {
             if (resource.components != 2 || resource.mode != 0 || resource.mask != 15 || !s.inputs.memory)
@@ -761,12 +765,44 @@ Step Lane::step() {
                 (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
                 fail("Invalid DXBC typed load destination");
             const auto target = s.address(destination);
-            const auto value = s.inputs.memory
-                                   ? s.inputs.memory->loadTyped(p.stage, binding, address.bits[0],
-                                                                declaration->second.second, resource.select,
-                                                                destination.mask, args[1].kind == 4,
-                                                                result.memoryGpuAssisted)
-                                   : Value{};
+            Value value;
+            if (dimension == 1)
+                value = s.inputs.memory
+                            ? s.inputs.memory->loadTyped(p.stage, binding, address.bits[0],
+                                                         declaration->second.second, resource.select,
+                                                         destination.mask, args[1].kind == 4,
+                                                         result.memoryGpuAssisted)
+                            : Value{};
+            else {
+                if (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8)
+                    fail("Unsupported native texture load dimension");
+                const uint32_t required = dimension == 2 ? 9 : dimension == 3 || dimension == 7 ? 11 : 15;
+                if ((address.valid & required) != required)
+                    fail("Unknown DXBC texture load address");
+                std::array<int32_t, 3> offsets{};
+                std::set<uint32_t> extensions;
+                for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+                    const auto token = instruction.words.at(pos), kind = token & 63;
+                    if (!extensions.insert(kind).second)
+                        fail("Duplicate DXBC texture load extension");
+                    if (kind == 1) {
+                        for (unsigned c = 0; c < 3; ++c)
+                            offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
+                    } else if (kind == 2) {
+                        if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
+                            fail("DXBC texture load dimension extension disagrees with its declaration");
+                    } else if (kind == 3) {
+                        if (((token >> 6) & 0xffff) != declaration->second.second)
+                            fail("DXBC texture load return extension disagrees with its declaration");
+                    } else
+                        fail("Unsupported DXBC texture load extension");
+                }
+                value = s.inputs.textures
+                            ? s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
+                                                      address, resource.select, destination.mask, offsets,
+                                                      s.inputs.gpu.get(), result.memoryGpuAssisted)
+                            : Value{};
+            }
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
                 auto after = before;

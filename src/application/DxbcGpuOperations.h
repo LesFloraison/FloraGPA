@@ -9,6 +9,11 @@ class GpuOperations {
     std::unique_ptr<State> state_;
     friend class Memory;
     friend class Lane;
+    friend struct TextureInputs;
+    Value loadTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
+                      uint32_t dimension, uint32_t returns, const Value &address,
+                      const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                      const std::array<int32_t, 3> &offset);
     Value loadTyped(uint32_t stage, const Buffer &, const BufferView &, uint32_t kind, uint32_t index,
                     uint32_t returns, const std::array<uint32_t, 4> &, uint32_t mask, bool literal);
     std::vector<uint8_t> storeTyped(const Buffer &, const BufferView &, uint32_t index, uint32_t returns,

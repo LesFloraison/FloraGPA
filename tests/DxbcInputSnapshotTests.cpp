@@ -350,7 +350,7 @@ class DxbcInputSnapshotTests final : public QObject {
             validate(replay);
         }
     }
-    void unsupportedIsNotUnbound() {
+    void typedResourcesAreNotUnbound() {
         for (bool texture : {false, true}) {
             auto capture = testing::computeCapture(true);
             std::erase_if(capture.entries, [](auto &e) { return e.id == 6; });
@@ -369,7 +369,8 @@ class DxbcInputSnapshotTests final : public QObject {
                                                                     D3D11_BIND_SHADER_RESOURCE,
                                                                     0,
                                                                     0},
-                                               Id(0)));
+                                               Id(41)));
+                capture.add(41, 9, 1, testing::statePack(4u, 0x81234567u));
                 desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
                 desc.Texture2D.MipLevels = 1;
             } else {
@@ -400,8 +401,8 @@ class DxbcInputSnapshotTests final : public QObject {
                 QVERIFY(snapshot.inputs.textures);
                 QCOMPARE(snapshot.inputs.textures->views.at({7, {0}}).resource, std::optional<uint64_t>(40));
                 QCOMPARE(snapshot.inputs.textures->resources.at(40).storage.bytes.size(), size_t(4));
-                // Observed bytes do not establish initialization, and texture execution remains unsupported.
-                QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(snapshot));
+                execute(snapshot);
+                QCOMPARE(Reader(snapshot.inputs.memory->buffers().at(7).bytes).read<uint32_t>(), 0x81234567u);
                 QVERIFY(!snapshot.inputs.textures->views.at({7, {1}}).resource);
             } else {
                 QVERIFY(!snapshot.unavailable.contains({7, {0}}));

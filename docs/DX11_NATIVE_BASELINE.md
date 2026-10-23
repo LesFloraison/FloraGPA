@@ -584,6 +584,17 @@ implicit-mip probe failures remain in the evidence ledger. See
 `DX11_DXBC_TEXTURE_INPUT_RESEARCH.md`; texture instructions, sampling, multisample
 storage and production debugger integration remain open.
 
+The non-MSAA texture-load checkpoint passes 754 cases, including 750 exact native
+CS comparisons exercised through PS/VS/CS instruction helpers on WARP, NVIDIA and
+Intel. Its six-suite serial regression passes 2505 cases with zero failures/skips
+in 561.60 seconds. A repeated pre-fix run exposed four WARP shader-creation failures;
+inspection found borrowed DXBC signature spans outliving their temporary bytecode
+owners. The PS and new CS paths now retain those owners through assembly, with no
+retry or weakened assertion. Earlier failures remain in the evidence ledger.
+See `DX11_DXBC_TEXTURE_LOAD_RESEARCH.md` for validity, cancellation, coordinate and
+MinLOD checks. Full shader parity, compressed/sRGB formats, texture UAV operations,
+MSAA, sampling and acceptable full-trace performance remain open.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

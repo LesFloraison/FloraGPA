@@ -1,0 +1,351 @@
+#include "StateCapture.h"
+#include "application/DxbcGpuOperations.h"
+#include "application/DxbcInputSnapshot.h"
+#include "application/DxbcTypedBuffer.h"
+#include "application/HlslCompilation.h"
+#include "core/Dxbc.h"
+#include <QTemporaryDir>
+#include <QtTest>
+#include <d3d11sdklayers.h>
+using namespace flora;
+using namespace flora::dxbc_exec;
+namespace {
+using Words = std::vector<uint32_t>;
+Words op(uint32_t code, std::initializer_list<Words> args = {}) {
+    Words out{code};
+    for (const auto &arg : args)
+        out.insert(out.end(), arg.begin(), arg.end());
+    out[0] |= uint32_t(out.size()) << 24;
+    return out;
+}
+Program single(uint32_t stage, uint32_t dimension, uint32_t returns, std::array<int32_t, 3> offset,
+               uint32_t mask = 15) {
+    uint32_t control = 1;
+    for (unsigned c = 0; c < 3; ++c)
+        control |= (uint32_t(offset[c]) & 15) << (9 + c * 4);
+    const auto target = (stage == 5 ? 0x100002u : 0x102002u) | (mask << 4);
+    std::vector<Words> rows{op(89, {{0x208e46, 0, 1}}),
+                            op(88 | (dimension << 11), {{0x1070f2, 0}, {returns}})};
+    if (stage == 5) {
+        rows.push_back(op(104, {{1}}));
+        rows.push_back(op(155, {{1, 1, 1}}));
+    } else
+        rows.push_back(op(101, {{target, 0}}));
+    if (mask != 15)
+        rows.push_back(op(54, {{target | 0xf0, 0}, {0x4002, 7, 8, 9, 10}}));
+    rows.push_back(op(45 | 0x80000000, {{control}, {target, 0}, {0x208e46, 0, 0}, {0x1071b6, 0}}));
+    rows.push_back(op(62));
+    return Program(makeDxbc({{0x58454853, writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows})}}));
+}
+void replace(testing::Capture &capture, Id id, uint16_t category, uint16_t type, const Words &desc, Id data) {
+    std::erase_if(capture.entries, [&](auto &entry) { return entry.id == id; });
+    std::vector<uint8_t> bytes(16);
+    for (auto word : desc)
+        testing::append(bytes, word);
+    testing::append(bytes, data);
+    capture.add(id, category, type, bytes);
+}
+void blob(testing::Capture &capture, Id id, Bytes bytes) {
+    std::erase_if(capture.entries, [&](auto &entry) { return entry.id == id; });
+    auto payload = testing::word(UINT(bytes.size()));
+    payload.insert(payload.end(), bytes.begin(), bytes.end());
+    capture.add(id, 9, 1, payload);
+}
+ReplayOptions options(uint32_t vendor) {
+    ReplayOptions o;
+    o.warp = !vendor;
+    if (vendor)
+        o.vendor = vendor;
+    o.debug = true;
+    o.before = true;
+    o.until = 100;
+    return o;
+}
+void validation(Replay &replay) {
+    Com<ID3D11InfoQueue> queue;
+    check(replay.nativeDevice()->QueryInterface(IID_PPV_ARGS(&queue)),
+          "Read texture load reference validation");
+    for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+        SIZE_T size = 0;
+        check(queue->GetMessage(i, nullptr, &size), "Read texture load validation size");
+        std::vector<uint8_t> bytes(size);
+        auto *message = reinterpret_cast<D3D11_MESSAGE *>(bytes.data());
+        check(queue->GetMessage(i, message, &size), "Read texture load validation");
+        if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+            throw std::runtime_error(message->pDescription);
+    }
+}
+} // namespace
+class DxbcTextureLoadTests final : public QObject {
+    Q_OBJECT
+  private slots:
+    void hardware_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<unsigned>("mode");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (uint32_t dimension : {2u, 3u, 5u, 7u, 8u})
+                for (uint32_t format : {2u, 3u, 10u, 28u, 42u})
+                    for (unsigned mode = 0; mode < 10; ++mode)
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(dimension).arg(format).arg(mode)))
+                            << vendor << dimension << format << mode;
+    }
+    void hardware() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, dimension);
+        QFETCH(uint32_t, format);
+        QFETCH(unsigned, mode);
+        try {
+            auto capture = testing::computeCapture(true);
+            std::erase_if(capture.entries,
+                          [](auto &e) { return e.id == 6 || e.id == 12 || e.id == 16 || e.id == 111; });
+            Resource resource{};
+            resource.type = dimension == 2 || dimension == 7 ? 0x84 : dimension == 5 ? 0x86 : 0x85;
+            const uint32_t layers = dimension == 7 || dimension == 8 ? 3 : 1;
+            if (resource.type == 0x84)
+                resource.desc = {8, 3, layers, format, 0, 8, 0, 0x80};
+            else if (resource.type == 0x86)
+                resource.desc = {8, 8, 4, 3, format, 0, 8, 0, 0x80};
+            else
+                resource.desc = {8, 8, 3, layers, format, 1, 0, 0, 8, 0, 0x80};
+            replace(capture, 4, 5, resource.type, resource.desc, 5);
+            const auto subs = textureSubresources(resource);
+            std::vector<uint8_t> bytes(subs.back().offset + subs.back().size);
+            for (size_t i = 0; i < bytes.size(); ++i)
+                bytes[i] = uint8_t(i * 37 + i / 13 + 7);
+            blob(capture, 5, bytes);
+            D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
+            srv.Format = DXGI_FORMAT(format);
+            srv.ViewDimension = D3D11_SRV_DIMENSION(dimension == 2   ? 2
+                                                    : dimension == 3 ? 4
+                                                    : dimension == 5 ? 8
+                                                    : dimension == 7 ? 3
+                                                                     : 5);
+            srv.Texture2DArray = {1, 2, layers > 1 ? 1u : 0u, layers > 1 ? 2u : 0u};
+            capture.add(6, 5, 0x8c, testing::statePack(Id(0), Id(0), Id(4), srv));
+            replace(capture, 10, 5, 0x83, {16, 0, 128, 0, 64, 16}, 11);
+            blob(capture, 11, std::vector<uint8_t>(16));
+            D3D11_UNORDERED_ACCESS_VIEW_DESC uav{};
+            uav.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+            uav.Buffer.NumElements = 1;
+            capture.add(12, 5, 0x8f, testing::statePack(Id(0), Id(0), Id(10), uav));
+            std::array<uint32_t, 4> address{1, 1, 1, 0};
+            std::array<int32_t, 3> offset{};
+            float lod = 0;
+            if (mode == 1)
+                address[0] = UINT32_MAX;
+            if (mode == 2)
+                address[3] = 1;
+            if (mode == 3)
+                address[3] = 2;
+            if (mode == 4)
+                offset = {-2, 1, -1};
+            if (mode == 5)
+                lod = 1.25f;
+            if (mode == 6)
+                lod = 2.5f;
+            if (mode == 7)
+                offset = {1, 1, -1};
+            if (mode == 8)
+                address[dimension == 7 ? 1 : 2] = UINT32_MAX;
+            if (mode == 9)
+                lod = 2;
+            capture.add(95, 7, 0x3515, testing::statePack(Id(0), Id(1), Id(4), lod));
+            blob(capture, 3, Bytes(reinterpret_cast<const uint8_t *>(address.data()), 16));
+            const std::string shape = dimension == 2   ? "Texture1D"
+                                      : dimension == 3 ? "Texture2D"
+                                      : dimension == 5 ? "Texture3D"
+                                      : dimension == 7 ? "Texture1DArray"
+                                                       : "Texture2DArray";
+            const auto type = typedBufferFormat(format)->returnType == 4 ? "uint" : "float";
+            const std::string coord = dimension == 2                     ? "int2(p.x,p.w)"
+                                      : dimension == 3 || dimension == 7 ? "int3(p.xy,p.w)"
+                                                                         : "int4(p.xyz,p.w)";
+            const auto off =
+                dimension == 2 || dimension == 7 ? std::to_string(offset[0])
+                : dimension == 5
+                    ? "int3(" + std::to_string(offset[0]) + "," + std::to_string(offset[1]) + "," +
+                          std::to_string(offset[2]) + ")"
+                    : "int2(" + std::to_string(offset[0]) + "," + std::to_string(offset[1]) + ")";
+            const auto code = compileHlsl("cbuffer Params:register(b0){uint4 p;}" + shape + "<" + type +
+                                              "4> src:register(t0);RWStructuredBuffer<uint4> "
+                                              "result:register(u1);[numthreads(1,1,1)]"
+                                              "void main(){result[0]=asuint(src.Load(" +
+                                              coord + "," + off + ").wzyx);}",
+                                          "cs_5_0")
+                                  .bytecode;
+            auto shader = testing::statePack(uint64_t(code.size()));
+            shader.insert(shader.end(), code.begin(), code.end());
+            testing::append(shader, Id(0));
+            capture.add(16, 9, 0x81, shader);
+            QTemporaryDir directory;
+            const auto path = directory.filePath("texture-load.gpa_frame");
+            capture.save(path);
+            Frame frame(path.toStdWString());
+            auto config = options(vendor);
+            Replay replay(frame, config);
+            const auto observed = snapshotResourceInputs(replay, 5);
+            config.before = false;
+            Replay reference(frame, config);
+            reference.run();
+            const auto expected = reference.readBuffer(10);
+            std::array<uint32_t, 4> expectedWords;
+            std::memcpy(expectedWords.data(), expected.data(), 16);
+            const auto returns = typedBufferFormat(format)->returnType * 0x1111;
+            for (uint32_t stage : {0u, 1u, 5u}) {
+                auto program = single(stage, dimension, returns, offset);
+                Lane lane(program, observed.inputs);
+                const auto step = lane.step();
+                QVERIFY(step.memoryGpuAssisted);
+                QCOMPARE(step.changes.size(), size_t(1));
+                const auto value = lane.value({stage == 5 ? 0u : 2u, {0}});
+                QCOMPARE(value.bits, expectedWords);
+                QCOMPARE(value.valid, uint8_t(15));
+            }
+            Program program(observed.bytecode);
+            Group group(program, observed.inputs);
+            while (!group.finished())
+                group.step();
+            QCOMPARE(observed.inputs.memory->buffers().at(10).bytes, expected);
+            QCOMPARE(replay.readTexture(4), bytes);
+            validation(replay);
+            validation(reference);
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"probe", "dxbc-texture-load"},
+                                {"vendor", vendor},
+                                {"dimension", dimension},
+                                {"format", format},
+                                {"mode", mode},
+                                {"frame_sha256", observed.frameSha256},
+                                {"expected", expectedWords},
+                                {"helper", observed.inputs.gpu->identity()},
+                                {"passed", true},
+                                {"reference_stage", "cs"},
+                                {"executed_stages", {"ps", "vs", "cs"}}})
+                    .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void missingBindingsStillValidateInstructions() {
+        Inputs inputs;
+        inputs.constantBuffers[0] = {Value::known({0, 0, 0, 0})};
+        for (uint32_t dimension : {0u, 4u, 6u, 9u, 10u}) {
+            const auto program = single(5, dimension, 0x4444, {});
+            Lane lane(program, inputs);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+        }
+        for (uint32_t dimension : {2u, 3u, 5u, 7u, 8u}) {
+            const auto program = single(5, dimension, 0x4444, {});
+            Lane lane(program, inputs);
+            const auto step = lane.step();
+            QVERIFY(!step.memoryGpuAssisted);
+            QCOMPARE(lane.value({0, {0}}).valid, uint8_t(0));
+        }
+    }
+    void validitySelectionAndRecovery() {
+        try {
+            QTemporaryDir directory;
+            const auto path = directory.filePath("texture-device.gpa_frame");
+            testing::computeCapture(true).save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(0));
+            replay.run();
+            bool cancelled = false;
+            Inputs inputs;
+            inputs.gpu =
+                std::make_shared<GpuOperations>(replay.nativeDevice(), true, [&] { return cancelled; });
+            inputs.textures = std::make_shared<TextureInputs>();
+            TextureInput texture;
+            texture.resource.type = 0x85;
+            texture.resource.desc = {4, 4, 2, 1, 3, 1, 0, 0, 8, 0, 0};
+            texture.subresources = textureSubresources(texture.resource);
+            texture.storage = Buffer::known(std::vector<uint8_t>(320, 0x11));
+            texture.storage.valid[0] = 0;
+            texture.storage.valid[16] = 0;
+            inputs.textures->resources.emplace(4, texture);
+            TextureInputView view;
+            view.resource = 4;
+            view.format = 3;
+            view.dimension = 4;
+            view.mipCount = 2;
+            view.nativeDescriptor = {3, 4, 0, 2, 0, 0};
+            inputs.textures->views[{7, {0}}] = view;
+            inputs.constantBuffers[0] = {Value::known({0, 0, 0, 0})};
+            const auto program = single(5, 3, 0x4444, {});
+            Lane lane(program, inputs);
+            const auto step = lane.step();
+            QVERIFY(step.memoryGpuAssisted);
+            QCOMPARE(lane.value({0, {0}}).valid, uint8_t(7));
+            QCOMPARE(step.changes.at(0).before.valid, uint8_t(0));
+            QCOMPARE(step.changes.at(0).after.valid, uint8_t(7));
+            QCOMPARE(inputs.textures->resources.at(4).storage.bytes, texture.storage.bytes);
+            QCOMPARE(inputs.textures->resources.at(4).storage.valid, texture.storage.valid);
+            const auto maskedProgram = single(5, 3, 0x4444, {}, 9);
+            Lane masked(maskedProgram, inputs);
+            masked.step();
+            masked.step();
+            QCOMPARE(masked.value({0, {0}}).bits, (std::array<uint32_t, 4>{0x11111111, 8, 9, 0x11111111}));
+            QCOMPARE(masked.value({0, {0}}).valid, uint8_t(7));
+            inputs.constantBuffers[0][0].bits[0] = 2;
+            Lane unrelatedUnknown(program, inputs);
+            unrelatedUnknown.step();
+            QCOMPARE(unrelatedUnknown.value({0, {0}}).valid, uint8_t(15));
+            inputs.constantBuffers[0][0].bits[0] = UINT32_MAX;
+            Lane outside(program, inputs);
+            outside.step();
+            QCOMPARE(outside.value({0, {0}}).bits, (std::array<uint32_t, 4>{}));
+            QCOMPARE(outside.value({0, {0}}).valid, uint8_t(15));
+            const auto operations = inputs.gpu->operations();
+            inputs.constantBuffers[0][0].valid = 14;
+            Lane unknown(program, inputs);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, unknown.step());
+            QCOMPARE(inputs.gpu->operations(), operations);
+            inputs.constantBuffers[0][0] = Value::known({0, 0, 0, 0});
+            inputs.textures->views.at({7, {0}}).resource.reset();
+            Lane unbound(program, inputs);
+            const auto nullStep = unbound.step();
+            QVERIFY(!nullStep.memoryGpuAssisted);
+            QCOMPARE(unbound.value({0, {0}}).bits, (std::array<uint32_t, 4>{}));
+            QCOMPARE(unbound.value({0, {0}}).valid, uint8_t(15));
+            inputs.textures->views.at({7, {0}}) = view;
+            inputs.textures->views.at({7, {0}}).firstMip = 1;
+            Lane inconsistent(program, inputs);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, inconsistent.step());
+            QCOMPARE(inputs.gpu->operations(), operations);
+            inputs.textures->views.at({7, {0}}) = view;
+            cancelled = true;
+            Lane cancel(program, inputs);
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled, cancel.step());
+            QCOMPARE(inputs.gpu->operations(), operations);
+            cancelled = false;
+            const auto retry = cancel.step();
+            QVERIFY(retry.memoryGpuAssisted);
+            QCOMPARE(cancel.value({0, {0}}).valid, uint8_t(7));
+            unsigned checks = 0;
+            inputs.gpu =
+                std::make_shared<GpuOperations>(replay.nativeDevice(), true, [&] { return ++checks == 3; });
+            Lane submitted(program, inputs);
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled, submitted.step());
+            QCOMPARE(checks, 3u);
+            QCOMPARE(inputs.gpu->operations(), uint64_t(0));
+            QCOMPARE(submitted.value({0, {0}}).valid, uint8_t(0));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, submitted.step());
+            inputs.gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), true);
+            Lane recreated(program, inputs);
+            recreated.step();
+            QCOMPARE(recreated.value({0, {0}}).valid, uint8_t(7));
+            inputs.textures->resources.clear();
+            Lane unavailable(program, inputs);
+            unavailable.step();
+            QCOMPARE(unavailable.value({0, {0}}).valid, uint8_t(0));
+            validation(replay);
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+};
+QTEST_GUILESS_MAIN(DxbcTextureLoadTests)
+#include "DxbcTextureLoadTests.moc"

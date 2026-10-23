@@ -404,7 +404,7 @@ an occlusion query verifying one covered sample. The 580-case PS suite passes,
 including 576 exact hardware comparisons and reference state/resource checks.
 See `DX11_DXBC_TYPED_PIXEL_RESEARCH.md`; this does not yet supply captured pixel
 inputs, quad/helper-lane semantics or full fragment debugging.
-Typed textures and GPU sampling assistance, complete vertex/pixel input
+Complete texture execution and GPU sampling assistance, vertex/pixel input
 extraction, quad/helper execution, full CS group/cross-group semantics,
 source/GUI integration and full parity remain required P6 work.
 
@@ -413,9 +413,18 @@ snapshot. The 76-case texture suite covers packed mip/layer/depth storage, nativ
 SRV/UAV ranges, alias deduplication, input/output edits, fractional MinLOD and
 restoration after budget failure or cancellation across WARP, NVIDIA and Intel.
 Real GF2, BF1 and Helldivers inputs have also been observed. See
-`DX11_DXBC_TEXTURE_INPUT_RESEARCH.md` for exact scope and evidence. MSAA storage,
-texture instruction execution, sampling and production debugger cutover remain
-pending; input observation alone does not satisfy those gates.
+`DX11_DXBC_TEXTURE_INPUT_RESEARCH.md` for exact scope and evidence. Input observation
+alone does not establish texture instruction execution; the next checkpoint below
+covers non-MSAA loads. MSAA storage, sampling and production debugger cutover
+remain pending.
+
+Non-MSAA `ld` now executes for 1D/2D/3D textures and 1D/2D arrays using the native
+typed-format mapping and same-adapter PS/VS/CS assistance. The CPU preserves
+coordinates, offsets, view-relative mip/layer selection, MinLOD bounds and
+component validity. See `DX11_DXBC_TEXTURE_LOAD_RESEARCH.md` for the native CS
+reference matrix, recovery checks and remaining format/performance limits.
+Compressed/sRGB formats, texture UAV operations, MSAA and sampling remain required
+before full texture execution parity or production debugger cutover.
 
 ## Delivery constraints
 
