@@ -1,10 +1,12 @@
 #include "NativeHistory.h"
+#include "NativePixel.h"
 #include "ViewEdits.h"
 #include "core/ClearView.h"
 #include "core/Commands.h"
 #include "core/CopyCommands.h"
 #include "core/TextureStorage.h"
 #include <algorithm>
+#include <set>
 
 namespace flora {
 namespace {
@@ -274,10 +276,13 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
     if (!s.maxReadbackBytes || storageSize > s.maxReadbackBytes)
         throw std::invalid_argument("Native history readback exceeds its storage budget");
     const auto selected = cell(resource, s);
+    if (s.typedFormat && !nativePixelFormatsCompatible(info.format, *s.typedFormat))
+        throw std::invalid_argument("Native history typed format is incompatible with resource storage");
     const auto maps = auditMapRecords(replay.frame(), cancelled);
+    NativePixelDecoder decoder(replay);
     Json records = Json::array(), pending = nullptr;
     uint64_t reads = 0, bytesRead = 0, pointReads = 0;
-    auto snapshot = [&](const auto &objects) -> Json {
+    auto snapshot = [&](const auto &objects, const Json &footprint) -> Json {
         checkCancellation(cancelled);
         if (!objects.contains(s.resource))
             return {{"available", false}, {"reason", "resource_not_materialized"}, {"defined", nullptr}};
@@ -313,6 +318,26 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
         }
         ++reads;
         bytesRead += bytes.size();
+        std::optional<uint32_t> interpretation = s.typedFormat;
+        std::string interpretationSource = interpretation ? "explicit_selection" : "unknown";
+        if (!interpretation) {
+            std::set<uint32_t> formats;
+            if (footprint.contains("descriptor"))
+                formats.insert(footprint.at("descriptor").value("format", 0u));
+            if (footprint.contains("outputs"))
+                for (const auto &output : footprint.at("outputs"))
+                    formats.insert(output.at("descriptor").value("format", 0u));
+            formats.erase(0);
+            if (formats.size() == 1 && nativePixelFormatsCompatible(info.format, *formats.begin())) {
+                interpretation = *formats.begin();
+                interpretationSource = footprint.contains("descriptor") ? "command_view" : "bound_view";
+            } else if (formats.empty() && !nativePixelTypeless(info.format)) {
+                interpretation = info.format;
+                interpretationSource = "resource_format";
+            }
+        }
+        const auto decoded = decoder.decode(Bytes(bytes).subspan(size_t(location.offset), location.bytes),
+                                            interpretation.value_or(0), s.x, s.y);
         return {{"available", true},
                 {"defined", nullptr},
                 {"format", textureInfo(storageResource).format},
@@ -321,9 +346,16 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                 {"exact_pixel_storage", location.exactPixel},
                 {"bytes", value},
                 {"canonical_unused_x", canonicalX},
-                {"decoded_color", nullptr},
-                {"depth", nullptr},
-                {"stencil", nullptr}};
+                {"value_format", interpretation ? Json(*interpretation) : Json(nullptr)},
+                {"value_format_source", interpretationSource},
+                {"decoding_status", decoded.at("status")},
+                {"decoding_reason", decoded.value("reason", Json(nullptr))},
+                {"decoding_source", decoded.at("source")},
+                {"decoding_adapter", decoded.value("gpu_adapter", Json(nullptr))},
+                {"storage_math_color", decoded.value("storage_math_color", Json(nullptr))},
+                {"decoded_color", decoded.at("color")},
+                {"depth", decoded.at("depth")},
+                {"stencil", decoded.at("stencil")}};
     };
     auto boundary = [&](Id event, bool after, const auto &objects, Json footprint, const char *boundaryName) {
         checkCancellation(cancelled);
@@ -343,7 +375,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                        {"boundary", boundaryName},
                        {"enabled", !suppressed && !replay.options().disabled.contains(event)},
                        {"footprint", footprint},
-                       {"before", snapshot(objects)},
+                       {"before", snapshot(objects, footprint)},
                        {"fragment", nullptr},
                        {"shader_output", nullptr},
                        {"failure_reasons", nullptr},
@@ -356,7 +388,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                 pending["after"] = {
                     {"available", false}, {"reason", "discarded_storage"}, {"defined", false}};
             else
-                pending["after"] = snapshot(objects);
+                pending["after"] = snapshot(objects, pending.at("footprint"));
             pending["storage_changed"] = nullptr;
             pending["pixel_storage_changed"] = nullptr;
             const auto &a = pending.at("before"), &b = pending.at("after");
@@ -399,7 +431,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                });
     if (!pending.is_null())
         throw std::runtime_error("Incomplete native history boundary");
-    return {{"schema", 1},
+    return {{"schema", 2},
             {"kind", "pixel_event_history"},
             {"source", "native_dx11_replay"},
             {"selection",
@@ -424,8 +456,11 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
               "Addressed command footprints do not prove GPU execution when predication applies.",
               "Undefined or missing initial contents are not reconstructed; definedness remains unknown.",
               "Compressed and packed groups retain raw bytes without claiming individual pixel changes.",
-              "The optional typed format selects the MSAA hardware read path; single-sample snapshots retain "
-              "raw storage.",
-              "Decoded color, depth and stencil fields remain unknown in this event-storage schema."}}};
+              "Decoded values use an explicit selection, an unambiguous command/bound view or a typed "
+              "resource format.",
+              "Unknown interpretations and unsupported encodings retain raw storage without invented numeric "
+              "values.",
+              "The decoding source distinguishes storage math from native GPU Load results; raw storage is "
+              "retained."}}};
 }
 } // namespace flora

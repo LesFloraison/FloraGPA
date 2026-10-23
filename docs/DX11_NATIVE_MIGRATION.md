@@ -17,7 +17,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
-| P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker prototype and narrow ordinary-texture readback; decoded values, full matrix and special-format performance remain open |
+| P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Pending |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
@@ -281,7 +281,7 @@ of the legacy mesh backend.
 FloraGPA.Cli analyze frame.gpa_frame history --history-scope events --resource 80 --x 1280 --y 720 --gpu-vendor 0x10de --out history
 ```
 
-This explicit scope exposes schema-1 `pixel_event_history` with GPA identities.
+This explicit scope exposes schema-2 `pixel_event_history` with GPA identities.
 Calling `history` without the scope still fails until fragment-history parity is
 implemented. The existing Pixel History GUI remains available on its original
 backend; this milestone does not replace or reduce its successful capabilities.
@@ -300,9 +300,21 @@ remain unavailable without premature materialization. Discarded snapshots have
 unavailable storage and false definedness. Other readbacks retain unknown
 definedness: stored bytes alone cannot establish initialization or full coverage.
 BC blocks, packed pixel groups and planar luma/shared chroma retain raw storage
-without claiming an individual pixel change. Decoded color/depth/stencil are null
-in this milestone. A typed format selects the MSAA hardware read path; ordinary
-single-sample snapshots retain the resource's raw storage format.
+without claiming an individual pixel change. Schema 2 adds typed color/depth/stencil
+values while retaining the original raw storage. Interpretation comes from an
+explicit compatible selection, a unique command/bound view, or an already typed
+resource, in that order. Ambiguous or absent interpretations stay unknown. Each
+snapshot records `value_format`, `value_format_source`, `decoding_status` and
+`decoding_source`; unavailable/unsupported values are not synthesized.
+
+Ordinary normalized values use ideal storage math. B5 and BC formats use a native
+texture Load on an isolated device with the verified same adapter LUID. Those
+snapshots retain float32 `component_bits` and `decoding_adapter`; B5 also retains
+`storage_math_color` because observed NVIDIA/Intel loads differ from ideal math.
+The helper never dispatches into the captured context. Typeless storage is not
+silently interpreted as float. A typed format also selects the MSAA read path;
+raw storage format and interpretation remain separate. See
+`DX11_PIXEL_VALUE_RESEARCH.md` for the independent hardware probes and limits.
 
 The Worker keeps the existing immutable request/context, artifact hashes, explicit
 adapter, timeout, cancellation and module snapshot. Readbacks are bounded to
@@ -313,7 +325,8 @@ Ordinary single-sample color storage uses a one-texel GPU copy and a reusable
 staging resource. Source format and texture dimension are retained; source
 mip/layer/slice coordinates are explicit. The copy temporarily disables predication
 and preserves affected output bindings, including WARP's array-mip workaround.
-Raw NaN and negative-zero bit patterns are not interpreted or converted.
+Raw NaN and negative-zero bit patterns remain unchanged; the separate numeric
+interpretation uses nonfinite strings and preserves negative zero.
 
 Depth/stencil, MSAA, compressed, packed and planar layouts keep the complete
 storage reader. This respects the whole-subresource requirement for depth and

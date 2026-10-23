@@ -14,6 +14,33 @@ import struct
 from validate_native_analysis import digest, load, run
 
 
+def verify_decoded_checkpoint(snapshot, reference):
+    """Independent scalar checks for the ordinary formats used by the real corpus.
+
+    Return None for an unimplemented probe interpretation; never invent values for
+    unknown snapshots or count a raw-only comparison as decoded-color validation.
+    """
+    if snapshot.get("decoding_status") != "decoded" or snapshot.get("decoding_source") != "storage_math":
+        return None
+    fmt = snapshot["value_format"]
+    if fmt not in (28, 29, 30, 31, 32, 61, 62, 63, 64):
+        return None
+    values = list(reference)
+    if fmt in (31, 32, 63, 64):
+        values = [value if value < 128 else value - 256 for value in values]
+    if fmt in (28, 29, 61):
+        values = [value / 255. for value in values]
+    if fmt in (31, 63):
+        values = [max(-1., value / 127.) for value in values]
+    if fmt == 29:
+        values[:3] = [value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
+                      for value in values[:3]]
+    if len(values) == 1:
+        values.extend([0, 0, 1])
+    actual = snapshot["decoded_color"]["rgba"]
+    return len(actual) == 4 and all(abs(a - b) <= 1e-12 for a, b in zip(actual, values))
+
+
 def texel_offset(capture, resource, x, y):
     with capture.open("rb") as source, mmap.mmap(source.fileno(), 0, access=mmap.ACCESS_READ) as raw:
         if raw[:4] != b"IGPA" or len(raw) < 260:
@@ -134,10 +161,13 @@ def main():
                 if offset + size > len(raw):
                     raise AssertionError("Prefix texture storage is incomplete")
                 expected = raw[offset:offset + size].hex()
+                decoded_equal = verify_decoded_checkpoint(value, raw[offset:offset + size])
                 row["comparisons"].append({"event": int(event), "native": value["bytes"],
                                            "prefix": expected, "equal": value["bytes"] == expected,
+                                           "decoded_equal": decoded_equal,
                                            "prefix_wall_seconds": wall, "prefix_storage_sha256": digest(target / "texture.bin")})
             row["ok"] = (all(item["equal"] for item in row["comparisons"])
+                         and all(item["decoded_equal"] is not False for item in row["comparisons"])
                          and row.get("reference_records_equal", True))
         except Exception as error:
             row["error"] = str(error)

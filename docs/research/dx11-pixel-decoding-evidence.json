@@ -15,7 +15,7 @@
     "failed": 0,
     "skipped": 0
   },
-  "test_provenance": "Pixel and native-analysis suites preceded the command_view provenance-label change; the 91-case history suite and real-capture probe were repeated after that final change.",
+  "test_provenance": "Pixel and native-analysis suites preceded the command_view provenance-label change; the 91-case history suite and real-capture probe were repeated after that final change. A final result-note wording change explicitly distinguished native GPU Load from storage math; history was rebuilt and passed 91 cases again (15.37 s CTest). The nine real-frame checks precede only this wording change.",
   "observations": [
     {
       "format": 85,
@@ -190,6 +190,16 @@
       "path": "artifacts/dx11-native/history-decoded-final/validation.json",
       "sha256": "de456679303bdcd69f62a3952c1a9ef75853f35a44a4df770b51136795b1fb75",
       "bytes": 19490
+    },
+    {
+      "path": "artifacts/dx11-native/native-history-decoding-notes-91.txt",
+      "sha256": "00c5ed0f9a15d9373f78ebe35b154e562c7e710a452f4273ceb1529e11c7f174",
+      "bytes": 5716
+    },
+    {
+      "path": "artifacts/dx11-native/native-pixel-notes-build.log",
+      "sha256": "3aaeffcd082833efca7abf4a4b66e568a01ae3c4e8656b0066800e14f6fea935",
+      "bytes": 2885
     }
   ],
   "sources": [
@@ -458,5 +468,9 @@
     "No full format or BC-mode coverage.",
     "No release performance acceptance.",
     "Module snapshots do not establish transient-load, child-process, imports or clean-package acceptance."
-  ]
+  ],
+  "final_note_source": {
+    "path": "src/application/NativeHistory.cpp",
+    "sha256": "5777fcb85edfb249541acf5e967217232b3e77465c6074d791540ff5686a69f4"
+  }
 }

@@ -99,11 +99,14 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(result.at("readback_bytes"), Json(result.at("readback_count").get<uint64_t>() * 4));
         QCOMPARE(row(result, 100).at("before").at("available"), Json(false));
         QCOMPARE(row(result, 100).at("after").at("bytes"), Json("000000ff"));
+        QCOMPARE(row(result, 100).at("after").at("decoded_color").at("rgba"), Json::array({0., 0., 0., 1.}));
+        QCOMPARE(row(result, 100).at("after").at("value_format_source"), Json("command_view"));
         QCOMPARE(row(result, 110).at("pixel_storage_changed"), Json(true));
         QCOMPARE(row(result, 120).at("pixel_storage_changed"), Json(false));
         QCOMPARE(row(result, 150).at("pixel_storage_changed"), Json(false));
         QCOMPARE(row(result, 170).at("after").at("bytes"), Json("00ff00ff"));
         QCOMPARE(row(result, 170).at("write_executed"), Json(true));
+        QCOMPARE(row(result, 170).at("after").at("value_format_source"), Json("resource_format"));
         QCOMPARE(row(result, 180).at("pixel_storage_changed"), Json(false));
         QCOMPARE(row(result, 180).at("write_executed"), Json(true));
         QCOMPARE(row(result, 195).at("after").at("bytes"), Json("0000ffff"));
@@ -153,6 +156,8 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(history.at("records").size(), size_t(3));
         QCOMPARE(history.at("point_readback_count"), Json(0));
         QVERIFY(row(history, 810).at("after").at("available").get<bool>());
+        QCOMPARE(row(history, 810).at("after").at("stencil"), Json(0x53));
+        QVERIFY(std::abs(row(history, 810).at("after").at("depth").get<double>() - .5) < 1e-7);
     }
     void multisampleAndResolve_data() { devices(); }
     void multisampleAndResolve() {
@@ -172,6 +177,9 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(result.at("records").size(), size_t(1));
         QCOMPARE(result.at("point_readback_count"), Json(0));
         QCOMPARE(row(result, 110).at("after").at("bytes"), Json("20000000030000010000000001000000"));
+        QCOMPARE(row(result, 110).at("after").at("decoded_color").at("numeric_type"), Json("uint"));
+        QCOMPARE(row(result, 110).at("after").at("decoded_color").at("rgba"),
+                 Json::array({32, 16777219, 0, 1}));
         Replay clean(frame, options(vendor));
         clean.run();
         QCOMPARE(replay.readMsaa(20, 2, 3).bytes, clean.readMsaa(20, 2, 3).bytes);
@@ -527,7 +535,68 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(row(history, 100).at("after").at("encoding"), Json("compressed_4x4_block"));
         QVERIFY(row(history, 110).at("pixel_storage_changed").is_null());
         QCOMPARE(row(history, 110).at("storage_changed"), Json(false));
+        QCOMPARE(row(history, 100).at("after").at("decoding_source"), Json("native_gpu_load"));
         QCOMPARE(replay.readTexture(10), (std::vector<uint8_t>(blank.begin() + 4, blank.end())));
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+        const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
+        Json selection{
+            {"resource", 10}, {"x", 7}, {"y", 7}, {"history_scope", "events"}, {"debug_device", true}};
+        if (vendor)
+            selection["gpu_vendor"] = vendor;
+        else
+            selection["warp"] = true;
+        const auto job =
+            prepareNativeAnalysisJob(path, "history", directory.filePath("worker"), worker, selection);
+        QFile file(runNativeAnalysisJob(job, worker, 30));
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto result = Json::parse(file.readAll().toStdString());
+        validateNativeAnalysisResult(job, result);
+        QCOMPARE(result.at("data"), history);
+        const auto &adapter = row(result.at("data"), 100).at("after").at("decoding_adapter");
+        QCOMPARE(adapter.at("luid_low"), result.at("context").at("adapter").at("luid_low"));
+        QCOMPARE(adapter.at("luid_high"), result.at("context").at("adapter").at("luid_high"));
+        for (const auto &module : result.at("execution").at("loaded_modules")) {
+            const auto modulePath = QString::fromStdString(module.get<std::string>()).toLower();
+            QVERIFY(!modulePath.contains("renderdoc") && !modulePath.contains("intelswtools\\gpa\\"));
+        }
+    }
+    void typelessInterpretations_data() { devices(); }
+    void typelessInterpretations() {
+        QFETCH(uint32_t, vendor);
+        auto c = commands();
+        for (const auto &entry : c.entries)
+            if (entry.id == 10 || entry.id == 11)
+                put(c.bytes, size_t(entry.offset) + 32, 27u);
+        c.add(14, 5, 0x8d, statePack(Id(0), Id(0), Id(10), 29u, 5u, 1u, 1u, 1u));
+        c.add(196, 7, 0x32, statePack(Id(0), Id(1), Id(14), uint8_t(1), .5f, .5f, .5f, .5f));
+        QTemporaryDir directory;
+        const auto path = directory.filePath("typeless.gpa_frame");
+        c.save(path);
+        Frame frame(path.toStdWString());
+        NativeHistorySelection s;
+        s.resource = 10;
+        s.mip = s.layer = s.x = 1;
+        Replay replay(frame, options(vendor));
+        const auto history = collectNativeEventHistory(replay, s);
+        QCOMPARE(history.at("schema"), Json(2));
+        QCOMPARE(row(history, 170).at("after").at("bytes"), Json("00ff00ff"));
+        QCOMPARE(row(history, 170).at("after").at("decoding_status"), Json("unknown"));
+        QVERIFY(row(history, 170).at("after").at("decoded_color").is_null());
+        QCOMPARE(row(history, 195).at("after").at("value_format"), Json(28));
+        const auto &srgb = row(history, 196).at("after");
+        QCOMPARE(srgb.at("value_format"), Json(29));
+        QCOMPARE(srgb.at("value_format_source"), Json("command_view"));
+        QCOMPARE(srgb.at("decoded_color").at("srgb_to_linear"), Json(true));
+        QVERIFY(std::abs(srgb.at("decoded_color").at("rgba")[0].get<double>() - .5) < .005);
+        s.typedFormat = 30;
+        Replay explicitView(frame, options(vendor));
+        const auto explicitHistory = collectNativeEventHistory(explicitView, s);
+        const auto &update = row(explicitHistory, 170).at("after");
+        QCOMPARE(update.at("value_format_source"), Json("explicit_selection"));
+        QCOMPARE(update.at("decoded_color").at("rgba"), Json::array({0, 255, 0, 255}));
+        QCOMPARE(explicitView.readTexture(10), replay.readTexture(10));
+        s.typedFormat = 41;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectNativeEventHistory(explicitView, s));
         QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
     }
     void workerRequest() {
@@ -549,8 +618,8 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(result.at("data").at("records").size(), size_t(8));
         QCOMPARE(result.at("data").at("fragment_history_available"), Json(false));
         for (const auto &module : result.at("execution").at("loaded_modules")) {
-            const auto path = QString::fromStdString(module.get<std::string>()).toLower();
-            QVERIFY(!path.contains("renderdoc") && !path.contains("intelswtools\\gpa\\"));
+            const auto modulePath = QString::fromStdString(module.get<std::string>()).toLower();
+            QVERIFY(!modulePath.contains("renderdoc") && !modulePath.contains("intelswtools\\gpa\\"));
         }
     }
 };

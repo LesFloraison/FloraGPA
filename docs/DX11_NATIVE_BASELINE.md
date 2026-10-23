@@ -376,6 +376,46 @@ stable at its first magnitude, but these runs still do not establish a controlle
 non-regression result. `history-point-repeat/performance.json` retains all four
 measurements, with full native results in the adjacent run directories.
 
+## Typed pixel decoding and isolated GPU loads
+
+The schema-2 event-history result adds typed numeric values without changing its
+event-only provenance. The focused suites passed **207 native-pixel, 91 history
+and 40 native-analysis cases**, with zero failures or skips. Pixel decoding covers
+52 ordinary typed formats on WARP/NVIDIA/Intel, depth/stencil, nonfinite and signed
+edge cases, 14 BC variants with all 16 block positions, and helper-device query,
+predicate, binding and hidden-UAV-counter isolation. The final command-view source
+label change was followed by another 91-case history run (15.46 s CTest time).
+The other two suites preceded that metadata-only change.
+
+The initial GPU comparison had four B5 failures on NVIDIA/Intel. They are preserved
+as evidence, not waived. B5 now retains both ideal storage math and the actual
+same-adapter GPU Load result; hardware result bits are compared exactly with an
+independently compiled shader. BC decoding uses the same isolated device path.
+See `DX11_PIXEL_VALUE_RESEARCH.md` and its hash ledger for details and limits.
+
+The final CLI/Worker was checked against frozen-main prefix replay on all nine
+real-capture checkpoints listed above. Both raw storage and independently decoded
+numeric values pass. The 98 history records retain event-only provenance; this run
+does not claim a complete schema-1/schema-2 record equality because the added typed
+fields intentionally differ. The optional strict prior-record comparator remains
+unchanged and is only appropriate for compatible result schemas.
+
+| Resource | Raw / decoded checkpoints | CLI wall seconds | Worker seconds | Peak working set MiB |
+| --- | --- | --- | --- | --- |
+| GF2 80 | 3 / 3 | 2.235 | 0.519 | 235.86 |
+| BF1 23209 | 3 / 3 | 19.266 | 2.569 | 1728.57 |
+| Helldivers 99 | 3 / 3 | 16.797 | 2.452 | 1691.34 |
+
+BF1/Helldivers still sample zero texels. These measurements retain the unresolved
+large-frame variance and do not close the performance gate. Module snapshots show
+no RenderDoc or original GPA modules in these Workers; the existing build still
+includes the legacy backend elsewhere. No clean package acceptance is claimed.
+
+Evidence: `native-pixel-math-vs-hardware-initial.txt`, `native-pixel-207.txt`,
+`native-history-decoding-91.txt`, `native-analysis-decoding-40.txt`,
+`native-pixel-final-{build,tests}.log`, `native-pixel-label-build.log`, and
+`history-decoded-final/validation.json`, all under `artifacts/dx11-native/`.
+
 ## Reproduction and evidence
 
 ```powershell
@@ -409,9 +449,9 @@ python tools/compare_native_counter_reports.py `
   --native artifacts/dx11-native/counter-batch-repeat/gf2/native/result.json `
   --reference artifacts/dx11-native/gf2-counter-cutover/baseline/result.json `
   --out artifacts/dx11-native/gf2-counter-comparison-new.json
-cmake --build build/vs2022 --config Release --target FloraNativeHistoryTests FloraNativeAnalysisTests FloraGPA.Cli
+cmake --build build/vs2022 --config Release --target FloraNativePixelTests FloraNativeHistoryTests FloraNativeAnalysisTests FloraGPA.Cli
 ctest --test-dir build/vs2022 -C Release -j 1 --timeout 180 `
-  -R '^(native_history|native_analysis)$' --output-on-failure
+  -R '^(native_pixel|native_history|native_analysis)$' --output-on-failure
 python tools/validate_native_history.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
   --baseline-cli build/dx11-native-baseline/Release/FloraGPA.Cli.exe `
   --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
@@ -425,8 +465,8 @@ python tools/validate_native_history.py --cli build/vs2022/Release/FloraGPA.Cli.
   --case D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame 80 1280 720 `
   --case D:/CDXrepo/captures/bf1_2026_01_21__16_53_05.gpa_frame 23209 512 512 `
   --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 99 128 128 `
-  --reference-history artifacts/dx11-native/history-prefix-validation `
-  --out artifacts/dx11-native/history-point-validation-new
+  --reference-history artifacts/dx11-native/history-decoded-final `
+  --out artifacts/dx11-native/history-decoded-comparison-new
 ```
 
 Raw build/CTest logs, JUnit output and original reports remain under ignored
