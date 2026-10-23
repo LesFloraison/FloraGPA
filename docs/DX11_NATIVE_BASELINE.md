@@ -550,6 +550,15 @@ they do not execute those real shaders. The original cancellation-type failure
 is retained and fixed without changing its assertion. See
 `DX11_DXBC_INPUT_RESEARCH.md` for exact scope, timings and resource identities.
 
+The typed-buffer checkpoint adds 473 passing cases, including 468 exact hardware
+comparisons across WARP, NVIDIA and Intel. The serial typed/input/counter/group/
+memory/execution regression passes all 1214 cases, with no failures or skips in
+214.37 seconds. Two real VS input observations now capture formerly unsupported
+R32G32B32A32_FLOAT buffers; they do not execute those vertex shaders. The invalid
+external-register fixture failure is retained and corrected with a legal constant
+buffer input, without weakening byte assertions. See
+`DX11_DXBC_TYPED_BUFFER_RESEARCH.md` for formats, validity, limits and evidence.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

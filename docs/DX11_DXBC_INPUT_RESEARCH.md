@@ -4,6 +4,10 @@ Date: 2026-10-24. This P6 checkpoint connects the private executor to buffer inp
 observed at a native GPA-frame replay boundary. It does not replace production
 debug actions or prove full real-capture shader execution.
 
+This document records the original `/1` checkpoint. The later typed-buffer
+extension uses `/2` provenance and retains supported native buffer formats;
+see `DX11_DXBC_TYPED_BUFFER_RESEARCH.md`. Original `/1` evidence remains unchanged.
+
 ## One event boundary and experiment scope
 
 `snapshotBufferInputs` performs a replay stopped before one selected work event.
