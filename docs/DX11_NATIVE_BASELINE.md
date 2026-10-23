@@ -496,6 +496,13 @@ binary/evidence identities are documented separately in `DX11_GPA_RESEARCH.md`.
 
 ## Remaining acceptance
 
+The DXBC execution prototype introduces an additional strict conformance suite;
+its latest run has 357 passes, 17 failures and zero skips. These are new unresolved
+research failures, not exceptions added to the frozen main baseline. The existing
+DXBC format, checkpoint model and output-log suites passed after the addition.
+See `DX11_DXBC_EXECUTION_RESEARCH.md` for retained inputs, independent GPU evidence
+and the explicit limits of this implementation checkpoint.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
