@@ -1,5 +1,9 @@
 # Native DXBC execution research checkpoint
 
+Subsequent checkpoint: `DX11_DXBC_GPU_INSTRUCTION_RESEARCH.md` records the
+same-adapter VS assist that resolves the 17 instruction differences below. This
+document and its ledger retain the original CPU-only failures and reasoning.
+
 Date: 2026-10-24. This is an unfinished P6 implementation checkpoint. The strict
 GPU conformance test is failing and remains enabled. It does not close debugger
 parity, authorize a GUI cutover, or establish standalone release acceptance.

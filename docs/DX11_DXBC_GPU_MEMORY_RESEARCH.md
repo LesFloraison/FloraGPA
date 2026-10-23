@@ -1,5 +1,9 @@
 # Native GPU assistance for DXBC buffer operations
 
+Subsequent checkpoint: `DX11_DXBC_GPU_INSTRUCTION_RESEARCH.md` records the VS
+instruction extension and renames the shared helper to `GpuOperations`. The
+scalar/control failure counts below describe the earlier buffer checkpoint.
+
 Date: 2026-10-24. The hybrid buffer suite now passes 246 cases with zero failures
 and zero skips. The six earlier buffer differences are reproduced and resolved
 by actual GPU operations, not vendor-specific guessed values. The separate

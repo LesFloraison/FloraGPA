@@ -13,7 +13,7 @@ def identity(path):
 
 def comparison_key(item):
     return tuple(item.get(key) for key in
-                 ("vendor", "opcode", "output", "aliased", "structured", "variant", "unbound")) + (
+                 ("vendor", "opcode", "output", "aliased", "form", "structured", "variant", "unbound")) + (
                      tuple(item.get("params", [])),)
 
 
@@ -50,6 +50,8 @@ def summarize(path, previous_failures=()):
                       if item.get("assistAll") is all_accesses)
             for mode, all_accesses in (("boundary", False), ("all_accesses", True))
         },
+        "instruction_gpu_operations": sum(item.get("gpu_operations", 0) for item in observations
+                                           if "assistAll" not in item),
         "resolved_cases": [item["case"] for item in observations
                            if item["cpu"] == item["gpu"] and comparison_key(item) in previous_failures],
         "same_operation_other_forms": [
