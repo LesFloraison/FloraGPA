@@ -4,10 +4,14 @@
 struct ID3D11Device;
 
 namespace flora::dxbc_exec {
-class GpuMemory {
+class GpuOperations {
     struct State;
     std::unique_ptr<State> state_;
     friend class Memory;
+    friend class Lane;
+    std::vector<Value> instruction(uint32_t stage, const Instruction &, const std::vector<Register> &,
+                                   const std::vector<uint32_t> &, const std::vector<Value> &,
+                                   const std::vector<Value> &);
     Value load(const Buffer &, const BufferView &, uint32_t kind, uint32_t index, uint32_t offset,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex, bool literalOffset);
     std::vector<uint8_t> store(const Buffer &, const BufferView &, uint32_t index, uint32_t offset,
@@ -16,8 +20,8 @@ class GpuMemory {
   public:
     // Creates a separate device on the reference device's exact adapter. WARP
     // must be explicitly requested; no fallback or reference-context use occurs.
-    GpuMemory(ID3D11Device *reference, bool warp, CancelCheck cancelled = {}, uint32_t timeoutMs = 5000);
-    ~GpuMemory();
+    GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled = {}, uint32_t timeoutMs = 5000);
+    ~GpuOperations();
     nlohmann::json identity() const;
     uint64_t operations() const;
 };

@@ -352,11 +352,14 @@ dynamic indices and structured control flow. Unknown control/address values and
 unsupported instructions fail without committing the instruction. It does not
 replace any production debug action yet.
 
-The current serial GPU conformance suite is deliberately still strict and fails:
-357 cases pass, 17 fail, none are skipped. The differences include immediate
-conversion/borrow behavior and Intel destination aliasing. Separate-register
-dynamic-input probes agree across WARP, NVIDIA and Intel, but this does not close
-the remaining forms. See `DX11_DXBC_EXECUTION_RESEARCH.md` and its evidence ledger.
+The CPU-only conformance checkpoint had 357 passes and 17 failures, with no skips.
+Those differences include immediate conversion/borrow behavior and Intel
+destination aliasing. Same-adapter VS instruction assistance now resolves all
+17 original cases with unchanged exact assertions. The original 374-case suite
+passes, and the expanded suite passes 375 cases with no failures or skips.
+Additional lifecycle validation and the retained prior differences are
+documented in `DX11_DXBC_GPU_INSTRUCTION_RESEARCH.md` and its evidence ledger.
+This does not establish equivalence for all shader contexts or other stages.
 No historical baseline failure category or test skip was expanded. Private raw
 and structured SRV/UAV snapshots now support loads, stores, view aliases and
 reversible memory changes with per-byte validity. The separate CS buffer suite
@@ -367,6 +370,8 @@ reference-context binding checks and cancellation/recreation. Its complete outpu
 comparisons include backing bytes outside the selected view. See
 `DX11_DXBC_GPU_MEMORY_RESEARCH.md` for provenance, bounds and remaining limits.
 This CS feature-level-11.0 evidence is not full stage or feature-level parity.
+The shared private device helper is now named `GpuOperations`, with backend
+identity `dxbc-gpu/2`; instruction and buffer passes retain separate trace flags.
 Typed resources and GPU sampling
 assistance, actual input extraction, quad/helper execution, CS group
 semantics, source/GUI integration and full parity remain required P6 work.

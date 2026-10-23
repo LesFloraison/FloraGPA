@@ -1,5 +1,6 @@
 #include "application/DxbcCheckpointModel.h"
 #include "application/DxbcExecution.h"
+#include "application/DxbcGpuOperations.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -317,19 +318,47 @@ class DxbcExecutionTests final : public QObject {
             qInfo().noquote() << QString::fromUtf8(static_cast<const char *>(disassembly->GetBufferPointer()),
                                                    int(disassembly->GetBufferSize()));
             Program program(shader);
-            Lane lane(program, inputs);
-            execute(lane);
             Device device(vendor);
+            const std::array<uint32_t, 4> sentinelBits{11, 22, 33, 44};
+            const D3D11_BUFFER_DESC sentinelDesc{16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0,
+                                                 0};
+            const D3D11_SUBRESOURCE_DATA sentinelData{sentinelBits.data(), 0, 0};
+            Com<ID3D11Buffer> sentinel;
+            check(device.device->CreateBuffer(&sentinelDesc, &sentinelData, &sentinel),
+                  "Create instruction sentinel");
+            auto *binding = sentinel.Get();
+            device.context->VSSetConstantBuffers(13, 1, &binding);
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), vendor == 0);
+            Lane lane(program, inputs);
+            const auto steps = execute(lane);
+            Com<ID3D11Buffer> preserved;
+            device.context->VSGetConstantBuffers(13, 1, &preserved);
+            QCOMPARE(preserved.Get(), sentinel.Get());
+            const auto assisted = std::count_if(steps.begin(), steps.end(),
+                                                [](const Step &step) { return step.instructionGpuAssisted; });
+            QVERIFY(inputs.gpu->operations() >= uint64_t(assisted));
+            QVERIFY(inputs.gpu->operations() <= uint64_t(assisted) * 2);
+            auto restored = lane.registers();
+            for (auto step = steps.rbegin(); step != steps.rend(); ++step)
+                for (auto change = step->changes.rbegin(); change != step->changes.rend(); ++change) {
+                    QCOMPARE(restored[change->destination], change->after);
+                    restored[change->destination] = change->before;
+                }
+            for (const auto &[reg, value] : restored)
+                QCOMPARE(value, inputs.registers.contains(reg) ? inputs.registers.at(reg) : Value{});
             const auto gpu = device.run(shader, constants);
             const auto cpu = lane.value({2, {0}});
-            qInfo().noquote() << QString::fromStdString(nlohmann::json({{"cpu", cpu.bits},
-                                                                        {"gpu", gpu},
-                                                                        {"opcode", opcode},
-                                                                        {"vendor", vendor},
-                                                                        {"form", form},
-                                                                        {"aliased", aliased},
-                                                                        {"output", output}})
-                                                            .dump());
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"cpu", cpu.bits},
+                                {"gpu", gpu},
+                                {"opcode", opcode},
+                                {"vendor", vendor},
+                                {"form", form},
+                                {"aliased", aliased},
+                                {"assistance", inputs.gpu->identity()},
+                                {"gpu_operations", inputs.gpu->operations()},
+                                {"output", output}})
+                    .dump());
             QCOMPARE(cpu.valid, uint8_t(15));
             for (size_t i = 0; i < 4; ++i)
                 QCOMPARE(cpu.bits[i], gpu[i]);
@@ -542,6 +571,36 @@ class DxbcExecutionTests final : public QObject {
             execute(lane);
             QCOMPARE(lane.value({2, {0}}), Value::known({expected, expected, expected, expected}));
         }
+    }
+    void instructionCancellationAndValidity() {
+        Device device(0);
+        int checks = 0;
+        Inputs inputs;
+        inputs.gpu =
+            std::make_shared<GpuOperations>(device.device.Get(), true, [&] { return ++checks == 3; });
+        Program program(binary(rawFixture(28, 0, false)));
+        Lane cancelled(program, inputs);
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, cancelled.step());
+        QCOMPARE(checks, 3);
+        QCOMPARE(inputs.gpu->operations(), uint64_t(0));
+        QVERIFY(cancelled.registers().empty());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, cancelled.step());
+        QVERIFY(cancelled.registers().empty());
+        inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), true);
+        Lane recovered(program, inputs);
+        QVERIFY(recovered.step().instructionGpuAssisted);
+        QCOMPARE(inputs.gpu->operations(), uint64_t(1));
+        QCOMPARE(recovered.value({2, {0}}).valid, uint8_t(15));
+        Program unknown(binary({op(132, {dst(2, 0, 3), dst(2, 0, 12), src(0, 0), literal(1)}), op(62)}));
+        Lane unknownLane(unknown, inputs);
+        QVERIFY(unknownLane.step().instructionGpuAssisted);
+        QCOMPARE(unknownLane.value({2, {0}}).valid, uint8_t(0));
+        const auto count = inputs.gpu->operations();
+        Program overlap(binary({op(132, {dst(2, 0, 3), dst(2, 0, 6), literal(1), literal(2)}), op(62)}));
+        Lane invalid(overlap, inputs);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, invalid.step());
+        QCOMPARE(inputs.gpu->operations(), count);
+        QVERIFY(invalid.registers().empty());
     }
 };
 QTEST_GUILESS_MAIN(DxbcExecutionTests)

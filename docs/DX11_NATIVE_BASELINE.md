@@ -517,6 +517,15 @@ and helper recreation. The scalar/control regression remains 357 passes and 17
 failures. Original CPU-only evidence is retained; see
 `DX11_DXBC_GPU_MEMORY_RESEARCH.md`. This does not close full P6 or release acceptance.
 
+The later VS instruction assist resolves all 17 original scalar/control failures
+with their original operand forms and exact comparisons. The final serial run has
+375 execution passes (62.87 s) and 246 buffer passes (48.28 s), zero failures and
+zero skips. It includes binding preservation, reversible register validity,
+cancellation/recreation and rejection before submission. An intermediate new
+lifecycle failure is retained in the evidence rather than reclassified as a
+baseline exception. See `DX11_DXBC_GPU_INSTRUCTION_RESEARCH.md` for stage/model
+limits and hashes. Neither suite is a complete real-capture debugger acceptance.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

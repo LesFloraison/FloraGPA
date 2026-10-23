@@ -1,5 +1,5 @@
 #include "application/DxbcExecution.h"
-#include "application/DxbcGpuMemory.h"
+#include "application/DxbcGpuOperations.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -229,7 +229,7 @@ class DxbcMemoryTests final : public QObject {
                 targetView = {};
             Inputs inputs;
             Device device(vendor);
-            const auto assist = std::make_shared<GpuMemory>(device.device.Get(), vendor == 0);
+            const auto assist = std::make_shared<GpuOperations>(device.device.Get(), vendor == 0);
             qInfo().noquote() << QString::fromStdString(assist->identity().dump());
             inputs.constantBuffers[0] = {Value::known(params)};
             inputs.memory = std::make_shared<Memory>(
@@ -374,9 +374,9 @@ class DxbcMemoryTests final : public QObject {
         Device device(0);
         int checks = 0;
         const auto assist =
-            std::make_shared<GpuMemory>(device.device.Get(), true, [&] { return ++checks == 3; });
+            std::make_shared<GpuOperations>(device.device.Get(), true, [&] { return ++checks == 3; });
         const auto initial = Buffer::known(bytes(64, 31));
-        const auto makeMemory = [&](const std::shared_ptr<GpuMemory> &gpu) {
+        const auto makeMemory = [&](const std::shared_ptr<GpuOperations> &gpu) {
             return std::make_shared<Memory>(std::map<uint64_t, Buffer>{{1, initial}},
                                             std::map<Register, BufferView>{{{30, {0}}, {1, 0, 64, 0}}}, 64,
                                             64, gpu, true);
@@ -391,7 +391,7 @@ class DxbcMemoryTests final : public QObject {
         QCOMPARE(inputs.memory->buffers().at(1).bytes, initial.bytes);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
         QCOMPARE(inputs.memory->buffers().at(1).bytes, initial.bytes);
-        const auto replacement = std::make_shared<GpuMemory>(device.device.Get(), true);
+        const auto replacement = std::make_shared<GpuOperations>(device.device.Get(), true);
         inputs.memory = makeMemory(replacement);
         Lane recovered(code, inputs);
         const auto steps = execute(recovered);
@@ -403,7 +403,7 @@ class DxbcMemoryTests final : public QObject {
         Com<ID3D11Buffer> stillBound;
         device.context->CSGetConstantBuffers(13, 1, &stillBound);
         QCOMPARE(stillBound.Get(), device.sentinel.Get());
-        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, GpuMemory(device.device.Get(), true, {}, 0));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, GpuOperations(device.device.Get(), true, {}, 0));
     }
 };
 QTEST_GUILESS_MAIN(DxbcMemoryTests)

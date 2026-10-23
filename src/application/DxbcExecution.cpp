@@ -1,5 +1,6 @@
 #include "DxbcExecution.h"
 #include "DxbcCheckpointModel.h"
+#include "DxbcGpuOperations.h"
 #include "DxbcOperandArities.h"
 #include <algorithm>
 #include <bit>
@@ -681,6 +682,8 @@ Step Lane::step() {
         }
         if (op == 142 && (targets[0] == targets[1] || !args[0].mask || !args[1].mask))
             fail("DXBC swapc requires distinct destinations with nonempty masks");
+        if (dual && targets[0] == targets[1] && targets[0].kind != 13 && (args[0].mask & args[1].mask))
+            fail("Overlapping DXBC multi-result destinations");
         std::vector<Value> values;
         for (size_t i = destinations; i < args.size(); ++i)
             values.push_back(s.source(args[i], integerSources(op)));
@@ -742,17 +745,33 @@ Step Lane::step() {
                         outputs[1].valid |= uint8_t(1u << i);
                 }
             }
+        const bool aliased = dual && targets[0] == targets[1] && targets[0].kind != 13;
+        const bool literalConversion = (op == 27 || op == 28 || op == 131) && args[destinations].kind == 4;
+        const bool literalBorrow = op == 133 && args[2].kind == 4 && args[3].kind == 4;
+        if (s.inputs.gpu && (aliased || literalConversion || literalBorrow)) {
+            std::vector<uint32_t> masks;
+            std::vector<Value> before;
+            for (size_t i = 0; i < destinations; ++i) {
+                masks.push_back(args[i].mask);
+                before.push_back(s.value(targets[i]));
+            }
+            const auto native =
+                s.inputs.gpu->instruction(p.stage, instruction, targets, masks, values, before);
+            const bool known =
+                std::all_of(values.begin(), values.end(), [](const Value &v) { return v.valid == 15; });
+            for (size_t i = 0; i < destinations; ++i) {
+                outputs[i].bits = native.at(i).bits;
+                if (!known)
+                    outputs[i].valid = 0;
+            }
+            result.instructionGpuAssisted = true;
+        }
         for (size_t i = 0; i < destinations; ++i) {
             const auto &target = targets[i];
             if (target.kind == 13 || !s.inBounds(target))
                 continue;
             const auto previous = std::find_if(result.changes.begin(), result.changes.end(),
                                                [&](const Change &c) { return c.destination == target; });
-            if (previous != result.changes.end()) {
-                for (size_t j = 0; j < i; ++j)
-                    if (targets[j] == target && (args[j].mask & args[i].mask))
-                        fail("Overlapping DXBC multi-result destinations");
-            }
             auto after = previous == result.changes.end() ? s.value(target) : previous->after;
             const auto before = after;
             for (unsigned c = 0; c < 4; ++c)
@@ -760,7 +779,7 @@ Step Lane::step() {
                     if (target.kind == 3 && c >= p.arrays.at(target.indices[0]).second)
                         continue;
                     auto bits = outputs[i].bits[c];
-                    if (instruction.words[0] & (1u << 13)) {
+                    if (!result.instructionGpuAssisted && (instruction.words[0] & (1u << 13))) {
                         const auto number = floating(bits);
                         bits = floatBits(std::isnan(number) ? 0.f : std::clamp(number, 0.f, 1.f));
                     }

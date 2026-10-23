@@ -1,5 +1,5 @@
 #include "DxbcExecution.h"
-#include "DxbcGpuMemory.h"
+#include "DxbcGpuOperations.h"
 #include <algorithm>
 #include <bit>
 #include <cstring>
@@ -23,7 +23,7 @@ Buffer Buffer::known(std::vector<uint8_t> bytes) {
     return result;
 }
 Memory::Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views, uint64_t maxBytes,
-               uint64_t maxChangeBytes, std::shared_ptr<GpuMemory> gpu, bool assistAll)
+               uint64_t maxChangeBytes, std::shared_ptr<GpuOperations> gpu, bool assistAll)
     : buffers_(std::move(buffers)), views_(std::move(views)), maxChangeBytes_(maxChangeBytes),
       gpu_(std::move(gpu)), assistAll_(assistAll) {
     if (!maxBytes || maxChangeBytes < 16)

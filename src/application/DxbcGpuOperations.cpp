@@ -1,4 +1,6 @@
-#include "DxbcGpuMemory.h"
+#include "DxbcGpuOperations.h"
+#include "DxbcCheckpointModel.h"
+#include "HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
 #include <algorithm>
@@ -58,16 +60,115 @@ Words kernel(bool store, uint32_t stride, uint32_t kind, uint32_t mask, uint32_t
     return result;
 }
 } // namespace
-struct GpuMemory::State {
+struct GpuOperations::State {
     Com<ID3D11Device> device;
     Com<ID3D11DeviceContext> context;
     std::map<Words, Com<ID3D11ComputeShader>> shaders;
+    struct VertexOperation {
+        Com<ID3D11VertexShader> vertex;
+        Com<ID3D11GeometryShader> stream;
+    };
+    std::map<Words, VertexOperation> vertexShaders;
     DXGI_ADAPTER_DESC description{};
     LARGE_INTEGER driver{};
     CancelCheck cancelled;
     uint32_t timeoutMs;
     uint64_t count = 0;
     bool failed = false, warp = false, debug = false;
+    Value vertex(const Words &words, const std::vector<Value> &constants) {
+        checkCancellation(cancelled);
+        if (failed)
+            throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+        try {
+            auto found = vertexShaders.find(words);
+            if (found == vertexShaders.end()) {
+                if (vertexShaders.size() >= 256)
+                    vertexShaders.clear();
+                const auto signature = compileHlsl("uint4 main():TEXCOORD0{return 0;}", "vs_5_0").bytecode;
+                auto parts = readDxbcParts(signature);
+                std::erase_if(parts, [](const auto &part) {
+                    return part.first == 0x58454853 || part.first == 0x52444853 || part.first == 0x54415453;
+                });
+                std::vector<uint8_t> bytes(words.size() * 4);
+                std::memcpy(bytes.data(), words.data(), bytes.size());
+                parts.emplace_back(0x58454853, std::move(bytes));
+                const auto binary = makeDxbc(parts);
+                VertexOperation operation;
+                check(device->CreateVertexShader(binary.data(), binary.size(), nullptr, &operation.vertex),
+                      "Create native instruction vertex shader");
+                const D3D11_SO_DECLARATION_ENTRY entry{0, "TEXCOORD", 0, 0, 4, 0};
+                const UINT stride = 16;
+                check(device->CreateGeometryShaderWithStreamOutput(binary.data(), binary.size(), &entry, 1,
+                                                                   &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM,
+                                                                   nullptr, &operation.stream),
+                      "Create native instruction stream output");
+                found = vertexShaders.emplace(words, std::move(operation)).first;
+            }
+            std::vector<std::array<uint32_t, 4>> bits;
+            for (const auto &value : constants)
+                bits.push_back(value.bits);
+            D3D11_BUFFER_DESC desc{
+                UINT(bits.size() * 16), D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            D3D11_SUBRESOURCE_DATA initial{bits.data(), 0, 0};
+            Com<ID3D11Buffer> cb, output, staging;
+            check(device->CreateBuffer(&desc, &initial, &cb), "Create native instruction constants");
+            desc = {16, D3D11_USAGE_DEFAULT, D3D11_BIND_STREAM_OUTPUT, 0, 0, 0};
+            check(device->CreateBuffer(&desc, nullptr, &output), "Create native instruction output");
+            desc.Usage = D3D11_USAGE_STAGING;
+            desc.BindFlags = 0;
+            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            check(device->CreateBuffer(&desc, nullptr, &staging), "Create native instruction staging");
+            auto *constant = cb.Get();
+            auto *target = output.Get();
+            const UINT offset = 0;
+            context->VSSetShader(found->second.vertex.Get(), nullptr, 0);
+            context->VSSetConstantBuffers(0, 1, &constant);
+            context->GSSetShader(found->second.stream.Get(), nullptr, 0);
+            context->SOSetTargets(1, &target, &offset);
+            context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+            context->Draw(1, 0);
+            context->ClearState();
+            context->CopyResource(staging.Get(), output.Get());
+            context->Flush();
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            for (;;) {
+                checkCancellation(cancelled);
+                const auto hr =
+                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                if (hr == S_OK)
+                    break;
+                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
+                    check(hr, "Read native instruction result");
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error("Native instruction operation timed out");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            Value result;
+            std::memcpy(result.bits.data(), mapped.pData, 16);
+            context->Unmap(staging.Get(), 0);
+            if (debug) {
+                Com<ID3D11InfoQueue> queue;
+                check(device.As(&queue), "Read native instruction validation queue");
+                for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                    SIZE_T size = 0;
+                    check(queue->GetMessage(i, nullptr, &size), "Read instruction validation message size");
+                    std::vector<uint8_t> data(size);
+                    auto *message = reinterpret_cast<D3D11_MESSAGE *>(data.data());
+                    check(queue->GetMessage(i, message, &size), "Read instruction validation message");
+                    if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+                        throw std::runtime_error(message->pDescription);
+                }
+                queue->ClearStoredMessages();
+            }
+            ++count;
+            return result;
+        } catch (...) {
+            context->ClearState();
+            failed = true;
+            throw;
+        }
+    }
     std::vector<uint8_t> execute(const Buffer &buffer, const BufferView &view, bool store, uint32_t kind,
                                  uint32_t index, uint32_t offset, const Value &value, uint32_t mask,
                                  uint32_t swizzle, bool literalIndex, bool literalOffset) {
@@ -198,7 +299,7 @@ struct GpuMemory::State {
         }
     }
 };
-GpuMemory::GpuMemory(ID3D11Device *reference, bool warp, CancelCheck cancelled, uint32_t timeoutMs)
+GpuOperations::GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled, uint32_t timeoutMs)
     : state_(std::make_unique<State>()) {
     if (!reference || !timeoutMs || timeoutMs > 60000)
         throw std::invalid_argument("Invalid native memory assist configuration");
@@ -226,8 +327,8 @@ GpuMemory::GpuMemory(ID3D11Device *reference, bool warp, CancelCheck cancelled, 
     check(actual->CheckInterfaceSupport(__uuidof(IDXGIDevice), &s.driver),
           "Read native memory assist driver identity");
 }
-GpuMemory::~GpuMemory() = default;
-nlohmann::json GpuMemory::identity() const {
+GpuOperations::~GpuOperations() = default;
+nlohmann::json GpuOperations::identity() const {
     const auto &s = *state_;
     return {{"luid_low", s.description.AdapterLuid.LowPart},
             {"luid_high", s.description.AdapterLuid.HighPart},
@@ -236,12 +337,82 @@ nlohmann::json GpuMemory::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-buffer-gpu/1"}};
+            {"backend", "dxbc-gpu/2"}};
 }
-uint64_t GpuMemory::operations() const { return state_->count; }
-Value GpuMemory::load(const Buffer &buffer, const BufferView &view, uint32_t kind, uint32_t index,
-                      uint32_t offset, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                      bool literalIndex, bool literalOffset) {
+uint64_t GpuOperations::operations() const { return state_->count; }
+std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction &instruction,
+                                              const std::vector<Register> &targets,
+                                              const std::vector<uint32_t> &masks,
+                                              const std::vector<Value> &sources,
+                                              const std::vector<Value> &before) {
+    if (stage != 1)
+        throw std::runtime_error("Native instruction assistance currently requires a vertex shader");
+    const auto operands = checkpoint::instructionOperands(instruction.words);
+    if (targets.empty() || targets.size() > 2 || masks.size() != targets.size() ||
+        before.size() != targets.size() || operands.ranges.size() != targets.size() + sources.size())
+        throw std::runtime_error("Invalid native instruction assist operands");
+    std::map<Register, uint32_t> indices;
+    uint32_t temps = 0, outputs = 0;
+    for (const auto &target : targets) {
+        if ((target.kind != 0 && target.kind != 2) || target.indices.size() != 1)
+            throw std::runtime_error("Unsupported native instruction assist destination");
+        if (!indices.contains(target))
+            indices[target] = target.kind == 0 ? temps++ : outputs++;
+    }
+    if (outputs > 1)
+        throw std::runtime_error("Native instruction assistance requires at most one output register");
+    std::vector<Value> constants = sources;
+    constants.insert(constants.end(), before.begin(), before.end());
+    auto operation = operands.prefix;
+    for (size_t i = 0; i < operands.ranges.size(); ++i) {
+        Words arg;
+        if (i < targets.size())
+            arg = dest(targets[i].kind, indices.at(targets[i]), masks[i]);
+        else {
+            const auto [begin, end] = operands.ranges[i];
+            if (((instruction.words[begin] >> 12) & 255) == 4)
+                arg.assign(instruction.words.begin() + begin, instruction.words.begin() + end);
+            else
+                arg = {0x208e46, 0, uint32_t(i - targets.size())};
+        }
+        operation.insert(operation.end(), arg.begin(), arg.end());
+    }
+    operation[0] = (operation[0] & 0x80ffffff) | (uint32_t(operation.size()) << 24);
+    std::vector<Value> result;
+    for (size_t selected = 0; selected < targets.size(); ++selected) {
+        if (selected && targets[selected] == targets[0]) {
+            result.push_back(result.front());
+            continue;
+        }
+        std::vector<Words> rows{row(89, {{0x208e46, 0, uint32_t(constants.size())}}),
+                                row(104, {{std::max(temps, 1u)}}), row(101, {dest(2, 0)})};
+        // Initialize only components the operation does not write. Literal
+        // operands remain literal to preserve the driver's instruction lowering.
+        for (size_t i = 0; i < targets.size(); ++i) {
+            if (i && targets[i] == targets[0])
+                continue;
+            uint32_t written = masks[i];
+            for (size_t j = i + 1; j < targets.size(); ++j)
+                if (targets[i] == targets[j])
+                    written |= masks[j];
+            if (written != 15)
+                rows.push_back(row(54, {dest(targets[i].kind, indices.at(targets[i]), 15 ^ written),
+                                        {0x208e46, 0, uint32_t(sources.size() + i)}}));
+        }
+        rows.push_back(operation);
+        if (targets[selected].kind == 0)
+            rows.push_back(row(54, {dest(2, 0), source(0, indices.at(targets[selected]))}));
+        rows.push_back(row(62, {}));
+        const auto bytes = writeDxbcProgram({{0x10050, 0}, rows});
+        Words words(bytes.size() / 4);
+        std::memcpy(words.data(), bytes.data(), bytes.size());
+        result.push_back(state_->vertex(words, constants));
+    }
+    return result;
+}
+Value GpuOperations::load(const Buffer &buffer, const BufferView &view, uint32_t kind, uint32_t index,
+                          uint32_t offset, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                          bool literalIndex, bool literalOffset) {
     uint32_t selection = 0;
     for (uint32_t c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
@@ -253,9 +424,9 @@ Value GpuMemory::load(const Buffer &buffer, const BufferView &view, uint32_t kin
         result.valid = uint8_t(mask);
     return result;
 }
-std::vector<uint8_t> GpuMemory::store(const Buffer &buffer, const BufferView &view, uint32_t index,
-                                      uint32_t offset, const Value &value, uint32_t mask, bool literalIndex,
-                                      bool literalOffset) {
+std::vector<uint8_t> GpuOperations::store(const Buffer &buffer, const BufferView &view, uint32_t index,
+                                          uint32_t offset, const Value &value, uint32_t mask,
+                                          bool literalIndex, bool literalOffset) {
     return state_->execute(buffer, view, true, 30, index, offset, value, mask, 0xe4, literalIndex,
                            literalOffset);
 }

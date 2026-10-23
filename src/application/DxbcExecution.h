@@ -36,12 +36,12 @@ struct MemoryChange {
     uint64_t resource, offset;
     std::vector<uint8_t> before, after, beforeValid, afterValid;
 };
-class GpuMemory;
+class GpuOperations;
 class Memory {
     std::map<uint64_t, Buffer> buffers_;
     std::map<Register, BufferView> views_;
     uint64_t maxChangeBytes_;
-    std::shared_ptr<GpuMemory> gpu_;
+    std::shared_ptr<GpuOperations> gpu_;
     bool assistAll_;
     friend class Lane;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
@@ -57,7 +57,7 @@ class Memory {
     // Lanes may share it only under an external serial execution scheduler.
     Memory(std::map<uint64_t, Buffer> buffers, std::map<Register, BufferView> views,
            uint64_t maxBytes = 256 * 1024 * 1024, uint64_t maxChangeBytes = 16 * 1024 * 1024,
-           std::shared_ptr<GpuMemory> gpu = {}, bool assistAll = false);
+           std::shared_ptr<GpuOperations> gpu = {}, bool assistAll = false);
     const std::map<uint64_t, Buffer> &buffers() const;
 };
 struct Inputs {
@@ -66,6 +66,7 @@ struct Inputs {
     std::map<Register, Value> registers;
     std::map<uint32_t, std::vector<Value>> constantBuffers;
     std::shared_ptr<Memory> memory;
+    std::shared_ptr<GpuOperations> gpu;
 };
 struct Change {
     Register destination;
@@ -80,6 +81,7 @@ struct Step {
     bool discarded = false;
     std::vector<MemoryChange> memoryChanges;
     bool memoryGpuAssisted = false;
+    bool instructionGpuAssisted = false;
 };
 struct ProgramData;
 class Program {
