@@ -1,29 +1,200 @@
 #pragma once
 #include <map>
 namespace flora::dxbc_detail {
-// Scalar opcode arity facts from the reference dxbc_operand_arities.json.
-// Original decoder provenance: RenderDuck / RenderDoc-derived DXBC decoder.
-// Header SHA256: 20cab5237247bc1cd47df33760b03317cc3ab9d42ca12ece20e8527d959a2aca
-// Source SHA256: f74753ff6ea5950427fda70a4c50b9541d72af15182ffa02830636c1361efd04
-// No decoder code or runtime binary is linked.
+// Generated scalar format facts from pinned Microsoft DXBC metadata.
+// Reproduce with tools/generate_dxbc_operand_arities.py; see
+// docs/DX11_DXBC_FORMAT_RESEARCH.md for sources and independent compiler probes.
+// This is operand framing, not an instruction executor or declaration parser.
 inline const std::map<unsigned, unsigned> operandArities{
-    {0, 3},   {1, 3},   {2, 0},   {3, 1},   {4, 1},   {5, 2},   {6, 1},   {7, 0},   {8, 1},   {9, 0},
-    {10, 0},  {11, 2},  {12, 2},  {13, 1},  {14, 3},  {15, 3},  {16, 3},  {17, 3},  {18, 0},  {19, 0},
-    {20, 0},  {21, 0},  {22, 0},  {23, 0},  {24, 3},  {25, 2},  {26, 2},  {27, 2},  {28, 2},  {29, 3},
-    {30, 3},  {31, 1},  {32, 3},  {33, 3},  {34, 3},  {35, 4},  {36, 3},  {37, 3},  {38, 4},  {39, 3},
-    {40, 2},  {41, 3},  {42, 3},  {43, 2},  {44, 1},  {45, 3},  {46, 4},  {47, 2},  {48, 0},  {49, 3},
-    {50, 4},  {51, 3},  {52, 3},  {54, 2},  {55, 4},  {56, 3},  {57, 3},  {58, 0},  {59, 2},  {60, 3},
-    {61, 3},  {62, 0},  {63, 1},  {64, 2},  {65, 2},  {66, 2},  {67, 2},  {68, 2},  {69, 4},  {70, 5},
-    {71, 5},  {72, 5},  {73, 6},  {74, 5},  {75, 2},  {76, 1},  {77, 3},  {78, 4},  {79, 3},  {80, 3},
-    {81, 4},  {82, 4},  {83, 3},  {84, 3},  {85, 3},  {86, 2},  {87, 3},  {108, 4}, {109, 4}, {110, 3},
-    {111, 2}, {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {118, 1}, {119, 1}, {120, 1}, {121, 2},
-    {122, 2}, {123, 2}, {124, 2}, {125, 2}, {126, 5}, {127, 5}, {128, 6}, {129, 2}, {130, 2}, {131, 2},
-    {132, 4}, {133, 4}, {134, 2}, {135, 2}, {136, 2}, {137, 2}, {138, 4}, {139, 4}, {140, 5}, {141, 2},
-    {142, 5}, {163, 3}, {164, 3}, {165, 3}, {166, 3}, {167, 4}, {168, 4}, {169, 3}, {170, 3}, {171, 3},
-    {172, 4}, {173, 3}, {174, 3}, {175, 3}, {176, 3}, {177, 3}, {178, 2}, {179, 2}, {180, 4}, {181, 4},
-    {182, 4}, {183, 4}, {184, 4}, {185, 5}, {186, 4}, {187, 4}, {188, 4}, {189, 4}, {190, 0}, {191, 3},
-    {192, 3}, {193, 3}, {194, 3}, {195, 3}, {196, 3}, {197, 3}, {198, 3}, {199, 2}, {200, 4}, {201, 2},
-    {202, 2}, {203, 3}, {204, 3}, {205, 2}, {207, 0}, {208, 0}, {210, 3}, {211, 4}, {212, 2}, {213, 4},
-    {214, 2}, {215, 2}, {216, 2}, {217, 2}, {219, 5}, {220, 6}, {221, 6}, {222, 7}, {223, 4}, {224, 5},
-    {225, 4}, {226, 4}, {227, 5}, {228, 6}, {229, 6}, {230, 6}, {231, 6}, {232, 7}, {233, 6}, {234, 2}};
+    {0, 3}, // add
+    {1, 3}, // and
+    {2, 0}, // break
+    {3, 1}, // breakc
+    {4, 1}, // call
+    {5, 2}, // callc
+    {6, 1}, // case
+    {7, 0}, // continue
+    {8, 1}, // continuec
+    {9, 0}, // cut
+    {10, 0}, // default
+    {11, 2}, // deriv_rtx
+    {12, 2}, // deriv_rty
+    {13, 1}, // discard
+    {14, 3}, // div
+    {15, 3}, // dp2
+    {16, 3}, // dp3
+    {17, 3}, // dp4
+    {18, 0}, // else
+    {19, 0}, // emit
+    {20, 0}, // emit_then_cut
+    {21, 0}, // endif
+    {22, 0}, // endloop
+    {23, 0}, // endswitch
+    {24, 3}, // eq
+    {25, 2}, // exp
+    {26, 2}, // frc
+    {27, 2}, // ftoi
+    {28, 2}, // ftou
+    {29, 3}, // ge
+    {30, 3}, // iadd
+    {31, 1}, // if
+    {32, 3}, // ieq
+    {33, 3}, // ige
+    {34, 3}, // ilt
+    {35, 4}, // imad
+    {36, 3}, // imax
+    {37, 3}, // imin
+    {38, 4}, // imul
+    {39, 3}, // ine
+    {40, 2}, // ineg
+    {41, 3}, // ishl
+    {42, 3}, // ishr
+    {43, 2}, // itof
+    {44, 1}, // label
+    {45, 3}, // ld
+    {46, 4}, // ldms
+    {47, 2}, // log
+    {48, 0}, // loop
+    {49, 3}, // lt
+    {50, 4}, // mad
+    {51, 3}, // min
+    {52, 3}, // max
+    {54, 2}, // mov
+    {55, 4}, // movc
+    {56, 3}, // mul
+    {57, 3}, // ne
+    {58, 0}, // nop
+    {59, 2}, // not
+    {60, 3}, // or
+    {61, 3}, // resinfo
+    {62, 0}, // ret
+    {63, 1}, // retc
+    {64, 2}, // round_ne
+    {65, 2}, // round_ni
+    {66, 2}, // round_pi
+    {67, 2}, // round_z
+    {68, 2}, // rsq
+    {69, 4}, // sample
+    {70, 5}, // sample_c
+    {71, 5}, // sample_c_lz
+    {72, 5}, // sample_l
+    {73, 6}, // sample_d
+    {74, 5}, // sample_b
+    {75, 2}, // sqrt
+    {76, 1}, // switch
+    {77, 3}, // sincos
+    {78, 4}, // udiv
+    {79, 3}, // ult
+    {80, 3}, // uge
+    {81, 4}, // umul
+    {82, 4}, // umad
+    {83, 3}, // umax
+    {84, 3}, // umin
+    {85, 3}, // ushr
+    {86, 2}, // utof
+    {87, 3}, // xor
+    {108, 4}, // lod
+    {109, 4}, // gather4
+    {110, 3}, // samplepos
+    {111, 2}, // sampleinfo
+    {113, 0}, // hs_decls
+    {114, 0}, // hs_control_point_phase
+    {115, 0}, // hs_fork_phase
+    {116, 0}, // hs_join_phase
+    {117, 1}, // emit_stream
+    {118, 1}, // cut_stream
+    {119, 1}, // emit_then_cut_stream
+    {120, 1}, // fcall
+    {121, 2}, // bufinfo
+    {122, 2}, // deriv_rtx_coarse
+    {123, 2}, // deriv_rtx_fine
+    {124, 2}, // deriv_rty_coarse
+    {125, 2}, // deriv_rty_fine
+    {126, 5}, // gather4_c
+    {127, 5}, // gather4_po
+    {128, 6}, // gather4_po_c
+    {129, 2}, // rcp
+    {130, 2}, // f32tof16
+    {131, 2}, // f16tof32
+    {132, 4}, // uaddc
+    {133, 4}, // usubb
+    {134, 2}, // countbits
+    {135, 2}, // firstbit_hi
+    {136, 2}, // firstbit_lo
+    {137, 2}, // firstbit_shi
+    {138, 4}, // ubfe
+    {139, 4}, // ibfe
+    {140, 5}, // bfi
+    {141, 2}, // bfrev
+    {142, 5}, // swapc
+    {163, 3}, // ld_uav_typed
+    {164, 3}, // store_uav_typed
+    {165, 3}, // ld_raw
+    {166, 3}, // store_raw
+    {167, 4}, // ld_structured
+    {168, 4}, // store_structured
+    {169, 3}, // atomic_and
+    {170, 3}, // atomic_or
+    {171, 3}, // atomic_xor
+    {172, 4}, // atomic_cmp_store
+    {173, 3}, // atomic_iadd
+    {174, 3}, // atomic_imax
+    {175, 3}, // atomic_imin
+    {176, 3}, // atomic_umax
+    {177, 3}, // atomic_umin
+    {178, 2}, // imm_atomic_alloc
+    {179, 2}, // imm_atomic_consume
+    {180, 4}, // imm_atomic_iadd
+    {181, 4}, // imm_atomic_and
+    {182, 4}, // imm_atomic_or
+    {183, 4}, // imm_atomic_xor
+    {184, 4}, // imm_atomic_exch
+    {185, 5}, // imm_atomic_cmp_exch
+    {186, 4}, // imm_atomic_imax
+    {187, 4}, // imm_atomic_imin
+    {188, 4}, // imm_atomic_umax
+    {189, 4}, // imm_atomic_umin
+    {190, 0}, // sync
+    {191, 3}, // dadd
+    {192, 3}, // dmax
+    {193, 3}, // dmin
+    {194, 3}, // dmul
+    {195, 3}, // deq
+    {196, 3}, // dge
+    {197, 3}, // dlt
+    {198, 3}, // dne
+    {199, 2}, // dmov
+    {200, 4}, // dmovc
+    {201, 2}, // dtof
+    {202, 2}, // ftod
+    {203, 3}, // eval_snapped
+    {204, 3}, // eval_sample_index
+    {205, 2}, // eval_centroid
+    {207, 0}, // abort
+    {208, 0}, // debug_break
+    {210, 3}, // ddiv
+    {211, 4}, // dfma
+    {212, 2}, // drcp
+    {213, 4}, // msad
+    {214, 2}, // dtoi
+    {215, 2}, // dtou
+    {216, 2}, // itod
+    {217, 2}, // utod
+    {219, 5}, // gather4_s
+    {220, 6}, // gather4_c_s
+    {221, 6}, // gather4_po_s
+    {222, 7}, // gather4_po_c_s
+    {223, 4}, // ld_s
+    {224, 5}, // ldms_s
+    {225, 4}, // ld_uav_typed_s
+    {226, 4}, // ld_raw_s
+    {227, 5}, // ld_structured_s
+    {228, 6}, // sample_l_s
+    {229, 6}, // sample_c_lz_s
+    {230, 6}, // sample_cl_s
+    {231, 7}, // sample_b_cl_s
+    {232, 8}, // sample_d_cl_s
+    {233, 7}, // sample_c_cl_s
+    {234, 2}, // check_access_fully_mapped
+};
 } // namespace flora::dxbc_detail

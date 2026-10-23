@@ -30,6 +30,14 @@
   `aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63`.
 - Windows D3D11, DXGI, D3DCompiler and BCrypt are operating-system APIs.
   No Intel GPA libraries are included.
+- DXBC scalar opcode/operand-count facts are generated from pinned Microsoft
+  DirectX-Headers and DirectXShaderCompiler metadata. Source identities and the
+  independent D3DCompiler probes are recorded in `docs/DX11_DXBC_FORMAT_RESEARCH.md`.
+  The reference files identify MIT and University of Illinois Open Source licenses
+  respectively. The product includes the generated facts, not those parser/header
+  implementations or a compiler runtime from either repository. Upstream notices:
+  https://github.com/microsoft/DirectX-Headers/blob/461ef5138bd30922b44fbad77c4e47662812d2d5/LICENSE
+  and https://github.com/microsoft/DirectXShaderCompiler/blob/3620b16697cf57313d7a3abdb7a1c3aa3838c35c/LICENSE.TXT.
 - RenderDoc public application API header: MIT, Copyright (c) 2015-2026 Baldur
   Karlsson. Vendored unmodified as `third_party/renderdoc/renderdoc_app.h`, with
   license at `third_party/renderdoc/LICENSE.MIT`. Source: the local upstream

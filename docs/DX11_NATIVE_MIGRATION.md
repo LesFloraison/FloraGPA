@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Pending |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Public-source operand framing and independent compiler probes added; execution engine and debugger parity remain pending |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -38,6 +38,7 @@ VS/PS/CS debugger or fragment history implementation.
 | Packaging | `tools/package.ps1`, pinned runtime manifest, DLL/tool/CRT copies and license inventory | Portable package without RenderDoc artifacts or discovery |
 | Tests/tools | RDC job/assets/counters/debug/worker/event tests and comparison scripts | Native contracts and deterministic independent probes |
 | Third party | `third_party/renderdoc` API/replay headers, ABI types and runtime notices | Remove active dependency; retain historical provenance in history/docs |
+| DXBC operand framing | The former derived scalar table is replaced by pinned Microsoft format facts with independent D3DCompiler probes | Completed for the table only; this is not shader execution parity |
 
 The replay counter implementation collects generic DX11 counters (GPU duration,
 eleven pipeline-statistics fields and occlusion). Enumerated vendor metadata is not

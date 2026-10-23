@@ -416,6 +416,26 @@ Evidence: `native-pixel-math-vs-hardware-initial.txt`, `native-pixel-207.txt`,
 `native-pixel-final-{build,tests}.log`, `native-pixel-label-build.log`, and
 `history-decoded-final/validation.json`, all under `artifacts/dx11-native/`.
 
+## Public-source DXBC operand framing
+
+The old RenderDoc-derived scalar operand-count table has been regenerated from
+pinned Microsoft opcode metadata, with all 190 opcode identities retained. Three
+clamped feedback sampling instructions had an omitted final operand. Independent
+PS 5.0 compilation reproduced all three parser failures before the replacement;
+the failure rows are retained. The new probe also verifies VS system-ID adjustment
+and output-log instrumentation without changing the sampling instruction tokens.
+
+Five serial CTest executables pass in 34.77 seconds, with **94 Qt cases, zero
+failures and zero skips**: 6 format probes, 54 native VS input cases, 15 checkpoint
+cases, 6 output-log cases and 13 PostTransform cases. The two stdout-only suites
+were repeated with explicit case logs. The generator reproduces the checked-in
+header exactly and rejects altered input sources. A clean capture-only configure
+and its boundary test pass without registering the replay test. This is framing
+and existing-consumer regression evidence, not VS/PS/CS interpreter acceptance.
+
+See `DX11_DXBC_FORMAT_RESEARCH.md` and `research/dx11-dxbc-format-evidence.json` for
+the source pins, independent probes, exact changes, logs and reproduction commands.
+
 ## Reproduction and evidence
 
 ```powershell
