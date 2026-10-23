@@ -503,6 +503,13 @@ DXBC format, checkpoint model and output-log suites passed after the addition.
 See `DX11_DXBC_EXECUTION_RESEARCH.md` for retained inputs, independent GPU evidence
 and the explicit limits of this implementation checkpoint.
 
+The private raw/structured buffer extension adds a CS suite with 119 passes,
+6 failures and zero skips. Its failures concern extreme-address GPU differences,
+including writes outside a structured view on NVIDIA. The scalar/control suite
+was rebuilt and repeated after this extension: its 357 passes and 17 failures
+are unchanged. Neither suite's strict assertions were relaxed. See
+`DX11_DXBC_MEMORY_RESEARCH.md` for exact reproduction and retained evidence.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

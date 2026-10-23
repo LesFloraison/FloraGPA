@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Independent single-lane CPU execution prototype and reversible register steps added; strict GPU suite has 357 passes and 17 unresolved failures; resource/thread semantics and debugger parity remain pending |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, reversible register steps and private raw/structured buffer operations added; strict suites retain 17 scalar/control and 6 buffer boundary failures; GPU assistance, thread semantics and debugger parity remain pending |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -357,8 +357,14 @@ The current serial GPU conformance suite is deliberately still strict and fails:
 conversion/borrow behavior and Intel destination aliasing. Separate-register
 dynamic-input probes agree across WARP, NVIDIA and Intel, but this does not close
 the remaining forms. See `DX11_DXBC_EXECUTION_RESEARCH.md` and its evidence ledger.
-No historical baseline failure category or test skip was expanded. Resource and
-sampling assistance, actual input extraction, quad/helper execution, CS group
+No historical baseline failure category or test skip was expanded. Private raw
+and structured SRV/UAV snapshots now support loads, stores, view aliases and
+reversible memory changes with per-byte validity. The separate CS buffer suite
+has 119 passes and 6 unresolved extreme-address failures across three devices.
+Its complete output comparisons include backing bytes outside the selected view;
+`DX11_DXBC_MEMORY_RESEARCH.md` records why GPU assistance must preserve full
+resources and original view offsets. Typed resources and GPU memory/sampling
+assistance, actual input extraction, quad/helper execution, CS group
 semantics, source/GUI integration and full parity remain required P6 work.
 
 ## Delivery constraints

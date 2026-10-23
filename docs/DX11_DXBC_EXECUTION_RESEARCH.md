@@ -25,7 +25,7 @@ addresses are evaluated before writeback. Source swizzles, masks and modifiers
 are independent of the result's raw bit storage. The thread's floating-point
 environment is restored after each instruction.
 
-This is not a complete VS/PS/CS debugger. Resource access, texture sampling,
+This is not a complete VS/PS/CS debugger. Typed resource access, texture sampling,
 derivatives, quad/helper execution, groupshared memory, barriers, atomics, doubles,
 minimum precision, actual input extraction, shader linkage, source-trace adapters
 and GUI workflows remain unfinished. Single-lane discard is not a helper-lane
@@ -34,6 +34,11 @@ device approximations. The core currently implements documented instruction
 semantics, not arbitrary machine-code optimizations across original instructions.
 It is not connected to production debug actions. Existing debug/checkpoint paths
 remain available. GPA's concrete debugger-engine object remains unresolved.
+
+Follow-up: private raw/structured buffer loads and stores are now implemented as
+described in `DX11_DXBC_MEMORY_RESEARCH.md`. Typed resources and GPU-assisted
+boundary behavior remain unfinished; this does not change the original execution
+probe's acceptance status or replace its retained evidence.
 
 ## Independent probes and corrections
 

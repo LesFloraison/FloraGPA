@@ -281,6 +281,7 @@ struct ProgramData {
     std::map<uint32_t, std::map<uint32_t, uint32_t>> cases;
     std::map<uint32_t, uint32_t> defaults;
     std::vector<Value> immediate;
+    std::map<Register, uint32_t> bufferStrides;
 };
 Program::Program(Bytes dxbc) {
     if (dxbc.size() > 64 * 1024 * 1024)
@@ -326,6 +327,17 @@ Program::Program(Bytes dxbc) {
                 args.push_back(operand(words, pos));
             if (pos != words.size())
                 fail("DXBC execution instruction operand tail");
+        } else if (op == 157 || op == 158 || op == 161 || op == 162) {
+            size_t pos = 1;
+            const auto arg = operand(words, pos);
+            const auto kind = op < 161 ? 30u : 7u;
+            const bool structured = op == 158 || op == 162;
+            const auto stride = structured ? words.at(pos++) : 0u;
+            if (pos != words.size() || arg.kind != kind || arg.indices.size() != 1 ||
+                arg.indices[0].relative || arg.indices[0].base >= (kind == 7 ? 128u : 64u) ||
+                (structured && (!stride || stride > 2048 || (stride & 3))) ||
+                !data->bufferStrides.emplace(Register{kind, {uint32_t(arg.indices[0].base)}}, stride).second)
+                fail("Invalid DXBC buffer declaration");
         } else if (op == 104) {
             if (temps || words.size() != 2 || words[1] > 4096)
                 fail("Invalid DXBC temporary declaration");
@@ -597,6 +609,56 @@ Step Lane::step() {
             done = true;
             result.discarded = true;
         }
+    } else if (op >= 165 && op <= 168) {
+        const bool store = op == 166 || op == 168, structured = op >= 167;
+        if (instruction.words[0] & (1u << 13))
+            fail("Unexpected saturation on a DXBC memory instruction");
+        const auto &resource = store ? args[0] : args.back();
+        if (resource.modifier || (resource.kind != 7 && resource.kind != 30))
+            fail("Unsupported DXBC memory operand");
+        const auto binding = s.address(resource);
+        const auto declaration = p.bufferStrides.find(binding);
+        if (declaration == p.bufferStrides.end() || structured != bool(declaration->second))
+            fail("DXBC memory instruction disagrees with its declaration");
+        if (s.inputs.memory) {
+            const auto view = s.inputs.memory->views_.find(binding);
+            if (view != s.inputs.memory->views_.end() && view->second.resource &&
+                view->second.stride != declaration->second)
+                fail("DXBC buffer declaration disagrees with captured stride");
+        }
+        const auto indexValue = structured ? s.source(args[1], true) : Value::known({});
+        const auto offsetValue = s.source(args[structured ? 2 : 1], true);
+        if (!(indexValue.valid & offsetValue.valid & 1))
+            fail("Unknown DXBC memory address");
+        if (store) {
+            if (resource.components != 2 || resource.mode != 0 || !s.inputs.memory)
+                fail("Unavailable or invalid DXBC memory store");
+            const auto value = s.source(args.back(), false);
+            result.memoryChanges = s.inputs.memory->store(binding, structured, indexValue.bits[0],
+                                                          offsetValue.bits[0], value, resource.mask);
+        } else {
+            const auto &destination = args[0];
+            if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+                fail("Invalid DXBC buffer load destination");
+            const auto target = s.address(destination);
+            const auto value =
+                s.inputs.memory
+                    ? s.inputs.memory->load(binding, structured, indexValue.bits[0], offsetValue.bits[0],
+                                            resource.select, destination.mask)
+                    : Value{};
+            if (s.inBounds(target)) {
+                const auto before = s.value(target);
+                auto after = before;
+                for (uint32_t c = 0; c < 4; ++c)
+                    if ((destination.mask & (1u << c)) &&
+                        (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                        after.bits[c] = value.bits[c];
+                        after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
+                    }
+                result.changes.push_back({target, before, after});
+            }
+        }
     } else if (op == 6 || op == 10 || op == 21 || op == 23 || op == 44 || op == 48 || op == 58) {
         // Structural instructions remain visible in the trace.
     } else {
@@ -713,6 +775,8 @@ Step Lane::step() {
     // Commit only after the complete instruction has validated and computed.
     for (const auto &change : result.changes)
         s.registers[change.destination] = change.after;
+    if (!result.memoryChanges.empty())
+        s.inputs.memory->commit(result.memoryChanges);
     s.calls = std::move(calls);
     s.pc = next;
     s.done = done;
