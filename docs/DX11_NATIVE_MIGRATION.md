@@ -385,7 +385,12 @@ overrides and explicit unavailable values. Forty counter cases pass, including
 thirty GPU cases across WARP, NVIDIA and Intel, plus snapshot restoration and
 cancellation checks. See `DX11_DXBC_COUNTER_RESEARCH.md` for Append identity limits
 and the distinction between simulated and captured ordering.
-Typed resources and GPU sampling assistance, complete actual input
+Native buffer inputs now come from an observed replay boundary inside scoped
+experiments: actual CB windows, raw/structured SRV/UAV views and hidden counters
+share one event state. The 42-case suite validates execution from those snapshots
+and cancellation restoration. See `DX11_DXBC_INPUT_RESEARCH.md` for identity,
+independent-replay provenance and explicit unsupported resources.
+Typed resources and GPU sampling assistance, complete vertex/pixel input
 extraction, quad/helper execution, full CS group/cross-group semantics,
 source/GUI integration and full parity remain required P6 work.
 

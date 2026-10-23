@@ -1672,6 +1672,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                     execute();
                 if (sample && !options_.measurement->singleEvent && id == options_.measurement->end)
                     sample->end();
+            } catch (const OperationCancelled &) {
+                throw;
             } catch (const std::exception &error) {
                 throw std::runtime_error("Event " + std::to_string(id) + " (" + commandName(e.type) +
                                          "): " + error.what());

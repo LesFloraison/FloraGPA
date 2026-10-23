@@ -542,6 +542,14 @@ and its evidence ledger; no prior failure or skip category was expanded.
 The final serial regression retains all 699 counter/group/execution/buffer passes
 with zero failures/skips in 107.88 seconds.
 
+The next buffer-input checkpoint supplies actual native CB/SRV/UAV snapshots from
+one scoped event boundary. Its final serial regression has 741 DXBC passes and
+46 native-analysis/pipeline passes, zero failures/skips. Eight real-capture input
+observations succeeded on NVIDIA while retaining explicit unsupported bindings;
+they do not execute those real shaders. The original cancellation-type failure
+is retained and fixed without changing its assertion. See
+`DX11_DXBC_INPUT_RESEARCH.md` for exact scope, timings and resource identities.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
