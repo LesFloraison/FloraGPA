@@ -1,0 +1,54 @@
+[
+  {
+    "name": "binaries.json",
+    "sha256": "f8d7d5441c560af31caa0fb073f65dbacdac12cd991288758bc422af1439cd19"
+  },
+  {
+    "name": "debugger-host.log",
+    "sha256": "bf3aac1d11fdf9072fe84ac6b7bf74b618b4c27457e0ddeda0e2143dc9504742"
+  },
+  {
+    "name": "debugger-host.txt",
+    "sha256": "79be5b73c6727a43e4ffa3782f06ccefdb03bf08d9d7676e99b66e4d578be611"
+  },
+  {
+    "name": "dx11_playback.dll-import.log",
+    "sha256": "2b6549ba41062390cf2d64cecd360cb9df127431cd5e3189a2a68ac34eb685d5"
+  },
+  {
+    "name": "dx11_player.dll-import.log",
+    "sha256": "41c959d338e6c104a9528bd7fae836dd66bd636f1c4d9e391e76658bf2e1e790"
+  },
+  {
+    "name": "geometry-query.log",
+    "sha256": "b89a6ff0c03dce6017ee97fa45f5665d489c0b29878099609d2df3ba45a68b39"
+  },
+  {
+    "name": "geometry-query.txt",
+    "sha256": "dddc41db5eba58990b9b95abfd02b00e2bde69fcf09c588574a54b5fcbcfe3e2"
+  },
+  {
+    "name": "pixel-history.log",
+    "sha256": "f9dc776c9aee899660a44868e3e0962d5f8508bed201e5fcf940fb7a8a7b72eb"
+  },
+  {
+    "name": "pixel-history.txt",
+    "sha256": "9075c7e3d7a6aa9d7fee13b240afd5ea5a16655b002578acddc474da34307a3f"
+  },
+  {
+    "name": "playback-analysis.log",
+    "sha256": "53d0e25c6c209c0f9e214f1858f7f023d580f8c377c06f353e222451404b4f53"
+  },
+  {
+    "name": "playback-analysis.txt",
+    "sha256": "d46daca53e9575c5f2b5ef8534d1a7df9a9b85619e1c1f361f18e078609079da"
+  },
+  {
+    "name": "player-field-3c0.log",
+    "sha256": "70d9b73bc7e8febdcc21fe579c92041f7cff2e7787444534b455a141a79e247a"
+  },
+  {
+    "name": "player-field-3c0.txt",
+    "sha256": "0e8ed25cfd373754402813922dbc26792dc840ed95f225b217e1260ba0d1f746"
+  }
+]
