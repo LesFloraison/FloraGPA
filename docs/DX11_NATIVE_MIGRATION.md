@@ -15,7 +15,7 @@ VS/PS/CS debugger or fragment history implementation.
 | --- | --- | --- |
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; debugger implementation not resolved |
-| P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure, artifact verification and 39 focused cases pass; GUI integration pending |
+| P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Pending |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
@@ -144,8 +144,11 @@ During this stage the legacy command is still present for baseline comparison;
 its final retirement and GUI cutover remain separate gates.
 
 Without an event/range selection, `counters` measures the 13 generic DX11 values
-for every draw/dispatch in one replay. Query storage is bounded to 64 pending
-samples, with a synchronization between batches. Counter identifiers and units
+for every draw/dispatch and recovered resource-writing command in one replay.
+Draw/dispatch intervals start after binding; resource-write intervals include the
+command implementation, including CPU-upload work. Query storage is bounded to
+64 pending samples. One completion fence covers each ended batch, avoiding a
+separate flush/completion round trip for every sample. Counter identifiers and units
 are strings owned by this project; invalid GPU durations are null. An explicit
 event or inclusive range retains the existing native statistics export, including
 stream-output and predication details. Vendor-specific metrics are not implied.
@@ -161,7 +164,38 @@ Each analysis uses a separate Worker process in a Windows job object. A readines
 handshake prevents analysis before assignment to the job. Timeout/cancellation
 terminates the process tree; a failed job cannot publish an accepted success.
 `result.json` is published after the action exports. Input and bounded worker logs
-are retained beside the result. GUI cache acceptance still needs integration.
+are retained beside CLI results. The desktop controller owns a temporary workspace,
+retains verified action bytes and removes the workspace after completion.
+
+### Replay Metrics desktop migration
+
+Replay Metrics now uses `NativeAnalysisController` and `NativeCountersView` with
+the same native Worker job API as the CLI. Frame/Worker hashing, experiment
+serialization, process execution and artifact verification run off the GUI thread.
+Cancellation is checked again when the queued completion reaches the GUI, so a
+late success cannot replace a cancelled request. The entire controller operation
+has a deadline, and context/request checks reject results after frame, experiment,
+adapter or selection changes during work. Completed frame-wide values survive
+ordinary selection changes. There is no recapture or RenderDoc backend fallback
+in this consumer; retired library settings are ignored here.
+
+Selection/Frame scope, filtering, exact uint64 values, null durations, details,
+event location, cancellation/retry and JSON export are retained. The catalog uses
+stable FloraGPA string identities, descriptions, category, byte width, type and
+unit; external numeric IDs and UUIDs are replaced rather than reused as native
+identities. The actual adapter and complete result context are exported. External
+vendor-provider catalogs are not enumerated by this generic query implementation;
+the existing native Intel Metrics consumer remains separate. Catalog coverage on
+other installed vendor providers still needs the full capability audit.
+
+The old counter view is compiled only into migration tests. Its historical report
+tests and the other RenderDoc consumers remain until their respective replacements
+pass. Current real-capture comparisons have no missing mapped generic values, but
+BF1 and Helldivers retain unresolved PS invocation differences. The native values
+match frozen-main native statistics at three investigated events; this establishes
+provenance, not complete equivalence to the external replay. See the validation
+ledger for exact counts, retained failures and performance observations. P3 is not
+closed by this desktop migration.
 
 Backend revision `dx11-native/2` publishes an artifact manifest containing the size
 and SHA-256 of every action export. Transport files (`job.json`, `worker.log`,

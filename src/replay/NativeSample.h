@@ -12,6 +12,8 @@ class NativeSample final {
     ~NativeSample();
     void begin();
     void end();
-    NativeStatistics result();
+    // A preceding sample's completion can cover this sample when both have ended
+    // on the same immediate context. Query reads still retain their own deadline.
+    NativeStatistics result(bool synchronize = true);
 };
 } // namespace flora

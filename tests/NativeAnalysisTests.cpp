@@ -1,5 +1,6 @@
 #include "DepthStencilCapture.h"
 #include "HullCapture.h"
+#include "MsaaCapture.h"
 #include "StreamCapture.h"
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
@@ -145,12 +146,20 @@ class NativeAnalysisTests final : public QObject {
                                                      allOptions, project);
         const auto all = load(runNativeAnalysisJob(allJob, worker(), 30)).at("data");
         QCOMPARE(all.at("catalog").size(), size_t(13));
-        QCOMPARE(all.at("events").size(), size_t(2));
+        QCOMPARE(all.at("events").size(), size_t(4));
+        for (size_t i = 0; i < 2; ++i) {
+            QCOMPARE(all.at("events")[i].at("event"), Json(i ? 810 : 800));
+            QCOMPARE(all.at("events")[i].at("boundary"), Json("resource_write_command"));
+            for (const auto &counter : all.at("catalog"))
+                if (counter.at("type") == "uint64")
+                    QCOMPARE(all.at("events")[i].at("values").at(counter.at("id").get<std::string>()),
+                             Json(0));
+        }
         QCOMPARE(all.at("replay_count").get<unsigned>(), 1u);
-        QCOMPARE(all.at("events")[0].at("event").get<Id>(), Id(1000));
-        QCOMPARE(all.at("events")[0].at("values").at("input.vertices").get<unsigned>(), 3u);
-        QCOMPARE(all.at("events")[1].at("event").get<Id>(), Id(2000));
-        QCOMPARE(all.at("events")[1].at("values").at("input.vertices").get<unsigned>(), 0u);
+        QCOMPARE(all.at("events")[2].at("event").get<Id>(), Id(1000));
+        QCOMPARE(all.at("events")[2].at("values").at("input.vertices").get<unsigned>(), 3u);
+        QCOMPARE(all.at("events")[3].at("event").get<Id>(), Id(2000));
+        QCOMPARE(all.at("events")[3].at("values").at("input.vertices").get<unsigned>(), 0u);
         auto changed = prepareNativeAnalysisJob(capture, "counters", directory.filePath("changed"), worker(),
                                                 options, project);
         append(project);
@@ -410,10 +419,11 @@ class NativeAnalysisTests final : public QObject {
                                                   {{"warp", true}});
         const auto result = load(runNativeAnalysisJob(job, worker(), 30));
         const auto &events = result.at("data").at("events");
-        QCOMPARE(events.size(), size_t(66));
+        QCOMPARE(events.size(), size_t(68));
         for (const auto &event : events) {
-            QCOMPARE(event.at("values").at("input.vertices").get<unsigned>(), 3u);
-            QCOMPARE(event.at("values").at("input.primitives").get<unsigned>(), 1u);
+            const bool draw = event.at("event").get<Id>() >= 1000;
+            QCOMPARE(event.at("values").at("input.vertices").get<unsigned>(), draw ? 3u : 0u);
+            QCOMPARE(event.at("values").at("input.primitives").get<unsigned>(), draw ? 1u : 0u);
         }
         for (const auto &module : result.at("execution").at("loaded_modules")) {
             const auto name = QString::fromStdString(module.get<std::string>()).toLower();
@@ -426,9 +436,48 @@ class NativeAnalysisTests final : public QObject {
         Replay reference(frame, options), measured(frame, options);
         reference.run();
         const auto measuredReport = collectNativeEventCounters(measured);
-        QCOMPARE(measuredReport.at("events").size(), size_t(66));
+        QCOMPARE(measuredReport.at("events").size(), size_t(68));
         QCOMPARE(measured.output().rgba, reference.output().rgba);
         QCOMPARE(measured.counts, reference.counts);
+    }
+    void writeCounterBoundaries() {
+        using namespace testing;
+        QTemporaryDir directory;
+        const auto capture = directory.filePath("writes.gpa_frame");
+        auto fixture = resolvedMsaaOutputCapture(false);
+        fixture.buffer(200, 201, 0, 0, {1, 2, 3, 4});
+        fixture.buffer(202, 203, 0, 0, {9, 8, 7, 6});
+        fixture.add(210, 7, 0x3e, statePack(Id(0), Id(1), Id(202), Id(200)));
+        fixture.add(211, 7, 0x40, statePack(Id(0), Id(1), Id(202), 0u, 0u, 0u, 0u, Id(200), 0u, uint8_t(0)));
+        fixture.add(212, 7, 0x247, statePack(Id(0), Id(1), Id(202), 0u, uint8_t(0), Id(201), 16u, 16u));
+        fixture.save(capture);
+        Frame frame(capture.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        Replay reference(frame, options), measured(frame, options);
+        reference.run();
+        const auto report = collectNativeEventCounters(measured);
+        QCOMPARE(measured.readBuffer(202), statePack(1u, 2u, 3u, 4u));
+        QCOMPARE(measured.readBuffer(202), reference.readBuffer(202));
+        QCOMPARE(measured.readTexture(70), reference.readTexture(70));
+        QCOMPARE(measured.counts, reference.counts);
+        const auto &rows = report.at("events");
+        QCOMPARE(rows.size(), size_t(7));
+        const std::array<Id, 7> ids{100, 110, 120, 121, 210, 211, 212};
+        for (size_t i = 0; i < ids.size(); ++i) {
+            QCOMPARE(rows[i].at("event"), Json(ids[i]));
+            QCOMPARE(rows[i].at("timing_valid"), Json(true));
+            QVERIFY(rows[i].at("values").at("gpu.duration").get<double>() >= 0);
+            if (i < 2) {
+                QCOMPARE(rows[i].at("values").at("input.vertices"), Json(3));
+                QCOMPARE(rows[i].at("boundary"), Json("submission_after_binding"));
+            } else {
+                QCOMPARE(rows[i].at("boundary"), Json("resource_write_command"));
+                for (const auto &counter : report.at("catalog"))
+                    if (counter.at("type") == "uint64")
+                        QCOMPARE(rows[i].at("values").at(counter.at("id").get<std::string>()), Json(0));
+            }
+        }
     }
     void failCancelTimeoutAndRetry() {
         QTemporaryDir directory;

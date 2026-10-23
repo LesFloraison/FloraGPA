@@ -46,7 +46,7 @@ void NativeSample::end() {
     active_ = false;
     ended_ = true;
 }
-NativeStatistics NativeSample::result() {
+NativeStatistics NativeSample::result(bool synchronize) {
     if (!ended_)
         throw std::runtime_error("Statistics range did not finish");
     auto wait = [&](ID3D11Query *query, void *data, UINT bytes, auto deadline) {
@@ -60,11 +60,13 @@ NativeStatistics NativeSample::result() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     };
-    BOOL complete = FALSE;
-    context_->End(completion_.Get());
-    context_->Flush();
-    wait(completion_.Get(), &complete, sizeof complete,
-         std::chrono::steady_clock::now() + std::chrono::seconds(10));
+    if (synchronize) {
+        BOOL complete = FALSE;
+        context_->End(completion_.Get());
+        context_->Flush();
+        wait(completion_.Get(), &complete, sizeof complete,
+             std::chrono::steady_clock::now() + std::chrono::seconds(10));
+    }
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
     NativeStatistics out;
     wait(queries_[0].Get(), &out.pipeline, sizeof out.pipeline, deadline);

@@ -1,6 +1,7 @@
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include "app/RdcCountersView.h"
+#include "app/NativeCountersView.h"
 #include "app/ReplayDebugView.h"
 #include <QAction>
 #include <QApplication>
@@ -205,34 +206,27 @@ class RdcCounterUiTests : public QObject {
         QTest::qWait(800);
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         tasks.clear();
-        auto view = window.findChild<RdcCountersView *>();
+        auto view = window.findChild<NativeCountersView *>();
         QVERIFY(view);
         window.findChild<QTabWidget *>("inspectorTabs")->setCurrentWidget(view);
-        view->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
-        action(*view, "readRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
         const auto original = view->result();
-        QVERIFY(original.at("values").size() > 0);
+        QVERIFY(original.at("data").at("events").size() > 0);
         bool known = false;
-        for (const auto &r : original["values"])
-            if (r["gpa_event"] == 105 && r["counter"] == 2) {
-                QCOMPARE(r["value"], Json(3));
+        for (const auto &r : original.at("data").at("events"))
+            if (r["event"] == 105) {
+                QCOMPARE(r["values"]["input.vertices"], Json(3));
                 known = true;
             }
         QVERIFY(known);
-        auto rows = view->findChild<QTreeWidget *>("rdcCounterValues");
+        auto rows = view->findChild<QTreeWidget *>("nativeCounterValues");
         QVERIFY(rows->topLevelItemCount() > 0);
         if (!output_.isEmpty()) {
             const auto suffix = warp ? QString("warp") : QString("hardware");
             view->exportResult(output_ + "/counters-" + suffix + ".json");
-            const auto path = QString::fromStdString(original.at("capture").get<std::string>());
-            const auto bytes = read(QFileInfo(path).dir().filePath("report.json")).dump(2);
-            QSaveFile f(output_ + "/capture-" + suffix + ".json");
-            QVERIFY(f.open(QIODevice::WriteOnly));
-            QCOMPARE(f.write(bytes.data(), qint64(bytes.size())), qint64(bytes.size()));
-            QVERIFY(f.commit());
             QVERIFY(window.grab().save(output_ + "/metrics-" + suffix + ".png"));
         }
         const auto token = view->requestId();
@@ -243,7 +237,7 @@ class RdcCounterUiTests : public QObject {
         QCOMPARE(view->requestId(), token);
         QCOMPARE(view->result(), original);
         QVERIFY(rows->topLevelItemCount() > 0);
-        view->findChild<QComboBox *>("rdcCountersScope")->setCurrentIndex(1);
+        view->findChild<QComboBox *>("nativeCountersScope")->setCurrentIndex(1);
         QTreeWidgetItem *draw = nullptr;
         for (int i = 0; i < rows->topLevelItemCount(); ++i)
             if (rows->topLevelItem(i)->data(0, Qt::UserRole).toULongLong() == 105) {
@@ -253,13 +247,13 @@ class RdcCounterUiTests : public QObject {
         QVERIFY(draw);
         rows->setCurrentItem(draw);
         window.findChild<QLineEdit *>("apiSearch")->setText("no match");
-        action(*view, "locateRdcCounter")->trigger();
+        action(*view, "locateNativeCounter")->trigger();
         QCOMPARE(api->currentIndex().data(Qt::UserRole).toULongLong(), qulonglong(105));
         QTest::qWait(800);
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         tasks.clear();
         QCOMPARE(view->result(), original);
-        // Debugging shares the capture, while the full-frame metrics survive the job.
+        // Legacy debugging uses its own capture; native full-frame metrics survive that job.
         auto debug = window.findChild<ReplayDebugView *>("replayDebug-ps");
         debug->selectPixel(48, 32, 0);
         debug->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
@@ -267,21 +261,21 @@ class RdcCounterUiTests : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        QCOMPARE(debug->exportReport().at("capture"), original.at("capture"));
+        QCOMPARE(debug->exportReport().at("frame_sha256"), original.at("context").at("frame_sha256"));
         QCOMPARE(view->result(), original);
         if (!output_.isEmpty())
             debug->exportResult(output_ + (warp ? "/debug-warp.json" : "/debug-hardware.json"));
-        action(*view, "readRdcCounters")->trigger();
-        action(*view, "cancelRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
+        action(*view, "cancelNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
         QVERIFY(!tasks.takeLast()[0].toBool());
         tasks.clear();
         QVERIFY(view->result().is_null());
-        action(*view, "readRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        QCOMPARE(view->result().at("capture"), original.at("capture"));
+        QCOMPARE(view->result().at("context_id"), original.at("context_id"));
         QAction *disable{}, *undo{};
         for (auto a : window.findChildren<QAction *>()) {
             if (a->text() == "Disable Event")
@@ -295,32 +289,35 @@ class RdcCounterUiTests : public QObject {
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
         QVERIFY(view->result().is_null());
-        action(*view, "readRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        QVERIFY(view->result().at("capture") != original.at("capture"));
-        for (const auto &r : view->result().at("values"))
-            QVERIFY(r.at("gpa_event") != 105);
+        QVERIFY(view->result().at("context_id") != original.at("context_id"));
+        for (const auto &r : view->result().at("data").at("events"))
+            if (r.at("event") == 105) {
+                QVERIFY(!r.at("enabled").get<bool>());
+                QCOMPARE(r.at("values").at("input.vertices"), Json(0));
+            }
         undo->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        action(*view, "readRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        QCOMPARE(view->result().at("capture"), original.at("capture"));
-        view->setBackendPath("C:/missing/renderdoc.dll");
-        action(*view, "readRdcCounters")->trigger();
-        QCOMPARE(tasks.size(), 1);
-        QVERIFY(!tasks.takeLast()[0].toBool());
-        view->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
-        action(*view, "readRdcCounters")->trigger();
+        QCOMPARE(view->result().at("context").at("effective_experiment").at("cursor"), Json(0));
+        QSettings().setValue("analysis/renderdoc", "C:/missing/renderdoc.dll");
+        action(*view, "readNativeCounters")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());
         tasks.clear();
-        action(*view, "readRdcCounters")->trigger();
+        action(*view, "readNativeCounters")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        tasks.clear();
+        action(*view, "readNativeCounters")->trigger();
         select(51);
         QTest::qWait(800);
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);

@@ -1,5 +1,6 @@
 #pragma once
 #include "Models.h"
+#include "NativeAnalysisController.h"
 #include "Views.h"
 #include "WorkerBuffer.h"
 #include "WorkerReport.h"
@@ -38,7 +39,7 @@ class QuadView;
 class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
-class RdcCountersView;
+class NativeCountersView;
 class ReplayMeshView;
 class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
@@ -48,7 +49,7 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_); }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active(); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -154,14 +155,18 @@ class MainWindow final : public QMainWindow {
     void updateStatistics();
     void updateCheckpointContext();
     QString historyContextKey() const;
-    enum class RdcAnalysis { History, Debug, Counters, Mesh };
+    enum class RdcAnalysis { History, Debug, Mesh };
     void readRdcAnalysis(ReplayDebugView *view = nullptr, RdcAnalysis kind = RdcAnalysis::History);
     bool finishRdcAnalysis(const nlohmann::json &result);
     void startHistoryWorker();
     PixelHistoryView *history_ = nullptr;
     std::array<ReplayDebugView *, 3> replayDebug_{};
     ReplayDebugView *runningDebug_ = nullptr;
-    RdcCountersView *rdcCounters_ = nullptr;
+    NativeCountersView *nativeCounters_ = nullptr;
+    NativeAnalysisController nativeAnalysis_;
+    void readNativeCounters();
+    uint64_t nativeRequestId_{};
+    QString nativeContextKey_;
     ReplayMeshView *replayMesh_ = nullptr;
     RdcAnalysis runningAnalysis_ = RdcAnalysis::History;
     nlohmann::json historyRequest_;

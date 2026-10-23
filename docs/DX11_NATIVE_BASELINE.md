@@ -183,6 +183,111 @@ Evidence under `artifacts/dx11-native/`: `vertex-input-build-final.log`,
 `helldivers-vs-153/` and `helldivers-state-200/`. Detailed current QtTest logs are
 `build/vs2022/{native-analysis,native-vertex-inputs,post-transform}-Release.txt`.
 
+## Native Replay Metrics desktop validation
+
+The desktop Replay Metrics consumer now uses native jobs directly. On 2026-10-24,
+the final focused run passed all four CTest executables in **48.31 seconds**:
+`native_analysis` (40 cases, 14.949 s), `native_counter_ui` (7 cases, 16.470 s),
+`post_transform` (13 cases, 16.552 s), and `rdc_counter_ui` (3 passed, 3 historical
+optional-corpus skips). The first three suites have no failures or skips. The old
+counter report corpus and original shader-source capture are not installed here;
+their optional tests retain their existing skips and are not claimed as verified.
+
+The subsequent desktop regression passed **66 cases, with 31 existing optional
+corpus skips and no failures** in 199.981 seconds. GF2, BF1 and the explicitly
+configured Helldivers capture ran in this suite. The final controller-specific
+run passed all 7 cases in 18.348 seconds, including preservation of a failed
+Worker's diagnostic log after temporary-workspace cleanup. Logs are
+`native-counter-desktop-regression.txt` and `native-counter-controller-final.txt`;
+desktop artifacts are in `native-counter-desktop-final-ui/`. These skips do not
+establish parity for the unavailable optional captures.
+
+After correcting the PS counter description to reflect the SDK's helper-pixel
+accounting rule, the product and both native test targets were rebuilt. The final
+source revision passed `native_analysis` and `native_counter_ui` again (32.68 s,
+no failures); see `native-counter-final-source-build.log` and
+`native-counter-final-source-tests.log`.
+
+The required native UI suite uses generated captures on WARP, NVIDIA and Intel.
+It verifies exact wide integers, invalid-duration display, 64-bit event location,
+scope/filter/catalog/details/export behavior, stale results, immediate and queued
+completion cancellation, deadline failure, missing-Worker recovery, experiment
+disable/undo and event changes during work. Invalid legacy RenderDoc settings do
+not affect native measurement. The controller retains verified artifacts after
+its temporary directory is removed. Existing child-process crash/tree termination
+checks remain in the native analysis suite. Screenshots were inspected, and query
+module snapshots contain no RenderDoc or GPA private DLLs.
+
+The all-event collector was extended after comparison found missing Clear rows.
+It now measures recovered resource writes as well as draw/dispatch submissions.
+Tests assert Clear identities and zero pipeline counts, and independently check
+CopyResource, CopySubresourceRegion, UpdateSubresource and MSAA Resolve boundaries,
+buffer/texture contents and unchanged replay command counts. Existing draw counts
+remain asserted; expected report sizes increased to include the new write rows.
+
+### Real-capture generic counter comparison
+
+The frozen-main CLI independently recaptured the original GPA files and collected
+its existing generic counter results on NVIDIA. The new path reads those same GPA
+files directly. The saved-report comparison maps all 13 generic identifiers and
+preserves every unmatched row and both catalogs. Durations are checked for valid
+non-negative values and provenance, not numerical equality. The final batch-fence
+implementation produced:
+
+| Capture | Native GPA events | Matched reference events | Exact integer values | Integer differences | Missing mapped values | Additional native events |
+| --- | --- | --- | --- | --- | --- | --- |
+| GF2 | 119 | 75 | 900 | 0 | 0 | 44 |
+| BF1 | 5491 | 1313 | 15655 | 101 | 0 | 4178 |
+| Helldivers | 3051 | 780 | 9348 | 12 | 0 | 2271 |
+
+All differences are PS invocation counts. The strict BF1/Helldivers comparisons
+remain **failed**, not waived. Before the synchronization optimization BF1 had
+100 such differences and Helldivers had 12. Comparing the two native runs changes
+only BF1 event 24020 (49913 to 49904 PS invocations); it does not explain the other
+differences. Frozen-main native single-event statistics independently produced
+554956 at BF1 event 2010, 172603 at BF1 event 10950 and 16933 at Helldivers event
+9983, exactly matching both new native runs at those events. This rules out the
+new batch collector as the source of those three discrepancies, but does not
+establish the external replay's cause or full P3 parity. Further controlled probes
+remain necessary. No baseline values were changed or comparisons relaxed.
+
+The [D3D11 functional specification, section 20.4.7](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm)
+allows implementation-dependent helper-pixel accounting and early depth/stencil
+effects on PS invocation counts. Those rules guide the next controlled probes;
+they do not, by themselves, explain or waive any recorded real-capture difference.
+
+Each reference has two measured events without GPA identity (26 values), retained
+separately rather than assigned invented GPA IDs. Additional native events include
+CPU uploads omitted from the reference action list. The reference catalog's extra
+NVIDIA entry reports a missing Nsight Perf SDK and is not a collected counter.
+The new catalog owns its identities/descriptions; general vendor-provider catalog
+coverage on other installations remains an open audit item.
+
+### Synchronization and performance observation
+
+The first implementation waited for a separate GPU completion after each sample.
+The final implementation ends all samples before draining a batch and waits for
+one completion covering that batch. Query reads retain bounded deadlines. The
+64-sample storage limit and one-replay execution remain unchanged.
+
+| Capture | Per-sample completion Worker time | Batch completion Worker time | Final CLI wall time | Final Worker peak working set |
+| --- | --- | --- | --- | --- |
+| GF2 | 2.181 s | 0.395 s | 1.515 s | 236.56 MiB |
+| BF1 | 86.445 s | 2.924 s | 13.359 s | 1781.47 MiB |
+| Helldivers | 48.523 s | 2.152 s | 13.625 s | 1728.61 MiB |
+
+These serial diagnostic observations are not a full P8 performance certification.
+The unchanged frame-hashing/startup overhead still contributes to wall time and
+working set. No external analysis modules appear in the final native snapshots;
+this is not a transient-module, import, clean-environment or package audit.
+
+Evidence under `artifacts/dx11-native/`: `native-counter-batch-build.log`,
+`native-counter-final.log`, `native-counter-final.xml`, `native-counter-final-ui/`,
+`gf2-counter-cutover/`, `real-counter-cutover/{bf1,helldivers}/`,
+`counter-batch-repeat/{gf2,bf1,helldivers}/`, and `counter-statistics-probes/`.
+Initial UI/build evidence remains in `native-counter-ui-*`. The comparison tool
+reads saved reports only and does not require or launch an external backend.
+
 ## Reproduction and evidence
 
 ```powershell
@@ -209,6 +314,13 @@ python tools/validate_native_vertex_inputs.py --cli build/vs2022/Release/FloraGP
   --case D:/CDXrepo/captures/helldivers2_2026_04_02__18_02_58.gpa_frame 200 `
   --reference-stage vs --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
   --out artifacts/dx11-native/vertex-input-helldivers-new
+cmake --build build/vs2022 --config Release --target FloraNativeCounterUiTests FloraNativeAnalysisTests
+ctest --test-dir build/vs2022 -C Release -j 1 --timeout 180 `
+  -R '^(native_analysis|native_counter_ui|post_transform|rdc_counter_ui)$' --output-on-failure
+python tools/compare_native_counter_reports.py `
+  --native artifacts/dx11-native/counter-batch-repeat/gf2/native/result.json `
+  --reference artifacts/dx11-native/gf2-counter-cutover/baseline/result.json `
+  --out artifacts/dx11-native/gf2-counter-comparison-new.json
 ```
 
 Raw build/CTest logs, JUnit output and original reports remain under ignored

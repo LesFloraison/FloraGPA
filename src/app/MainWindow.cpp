@@ -23,7 +23,7 @@
 #include "PredicateView.h"
 #include "QuadView.h"
 #include "RasterizerDialog.h"
-#include "RdcCountersView.h"
+#include "NativeCountersView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
@@ -347,10 +347,39 @@ MainWindow::MainWindow() : loader_(this) {
             emit taskFinished(false);
         }
     });
+    connect(&nativeAnalysis_, &NativeAnalysisController::finished, this,
+            [this](const NativeAnalysisOutcome &outcome) {
+        setBusy(busy());
+        bool accepted = false;
+        try {
+            if (nativeContextKey_ != historyContextKey())
+                throw std::runtime_error("Native analysis context changed");
+            if (!outcome.error.isEmpty())
+                throw std::runtime_error(outcome.error.toStdString());
+            if (outcome.result.at("context").at("frame_sha256") != frame_->sha256())
+                throw std::runtime_error("Native analysis frame changed");
+            const auto report = outcome.artifacts.value("counters.json");
+            if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
+                throw std::runtime_error("Native counter artifact disagrees with the result");
+            accepted = nativeCounters_->finish(nativeRequestId_, outcome.result);
+            statusBar()->showMessage(accepted ? "Replay metrics ready" : "Analysis context changed", 3000);
+        } catch (const std::exception &error) {
+            nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+            if (!outcome.workerLog.isEmpty())
+                log_->appendPlainText(QString::fromUtf8(outcome.workerLog));
+            if (!outcome.cancelled)
+                showError(QString::fromUtf8(error.what()));
+            else
+                statusBar()->showMessage("Native analysis cancelled", 3000);
+        }
+        emit taskFinished(accepted);
+    });
     connect(&process_, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    nativeAnalysis_.disconnect(this);
+    nativeAnalysis_.cancel();
     if (exportCancel_)
         exportCancel_->store(true);
     if (artifactJob_)
@@ -1209,8 +1238,8 @@ void MainWindow::buildUi() {
     metrics_->setColumnWidth(0, 175);
     rightTabs->addTab(properties_, "Properties");
     rightTabs->addTab(metrics_, "Metrics");
-    rdcCounters_ = new RdcCountersView;
-    rightTabs->addTab(rdcCounters_, "Replay Metrics");
+    nativeCounters_ = new NativeCountersView;
+    rightTabs->addTab(nativeCounters_, "Replay Metrics");
     scheduledMetrics_ = new IntelMetricsView;
     rightTabs->addTab(scheduledMetrics_, "Intel Metrics");
     connect(scheduledMetrics_, &IntelMetricsView::readRequested, this, &MainWindow::readScheduledMetrics);
@@ -1219,11 +1248,11 @@ void MainWindow::buildUi() {
         if (!busy())
             locateEvent(event);
     });
-    connect(rdcCounters_, &RdcCountersView::readRequested, this,
-            [this] { readRdcAnalysis(nullptr, RdcAnalysis::Counters); });
-    connect(rdcCounters_, &RdcCountersView::cancelRequested, this, &MainWindow::cancel);
-    connect(rdcCounters_, &RdcCountersView::error, this, &MainWindow::showError);
-    connect(rdcCounters_, &RdcCountersView::eventRequested, this, [this](qulonglong event) {
+    connect(nativeCounters_, &NativeCountersView::readRequested, this,
+            [this] { readNativeCounters(); });
+    connect(nativeCounters_, &NativeCountersView::cancelRequested, this, &MainWindow::cancel);
+    connect(nativeCounters_, &NativeCountersView::error, this, &MainWindow::showError);
+    connect(nativeCounters_, &NativeCountersView::eventRequested, this, [this](qulonglong event) {
         if (!busy())
             locateEvent(event);
     });
@@ -1288,7 +1317,7 @@ void MainWindow::buildUi() {
             return;
         ++revision_;
         ++outputGeneration_;
-        if (process_.state() != QProcess::NotRunning || artifactJob_)
+        if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
             cancel();
         replayTimer_.start();
     };
@@ -1309,7 +1338,7 @@ void MainWindow::buildUi() {
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
         if (frame_) {
             ++revision_;
-            if (process_.state() != QProcess::NotRunning || artifactJob_)
+            if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
                 cancel();
             replayTimer_.start();
         }
@@ -1322,7 +1351,7 @@ void MainWindow::buildUi() {
         predicateView_->invalidate();
         gpuStatistics_->invalidate();
         ++revision_;
-        if (process_.state() != QProcess::NotRunning || artifactJob_)
+        if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
             cancel();
         chart_->clear();
         if (frame_)
@@ -1376,7 +1405,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1387,8 +1416,8 @@ void MainWindow::setBusy(bool busy) {
     updateCheckpointContext();
     if (history_)
         history_->setWorkerBusy(busy);
-    if (rdcCounters_)
-        rdcCounters_->setWorkerBusy(busy);
+    if (nativeCounters_)
+        nativeCounters_->setWorkerBusy(busy);
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
@@ -1450,8 +1479,8 @@ void MainWindow::updateCheckpointContext() {
             view->setContext(key, available);
     if (history_)
         history_->setContext(historyContextKey(), selectedEvent_);
-    if (rdcCounters_)
-        rdcCounters_->setContext(historyContextKey(), selectedEvent_);
+    if (nativeCounters_)
+        nativeCounters_->setContext(historyContextKey(), selectedEvent_);
     if (replayMesh_)
         replayMesh_->setContext(historyContextKey(), selectedEvent_);
     for (auto view : replayDebug_)
@@ -1473,8 +1502,6 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
     if (runningAnalysis_ == RdcAnalysis::Mesh)
         return replayMesh_->finish(historyRequestId_, result,
                                    jobDir_ ? jobDir_->path() + "/result" : QString());
-    if (runningAnalysis_ == RdcAnalysis::Counters)
-        return rdcCounters_->finish(historyRequestId_, result);
     return runningDebug_ ? runningDebug_->finish(historyRequestId_, result)
                          : history_->finish(historyRequestId_, result);
 }
@@ -1488,18 +1515,15 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     }
     runningDebug_ = view;
     runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
-    const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
+    const bool mesh = kind == RdcAnalysis::Mesh;
     historyRequestId_ = mesh       ? replayMesh_->requestId()
-                        : counters ? rdcCounters_->requestId()
                         : view     ? view->requestId()
                                    : history_->requestId();
     try {
         historyRequest_ = mesh       ? replayMesh_->request()
-                          : counters ? rdcCounters_->request()
                           : view     ? view->request()
                                      : history_->request();
         const auto library = QFileInfo(mesh       ? replayMesh_->backendPath()
-                                       : counters ? rdcCounters_->backendPath()
                                        : view     ? view->backendPath()
                                                   : history_->backendPath())
                                  .canonicalFilePath();
@@ -1533,6 +1557,30 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         emit taskFinished(false);
     }
 }
+void MainWindow::readNativeCounters() {
+    if (busy() || !frame_)
+        return;
+    nativeRequestId_ = nativeCounters_->requestId();
+    nativeContextKey_ = historyContextKey();
+    try {
+        replayTimer_.stop();
+        textureTimer_.stop();
+        bufferTimer_.stop();
+        nlohmann::json options = nlohmann::json::object();
+        if (adapter_->currentIndex() == 1)
+            options["warp"] = true;
+        else if (const auto vendor = selectedReplayVendor(*adapter_))
+            options["gpu_vendor"] = *vendor;
+        nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                              "counters", options, experiment_ ? experiment_->document() : nlohmann::json());
+        setBusy(true);
+        statusBar()->showMessage("Measuring replay counters…");
+    } catch (const std::exception &error) {
+        nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+        showError(QString::fromUtf8(error.what()));
+        emit taskFinished(false);
+    }
+}
 void MainWindow::startHistoryWorker() {
     replayTimer_.stop();
     textureTimer_.stop();
@@ -1559,7 +1607,6 @@ void MainWindow::startHistoryWorker() {
     workerTimedOut_ = false;
     setBusy(true);
     statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
-                             : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
                              : runningDebug_                             ? "Reading shader trace…"
                                                                          : "Reading pixel history…");
     timeout_.start(180000);
@@ -1605,7 +1652,7 @@ void MainWindow::openCapture(const QString &path) {
 void MainWindow::replay(bool timings) {
     if (!frame_ || loadCancel_)
         return;
-    if (process_.state() != QProcess::NotRunning || artifactJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active()) {
         cancel();
         replayTimer_.start();
         return;
@@ -1647,7 +1694,7 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
     }
 }
 void MainWindow::startWorker(QStringList args, bool timings) {
-    if (process_.state() != QProcess::NotRunning || artifactJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
         return;
     runningRecover_ = args.first() == "shader" && args.contains("--recover");
     if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project" || args.first() == "assemble")
@@ -1727,6 +1774,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    nativeAnalysis_.cancel();
     if (exportCancel_) {
         exportCancel_->store(true);
         cancelAction_->setEnabled(false);
@@ -1850,8 +1898,6 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
             statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
-                                                 : runningAnalysis_ == RdcAnalysis::Counters
-                                                     ? "Replay metrics ready"
                                                  : runningDebug_ ? "Shader trace ready"
                                                                  : "Pixel history ready")
                                               : "Analysis selection changed",
@@ -2196,7 +2242,7 @@ void MainWindow::selectEvent(Id id) {
         QSignalBlocker blocker(boundary_);
         boundary_->setCurrentIndex(2);
     }
-    if (process_.state() != QProcess::NotRunning || artifactJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
         cancel();
     updateResourceContext(true);
     if (!selectedBinding_) { resourceImages_->setCurrentIndex(0); replayTimer_.start(); }
@@ -2386,7 +2432,7 @@ void MainWindow::inspectResource(Id id) {
         if (selectedResource_ != id || (!resourceSelecting_ && selectedBinding_)) {
             clearBufferDetails();
             ++revision_;
-            if (process_.state() != QProcess::NotRunning || artifactJob_)
+            if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
                 cancel();
             textureTimer_.stop();
             bufferTimer_.stop();
@@ -2773,7 +2819,7 @@ void MainWindow::previewTexture() {
     const auto &entry = frame_->entry(selectedResource_);
     if (entry.type < 0x84 || entry.type > 0x87)
         return;
-    if (process_.state() != QProcess::NotRunning || artifactJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active()) {
         cancel();
         textureTimer_.start();
         return;
@@ -2816,7 +2862,7 @@ void MainWindow::previewTexture() {
 void MainWindow::previewBuffer() {
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
         return;
-    if (process_.state() != QProcess::NotRunning || artifactJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active()) {
         cancel();
         bufferTimer_.start();
         return;
@@ -2961,7 +3007,7 @@ void MainWindow::experimentChanged() {
             }
         }
     }
-    if (process_.state() != QProcess::NotRunning || artifactJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_ || nativeAnalysis_.active())
         cancel();
     if (selectedResource_) {
         auto type = frame_->entry(selectedResource_).type;
