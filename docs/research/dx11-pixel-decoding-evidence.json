@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "date": "2026-10-24",
+  "scope": "native_pixel_storage_interpretation",
+  "complete_release_acceptance": false,
+  "initial_result": {
+    "passed": 158,
+    "failed": 4,
+    "finding": "B5 native Load differs from ideal normalization on NVIDIA and Intel; WARP agrees within float rounding."
+  },
+  "final_tests": {
+    "native_pixel": 207,
+    "native_history": 91,
+    "native_analysis": 40,
+    "failed": 0,
+    "skipped": 0
+  },
+  "test_provenance": "Pixel and native-analysis suites preceded the command_view provenance-label change; the 91-case history suite and real-capture probe were repeated after that final change.",
+  "observations": [
+    {
+      "format": 85,
+      "gpu_bits": [
+        1059400010,
+        1060293421,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.6451612710952759,
+        0.6984127163887024,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.6451612903225806,
+        0.6984126984126984,
+        0.0,
+        1
+      ],
+      "vendor": 0
+    },
+    {
+      "format": 86,
+      "gpu_bits": [
+        1049929001,
+        1053176204,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.29032257199287415,
+        0.3870967626571655,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.2903225806451613,
+        0.3870967741935484,
+        0.0,
+        1.0
+      ],
+      "vendor": 0
+    },
+    {
+      "format": 85,
+      "gpu_bits": [
+        1059431846,
+        1060287155,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.6470588445663452,
+        0.6980392336845398,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.6451612903225806,
+        0.6984126984126984,
+        0.0,
+        1
+      ],
+      "vendor": 4318
+    },
+    {
+      "format": 86,
+      "gpu_bits": [
+        1049924757,
+        1053214407,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.29019609093666077,
+        0.38823530077934265,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.2903225806451613,
+        0.3870967741935484,
+        0.0,
+        1.0
+      ],
+      "vendor": 4318
+    },
+    {
+      "format": 85,
+      "gpu_bits": [
+        1059431846,
+        1060287155,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.6470588445663452,
+        0.6980392336845398,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.6451612903225806,
+        0.6984126984126984,
+        0.0,
+        1
+      ],
+      "vendor": 32902
+    },
+    {
+      "format": 86,
+      "gpu_bits": [
+        1049924757,
+        1053214407,
+        0,
+        1065353216
+      ],
+      "gpu_load": [
+        0.29019609093666077,
+        0.38823530077934265,
+        0.0,
+        1.0
+      ],
+      "storage_math": [
+        0.2903225806451613,
+        0.3870967741935484,
+        0.0,
+        1.0
+      ],
+      "vendor": 32902
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/native-pixel-math-vs-hardware-initial.txt",
+      "sha256": "db48793ca47adeedf9afc10c4b636aef544a317056e21bc6e2fb8825008c9ed7",
+      "bytes": 9436
+    },
+    {
+      "path": "artifacts/dx11-native/native-pixel-207.txt",
+      "sha256": "ab3dd4898f0b0c4f1d455661694c4fad84cc6d36b7eb657acaf6406d6b1f65d5",
+      "bytes": 12422
+    },
+    {
+      "path": "artifacts/dx11-native/native-analysis-decoding-40.txt",
+      "sha256": "0711e14c1224d2e19959b375cc1c55d7bb7bb412668df540065e5f5cff9cce10",
+      "bytes": 2569
+    },
+    {
+      "path": "artifacts/dx11-native/native-history-decoding-91.txt",
+      "sha256": "4989df9eda8d652314b13a52074ae3f600b00c91628fe841cbf040a256a25701",
+      "bytes": 5716
+    },
+    {
+      "path": "artifacts/dx11-native/native-pixel-final-build.log",
+      "sha256": "f64f8fd1ed6ce349286ad26a78fa5fe9d46de83ff56fe2a44984a414fb17932f",
+      "bytes": 5547
+    },
+    {
+      "path": "artifacts/dx11-native/native-pixel-final-tests.log",
+      "sha256": "124bc14d08d36906a4b039c0833d53be957aa7228ed0766931ec41031a9b1215",
+      "bytes": 544
+    },
+    {
+      "path": "artifacts/dx11-native/native-pixel-label-build.log",
+      "sha256": "edc844b371e02c70e88452c23d2995f4f59e11d38cad155cfdf457bf8bae116d",
+      "bytes": 2911
+    },
+    {
+      "path": "artifacts/dx11-native/history-decoded-final/validation.json",
+      "sha256": "de456679303bdcd69f62a3952c1a9ef75853f35a44a4df770b51136795b1fb75",
+      "bytes": 19490
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/NativePixel.cpp",
+      "sha256": "5848c63407175307ecb13fb41c76135c9dce081ff476a20d010b5a7a21597871"
+    },
+    {
+      "path": "src/application/NativePixelGpu.cpp",
+      "sha256": "2a3c0f460054b4b87ec1c1feeaf36f65beb2ca6124e25c58c8bb5ec4a20500c5"
+    },
+    {
+      "path": "src/application/NativePixel.h",
+      "sha256": "0d271ef59925b028e84e6fdcf0344eb1a5fcf0d5b671d7e25f3c89543324bdd8"
+    },
+    {
+      "path": "src/application/NativeHistory.cpp",
+      "sha256": "8b24ebd7d05b34c9e38ee5bfcc4965034ed653866e0f27ce15ac4498ac0aca74"
+    },
+    {
+      "path": "tests/NativePixelTests.cpp",
+      "sha256": "43a5a0087a60ee2465e67637318e2830a323747585ba69302a7d9d820cf851bb"
+    },
+    {
+      "path": "tests/NativeHistoryTests.cpp",
+      "sha256": "a651ed0b1cfe9a8c298c9de981272bf264e48f7f1bcd3a89bf7577c6d666419c"
+    },
+    {
+      "path": "tools/validate_native_history.py",
+      "sha256": "e24ce210707cf842c46ed4fc8b4a40e36dfceae588831d3302ff4b8dc5c71943"
+    }
+  ],
+  "real_capture_checks": [
+    {
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "resource": 80,
+      "x": 1280,
+      "y": 720,
+      "records": 72,
+      "comparisons": [
+        {
+          "event": 79,
+          "native": "000000ff",
+          "prefix": "000000ff",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 0.9529999999795109,
+          "prefix_storage_sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+        },
+        {
+          "event": 879,
+          "native": "302e30a9",
+          "prefix": "302e30a9",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 1.1089999999967404,
+          "prefix_storage_sha256": "f8e6e7fbccad4d6d90ec3421636c3e73e189f970fb90c521fc39a4fdfd48df9d"
+        },
+        {
+          "event": 1455,
+          "native": "302e30a9",
+          "prefix": "302e30a9",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 0.9529999999795109,
+          "prefix_storage_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+        }
+      ],
+      "wall_seconds": 2.235000000044238,
+      "readback_count": 144,
+      "readback_bytes": 576,
+      "context": {
+        "action": "history",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "backend": "dx11-native/2",
+        "backend_sha256": "696f29d23d45710fcfe9b3124d3daf1183bd973758c4303dff11a9ce86e9750f",
+        "effective_experiment": {
+          "cursor": 0,
+          "format": "FloraGPA experiment 1",
+          "frame_name": "GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+          "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+          "history": []
+        },
+        "experiment_sha256": null,
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "options": {
+          "gpu_vendor": 4318,
+          "history_scope": "events",
+          "resource": 80,
+          "x": 1280,
+          "y": 720
+        },
+        "schema": 1
+      },
+      "worker_elapsed_ms": 519,
+      "peak_working_set_bytes": 247320576
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "resource": 23209,
+      "x": 512,
+      "y": 512,
+      "records": 7,
+      "comparisons": [
+        {
+          "event": 23208,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 2.125,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        },
+        {
+          "event": 24115,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 2.0619999999762513,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        },
+        {
+          "event": 25204,
+          "native": "00",
+          "prefix": "00",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 2.0160000000032596,
+          "prefix_storage_sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+        }
+      ],
+      "wall_seconds": 19.26600000000326,
+      "readback_count": 14,
+      "readback_bytes": 14,
+      "context": {
+        "action": "history",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "backend": "dx11-native/2",
+        "backend_sha256": "696f29d23d45710fcfe9b3124d3daf1183bd973758c4303dff11a9ce86e9750f",
+        "effective_experiment": {
+          "cursor": 0,
+          "format": "FloraGPA experiment 1",
+          "frame_name": "bf1_2026_01_21__16_53_05.gpa_frame",
+          "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+          "history": []
+        },
+        "experiment_sha256": null,
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "options": {
+          "gpu_vendor": 4318,
+          "history_scope": "events",
+          "resource": 23209,
+          "x": 512,
+          "y": 512
+        },
+        "schema": 1
+      },
+      "worker_elapsed_ms": 2569,
+      "peak_working_set_bytes": 1812541440
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "resource": 99,
+      "x": 128,
+      "y": 128,
+      "records": 19,
+      "comparisons": [
+        {
+          "event": 98,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 0.7809999999590218,
+          "prefix_storage_sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+        },
+        {
+          "event": 516,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 1.0160000000032596,
+          "prefix_storage_sha256": "a84ec18ccdea166c43978ecc017d59decb0e777314465f4b8515562490aab630"
+        },
+        {
+          "event": 2083,
+          "native": "00000000",
+          "prefix": "00000000",
+          "equal": true,
+          "decoded_equal": true,
+          "prefix_wall_seconds": 1.4530000000377186,
+          "prefix_storage_sha256": "e4873d7cde1d83f28d9c41ad07a6609d1762a3b4a1d6cb9db4ac7a57bc8bedb3"
+        }
+      ],
+      "wall_seconds": 16.79700000002049,
+      "readback_count": 37,
+      "readback_bytes": 148,
+      "context": {
+        "action": "history",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 49408,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "backend": "dx11-native/2",
+        "backend_sha256": "696f29d23d45710fcfe9b3124d3daf1183bd973758c4303dff11a9ce86e9750f",
+        "effective_experiment": {
+          "cursor": 0,
+          "format": "FloraGPA experiment 1",
+          "frame_name": "helldivers2_2026_04_02__18_02_58.gpa_frame",
+          "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+          "history": []
+        },
+        "experiment_sha256": null,
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "options": {
+          "gpu_vendor": 4318,
+          "history_scope": "events",
+          "resource": 99,
+          "x": 128,
+          "y": 128
+        },
+        "schema": 1
+      },
+      "worker_elapsed_ms": 2452,
+      "peak_working_set_bytes": 1773494272
+    }
+  ],
+  "limits": [
+    "Event snapshots are not fragments.",
+    "No GPA debugger-engine closure.",
+    "No full format or BC-mode coverage.",
+    "No release performance acceptance.",
+    "Module snapshots do not establish transient-load, child-process, imports or clean-package acceptance."
+  ]
+}
