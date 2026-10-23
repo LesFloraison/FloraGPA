@@ -3,6 +3,7 @@
 #include "CaptureNames.h"
 #include "Experiment.h"
 #include "GpuStatistics.h"
+#include "NativeArtifacts.h"
 #include "NativeCounters.h"
 #include "PostTransform.h"
 #include "TextureInspector.h"
@@ -109,8 +110,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             if (!selected->second.contains(key))
                 throw std::invalid_argument("Unsupported " + action + " option: " + key);
             if (key == "stage") {
-                if (value != "vs" && value != "ds" && value != "gs" && value != "hs" && value != "final")
-                    throw std::invalid_argument("Mesh stage must be vs, ds, gs, hs or final");
+                if (value != "vs" && value != "vs-index" && value != "ds" && value != "gs" && value != "hs" &&
+                    value != "final")
+                    throw std::invalid_argument("Mesh stage must be vs, vs-index, ds, gs, hs or final");
             } else if (key == "group" || key == "thread") {
                 if (!value.is_array() || value.size() != 3)
                     throw std::invalid_argument("Expected three coordinates: " + key);
@@ -298,6 +300,12 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                 inspect.instance = selection.at("instance").get<uint32_t>();
             auto result = inspectPostTransform(replay, options.until, inspect);
             exportPostTransform(result, output.toStdWString());
+            if (result.report.contains("vertex_identity")) {
+                Json identities = Json::array();
+                for (const auto &identity : result.identities)
+                    identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
+                save(directory.filePath("identities.json"), identities);
+            }
             data = result.report;
         }
     }
@@ -308,7 +316,8 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                 {"request_id", job.at("request_id")},
                 {"context", context},
                 {"context_id", analysisIdentity(context)},
-                {"data", data}};
+                {"data", data},
+                {"artifacts", nativeArtifactManifest(output, cancelled)}};
     PROCESS_MEMORY_COUNTERS memory{};
     if (!GetProcessMemoryInfo(GetCurrentProcess(), &memory, sizeof memory))
         throw std::runtime_error("Cannot read native analysis memory usage");

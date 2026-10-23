@@ -1,7 +1,10 @@
 #include "DepthStencilCapture.h"
+#include "HullCapture.h"
+#include "StreamCapture.h"
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeCounters.h"
+#include "application/NativeMesh.h"
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
@@ -195,6 +198,206 @@ class NativeAnalysisTests final : public QObject {
         QVERIFY(finalBytes.open(QIODevice::ReadOnly));
         QCOMPARE(initialBytes.readAll(), QByteArray::fromHex("00ff00ff"));
         QCOMPARE(finalBytes.readAll(), QByteArray::fromHex("ff0000ff"));
+    }
+    void meshArtifacts_data() {
+        QTest::addColumn<QString>("scenario");
+        QTest::addColumn<unsigned>("vendor");
+        for (const auto vendor : {0u, 0x10deu, 0x8086u})
+            for (const auto scenario :
+                 {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav", "gs", "auto"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(scenario).arg(vendor)))
+                    << QString(scenario) << vendor;
+    }
+    void meshArtifacts() {
+        try {
+            QFETCH(QString, scenario);
+            QFETCH(unsigned, vendor);
+            if (vendor) {
+                Com<IDXGIFactory1> factory;
+                check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)), "Enumerate mesh test adapters");
+                bool installed = false;
+                for (UINT i = 0;; ++i) {
+                    Com<IDXGIAdapter1> adapter;
+                    const auto status = factory->EnumAdapters1(i, &adapter);
+                    if (status == DXGI_ERROR_NOT_FOUND)
+                        break;
+                    check(status, "Enumerate mesh test adapter");
+                    DXGI_ADAPTER_DESC1 desc{};
+                    check(adapter->GetDesc1(&desc), "Describe mesh test adapter");
+                    installed |= desc.VendorId == vendor;
+                }
+                if (!installed)
+                    QSKIP("The requested hardware vendor is not installed; WARP is tested separately");
+            }
+            QTemporaryDir directory;
+            const auto capture = directory.filePath("frame.gpa_frame"), output = directory.filePath("mesh");
+            auto fixture = scenario == "instanced" || scenario.startsWith("ds") ? testing::hullCapture()
+                           : scenario == "gs" || scenario == "auto"             ? testing::streamCapture()
+                                                                    : testing::depthStencilCapture();
+            const auto event = scenario == "instanced" || scenario.startsWith("ds") || scenario == "auto"
+                                   ? 200u
+                               : scenario == "gs" ? 150u
+                                                  : 1000u;
+            const std::string stage = scenario == "vs"            ? "vs"
+                                      : scenario.startsWith("ds") ? "ds"
+                                      : scenario == "gs"          ? "gs"
+                                                                  : "vs-index";
+            if (scenario == "indexed" || scenario == "tail") {
+                fixture.entries.erase(
+                    std::remove_if(fixture.entries.begin(), fixture.entries.end(),
+                                   [](const auto &e) { return e.id == 31 || e.id == 990 || e.id == 1000; }),
+                    fixture.entries.end());
+                auto code = testing::compileClassProgram(
+                    "float4 main(uint id:SV_VertexID):SV_Position{return float4(id,0,0,1);}", "vs_5_0");
+                auto bytes = testing::statePack(uint64_t(code.size()));
+                bytes.insert(bytes.end(), code.begin(), code.end());
+                testing::append(bytes, Id(0));
+                fixture.add(31, 9, 0x81, bytes);
+                State state{};
+                state.topology = 4;
+                state.sampleMask = UINT32_MAX;
+                state.stages[0].shader = 30;
+                state.omStart = 8;
+                if (scenario == "indexed") {
+                    fixture.add(9000, 5, 0x83,
+                                testing::statePack(Id(0), Id(0), 24u, 0u, uint32_t(D3D11_BIND_INDEX_BUFFER),
+                                                   0u, 0u, 0u, Id(9001)));
+                    fixture.add(9001, 9, 1, testing::statePack(24u, 2u, 0u, 1u, 2u, 1u, 0u));
+                    state.ib = 9000;
+                    state.ibFormat = DXGI_FORMAT_R32_UINT;
+                }
+                fixture.add(990, 3, 3, testing::snapshot(state));
+                fixture.add(1000, 7, scenario == "indexed" ? 0x39 : 0x37,
+                            scenario == "indexed" ? testing::statePack(Id(990), Id(0), Id(1), 6u, 0u, 5u)
+                                                  : testing::statePack(Id(990), Id(0), Id(1), 4u, 0u));
+            }
+            if (scenario == "ds") {
+                fixture.entries.erase(std::remove_if(fixture.entries.begin(), fixture.entries.end(),
+                                                     [](const auto &e) { return e.id == 7003; }),
+                                      fixture.entries.end());
+                const auto code = testing::compileClassProgram(
+                    "struct V{float4 p:SV_Position;};"
+                    "struct C{float edges[3]:SV_TessFactor;float inside:SV_InsideTessFactor;uint tag:ATTR;};"
+                    "C patch(InputPatch<V,3> p,uint pid:SV_PrimitiveID){C c;"
+                    "c.edges[0]=c.edges[1]=c.edges[2]=c.inside=1;c.tag=42+pid;return c;}"
+                    "[domain(\"tri\")][partitioning(\"integer\")][outputtopology(\"triangle_cw\")]"
+                    "[outputcontrolpoints(3)][patchconstantfunc(\"patch\")]"
+                    "V main(InputPatch<V,3> p,uint id:SV_OutputControlPointID){return p[id];}",
+                    "hs_5_0");
+                auto bytes = testing::statePack(uint64_t(code.size()));
+                bytes.insert(bytes.end(), code.begin(), code.end());
+                testing::append(bytes, Id(0));
+                fixture.add(7003, 9, 0x81, bytes);
+            }
+            fixture.save(capture);
+            Json options{
+                {"gpa_event", event}, {"stage", stage}, {"instance", scenario == "instanced" ? 1 : 0}};
+            if (vendor)
+                options["gpu_vendor"] = vendor;
+            else
+                options["warp"] = true;
+            if (scenario == "ds-uav") {
+                const auto unsupported = prepareNativeAnalysisJob(
+                    capture, "mesh", directory.filePath("instance"), worker(), options);
+                bool rejected = false;
+                try {
+                    runNativeAnalysisJob(unsupported, worker(), 30);
+                } catch (const std::runtime_error &error) {
+                    rejected = QString::fromUtf8(error.what())
+                                   .contains("Instance boundaries through HS/DS/GS with UAV access");
+                }
+                QVERIFY2(rejected, "UAV-dependent instance boundaries must not be guessed");
+                options.erase("instance");
+            }
+            const auto job = prepareNativeAnalysisJob(capture, "mesh", output, worker(), options);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 30));
+            const auto mesh = readNativeMesh(job, result, output, 64 * 1024 * 1024);
+            // Both original GS draws emit three vertices into the same SO cursor before DrawAuto.
+            const auto expected =
+                scenario == "ds-uav" ? 12u
+                : scenario == "instanced" || scenario == "ds" || scenario == "auto" || scenario == "indexed"
+                    ? 6u
+                    : 3u;
+            QCOMPARE(mesh.geometry.report.at("vertices").get<unsigned>(), expected);
+            if (vendor)
+                QCOMPARE(result.at("context").at("adapter").at("vendor").get<unsigned>(), vendor);
+            else
+                QVERIFY(result.at("context").at("adapter").at("warp") == true);
+            if (stage == "vs-index") {
+                QCOMPARE(mesh.geometry.identities.size(), size_t(expected));
+                for (size_t i = 0; i < mesh.geometry.identities.size(); ++i) {
+                    const auto &identity = mesh.geometry.identities[i];
+                    const uint32_t index =
+                        scenario == "indexed" ? std::array{2u, 0u, 1u, 2u, 1u, 0u}[i] : uint32_t(i);
+                    QCOMPARE(identity.instance, scenario == "instanced" ? 1u : 0u);
+                    QCOMPARE(identity.vertexId, index);
+                    QCOMPARE(identity.vertexIndex, int64_t(index + (scenario == "indexed" ? 5 : 0)));
+                }
+                if (scenario == "indexed") {
+                    QCOMPARE(mesh.tables.at("unique_vertices"), Json(3));
+                    const auto &references = mesh.tables.at("tables").at("references").at("rows");
+                    QCOMPARE(references[0][8], references[3][8]);
+                    QCOMPARE(references[1][8], references[5][8]);
+                    QCOMPARE(references[2][8], references[4][8]);
+                }
+            }
+            if (scenario == "tail") {
+                // Keep this gap explicit: assembled output omits the fourth input reference.
+                QCOMPARE(
+                    mesh.geometry.report.at("vertex_identity").at("original_parameters").at("vertex_count"),
+                    Json(4));
+                QVERIFY(!mesh.geometry.report.at("limits").empty());
+            }
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, readNativeMesh(job, result, output, 1));
+            auto stale = job;
+            stale["request_id"] = "another request";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     readNativeMesh(stale, result, output, 64 * 1024 * 1024));
+            auto invalid = result;
+            invalid["data"]["obj_faces"] = 999;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     readNativeMesh(job, invalid, output, 64 * 1024 * 1024));
+            // Corruption that preserves length must fail digest validation.
+            QFile file(output + "/vertices.bin");
+            QVERIFY(file.open(QIODevice::ReadWrite));
+            auto first = file.read(1);
+            QVERIFY(!first.isEmpty());
+            first[0] = char(uint8_t(first[0]) ^ 0x80);
+            QVERIFY(file.seek(0));
+            QCOMPARE(file.write(first), qint64(1));
+            file.close();
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     readNativeMesh(job, result, output, 64 * 1024 * 1024));
+            // Verified bytes remain owned by the consumer after exports are damaged.
+            QVERIFY(mesh.artifacts.contains("vertices.csv"));
+            QCOMPARE(sha256(mesh.geometry.bytes), result.at("data").at("sha256").get<std::string>());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void artifactManifestValidation() {
+        QTemporaryDir directory;
+        QFile file(directory.filePath("sample.bin"));
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        QCOMPARE(file.write("abcd"), qint64(4));
+        file.close();
+        const auto manifest = nativeArtifactManifest(directory.path());
+        QCOMPARE(readNativeArtifacts(directory.path(), manifest, 4).value("sample.bin"), QByteArray("abcd"));
+        for (const auto name :
+             {"../sample.bin", "C:sample.bin", "a\\sample.bin", "sample.bin.", "job.json"}) {
+            const Json invalid{{name, manifest.at("sample.bin")}};
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, readNativeArtifacts(directory.path(), invalid, 100));
+        }
+        auto duplicate = manifest;
+        duplicate["SAMPLE.BIN"] = manifest.at("sample.bin");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readNativeArtifacts(directory.path(), duplicate, 100));
+        auto invalidSize = manifest;
+        invalidSize["sample.bin"]["bytes"] = -1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readNativeArtifacts(directory.path(), invalidSize, 100));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                 readNativeArtifacts(directory.path(), manifest, 4, [] { return true; }));
+        append(directory.filePath("sample.bin"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, verifyNativeArtifacts(directory.path(), manifest));
     }
     void counterBatchBoundary() {
         QTemporaryDir directory;

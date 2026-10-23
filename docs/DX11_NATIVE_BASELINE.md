@@ -93,6 +93,43 @@ Evidence: `native-analysis-tests.xml`, `native-analysis-tests.log`,
 `gf2-baseline-statistics-{113,879,1508}/`, and `gf2-counter-comparison.json` under
 the artifact root unless otherwise qualified.
 
+## Native mesh transport validation
+
+On 2026-10-24, the expanded native analysis suite passed **39 cases, zero failures
+and zero skips** in 17.019 seconds. Its 27 mesh rows run nine scenarios serially on
+WARP, NVIDIA and Intel: VS, VS identities, indexed references with base vertex 5,
+an incomplete triangle tail, VS instance selection, pure-shader DS instance
+selection, UAV-dependent DS selection rejection plus all-instance capture, GS,
+and DrawAuto. Indexed output has six references mapping to three unique vertices.
+DrawAuto correctly retains six vertices emitted by the fixture's two preceding
+GS draws, consistent with the pre-existing StreamOutputTests expectation.
+
+Artifact tests reject size-preserving binary corruption, stale request IDs,
+inconsistent metadata, invalid names, duplicate case-insensitive names, changed
+lengths, cancelled reads and exceeded payload budgets. Mesh CSV, OBJ and tables
+are reconstructed from raw bytes and identities before acceptance; verified
+bytes remain owned by the reader after the source artifacts are damaged.
+
+The unchanged existing PostTransform suite passed **13 cases, zero failures and
+zero skips** in 16.168 seconds, including GPU checkpoint inspection, private-output
+and failure restoration, original SO cursor restoration, hull inspection, empty
+and nonfinite exports, and the native geometry GUI workflow. Both CTest targets
+ran serially and passed in 33.35 seconds total. This is focused regression
+validation, not a rerun of all 317 baseline tests or complete Replay Mesh parity.
+
+Evidence under `artifacts/dx11-native/`: `native-mesh-build.log`,
+`native-mesh-build-final.log`, `native-mesh-final.log`, `native-mesh-final.xml`.
+Detailed outputs are `build/vs2022/native-analysis-Release.txt` and
+`build/vs2022/post-transform-Release.txt`. Earlier exploratory failures are retained
+in `native-mesh-tests.txt`: a first fixture expectation incorrectly assumed three
+DrawAuto vertices rather than the six specified by its two original GS draws.
+The existing fixture and baseline assertions were not changed.
+
+The incomplete-tail and UAV-dependent instance cases expose open native coverage
+gaps. Tests of their current behavior are diagnostic evidence, not a lowered
+acceptance gate. Replay Mesh GUI cutover remains blocked until baseline parity is
+demonstrated for those cases and the rest of the matrix.
+
 ## Reproduction and evidence
 
 ```powershell
@@ -102,6 +139,9 @@ cmake -S artifacts/dx11-native/baseline-src -B build/dx11-native-baseline `
   -DFLORA_TEST_CAPTURE_DIR=D:/CDXrepo/captures
 cmake --build build/dx11-native-baseline --config Release --parallel 8
 ctest --test-dir build/dx11-native-baseline -C Release -j 1 --timeout 300 --output-on-failure
+cmake --build build/vs2022 --config Release --target FloraNativeAnalysisTests FloraPostTransformTests
+ctest --test-dir build/vs2022 -C Release -j 1 --timeout 180 `
+  -R '^(native_analysis|post_transform)$' --output-on-failure
 python tools/validate_native_analysis.py --cli build/vs2022/Release/FloraGPA.Cli.exe `
   --baseline-cli build/dx11-native-baseline/Release/FloraGPA.Cli.exe `
   --capture D:/CDXrepo/captures/GF2_Exilium_2026_03_03__00_19_35.gpa_frame `

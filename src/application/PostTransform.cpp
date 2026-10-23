@@ -1241,13 +1241,16 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
     const auto &report = geometry.report;
     const auto count = report.at("vertices").get<uint64_t>(), stride = report.at("stride").get<uint64_t>();
     const auto factor = report.at("vertices_per_primitive").get<uint32_t>();
-    if (!stride || !factor || factor > 3 || count > geometry.bytes.size() / stride ||
+    if (!stride || !factor || factor > 3 || count % factor || count > geometry.bytes.size() / stride ||
         count * stride != geometry.bytes.size())
         throw std::runtime_error("Post-transform vertex storage bounds");
     Json columns = {"vertex", "primitive", "corner"}, rows = Json::array(), positions = Json::array(),
          faces = Json::array(), lines = Json::array(), points = Json::array();
     std::optional<uint32_t> position;
     for (const auto &field : report.at("attributes")) {
+        if (!field.at("components").is_array() || field.at("components").empty() ||
+            field.at("components").size() != field.at("component_count").get<unsigned>())
+            throw std::runtime_error("Invalid post-transform component count");
         for (const auto &component : field.at("components")) {
             const auto c = component.get<unsigned>();
             if (c > 3)
@@ -1365,6 +1368,8 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
     }
     return result;
 }
+static void visitPostTransformFiles(const PostTransformGeometry &geometry,
+                                   const std::function<void(const QString &, const QByteArray &)> &save);
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory) {
     if (geometry.report.value("requested_stage", std::string{}) == "hs") {
         exportHull(geometry, directory);
@@ -1374,14 +1379,25 @@ void exportPostTransform(const PostTransformGeometry &geometry, const std::files
         exportOutputLog(geometry, directory);
         return;
     }
-    auto root = QString::fromStdWString(directory.wstring());
+    const auto root = QString::fromStdWString(directory.wstring());
     if (!QDir().mkpath(root))
         throw std::runtime_error("Cannot create post-transform export directory");
-    auto save = [&](const QString &name, const QByteArray &bytes) {
+    bool hasObj = false;
+    visitPostTransformFiles(geometry, [&](const QString &name, const QByteArray &bytes) {
+        hasObj |= name == "geometry.obj";
         QSaveFile file(root + '/' + name);
         if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
             throw std::runtime_error("Cannot save post-transform export");
-    };
+    });
+    if (!hasObj && QFile::exists(root + "/geometry.obj") &&
+        !QFile::remove(root + "/geometry.obj"))
+        throw std::runtime_error("Cannot remove obsolete post-transform OBJ");
+}
+static void visitPostTransformFiles(const PostTransformGeometry &geometry,
+                                   const std::function<void(const QString &, const QByteArray &)> &save) {
+    const auto requestedStage = geometry.report.value("requested_stage", std::string{});
+    if (requestedStage == "hs" || isOutputLogStage(requestedStage))
+        throw std::runtime_error("Assembled mesh exports cannot represent hull phases or invocation logs");
     auto tables = postTransformTables(geometry);
     save("geometry.json", QByteArray::fromStdString(geometry.report.dump(2) + "\n"));
     save("geometry-ui.json", QByteArray::fromStdString(tables.dump()));
@@ -1445,7 +1461,13 @@ void exportPostTransform(const PostTransformGeometry &geometry, const std::files
                 obj << '\n';
             }
         save("geometry.obj", QByteArray::fromStdString(obj.str()));
-    } else if (QFile::exists(root + "/geometry.obj") && !QFile::remove(root + "/geometry.obj"))
-        throw std::runtime_error("Cannot remove obsolete post-transform OBJ");
+    }
+}
+QMap<QString, QByteArray> postTransformFiles(const PostTransformGeometry &geometry) {
+    QMap<QString, QByteArray> files;
+    visitPostTransformFiles(geometry, [&](const QString &name, const QByteArray &bytes) {
+        files.insert(name, bytes);
+    });
+    return files;
 }
 } // namespace flora

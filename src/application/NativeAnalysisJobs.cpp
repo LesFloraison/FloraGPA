@@ -1,4 +1,5 @@
 #include "NativeAnalysisJobs.h"
+#include "NativeArtifacts.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QElapsedTimer>
@@ -173,7 +174,13 @@ QString runNativeAnalysisJob(const Json &job, const QString &worker, double time
     QFile result(QDir(output).filePath("result.json"));
     if (!result.open(QIODevice::ReadOnly))
         throw std::runtime_error("Native analysis did not publish result.json");
-    validateNativeAnalysisResult(job, Json::parse(result.readAll().toStdString()));
+    const auto report = Json::parse(result.readAll().toStdString());
+    validateNativeAnalysisResult(job, report);
+    verifyNativeArtifacts(output, report.at("artifacts"), [&] {
+        if (timer.elapsed() >= deadline)
+            throw std::runtime_error("Native analysis artifact verification timed out");
+        return cancelled && cancelled();
+    });
     return result.fileName();
 }
 int nativeAnalysisWorker(const QString &jobPath, const QString &readyPath) {

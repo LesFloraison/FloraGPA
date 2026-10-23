@@ -1,6 +1,8 @@
 #pragma once
 #include "replay/Replay.h"
 #include <nlohmann/json.hpp>
+#include <QByteArray>
+#include <QMap>
 namespace flora {
 struct PostTransformOptions {
     std::string stage = "final";
@@ -31,4 +33,6 @@ PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &eve
 nlohmann::json postTransformLayout(Bytes bytecode, uint32_t stream);
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory);
 nlohmann::json postTransformTables(const PostTransformGeometry &geometry);
+// Canonical assembled-stage exports, independent of a temporary worker directory.
+QMap<QString, QByteArray> postTransformFiles(const PostTransformGeometry &geometry);
 } // namespace flora

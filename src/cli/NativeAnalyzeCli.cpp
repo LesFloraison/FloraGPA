@@ -35,7 +35,7 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"warp", "Select the WARP software adapter"});
         parser.addOption({"debug-device", "Enable D3D11 validation"});
         parser.addOption({"gpu-vendor", "Select a PCI vendor ID (decimal or 0x hex)", "id"});
-        parser.addOption({"stage", "Mesh stage: final, vs, hs, ds or gs", "stage"});
+        parser.addOption({"stage", "Mesh stage: final, vs, vs-index, hs, ds or gs", "stage"});
         parser.addOption({"group", "Compute group X Y Z", "coordinates"});
         parser.addOption({"thread", "Compute local thread X Y Z", "coordinates"});
         for (const auto key :

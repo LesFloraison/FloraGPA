@@ -15,8 +15,8 @@ VS/PS/CS debugger or fragment history implementation.
 | --- | --- | --- |
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; debugger implementation not resolved |
-| P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and 11 focused tests pass; GUI integration pending |
-| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; three real inventory comparisons pass; full parity matrix pending |
+| P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure, artifact verification and 39 focused cases pass; GUI integration pending |
+| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Pending |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Pending |
@@ -134,6 +134,7 @@ FloraGPA.Cli analyze frame.gpa_frame counters --out counters-all
 FloraGPA.Cli analyze frame.gpa_frame counters --gpa-event 1000 --out counters
 FloraGPA.Cli analyze frame.gpa_frame texture --resource 20 --gpa-event 2000 --out texture
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs --out mesh
+FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-index --instance 0 --out mesh-identities
 ```
 
 The native entry point never recaptures to RDC or selects an external replay
@@ -160,6 +161,46 @@ handshake prevents analysis before assignment to the job. Timeout/cancellation
 terminates the process tree; a failed job cannot publish an accepted success.
 `result.json` is published after the action exports. Input and bounded worker logs
 are retained beside the result. GUI cache acceptance still needs integration.
+
+Backend revision `dx11-native/2` publishes an artifact manifest containing the size
+and SHA-256 of every action export. Transport files (`job.json`, `worker.log`,
+`result.json`) are not action artifacts. The submitting process verifies all
+exported bytes before returning success, using bounded streaming reads and the
+same cancellation/deadline. Consumers can instead retain verified bytes with an
+explicit total payload budget. That budget does not include parsed JSON, geometry
+tables or canonical export reconstruction; it is not a peak-memory guarantee.
+
+`vs-index` exports each assembled reference's instance, input vertex index and
+shader vertex ID in `identities.json`. Unique vertices and references remain
+separate, including distinct output bit patterns for the same identity. The
+`NativeMesh` reader validates the request context, selection, binary data, identity
+records, counts, tables and canonical CSV/OBJ exports before accepting a result.
+It owns verified bytes independently of the worker directory and does not use
+RenderDoc resource IDs, topology enums or mesh layouts. Hull phase exports retain
+their existing separate representation; they are not coerced into assembled meshes.
+
+### Mesh cutover gaps
+
+The Replay Mesh GUI remains on its existing path until its successful baseline
+coverage is preserved. The following are explicit P3 blockers, not exemptions:
+
+- Primitive assembly can omit adjacency helper vertices and incomplete tail
+  references. The new four-input triangle fixture demonstrates three captured
+  references on WARP, NVIDIA and Intel; it does not certify complete VS output.
+- Per-instance HS/DS/GS boundaries with UAV access remain unverified. The current
+  native implementation rejects that selection. Tests check both this rejection
+  and successful all-instance DS capture, separately from a pure-shader DS
+  instance-selection fixture. They do not establish equivalence to baseline
+  Replay Mesh for the rejected selection.
+- Identity instrumentation still requires available signature components and
+  supported bytecode signatures. Indirect draws, nonzero SO streams, adjacency,
+  deferred contexts and real-capture mesh parity need the remaining matrix work.
+
+The three-adapter tests preserve indexed reference reuse with nonzero base vertex,
+VS instance selection with nonzero start instance, DS/GS output, DrawAuto's original
+SO cursor count, artifact corruption detection, stale request rejection and byte
+ownership. Passing those tests does not close the gaps above or authorize removal
+of the legacy mesh backend.
 
 ## Delivery constraints
 
