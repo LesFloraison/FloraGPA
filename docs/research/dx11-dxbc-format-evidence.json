@@ -1,0 +1,260 @@
+{
+  "old_commit": "02f7b06eb524c021488b28275a94df232e75d2af",
+  "old_header_sha256": "3716aa1719179a4fb2aeac49f8418d7f728a7b673d11a418a6744e88df8f06ff",
+  "new_header_sha256": "f761e5b30f3dbbc39f15067c62997502466c023e4ecf81dbc60f2873514833b1",
+  "opcodes_before": 190,
+  "opcodes_after": 190,
+  "unchanged_counts": 187,
+  "changed_counts": [
+    {
+      "opcode": 231,
+      "before": 6,
+      "after": 7
+    },
+    {
+      "opcode": 232,
+      "before": 7,
+      "after": 8
+    },
+    {
+      "opcode": 233,
+      "before": 6,
+      "after": 7
+    }
+  ],
+  "unpinned_source_rejected": true,
+  "sources": {
+    "shader_binary": {
+      "url": "https://raw.githubusercontent.com/microsoft/DirectXShaderCompiler/3620b16697cf57313d7a3abdb7a1c3aa3838c35c/projects/dxilconv/lib/ShaderBinary/ShaderBinary.cpp",
+      "sha256": "0558a390ce2de0d76fc072893f15501d36e39abf379ff0611ead3b515ca7b63d"
+    },
+    "token_format": {
+      "url": "https://raw.githubusercontent.com/microsoft/DirectX-Headers/461ef5138bd30922b44fbad77c4e47662812d2d5/include/directx/D3D12TokenizedProgramFormat.hpp",
+      "sha256": "5862ef7c8b819f0d02ba73563a9df4dc0e89f11fe59d8f598def39122273c626"
+    },
+    "generator": {
+      "path": "tools/generate_dxbc_operand_arities.py",
+      "sha256": "a4bc61633c10f9b0d6d52e9cd9d2f6992a80864c79bbc827d1396576915395de"
+    },
+    "probe": {
+      "path": "tests/DxbcFormatTests.cpp",
+      "sha256": "fdf397794cc34079fd703d753ada75db7f02684e32bfb208411eb884e7cafc22"
+    }
+  },
+  "schema": 1,
+  "date": "2026-10-24",
+  "scope": "independent_dxbc_operand_framing",
+  "complete_release_acceptance": false,
+  "initial_probe": {
+    "passed": 2,
+    "failed": 3,
+    "skipped": 0,
+    "reason": "Old table rejects independently compiled opcode 231/232/233 rows with their final clamp operand."
+  },
+  "final_probe": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "tokens": [
+      {
+        "opcode": 231,
+        "operands": 7,
+        "tokens": [
+          2483028199,
+          2147500545,
+          2147483842,
+          1398083,
+          1048818,
+          0,
+          1048594,
+          1,
+          1052742,
+          0,
+          1080902,
+          0,
+          1073152,
+          0,
+          2129930,
+          0,
+          0,
+          2129946,
+          0,
+          0
+        ]
+      },
+      {
+        "opcode": 232,
+        "operands": 8,
+        "tokens": [
+          2533359848,
+          2147500545,
+          2147483842,
+          1398083,
+          1048818,
+          0,
+          1048594,
+          1,
+          1052742,
+          0,
+          1080902,
+          0,
+          1073152,
+          0,
+          2132710,
+          0,
+          0,
+          2129990,
+          0,
+          1,
+          2129946,
+          0,
+          0
+        ]
+      },
+      {
+        "opcode": 233,
+        "operands": 7,
+        "tokens": [
+          2483028201,
+          2147500545,
+          2147483842,
+          1398083,
+          1048594,
+          0,
+          1048594,
+          1,
+          1052742,
+          0,
+          1077254,
+          0,
+          1073152,
+          1,
+          2129930,
+          0,
+          0,
+          2129946,
+          0,
+          0
+        ]
+      },
+      {
+        "opcode": 232,
+        "operands": 8,
+        "tokens": [
+          2533359848,
+          2147500545,
+          2147483842,
+          1398083,
+          1048818,
+          0,
+          1048594,
+          1,
+          1048646,
+          0,
+          1080902,
+          0,
+          1073152,
+          0,
+          2132710,
+          0,
+          0,
+          2129990,
+          0,
+          1,
+          2129946,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/dxbc-format-final.txt",
+      "sha256": "698a1e66cf2ddb15b8676f33ff17d318dfce3be7d921be8eee6efe8861e4f887",
+      "bytes": 1572
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-vertex-inputs.txt",
+      "sha256": "63d084bdae3ec494da167ccde77f159c0af135b30127f0bb2276a35366db0cf0",
+      "bytes": 3971
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-post-transform.txt",
+      "sha256": "2bc8041d6d4f1942c58a52df25f5a107c02fbb4a7104b5b66c774917a28f315c",
+      "bytes": 6187
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-ctest-details.log",
+      "sha256": "19267b10923463911ef4c4f66f6d8a0ce029b1bc743666c17f32795c4063f17d",
+      "bytes": 3375
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-capture-boundaries.log",
+      "sha256": "07a49dd799a26bbd9e4ee22d87f817d4a5e01f86c6c05505f4bbbe9f18e93864",
+      "bytes": 945
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-initial-failures.txt",
+      "sha256": "6438d072fa91e1ad1cf7949d7aede6e6fa4b058560f05af90af3c51a9bdaac4b",
+      "bytes": 1627
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-comparison.json",
+      "sha256": "381c16aeafde656c378d6cde408119c92e6fb90101a448e104805700640889e0",
+      "bytes": 1213
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-build.log",
+      "sha256": "34dbfb89d1fcfa689bc79e4f2cbe6c5ea6ef27858ca9d9e2b0b6b18bbd38be5c",
+      "bytes": 6862
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-tests.log",
+      "sha256": "9db97ae14fcbd33102ef6c6d0e273645398a54f102ca9dbb4c5ab1ef29cdcd10",
+      "bytes": 759
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-capture-configure.log",
+      "sha256": "103fd4bb7ca8922d3ac02443536e921f5b76c81c99e3b16df1a27b288e744ab2",
+      "bytes": 649
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-checkpoint-details.txt",
+      "sha256": "1b5ec490c7c67ba2582f268cc2b47ca0b519a6530f7fd642ba7810dd322b2104",
+      "bytes": 2236
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-format-output-log-details.txt",
+      "sha256": "57166027793cd3f85f9197dd757b7ef949d5bf6d7e5c52b9e923df4403097ade",
+      "bytes": 548
+    }
+  ],
+  "app_local_compiler": {
+    "path": "build/vs2022/Release/D3DCOMPILER_47.dll",
+    "file_version": "6.3.9600.16384 (winblue_rtm.130821-1623)",
+    "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+  },
+  "capture_only_check": "Clean capture-only configuration and capture_boundaries passed; no replay DXBC target was registered. This is not a complete capture-only build/test acceptance.",
+  "limits": [
+    "No interpreter execution semantics established.",
+    "No GPU residency or sampling behavior acceptance.",
+    "No GPA debugger-engine closure.",
+    "No full release or dependency removal acceptance."
+  ],
+  "final_regression": {
+    "ctest_executables_passed": 5,
+    "ctest_seconds": 34.77,
+    "qt_passed": 94,
+    "qt_failed": 0,
+    "qt_skipped": 0,
+    "cases": {
+      "dxbc_format": 6,
+      "native_vertex_inputs": 54,
+      "checkpoint_model": 15,
+      "dxbc_output_log": 6,
+      "post_transform": 13
+    },
+    "case_log_note": "The two stdout-only suites were repeated with explicit output files to retain case-level results."
+  }
+}
