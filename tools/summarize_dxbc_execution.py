@@ -24,7 +24,7 @@ def summarize(path):
         if "adapter" in item:
             adapters[json.dumps(item, sort_keys=True)] = item
         if "cpu" in item and "gpu" in item:
-            item["case"] = re.search(r"rawInstructions\(([^)]+)\)", line).group(1)
+            item["case"] = re.search(r"(?:rawInstructions|hardware)\(([^)]+)\)", line).group(1)
             observations.append(item)
     mismatches = [item for item in observations if item["cpu"] != item["gpu"]]
     return {
@@ -41,7 +41,8 @@ def summarize(path):
             for item in observations
             if item["cpu"] == item["gpu"]
             and any(
-                all(item.get(key) == mismatch.get(key) for key in ("vendor", "opcode", "output", "aliased"))
+                all(item.get(key) == mismatch.get(key) for key in
+                    ("vendor", "opcode", "output", "aliased", "structured", "variant", "unbound"))
                 for mismatch in mismatches
             )
         ],
@@ -52,12 +53,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=Path, action="append", required=True)
     parser.add_argument("--source", type=Path, action="append", default=[])
+    parser.add_argument("--scope", default="native_dxbc_execution_core_research")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     reports = [summarize(path) for path in args.log]
     result = {
         "schema": 1,
-        "scope": "native_dxbc_execution_core_research",
+        "scope": args.scope,
         "complete_release_acceptance": False,
         "latest_run_passed": reports[-1]["failed"] == 0 and reports[-1]["skipped"] == 0,
         "sources": [identity(path) for path in args.source],
