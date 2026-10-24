@@ -50,7 +50,7 @@ void shader(Capture &capture, Id id, const std::string &source, bool compute = f
     capture.add(id + 1, 9, 0x81, blob);
 }
 Capture fixture(uint32_t format, bool array, uint32_t width = 4, uint32_t height = 4,
-                std::optional<float> minLod = {}) {
+                std::optional<float> minLod = {}, uint32_t samples = 4) {
     const bool rawFloat = format == 139;
     const bool depth = format == 121 || format == 122 || format == 146 || format == 147;
     const auto viewFormat = rawFloat ? 41u : depth ? format - 100 : format;
@@ -69,7 +69,7 @@ Capture fixture(uint32_t format, bool array, uint32_t width = 4, uint32_t height
         DXGI_FORMAT(rawFloat ? 39u
                     : depth  ? (format < 130 ? 19u : 44u)
                              : format),
-        {4, 0},
+        {samples, 0},
         D3D11_USAGE_DEFAULT,
         UINT(D3D11_BIND_SHADER_RESOURCE | (depth ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET)),
         0,
@@ -391,6 +391,64 @@ class DxbcMultisampleTests final : public QObject {
                                 {"multisample_inputs", report.at("multisample_inputs")},
                                 {"native_comparison", comparison},
                                 {"steps", execution.at("steps")},
+                                {"passed", true}})
+                    .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void singleSampleViews_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<bool>("array");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (bool array : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(array))) << vendor << array;
+    }
+    void singleSampleViews() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(bool, array);
+        try {
+            QTemporaryDir directory;
+            const auto path = directory.filePath("single-sample-ms-view.gpa_frame");
+            fixture(42, array, 4, 4, {}, 1).save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(vendor));
+            const auto observed = snapshotResourceInputs(replay, 4);
+            QCOMPARE(observed.adapterLuid, probeAdapters.at(vendor));
+            QVERIFY(observed.inputs.textures->resources.empty());
+            const auto &view = observed.inputs.textures->views.at({7, {0}});
+            QVERIFY(view.samples);
+            QVERIFY(view.samples == observed.inputs.textures->views.at({7, {1}}).samples);
+            QCOMPARE(view.samples->values.size(), size_t((array ? 2 : 1) * 16 + 1));
+            for (uint32_t layer = 0; layer < (array ? 2u : 1u); ++layer)
+                for (uint32_t y = 0; y < 4; ++y)
+                    for (uint32_t x = 0; x < 4; ++x)
+                        QCOMPARE(view.samples->values[(layer * 4 + y) * 4 + x],
+                                 expected(42, x, y, layer + (array ? 1 : 0), 0));
+            QCOMPARE(view.samples->values.back(), (std::array<uint32_t, 4>{0, 0, 0, 1}));
+            for (uint32_t stage : {0u, 1u, 5u}) {
+                auto inputs = observed.inputs;
+                inputs.constantBuffers[0] = {Value::known({1, 2, 0, 0}), Value::known({0, 0, 0, 0})};
+                auto program = load(stage, array ? 9 : 4, 4);
+                Lane lane(program, inputs);
+                lane.step();
+                lane.step();
+                auto bits = expected(42, 1, 2, array ? 1 : 0, 0);
+                std::reverse(bits.begin(), bits.end());
+                const auto value = lane.value({stage == 5 ? 0u : 2u, {0}});
+                QCOMPARE(value.bits, bits);
+                QCOMPARE(value.valid, uint8_t(15));
+            }
+            const auto bytes = view.samples->values.size() * 16;
+            const auto repeated = snapshotResourceInputs(replay, 4, bytes);
+            QCOMPARE(repeated.inputs.textures->views.at({7, {0}}).samples->values, view.samples->values);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, snapshotResourceInputs(replay, 4, bytes - 1));
+            validate(replay);
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"single_sample_ms_view", true},
+                                {"vendor", vendor},
+                                {"array", array},
+                                {"adapter_luid", observed.adapterLuid},
                                 {"passed", true}})
                     .dump());
         } catch (const std::exception &error) {

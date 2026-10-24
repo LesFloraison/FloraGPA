@@ -20,7 +20,7 @@ Replay::observeTextureSamples(Id id, const D3D11_SHADER_RESOURCE_VIEW_DESC &view
     const auto first = array ? view.Texture2DMSArray.FirstArraySlice : 0;
     const auto layers = array ? view.Texture2DMSArray.ArraySize : 1;
     if ((!array && view.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2DMS) || info.dimension != 3 ||
-        info.samples <= 1 || info.samples > 32 || info.mips != 1 || !layers || first >= info.layers ||
+        !info.samples || info.samples > 32 || info.mips != 1 || !layers || first >= info.layers ||
         layers > info.layers - first || (!array && info.layers != 1))
         throw std::invalid_argument("Invalid multisample observation view");
     const uint64_t count = uint64_t(info.width) * info.height * layers * info.samples;

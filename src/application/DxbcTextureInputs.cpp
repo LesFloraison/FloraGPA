@@ -84,8 +84,8 @@ Value TextureInputs::loadMultisample(const Register &binding, uint32_t dimension
     const auto &observed = *view.samples;
     const auto info = textureInfo(observed.resource);
     const auto count = uint64_t(info.width) * info.height * view.layerCount * info.samples;
-    if (observed.resource.id != *view.resource || info.dimension != 3 || info.samples <= 1 ||
-        info.samples > 32 || info.mips != 1 || view.firstMip || view.mipCount != 1 || !view.layerCount ||
+    if (observed.resource.id != *view.resource || info.dimension != 3 || !info.samples || info.samples > 32 ||
+        info.mips != 1 || view.firstMip || view.mipCount != 1 || !view.layerCount ||
         view.firstLayer >= info.layers || view.layerCount > info.layers - view.firstLayer ||
         observed.format != view.format || observed.dimension != view.dimension ||
         observed.firstLayer != view.firstLayer || observed.layerCount != view.layerCount ||

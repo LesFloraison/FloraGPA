@@ -18,6 +18,7 @@ def matrix(path):
     result["dispatch_rows"] = []
     result["resource_clamps"] = []
     result["native_comparisons"] = []
+    result["single_sample_views"] = []
     for line in text.splitlines():
         if not line.startswith("QINFO") or " {" not in line:
             continue
@@ -28,7 +29,7 @@ def matrix(path):
             case = re.search(r"DxbcMultisampleTests::([^ ]+)", line).group(1)
             item["test_passed"] = bool(re.search(
                 r"^PASS\s+: DxbcMultisampleTests::" + re.escape(case) + r"$", text, re.MULTILINE))
-            collection = "native_comparisons" if item.get("probe_native_comparison") else "dispatch_rows" if item.get("dispatch_rows") else "resource_clamps" if item.get("resource_clamp_test") else "hardware"
+            collection = "single_sample_views" if item.get("single_sample_ms_view") else "native_comparisons" if item.get("probe_native_comparison") else "dispatch_rows" if item.get("dispatch_rows") else "resource_clamps" if item.get("resource_clamp_test") else "hardware"
             result[collection].append(item)
     result["boundary_test_passed"] = bool(re.search(
         r"^PASS\s+: DxbcMultisampleTests::unavailableAndValidation\(\)$", text, re.MULTILINE))
@@ -77,12 +78,15 @@ def main():
     large = final["dispatch_rows"]
     clamps = final["resource_clamps"]
     comparisons = final["native_comparisons"]
+    singles = final["single_sample_views"]
     extra_ok = len(large) == 3 and {p["vendor"] for p in large} == {0, 4318, 32902} and all(
         p["values"] == 4194305 for p in large)
     extra_ok &= len(clamps) == 9 and {(p["vendor"], p["lod"]) for p in clamps} == set(
         itertools.product([0, 4318, 32902], [0, .25, 1]))
     extra_ok &= len(comparisons) == 6 and {(p["vendor"], p["format"]) for p in comparisons} == set(
         itertools.product([0, 4318, 32902], [139, 147]))
+    extra_ok &= len(singles) == 6 and {(p["vendor"], p["array"]) for p in singles} == set(
+        itertools.product([0, 4318, 32902], [False, True]))
     for item in comparisons:
         comparison = item["native_comparison"]
         samples = item["multisample_inputs"]
@@ -94,8 +98,8 @@ def main():
                      and all(r["equal"] and r["expected_sha256"] == r["native_sha256"]
                              for r in comparison["resources"]))
     extra_ok &= all(p["passed"] and p["test_passed"] and p["adapter_luid"] == adapters.get(p["vendor"])
-                    for p in [*large, *clamps, *comparisons])
-    success = complete and probe_ok and extra_ok and final["boundary_test_passed"] and final["passed"] == 99 and all(
+                    for p in [*large, *clamps, *comparisons, *singles])
+    success = complete and probe_ok and extra_ok and final["boundary_test_passed"] and final["passed"] == 105 and all(
         p["passed"] and p["test_passed"] and p["source"] == "independent-replay-resource-inputs/5"
         and p["adapter_luid"] == adapters.get(p["vendor"]) for p in cases) and all(
             r["completed"] and r["failed"] == 0 and r["skipped"] == 0 for r in [final, *regressions])
@@ -111,12 +115,12 @@ def main():
              "observed_bits": sorted({tuple(record["bits"]) for record in probe["records"]})}
             for probe in run.pop("independent_probes")]
         if run is not final:
-            for key in ("hardware", "dispatch_rows", "resource_clamps", "native_comparisons"):
+            for key in ("hardware", "dispatch_rows", "resource_clamps", "native_comparisons", "single_sample_views"):
                 run[key + "_count"] = len(run.pop(key))
     for regression in regressions:
         regression["probe_count"] = len(regression.pop("probes"))
     report = {"schema": 1, "scope": "native_dxbc_multisample_execution", "complete_release_acceptance": False,
-              "sample_count_tested": 4, "hardware_matrix_complete": complete, "independent_probes_valid": probe_ok,
+              "sample_counts_tested": [1, 4], "hardware_matrix_complete": complete, "independent_probes_valid": probe_ok,
               "dispatch_and_clamp_validation_passed": extra_ok,
               "observed_stencil_alpha": alphas, "latest_validation_passed": bool(success),
               "runs": runs, "regressions": regressions, "builds": builds,

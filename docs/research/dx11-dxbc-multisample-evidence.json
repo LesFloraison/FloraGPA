@@ -2,7 +2,10 @@
   "schema": 1,
   "scope": "native_dxbc_multisample_execution",
   "complete_release_acceptance": false,
-  "sample_count_tested": 4,
+  "sample_counts_tested": [
+    1,
+    4
+  ],
   "hardware_matrix_complete": true,
   "independent_probes_valid": true,
   "dispatch_and_clamp_validation_passed": true,
@@ -116,7 +119,8 @@
       "hardware_count": 0,
       "dispatch_rows_count": 0,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-used-views.txt",
@@ -141,7 +145,8 @@
       "hardware_count": 74,
       "dispatch_rows_count": 0,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-independent-oracle.txt",
@@ -228,7 +233,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 0,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-final.txt",
@@ -315,7 +321,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 0,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-bounds-clamp.txt",
@@ -598,7 +605,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 3,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-clamp-initial-state.txt",
@@ -881,7 +889,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 3,
       "resource_clamps_count": 0,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-clamp-immediate.txt",
@@ -1154,7 +1163,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 3,
       "resource_clamps_count": 9,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-native-comparison.txt",
@@ -1434,7 +1444,8 @@
       "hardware_count": 78,
       "dispatch_rows_count": 3,
       "resource_clamps_count": 9,
-      "native_comparisons_count": 0
+      "native_comparisons_count": 0,
+      "single_sample_views_count": 0
     },
     {
       "path": "artifacts/dx11-native/msaa-matrix-native-comparison-type.txt",
@@ -1446,6 +1457,280 @@
       "failed": 0,
       "skipped": 0,
       "elapsed_ms": 35311,
+      "failures": [],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 3,
+      "resource_clamps_count": 9,
+      "native_comparisons_count": 6,
+      "single_sample_views_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-single-sample.txt",
+      "sha256": "a5c961b27e78654a86024daaf502191bdec57c2a31d45e063c7e16c98ff1d370",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 105,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 41945,
       "failures": [],
       "probes": [],
       "unit_cases": [],
@@ -2378,7 +2663,7 @@
           ],
           "native_comparison": {
             "attempted": true,
-            "elapsed_ms": 29,
+            "elapsed_ms": 45,
             "matching_native_inputs": true,
             "multisample_inputs_checked": 1,
             "original_observed_resources_unchanged": true,
@@ -2514,7 +2799,7 @@
           ],
           "native_comparison": {
             "attempted": true,
-            "elapsed_ms": 82,
+            "elapsed_ms": 110,
             "matching_native_inputs": true,
             "multisample_inputs_checked": 1,
             "original_observed_resources_unchanged": true,
@@ -2582,7 +2867,7 @@
           ],
           "native_comparison": {
             "attempted": true,
-            "elapsed_ms": 96,
+            "elapsed_ms": 118,
             "matching_native_inputs": true,
             "multisample_inputs_checked": 1,
             "original_observed_resources_unchanged": true,
@@ -2650,7 +2935,7 @@
           ],
           "native_comparison": {
             "attempted": true,
-            "elapsed_ms": 70,
+            "elapsed_ms": 115,
             "matching_native_inputs": true,
             "multisample_inputs_checked": 1,
             "original_observed_resources_unchanged": true,
@@ -2718,7 +3003,7 @@
           ],
           "native_comparison": {
             "attempted": true,
-            "elapsed_ms": 100,
+            "elapsed_ms": 115,
             "matching_native_inputs": true,
             "multisample_inputs_checked": 1,
             "original_observed_resources_unchanged": true,
@@ -2737,6 +3022,56 @@
           "passed": true,
           "probe_native_comparison": true,
           "steps": 12,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "single_sample_views": [
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "passed": true,
+          "single_sample_ms_view": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "passed": true,
+          "single_sample_ms_view": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "passed": true,
+          "single_sample_ms_view": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "passed": true,
+          "single_sample_ms_view": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "passed": true,
+          "single_sample_ms_view": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "passed": true,
+          "single_sample_ms_view": true,
           "vendor": 32902,
           "test_passed": true
         }
@@ -3050,29 +3385,29 @@
       "probe_count": 0
     },
     {
-      "path": "artifacts/dx11-native/msaa-regression-texture-input.txt",
-      "sha256": "7d9283dd10368151ca44254970c8ef52fae51dbc660c0d82f1966df54a37cc0a",
+      "path": "artifacts/dx11-native/msaa-regression-texture-input-single-sample.txt",
+      "sha256": "2c7cccf732d778b4b704e7fc026366ad7573bb23d5bd975665abac6232bb2cfa",
       "completed": true,
       "totals_present": true,
       "unhandled_exception": false,
       "passed": 76,
       "failed": 0,
       "skipped": 0,
-      "elapsed_ms": 14881,
+      "elapsed_ms": 17231,
       "failures": [],
       "unit_cases": [],
       "probe_count": 0
     },
     {
-      "path": "artifacts/dx11-native/msaa-regression-input-snapshot.txt",
-      "sha256": "733499cdd4452ef152a9951842cfe6a707ceac6491c8c3e786189eab0bc0fb74",
+      "path": "artifacts/dx11-native/msaa-regression-input-snapshot-single-sample.txt",
+      "sha256": "a71c030553d1b6dce1295897142497ca024aa3c70831ea8681f596e93d2d651f",
       "completed": true,
       "totals_present": true,
       "unhandled_exception": false,
       "passed": 42,
       "failed": 0,
       "skipped": 0,
-      "elapsed_ms": 7883,
+      "elapsed_ms": 7610,
       "failures": [],
       "unit_cases": [],
       "probe_count": 0
@@ -3151,6 +3486,11 @@
       "compiler_errors": []
     },
     {
+      "path": "artifacts/dx11-native/msaa-build-single-sample.txt",
+      "sha256": "497c6f6d6479bdfa34e4a74b3ae5ee6752e1820de32546b968af2416b4f0af59",
+      "compiler_errors": []
+    },
+    {
       "path": "artifacts/dx11-native/msaa-build-used-views.txt",
       "sha256": "b20ef53edc1dcd8d635f6d7f07218a4f36783d5263c3de34733c143dfed1c36f",
       "compiler_errors": []
@@ -3159,7 +3499,7 @@
   "sources": [
     {
       "path": "CMakeLists.txt",
-      "sha256": "c5ab0a4b71a0a79e644ec276d5d43220336d287ac2f564c46f6cbd4374f49400"
+      "sha256": "7ce611b4dab5c0f611fc8f1dcd94eb6633785de9679cdc71c28007c5126c7761"
     },
     {
       "path": "src/application/DxbcExecution.cpp",
@@ -3167,7 +3507,7 @@
     },
     {
       "path": "src/application/DxbcInputSnapshot.cpp",
-      "sha256": "bca0032e5f26922d483d25fc64f3ed130f7c2da2d1729131ad525643afdac1bb"
+      "sha256": "3383bd220f8998dd88f104b99b6e0d43d546152cc4892cf4797a90bdd5a6c304"
     },
     {
       "path": "src/application/DxbcInputSnapshot.h",
@@ -3175,7 +3515,7 @@
     },
     {
       "path": "src/application/DxbcTextureInputs.cpp",
-      "sha256": "682b8b18b8bb572bab441f4115e2381271f8122892d9a041ce14198e98755625"
+      "sha256": "6d2a2bdf22c94506531a1af1dfd8709d6cb365da79e5f2fbc4f8f2141510d5c8"
     },
     {
       "path": "src/application/DxbcTextureInputs.h",
@@ -3187,7 +3527,7 @@
     },
     {
       "path": "src/replay/TextureSamples.cpp",
-      "sha256": "e293265cb696d866ff872a29baa9f41bf7471d0d98d88305985444d2a3a92850"
+      "sha256": "f198e165316e083898378a3c5c1226d76704d94b5e2eff536e31718ce22bcaba"
     },
     {
       "path": "tests/DxbcTextureInputTests.cpp",
@@ -3195,7 +3535,7 @@
     },
     {
       "path": "tests/DxbcMultisampleTests.cpp",
-      "sha256": "750ea77fa635ebc6d7fadf24b5b6990a648de7cab436d83a459a0387e57be9b4"
+      "sha256": "408eb9a0fda842d25497637e4c9bd328954f686882aa83e4093c51a110da9e48"
     },
     {
       "path": "tools/probe_dxbc_inputs.cpp",
@@ -3203,7 +3543,7 @@
     },
     {
       "path": "tools/summarize_dxbc_multisample.py",
-      "sha256": "6963ef78d139d9a264e876a1bc0bfcf9550f8c0a60a9a4120e4d9bd739181485"
+      "sha256": "dff73c53e249f58cf66fc8bb45a1d2b5e1a43c3c45530782750ac20e5fda20b9"
     },
     {
       "path": "tools/summarize_dxbc_texture_loads.py",
@@ -3226,24 +3566,28 @@
       "sha256": "a92e8fe5ecc77caad8c87c3521278433a192cc4b899aa304a4556667cf511b29"
     },
     {
+      "path": "docs/research/dx11-sample-query-evidence.json",
+      "sha256": "7cbbf1acf63a24f12d24060e623ee22ba655cbbd2ac8b2d711ba52574c5ec731"
+    },
+    {
       "path": "build/vs2022/Release/FloraDxbcMultisampleTests.exe",
-      "sha256": "cba5f69a80a5b191b06befc626f852a59660d89484a9bb714023fa6d7a78a27b"
+      "sha256": "f38d91ba25e6f77b5fa1b1a704be9aac8cfba5d44977c919a5b3411b27614def"
     },
     {
       "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
-      "sha256": "50cb42dac6dd3309648a9b1ccadf10222560de0307d8f56a953343a73e81c2bf"
+      "sha256": "071bd959cc306f6a66f929cd6ed4982759402ee2a0c0974d5fb326d5c679d76b"
     },
     {
       "path": "build/vs2022/Release/FloraMsaaStencilProbe.exe",
       "sha256": "05b10dfac08da02508c164e31eafc1b24b53189c6556f390889ce5cbaaf0f8e2"
     },
     {
-      "path": "artifacts/dx11-native/msaa-final-evidence-integrity.json",
+      "path": "artifacts/dx11-native/msaa-single-evidence-integrity.json",
       "sha256": "67fc61b8465d7acaf51f3cfc0c26abcc63749a69a77d6504359f00cd072a3e08"
     },
     {
-      "path": "artifacts/dx11-native/msaa-native-comparison-type-ctest.txt",
-      "sha256": "7c86acf86214bef9151b27dc4029da8feb5ce30a47762d35d61dc2fe78ad4da6"
+      "path": "artifacts/dx11-native/msaa-single-sample-ctest.txt",
+      "sha256": "e66724378bf433830bb1e81d5e2ff3e78f5094d82c5400ae4d9ae8ec18bea474"
     },
     {
       "path": "artifacts/dx11-native/msaa-regressions-ctest.txt",

@@ -44,6 +44,13 @@ view. Private source/output/staging GPU allocations are additional bounded copie
 with driver-dependent layout overhead. This expansion can reject a large MSAA
 snapshot explicitly; sparse/on-demand observation remains a performance task.
 
+MS view dimensions, rather than a base `SampleDesc.Count > 1` test alone, select
+this path. D3D11 also accepts count-1 MS views. Independent PS probes on all three
+devices confirm their query and load behavior; see `DX11_SAMPLE_QUERY_RESEARCH.md`.
+The initial checkpoint missed these views and left their loads unavailable. The
+follow-up routes them through the same private observation and validity checks,
+including nonzero array starts, alias deduplication and exact byte budgets.
+
 Observation checks cancellation before submission, during nonblocking staging
 polls and after readback. Its default deadline is 30 seconds, configurable only
 within 1–60,000 ms. `ExecuteCommandList(..., TRUE)`, predicate isolation and the
@@ -137,6 +144,15 @@ stencil values, missing native comparisons and corrupted native-output hashes.
 Those checks use separate copies of logs; original successful and failed runs
 are unchanged. All of these results are checkpoint validation, not P8 acceptance.
 
+The subsequent count-1 MS-view correction expands the MSAA suite to **105 passing
+tests**, zero failures/skips, in 41.945 seconds. Texture-input and input-snapshot
+regressions pass another 118 tests; the three-suite serial run takes 67.37 seconds.
+The new six cases execute VS/PS/CS loads and check both view shapes, exact sample
+bits, array starts, alias budgets and unchanged repeated observations. GUI, CLI
+and Worker Release builds pass after the correction. With unchanged adjacent
+regression counts, the latest unique checkpoint total is **3,437**; the earlier
+99-case run and its failures remain separate entries in the ledger.
+
 Build `FloraDxbcMultisampleTests` in Release, then run:
 
 ```powershell
@@ -144,8 +160,9 @@ ctest --test-dir build/vs2022 -C Release -R '^dxbc_multisample$' --output-on-fai
 ```
 
 The native probe is a test dependency, not a deployed product component. GPU work
-is serial. No unavailable adapter is silently replaced. This checkpoint tests four
-samples and representative formats; the complete sample-count/quality and real
+is serial. No unavailable adapter is silently replaced. The full format matrix uses
+four samples; the count-1 extension covers 2D/array R32_UINT views on all three
+devices. The complete sample-count/quality and real
 capture matrix, allocation/performance acceptance, sampling instructions,
 derivatives, helper lanes, source/trace UI integration and standalone release gates
 remain open. The existing RenderDoc backend remains until full parity is proven.

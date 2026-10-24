@@ -184,7 +184,8 @@ class Snapshot {
         if (SUCCEEDED(resource.As(&texture2d))) {
             D3D11_TEXTURE2D_DESC d{};
             texture2d->GetDesc(&d);
-            if (d.SampleDesc.Count != 1) {
+            if (d.SampleDesc.Count != 1 ||
+                (binding.kind == 7 && (view.dimension == 6 || view.dimension == 7))) {
                 const auto returns = TextureInputs::loadReturnType(view.format);
                 if (binding.kind != 7 || !returns) {
                     result.unavailable[binding] = "Multisample view return type is unavailable";

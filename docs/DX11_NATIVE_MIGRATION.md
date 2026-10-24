@@ -460,6 +460,11 @@ stencil probe are documented in `DX11_DXBC_MULTISAMPLE_RESEARCH.md`, including t
 locally observed Intel alpha discrepancy and remaining coverage/performance limits.
 This supersedes the earlier checkpoint's MSAA-input limitation, while full P6
 debugger parity and P5/P7/P8 gates remain open.
+The follow-up also recognizes count-1 MS views by their actual SRV dimension.
+Independent sample-query research records the accepted count-1 load behavior
+and an unresolved Intel rasterizer/SRV center-position discrepancy in
+`DX11_SAMPLE_QUERY_RESEARCH.md`; sample-info/position interpreter execution is
+still pending.
 
 ## Delivery constraints
 

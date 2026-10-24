@@ -655,6 +655,15 @@ ledger; no historical golden or skip range was changed. See
 `DX11_DXBC_MULTISAMPLE_RESEARCH.md` for independent evidence, report schema 4,
 the tested four-sample boundary and remaining coverage/performance constraints.
 
+Independent sample-query probes subsequently establish valid count-1 MS SRV
+loads on all three devices. The corrected native input path recognizes those
+views and the expanded suite passes 105 tests. Texture-input/snapshot regressions
+pass another 118 tests, with zero failures/skips across the three-suite run in
+67.37 seconds. The latest unique checkpoint total is 3,437; earlier results are
+retained. `DX11_SAMPLE_QUERY_RESEARCH.md` separately records 3,132 query/load
+observations and the unresolved Intel center-quality rasterizer query discrepancy.
+Sample-info/position instruction execution remains pending.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
