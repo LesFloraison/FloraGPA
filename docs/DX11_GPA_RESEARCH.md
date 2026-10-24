@@ -150,6 +150,12 @@ The concrete engine constructor, implementation vtable and supplying module
 remain unresolved. These findings do not establish valid shader trace execution.
 The compact evidence ledger is `research/dx11-debugger-watch-evidence.json`.
 
+`DX11_GPA_DEBUGGER_ADAPTER_RESEARCH.md` then follows the legacy factory/device
+chain to playback vtable `0x2b9e78`, slot `+0x90`, method `0x5f2e0`, and protocol
+command 9. Nine synthetic original-codec cases verify the 17-word wire request
+and bounded result-layout observations. This closes the client-adapter identity
+question, not the player engine's constructor/vtable/module gate.
+
 ## Reproduction
 
 `tools/ghidra/Invoke-Dx11Research.ps1` checks the exact binary hashes before and

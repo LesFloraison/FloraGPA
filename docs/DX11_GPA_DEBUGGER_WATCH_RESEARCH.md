@@ -207,11 +207,16 @@ An initial headless regex containing a pipe was interpreted by the batch shell
 and failed; rerunning with plain `ShaderDebug` completed. None of these failures
 was deleted or relabeled as a pass.
 
-The next unresolved P1 step is the concrete implementation behind the queue's
+The next unresolved P1 step at this checkpoint was the concrete implementation behind the queue's
 `+0x1a8` adapter and virtual slot `+0x90`, including any engine construction it
 enables. The engine's nonzero assignment,
 implementation vtable and supplying module remain unknown. P5, remaining P6,
 production debugger integration, P7 removal and P8 standalone acceptance stay open.
+
+The subsequent `DX11_GPA_DEBUGGER_ADAPTER_RESEARCH.md` resolves that adapter to
+`legacy::Playback` in `dx11_playback.dll`, identifies protocol command 9 and
+verifies the request/result codecs against both original DLLs. It still does not
+recover the downstream execution engine.
 
 Windows debug-loop behavior follows Microsoft's
 [debugger main-loop documentation](https://learn.microsoft.com/en-us/windows/win32/debug/writing-the-debugger-s-main-loop).

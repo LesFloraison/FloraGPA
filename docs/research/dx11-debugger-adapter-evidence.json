@@ -1,0 +1,366 @@
+{
+  "schema": "FloraGPA debugger adapter evidence 1",
+  "date": "2026-10-24",
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "scope": "Pinned DX11 legacy adapter and synthetic codec behavior only; no original shader execution",
+  "binaries": [
+    {
+      "Sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "Path": "dx11_player.dll"
+    },
+    {
+      "Sha256": "0a531905386af6c5f2c0357d4179cec208bb171a287b262f3c4a5539d483bf5e",
+      "Path": "dx11_playback.dll"
+    },
+    {
+      "Sha256": "35a03995d50f390ed74722385583e7bb011f84e563a579c88086d8039ad1df80",
+      "Path": "com/intel/framedb/framedb_qt.dll"
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/probe_original_debugger_wire.py",
+      "sha256": "185b1a35aae784922acf2dbe2404ea0088d2da8aed1201fc745065c2c0006edd"
+    },
+    {
+      "path": "tools/summarize_debugger_adapter.py",
+      "sha256": "f5ab138211a4d12f5a5c19ca992181b92a81c8dce0a12888b265535658b6e935"
+    },
+    {
+      "path": "tools/ghidra/ExportFieldStores.java",
+      "sha256": "efecffd790279c29c6c732d67ca91cc3fc04646cd777ebfdf29050052066b5bc"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportSymbolEvidence.java",
+      "sha256": "f3b81eae0e8e622ea92cbfe5fc7138f5aaa7127a45d63f856d4777054ea95012"
+    },
+    {
+      "path": "tools/ghidra/Invoke-DebuggerAdapterResearch.ps1",
+      "sha256": "70005a9fe5bdb6c07a2becabb860896e843074726835775efb62cbb0b545daa7"
+    }
+  ],
+  "static_exports": [
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-adapter-addresses.txt",
+      "sha256": "4f428005ec8837c5388b707c254bd428268fb53c5444404ec1832e406ff804c4",
+      "completion": "COMPLETE 108"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-adapter-stores.txt",
+      "sha256": "8b4fd109c03b79717702f026c081198aeded7579476fc8597cd4a6c5ba94a99b",
+      "completion": "COMPLETE 133"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-factory-loader.txt",
+      "sha256": "280d613eca70e54dea625c99b002bd3ab31230c179261855b78b5e433d065a77",
+      "completion": "COMPLETE 1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-factory-lookup.txt",
+      "sha256": "acbef8e2f484753bbd09b42a8716b6e57916743d9911e3c00059b77004ad351d",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-legacy-creation.txt",
+      "sha256": "1945f72f2dd86f1bd36dc51fbf1c1242afe3bc517365ee55164f66f2da3748ed",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/framedb-queue-assignment.txt",
+      "sha256": "51ebc50c7940ab80532eae4667dd61ac18c06a3d1407d0039f44d529da7cc6db",
+      "completion": "COMPLETE 5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-context-factory.txt",
+      "sha256": "8b65a1da2cd3e37e865d2b79522c9b6901db820ae40d826e4539657322399c31",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-context-symbols.txt",
+      "sha256": "96d6f34574ad103c6a8e5302a0c2ed3ac82d71fbebc9059ad2dd8a79b3e51eb8",
+      "completion": "COMPLETE 17"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-debugger-method.txt",
+      "sha256": "6df1d865154ef81dfd1096d243305c018e4a2ef10228ae076296fcf81b2d294d",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-debugger-wire.txt",
+      "sha256": "7423dabc17c75dcc9d10c439add1e8f7dc2ea5a7fe9d9742e677af2ef28ea7bc",
+      "completion": "COMPLETE 4"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-device-symbols.txt",
+      "sha256": "f51b4c183264256c811ba8f8eec58afc0b746afbeed4f37085e1f967e85c13fc",
+      "completion": "COMPLETE 15"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-factory-create.txt",
+      "sha256": "3bd1cefedf4d64349e27bd8f4201d3163af15bc5841d0def3d97fa00c36aa267",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-factory-symbols.txt",
+      "sha256": "e122bab358953fd52814be86774b769c1480e4b233e1ef85e6f0185d61afff89",
+      "completion": "COMPLETE 19"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/playback-result-fields.txt",
+      "sha256": "e852c8564184fc988cc5e3b1b2b9c2b157290de4323564c3c93b3a22a9c83268",
+      "completion": "COMPLETE 5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/player-wire-codec.txt",
+      "sha256": "9005534e069ada47daaf6ef970f2e1ad9cd1475aacba449697f18480012f547c",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/player-wire-dispatch.txt",
+      "sha256": "b0c4492c2ca6d52c061798b6fa702cf3d6840233b3439964bef75dbc211f9d04",
+      "completion": "COMPLETE 4"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-adapter/verified/player-wire-primitives.txt",
+      "sha256": "5823c3eb7303049d9e0083f3417402d56ed6db443d9867166f31a20d3a46b73e",
+      "completion": "COMPLETE 3"
+    }
+  ],
+  "process": {
+    "path": "artifacts/dx11-native/debugger-adapter/wire-cross-module/process.json",
+    "sha256": "7c93415297e4793ec0320978f58d1d4e5b5332fc5ec8e2f7497a76eb78db4953"
+  },
+  "wire": {
+    "path": "artifacts/dx11-native/debugger-adapter/wire-cross-module/wire.json",
+    "sha256": "d6d91bc3fdd424c6664dfad3fd3b72036c79198eedf25c7e09eb42a38f4bb959"
+  },
+  "cases": [
+    {
+      "name": "request",
+      "original_words": [
+        270544960,
+        270544961,
+        270544962,
+        270544963,
+        270544964,
+        270544965,
+        270544966,
+        270544967
+      ],
+      "field_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        2,
+        3,
+        4,
+        5,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "wire_hex": "090000004030201041302010423020104330201044302010453020104630201042302010433020104430201045302010423020104330201044302010453020104630201047302010",
+      "write_sizes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "matched": true
+    },
+    {
+      "name": "cross_module_request",
+      "decoded_words": [
+        270544960,
+        270544961,
+        270544962,
+        270544963,
+        270544964,
+        270544965,
+        270544966,
+        270544967
+      ],
+      "read_sizes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "matched": true
+    },
+    {
+      "name": "repeated_field_decoding",
+      "wire_words": [
+        1432748032,
+        1432748033,
+        1432748034,
+        1432748035,
+        1432748036,
+        1432748037,
+        1432748038,
+        1432748039,
+        1432748040,
+        1432748041,
+        1432748042,
+        1432748043,
+        1432748044,
+        1432748045,
+        1432748046,
+        1432748047,
+        1432748048
+      ],
+      "decoded_words": [
+        1432748032,
+        1432748033,
+        1432748043,
+        1432748044,
+        1432748045,
+        1432748046,
+        1432748047,
+        1432748048
+      ],
+      "matched": true
+    },
+    {
+      "name": "status",
+      "markers_hex": "00",
+      "status": 0,
+      "read_sizes": [
+        1,
+        1
+      ],
+      "matched": true
+    },
+    {
+      "name": "status",
+      "markers_hex": "017f00",
+      "status": 1,
+      "read_sizes": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "matched": true
+    },
+    {
+      "name": "empty_vectors_and_inline_strings",
+      "strings": [
+        "",
+        ""
+      ],
+      "read_sizes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "matched": true
+    },
+    {
+      "name": "cross_module_result",
+      "wire_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "write_sizes": [
+        8,
+        8,
+        8,
+        8,
+        0,
+        8,
+        8,
+        0
+      ],
+      "matched": true
+    },
+    {
+      "name": "empty_vectors_and_inline_strings",
+      "strings": [
+        "assembly",
+        "source"
+      ],
+      "read_sizes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        6
+      ],
+      "matched": true
+    },
+    {
+      "name": "cross_module_result",
+      "wire_hex": "0000000000000000000000000000000000000000000000000800000000000000617373656d626c7900000000000000000600000000000000736f75726365",
+      "write_sizes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        6
+      ],
+      "matched": true
+    }
+  ],
+  "dispatch": {
+    "factory_rva": "0x3b8020",
+    "factory_vtable_rva": "0x2b5058",
+    "factory_create_device_rva": "0x49a20",
+    "device_create_playback_rva": "0x4c950",
+    "playback_debugger_rva": "0x5f2e0"
+  },
+  "retained_failure": {
+    "path": "artifacts/dx11-native/debugger-adapter/framedb-adapter-stores.log",
+    "sha256": "064cb31b46e3d402a3fe7f351cc1a86e5f394423f1db6b0e429e45c3ad2ff0d6",
+    "reason": "Unresolved memory operands can have null Ghidra reference types; replaced with explicit candidate opcode matching"
+  },
+  "integrity_negative": {
+    "path": "artifacts/dx11-native/debugger-adapter/integrity-negative.json",
+    "sha256": "472c7adc2b3ac5ff6fcb7b5887855275212cf81ef32665a7bc79cd497da7a846"
+  }
+}
