@@ -1,0 +1,3146 @@
+{
+  "schema": 1,
+  "scope": "independent_sample_query_research",
+  "validation_passed": true,
+  "center_pattern_queries_agree": false,
+  "center_pattern_discrepancies": [
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 2,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        1048576000,
+        1048576000
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 2,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        3196059648,
+        3196059648
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        3187671040,
+        3200253952
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        1052770304,
+        3187671040
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 2,
+      "position_bits": [
+        3200253952,
+        1040187392
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 3,
+      "position_bits": [
+        1040187392,
+        1052770304
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        1031798784,
+        3191865344
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        3179282432,
+        1044381696
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 2,
+      "position_bits": [
+        1050673152,
+        1031798784
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 3,
+      "position_bits": [
+        3191865344,
+        3198156800
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 4,
+      "position_bits": [
+        3198156800,
+        1050673152
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 5,
+      "position_bits": [
+        3202351104,
+        3179282432
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 6,
+      "position_bits": [
+        1044381696,
+        1054867456
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 7,
+      "position_bits": [
+        1054867456,
+        3202351104
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 2,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        1048576000,
+        1048576000
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 2,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        3196059648,
+        3196059648
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        3187671040,
+        3200253952
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        1052770304,
+        3187671040
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 2,
+      "position_bits": [
+        3200253952,
+        1040187392
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 4,
+      "mode": 2,
+      "unbound": false,
+      "sample": 3,
+      "position_bits": [
+        1040187392,
+        1052770304
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 0,
+      "position_bits": [
+        1031798784,
+        3191865344
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 1,
+      "position_bits": [
+        3179282432,
+        1044381696
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 2,
+      "position_bits": [
+        1050673152,
+        1031798784
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 3,
+      "position_bits": [
+        3191865344,
+        3198156800
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 4,
+      "position_bits": [
+        3198156800,
+        1050673152
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 5,
+      "position_bits": [
+        3202351104,
+        3179282432
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 6,
+      "position_bits": [
+        1044381696,
+        1054867456
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "count": 8,
+      "mode": 2,
+      "unbound": false,
+      "sample": 7,
+      "position_bits": [
+        1054867456,
+        3202351104
+      ]
+    }
+  ],
+  "complete_release_acceptance": false,
+  "observations": 3132,
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/0-0/results.json",
+      "sha256": "7ebb53aa6cb3b20cf360a8d7a4bdd0be2fd2f012cca0084644293af807c14af7",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "configurations": 90,
+      "observed_configurations": 90,
+      "unsupported_sample_counts": [],
+      "records": 738,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              1031798784
+            ],
+            [
+              3179282432,
+              3191865344
+            ],
+            [
+              3191865344,
+              1040187392
+            ],
+            [
+              1048576000,
+              3179282432
+            ],
+            [
+              3198156800,
+              3187671040
+            ],
+            [
+              1040187392,
+              1050673152
+            ],
+            [
+              1050673152,
+              1044381696
+            ],
+            [
+              1044381696,
+              3198156800
+            ],
+            [
+              3187671040,
+              1052770304
+            ],
+            [
+              0,
+              3202351104
+            ],
+            [
+              3196059648,
+              3200253952
+            ],
+            [
+              3200253952,
+              1048576000
+            ],
+            [
+              3204448256,
+              0
+            ],
+            [
+              1054867456,
+              3196059648
+            ],
+            [
+              1052770304,
+              1054867456
+            ],
+            [
+              3202351104,
+              3204448256
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              1031798784
+            ],
+            [
+              3179282432,
+              3191865344
+            ],
+            [
+              3191865344,
+              1040187392
+            ],
+            [
+              1048576000,
+              3179282432
+            ],
+            [
+              3198156800,
+              3187671040
+            ],
+            [
+              1040187392,
+              1050673152
+            ],
+            [
+              1050673152,
+              1044381696
+            ],
+            [
+              1044381696,
+              3198156800
+            ],
+            [
+              3187671040,
+              1052770304
+            ],
+            [
+              0,
+              3202351104
+            ],
+            [
+              3196059648,
+              3200253952
+            ],
+            [
+              3200253952,
+              1048576000
+            ],
+            [
+              3204448256,
+              0
+            ],
+            [
+              1054867456,
+              3196059648
+            ],
+            [
+              1052770304,
+              1054867456
+            ],
+            [
+              3202351104,
+              3204448256
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-0/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/0-1/results.json",
+      "sha256": "8e15ad24ce3c6de304cf354324a4cc5b40ce88e4c0430d7163342e5ef25c5e64",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "configurations": 90,
+      "observed_configurations": 90,
+      "unsupported_sample_counts": [],
+      "records": 738,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              1031798784
+            ],
+            [
+              3179282432,
+              3191865344
+            ],
+            [
+              3191865344,
+              1040187392
+            ],
+            [
+              1048576000,
+              3179282432
+            ],
+            [
+              3198156800,
+              3187671040
+            ],
+            [
+              1040187392,
+              1050673152
+            ],
+            [
+              1050673152,
+              1044381696
+            ],
+            [
+              1044381696,
+              3198156800
+            ],
+            [
+              3187671040,
+              1052770304
+            ],
+            [
+              0,
+              3202351104
+            ],
+            [
+              3196059648,
+              3200253952
+            ],
+            [
+              3200253952,
+              1048576000
+            ],
+            [
+              3204448256,
+              0
+            ],
+            [
+              1054867456,
+              3196059648
+            ],
+            [
+              1052770304,
+              1054867456
+            ],
+            [
+              3202351104,
+              3204448256
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              1031798784
+            ],
+            [
+              3179282432,
+              3191865344
+            ],
+            [
+              3191865344,
+              1040187392
+            ],
+            [
+              1048576000,
+              3179282432
+            ],
+            [
+              3198156800,
+              3187671040
+            ],
+            [
+              1040187392,
+              1050673152
+            ],
+            [
+              1050673152,
+              1044381696
+            ],
+            [
+              1044381696,
+              3198156800
+            ],
+            [
+              3187671040,
+              1052770304
+            ],
+            [
+              0,
+              3202351104
+            ],
+            [
+              3196059648,
+              3200253952
+            ],
+            [
+              3200253952,
+              1048576000
+            ],
+            [
+              3204448256,
+              0
+            ],
+            [
+              1054867456,
+              3196059648
+            ],
+            [
+              1052770304,
+              1054867456
+            ],
+            [
+              3202351104,
+              3204448256
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 16,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/0-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/4318-0/results.json",
+      "sha256": "05eafb5ee5c099aecbf1af3126ba243d6ea382685e3c656b058ef42cc52fbe98",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "configurations": 90,
+      "observed_configurations": 72,
+      "unsupported_sample_counts": [
+        16
+      ],
+      "records": 414,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-0/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/4318-1/results.json",
+      "sha256": "a10e41ab2de88efe85ae3b1785cbf274d100971d9f49083254a4dab41467b4a7",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "configurations": 90,
+      "observed_configurations": 72,
+      "unsupported_sample_counts": [
+        16
+      ],
+      "records": 414,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/4318-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/32902-0/results.json",
+      "sha256": "6e6531404503ca828c88b3811738e7af453ea502e0c18ac08c1abb1438a9c8d0",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "configurations": 90,
+      "observed_configurations": 72,
+      "unsupported_sample_counts": [
+        16
+      ],
+      "records": 414,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-0/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-queries-final/32902-1/results.json",
+      "sha256": "223f8f0d9e37c59bd3bb5ffcf6f6610e8cc168a04871d9da234387925cdccf96",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "configurations": 90,
+      "observed_configurations": 72,
+      "unsupported_sample_counts": [
+        16
+      ],
+      "records": 414,
+      "bound_position_patterns": [
+        {
+          "count": 1,
+          "quality": 0,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967295,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 1,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 0,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 2,
+          "quality": 4294967294,
+          "positions": [
+            [
+              1048576000,
+              1048576000
+            ],
+            [
+              3196059648,
+              3196059648
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 0,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967295,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 4,
+          "quality": 4294967294,
+          "positions": [
+            [
+              3187671040,
+              3200253952
+            ],
+            [
+              1052770304,
+              3187671040
+            ],
+            [
+              3200253952,
+              1040187392
+            ],
+            [
+              1040187392,
+              1052770304
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 0,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967295,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "modes": [
+            0,
+            1
+          ]
+        },
+        {
+          "count": 8,
+          "quality": 4294967294,
+          "positions": [
+            [
+              1031798784,
+              3191865344
+            ],
+            [
+              3179282432,
+              1044381696
+            ],
+            [
+              1050673152,
+              1031798784
+            ],
+            [
+              3191865344,
+              3198156800
+            ],
+            [
+              3198156800,
+              1050673152
+            ],
+            [
+              3202351104,
+              3179282432
+            ],
+            [
+              1044381696,
+              1054867456
+            ],
+            [
+              1054867456,
+              3202351104
+            ]
+          ],
+          "modes": [
+            2
+          ]
+        }
+      ],
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-0.asm.txt",
+          "sha256": "163bdbf4b462b19e24bbbc5207073e1b3596b168aa3ebd859777dbe1d5fb26bf"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-1.asm.txt",
+          "sha256": "f08dbec9469d01cd049065d05d4421250ec8e3842ab37ad95b2516a0f337770f"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-queries-final/32902-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    }
+  ],
+  "binary": {
+    "path": "build/vs2022/Release/FloraSampleQueryProbe.exe",
+    "sha256": "3731f522420f81f8daae09a215ffe0862a7b767ebaa02b5ccc11e4e77d24253a"
+  },
+  "sources": [
+    {
+      "path": "tools/native/sample_query_probe.cpp",
+      "sha256": "80edfca7d283887ddcdcdf4e60c4ce358076582c3f4a6415d20188e528eac9bb"
+    },
+    {
+      "path": "tools/summarize_sample_queries.py",
+      "sha256": "a960d0609d84b7547e46cf61a5c9a2cf3bfd53564500ee4387d71bc48a405642"
+    }
+  ]
+}
