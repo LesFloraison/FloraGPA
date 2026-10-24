@@ -432,6 +432,14 @@ video access remain required before full texture execution parity or production
 debugger cutover. The optional input-probe group execution mode reports bounded
 real-CS progress without claiming native-output parity.
 
+Texture `resinfo` now uses separately observed native metadata, including MSAA
+descriptions without inventing pixel storage. Integer/float view queries execute
+in the CPU interpreter; reciprocal, out-of-range and 3D UAV cases use the isolated
+same-adapter helper to preserve observed driver behavior. Source identity is
+`independent-replay-resource-inputs/4`, and the helper identity is `dxbc-gpu/8`.
+See `DX11_DXBC_RESOURCE_INFO_RESEARCH.md` for exact comparisons, independent HLSL
+probes, unknown-field handling and the remaining debugger integration requirements.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable

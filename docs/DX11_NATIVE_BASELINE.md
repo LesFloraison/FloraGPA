@@ -607,6 +607,17 @@ failed run remains recorded. Real CS probes reach a texture UAV gap in BF1 and
 an unimplemented resinfo instruction in Helldivers; neither is a full execution
 success. See `DX11_DXBC_TEXTURE_FORMAT_RESEARCH.md` for evidence and remaining scope.
 
+The resource-information checkpoint adds view-aware `resinfo` and validates
+extended dimension/return tokens used by the real Helldivers shader. Its initial
+four-suite regression passes 2,186 cases in 542.96 seconds; after the captured
+extension fix, the complete query suite passes 629 cases in 133.67 seconds, with
+zero failures or skips. Same-adapter private queries retain NVIDIA out-of-range,
+Intel reciprocal and 3D UAV subrange behavior established by native probes.
+Helldivers event 893 now completes 256 group steps before the texture UAV store
+gap; BF1 retains its 11,264 steps and 512 GPU operations. Neither is complete
+shader execution. See `DX11_DXBC_RESOURCE_INFO_RESEARCH.md` and its evidence ledger
+for exact validation scope, initial failures and independent HLSL comparisons.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
