@@ -139,6 +139,17 @@ are not valid VS/PS/CS trace tests. A successful request status is demonstrably
 insufficient evidence of an operational debugger. P1's constructor/vtable/module
 gate and P6's independent execution implementation remain open.
 
+## Hardware watch and framedb follow-up
+
+`DX11_GPA_DEBUGGER_WATCH_RESEARCH.md` extends the sampled-boundary work with three
+concurrent calibration runs and six original-player hardware-watch lifecycles.
+Only constructor zeroing and destructor-phase heap fill were observed at host
+`+0x3c0`; both requests in each run saw null. Ghidra now also identifies framedb's
+debugger-setting fallback, 32-byte request builder, queue and task construction.
+The concrete engine constructor, implementation vtable and supplying module
+remain unresolved. These findings do not establish valid shader trace execution.
+The compact evidence ledger is `research/dx11-debugger-watch-evidence.json`.
+
 ## Reproduction
 
 `tools/ghidra/Invoke-Dx11Research.ps1` checks the exact binary hashes before and

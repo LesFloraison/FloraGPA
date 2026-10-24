@@ -1,0 +1,558 @@
+{
+  "schema": "FloraGPA debugger hardware watch evidence 1",
+  "date": "2026-10-24",
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "scope": "Constructor-to-destruction field-write events for six synchronous probe lifecycles; no claim about other initialization routes or valid shader traces",
+  "runtime_manifest": {
+    "path": "artifacts/dx11-native/debugger-write-watch/verified-final/runs.json",
+    "sha256": "d4f57be2077dcb6e5e023c3012f47c8900fdc45c9d89746837aca84ee25b65dc"
+  },
+  "sources": [
+    {
+      "path": "tools/native/probe_original_debugger_watch.cpp",
+      "sha256": "186047d97aa4bf19bc0fa119663bf05ca51fa5b0a281d6979f5fd175d8f69849"
+    },
+    {
+      "path": "tools/run_original_debugger_watch.py",
+      "sha256": "f2d74d9c8f2db7b9c6b25d1e4bee8e5d3ffde3158647b0fdacd94bff07f4f7c9"
+    },
+    {
+      "path": "tools/probe_original_debugger_host.py",
+      "sha256": "2b80fca56899dd7d9297b89090223809f83315350b534167c75c7489385d9137"
+    },
+    {
+      "path": "tools/scan_gpa_debugger_modules.py",
+      "sha256": "838a2c0a8ae3d8d982a33abab8e2428ea6474e5141e5fcae40b73fda7e98c029"
+    },
+    {
+      "path": "tools/summarize_debugger_watch.py",
+      "sha256": "cd99beda93eb5c3c6cf39c9e0920dbb8496b9338028fa67f241fa02bc20d3a7e"
+    },
+    {
+      "path": "tools/ghidra/Invoke-DebuggerWatchResearch.ps1",
+      "sha256": "b5dc6849ec3d4c56dbd0355227b628b2f90364d4fc48e04e773554d19c4b15e4"
+    },
+    {
+      "path": "tools/ghidra/ExportSymbolEvidence.java",
+      "sha256": "f3b81eae0e8e622ea92cbfe5fc7138f5aaa7127a45d63f856d4777054ea95012"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportAddressEvidence.java",
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    }
+  ],
+  "calibrations": [
+    {
+      "name": "calibration-0",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/calibration-0.json",
+        "sha256": "536c3e00e66087c40b5e1b1b9e7cdf407986474de5cf8323506e0b464e8eda26"
+      },
+      "elapsed_ms": 31,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 36,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 17,
+      "writer_thread_count": 3
+    },
+    {
+      "name": "calibration-1",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/calibration-1.json",
+        "sha256": "e0be4c04e34a388cec8c3832dcd132fa98f131f26350bfa8107f64f1e0aab477"
+      },
+      "elapsed_ms": 47,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 36,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 17,
+      "writer_thread_count": 3
+    },
+    {
+      "name": "calibration-2",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/calibration-2.json",
+        "sha256": "a7193dc59192482f51ee499a444c931bbd4a0e813553a911ead914082baf1219"
+      },
+      "elapsed_ms": 31,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 36,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 17,
+      "writer_thread_count": 3
+    }
+  ],
+  "runs": [
+    {
+      "name": "gf2-controlled",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/gf2-controlled/watch.json",
+        "sha256": "7138753832c8b0c6923263ca932f12a2113b42585cf83eded148b4cfdf3e6675"
+      },
+      "elapsed_ms": 6453,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/gf2-controlled/dispatch.json",
+        "sha256": "b6f865422b45402ba08b81d8487fa34c695c19d2fb361062afc4241573badf5b"
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        113,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0x37a72"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gf2-default",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/gf2-default/watch.json",
+        "sha256": "f901393a9c7e17e7d6aca8f0606cbb5642c2ecfc85c624f3ee2029fb5c8051be"
+      },
+      "elapsed_ms": 5250,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/gf2-default/dispatch.json",
+        "sha256": "4d390517de6cbed605f7ffc590532fb2592bac8a63e42f85f6d0993cbe240327"
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        113,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0x37a72"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bf1-controlled",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/bf1-controlled/watch.json",
+        "sha256": "6e94ad987b538ed5a52ea8b35d2a828fac8746749a697f03941d0a5c1820787b"
+      },
+      "elapsed_ms": 32828,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/bf1-controlled/dispatch.json",
+        "sha256": "d8b32427bbf5276f25a8712ba84a3838ed19104437f0b4b875ddd90a5a848b7a"
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        876,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0xa722"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bf1-default",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/bf1-default/watch.json",
+        "sha256": "bad8b5774747396476a926b8a6bcd683ef575578e948cf5d240a22a13a7767b4"
+      },
+      "elapsed_ms": 30781,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/bf1-default/dispatch.json",
+        "sha256": "752538a4c446fa8e97af27b47ac6cd269e36da4a61cb2a289ab0a34203b35849"
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        876,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0x37a72"
+          }
+        }
+      ]
+    },
+    {
+      "name": "helldivers-controlled",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/helldivers-controlled/watch.json",
+        "sha256": "bc73d34f39d14c8f0dcaae3e9631832a408115e8b5995382ca08d272e9231f7b"
+      },
+      "elapsed_ms": 26875,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/helldivers-controlled/dispatch.json",
+        "sha256": "8eaf3643f8d163d15c35f77348f50988c6f3a8ec47ba044133aab6b8da103dbd"
+      },
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        200,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0xa722"
+          }
+        }
+      ]
+    },
+    {
+      "name": "helldivers-default",
+      "report": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/helldivers-default/watch.json",
+        "sha256": "884477436ab7f0c9fdbe53938f6a20cfe226de67dc34eb9dea7b2d387b99c9e3"
+      },
+      "elapsed_ms": 24828,
+      "constructor_hits": 1,
+      "destructor_hits": 1,
+      "field_writes": 2,
+      "request_hits": 2,
+      "nonzero_live_field_observations": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-write-watch/verified-final/helldivers-default/dispatch.json",
+        "sha256": "265ebfecdd4a0962d10ef7d23dfe16f3a63341b984d4c2432db861f0514bc2c2"
+      },
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "adapter_selection": "Original default with undefined GpuId; no product adapter assertion",
+      "raw_selection": [
+        0,
+        200,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "result_callback_count": 0,
+      "field_observations": [
+        {
+          "phase": "constructing",
+          "value": "0x0",
+          "instruction_module": {
+            "path": "//?/C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+            "rva": "0x89cec"
+          }
+        },
+        {
+          "phase": "destroying",
+          "value": "0xfeeefeeefeeefeee",
+          "instruction_module": {
+            "path": "//?/C:/Windows/System32/ntdll.dll",
+            "rva": "0xa722"
+          }
+        }
+      ]
+    }
+  ],
+  "static_binaries": [
+    {
+      "Sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "Path": "dx11_player.dll"
+    },
+    {
+      "Sha256": "0a531905386af6c5f2c0357d4179cec208bb171a287b262f3c4a5539d483bf5e",
+      "Path": "dx11_playback.dll"
+    },
+    {
+      "Sha256": "35a03995d50f390ed74722385583e7bb011f84e563a579c88086d8039ad1df80",
+      "Path": "com/intel/framedb/framedb_qt.dll"
+    }
+  ],
+  "static_exports": [
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-addresses.txt",
+      "sha256": "f266b52cb65ac4fe71bdf68121e58221980e3571c0aa70482ff628687e9367b4",
+      "completion": "COMPLETE 6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-functions.txt",
+      "sha256": "b2c4238753b4a05d7faf66c4e924c4192c1cefac86a9c1aefc5f680ca23c674a",
+      "completion": "COMPLETE 4"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-setting-functions.txt",
+      "sha256": "35ff13af2ecececfa7deee83858d745f7ca01ed82bdc38cabf895d780b6450e5",
+      "completion": "COMPLETE 3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-symbols.txt",
+      "sha256": "44d5d6f8048e4001e35f738cbb31903310ff76e89e081df4e77a45f1ac017be3",
+      "completion": "COMPLETE 63"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-task-execution.txt",
+      "sha256": "531bd7d62a15097d8f1974056f4c804efd267f9661288a69dc0cd915b10fc958",
+      "completion": "COMPLETE 5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/framedb-task.txt",
+      "sha256": "95f592aa361cfc131a0ff66316d68db8ef749739d6dd6de64ced9cb096a51074",
+      "completion": "COMPLETE 5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/playback-addresses.txt",
+      "sha256": "7bf7b7891a0c77f270cd84b5c230fa42650137f6f9a342aa59fd61d56be7fc1f",
+      "completion": "COMPLETE 1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/playback-functions.txt",
+      "sha256": "092241808feea6df9990db1a667ac75bb1124a869e8f3d028a629dd8c8bab6c7",
+      "completion": "COMPLETE 1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/player-debugger-detection.txt",
+      "sha256": "eba97eb031b1c6e65d0cd25b8c5692ccb8b734b996b5fde7b1357ed512715898",
+      "completion": "COMPLETE 2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/player-debugger-symbols.txt",
+      "sha256": "5569d420e466d512562cb57ba72ccd2bb821062b254fb00d867e01ac8d8e2f58",
+      "completion": "COMPLETE 3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/static-complete/player-lifetime.txt",
+      "sha256": "0dcc362d9de2873e59200529f70f1b78a819524cef9f9d15e5bf770a90be0b74",
+      "completion": "COMPLETE 5"
+    }
+  ],
+  "retained_failures": [
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/gf2-controlled/watch.json",
+      "sha256": "d1fdf96bcae1fb2478eb31d205dc172e92f9a05c41e8214e215107e1f9088f5f",
+      "reason": "Teardown heap-fill pointer dereference was not optional",
+      "error": "Read watched value: 998"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/self-test-final.json",
+      "sha256": "0cfe9c94def06a2f4f392e6824de4054cd70a0dd2729fa98261f8b0f5c04cec5",
+      "reason": "Identical fixture lifecycle functions folded by linker ICF",
+      "error": "Incomplete hardware watch coverage: 0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/self-test-concurrent-1.json",
+      "sha256": "4cde490e3a9a276bcf33a4caf9d3e2c44c2621e917eb242271eb5ffae5fff62c",
+      "reason": "Reconfiguring other threads interfered with queued traps",
+      "error": "Incomplete hardware watch coverage: 121"
+    }
+  ],
+  "superseded": [
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/gf2-controlled-final/watch.json",
+      "sha256": "4dc857cefeafb8a6846463ca2a59f29d6fd637b92824b3575fc3183136267860",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/gf2-default/watch.json",
+      "sha256": "6dc1ae9f1b3f4a23e65dda826078a6553d7fd62e4fcd082bae77c9236ed2c90f",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/bf1-controlled/watch.json",
+      "sha256": "3dc958b186bfd2e0cd87dca5953e18f94ae0a82bc80664a9d4a2ced0af598c21",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/bf1-default/watch.json",
+      "sha256": "8faece58a31ae50db2f02fcd43ea783376593310798d51ef95ffee2c644bc96f",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/helldivers-controlled/watch.json",
+      "sha256": "daa7f8bc7522ce75eddbcba7f8e35e0146c8f03040081cf1749ef647f9c94288",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-write-watch/helldivers-default/watch.json",
+      "sha256": "573e07621ee3832211c3bf6d55718b2c60ac0f67c58c17337509920cff6f6f16",
+      "reason": "Predates concurrent calibration and thread-context fix"
+    }
+  ],
+  "build_log": {
+    "path": "artifacts/dx11-native/debugger-write-watch/build-seventh.txt",
+    "sha256": "5a183985a9c6cde72469fea1d6ce9499984258b0c49341961897d4f278add927"
+  },
+  "capture_boundaries": {
+    "path": "artifacts/dx11-native/debugger-write-watch/capture-boundaries.txt",
+    "sha256": "3af9282a44585438cb71b1b730bf72e53ab67e850934b491741072c27c966a62"
+  },
+  "module_candidates": {
+    "path": "artifacts/dx11-native/debugger-write-watch/module-candidates.json",
+    "sha256": "034a3847253384b4651314b61334c71a7173771ed0a47d149031fcaca355d39d"
+  },
+  "integrity_negative_check": {
+    "path": "artifacts/dx11-native/debugger-write-watch/summary-negative.json",
+    "sha256": "84fb540510567bf3c45d6dbccfa6fa5e9566ff63d5cad6d89c9d56c775a949ea"
+  }
+}
