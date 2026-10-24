@@ -18,6 +18,9 @@ std::string hash(Bytes bytes) {
         .toHex()
         .toStdString();
 }
+Bytes sampleBytes(const std::vector<std::array<uint32_t, 4>> &values) {
+    return {reinterpret_cast<const uint8_t *>(values.data()), values.size() * 16};
+}
 uint64_t number(const QString &text) {
     bool ok = false;
     const auto result = text.toULongLong(&ok, 0);
@@ -37,7 +40,7 @@ int main(int argc, char **argv) {
         return 2;
     }
     Json report{
-        {"schema", execute ? 3 : 2},
+        {"schema", 4},
         {"scope", execute ? "native_dxbc_compute_group_probe" : "native_dxbc_resource_input_observation"},
         {"complete_release_acceptance", false},
         {"shader_execution_performed", false},
@@ -102,6 +105,8 @@ int main(int argc, char **argv) {
         report["textures"] = Json::array();
         report["texture_views"] = Json::array();
         report["texture_metadata"] = Json::array();
+        report["multisample_inputs"] = Json::array();
+        std::map<const dxbc_exec::TextureInputView::Samples *, std::string> sampleHashes;
         for (const auto &[id, metadata] : snapshot.inputs.textures->metadata)
             report["texture_metadata"].push_back({{"resource", id},
                                                   {"type", metadata.resource.type},
@@ -150,6 +155,29 @@ int main(int argc, char **argv) {
                 item["plane_slice"] = *view.planeSlice;
             if (view.depthSlices)
                 item["depth_slices"] = *view.depthSlices;
+            item["samples_available"] = bool(view.samples);
+            if (view.samples) {
+                const auto &samples = *view.samples;
+                if (!sampleHashes.contains(&samples)) {
+                    const auto digest = hash(sampleBytes(samples.values));
+                    sampleHashes.emplace(&samples, digest);
+                    report["multisample_inputs"].push_back(
+                        {{"resource", *view.resource},
+                         {"format", view.format},
+                         {"dimension", view.dimension},
+                         {"first_layer", view.firstLayer},
+                         {"layer_count", view.layerCount},
+                         {"return_type", samples.returnType},
+                         {"descriptor", samples.resource.desc},
+                         {"native_descriptor", view.nativeDescriptor},
+                         {"min_lod", snapshot.inputs.textures->metadata.at(*view.resource).minLod},
+                         {"bytes", samples.values.size() * 16},
+                         {"value_count", samples.values.size()},
+                         {"sha256", digest},
+                         {"spatial_outside", samples.values.back()}});
+                }
+                item["sample_sha256"] = sampleHashes.at(&samples);
+            }
             report["texture_views"].push_back(item);
         }
         for (const auto &[id, counter] : snapshot.inputs.memory->counters()) {
@@ -258,6 +286,27 @@ int main(int argc, char **argv) {
                                     item["sha256"].get<std::string>())
                                     throw std::runtime_error("Native comparison texture input mismatch");
                             }
+                            for (const auto &item : report["multisample_inputs"]) {
+                                checkTime();
+                                const auto id = item["resource"].get<uint64_t>();
+                                const auto metadata = source.observeTextureMetadata(id);
+                                if (metadata.resource.desc !=
+                                        item["descriptor"].get<std::vector<uint32_t>>() ||
+                                    metadata.minLod != item["min_lod"].get<float>())
+                                    throw std::runtime_error(
+                                        "Native comparison multisample metadata mismatch");
+                                const auto words = item["native_descriptor"].get<std::vector<uint32_t>>();
+                                D3D11_SHADER_RESOURCE_VIEW_DESC view{};
+                                if (words.size() * 4 != sizeof view)
+                                    throw std::runtime_error("Invalid comparison multisample view");
+                                std::memcpy(&view, words.data(), sizeof view);
+                                const auto values = source.observeTextureSamples(
+                                    id, view, item["return_type"].get<uint32_t>(),
+                                    item["bytes"].get<uint64_t>(),
+                                    [&] { return comparisonTimer.elapsed() >= 30000; });
+                                if (hash(sampleBytes(values)) != item["sha256"].get<std::string>())
+                                    throw std::runtime_error("Native comparison multisample input mismatch");
+                            }
                         };
                         checkBefore(replay);
                         comparison["original_observed_resources_unchanged"] = true;
@@ -287,6 +336,7 @@ int main(int argc, char **argv) {
                         if (!beforeSeen)
                             throw std::runtime_error("Native comparison did not observe the selected event");
                         comparison["matching_native_inputs"] = true;
+                        comparison["multisample_inputs_checked"] = report["multisample_inputs"].size();
                         comparison["resources"] = Json::array();
                         auto compare = [&](uint64_t id, const auto &expected, auto actual) {
                             checkTime();

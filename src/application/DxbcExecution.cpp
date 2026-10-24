@@ -783,20 +783,23 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
-    } else if (op == 45 || op == 163 || op == 164) {
+    } else if (op == 45 || op == 46 || op == 163 || op == 164) {
         const bool store = op == 164;
+        const bool multisample = op == 46;
         const auto &resource = store ? args[0] : args[2];
-        if (p.stage != 5 && !((p.stage == 0 || p.stage == 1) && op == 45))
+        if (p.stage != 5 && !((p.stage == 0 || p.stage == 1) && (op == 45 || multisample)))
             fail("Native typed buffer assistance requires CS execution or a VS/PS SRV load");
         if (instruction.words[0] & (1u << 13))
             fail("Unexpected saturation on a typed buffer instruction");
-        if (resource.modifier || resource.kind != (op == 45 ? 7u : 30u))
+        if (resource.modifier || resource.kind != (op == 45 || multisample ? 7u : 30u))
             fail("Invalid DXBC typed resource operand");
         const auto binding = s.address(resource);
         const auto declaration = p.typedResources.find(binding);
         if (declaration == p.typedResources.end())
             fail("Native typed execution requires a resource declaration");
         const auto dimension = declaration->second.first;
+        if (multisample != (dimension == 4 || dimension == 9))
+            fail("DXBC load opcode disagrees with multisample resource dimension");
         const auto address = s.source(args[1], true);
         if (dimension == 1 && !(address.valid & 1))
             fail("Unknown DXBC typed buffer address");
@@ -838,11 +841,12 @@ Step Lane::step() {
                                                          result.memoryGpuAssisted)
                             : Value{};
             else {
-                if (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8)
+                if (!multisample && dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 &&
+                    dimension != 8)
                     fail("Unsupported native texture load dimension");
-                const uint32_t required = (dimension == 2                     ? 1u
-                                           : dimension == 3 || dimension == 7 ? 3u
-                                                                              : 7u) |
+                const uint32_t required = (dimension == 2                                       ? 1u
+                                           : dimension == 3 || dimension == 4 || dimension == 7 ? 3u
+                                                                                                : 7u) |
                                           (op == 45 ? 8u : 0u);
                 if ((address.valid & required) != required)
                     fail("Unknown DXBC texture load address");
@@ -852,7 +856,7 @@ Step Lane::step() {
                     const auto token = instruction.words.at(pos), kind = token & 63;
                     if (!extensions.insert(kind).second)
                         fail("Duplicate DXBC texture load extension");
-                    if (kind == 1 && op == 45) {
+                    if (kind == 1 && (op == 45 || multisample)) {
                         for (unsigned c = 0; c < 3; ++c)
                             offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
                     } else if (kind == 2) {
@@ -865,6 +869,10 @@ Step Lane::step() {
                         fail("Unsupported DXBC texture load extension");
                 }
                 value = !s.inputs.textures ? Value{}
+                        : multisample      ? s.inputs.textures->loadMultisample(
+                                            binding, dimension, declaration->second.second, address,
+                                            s.source(args[3], true), resource.select, destination.mask,
+                                            offsets, result.memoryGpuAssisted)
                         : op == 163
                             ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second,
                                                          address, resource.select, destination.mask,

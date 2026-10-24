@@ -252,7 +252,7 @@ class DxbcTextureInputTests final : public QObject {
                             {"passed", true}})
                 .dump());
     }
-    void multisampleIsUnavailable() {
+    void multisampleObservation() {
         QTemporaryDir directory;
         const auto path = directory.filePath("msaa.gpa_frame");
         auto capture = textureEditCapture(28, 4, false);
@@ -271,7 +271,19 @@ class DxbcTextureInputTests final : public QObject {
         const auto observed = snapshotResourceInputs(replay, 4);
         QVERIFY(observed.inputs.textures->resources.empty());
         QCOMPARE(observed.inputs.textures->views.at({7, {0}}).resource, std::optional<uint64_t>(20));
-        QVERIFY(observed.unavailable.at({7, {0}}).find("Multisampled") != std::string::npos);
+        QVERIFY(!observed.unavailable.contains({7, {0}}));
+        const auto &samples = observed.inputs.textures->views.at({7, {0}}).samples;
+        QVERIFY(samples);
+        QCOMPARE(samples->values.size(), size_t(4 * 4 * 2 * 4 + 1));
+        for (const auto &value : samples->values)
+            QCOMPARE(value, (std::array<uint32_t, 4>{}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, snapshotResourceInputs(replay, 4, 2048));
+        Program program(observed.bytecode);
+        Lane lane(program, observed.inputs);
+        while (!lane.finished())
+            lane.step();
+        QCOMPARE(lane.value({2, {0}}).bits, (std::array<uint32_t, 4>{}));
+        QCOMPARE(lane.value({2, {0}}).valid, uint8_t(15));
         QVERIFY(!observed.inputs.textures->views.at({7, {1}}).resource);
         validate(replay);
     }

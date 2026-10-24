@@ -451,6 +451,16 @@ observed output bytes. BF1 event 209 completes the selected group but has multip
 dispatch groups, so its report explicitly does not claim whole-dispatch parity.
 Neither result establishes production debugger or full release acceptance.
 
+MSAA `ld_ms` now reads immutable, typed sample observations in the independent
+VS/PS/CS executor. Input snapshot identity is `independent-replay-resource-inputs/5`.
+The selected replay adapter supplies sample bits through a private copy and bounded
+readback; no resolve, vendor substitution or original GPA module is used. Undefined
+sample indices remain unknown. The four-sample hardware matrix and independent
+stencil probe are documented in `DX11_DXBC_MULTISAMPLE_RESEARCH.md`, including the
+locally observed Intel alpha discrepancy and remaining coverage/performance limits.
+This supersedes the earlier checkpoint's MSAA-input limitation, while full P6
+debugger parity and P5/P7/P8 gates remain open.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable

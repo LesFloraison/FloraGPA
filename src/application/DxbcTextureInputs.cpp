@@ -55,6 +55,72 @@ std::optional<LoadFormat> loadFormat(uint32_t format) {
     return found == formats.end() ? std::nullopt : std::optional(found->second);
 }
 } // namespace
+uint32_t TextureInputs::loadReturnType(uint32_t format) {
+    const auto description = loadFormat(format);
+    return description ? description->returnType : 0;
+}
+Value TextureInputs::loadMultisample(const Register &binding, uint32_t dimension, uint32_t returns,
+                                     const Value &address, const Value &sample,
+                                     const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                     const std::array<int32_t, 3> &offset, bool &assisted) const {
+    if ((dimension != 4 && dimension != 9) || binding.kind != 7 || mask > 15)
+        throw std::runtime_error("Invalid multisample load dimension or binding");
+    const uint32_t required = dimension == 4 ? 3 : 7;
+    if ((address.valid & required) != required || !(sample.valid & 1))
+        throw std::runtime_error("Unknown multisample load address or sample");
+    for (auto component : swizzle)
+        if (component > 3)
+            throw std::runtime_error("Invalid multisample load swizzle");
+    const auto selected = views.find(binding);
+    if (selected == views.end())
+        return {};
+    const auto &view = selected->second;
+    if (!view.resource)
+        return Value::known({});
+    if (view.dimension != (dimension == 4 ? 6u : 7u))
+        throw std::runtime_error("Multisample declaration disagrees with its native view");
+    if (!view.samples)
+        return {};
+    const auto &observed = *view.samples;
+    const auto info = textureInfo(observed.resource);
+    const auto count = uint64_t(info.width) * info.height * view.layerCount * info.samples;
+    if (observed.resource.id != *view.resource || info.dimension != 3 || info.samples <= 1 ||
+        info.samples > 32 || info.mips != 1 || view.firstMip || view.mipCount != 1 || !view.layerCount ||
+        view.firstLayer >= info.layers || view.layerCount > info.layers - view.firstLayer ||
+        observed.format != view.format || observed.dimension != view.dimension ||
+        observed.firstLayer != view.firstLayer || observed.layerCount != view.layerCount ||
+        observed.returnType != loadReturnType(view.format) || !observed.returnType ||
+        observed.values.size() != count + 1 || view.nativeDescriptor.size() != 6 ||
+        view.nativeDescriptor[0] != view.format || view.nativeDescriptor[1] != view.dimension ||
+        (dimension == 9
+             ? view.nativeDescriptor[2] != view.firstLayer || view.nativeDescriptor[3] != view.layerCount
+             : view.firstLayer || view.layerCount != 1 || info.layers != 1))
+        throw std::runtime_error("Invalid multisample observation or view range");
+    for (unsigned c = 0; c < 4; ++c) {
+        const auto type = (returns >> (c * 4)) & 15;
+        if (type != observed.returnType && !(observed.returnType == 5 && (type == 1 || type == 2)))
+            throw std::runtime_error("Multisample return class disagrees with its view");
+    }
+    // D3D11 functional specification 22.4.7 leaves an invalid sample index undefined.
+    // Do not turn a particular driver's response into a defined zero or a wrapped sample.
+    if (sample.bits[0] >= info.samples)
+        return {};
+    const auto x = address.bits[0] + uint32_t(offset[0]);
+    const auto y = address.bits[1] + uint32_t(offset[1]);
+    const auto layer = dimension == 9 ? address.bits[2] : 0;
+    const auto index =
+        x >= info.width || y >= info.height || layer >= view.layerCount
+            ? count
+            : ((uint64_t(layer) * info.height + y) * info.width + x) * info.samples + sample.bits[0];
+    Value result;
+    for (unsigned c = 0; c < 4; ++c)
+        if (mask & (1u << c)) {
+            result.bits[c] = observed.values.at(size_t(index))[swizzle[c]];
+            result.valid |= uint8_t(1u << c);
+        }
+    assisted = true;
+    return result;
+}
 Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dimension, uint32_t returns,
                           const Value &address, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                           const std::array<int32_t, 3> &offset, GpuOperations *gpu, bool &assisted) const {

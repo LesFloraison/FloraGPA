@@ -1,0 +1,3254 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_multisample_execution",
+  "complete_release_acceptance": false,
+  "sample_count_tested": 4,
+  "hardware_matrix_complete": true,
+  "independent_probes_valid": true,
+  "dispatch_and_clamp_validation_passed": true,
+  "observed_stencil_alpha": {
+    "0": [
+      1
+    ],
+    "4318": [
+      1
+    ],
+    "32902": [
+      0
+    ]
+  },
+  "latest_validation_passed": true,
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-first.txt",
+      "sha256": "35c3c1b857a478a9605b3faf591cfabd783f971c2c59d4603f2e56f972ce46ba",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 3,
+      "failed": 78,
+      "skipped": 0,
+      "elapsed_ms": 10331,
+      "failures": [
+        "DxbcMultisampleTests::hardware(0-2-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-2-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-3-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-3-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-4-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-4-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-10-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-10-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-28-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-28-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-41-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-41-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-42-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-42-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-43-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-43-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-139-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-139-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-121-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-121-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-122-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-122-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-146-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-146-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-147-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(0-147-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-2-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-2-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-3-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-3-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-4-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-4-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-10-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-10-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-28-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-28-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-41-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-41-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-42-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-42-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-43-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-43-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-139-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-139-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-121-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-121-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-122-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-122-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-146-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-146-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-147-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(4318-147-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-2-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-2-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-3-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-3-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-4-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-4-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-10-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-10-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-28-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-28-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-41-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-41-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-42-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-42-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-43-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-43-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-139-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-139-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-121-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-121-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-122-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-122-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-146-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-146-1) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-147-0) 'view.samples' returned FALSE. ()",
+        "DxbcMultisampleTests::hardware(32902-147-1) 'view.samples' returned FALSE. ()"
+      ],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [],
+      "hardware_count": 0,
+      "dispatch_rows_count": 0,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-used-views.txt",
+      "sha256": "d33c7efc25601444703a47127534d82f42455fb5df3bd2d4686cf087c5d8fe39",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 77,
+      "failed": 4,
+      "skipped": 0,
+      "elapsed_ms": 20766,
+      "failures": [
+        "DxbcMultisampleTests::hardware(32902-122-0) Compared values are not the same",
+        "DxbcMultisampleTests::hardware(32902-122-1) Compared values are not the same",
+        "DxbcMultisampleTests::hardware(32902-147-0) Compared values are not the same",
+        "DxbcMultisampleTests::hardware(32902-147-1) Compared values are not the same"
+      ],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [],
+      "hardware_count": 74,
+      "dispatch_rows_count": 0,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-independent-oracle.txt",
+      "sha256": "49139891b1471fc478bff7be3329758425304986e0f8136e23cbb611afb42711",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 27650,
+      "failures": [],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 0,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-final.txt",
+      "sha256": "61f0b0d45ee3f2502635769c112f45b8c104b8722949522c454a9230cc7f5376",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 25609,
+      "failures": [],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 0,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-bounds-clamp.txt",
+      "sha256": "5aae1e0727c388650430de92b0caf1c246ca14bc1f26957eb85b0d85a2edeae1",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 84,
+      "failed": 9,
+      "skipped": 0,
+      "elapsed_ms": 37713,
+      "failures": [
+        "DxbcMultisampleTests::resourceClamp(0-0) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(0-0.25) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(0-1) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(4318-0) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(4318-0.25) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(4318-1) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(32902-0) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(32902-0.25) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access",
+        "DxbcMultisampleTests::resourceClamp(32902-1) Event 50 (ClearDepthStencilView): Resource 20: initial minimum LOD is unresolved at this access"
+      ],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 3,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-clamp-initial-state.txt",
+      "sha256": "f0e3216fcac717afa424fee4ec3ca152aa20c40e55ae0c9ff09ccdd8f0c8ad28",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 84,
+      "failed": 9,
+      "skipped": 0,
+      "elapsed_ms": 38947,
+      "failures": [
+        "DxbcMultisampleTests::resourceClamp(0-0) ID3D11DeviceContext::SetResourceMinLOD: SetResourceMinLOD can only be called on the Immediate Context.",
+        "DxbcMultisampleTests::resourceClamp(0-0.25) Compared values are not the same",
+        "DxbcMultisampleTests::resourceClamp(0-1) Compared values are not the same",
+        "DxbcMultisampleTests::resourceClamp(4318-0) ID3D11DeviceContext::SetResourceMinLOD: SetResourceMinLOD can only be called on the Immediate Context.",
+        "DxbcMultisampleTests::resourceClamp(4318-0.25) Compared values are not the same",
+        "DxbcMultisampleTests::resourceClamp(4318-1) Compared values are not the same",
+        "DxbcMultisampleTests::resourceClamp(32902-0) ID3D11DeviceContext::SetResourceMinLOD: SetResourceMinLOD can only be called on the Immediate Context.",
+        "DxbcMultisampleTests::resourceClamp(32902-0.25) Compared values are not the same",
+        "DxbcMultisampleTests::resourceClamp(32902-1) Compared values are not the same"
+      ],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 3,
+      "resource_clamps_count": 0,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-clamp-immediate.txt",
+      "sha256": "ed31144ae212958b610e3adbff6bfb6add75ba826452f81960b1324e607ffde4",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 93,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 38974,
+      "failures": [],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 3,
+      "resource_clamps_count": 9,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-native-comparison.txt",
+      "sha256": "dcf0e295d76b0d46e31fd01422e0b3a87dbf9ed75d01bf610961744ce1f11f65",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 93,
+      "failed": 6,
+      "skipped": 0,
+      "elapsed_ms": 41226,
+      "failures": [
+        "DxbcMultisampleTests::probeNativeComparison(0-139) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-umKIxM/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":27,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":0,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})",
+        "DxbcMultisampleTests::probeNativeComparison(0-147) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-dyPEsK/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":26,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":0,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})",
+        "DxbcMultisampleTests::probeNativeComparison(4318-139) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-rngKgj/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":308,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":4318,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})",
+        "DxbcMultisampleTests::probeNativeComparison(4318-147) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-twtSPP/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":308,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":4318,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})",
+        "DxbcMultisampleTests::probeNativeComparison(32902-139) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-JnOgXC/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":601,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":32902,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})",
+        "DxbcMultisampleTests::probeNativeComparison(32902-147) 'process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0' returned FALSE. ({\"capture\":\"C:/Users/Flora/AppData/Local/Temp/FloraDxbcMultisampleTests-ypnYsn/compute-samples.gpa_frame\",\"complete_release_acceptance\":false,\"elapsed_ms\":184,\"error\":\"Event 200 (Dispatch): Unexpected record type for 82\",\"event\":200,\"observed\":false,\"requested_vendor\":32902,\"schema\":4,\"scope\":\"native_dxbc_compute_group_probe\",\"shader_execution_performed\":false,\"stage\":5})"
+      ],
+      "probes": [],
+      "unit_cases": [],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hardware_count": 78,
+      "dispatch_rows_count": 3,
+      "resource_clamps_count": 9,
+      "native_comparisons_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-matrix-native-comparison-type.txt",
+      "sha256": "5475b16709cc5423a2a0fd43922b9c86cb0b19b431019f1c384f644235487163",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 99,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 35311,
+      "failures": [],
+      "probes": [],
+      "unit_cases": [],
+      "hardware": [
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": false,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "array": true,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": false,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "array": true,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 2,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 3,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 4,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 10,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 28,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 41,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 42,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 43,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 139,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 121,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 122,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 146,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": false,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 65,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "array": true,
+          "format": 147,
+          "passed": true,
+          "source": "independent-replay-resource-inputs/5",
+          "values": 129,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "dispatch_rows": [
+        {
+          "adapter_luid": 73789,
+          "dispatch_rows": true,
+          "passed": true,
+          "values": 4194305,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "dispatch_rows": true,
+          "passed": true,
+          "values": 4194305,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "dispatch_rows": true,
+          "passed": true,
+          "values": 4194305,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "resource_clamps": [
+        {
+          "adapter_luid": 73789,
+          "lod": 0.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "lod": 0.25,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "lod": 1.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "lod": 0.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "lod": 0.25,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "lod": 1.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "lod": 0.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "lod": 0.25,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "lod": 1.0,
+          "passed": true,
+          "resource_clamp_test": true,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "native_comparisons": [
+        {
+          "adapter_luid": 73789,
+          "format": 139,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                39,
+                4,
+                0,
+                0,
+                40,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 41,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                41,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 5,
+              "sha256": "277f542f17d96e8dc94481390edcb2813d7b5942fd9a6417618c0d6a69ad926f",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                1065353216
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 29,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "native_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "format": 147,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                44,
+                4,
+                0,
+                0,
+                72,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 47,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                47,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 4,
+              "sha256": "1702d67d91a2a34254a1a41f5cbf365a2c24207d83caa064eb6c783d6bf61fbc",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 29,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "ae9f55c62136f9f9cb57a4f8ee378c4173993d7279428373b53d24d6eb0c18df",
+                "native_sha256": "ae9f55c62136f9f9cb57a4f8ee378c4173993d7279428373b53d24d6eb0c18df",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "format": 139,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                39,
+                4,
+                0,
+                0,
+                40,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 41,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                41,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 5,
+              "sha256": "277f542f17d96e8dc94481390edcb2813d7b5942fd9a6417618c0d6a69ad926f",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                1065353216
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 82,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "native_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "format": 147,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                44,
+                4,
+                0,
+                0,
+                72,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 47,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                47,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 4,
+              "sha256": "1702d67d91a2a34254a1a41f5cbf365a2c24207d83caa064eb6c783d6bf61fbc",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 96,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "ae9f55c62136f9f9cb57a4f8ee378c4173993d7279428373b53d24d6eb0c18df",
+                "native_sha256": "ae9f55c62136f9f9cb57a4f8ee378c4173993d7279428373b53d24d6eb0c18df",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "format": 139,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                39,
+                4,
+                0,
+                0,
+                40,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 41,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                41,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 5,
+              "sha256": "277f542f17d96e8dc94481390edcb2813d7b5942fd9a6417618c0d6a69ad926f",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                1065353216
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 70,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "native_sha256": "385c41da2e3780483a675fdcb77e4019a60a7c880ce51755ecbd80f4eceb780d",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "format": 147,
+          "multisample_inputs": [
+            {
+              "bytes": 2064,
+              "descriptor": [
+                4,
+                4,
+                1,
+                3,
+                44,
+                4,
+                0,
+                0,
+                72,
+                0,
+                0
+              ],
+              "dimension": 7,
+              "first_layer": 1,
+              "format": 47,
+              "layer_count": 2,
+              "min_lod": 0.0,
+              "native_descriptor": [
+                47,
+                7,
+                1,
+                2,
+                0,
+                0
+              ],
+              "resource": 20,
+              "return_type": 4,
+              "sha256": "db814794fce6fbdef69c4dcc40416bbc1173c5728de377c20c6acede3976ab81",
+              "spatial_outside": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "value_count": 129
+            }
+          ],
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 100,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 1,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 64,
+                "equal": true,
+                "expected_sha256": "82f2725d5da0f527077be9584ac109c6432ca5b3d9cb40e677893ace0ac946a2",
+                "native_sha256": "82f2725d5da0f527077be9584ac109c6432ca5b3d9cb40e677893ace0ac946a2",
+                "resource": 30
+              }
+            ],
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "passed": true,
+          "probe_native_comparison": true,
+          "steps": 12,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "boundary_test_passed": true,
+      "independent_probe_summaries": [
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 140,
+          "adapter_luid": 73789,
+          "adapter_vendor": 5140,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 0,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              90,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 11352,
+          "adapter_luid": 68403,
+          "adapter_vendor": 4318,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 4318,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": false,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              90,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 0.25,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "adapter_device": 32103,
+          "adapter_luid": 73907,
+          "adapter_vendor": 32902,
+          "requested_min_lod": 1,
+          "resource_clamp": true,
+          "validation_errors": 0,
+          "vendor": 32902,
+          "record_count": 40,
+          "observed_bits": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/msaa-regression-texture-uav.txt",
+      "sha256": "efe8116c6664b1520b7a345931abf855613adc5a1ced4512fc8399fe9b1fb6af",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 765,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 160589,
+      "failures": [],
+      "unit_cases": [
+        "validityAndTransactions(packed-shared-bytes)",
+        "validityAndTransactions(missing-default-components)",
+        "validityAndTransactions(independent-rg-channels)",
+        "cancellationAndRecovery()",
+        "cooperativeAndRollback(0)",
+        "cooperativeAndRollback(4318)",
+        "cooperativeAndRollback(32902)"
+      ],
+      "probe_count": 756
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regression-resource-info.txt",
+      "sha256": "8f80781274fea08bd4cc97d9c7ca93dde3d9a587b78e83400baae76eb9b98c48",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 629,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 142730,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regression-texture-load.txt",
+      "sha256": "b9399872c4dc8b3f5274421d25c4ed7277b8ea070f25d7cc008474661a13d618",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 1445,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 422345,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regression-texture-input.txt",
+      "sha256": "7d9283dd10368151ca44254970c8ef52fae51dbc660c0d82f1966df54a37cc0a",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 14881,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regression-input-snapshot.txt",
+      "sha256": "733499cdd4452ef152a9951842cfe6a707ceac6491c8c3e786189eab0bc0fb74",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 42,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 7883,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regression-execution.txt",
+      "sha256": "ab2de898a7fa1999772b2ffe35ec93a0ee1eaa4914cf1aca1d206ad14f15a150",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 59598,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/msaa-build-bounds-clamp.txt",
+      "sha256": "a05fbd7d1fb48f2105c804ef2ba3b255249820ba181338bb49ebd9ad4906c00d",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-clamp-immediate.txt",
+      "sha256": "4da19f3eb17a938ba0e691fea422115846e7e9f82094c0012d18ef3ec6916ff5",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-clamp-initial-state.txt",
+      "sha256": "9d076b975d9e98712cd63162e39a63ab53beed09e32341d660a6ad0ef2780452",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-first.txt",
+      "sha256": "6f6cc43f91cb38b2413ccd65d1205a7b84003b2fd026a2ecb28aeaeb52bdd846",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-independent-oracle.txt",
+      "sha256": "78ccec175b88f342a60006497106b7a458103cc56ffa985ed9517e64ebca4a23",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-matrix-retry.txt",
+      "sha256": "b20ef53edc1dcd8d635f6d7f07218a4f36783d5263c3de34733c143dfed1c36f",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-matrix.txt",
+      "sha256": "530cf50b6589a33622aeaef1a473527620e3ec576f6c8b4f48bc7d944079dd32",
+      "compiler_errors": [
+        "D:\\CDXrepo\\FloraGPA-Cpp\\tests\\DxbcMultisampleTests.cpp(410,57): error C3861: \u201cJson\u201d: \u627e\u4e0d\u5230\u6807\u8bc6\u7b26 [D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\FloraDxbcMultisampleTests.vcxproj]"
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-native-comparison-type.txt",
+      "sha256": "bf2e39a3c80e1978d084b4df14e1f84c97976b0cfbd5552d7437c02c20a3fac9",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-native-comparison.txt",
+      "sha256": "137c2904963b5dc03533e159c83f06054adddb51c17b6293674424cb351f6e3a",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-products.txt",
+      "sha256": "184c82167f9d15dfe0298b23191d96ac6ff234c7db58abeea224d28aaf987408",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-regressions.txt",
+      "sha256": "d796aa02aa040839116be72f3bd6dbb762c8d1bfd51e04d9d23392317f00cb82",
+      "compiler_errors": []
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-build-used-views.txt",
+      "sha256": "b20ef53edc1dcd8d635f6d7f07218a4f36783d5263c3de34733c143dfed1c36f",
+      "compiler_errors": []
+    }
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "c5ab0a4b71a0a79e644ec276d5d43220336d287ac2f564c46f6cbd4374f49400"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "83ca2a8dcfa21060573c0065e63a7250c5be33fba568eafb5e16f8f6e60c1f15"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "sha256": "bca0032e5f26922d483d25fc64f3ed130f7c2da2d1729131ad525643afdac1bb"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "sha256": "95847ae27954f3bdd7b88866a1ae1b7d38d8cdb9da25fadb168a9f0d9cb463be"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.cpp",
+      "sha256": "682b8b18b8bb572bab441f4115e2381271f8122892d9a041ce14198e98755625"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "sha256": "2259412630600cfe390130c07208bb8528b065c342f3aa4162e9b7743d9d0618"
+    },
+    {
+      "path": "src/replay/Replay.h",
+      "sha256": "f010e0955c00c095c5be96c65dc793dbb3163906c50a82c632d8615a1e444d91"
+    },
+    {
+      "path": "src/replay/TextureSamples.cpp",
+      "sha256": "e293265cb696d866ff872a29baa9f41bf7471d0d98d88305985444d2a3a92850"
+    },
+    {
+      "path": "tests/DxbcTextureInputTests.cpp",
+      "sha256": "4179112baf8d06fbe6fd933ed7f993883f1dd778b706e66802bf969299418889"
+    },
+    {
+      "path": "tests/DxbcMultisampleTests.cpp",
+      "sha256": "750ea77fa635ebc6d7fadf24b5b6990a648de7cab436d83a459a0387e57be9b4"
+    },
+    {
+      "path": "tools/probe_dxbc_inputs.cpp",
+      "sha256": "a81834e03a0a07f5cf46260ee287fece860c780798024bbabb7e5ec7b8a258f0"
+    },
+    {
+      "path": "tools/summarize_dxbc_multisample.py",
+      "sha256": "6963ef78d139d9a264e876a1bc0bfcf9550f8c0a60a9a4120e4d9bd739181485"
+    },
+    {
+      "path": "tools/summarize_dxbc_texture_loads.py",
+      "sha256": "1a05fdf7535d6d904d449e61f2f18ae17bfb78caec2cd3af9bc51696d8449815"
+    },
+    {
+      "path": "tools/summarize_dxbc_texture_uav.py",
+      "sha256": "27040ae4f9a5f4d18a86c8cf9e2ac6afa92b5bb96d3c3d9aef6c18ec599c6fda"
+    },
+    {
+      "path": "tools/summarize_dxbc_execution.py",
+      "sha256": "e98ea87ed7cf40aa36c98d620f0e6ccf6133359749bd66ffac2992b98b3af24a"
+    },
+    {
+      "path": "tools/native/msaa_stencil_probe.cpp",
+      "sha256": "c0c053498ffab661e6373fa4ad1e0b019b9540a1771fe5bafa7ef73506fef8ca"
+    },
+    {
+      "path": "docs/research/dx11-msaa-stencil-evidence.json",
+      "sha256": "a92e8fe5ecc77caad8c87c3521278433a192cc4b899aa304a4556667cf511b29"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcMultisampleTests.exe",
+      "sha256": "cba5f69a80a5b191b06befc626f852a59660d89484a9bb714023fa6d7a78a27b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
+      "sha256": "50cb42dac6dd3309648a9b1ccadf10222560de0307d8f56a953343a73e81c2bf"
+    },
+    {
+      "path": "build/vs2022/Release/FloraMsaaStencilProbe.exe",
+      "sha256": "05b10dfac08da02508c164e31eafc1b24b53189c6556f390889ce5cbaaf0f8e2"
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-final-evidence-integrity.json",
+      "sha256": "67fc61b8465d7acaf51f3cfc0c26abcc63749a69a77d6504359f00cd072a3e08"
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-native-comparison-type-ctest.txt",
+      "sha256": "7c86acf86214bef9151b27dc4029da8feb5ce30a47762d35d61dc2fe78ad4da6"
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-regressions-ctest.txt",
+      "sha256": "232f8753d5493a007f13153e5e715bcab82bf0cc8765698d1168d7a335c9333d"
+    }
+  ],
+  "standalone_probes": []
+}

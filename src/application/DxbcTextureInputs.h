@@ -20,12 +20,23 @@ struct TextureInputView {
     std::optional<std::array<uint32_t, 2>> depthSlices;
     std::optional<uint32_t> planeSlice;
     std::vector<uint32_t> nativeDescriptor;
+    struct Samples {
+        Resource resource;
+        uint32_t format = 0, returnType = 0, dimension = 0, firstLayer = 0, layerCount = 0;
+        // Shader-observed typed values, not raw texture storage. The last value is spatial OOB.
+        std::vector<std::array<uint32_t, 4>> values;
+    };
+    std::shared_ptr<const Samples> samples;
 };
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
     // Native D3D11 SRV/UAV dimensions; missing resource storage stays unavailable.
     std::map<Register, TextureInputView> views;
+    static uint32_t loadReturnType(uint32_t format);
+    Value loadMultisample(const Register &, uint32_t dimension, uint32_t returns, const Value &address,
+                          const Value &sample, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                          const std::array<int32_t, 3> &offset, bool &assisted) const;
     Value dimensions(const Register &, uint32_t dimension, const Value &mip, uint32_t mode, GpuOperations *,
                      bool &assisted) const;
     Value loadUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address,

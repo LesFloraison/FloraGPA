@@ -185,7 +185,34 @@ class Snapshot {
             D3D11_TEXTURE2D_DESC d{};
             texture2d->GetDesc(&d);
             if (d.SampleDesc.Count != 1) {
-                result.unavailable[binding] = "Multisampled texture storage observation is unavailable";
+                const auto returns = TextureInputs::loadReturnType(view.format);
+                if (binding.kind != 7 || !returns) {
+                    result.unavailable[binding] = "Multisample view return type is unavailable";
+                    return;
+                }
+                for (const auto &[otherBinding, other] : textures->views)
+                    if (other.samples && other.resource == view.resource && other.format == view.format &&
+                        other.dimension == view.dimension && other.firstLayer == view.firstLayer &&
+                        other.layerCount == view.layerCount) {
+                        view.samples = other.samples;
+                        break;
+                    }
+                if (!view.samples) {
+                    D3D11_SHADER_RESOURCE_VIEW_DESC sampleView{};
+                    std::memcpy(&sampleView, view.nativeDescriptor.data(), sizeof sampleView);
+                    auto samples = std::make_shared<TextureInputView::Samples>();
+                    samples->resource = textures->metadata.at(id).resource;
+                    samples->format = view.format;
+                    samples->returnType = returns;
+                    samples->dimension = view.dimension;
+                    samples->firstLayer = view.firstLayer;
+                    samples->layerCount = view.layerCount;
+                    samples->values =
+                        replay.observeTextureSamples(id, sampleView, returns, budget - used, cancelled);
+                    used += samples->values.size() * 16;
+                    view.samples = std::move(samples);
+                }
+                result.bindings[binding].size = view.samples->values.size() * 16;
                 return;
             }
         }

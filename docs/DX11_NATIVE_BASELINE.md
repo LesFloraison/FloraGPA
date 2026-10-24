@@ -638,6 +638,23 @@ single interpreted group. The original 30-second execution limit is unchanged.
 See `DX11_DXBC_TEXTURE_UAV_RESEARCH.md` and its evidence ledger for validation and
 remaining semantic/performance scope. The helper identity is now `dxbc-gpu/9`.
 
+The multisample checkpoint adds `ld_ms` to the independent VS/PS/CS executor with
+typed, immutable sample observations and input identity
+`independent-replay-resource-inputs/5`. It preserves view-relative sample/layer
+selection, raw float bits, actual missing-component behavior and resource MinLOD.
+The final suite passes 99 tests with zero failures/skips in 35.311 seconds;
+the six adjacent regression suites pass 3,332 tests. This is 3,431 unique passing
+cases, with the earlier MSAA matrix replaced by its expanded final run in that
+count. GUI, CLI and Worker Release builds pass.
+
+Twelve independent PS probe runs establish 480 stencil/MinLOD observations on
+WARP, NVIDIA and Intel. Six subprocess CS cases verify exact native outputs,
+matching MSAA inputs and unchanged original observations. The initial fixture,
+clamp-context and local Intel stencil discrepancies remain in the evidence
+ledger; no historical golden or skip range was changed. See
+`DX11_DXBC_MULTISAMPLE_RESEARCH.md` for independent evidence, report schema 4,
+the tested four-sample boundary and remaining coverage/performance constraints.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
