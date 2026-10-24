@@ -797,17 +797,32 @@ Step Lane::step() {
         if (declaration == p.typedResources.end())
             fail("Native typed execution requires a resource declaration");
         const auto dimension = declaration->second.first;
-        if (dimension != 1 && op != 45)
-            fail("Native typed UAV execution currently requires a buffer declaration");
         const auto address = s.source(args[1], true);
         if (dimension == 1 && !(address.valid & 1))
             fail("Unknown DXBC typed buffer address");
         if (store) {
-            if (resource.components != 2 || resource.mode != 0 || resource.mask != 15 || !s.inputs.memory)
+            if (resource.components != 2 || resource.mode != 0 || resource.mask != 15 ||
+                (dimension == 1 ? !s.inputs.memory : !s.inputs.textures))
                 fail("DXBC typed stores require a complete xyzw destination and a snapshot");
-            result.memoryChanges = s.inputs.memory->storeTyped(
-                binding, address.bits[0], declaration->second.second, s.source(args[2], false),
-                args[1].kind == 4, result.memoryGpuAssisted);
+            if (dimension == 1)
+                result.memoryChanges = s.inputs.memory->storeTyped(
+                    binding, address.bits[0], declaration->second.second, s.source(args[2], false),
+                    args[1].kind == 4, result.memoryGpuAssisted);
+            else {
+                std::set<uint32_t> extensions;
+                for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+                    const auto token = instruction.words.at(pos), kind = token & 63;
+                    if (!extensions.insert(kind).second ||
+                        (kind == 2 ? ((token >> 6) & 31) != dimension || (token & 0x7ffff800)
+                         : kind == 3
+                             ? ((token >> 6) & 0xffff) != declaration->second.second || (token & 0x7fc00000)
+                             : true))
+                        fail("Invalid typed texture UAV store extension");
+                }
+                result.textureChanges = s.inputs.textures->storeUav(
+                    binding, dimension, declaration->second.second, address, s.source(args[2], false),
+                    s.inputs.gpu.get(), result.memoryGpuAssisted);
+            }
         } else {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
@@ -825,7 +840,10 @@ Step Lane::step() {
             else {
                 if (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8)
                     fail("Unsupported native texture load dimension");
-                const uint32_t required = dimension == 2 ? 9 : dimension == 3 || dimension == 7 ? 11 : 15;
+                const uint32_t required = (dimension == 2                     ? 1u
+                                           : dimension == 3 || dimension == 7 ? 3u
+                                                                              : 7u) |
+                                          (op == 45 ? 8u : 0u);
                 if ((address.valid & required) != required)
                     fail("Unknown DXBC texture load address");
                 std::array<int32_t, 3> offsets{};
@@ -834,7 +852,7 @@ Step Lane::step() {
                     const auto token = instruction.words.at(pos), kind = token & 63;
                     if (!extensions.insert(kind).second)
                         fail("Duplicate DXBC texture load extension");
-                    if (kind == 1) {
+                    if (kind == 1 && op == 45) {
                         for (unsigned c = 0; c < 3; ++c)
                             offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
                     } else if (kind == 2) {
@@ -846,11 +864,14 @@ Step Lane::step() {
                     } else
                         fail("Unsupported DXBC texture load extension");
                 }
-                value = s.inputs.textures
-                            ? s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
+                value = !s.inputs.textures ? Value{}
+                        : op == 163
+                            ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second,
+                                                         address, resource.select, destination.mask,
+                                                         s.inputs.gpu.get(), result.memoryGpuAssisted)
+                            : s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
                                                       address, resource.select, destination.mask, offsets,
-                                                      s.inputs.gpu.get(), result.memoryGpuAssisted)
-                            : Value{};
+                                                      s.inputs.gpu.get(), result.memoryGpuAssisted);
             }
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
@@ -1147,6 +1168,8 @@ Step Lane::step() {
         s.inputs.sharedMemory->commit(result.sharedMemoryChanges);
     if (!result.counterChanges.empty())
         s.inputs.memory->commitCounters(result.counterChanges);
+    if (!result.textureChanges.empty())
+        s.inputs.textures->apply(result.textureChanges);
     s.calls = std::move(calls);
     s.loops = std::move(loops);
     s.callLoopDepths = std::move(callLoopDepths);

@@ -28,6 +28,14 @@ struct TextureInputs {
     std::map<Register, TextureInputView> views;
     Value dimensions(const Register &, uint32_t dimension, const Value &mip, uint32_t mode, GpuOperations *,
                      bool &assisted) const;
+    Value loadUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address,
+                  const std::array<uint32_t, 4> &swizzle, uint32_t mask, GpuOperations *,
+                  bool &assisted) const;
+    std::vector<MemoryChange> storeUav(const Register &, uint32_t dimension, uint32_t returns,
+                                       const Value &address, const Value &, GpuOperations *,
+                                       bool &assisted) const;
+    // Validate the complete transaction before applying a forward or reverse trace step.
+    void apply(const std::vector<MemoryChange> &, bool forward = true);
     Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
                GpuOperations *, bool &assisted) const;

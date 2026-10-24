@@ -618,6 +618,26 @@ gap; BF1 retains its 11,264 steps and 512 GPU operations. Neither is complete
 shader execution. See `DX11_DXBC_RESOURCE_INFO_RESEARCH.md` and its evidence ledger
 for exact validation scope, initial failures and independent HLSL comparisons.
 
+The texture UAV checkpoint adds typed compute-stage texture reads/writes, exact
+before/after byte and validity traces, checked undo/redo, private alias sharing,
+and bounded same-adapter GPU resource caching. Its full suite passes 765 cases
+with zero failures/skips in 165.425 seconds. Three compiled-HLSL cooperative
+tests verify cross-thread reads after a device-memory group barrier and cache
+resynchronization after rollback. Independent marker probes preserve observed
+3D out-of-view behavior without dropping unchanged-value writes. Earlier fixture,
+declaration, footprint, build and timeout failures remain recorded.
+The five-suite serial regression passes 2,957 cases with zero failures/skips in
+741.65 seconds across two CTest invocations.
+
+Helldivers event 893 now completes 384 steps and 64 texture writes and matches
+native post-dispatch observed bytes exactly after verifying identical native
+inputs and unchanged original observed resources. BF1 event 209 completes group
+zero in 14.47 seconds with 14,992 steps, 2,000 GPU operations and 1,488 texture
+writes; its 2x2x1 dispatch remains ineligible for whole-dispatch parity from a
+single interpreted group. The original 30-second execution limit is unchanged.
+See `DX11_DXBC_TEXTURE_UAV_RESEARCH.md` and its evidence ledger for validation and
+remaining semantic/performance scope. The helper identity is now `dxbc-gpu/9`.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

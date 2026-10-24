@@ -29,10 +29,11 @@ uint64_t number(const QString &text) {
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     const auto args = app.arguments();
-    const bool execute = args.size() == 7 && args[6] == "--execute-group";
+    const bool compareNative = args.size() == 8 && args[7] == "--compare-native";
+    const bool execute = (args.size() == 7 || compareNative) && args[6] == "--execute-group";
     if (args.size() != 6 && !execute) {
         std::cerr << "Usage: FloraDxbcInputProbe <frame> <event> <native-stage-0..5> <vendor-or-0-for-WARP> "
-                     "<report.json> [--execute-group]\n";
+                     "<report.json> [--execute-group [--compare-native]]\n";
         return 2;
     }
     Json report{
@@ -172,8 +173,9 @@ int main(int argc, char **argv) {
                          {"step_limit", 100000},
                          {"timeout_ms", 30000},
                          {"native_output_parity_verified", false}};
+            execution["dispatch_arguments"] = frame.event(event).args;
             executionTimer.start();
-            uint64_t steps = 0;
+            uint64_t steps = 0, textureWrites = 0, textureWriteBytes = 0;
             try {
                 const dxbc_exec::Program program(snapshot.bytecode);
                 execution["thread_group_size"] = program.threadGroupSize();
@@ -181,6 +183,9 @@ int main(int argc, char **argv) {
                 while (!group.finished()) {
                     const auto step = group.step();
                     ++steps;
+                    textureWrites += step.step.textureChanges.size();
+                    for (const auto &change : step.step.textureChanges)
+                        textureWriteBytes += change.after.size();
                     execution["last_completed_step"] = {{"lane", step.lane},
                                                         {"instruction", step.step.instruction},
                                                         {"word_offset", step.step.wordOffset}};
@@ -191,6 +196,8 @@ int main(int argc, char **argv) {
                 status = 1;
             }
             execution["steps"] = steps;
+            execution["texture_writes"] = textureWrites;
+            execution["texture_write_bytes"] = textureWriteBytes;
             execution["elapsed_ms"] = executionTimer.elapsed();
             report["shader_execution_performed"] = steps != 0;
             if (snapshot.inputs.gpu) {
@@ -202,6 +209,109 @@ int main(int argc, char **argv) {
                 execution["buffers_after"].push_back({{"resource", id},
                                                       {"sha256", hash(buffer.bytes)},
                                                       {"validity_sha256", hash(buffer.valid)}});
+            execution["textures_after"] = Json::array();
+            for (const auto &[id, texture] : snapshot.inputs.textures->resources)
+                execution["textures_after"].push_back(
+                    {{"resource", id},
+                     {"bytes", texture.storage.bytes.size()},
+                     {"sha256", hash(texture.storage.bytes)},
+                     {"validity_sha256", hash(texture.storage.valid)},
+                     {"known_bytes",
+                      std::count(texture.storage.valid.begin(), texture.storage.valid.end(), uint8_t(1))}});
+            if (compareNative) {
+                auto &comparison = execution["native_comparison"];
+                comparison = {{"scope", "single_direct_dispatch_observed_resources"},
+                              {"attempted", false},
+                              {"passed", false}};
+                const auto dispatch = frame.event(event);
+                bool known = true;
+                for (const auto &[id, buffer] : snapshot.inputs.memory->buffers())
+                    known &=
+                        std::all_of(buffer.valid.begin(), buffer.valid.end(), [](auto v) { return v == 1; });
+                for (const auto &[id, texture] : snapshot.inputs.textures->resources)
+                    known &= std::all_of(texture.storage.valid.begin(), texture.storage.valid.end(),
+                                         [](auto v) { return v == 1; });
+                if (!execution["completed"].get<bool>() || frame.entry(event).type != 0x35 ||
+                    dispatch.args != std::vector<uint32_t>{1, 1, 1} || !known ||
+                    !snapshot.unavailable.empty() || !snapshot.inputs.memory->counters().empty()) {
+                    comparison["reason"] = "Requires a completed single direct dispatch with known observed "
+                                           "storage and no hidden counters";
+                } else {
+                    comparison["attempted"] = true;
+                    QElapsedTimer comparisonTimer;
+                    comparisonTimer.start();
+                    try {
+                        auto checkTime = [&] {
+                            if (comparisonTimer.elapsed() >= 30000)
+                                throw std::runtime_error("Native comparison timed out");
+                        };
+                        auto checkBefore = [&](Replay &source) {
+                            for (const auto &item : report["buffers"]) {
+                                checkTime();
+                                if (hash(source.readBuffer(item["resource"].get<uint64_t>())) !=
+                                    item["sha256"].get<std::string>())
+                                    throw std::runtime_error("Native comparison buffer input mismatch");
+                            }
+                            for (const auto &item : report["textures"]) {
+                                checkTime();
+                                if (hash(source.readTexture(item["resource"].get<uint64_t>())) !=
+                                    item["sha256"].get<std::string>())
+                                    throw std::runtime_error("Native comparison texture input mismatch");
+                            }
+                        };
+                        checkBefore(replay);
+                        comparison["original_observed_resources_unchanged"] = true;
+                        options.before = false;
+                        Replay reference(frame, options);
+                        bool beforeSeen = false;
+                        reference.run(
+                            [&](Id, size_t, size_t) { checkTime(); },
+                            [&](Id id, bool after, ID3D11DeviceContext *context, const auto &) {
+                                if (id != event || after)
+                                    return;
+                                Com<ID3D11Device> device;
+                                context->GetDevice(&device);
+                                Com<IDXGIDevice> dxgi;
+                                check(device.As(&dxgi), "Read reference adapter");
+                                Com<IDXGIAdapter> adapter;
+                                check(dxgi->GetAdapter(&adapter), "Read reference adapter identity");
+                                DXGI_ADAPTER_DESC desc{};
+                                check(adapter->GetDesc(&desc), "Read reference adapter description");
+                                const uint64_t luid = uint64_t(uint32_t(desc.AdapterLuid.HighPart)) << 32 |
+                                                      desc.AdapterLuid.LowPart;
+                                if (luid != snapshot.adapterLuid)
+                                    throw std::runtime_error("Native comparison adapter mismatch");
+                                checkBefore(reference);
+                                beforeSeen = true;
+                            });
+                        if (!beforeSeen)
+                            throw std::runtime_error("Native comparison did not observe the selected event");
+                        comparison["matching_native_inputs"] = true;
+                        comparison["resources"] = Json::array();
+                        auto compare = [&](uint64_t id, const auto &expected, auto actual) {
+                            checkTime();
+                            const bool equal = expected == actual;
+                            comparison["resources"].push_back({{"resource", id},
+                                                               {"bytes", actual.size()},
+                                                               {"expected_sha256", hash(expected)},
+                                                               {"native_sha256", hash(actual)},
+                                                               {"equal", equal}});
+                            if (!equal)
+                                throw std::runtime_error("Native comparison output mismatch");
+                        };
+                        for (const auto &[id, buffer] : snapshot.inputs.memory->buffers())
+                            compare(id, buffer.bytes, reference.readBuffer(id));
+                        for (const auto &[id, texture] : snapshot.inputs.textures->resources)
+                            compare(id, texture.storage.bytes, reference.readTexture(id));
+                        comparison["passed"] = true;
+                        execution["native_output_parity_verified"] = true;
+                    } catch (const std::exception &error) {
+                        comparison["error"] = error.what();
+                        status = 1;
+                    }
+                    comparison["elapsed_ms"] = comparisonTimer.elapsed();
+                }
+            }
         }
     } catch (const std::exception &error) {
         report["observed"] = false;

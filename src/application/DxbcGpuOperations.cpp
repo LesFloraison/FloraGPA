@@ -129,6 +129,16 @@ struct GpuOperations::State {
     Com<ID3D11DeviceContext> context;
     std::map<Words, Com<ID3D11ComputeShader>> shaders;
     std::map<Words, Value> textureDimensionResults;
+    std::map<Words, std::optional<uint64_t>> textureFootprints;
+    struct TextureUavOperation {
+        Com<ID3D11Resource> texture, staging;
+        Com<ID3D11UnorderedAccessView> view;
+        std::vector<uint8_t> shadow;
+    };
+    std::map<Words, TextureUavOperation> textureUavs;
+    uint64_t textureUavBytes = 0;
+    Com<ID3D11Buffer> textureUavConstants, textureUavOutput, textureUavStaging;
+    Com<ID3D11UnorderedAccessView> textureUavOutputView;
     struct VertexOperation {
         Com<ID3D11VertexShader> vertex;
         Com<ID3D11GeometryShader> stream;
@@ -751,9 +761,264 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/8"}};
+            {"backend", "dxbc-gpu/9"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
+std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
+                                                           const TextureInputView &view, uint32_t dimension,
+                                                           uint32_t returns, const Value &address) {
+    auto &s = *state_;
+    checkCancellation(s.cancelled);
+    if (s.failed)
+        throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+    Words key = input.resource.desc;
+    key.insert(key.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
+    key.insert(key.end(), address.bits.begin(), address.bits.end());
+    key.insert(key.end(), {dimension, returns, std::bit_cast<uint32_t>(input.minLod)});
+    if (auto found = s.textureFootprints.find(key); found != s.textureFootprints.end())
+        return found->second;
+    const auto format = typedBufferFormat(view.format);
+    if (!format || input.storage.bytes.size() > 256ull * 1024 * 1024)
+        throw std::runtime_error("Invalid texture UAV footprint request");
+    auto marker = input;
+    std::fill(marker.storage.bytes.begin(), marker.storage.bytes.end(), 0);
+    const uint32_t one = format->returnType == 5 ? 0x3f800000u : 1u;
+    const auto after = textureUav(marker, view, dimension, returns, address,
+                                  Value::known({one, one, one, one}), true, {0, 1, 2, 3}, 15)
+                           .second;
+    std::optional<uint64_t> selected;
+    for (size_t i = 0; i < after.size(); ++i)
+        if (after[i]) {
+            const auto texel = uint64_t(i / format->bytes) * format->bytes;
+            if (selected && *selected != texel)
+                throw std::runtime_error("Native texture UAV footprint covers multiple texels");
+            selected = texel;
+        }
+    if (s.textureFootprints.size() >= 256)
+        s.textureFootprints.clear();
+    s.textureFootprints.emplace(std::move(key), selected);
+    return selected;
+}
+std::pair<Value, std::vector<uint8_t>>
+GpuOperations::textureUav(const TextureInput &input, const TextureInputView &view, uint32_t dimension,
+                          uint32_t returns, const Value &address, const Value &value, bool store,
+                          const std::array<uint32_t, 4> &swizzle, uint32_t mask) {
+    auto &s = *state_;
+    checkCancellation(s.cancelled);
+    if (s.failed)
+        throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+    if (input.storage.bytes.empty() || input.storage.bytes.size() > 256ull * 1024 * 1024 ||
+        view.nativeDescriptor.size() != 5 ||
+        (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8))
+        throw std::runtime_error("Invalid native texture UAV operation");
+    try {
+        D3D11_FEATURE_DATA_FORMAT_SUPPORT2 support{DXGI_FORMAT(view.format), 0};
+        check(s.device->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2, &support, sizeof support),
+              "Query native texture UAV support");
+        const auto required =
+            store ? D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE : D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD;
+        if (!(support.OutFormatSupport2 & required))
+            throw std::runtime_error("Selected adapter does not support this typed texture UAV operation");
+        const auto layout = textureInitialSubresources(input.resource, input.storage.bytes);
+        std::vector<D3D11_SUBRESOURCE_DATA> initial;
+        for (const auto &sub : layout)
+            initial.push_back({input.storage.bytes.data() + sub.offset, sub.rowPitch, UINT(sub.slicePitch)});
+        Words resourceKey{input.resource.type, uint32_t(view.resource.value_or(0)),
+                          uint32_t(view.resource.value_or(0) >> 32), uint32_t(input.resource.desc.size())};
+        resourceKey.insert(resourceKey.end(), input.resource.desc.begin(), input.resource.desc.end());
+        resourceKey.insert(resourceKey.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
+        resourceKey.push_back(std::bit_cast<uint32_t>(input.minLod));
+        auto cached = s.textureUavs.find(resourceKey);
+        if (cached == s.textureUavs.end()) {
+            if (s.textureUavs.size() >= 64 ||
+                s.textureUavBytes + input.storage.bytes.size() > 256ull * 1024 * 1024) {
+                s.textureUavs.clear();
+                s.textureUavBytes = 0;
+            }
+            cached = s.textureUavs.emplace(std::move(resourceKey), State::TextureUavOperation{}).first;
+            s.textureUavBytes += input.storage.bytes.size();
+        }
+        auto &operation = cached->second;
+        auto &texture = operation.texture;
+        auto &textureStaging = operation.staging;
+        auto create = [&]<class T, class D>(auto method) {
+            if (input.resource.desc.size() * 4 != sizeof(D))
+                throw std::runtime_error("Native texture UAV descriptor size mismatch");
+            D desc{};
+            std::memcpy(&desc, input.resource.desc.data(), sizeof desc);
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+            desc.CPUAccessFlags = 0;
+            desc.MiscFlags &= D3D11_RESOURCE_MISC_RESOURCE_CLAMP;
+            Com<T> object;
+            check((s.device.Get()->*method)(&desc, initial.data(), &object),
+                  "Create private texture UAV storage");
+            texture = object;
+            {
+                desc.Usage = D3D11_USAGE_STAGING;
+                desc.BindFlags = 0;
+                desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+                desc.MiscFlags = 0;
+                object.Reset();
+                check((s.device.Get()->*method)(&desc, nullptr, &object), "Create texture UAV staging");
+                textureStaging = object;
+            }
+        };
+        if (!texture) {
+            if (input.resource.type == 0x84)
+                create.operator()<ID3D11Texture1D, D3D11_TEXTURE1D_DESC>(&ID3D11Device::CreateTexture1D);
+            else if (input.resource.type == 0x85)
+                create.operator()<ID3D11Texture2D, D3D11_TEXTURE2D_DESC>(&ID3D11Device::CreateTexture2D);
+            else if (input.resource.type == 0x86)
+                create.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(&ID3D11Device::CreateTexture3D);
+            else
+                throw std::runtime_error("Unsupported native texture UAV storage");
+            if (hasResourceLodClamp(input.resource))
+                s.context->SetResourceMinLOD(texture.Get(), input.minLod);
+            D3D11_UNORDERED_ACCESS_VIEW_DESC vd{};
+            std::memcpy(&vd, view.nativeDescriptor.data(), sizeof vd);
+            check(s.device->CreateUnorderedAccessView(texture.Get(), &vd, &operation.view),
+                  "Create private texture UAV");
+            operation.shadow = input.storage.bytes;
+        } else if (operation.shadow != input.storage.bytes) {
+            // CPU rollback and writes through other views invalidate the private GPU copy.
+            for (const auto &sub : layout)
+                s.context->UpdateSubresource(texture.Get(), sub.index, nullptr,
+                                             input.storage.bytes.data() + sub.offset, sub.rowPitch,
+                                             UINT(sub.slicePitch));
+            operation.shadow = input.storage.bytes;
+        }
+        std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
+                                row(156 | (dimension << 11), {dest(30, 0), {returns}})};
+        if (store)
+            rows.push_back(row(164, {dest(30, 0), {0x208e46, 0, 0}, {0x208e46, 0, 1}}));
+        else {
+            uint32_t selection = 0;
+            for (unsigned c = 0; c < 4; ++c)
+                selection |= swizzle[c] << (c * 2);
+            rows.push_back(row(158, {dest(30, 1), {16}}));
+            rows.push_back(row(54, {dest(0, 0), immediate(0)}));
+            rows.push_back(row(163, {dest(0, 0, mask), {0x208e46, 0, 0}, source(30, 0, selection)}));
+            rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}));
+        }
+        rows.push_back(row(62, {}));
+        const auto bytes = writeDxbcProgram({{0x50050, 0}, rows});
+        Words key(bytes.size() / 4);
+        std::memcpy(key.data(), bytes.data(), bytes.size());
+        auto found = s.shaders.find(key);
+        if (found == s.shaders.end()) {
+            if (s.shaders.size() >= 256)
+                s.shaders.clear();
+            const auto binary = makeDxbc({{0x58454853, bytes}});
+            Com<ID3D11ComputeShader> shader;
+            check(s.device->CreateComputeShader(binary.data(), binary.size(), nullptr, &shader),
+                  "Create native texture UAV shader");
+            found = s.shaders.emplace(std::move(key), std::move(shader)).first;
+        }
+        const std::array<uint32_t, 8> parameters{address.bits[0], address.bits[1], address.bits[2],
+                                                 address.bits[3], value.bits[0],   value.bits[1],
+                                                 value.bits[2],   value.bits[3]};
+        D3D11_BUFFER_DESC bd{32, D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+        if (!s.textureUavConstants)
+            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavConstants),
+                  "Create texture UAV constants");
+        s.context->UpdateSubresource(s.textureUavConstants.Get(), 0, nullptr, parameters.data(), 0, 0);
+        if (!store && !s.textureUavOutput) {
+            bd = {16,
+                  D3D11_USAGE_DEFAULT,
+                  D3D11_BIND_UNORDERED_ACCESS,
+                  0,
+                  D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+                  16};
+            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavOutput),
+                  "Create texture UAV load output");
+            check(s.device->CreateUnorderedAccessView(s.textureUavOutput.Get(), nullptr,
+                                                      &s.textureUavOutputView),
+                  "Create texture UAV load output view");
+            bd = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavStaging),
+                  "Create texture UAV load staging");
+        }
+        auto *cb = s.textureUavConstants.Get();
+        ID3D11UnorderedAccessView *targets[]{operation.view.Get(),
+                                             store ? nullptr : s.textureUavOutputView.Get()};
+        s.context->CSSetShader(found->second.Get(), nullptr, 0);
+        s.context->CSSetConstantBuffers(0, 1, &cb);
+        s.context->CSSetUnorderedAccessViews(0, 2, targets, nullptr);
+        s.context->Dispatch(1, 1, 1);
+        s.context->ClearState();
+        ID3D11Resource *staging = store ? textureStaging.Get() : s.textureUavStaging.Get();
+        s.context->CopyResource(staging, store ? texture.Get() : s.textureUavOutput.Get());
+        s.context->Flush();
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(s.timeoutMs);
+        const auto yieldUntil = std::chrono::steady_clock::now() + std::chrono::microseconds(500);
+        auto map = [&](uint32_t subresource) {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            for (;;) {
+                checkCancellation(s.cancelled);
+                const auto hr =
+                    s.context->Map(staging, subresource, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                if (hr == S_OK)
+                    return mapped;
+                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
+                    check(hr, "Read native texture UAV result");
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error("Native texture UAV operation timed out");
+                // Avoid a coarse scheduler tick for short copies; keep busy polling bounded.
+                if (std::chrono::steady_clock::now() < yieldUntil)
+                    std::this_thread::yield();
+                else
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        };
+        std::pair<Value, std::vector<uint8_t>> result;
+        if (store) {
+            result.second.resize(input.storage.bytes.size());
+            for (const auto &sub : layout) {
+                const auto mapped = map(sub.index);
+                if (mapped.RowPitch < sub.rowPitch ||
+                    (sub.depth > 1 && mapped.DepthPitch < uint64_t(mapped.RowPitch) * sub.height)) {
+                    s.context->Unmap(staging, sub.index);
+                    throw std::runtime_error("Native texture UAV readback pitch is too small");
+                }
+                for (uint32_t z = 0; z < sub.depth; ++z)
+                    for (uint32_t y = 0; y < sub.height; ++y)
+                        std::memcpy(result.second.data() + sub.offset + uint64_t(z) * sub.slicePitch +
+                                        uint64_t(y) * sub.rowPitch,
+                                    static_cast<const uint8_t *>(mapped.pData) +
+                                        uint64_t(z) * mapped.DepthPitch + uint64_t(y) * mapped.RowPitch,
+                                    sub.rowPitch);
+                s.context->Unmap(staging, sub.index);
+            }
+        } else {
+            const auto mapped = map(0);
+            std::memcpy(result.first.bits.data(), mapped.pData, 16);
+            s.context->Unmap(staging, 0);
+        }
+        if (s.debug) {
+            Com<ID3D11InfoQueue> queue;
+            check(s.device.As(&queue), "Read texture UAV validation queue");
+            for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                SIZE_T size = 0;
+                check(queue->GetMessage(i, nullptr, &size), "Read texture UAV validation size");
+                std::vector<uint8_t> data(size);
+                auto *message = reinterpret_cast<D3D11_MESSAGE *>(data.data());
+                check(queue->GetMessage(i, message, &size), "Read texture UAV validation message");
+                if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+                    throw std::runtime_error(message->pDescription);
+            }
+            queue->ClearStoredMessages();
+        }
+        if (store)
+            operation.shadow = result.second;
+        ++s.count;
+        return result;
+    } catch (...) {
+        s.context->ClearState();
+        s.failed = true;
+        throw;
+    }
+}
 Value GpuOperations::textureDimensions(const TextureMetadata &input, const TextureInputView &view,
                                        uint32_t kind, uint32_t dimension, uint32_t mip, uint32_t mode) {
     auto &s = *state_;

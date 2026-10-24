@@ -117,6 +117,7 @@ struct Step {
     std::vector<std::pair<uint32_t, uint64_t>> syncLoopIterations;
     bool atomic = false;
     std::vector<CounterChange> counterChanges;
+    std::vector<MemoryChange> textureChanges;
 };
 struct SharedDeclaration {
     uint32_t bytes = 0, stride = 0;

@@ -440,6 +440,17 @@ same-adapter helper to preserve observed driver behavior. Source identity is
 See `DX11_DXBC_RESOURCE_INFO_RESEARCH.md` for exact comparisons, independent HLSL
 probes, unknown-field handling and the remaining debugger integration requirements.
 
+Compute texture UAV loads/stores now use the independent executor and private
+same-adapter helper `dxbc-gpu/9`. Texture changes retain before/after bytes and
+validity, including unchanged-value writes, and support checked undo/redo.
+Bounded private storage caches resynchronize after CPU rollback or alias writes.
+See `DX11_DXBC_TEXTURE_UAV_RESEARCH.md` for native format conversion, the observed
+3D view discrepancy, cooperative-thread tests and exact remaining scope.
+The real Helldivers event 893 single-dispatch probe completes and matches native
+observed output bytes. BF1 event 209 completes the selected group but has multiple
+dispatch groups, so its report explicitly does not claim whole-dispatch parity.
+Neither result establishes production debugger or full release acceptance.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable
