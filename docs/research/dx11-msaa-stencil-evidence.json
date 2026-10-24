@@ -1,0 +1,561 @@
+{
+  "schema": 1,
+  "scope": "independent_d3d11_msaa_stencil_and_min_lod",
+  "complete_release_acceptance": false,
+  "validation_passed": true,
+  "records": 480,
+  "adapters": {
+    "0": [
+      5140,
+      140,
+      73789
+    ],
+    "32902": [
+      32902,
+      32103,
+      73907
+    ],
+    "4318": [
+      4318,
+      11352,
+      68403
+    ]
+  },
+  "observed_alpha": {
+    "0": 1,
+    "32902": 0,
+    "4318": 1
+  },
+  "binary": {
+    "path": "build/vs2022/Release/FloraMsaaStencilProbe.exe",
+    "sha256": "05b10dfac08da02508c164e31eafc1b24b53189c6556f390889ce5cbaaf0f8e2"
+  },
+  "sources": [
+    {
+      "path": "tools/native/msaa_stencil_probe.cpp",
+      "sha256": "c0c053498ffab661e6373fa4ad1e0b019b9540a1771fe5bafa7ef73506fef8ca"
+    },
+    {
+      "path": "tools/summarize_msaa_stencil.py",
+      "sha256": "29f2a9432752e0ec5ed53f47b17d09021af81b2240ce38a0398785c3b44cc3dc"
+    }
+  ],
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/0-0/results.json",
+      "sha256": "96b855dd5be717017bb954152df1bb37e2c7aa64dc57cb99502c740d25b695c5",
+      "result": {
+        "vendor": 0,
+        "adapter_vendor": 5140,
+        "adapter_device": 140,
+        "adapter_luid": 73789,
+        "resource_clamp": true,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            90,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/0-0.25/results.json",
+      "sha256": "f970ee11137918ba91ffac886a4931ddf351250e692142d4313e79a1651d6390",
+      "result": {
+        "vendor": 0,
+        "adapter_vendor": 5140,
+        "adapter_device": 140,
+        "adapter_luid": 73789,
+        "resource_clamp": true,
+        "requested_min_lod": 0.25,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0.25/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0.25/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0.25/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-0.25/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/0-1/results.json",
+      "sha256": "47aa0bf7722a92fca5681aa9b1ccb7544d09eae375a328d654cff5131cc34b93",
+      "result": {
+        "vendor": 0,
+        "adapter_vendor": 5140,
+        "adapter_device": 140,
+        "adapter_luid": 73789,
+        "resource_clamp": true,
+        "requested_min_lod": 1,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-1/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-1/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-1/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-1/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/0-default/results.json",
+      "sha256": "5569cf3ecd158c77295d0a37eee4694d028b9864ba5341010ae795f218a248bb",
+      "result": {
+        "vendor": 0,
+        "adapter_vendor": 5140,
+        "adapter_device": 140,
+        "adapter_luid": 73789,
+        "resource_clamp": false,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            90,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-default/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-default/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-default/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/0-default/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/32902-0/results.json",
+      "sha256": "5408434578b81e66b3671988180429a2eac16cd49de18af7d81fff1efb423534",
+      "result": {
+        "vendor": 32902,
+        "adapter_vendor": 32902,
+        "adapter_device": 32103,
+        "adapter_luid": 73907,
+        "resource_clamp": true,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            90,
+            0,
+            0
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/32902-0.25/results.json",
+      "sha256": "7dbf3ff38df13c099defa4128987d5a441e2dbd8812ac9a3b223492e892aeace",
+      "result": {
+        "vendor": 32902,
+        "adapter_vendor": 32902,
+        "adapter_device": 32103,
+        "adapter_luid": 73907,
+        "resource_clamp": true,
+        "requested_min_lod": 0.25,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0.25/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0.25/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0.25/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-0.25/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/32902-1/results.json",
+      "sha256": "4913e7f09b90997af171247ee3d723e8787774d9f33dd710ddd0203d96a680af",
+      "result": {
+        "vendor": 32902,
+        "adapter_vendor": 32902,
+        "adapter_device": 32103,
+        "adapter_luid": 73907,
+        "resource_clamp": true,
+        "requested_min_lod": 1,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-1/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-1/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-1/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-1/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/32902-default/results.json",
+      "sha256": "b1edb63d6f6a3d4e48eb4df7e6c6147aeb8112ad54337ded8221fdeb36f6f1fa",
+      "result": {
+        "vendor": 32902,
+        "adapter_vendor": 32902,
+        "adapter_device": 32103,
+        "adapter_luid": 73907,
+        "resource_clamp": false,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            90,
+            0,
+            0
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-default/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-default/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-default/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/32902-default/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/4318-0/results.json",
+      "sha256": "0194b22f750908aa89d677d083cae7bcece209695ff871e9c2188ea4e8343c4f",
+      "result": {
+        "vendor": 4318,
+        "adapter_vendor": 4318,
+        "adapter_device": 11352,
+        "adapter_luid": 68403,
+        "resource_clamp": true,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            90,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/4318-0.25/results.json",
+      "sha256": "c1d1bf38f6d86f527ba632b20daec9318a5ad4762d7d729ec2db69b473f2f01d",
+      "result": {
+        "vendor": 4318,
+        "adapter_vendor": 4318,
+        "adapter_device": 11352,
+        "adapter_luid": 68403,
+        "resource_clamp": true,
+        "requested_min_lod": 0.25,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0.25/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0.25/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0.25/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-0.25/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/4318-1/results.json",
+      "sha256": "903a6abb4f219835442c4b34d3ce2a8975c54fc9a62d1036de84bcc6837be9f3",
+      "result": {
+        "vendor": 4318,
+        "adapter_vendor": 4318,
+        "adapter_device": 11352,
+        "adapter_luid": 68403,
+        "resource_clamp": true,
+        "requested_min_lod": 1,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-1/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-1/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-1/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-1/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/msaa-stencil-final/4318-default/results.json",
+      "sha256": "79750e0fd1fd1d6ee3d03f1c6f5102f3a5c5c1883575a441751ce7d836e0445b",
+      "result": {
+        "vendor": 4318,
+        "adapter_vendor": 4318,
+        "adapter_device": 11352,
+        "adapter_luid": 68403,
+        "resource_clamp": false,
+        "requested_min_lod": 0,
+        "validation_errors": 0,
+        "record_count": 40,
+        "observed_values": [
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            90,
+            0,
+            1
+          ]
+        ]
+      },
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-default/22-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-default/22-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-default/47-2d.dxbc",
+          "sha256": "db6558f77b1258c1ba9e49586fa0b45470981501696a0eaecba5a50105948b6a"
+        },
+        {
+          "path": "artifacts/dx11-native/msaa-stencil-final/4318-default/47-array.dxbc",
+          "sha256": "c20062860c7c571d655efefceac34a3c496ee71bdce7f579e1ff8d79a2f48002"
+        }
+      ]
+    }
+  ]
+}
