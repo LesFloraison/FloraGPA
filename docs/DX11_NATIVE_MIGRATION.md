@@ -423,8 +423,14 @@ typed-format mapping and same-adapter PS/VS/CS assistance. The CPU preserves
 coordinates, offsets, view-relative mip/layer selection, MinLOD bounds and
 component validity. See `DX11_DXBC_TEXTURE_LOAD_RESEARCH.md` for the native CS
 reference matrix, recovery checks and remaining format/performance limits.
-Compressed/sRGB formats, texture UAV operations, MSAA and sampling remain required
-before full texture execution parity or production debugger cutover.
+The subsequent format extension adds BC1 through BC7, sRGB, BGRA/BGRX, packed
+color, shared-exponent RGB, alpha-only and depth/stencil SRV loads. Its separate
+texture layout tracks component validity without changing typed-buffer execution.
+See `DX11_DXBC_TEXTURE_FORMAT_RESEARCH.md` for native comparisons and conservative
+compressed-block validity. Texture UAV operations, MSAA, sampling and packed/planar
+video access remain required before full texture execution parity or production
+debugger cutover. The optional input-probe group execution mode reports bounded
+real-CS progress without claiming native-output parity.
 
 ## Delivery constraints
 

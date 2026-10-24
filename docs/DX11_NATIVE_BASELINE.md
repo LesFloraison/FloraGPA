@@ -595,6 +595,18 @@ See `DX11_DXBC_TEXTURE_LOAD_RESEARCH.md` for validity, cancellation, coordinate 
 MinLOD checks. Full shader parity, compressed/sRGB formats, texture UAV operations,
 MSAA, sampling and acceptable full-trace performance remain open.
 
+The texture-format extension adds 28 SRV formats, including BC1-BC7, sRGB,
+depth/stencil component views and packed/BGRA formats. Its full load suite passes
+1445 cases; the focused load/input/snapshot regression passes 1563 cases without
+failures/skips in 413.62 seconds. The original 750 hardware cases remain in place.
+The first run's 32 failures came from expecting unused X24 initializer bytes to
+survive native storage unchanged. A pre-execution probe locates that difference
+before DXBC execution; the final check retains exact defined initializer bytes
+and compares all actual native bytes before and after execution. The original
+failed run remains recorded. Real CS probes reach a texture UAV gap in BF1 and
+an unimplemented resinfo instruction in Helldivers; neither is a full execution
+success. See `DX11_DXBC_TEXTURE_FORMAT_RESEARCH.md` for evidence and remaining scope.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

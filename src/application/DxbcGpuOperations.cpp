@@ -749,7 +749,7 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/6"}};
+            {"backend", "dxbc-gpu/7"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 Value GpuOperations::loadTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,

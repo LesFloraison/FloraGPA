@@ -1,3 +1,4 @@
+#include "application/DxbcGpuOperations.h"
 #include "application/DxbcInputSnapshot.h"
 #include "replay/Replay.h"
 #include <QCoreApplication>
@@ -28,16 +29,18 @@ uint64_t number(const QString &text) {
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     const auto args = app.arguments();
-    if (args.size() != 6) {
+    const bool execute = args.size() == 7 && args[6] == "--execute-group";
+    if (args.size() != 6 && !execute) {
         std::cerr << "Usage: FloraDxbcInputProbe <frame> <event> <native-stage-0..5> <vendor-or-0-for-WARP> "
-                     "<report.json>\n";
+                     "<report.json> [--execute-group]\n";
         return 2;
     }
-    Json report{{"schema", 2},
-                {"scope", "native_dxbc_resource_input_observation"},
-                {"complete_release_acceptance", false},
-                {"shader_execution_performed", false},
-                {"capture", args[1].toStdString()}};
+    Json report{
+        {"schema", execute ? 3 : 2},
+        {"scope", execute ? "native_dxbc_compute_group_probe" : "native_dxbc_resource_input_observation"},
+        {"complete_release_acceptance", false},
+        {"shader_execution_performed", false},
+        {"capture", args[1].toStdString()}};
     QElapsedTimer timer;
     timer.start();
     int status = 0;
@@ -45,6 +48,8 @@ int main(int argc, char **argv) {
         const auto event = number(args[2]), stage = number(args[3]), vendor = number(args[4]);
         if (stage > 5 || vendor > UINT32_MAX)
             throw std::runtime_error("Probe stage or vendor out of range");
+        if (execute && stage != 5)
+            throw std::runtime_error("Group execution requires a compute shader");
         report["event"] = event;
         report["stage"] = stage;
         report["requested_vendor"] = vendor;
@@ -56,7 +61,10 @@ int main(int argc, char **argv) {
         if (vendor)
             options.vendor = uint32_t(vendor);
         Replay replay(frame, options);
-        const auto snapshot = dxbc_exec::snapshotResourceInputs(replay, unsigned(stage));
+        QElapsedTimer executionTimer;
+        const auto cancelled = [&] { return executionTimer.isValid() && executionTimer.elapsed() >= 30000; };
+        const auto snapshot =
+            dxbc_exec::snapshotResourceInputs(replay, unsigned(stage), 256 * 1024 * 1024, cancelled);
         report["source"] = dxbc_exec::InputSnapshot::source;
         report["frame_sha256"] = snapshot.frameSha256;
         report["shader"] = snapshot.shader;
@@ -148,6 +156,47 @@ int main(int argc, char **argv) {
             report["counters"].push_back(item);
         }
         report["observed"] = true;
+        if (execute) {
+            auto &execution = report["execution"];
+            execution = {{"attempted", true},
+                         {"completed", false},
+                         {"steps", 0},
+                         {"group", {0, 0, 0}},
+                         {"model", dxbc_exec::Group::executionModel},
+                         {"step_limit", 100000},
+                         {"timeout_ms", 30000},
+                         {"native_output_parity_verified", false}};
+            executionTimer.start();
+            uint64_t steps = 0;
+            try {
+                const dxbc_exec::Program program(snapshot.bytecode);
+                execution["thread_group_size"] = program.threadGroupSize();
+                dxbc_exec::Group group(program, snapshot.inputs, {}, 100000, cancelled);
+                while (!group.finished()) {
+                    const auto step = group.step();
+                    ++steps;
+                    execution["last_completed_step"] = {{"lane", step.lane},
+                                                        {"instruction", step.step.instruction},
+                                                        {"word_offset", step.step.wordOffset}};
+                }
+                execution["completed"] = true;
+            } catch (const std::exception &error) {
+                execution["error"] = error.what();
+                status = 1;
+            }
+            execution["steps"] = steps;
+            execution["elapsed_ms"] = executionTimer.elapsed();
+            report["shader_execution_performed"] = steps != 0;
+            if (snapshot.inputs.gpu) {
+                execution["helper"] = snapshot.inputs.gpu->identity();
+                execution["gpu_operations"] = snapshot.inputs.gpu->operations();
+            }
+            execution["buffers_after"] = Json::array();
+            for (const auto &[id, buffer] : snapshot.inputs.memory->buffers())
+                execution["buffers_after"].push_back({{"resource", id},
+                                                      {"sha256", hash(buffer.bytes)},
+                                                      {"validity_sha256", hash(buffer.valid)}});
+        }
     } catch (const std::exception &error) {
         report["observed"] = false;
         report["error"] = error.what();
@@ -160,7 +209,6 @@ int main(int argc, char **argv) {
         std::cerr << "Cannot write probe report\n";
         return 2;
     }
-    std::cout << (status ? "Input observation failed" : "Input observation recorded") << " in "
-              << timer.elapsed() << " ms\n";
+    std::cout << (status ? "Probe incomplete" : "Probe recorded") << " in " << timer.elapsed() << " ms\n";
     return status;
 }

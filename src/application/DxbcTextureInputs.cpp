@@ -5,6 +5,56 @@
 #include <cmath>
 
 namespace flora::dxbc_exec {
+namespace {
+struct LoadFormat {
+    uint32_t bytes, returnType, width = 1, height = 1;
+    // Each bit selects a contributing storage byte. Empty masks are format defaults.
+    std::array<uint16_t, 4> dependencies{};
+};
+std::optional<LoadFormat> loadFormat(uint32_t format) {
+    if (const auto typed = typedBufferFormat(format)) {
+        LoadFormat result{typed->bytes, typed->returnType};
+        unsigned bit = 0;
+        for (unsigned c = 0; c < 4; ++c) {
+            if (typed->bits[c])
+                for (unsigned byte = bit / 8; byte < (bit + typed->bits[c] + 7) / 8; ++byte)
+                    result.dependencies[c] |= uint16_t(1u << byte);
+            bit += typed->bits[c];
+        }
+        return result;
+    }
+    static const std::map<uint32_t, LoadFormat> formats{{21, {8, 5, 1, 1, {0x000f, 0, 0, 0}}},
+                                                        {22, {8, 4, 1, 1, {0, 0x0010, 0, 0}}},
+                                                        {29, {4, 5, 1, 1, {1, 2, 4, 8}}},
+                                                        {46, {4, 5, 1, 1, {7, 0, 0, 0}}},
+                                                        {47, {4, 4, 1, 1, {0, 8, 0, 0}}},
+                                                        {65, {1, 5, 1, 1, {0, 0, 0, 1}}},
+                                                        {67, {4, 5, 1, 1, {11, 14, 12, 0}}},
+                                                        {71, {8, 5, 4, 4, {0xff, 0xff, 0xff, 0xff}}},
+                                                        {72, {8, 5, 4, 4, {0xff, 0xff, 0xff, 0xff}}},
+                                                        {74, {16, 5, 4, 4, {0xff00, 0xff00, 0xff00, 0x00ff}}},
+                                                        {75, {16, 5, 4, 4, {0xff00, 0xff00, 0xff00, 0x00ff}}},
+                                                        {77, {16, 5, 4, 4, {0xff00, 0xff00, 0xff00, 0x00ff}}},
+                                                        {78, {16, 5, 4, 4, {0xff00, 0xff00, 0xff00, 0x00ff}}},
+                                                        {80, {8, 5, 4, 4, {0xff, 0, 0, 0}}},
+                                                        {81, {8, 5, 4, 4, {0xff, 0, 0, 0}}},
+                                                        {83, {16, 5, 4, 4, {0x00ff, 0xff00, 0, 0}}},
+                                                        {84, {16, 5, 4, 4, {0x00ff, 0xff00, 0, 0}}},
+                                                        {85, {2, 5, 1, 1, {2, 3, 1, 0}}},
+                                                        {86, {2, 5, 1, 1, {2, 3, 1, 2}}},
+                                                        {87, {4, 5, 1, 1, {4, 2, 1, 8}}},
+                                                        {88, {4, 5, 1, 1, {4, 2, 1, 0}}},
+                                                        {91, {4, 5, 1, 1, {4, 2, 1, 8}}},
+                                                        {93, {4, 5, 1, 1, {4, 2, 1, 0}}},
+                                                        {95, {16, 5, 4, 4, {0xffff, 0xffff, 0xffff, 0}}},
+                                                        {96, {16, 5, 4, 4, {0xffff, 0xffff, 0xffff, 0}}},
+                                                        {98, {16, 5, 4, 4, {0xffff, 0xffff, 0xffff, 0xffff}}},
+                                                        {99, {16, 5, 4, 4, {0xffff, 0xffff, 0xffff, 0xffff}}},
+                                                        {115, {2, 5, 1, 1, {2, 1, 1, 2}}}};
+    const auto found = formats.find(format);
+    return found == formats.end() ? std::nullopt : std::optional(found->second);
+}
+} // namespace
 Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dimension, uint32_t returns,
                           const Value &address, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                           const std::array<int32_t, 3> &offset, GpuOperations *gpu, bool &assisted) const {
@@ -31,7 +81,7 @@ Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dime
     if (found == resources.end())
         return {};
     const auto &texture = found->second;
-    const auto format = typedBufferFormat(view.format);
+    const auto format = loadFormat(view.format);
     if (!format)
         throw std::runtime_error("Native texture load format validity mapping is unavailable");
     for (unsigned c = 0; c < 4; ++c) {
@@ -78,18 +128,17 @@ Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dime
         result.valid = uint8_t(mask);
         return result;
     }
-    const auto start =
-        sub.offset + uint64_t(z) * sub.slicePitch + uint64_t(y) * sub.rowPitch + uint64_t(x) * format->bytes;
+    const auto start = sub.offset + uint64_t(z) * sub.slicePitch +
+                       uint64_t(y / format->height) * sub.rowPitch +
+                       uint64_t(x / format->width) * format->bytes;
     if (start > texture.storage.bytes.size() || format->bytes > texture.storage.bytes.size() - start)
         throw std::runtime_error("Native texture load format exceeds its storage layout");
     std::array<bool, 4> known{};
-    uint32_t bit = 0;
     for (unsigned c = 0; c < 4; ++c) {
-        known[c] = !format->bits[c] ||
-                   std::all_of(texture.storage.valid.begin() + start + bit / 8,
-                               texture.storage.valid.begin() + start + (bit + format->bits[c] + 7) / 8,
-                               [](uint8_t value) { return value != 0; });
-        bit += format->bits[c];
+        known[c] = true;
+        for (unsigned byte = 0; byte < format->bytes; ++byte)
+            if ((format->dependencies[c] & (1u << byte)) && !texture.storage.valid[start + byte])
+                known[c] = false;
     }
     result.valid = 0;
     for (unsigned c = 0; c < 4; ++c)

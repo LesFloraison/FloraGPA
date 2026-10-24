@@ -97,6 +97,33 @@ class DxbcTextureLoadTests final : public QObject {
         QFETCH(uint32_t, dimension);
         QFETCH(uint32_t, format);
         QFETCH(unsigned, mode);
+        runHardware(vendor, dimension, format, mode);
+    }
+    void formats_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<unsigned>("mode");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (uint32_t dimension : {3u, 8u})
+                for (uint32_t format :
+                     {21u, 22u, 29u, 46u, 47u, 65u, 67u, 71u, 72u, 74u, 75u, 77u, 78u, 80u,
+                      81u, 83u, 84u, 85u, 86u, 87u, 88u, 91u, 93u, 95u, 96u, 98u, 99u, 115u})
+                    for (unsigned mode : {0u, 10u, 11u, 12u})
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(dimension).arg(format).arg(mode)))
+                            << vendor << dimension << format << mode;
+    }
+    void formats() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, dimension);
+        QFETCH(uint32_t, format);
+        QFETCH(unsigned, mode);
+        runHardware(vendor, dimension, format, mode);
+    }
+
+  private:
+    void runHardware(uint32_t vendor, uint32_t dimension, uint32_t format, unsigned mode) {
         try {
             auto capture = testing::computeCapture(true);
             std::erase_if(capture.entries,
@@ -110,11 +137,30 @@ class DxbcTextureLoadTests final : public QObject {
                 resource.desc = {8, 8, 4, 3, format, 0, 8, 0, 0x80};
             else
                 resource.desc = {8, 8, 3, layers, format, 1, 0, 0, 8, 0, 0x80};
+            const bool extended = !typedBufferFormat(format);
+            if (extended) {
+                resource.desc[0] = resource.desc[1] = 16;
+                resource.desc[2] = 5;
+                if (format == 21 || format == 22)
+                    resource.desc[4] = 19;
+                if (format == 46 || format == 47)
+                    resource.desc[4] = 44;
+            }
             replace(capture, 4, 5, resource.type, resource.desc, 5);
             const auto subs = textureSubresources(resource);
             std::vector<uint8_t> bytes(subs.back().offset + subs.back().size);
             for (size_t i = 0; i < bytes.size(); ++i)
                 bytes[i] = uint8_t(i * 37 + i / 13 + 7);
+            const bool compressed = (format >= 71 && format <= 84) || (format >= 95 && format <= 99);
+            if (compressed) {
+                const auto blockSize = format <= 72 || format == 80 || format == 81 ? 8u : 16u;
+                for (size_t i = 0; i < bytes.size(); i += blockSize) {
+                    if (format == 95 || format == 96)
+                        bytes[i] &= 0xfc; // Valid BC6H mode 00.
+                    if (format == 98 || format == 99)
+                        bytes[i] = 0x40; // Valid BC7 mode 6.
+                }
+            }
             blob(capture, 5, bytes);
             D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
             srv.Format = DXGI_FORMAT(format);
@@ -123,7 +169,7 @@ class DxbcTextureLoadTests final : public QObject {
                                                     : dimension == 5 ? 8
                                                     : dimension == 7 ? 3
                                                                      : 5);
-            srv.Texture2DArray = {1, 2, layers > 1 ? 1u : 0u, layers > 1 ? 2u : 0u};
+            srv.Texture2DArray = {1, extended ? 4u : 2u, layers > 1 ? 1u : 0u, layers > 1 ? 2u : 0u};
             capture.add(6, 5, 0x8c, testing::statePack(Id(0), Id(0), Id(4), srv));
             replace(capture, 10, 5, 0x83, {16, 0, 128, 0, 64, 16}, 11);
             blob(capture, 11, std::vector<uint8_t>(16));
@@ -152,6 +198,12 @@ class DxbcTextureLoadTests final : public QObject {
                 address[dimension == 7 ? 1 : 2] = UINT32_MAX;
             if (mode == 9)
                 lod = 2;
+            if (mode == 10)
+                address = {5, 6, 1, 0};
+            if (mode == 11)
+                address = {1, 1, 1, 2};
+            if (mode == 12)
+                address = {0, 0, 1, 3};
             capture.add(95, 7, 0x3515, testing::statePack(Id(0), Id(1), Id(4), lod));
             blob(capture, 3, Bytes(reinterpret_cast<const uint8_t *>(address.data()), 16));
             const std::string shape = dimension == 2   ? "Texture1D"
@@ -159,7 +211,10 @@ class DxbcTextureLoadTests final : public QObject {
                                       : dimension == 5 ? "Texture3D"
                                       : dimension == 7 ? "Texture1DArray"
                                                        : "Texture2DArray";
-            const auto type = typedBufferFormat(format)->returnType == 4 ? "uint" : "float";
+            const auto returns = format == 22 || format == 47 ? 4u
+                                 : extended                   ? 5u
+                                                              : typedBufferFormat(format)->returnType;
+            const auto type = returns == 4 ? "uint" : "float";
             const std::string coord = dimension == 2                     ? "int2(p.x,p.w)"
                                       : dimension == 3 || dimension == 7 ? "int3(p.xy,p.w)"
                                                                          : "int4(p.xyz,p.w)";
@@ -187,15 +242,27 @@ class DxbcTextureLoadTests final : public QObject {
             auto config = options(vendor);
             Replay replay(frame, config);
             const auto observed = snapshotResourceInputs(replay, 5);
+            const auto before = replay.readTexture(4);
+            QCOMPARE(observed.inputs.textures->resources.at(4).storage.bytes, before);
+            size_t paddingChanges = 0;
+            if (format == 21 || format == 22) {
+                QCOMPARE(before.size(), bytes.size());
+                for (size_t i = 0; i < before.size(); ++i) {
+                    if (i % 8 < 5)
+                        QCOMPARE(before[i], bytes[i]);
+                    else
+                        paddingChanges += before[i] != bytes[i];
+                }
+            } else
+                QCOMPARE(before, bytes);
             config.before = false;
             Replay reference(frame, config);
             reference.run();
             const auto expected = reference.readBuffer(10);
             std::array<uint32_t, 4> expectedWords;
             std::memcpy(expectedWords.data(), expected.data(), 16);
-            const auto returns = typedBufferFormat(format)->returnType * 0x1111;
             for (uint32_t stage : {0u, 1u, 5u}) {
-                auto program = single(stage, dimension, returns, offset);
+                auto program = single(stage, dimension, returns * 0x1111, offset);
                 Lane lane(program, observed.inputs);
                 const auto step = lane.step();
                 QVERIFY(step.memoryGpuAssisted);
@@ -209,7 +276,7 @@ class DxbcTextureLoadTests final : public QObject {
             while (!group.finished())
                 group.step();
             QCOMPARE(observed.inputs.memory->buffers().at(10).bytes, expected);
-            QCOMPARE(replay.readTexture(4), bytes);
+            QCOMPARE(replay.readTexture(4), before);
             validation(replay);
             validation(reference);
             qInfo().noquote() << QString::fromStdString(
@@ -220,11 +287,96 @@ class DxbcTextureLoadTests final : public QObject {
                                 {"mode", mode},
                                 {"frame_sha256", observed.frameSha256},
                                 {"expected", expectedWords},
+                                {"initial_padding_differences", paddingChanges},
                                 {"helper", observed.inputs.gpu->identity()},
                                 {"passed", true},
                                 {"reference_stage", "cs"},
                                 {"executed_stages", {"ps", "vs", "cs"}}})
                     .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+
+  private slots:
+    void formatValidity_data() {
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<unsigned>("unknownByte");
+        QTest::addColumn<unsigned>("validMask");
+        // Masks are after the instruction's wzyx swizzle.
+        QTest::newRow("bc3-alpha-independent") << 77u << 0u << 14u;
+        QTest::newRow("bc3-color-independent") << 77u << 8u << 1u;
+        QTest::newRow("bc5-red-independent") << 83u << 0u << 7u;
+        QTest::newRow("bc5-green-independent") << 83u << 8u << 11u;
+        QTest::newRow("bc4-default-components") << 80u << 0u << 7u;
+        QTest::newRow("bc6-default-alpha") << 95u << 0u << 1u;
+        QTest::newRow("bc7-shared-block") << 98u << 0u << 0u;
+        QTest::newRow("bgra-byte-order") << 87u << 0u << 13u;
+        QTest::newRow("bgrx-unused-byte") << 88u << 3u << 15u;
+        QTest::newRow("alpha-only") << 65u << 0u << 14u;
+        QTest::newRow("stencil-ignores-depth") << 47u << 0u << 15u;
+        QTest::newRow("stencil-green-component") << 47u << 3u << 11u;
+        QTest::newRow("depth-ignores-stencil") << 46u << 3u << 15u;
+        QTest::newRow("depth-red-component") << 46u << 0u << 7u;
+        QTest::newRow("depth-unused-padding") << 21u << 7u << 15u;
+        QTest::newRow("shared-exponent") << 67u << 3u << 1u;
+        QTest::newRow("srgb-alpha-independent") << 29u << 3u << 14u;
+        QTest::newRow("b565-shared-byte") << 85u << 0u << 9u;
+        QTest::newRow("b4444-shared-byte") << 115u << 0u << 9u;
+    }
+    void formatValidity() {
+        QFETCH(uint32_t, format);
+        QFETCH(unsigned, unknownByte);
+        QFETCH(unsigned, validMask);
+        try {
+            QTemporaryDir directory;
+            const auto path = directory.filePath("format-validity.gpa_frame");
+            testing::computeCapture(true).save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(0));
+            replay.run();
+            Inputs inputs;
+            inputs.gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), true);
+            inputs.textures = std::make_shared<TextureInputs>();
+            TextureInput texture;
+            const auto storageFormat = format == 21 ? 19u : format == 46 || format == 47 ? 44u : format;
+            texture.resource.type = 0x85;
+            texture.resource.desc = {8, 8, 1, 1, storageFormat, 1, 0, 0, 8, 0, 0};
+            texture.subresources = textureSubresources(texture.resource);
+            texture.storage = Buffer::known(std::vector<uint8_t>(texture.subresources[0].size, 0x34));
+            if (format == 98)
+                for (size_t i = 0; i < texture.storage.bytes.size(); i += 16)
+                    texture.storage.bytes[i] = 0x40;
+            inputs.textures->resources.emplace(4, texture);
+            TextureInputView view;
+            view.resource = 4;
+            view.format = format;
+            view.dimension = 4;
+            view.nativeDescriptor = {format, 4, 0, 1, 0, 0};
+            inputs.textures->views[{7, {0}}] = view;
+            inputs.constantBuffers[0] = {Value::known({0, 0, 0, 0})};
+            const auto program = single(5, 3, format == 47 ? 0x4444 : 0x5555, {});
+            Lane known(program, inputs);
+            known.step();
+            const auto original = known.value({0, {0}});
+            QCOMPARE(original.valid, uint8_t(15));
+            inputs.textures->resources.at(4).storage.valid.at(unknownByte) = 0;
+            Lane partial(program, inputs);
+            const auto step = partial.step();
+            const auto value = partial.value({0, {0}});
+            QCOMPARE(value.bits, original.bits);
+            QCOMPARE(value.valid, uint8_t(validMask));
+            QCOMPARE(step.changes.at(0).after.valid, value.valid);
+            inputs.constantBuffers[0][0] = Value::known({4, 4, 0, 0});
+            Lane otherBlock(program, inputs);
+            otherBlock.step();
+            QCOMPARE(otherBlock.value({0, {0}}).valid, uint8_t(15));
+            inputs.constantBuffers[0][0] = Value::known({8, 0, 0, 0});
+            Lane outside(program, inputs);
+            outside.step();
+            QCOMPARE(outside.value({0, {0}}).valid, uint8_t(15));
+            QCOMPARE(inputs.textures->resources.at(4).storage.bytes, texture.storage.bytes);
+            validation(replay);
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
