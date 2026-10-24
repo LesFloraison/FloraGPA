@@ -10,6 +10,8 @@ class GpuOperations {
     friend class Memory;
     friend class Lane;
     friend struct TextureInputs;
+    Value textureDimensions(const struct TextureMetadata &, const struct TextureInputView &, uint32_t kind,
+                            uint32_t dimension, uint32_t mip, uint32_t mode);
     Value loadTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
                       uint32_t dimension, uint32_t returns, const Value &address,
                       const std::array<uint32_t, 4> &swizzle, uint32_t mask,

@@ -7,6 +7,7 @@
 #include "core/TextureStorage.h"
 #include "replay/Replay.h"
 #include <algorithm>
+#include <bit>
 #include <chrono>
 #include <d3d11sdklayers.h>
 #include <dxgi.h>
@@ -127,6 +128,7 @@ struct GpuOperations::State {
     Com<ID3D11Device> device;
     Com<ID3D11DeviceContext> context;
     std::map<Words, Com<ID3D11ComputeShader>> shaders;
+    std::map<Words, Value> textureDimensionResults;
     struct VertexOperation {
         Com<ID3D11VertexShader> vertex;
         Com<ID3D11GeometryShader> stream;
@@ -749,9 +751,147 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/7"}};
+            {"backend", "dxbc-gpu/8"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
+Value GpuOperations::textureDimensions(const TextureMetadata &input, const TextureInputView &view,
+                                       uint32_t kind, uint32_t dimension, uint32_t mip, uint32_t mode) {
+    auto &s = *state_;
+    checkCancellation(s.cancelled);
+    if (s.failed)
+        throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+    const bool uav = kind == 30;
+    if ((!uav && kind != 7) || dimension < 2 || dimension > 10 || mode > 2 ||
+        view.nativeDescriptor.size() != (uav ? 5u : 6u))
+        throw std::runtime_error("Invalid native resource query");
+    Words key = input.resource.desc;
+    key.insert(key.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
+    key.insert(key.end(), {kind, dimension, mip, mode, std::bit_cast<uint32_t>(input.minLod)});
+    if (auto found = s.textureDimensionResults.find(key); found != s.textureDimensionResults.end())
+        return found->second;
+    const auto layout = textureSubresources(input.resource);
+    const auto info = textureInfo(input.resource);
+    if (layout.empty() || layout.back().offset + layout.back().size > (256ull * 1024 * 1024) / info.samples)
+        throw std::runtime_error("Native resource query exceeds the private texture budget");
+    try {
+        Com<ID3D11Resource> texture;
+        auto create = [&]<class T, class D>(auto method) {
+            if (input.resource.desc.size() * 4 != sizeof(D))
+                throw std::runtime_error("Native resource query descriptor size mismatch");
+            D desc{};
+            std::memcpy(&desc, input.resource.desc.data(), sizeof desc);
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.BindFlags = uav ? D3D11_BIND_UNORDERED_ACCESS : D3D11_BIND_SHADER_RESOURCE;
+            desc.CPUAccessFlags = 0;
+            desc.MiscFlags &= D3D11_RESOURCE_MISC_TEXTURECUBE | D3D11_RESOURCE_MISC_RESOURCE_CLAMP;
+            Com<T> object;
+            check((s.device.Get()->*method)(&desc, nullptr, &object),
+                  "Create private resource query texture");
+            texture = object;
+        };
+        if (input.resource.type == 0x84)
+            create.operator()<ID3D11Texture1D, D3D11_TEXTURE1D_DESC>(&ID3D11Device::CreateTexture1D);
+        else if (input.resource.type == 0x85)
+            create.operator()<ID3D11Texture2D, D3D11_TEXTURE2D_DESC>(&ID3D11Device::CreateTexture2D);
+        else if (input.resource.type == 0x86)
+            create.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(&ID3D11Device::CreateTexture3D);
+        else
+            throw std::runtime_error("Unsupported native resource query type");
+        if (hasResourceLodClamp(input.resource))
+            s.context->SetResourceMinLOD(texture.Get(), input.minLod);
+        Com<ID3D11UnorderedAccessView> viewObject, target;
+        Com<ID3D11ShaderResourceView> srv;
+        if (uav) {
+            D3D11_UNORDERED_ACCESS_VIEW_DESC vd{};
+            std::memcpy(&vd, view.nativeDescriptor.data(), sizeof vd);
+            check(s.device->CreateUnorderedAccessView(texture.Get(), &vd, &viewObject),
+                  "Create private resource query UAV");
+        } else {
+            D3D11_SHADER_RESOURCE_VIEW_DESC vd{};
+            std::memcpy(&vd, view.nativeDescriptor.data(), sizeof vd);
+            check(s.device->CreateShaderResourceView(texture.Get(), &vd, &srv),
+                  "Create private resource query SRV");
+        }
+        const auto bytes = writeDxbcProgram(
+            {{0x50050, 0},
+             {row(89, {{0x208e46, 0, 1}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
+              row((uav ? 156u : 88u) | (dimension << 11) |
+                      ((dimension == 4 || dimension == 9) ? info.samples << 16 : 0u),
+                  {dest(kind, 0), {0x4444}}),
+              row(158, {dest(30, 1), {16}}),
+              row(61 | (mode << 11), {dest(0, 0), {0x20800a, 0, 0}, source(kind, 0)}),
+              row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}), row(62, {})}});
+        const auto binary = makeDxbc({{0x58454853, bytes}});
+        Com<ID3D11ComputeShader> shader;
+        check(s.device->CreateComputeShader(binary.data(), binary.size(), nullptr, &shader),
+              "Create native resource query shader");
+        D3D11_BUFFER_DESC bd{
+            16, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0, D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+            16};
+        Com<ID3D11Buffer> output, staging;
+        check(s.device->CreateBuffer(&bd, nullptr, &output), "Create resource query output");
+        check(s.device->CreateUnorderedAccessView(output.Get(), nullptr, &target),
+              "Create resource query output view");
+        bd = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+        check(s.device->CreateBuffer(&bd, nullptr, &staging), "Create resource query staging");
+        const std::array<uint32_t, 4> parameters{mip, 0, 0, 0};
+        D3D11_SUBRESOURCE_DATA initial{parameters.data(), 0, 0};
+        bd = {16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+        Com<ID3D11Buffer> constants;
+        check(s.device->CreateBuffer(&bd, &initial, &constants), "Create resource query constants");
+        auto *cb = constants.Get();
+        auto *sourceView = srv.Get();
+        ID3D11UnorderedAccessView *targets[]{viewObject.Get(), target.Get()};
+        s.context->CSSetShader(shader.Get(), nullptr, 0);
+        s.context->CSSetConstantBuffers(0, 1, &cb);
+        s.context->CSSetShaderResources(0, 1, &sourceView);
+        s.context->CSSetUnorderedAccessViews(0, 2, targets, nullptr);
+        s.context->Dispatch(1, 1, 1);
+        s.context->ClearState();
+        s.context->CopyResource(staging.Get(), output.Get());
+        s.context->Flush();
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(s.timeoutMs);
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        for (;;) {
+            checkCancellation(s.cancelled);
+            const auto hr =
+                s.context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+            if (hr == S_OK)
+                break;
+            if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
+                check(hr, "Read native resource query result");
+            if (std::chrono::steady_clock::now() >= deadline)
+                throw std::runtime_error("Native resource query timed out");
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        Value result = Value::known({});
+        std::memcpy(result.bits.data(), mapped.pData, 16);
+        s.context->Unmap(staging.Get(), 0);
+        if (s.debug) {
+            Com<ID3D11InfoQueue> queue;
+            check(s.device.As(&queue), "Read resource query validation queue");
+            for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                SIZE_T size = 0;
+                check(queue->GetMessage(i, nullptr, &size), "Read resource query validation size");
+                std::vector<uint8_t> data(size);
+                auto *message = reinterpret_cast<D3D11_MESSAGE *>(data.data());
+                check(queue->GetMessage(i, message, &size), "Read resource query validation message");
+                if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+                    throw std::runtime_error(message->pDescription);
+            }
+            queue->ClearStoredMessages();
+        }
+        if (s.textureDimensionResults.size() >= 256)
+            s.textureDimensionResults.clear();
+        s.textureDimensionResults.emplace(std::move(key), result);
+        ++s.count;
+        return result;
+    } catch (...) {
+        s.context->ClearState();
+        s.failed = true;
+        throw;
+    }
+}
 Value GpuOperations::loadTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
                                  uint32_t dimension, uint32_t returns, const Value &address,
                                  const std::array<uint32_t, 4> &swizzle, uint32_t mask,

@@ -67,10 +67,9 @@ std::vector<uint8_t> Replay::readTexture(Id id) {
     const auto resource = frame_.resource(id);
     return readTextureStorage(get<ID3D11Resource>(id), resource);
 }
-NativeTextureStorage Replay::observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled) {
-    checkCancellation(cancelled);
+NativeTextureMetadata Replay::observeTextureMetadata(Id id) {
     auto *source = get<ID3D11Resource>(id);
-    NativeTextureStorage result;
+    NativeTextureMetadata result;
     result.resource = frame_.resource(id);
     D3D11_RESOURCE_DIMENSION dimension{};
     source->GetType(&dimension);
@@ -91,16 +90,22 @@ NativeTextureStorage Replay::observeTextureStorage(Id id, uint64_t maxBytes, con
         describe.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(0x86);
     else
         throw std::runtime_error("Native texture observation requires a texture resource");
+    requireResourceLod(id);
+    if (hasResourceLodClamp(result.resource))
+        result.minLod = context_->GetResourceMinLOD(source);
+    return result;
+}
+NativeTextureStorage Replay::observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    auto metadata = observeTextureMetadata(id);
+    NativeTextureStorage result{std::move(metadata.resource), {}, metadata.minLod};
     if (textureInfo(result.resource).samples != 1)
         throw std::runtime_error("Native texture observation requires non-MSAA storage");
     const auto layout = textureSubresources(result.resource);
     const auto size = layout.back().offset + layout.back().size;
     if (!maxBytes || size > maxBytes)
         throw std::runtime_error("Native texture observation byte budget exceeded");
-    requireResourceLod(id);
-    if (hasResourceLodClamp(result.resource))
-        result.minLod = context_->GetResourceMinLOD(source);
-    result.bytes = readTextureStorage(source, result.resource, cancelled);
+    result.bytes = readTextureStorage(get<ID3D11Resource>(id), result.resource, cancelled);
     checkCancellation(cancelled);
     if (result.bytes.size() != size)
         throw std::runtime_error("Native texture observation size changed");

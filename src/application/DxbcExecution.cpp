@@ -734,6 +734,55 @@ Step Lane::step() {
             done = true;
             result.discarded = true;
         }
+    } else if (op == 61) {
+        const auto &destination = args[0], &level = args[1], &resource = args[2];
+        const auto mode = (instruction.words[0] >> 11) & 3;
+        if ((instruction.words[0] & 0x2000u) || mode > 2 || destination.modifier ||
+            destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || level.modifier ||
+            (level.components != 1 && !(level.components == 2 && level.mode == 2)) || resource.modifier ||
+            (resource.kind != 7 && resource.kind != 30) || resource.indices.size() != 1 ||
+            resource.indices[0].relative)
+            fail("Invalid DXBC resource information operands");
+        const auto binding = s.address(resource);
+        const auto declaration = p.typedResources.find(binding);
+        if (declaration == p.typedResources.end() || declaration->second.first < 2 ||
+            declaration->second.first > 10 ||
+            (resource.kind == 30 && (declaration->second.first == 4 || declaration->second.first == 6 ||
+                                     declaration->second.first >= 9)))
+            fail("Invalid DXBC resource information declaration");
+        std::set<uint32_t> extensions;
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+            const auto token = instruction.words.at(pos), kind = token & 63;
+            if (!extensions.insert(kind).second)
+                fail("Duplicate DXBC resource information extension");
+            if (kind == 2) {
+                if (((token >> 6) & 31) != declaration->second.first || (token & 0x7ffff800))
+                    fail("Resource information dimension extension disagrees with its declaration");
+            } else if (kind == 3) {
+                if (((token >> 6) & 0xffff) != declaration->second.second || (token & 0x7fc00000))
+                    fail("Resource information return extension disagrees with its declaration");
+            } else
+                fail("Unsupported DXBC resource information extension");
+        }
+        const auto value =
+            s.inputs.textures
+                ? s.inputs.textures->dimensions(binding, declaration->second.first, s.source(level, true),
+                                                mode, s.inputs.gpu.get(), result.memoryGpuAssisted)
+                : Value{};
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned c = 0; c < 4; ++c)
+                if ((destination.mask & (1u << c)) &&
+                    (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                    after.bits[c] = value.bits[resource.select[c]];
+                    after.valid = uint8_t((after.valid & ~(1u << c)) |
+                                          (((value.valid >> resource.select[c]) & 1u) << c));
+                }
+            result.changes.push_back({target, before, after});
+        }
     } else if (op == 45 || op == 163 || op == 164) {
         const bool store = op == 164;
         const auto &resource = store ? args[0] : args[2];

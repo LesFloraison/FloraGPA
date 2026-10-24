@@ -3,6 +3,10 @@
 #include "core/TextureEdits.h"
 
 namespace flora::dxbc_exec {
+struct TextureMetadata {
+    Resource resource;
+    float minLod = 0;
+};
 struct TextureInput {
     Resource resource; // Canonical native base descriptor with the original GPA identity.
     Buffer storage;
@@ -18,9 +22,12 @@ struct TextureInputView {
     std::vector<uint32_t> nativeDescriptor;
 };
 struct TextureInputs {
+    std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
     // Native D3D11 SRV/UAV dimensions; missing resource storage stays unavailable.
     std::map<Register, TextureInputView> views;
+    Value dimensions(const Register &, uint32_t dimension, const Value &mip, uint32_t mode, GpuOperations *,
+                     bool &assisted) const;
     Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
                GpuOperations *, bool &assisted) const;

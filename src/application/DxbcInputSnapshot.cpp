@@ -162,6 +162,24 @@ class Snapshot {
             }
         }
         result.bindings[binding].format = view.format;
+        if (!textures->metadata.contains(id)) {
+            auto description = replay.observeTextureMetadata(id);
+            textures->metadata.emplace(id,
+                                       TextureMetadata{std::move(description.resource), description.minLod});
+        }
+        const auto info = textureInfo(textures->metadata.at(id).resource);
+        auto range = [](uint32_t first, uint32_t &count, uint32_t total) {
+            if (first >= total)
+                throw std::runtime_error("Native texture view starts outside its storage");
+            if (count == UINT32_MAX)
+                count = total - first;
+            if (!count || count > total - first)
+                throw std::runtime_error("Native texture view exceeds its storage");
+        };
+        range(view.firstMip, view.mipCount, info.mips);
+        range(view.firstLayer, view.layerCount, info.layers);
+        if (view.depthSlices)
+            range((*view.depthSlices)[0], (*view.depthSlices)[1], std::max(1u, info.depth >> view.firstMip));
         Com<ID3D11Texture2D> texture2d;
         if (SUCCEEDED(resource.As(&texture2d))) {
             D3D11_TEXTURE2D_DESC d{};
@@ -182,19 +200,6 @@ class Snapshot {
             input.subresources = textureSubresources(input.resource);
             found = textures->resources.emplace(id, std::move(input)).first;
         }
-        const auto info = textureInfo(found->second.resource);
-        auto range = [](uint32_t first, uint32_t &count, uint32_t total) {
-            if (first >= total)
-                throw std::runtime_error("Native texture view starts outside its storage");
-            if (count == UINT32_MAX)
-                count = total - first;
-            if (!count || count > total - first)
-                throw std::runtime_error("Native texture view exceeds its storage");
-        };
-        range(view.firstMip, view.mipCount, info.mips);
-        range(view.firstLayer, view.layerCount, info.layers);
-        if (view.depthSlices)
-            range((*view.depthSlices)[0], (*view.depthSlices)[1], std::max(1u, info.depth >> view.firstMip));
         result.bindings[binding].size = found->second.storage.bytes.size();
     }
     template <class Shader>
@@ -418,7 +423,7 @@ class Snapshot {
         resources(context);
         checkCancellation(cancelled);
         std::shared_ptr<GpuOperations> gpu;
-        if ((!textures->resources.empty() && replay.featureLevel() >= D3D_FEATURE_LEVEL_11_0) ||
+        if ((!textures->metadata.empty() && replay.featureLevel() >= D3D_FEATURE_LEVEL_11_0) ||
             std::any_of(views.begin(), views.end(), [](const auto &item) { return item.second.format != 0; }))
             gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), replay.options().warp, cancelled);
         result.inputs.gpu = gpu;

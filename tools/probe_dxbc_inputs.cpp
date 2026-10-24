@@ -100,6 +100,12 @@ int main(int argc, char **argv) {
         report["counters"] = Json::array();
         report["textures"] = Json::array();
         report["texture_views"] = Json::array();
+        report["texture_metadata"] = Json::array();
+        for (const auto &[id, metadata] : snapshot.inputs.textures->metadata)
+            report["texture_metadata"].push_back({{"resource", id},
+                                                  {"type", metadata.resource.type},
+                                                  {"descriptor", metadata.resource.desc},
+                                                  {"min_lod", metadata.minLod}});
         for (const auto &[id, texture] : snapshot.inputs.textures->resources) {
             Json item{{"resource", id},
                       {"type", texture.resource.type},

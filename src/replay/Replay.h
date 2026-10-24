@@ -101,6 +101,10 @@ struct MsaaStorage {
     std::string mode;
     bool integerBits = false, depthStencil = false, canonicalX = false;
 };
+struct NativeTextureMetadata {
+    Resource resource;
+    float minLod = 0;
+};
 struct NativeTextureStorage {
     Resource resource;
     std::vector<uint8_t> bytes;
@@ -385,6 +389,7 @@ class Replay {
     std::vector<uint8_t> readBuffer(Id id);
     std::vector<uint8_t> readTexture(Id id);
     NativeTextureStorage observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled = {});
+    NativeTextureMetadata observeTextureMetadata(Id id);
     // Nullopt retains the complete-storage path for MSAA, depth and grouped formats.
     std::optional<std::vector<uint8_t>> readTexturePoint(Id id, uint32_t x, uint32_t y, uint32_t slice,
                                                          uint32_t mip, uint32_t layer);
