@@ -10,7 +10,7 @@ from summarize_dxbc_execution import identity
 from summarize_dxbc_texture_uav import read_run
 
 
-def validate(path):
+def validate(path, backend="dxbc-gpu/15", execution_model="coherent-pixel-sampling/2"):
     text = path.read_text(encoding="utf-8-sig")
     rows = [json.loads(line[line.index(" {") + 1:]) for line in text.splitlines()
             if line.startswith("QINFO") and " {" in line]
@@ -28,8 +28,8 @@ def validate(path):
             coverage, discarded = (15, 3, 5, 1)[index % 4], 0
         if (row["components"] != (coverage & ~discarded).bit_count() * 4
                 or row["batches"] != 1 or not 4 <= row["steps"] <= 1000
-                or row["model"] != "coherent-pixel-derivatives/1"
-                or row["adapter"]["backend"] != "dxbc-gpu/14"
+                or row["model"] != execution_model
+                or row["adapter"]["backend"] != backend
                 or row["adapter"]["vendor_id"] != (row["vendor"] or 5140)
                 or row["adapter"]["warp"] != (row["vendor"] == 0)):
             raise ValueError("Pixel quad assertions or execution identity changed")
@@ -49,6 +49,9 @@ def validate(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--backend", default="dxbc-gpu/15")
+    parser.add_argument("--execution-model", default="coherent-pixel-sampling/2")
+    parser.add_argument("--additional-ctest", action="append", default=[])
     for name in ("log", "out"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--ctest", type=Path, required=True)
@@ -56,7 +59,7 @@ def main():
     for name in ("regression", "source", "build", "binary", "evidence"):
         parser.add_argument("--" + name, type=Path, action="append", default=[])
     args = parser.parse_args()
-    result = validate(args.log)
+    result = validate(args.log, args.backend, args.execution_model)
     regressions, keys = [], []
     for path in args.regression:
         run = read_run(path)
@@ -76,8 +79,9 @@ def main():
             r"\d+/\d+ Test\s+#\d+:\s+(\w+)\s+\.+\s+Passed\s+([\d.]+)\s+sec",
             path.read_text(encoding="utf-8-sig"))}
     current, baseline = times(args.ctest), times(args.baseline_ctest)
-    if set(current) != {"dxbc_pixel_quad", "dxbc_sample_comparison", "dxbc_sampling_group",
-                        "dxbc_sample_grad", "dxbc_sample_level", "dxbc_typed_pixel", "dxbc_group", "dxbc_execution"}:
+    required_ctest = {"dxbc_pixel_quad", "dxbc_sample_comparison", "dxbc_sampling_group",
+                        "dxbc_sample_grad", "dxbc_sample_level", "dxbc_typed_pixel", "dxbc_group", "dxbc_execution"}
+    if set(current) != required_ctest | set(args.additional_ctest):
         raise ValueError("Missing final serial CTest completion evidence")
     performance = dict(current=identity(args.ctest), baseline=identity(args.baseline_ctest),
         current_seconds=current, baseline_seconds=baseline,

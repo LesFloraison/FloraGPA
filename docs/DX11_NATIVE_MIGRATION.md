@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, private buffers, GPU assistance, cooperative CS groups, hidden counters and pixel quad derivatives tested; captured quad inputs, helper memory semantics, production debugger integration and full parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, private buffers, GPU assistance, cooperative CS groups, hidden counters, pixel quad derivatives and implicit sampling tested; captured quad inputs, helper memory semantics, production debugger integration and full parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -548,3 +548,13 @@ passes, including raw bits, partial validity, bounded waits and cancellation.
 See `DX11_DXBC_PIXEL_QUAD.md`. Captured quad provenance, implicit sampling, helper
 memory semantics and debugger presentation remain open; this checkpoint does not
 close P6 or permit removal of the existing debugger backend.
+
+## Implicit pixel sampling continuation
+
+`dxbc-gpu/15` and `coherent-pixel-sampling/2` add actual native `sample`, `sample_b`
+and `sample_c` instructions to the CPU pixel quad scheduler. The R32_FLOAT 2D
+matrix passes 9,408 complete shader scenarios, including 192 explicit undefined
+comparison-sampler rejections, and 19 semantic/recovery checks. The implementation
+preserves per-pixel operands, unknown validity, trace changes and private snapshots.
+See `DX11_DXBC_PIXEL_SAMPLING.md`. Additional shapes/formats, captured invocations,
+helper memory behavior and full debugger/source integration remain required.

@@ -785,3 +785,23 @@ and group times remained close. The report records the observed power/timer
 context without assigning a cause. This is a functional checkpoint, not a
 performance acceptance. Captured quad provenance, implicit sampling, helper
 memory semantics, debugger integration and the remaining P5-P8 gates stay open.
+
+## Implicit pixel sampling execution checkpoint
+
+Independent public-D3D11 observations cover 9,408 original shader scenarios on
+WARP, NVIDIA and Intel. The CPU quad scheduler and `dxbc-gpu/15` execute native
+`sample`, `sample_b` and `sample_c` instructions while preserving selected-adapter
+identity, private snapshots, per-pixel operands and explicit unknown validity.
+The implementation compares 71,424 components, handles 9,216 defined sampling
+cohorts and rejects 192 undefined comparison-sampler scenarios. All 168 implicit
+sampling tests pass, including 19 semantic and recovery checks.
+
+The final nine-suite serial run passes 3,087 tests with zero failures/skips in
+1,343.03 seconds. GUI, CLI and Worker Release builds and all six strict evidence
+validators pass. `DX11_DXBC_PIXEL_SAMPLING.md` and
+`research/dx11-dxbc-pixel-sampling-evidence.json` retain implementation boundaries,
+source/build/binary identities, negative evidence checks and timing observations.
+The timings are not controlled performance acceptance. Further helper-dependent
+operations, additional shapes/formats, captured invocation provenance, helper
+memory semantics, source/debugger integration and full P5-P8 acceptance remain
+open. RenderDoc removal is not complete.

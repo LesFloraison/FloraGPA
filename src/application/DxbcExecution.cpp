@@ -608,27 +608,32 @@ struct Lane::State {
         const auto &instruction = p.instructions.at(pc);
         const auto &args = p.operands.at(pc);
         const auto op = instruction.opcode;
+        const bool comparison = op == 70 || op == 71;
+        const bool implicit = op == 69 || op == 70 || op == 74;
         if (instruction.words[0] & 0x2000)
             fail("Unexpected saturation on a DXBC sampling instruction");
         const auto &destination = args[0], &resource = args[2], &sampler = args[3];
         if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
             (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
             resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
-            (op != 73 && args[4].components != 1 &&
+            (op != 69 && op != 73 && args[4].components != 1 &&
              !(args[4].components == 2 &&
                (args[4].mode == 2 ||
                 (args[4].mode == 1 &&
                  std::all_of(args[4].select.begin(), args[4].select.end(),
                              [&](auto component) { return component == args[4].select[0]; }))))))
             fail("Invalid DXBC explicit sampling operands");
-        if (op == 71 && std::any_of(resource.select.begin(), resource.select.end(),
-                                    [](auto component) { return component != 0; }))
+        if (implicit && (p.stage != 0 || resource.indices.size() != 1 || resource.indices[0].relative ||
+                         sampler.indices.size() != 1 || sampler.indices[0].relative))
+            fail("Implicit sampling requires pixel stage and static texture and sampler bindings");
+        if (comparison && std::any_of(resource.select.begin(), resource.select.end(),
+                                      [](auto component) { return component != 0; }))
             fail("Comparison sampling requires a replicated red resource selection");
         const auto binding = s.address(resource), samplerBinding = s.address(sampler);
         const auto declared = p.typedResources.find(binding);
         const auto samplerDeclaration = p.samplers.find(samplerBinding);
         if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
-            samplerDeclaration->second != (op == 71 ? 1u : 0u))
+            samplerDeclaration->second != (comparison ? 1u : 0u))
             fail("Explicit sampling requires matching texture and sampler declarations");
         const auto [dimension, returns] = declared->second;
         std::array<int32_t, 3> offsets{};
@@ -656,7 +661,7 @@ struct Lane::State {
                 dimension,
                 returns,
                 source(args[1], false),
-                source(args[4], false),
+                op == 69 ? Value::known({}) : source(args[4], false),
                 op == 73 ? std::optional<Value>(source(args[5], false)) : std::nullopt,
                 resource.select,
                 destination.mask,
@@ -969,7 +974,9 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
-    } else if (op == 71 || op == 72 || op == 73) {
+    } else if (op >= 69 && op <= 74) {
+        if ((op == 69 || op == 70 || op == 74) && (!s.quad || !s.pendingSampling))
+            fail("Implicit sampling requires a coherent pixel quad");
         const auto request = s.sampling();
         const auto &destination = args[0];
         const auto target = s.address(destination);
@@ -1413,7 +1420,7 @@ Step Lane::step() {
 struct PixelQuad::State {
     std::array<std::unique_ptr<Lane>, 4> lanes;
     CancelCheck cancelled;
-    uint64_t sequence = 0, maxSteps, batches = 0;
+    uint64_t sequence = 0, maxSteps, batches = 0, sampling = 0;
     uint32_t cursor = 0, waitingSteps = 0;
     uint8_t active;
     bool failed = false;
@@ -1448,6 +1455,7 @@ bool PixelQuad::finished() const {
 const Lane &PixelQuad::lane(uint32_t index) const { return *state_->lanes.at(index); }
 uint8_t PixelQuad::activeMask() const { return state_->active; }
 uint64_t PixelQuad::derivativeBatches() const { return state_->batches; }
+uint64_t PixelQuad::samplingBatches() const { return state_->sampling; }
 PixelQuadStep PixelQuad::step() {
     auto &s = *state_;
     if (s.failed)
@@ -1465,10 +1473,10 @@ PixelQuadStep PixelQuad::step() {
             if (lane.waiting)
                 fail("Pixel quad encountered a compute barrier");
             const auto op = lane.program->instructions.at(lane.pc).opcode;
-            if (lane.pendingDerivative) {
+            if (lane.pendingDerivative || lane.pendingSampling) {
                 if (pending == 4)
                     pending = i;
-            } else if (op == 11 || op == 12 || (op >= 122 && op <= 125)) {
+            } else if (op == 11 || op == 12 || (op >= 122 && op <= 125) || op == 69 || op == 70 || op == 74) {
                 if (boundary == 4)
                     boundary = i;
             } else if (ordinary == 4)
@@ -1478,24 +1486,52 @@ PixelQuadStep PixelQuad::step() {
         if (pending == 4 && boundary != 4) {
             if (ordinary != 4) {
                 if (++s.waitingSteps > 4096)
-                    fail("Pixel derivative rendezvous exceeded its progress budget");
+                    fail("Pixel quad rendezvous exceeded its progress budget");
             } else {
                 const auto &first = *s.lanes[boundary]->state_;
-                std::array<Value, 4> values;
                 for (unsigned i = 0; i < 4; ++i) {
                     const auto &other = *s.lanes[i]->state_;
                     if (other.done || other.pc != first.pc || other.calls != first.calls ||
                         other.loops != first.loops || other.callLoopDepths != first.callLoopDepths)
-                        fail("Pixel lanes did not reach the same dynamic derivative instruction");
-                    values[i] = other.source(other.program->operands.at(other.pc).at(1), false);
+                        fail("Pixel lanes did not reach the same dynamic quad instruction");
                 }
-                if (!first.inputs.gpu)
-                    fail("Pixel derivatives require the selected adapter GPU assist");
-                const auto results = first.inputs.gpu->pixelDerivatives(
-                    first.program->instructions.at(first.pc).opcode, values);
-                for (unsigned i = 0; i < 4; ++i)
-                    s.lanes[i]->state_->pendingDerivative = results[i];
-                ++s.batches;
+                const auto opcode = first.program->instructions.at(first.pc).opcode;
+                if (opcode == 69 || opcode == 70 || opcode == 74) {
+                    const auto request = first.sampling();
+                    std::array<PixelSamplingInvocation, 4> invocations;
+                    for (unsigned i = 0; i < 4; ++i) {
+                        const auto item = s.lanes[i]->state_->sampling();
+                        if (item.binding != request.binding || item.sampler != request.sampler ||
+                            item.dimension != request.dimension || item.returns != request.returns ||
+                            item.swizzle != request.swizzle || item.mask != request.mask ||
+                            item.offset != request.offset)
+                            fail("Pixel sampling cohort bindings disagree");
+                        invocations[i] = {item.address, item.lodOrDdx};
+                    }
+                    bool assisted = false;
+                    const auto results =
+                        first.inputs.textures
+                            ? first.inputs.textures->samplePixelQuad(
+                                  opcode, request.binding, request.sampler, request.dimension,
+                                  request.returns, invocations, request.swizzle, request.mask, request.offset,
+                                  first.inputs.gpu.get(), assisted)
+                            : std::array<Value, 4>{};
+                    for (unsigned i = 0; i < 4; ++i)
+                        s.lanes[i]->state_->pendingSampling = std::make_pair(results[i], assisted);
+                    ++s.sampling;
+                } else {
+                    if (!first.inputs.gpu)
+                        fail("Pixel derivatives require the selected adapter GPU assist");
+                    std::array<Value, 4> values;
+                    for (unsigned i = 0; i < 4; ++i) {
+                        const auto &lane = *s.lanes[i]->state_;
+                        values[i] = lane.source(lane.program->operands.at(lane.pc).at(1), false);
+                    }
+                    const auto results = first.inputs.gpu->pixelDerivatives(opcode, values);
+                    for (unsigned i = 0; i < 4; ++i)
+                        s.lanes[i]->state_->pendingDerivative = results[i];
+                    ++s.batches;
+                }
                 selected = boundary;
                 s.waitingSteps = 0;
             }

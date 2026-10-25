@@ -2,6 +2,7 @@
 #include "DxbcGpuOperations.h"
 #include "DxbcTypedBuffer.h"
 #include <algorithm>
+#include <bit>
 #include <cmath>
 
 namespace flora::dxbc_exec {
@@ -140,6 +141,54 @@ std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register
                      [](auto v) { return v == 1; }))
         return Value{};
     return std::nullopt;
+}
+std::array<Value, 4> TextureInputs::samplePixelQuad(uint32_t opcode, const Register &binding,
+                                                    const Register &samplerBinding, uint32_t dimension,
+                                                    uint32_t returns,
+                                                    const std::array<PixelSamplingInvocation, 4> &invocations,
+                                                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                                    const std::array<int32_t, 3> &offset, GpuOperations *gpu,
+                                                    bool &assisted) const {
+    assisted = false;
+    if (opcode != 69 && opcode != 70 && opcode != 74)
+        throw std::runtime_error("Invalid implicit pixel sampling opcode");
+    const uint32_t addressMask = dimension == 2                     ? 1
+                                 : dimension == 3 || dimension == 7 ? 3
+                                 : dimension == 10                  ? 15
+                                                                    : 7;
+    const auto unknown = std::find_if(invocations.begin(), invocations.end(), [&](const auto &lane) {
+        return (lane.address.valid & addressMask) != addressMask;
+    });
+    for (const auto &lane : invocations) {
+        if (lane.address.valid > 15 || lane.parameter.valid > 15)
+            throw std::runtime_error("Invalid implicit sampling input validity");
+        if (opcode == 74 && (lane.parameter.valid & 1)) {
+            const auto bias = std::bit_cast<float>(lane.parameter.bits[0]);
+            if (!std::isfinite(bias) || bias < -16.f || bias > 15.99f)
+                throw std::runtime_error("Implicit sampling bias is outside its defined range");
+        }
+    }
+    // Unknown coordinates can affect every lane's implicit footprint. A missing
+    // per-pixel comparison reference or bias does not define that lane's result.
+    const auto &representative = unknown == invocations.end() ? invocations[0] : *unknown;
+    if (const auto resolved =
+            prepareSample(0, binding, samplerBinding, dimension, returns, representative.address,
+                          Value::known({}), swizzle, mask, offset, {}, opcode == 70))
+        return {*resolved, *resolved, *resolved, *resolved};
+    auto batch = invocations;
+    for (auto &lane : batch)
+        if (opcode == 69 || !(lane.parameter.valid & 1))
+            lane.parameter = Value::known({});
+    if (!gpu)
+        throw std::runtime_error("Implicit pixel sampling requires the selected adapter GPU assist");
+    const auto &view = views.at(binding);
+    auto result =
+        gpu->samplePixelQuad(opcode, resources.at(*view.resource), view, samplers.at(samplerBinding),
+                             dimension, returns, batch, swizzle, mask, offset);
+    for (unsigned i = 0; i < 4; ++i)
+        result[i].valid = opcode == 69 || (invocations[i].parameter.valid & 1) ? uint8_t(mask) : 0;
+    assisted = true;
+    return result;
 }
 Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, const Register &samplerBinding,
                                    uint32_t dimension, uint32_t returns, const Value &address,

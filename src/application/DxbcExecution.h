@@ -200,6 +200,7 @@ class PixelQuad {
     const Lane &lane(uint32_t index) const;
     uint8_t activeMask() const;
     uint64_t derivativeBatches() const;
-    static constexpr const char *executionModel = "coherent-pixel-derivatives/1";
+    uint64_t samplingBatches() const;
+    static constexpr const char *executionModel = "coherent-pixel-sampling/2";
 };
 } // namespace flora::dxbc_exec

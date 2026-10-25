@@ -1,0 +1,330 @@
+{
+  "final": {
+    "path": "artifacts/dx11-native/pixel-sampling-final.txt",
+    "sha256": "fc217bc27008a354ba5e2366e8e1262a7d7cab2df1b812f092472ede0c90be1c",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 168,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 283645,
+    "failures": [],
+    "unit_cases": []
+  },
+  "configurations": 147,
+  "shader_cases": 9408,
+  "compared_components": 71424,
+  "undefined_sampler_rejections": 192,
+  "sampling_cohorts": 9216,
+  "steps": 361728,
+  "unit_cases": [
+    "cancellation(0-69)",
+    "cancellation(0-70)",
+    "cancellation(0-74)",
+    "cancellation(32902-69)",
+    "cancellation(32902-70)",
+    "cancellation(32902-74)",
+    "cancellation(4318-69)",
+    "cancellation(4318-70)",
+    "cancellation(4318-74)",
+    "semantics(0-69)",
+    "semantics(0-70)",
+    "semantics(0-74)",
+    "semantics(32902-69)",
+    "semantics(32902-70)",
+    "semantics(32902-74)",
+    "semantics(4318-69)",
+    "semantics(4318-70)",
+    "semantics(4318-74)",
+    "unknownAndInvalid()"
+  ],
+  "schema": 1,
+  "scope": "native_implicit_pixel_sampling",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "captured_quad_inputs_validated": false,
+  "helper_memory_semantics_validated": false,
+  "additional_texture_shapes_validated": false,
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-pixel-quad.txt",
+      "sha256": "ba59bb55cd6ab66a842ae85b6c25f95c6a75b41f4cc8b092217824ca5e14829d",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 1022,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 25817,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-comparison.txt",
+      "sha256": "dc3d6aabdf729ead0d262e8444063a8b9a3ce6062c06c3d4f01e7c26898f49c1",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 190,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 607161,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-sampling-group.txt",
+      "sha256": "7871835bc3e1b5fbcd1468663d3e349cfe369e58f8e6da152062d2eb200f7e8c",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 35558,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-sample-grad.txt",
+      "sha256": "06c8a64e8b5f60b5958af1b05405d6e06438c3409171cd694f11b0495e05b295",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 262,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 168520,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-sample-level.txt",
+      "sha256": "d84237f09aecc3bae1a8798b0529e7bb25ede42382e891615d928af1540ddad9",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 156,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 127706,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-typed-pixel.txt",
+      "sha256": "12d996759c5dd8bf65fa537fc25bceb0f9489d1cdb6a62233859b15b732867b8",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 58511,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-group.txt",
+      "sha256": "6bd2d97c6b270538ad3a3aaae23cf90abbb210a1ae75e06eb2c4780d0959059c",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 2464,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-regression-execution.txt",
+      "sha256": "5efaf89867d3072e6eda49a36f8cdcac114e2c105aa757d85a666db490245b10",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 32045,
+      "failures": [],
+      "unit_cases": []
+    }
+  ],
+  "performance": {
+    "current": {
+      "path": "artifacts/dx11-native/pixel-sampling-final-ctest.txt",
+      "sha256": "70912f368fbe5424283166e27ec9944b494fc0ff3471aaa549c9b3e8729a2bcb"
+    },
+    "baseline": {
+      "path": "artifacts/dx11-native/pixel-quad-final-ctest.txt",
+      "sha256": "81df3b78747595eb3960f027b6ed6ec116837ba2d7cffd5cc8ab085d9ee62aa3"
+    },
+    "current_seconds": {
+      "dxbc_pixel_sampling": 283.78,
+      "dxbc_pixel_quad": 25.92,
+      "dxbc_sample_comparison": 607.33,
+      "dxbc_sampling_group": 35.81,
+      "dxbc_sample_grad": 168.74,
+      "dxbc_sample_level": 127.86,
+      "dxbc_typed_pixel": 58.76,
+      "dxbc_group": 2.53,
+      "dxbc_execution": 32.27
+    },
+    "baseline_seconds": {
+      "dxbc_pixel_quad": 43.18,
+      "dxbc_sample_comparison": 698.65,
+      "dxbc_sampling_group": 40.61,
+      "dxbc_sample_grad": 363.36,
+      "dxbc_sample_level": 383.65,
+      "dxbc_typed_pixel": 62.86,
+      "dxbc_group": 2.54,
+      "dxbc_execution": 33.33
+    },
+    "ratios": {
+      "dxbc_pixel_quad": 0.6002779064381658,
+      "dxbc_sample_comparison": 0.8692907750661992,
+      "dxbc_sampling_group": 0.8818025116966265,
+      "dxbc_sample_grad": 0.46438793483047114,
+      "dxbc_sample_level": 0.33327251401016555,
+      "dxbc_typed_pixel": 0.9347756920139993,
+      "dxbc_group": 0.9960629921259841,
+      "dxbc_execution": 0.9681968196819684
+    },
+    "controlled_comparison": false,
+    "performance_acceptance": false
+  },
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "6a4de5917a2250cfee3f444c82f24ff070a139b44780c8db23c6e3476d8fcca9"
+    },
+    {
+      "path": "tests/DxbcPixelSamplingTests.cpp",
+      "sha256": "fcbd0714768e0cd56f940b20ca9491e9c7b517f8bc672bc29292c8af29f52261"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_sampling.py",
+      "sha256": "a0e1c00c9290d4fd3153d1bc151c603c0c41124e3d757df12fab576afa16b160"
+    },
+    {
+      "path": "tools/native/pixel_sampling_probe.cpp",
+      "sha256": "6d1e08d5288d60f46e806e745170cec07cb70f9be559754eb1162576fe29ed1c"
+    },
+    {
+      "path": "tools/summarize_pixel_sampling.py",
+      "sha256": "2424d7a3057aecddda2656fdf74dac07dac2fa28da85be5da78ab52e3914d0e4"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "765a96d5862042384d49d2672a03bc446492f984a10ed390191e53f2f3988dc9"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "sha256": "763fb7fa5741fec1a10bcb06a36586788bfc0ac62d5d5cb2c518700dcb4bff4c"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "sha256": "ba0f78c2b165f13a0fe04db598bee981c987994bdc97c68bd10c3fb51e49cf85"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "sha256": "bdf707a579528f2c9f226fdc90dc40e3179872a8f8b6a20860583a878622fe2c"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.cpp",
+      "sha256": "1cb53f5eb783b59f34f9f89275a71f6c0a2da29be1c0ed85f9354449c9011a66"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "sha256": "15204ed4fd4606896eb3d0cf4d5db2f788f5c84b027522b5c07df33da9051d0a"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_quad.py",
+      "sha256": "1914fd226827807100392aa9cb53dfcd9c05429a1c74337316695607e178eed4"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_comparison.py",
+      "sha256": "20fff2f32c8d89f9da46d684eb759bbb6be035f9335fe6d310bf679d9a7a3c70"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_level.py",
+      "sha256": "1616c6f1b3288aeb7762791c72cff4c5a153d0bf7e52a193c5f4a2e3e38add68"
+    },
+    {
+      "path": "tools/summarize_dxbc_sampling_groups.py",
+      "sha256": "b5af375326b69a6ec400f89eec3f9b0d4f8520eb675265b603c2f0ab85ad8957"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-release-build.txt",
+      "sha256": "0e2559c619503614201d8504cebf7be89ec7dae2b011b332215d58ac9842af7f"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "sha256": "48fed86e9643d515b91184f6e37eeaef8969aef34346ea5e6f4823d03568dc7e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "sha256": "690731762b0dd69e0075a90e19fd1e151f650720a81cdcbaf4827f4dde694165"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "sha256": "b2e913dfc255952d7c6d72dcd4a8b9d8c6114296179c0f17afc750c612a114d8"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "sha256": "e2f77ccdfc7154da4a37a0b7437111b82f41d753e998838c54028a9e33f8d253"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPixelSamplingProbe.exe",
+      "sha256": "9be96beef178e630b4360950d2a034645b5f3766d78c411ffaf9e9b0de574875"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-sample-level-gate.json",
+      "sha256": "112e7e2beacef3dc83be65727a1ca1e97c4dcc4b616d7a4a289a0400ce5a9682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-sample-grad-gate.json",
+      "sha256": "a6490151573c2b7e0b7e08d9f3d5bf8e15a3765f68d4b5eeec98aca32be7665e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-comparison-gate.json",
+      "sha256": "0d30fd5c02ec5798d5ba651aed4ffd20a890a2b424b98c4c4dadb23607ceac50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-sampling-group-gate.json",
+      "sha256": "0847d45c92e7aead16af1cfd0b6078007918e901389b8885ea98c8589068bf20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-pixel-quad-gate.json",
+      "sha256": "2ca746f1c021591ab5b411b7a494c4b29b8ccf2ed28287e077184975c2e0c90d"
+    },
+    {
+      "path": "docs/research/dx11-pixel-sampling-observations.json",
+      "sha256": "2f6b82624e7201295cde64a6548a1e290b1d0a838f3ec37539fb43eb46805991"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-negative.json",
+      "sha256": "6f4981c0da4195fe041f7c97469a36b7463237ae69994ffcc733bfed65599a4d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-point-negative.json",
+      "sha256": "32b540b7a51f39fb82ffd896e8e1d454c3af912d0387cc8d51b05e2aba19714e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-execution-negative.json",
+      "sha256": "c9a739749a059896c17c90699ad03a0a5cb65ff9a96eb3e3ae71d40560228b26"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-first.txt",
+      "sha256": "c912a550ffa8fca465a803059a73c1700733dacd373eafabee873842361517e7"
+    }
+  ]
+}

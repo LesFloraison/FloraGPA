@@ -12,7 +12,7 @@ from summarize_dxbc_texture_uav import read_run
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--backend", default="dxbc-gpu/14")
+    parser.add_argument("--backend", default="dxbc-gpu/15")
     for name in ("log", "out"):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("regression", "source", "build", "binary", "evidence"):

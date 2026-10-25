@@ -45,6 +45,9 @@ struct SamplingInvocation {
     Value address, ddx, ddy;
     bool active = false;
 };
+struct PixelSamplingInvocation {
+    Value address, parameter;
+};
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
@@ -52,6 +55,12 @@ struct TextureInputs {
     std::map<Register, TextureInputView> views;
     // Missing entries are unavailable, distinct from observed null bindings.
     std::map<Register, SamplerInput> samplers;
+    std::array<Value, 4> samplePixelQuad(uint32_t opcode, const Register &, const Register &,
+                                         uint32_t dimension, uint32_t returns,
+                                         const std::array<PixelSamplingInvocation, 4> &,
+                                         const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                         const std::array<int32_t, 3> &offset, GpuOperations *,
+                                         bool &assisted) const;
     std::shared_ptr<const SampleQueryInput> rasterizerQueries;
     Value sampleTexture(uint32_t stage, const Register &resource, const Register &sampler, uint32_t dimension,
                         uint32_t returns, const Value &address, const Value &lodOrDdx,
