@@ -95,8 +95,11 @@ Words typedGraphicsKernel(uint32_t stage, uint32_t mask, uint32_t swizzle, uint3
     return result;
 }
 Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
-                    const std::array<int32_t, 3> &offset, bool sampling = false) {
-    std::vector<Words> rows{row(89, {{0x208e46, 0, sampling ? 2u : 1u}}),
+                    const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false) {
+    std::vector<Words> rows{row(89, {{0x208e46, 0,
+                                      gradient   ? 3u
+                                      : sampling ? 2u
+                                                 : 1u}}),
                             row(88 | (dimension << 11), {dest(7, 0), {returns}})};
     if (sampling)
         rows.push_back(row(90, {{0x106000, 0}}));
@@ -115,7 +118,15 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
             throw std::runtime_error("Native texture offset exceeds the DXBC immediate range");
         control |= (uint32_t(offset[c]) & 15) << (9 + c * 4);
     }
-    if (sampling)
+    if (gradient)
+        rows.push_back(row(73 | 0x80000000, {{control},
+                                             dest(target, 0, mask),
+                                             {0x208e46, 0, 0},
+                                             source(7, 0, swizzle),
+                                             {0x106000, 0},
+                                             {0x208e46, 0, 1},
+                                             {0x208e46, 0, 2}}));
+    else if (sampling)
         rows.push_back(row(72 | 0x80000000, {{control},
                                              dest(target, 0, mask),
                                              {0x208e46, 0, 0},
@@ -129,6 +140,39 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
         rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, 0)}));
     rows.push_back(row(62, {}));
     const auto bytes = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
+    Words result(bytes.size() / 4);
+    std::memcpy(result.data(), bytes.data(), bytes.size());
+    return result;
+}
+Words samplingGroupKernel(uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
+                          const std::array<int32_t, 3> &offset, const std::array<uint32_t, 3> &size) {
+    const Words flat{0x24001};
+    std::vector<Words> rows{row(88 | (dimension << 11), {dest(7, 0), {returns}}),
+                            row(162, {dest(7, 1), {64}}),
+                            row(90, {{0x106000, 0}}),
+                            row(158, {dest(30, 0), {16}}),
+                            row(95, {flat}),
+                            row(104, {{4}}),
+                            row(155, {{size[0], size[1], size[2]}})};
+    rows.push_back(row(167, {dest(0, 3, 1), flat, immediate(48), source(7, 1, 0)}));
+    rows.push_back(row(31 | (1u << 18), {{0x10000a, 3}}));
+    for (unsigned i = 0; i < 3; ++i)
+        rows.push_back(row(167, {dest(0, i), flat, immediate(i * 16), source(7, 1)}));
+    rows.push_back(row(54, {dest(0, 3), immediate(0)}));
+    uint32_t control = 1;
+    for (unsigned c = 0; c < 3; ++c)
+        control |= (uint32_t(offset[c]) & 15) << (9 + c * 4);
+    rows.push_back(row(73 | 0x80000000, {{control},
+                                         dest(0, 3, mask),
+                                         source(0, 0),
+                                         source(7, 0, swizzle),
+                                         {0x106000, 0},
+                                         source(0, 1),
+                                         source(0, 2)}));
+    rows.push_back(row(168, {dest(30, 0), flat, immediate(0), source(0, 3)}));
+    rows.push_back(row(21, {}));
+    rows.push_back(row(62, {}));
+    const auto bytes = writeDxbcProgram({{0x50050, 0}, rows});
     Words result(bytes.size() / 4);
     std::memcpy(result.data(), bytes.data(), bytes.size());
     return result;
@@ -440,10 +484,13 @@ struct GpuOperations::State {
             throw;
         }
     }
-    Value texture(uint32_t stage, const TextureInput &input, const TextureInputView &view, uint32_t dimension,
-                  uint32_t returns, const Value &address, uint32_t swizzle, uint32_t mask,
-                  const std::array<int32_t, 3> &offset, const SamplerInput *sampler = nullptr,
-                  const Value &lod = {}) {
+    std::vector<Value> texture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
+                               uint32_t dimension, uint32_t returns, const Value &address, uint32_t swizzle,
+                               uint32_t mask, const std::array<int32_t, 3> &offset,
+                               const SamplerInput *sampler = nullptr, const Value &lodOrDdx = {},
+                               const std::optional<Value> &ddy = {},
+                               const std::array<uint32_t, 3> &groupSize = {},
+                               const std::vector<SamplingInvocation> *batch = nullptr) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -451,6 +498,9 @@ struct GpuOperations::State {
             input.storage.bytes.size() > 256ull * 1024 * 1024 || view.nativeDescriptor.size() != 6 ||
             (view.planeSlice && *view.planeSlice))
             throw std::runtime_error("Invalid or unsupported native texture load request");
+        const UINT resultCount = batch ? UINT(batch->size()) : 1;
+        if (batch && (stage != 5 || !sampler || !resultCount || resultCount > 1024))
+            throw std::runtime_error("Invalid GPU sampling batch");
         try {
             auto r = input.resource;
             auto &d = r.desc;
@@ -505,16 +555,23 @@ struct GpuOperations::State {
                 std::memcpy(&sd, sampler->descriptor->data(), sizeof sd);
                 check(device->CreateSamplerState(&sd, &nativeSampler), "Create private sampler snapshot");
             }
-            const auto words =
-                textureKernel(stage, dimension, returns, mask, swizzle, offset, sampler != nullptr);
+            const auto words = batch
+                                   ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize)
+                                   : textureKernel(stage, dimension, returns, mask, swizzle, offset,
+                                                   sampler != nullptr, ddy.has_value());
             std::vector<std::array<uint32_t, 4>> values{address.bits};
             if (sampler)
-                values.push_back(lod.bits);
+                values.push_back(lodOrDdx.bits);
+            if (ddy)
+                values.push_back(ddy->bits);
             if (stage == 0)
-                return pixel(words, values, srv.Get(), nativeSampler.Get());
-            if (stage == 1)
-                return vertex(words, sampler ? std::vector<Value>{address, lod} : std::vector<Value>{address},
-                              srv.Get(), nativeSampler.Get());
+                return {pixel(words, values, srv.Get(), nativeSampler.Get())};
+            if (stage == 1) {
+                std::vector<Value> constants;
+                for (const auto &value : values)
+                    constants.push_back(Value::known(value));
+                return {vertex(words, constants, srv.Get(), nativeSampler.Get())};
+            }
             auto found = shaders.find(words);
             if (found == shaders.end()) {
                 if (shaders.size() >= 256)
@@ -533,12 +590,29 @@ struct GpuOperations::State {
                       "Create native texture load shader");
                 found = shaders.emplace(words, std::move(shader)).first;
             }
-            D3D11_BUFFER_DESC bd{
-                UINT(values.size() * 16), D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            if (batch) {
+                values.clear();
+                for (const auto &lane : *batch) {
+                    values.push_back(lane.address.bits);
+                    values.push_back(lane.ddx.bits);
+                    values.push_back(lane.ddy.bits);
+                    values.push_back({lane.active ? 1u : 0u, 0, 0, 0});
+                }
+            }
+            D3D11_BUFFER_DESC bd{UINT(values.size() * 16),
+                                 D3D11_USAGE_IMMUTABLE,
+                                 batch ? D3D11_BIND_SHADER_RESOURCE : D3D11_BIND_CONSTANT_BUFFER,
+                                 0,
+                                 batch ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : 0u,
+                                 batch ? 64u : 0u};
             D3D11_SUBRESOURCE_DATA cbData{values.data(), 0, 0};
             Com<ID3D11Buffer> cb, output, staging;
             check(device->CreateBuffer(&bd, &cbData, &cb), "Create texture load constants");
-            bd = {16,
+            Com<ID3D11ShaderResourceView> inputView;
+            if (batch)
+                check(device->CreateShaderResourceView(cb.Get(), nullptr, &inputView),
+                      "Create sampling batch inputs");
+            bd = {resultCount * 16,
                   D3D11_USAGE_DEFAULT,
                   D3D11_BIND_UNORDERED_ACCESS,
                   0,
@@ -548,13 +622,20 @@ struct GpuOperations::State {
             Com<ID3D11UnorderedAccessView> target;
             check(device->CreateUnorderedAccessView(output.Get(), nullptr, &target),
                   "Create texture load output view");
-            bd = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+            bd = {resultCount * 16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
             check(device->CreateBuffer(&bd, nullptr, &staging), "Create texture load staging");
             auto *constants = cb.Get();
             auto *source = srv.Get();
             auto *destination = target.Get();
             context->CSSetShader(found->second.Get(), nullptr, 0);
-            context->CSSetConstantBuffers(0, 1, &constants);
+            if (!batch)
+                context->CSSetConstantBuffers(0, 1, &constants);
+            else {
+                auto *view = inputView.Get();
+                context->CSSetShaderResources(1, 1, &view);
+                const UINT sentinel[]{0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef};
+                context->ClearUnorderedAccessViewUint(destination, sentinel);
+            }
             context->CSSetShaderResources(0, 1, &source);
             auto *samplerState = nativeSampler.Get();
             context->CSSetSamplers(0, 1, &samplerState);
@@ -577,8 +658,9 @@ struct GpuOperations::State {
                     throw std::runtime_error("Native texture load timed out");
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-            Value result;
-            std::memcpy(result.bits.data(), mapped.pData, 16);
+            std::vector<Value> result(resultCount);
+            for (UINT i = 0; i < resultCount; ++i)
+                std::memcpy(result[i].bits.data(), static_cast<const uint8_t *>(mapped.pData) + i * 16, 16);
             context->Unmap(staging.Get(), 0);
             if (debug) {
                 Com<ID3D11InfoQueue> queue;
@@ -797,7 +879,7 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/10"}};
+            {"backend", "dxbc-gpu/12"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
@@ -1200,18 +1282,32 @@ Value GpuOperations::loadTexture(uint32_t stage, const TextureInput &input, cons
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
-    return state_->texture(stage, input, view, dimension, returns, address, selection, mask, offset);
+    return state_->texture(stage, input, view, dimension, returns, address, selection, mask, offset).front();
 }
-Value GpuOperations::sampleLevel(uint32_t stage, const TextureInput &input, const TextureInputView &view,
-                                 const SamplerInput &sampler, uint32_t dimension, uint32_t returns,
-                                 const Value &address, const Value &lod,
-                                 const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                 const std::array<int32_t, 3> &offset) {
+Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
+                                   const SamplerInput &sampler, uint32_t dimension, uint32_t returns,
+                                   const Value &address, const Value &lodOrDdx,
+                                   const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                   const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
-    return state_->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler,
-                           lod);
+    return state_
+        ->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler,
+                  lodOrDdx, ddy)
+        .front();
+}
+std::vector<Value> GpuOperations::sampleGradBatch(const TextureInput &input, const TextureInputView &view,
+                                                  const SamplerInput &sampler, uint32_t dimension,
+                                                  uint32_t returns, const std::array<uint32_t, 3> &groupSize,
+                                                  const std::vector<SamplingInvocation> &batch,
+                                                  const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                                  const std::array<int32_t, 3> &offset) {
+    uint32_t selection = 0;
+    for (unsigned c = 0; c < 4; ++c)
+        selection |= swizzle[c] << (2 * c);
+    return state_->texture(5, input, view, dimension, returns, {}, selection, mask, offset, &sampler, {}, {},
+                           groupSize, &batch);
 }
 Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t kind,
                                uint32_t index, uint32_t returns, const std::array<uint32_t, 4> &swizzle,

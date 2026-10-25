@@ -701,6 +701,22 @@ The sample-level suite takes 442.870 seconds, so this checkpoint explicitly does
 not close production performance acceptance. Earlier filter-mode and cancellation
 fixture failures remain in the evidence ledger.
 
+The subsequent explicit-gradient checkpoint adds `sample_d` and coherent CS
+sampling batches. It retains the original batch-output assertions and separately
+checks single-invocation references for individual VS/PS/CS lanes. The gradient
+suite passes 262 tests with zero failures/skips, including 102 lane matrices,
+102 direct batch matrices, 42 synthetic shapes, twelve cancellation/recovery
+cases and two input-validation cases. Helper identity is `dxbc-gpu/12` and the
+scheduler identity is `serial-round-robin/2`. See `DX11_DXBC_SAMPLE_GRAD.md` and
+the independent invocation evidence for the original WARP failures and their
+context-preserving resolution. Broader divergence and PS quad behavior remain
+acceptance gaps.
+The final five-suite run totals 2,276 passes with zero failures/skips and
+1,135.50 seconds of CTest wall time. Explicit LOD (156), texture loads (1,445),
+groups (38) and scalar execution (375) pass alongside the 262 gradient cases.
+GUI, CLI and Worker Release builds pass. The gradient evidence validator also
+rejects altered invocation modes, batch counts and missing batch records.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

@@ -139,6 +139,7 @@ class Lane {
     std::unique_ptr<State> state_;
     friend class Group;
     void releaseBarrier();
+    bool prepareSamplingBatch(const std::vector<Lane *> &);
 
   public:
     Lane(const Program &program, Inputs inputs, uint64_t maxSteps = 1000000);
@@ -171,6 +172,7 @@ class Group {
     GroupStep step();
     const Lane &lane(uint32_t index) const;
     const Memory &sharedMemory() const;
-    static constexpr const char *executionModel = "serial-round-robin/1";
+    uint64_t samplingBatches() const;
+    static constexpr const char *executionModel = "serial-round-robin/2";
 };
 } // namespace flora::dxbc_exec

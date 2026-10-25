@@ -16,6 +16,13 @@ using namespace flora::dxbc_exec;
 using Json = nlohmann::json;
 namespace {
 using Words = std::vector<uint32_t>;
+#ifdef FLORA_SAMPLE_GRAD_TESTS
+constexpr bool gradient = true;
+#else
+constexpr bool gradient = false;
+#endif
+constexpr uint32_t samplingOpcode = gradient ? 73 : 72;
+const QString shaderPrefix = gradient ? "sample-grad" : "sample-level";
 Words row(uint32_t opcode, std::initializer_list<Words> args = {}) {
     Words result{opcode};
     for (const auto &arg : args)
@@ -26,7 +33,10 @@ Words row(uint32_t opcode, std::initializer_list<Words> args = {}) {
 std::vector<uint8_t> program(uint32_t stage, unsigned offset, uint32_t mask = 15, bool saturate = false,
                              uint32_t dimension = 3, bool separateLod = false) {
     const uint32_t target = stage == 5 ? 0x100002 : 0x102002;
-    std::vector<Words> rows{row(89, {{0x208e46, 0, separateLod ? 2u : 1u}}),
+    std::vector<Words> rows{row(89, {{0x208e46, 0,
+                                      gradient      ? 3u
+                                      : separateLod ? 2u
+                                                    : 1u}}),
                             row(88 | (dimension << 11), {{0x1070f2, 0}, {0x5555}}), row(90, {{0x106000, 3}})};
     if (stage == 5) {
         rows.push_back(row(104, {{1}}));
@@ -35,13 +45,22 @@ std::vector<uint8_t> program(uint32_t stage, unsigned offset, uint32_t mask = 15
         rows.push_back(row(101, {{target | 0xf0, 0}}));
     rows.push_back(row(54, {{target | 0xf0, 0}, {0x4002, 7, 8, 9, 10}}));
     const uint32_t control = offset ? 1 | (15 << 9) | (1 << 13) : 1;
-    rows.push_back(row(72 | 0x80000000 | (saturate ? 0x2000u : 0u),
-                       {{control},
-                        {target | (mask << 4), 0},
-                        {0x208e46, 0, 0},
-                        {0x1071b6, 0},
-                        {0x106000, 3},
-                        separateLod ? Words{0x20800a, 0, 1} : Words{0x20802a, 0, 0}}));
+    if (gradient)
+        rows.push_back(row(73 | 0x80000000 | (saturate ? 0x2000u : 0u), {{control},
+                                                                         {target | (mask << 4), 0},
+                                                                         {0x208e46, 0, 0},
+                                                                         {0x1071b6, 0},
+                                                                         {0x106000, 3},
+                                                                         {0x208e46, 0, 1},
+                                                                         {0x208e46, 0, 2}}));
+    else
+        rows.push_back(row(72 | 0x80000000 | (saturate ? 0x2000u : 0u),
+                           {{control},
+                            {target | (mask << 4), 0},
+                            {0x208e46, 0, 0},
+                            {0x1071b6, 0},
+                            {0x106000, 3},
+                            separateLod ? Words{0x20800a, 0, 1} : Words{0x20802a, 0, 0}}));
     rows.push_back(row(62));
     return makeDxbc({{0x58454853, writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows})}});
 }
@@ -168,7 +187,9 @@ testing::Capture shapeCapture(uint32_t dimension, uint32_t format) {
     const uint32_t firstLayer = dimension == 10 ? 6 : dimension == 7 || dimension == 8 ? 1 : 0;
     const uint32_t count = dimension == 10 ? 1 : dimension == 7 || dimension == 8 ? 2 : 0;
     capture.add(6, 5, 0x8c, statePack(Id(0), Id(0), Id(4), format, native, 1u, 2u, firstLayer, count));
-    std::array<float, 8> values{.3f, .4f, .6f, 0, .75f, 0, 0, 0};
+    std::vector<float> values{.3f, .4f, .6f, 0, .75f, 0, 0, 0};
+    if (gradient)
+        values = {.3f, .4f, .6f, 0, .25f, .125f, .0625f, 7, -.125f, .25f, .03125f, -9};
     if (dimension == 7)
         values[1] = 1;
     if (dimension == 8)
@@ -179,8 +200,13 @@ testing::Capture shapeCapture(uint32_t dimension, uint32_t format) {
         values[2] = -.3f;
     }
     capture.add(2, 5, 0x83,
-                statePack(Id(0), Id(0), D3D11_BUFFER_DESC{32, D3D11_USAGE_DEFAULT, 4, 0, 0, 0}, Id(3)));
-    capture.add(3, 9, 1, statePack(32u, values));
+                statePack(Id(0), Id(0),
+                          D3D11_BUFFER_DESC{UINT(values.size() * 4), D3D11_USAGE_DEFAULT, 4, 0, 0, 0},
+                          Id(3)));
+    auto constants = statePack(uint32_t(values.size() * 4));
+    for (float value : values)
+        append(constants, value);
+    capture.add(3, 9, 1, constants);
     capture.add(7, 5, 0x83,
                 statePack(Id(0), Id(0),
                           D3D11_BUFFER_DESC{16, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0,
@@ -210,12 +236,17 @@ testing::Capture shapeCapture(uint32_t dimension, uint32_t format) {
                                : dimension == 3 || dimension == 7 ? "p.xy"
                                : dimension == 10                  ? "p"
                                                                   : "p.xyz";
+    const std::string components = dimension == 2 || dimension == 7   ? ".x"
+                                   : dimension == 3 || dimension == 8 ? ".xy"
+                                                                      : ".xyz";
+    const std::string sampling = gradient ? ",lod" + components + ",dy" + components : ",lod.x";
     const auto shader =
-        compileHlsl("cbuffer Params:register(b0){float4 p;float4 lod;}" + shape +
+        compileHlsl("cbuffer Params:register(b0){float4 p;float4 lod;float4 dy;}" + shape +
                         "<float4> src:register(t0);SamplerState samp:register(s3);"
                         "RWStructuredBuffer<uint4> dst:register(u0);[numthreads(1,1,1)]void main(){"
-                        "dst[0]=asuint(src.SampleLevel(samp," +
-                        coords + ",lod.x).wzyx);}",
+                        "dst[0]=asuint(src." +
+                        std::string(gradient ? "SampleGrad" : "SampleLevel") + "(samp," + coords + sampling +
+                        ").wzyx);}",
                     "cs_5_0")
             .bytecode;
     auto object = std::vector<uint8_t>(48);
@@ -242,13 +273,16 @@ class DxbcSampleLevelTests final : public QObject {
     Q_OBJECT
     QTemporaryDir evidence;
     std::map<uint32_t, Json> references;
+    std::map<std::pair<uint32_t, uint32_t>, Json> laneReferences;
   private slots:
     void initTestCase() {
         for (uint32_t vendor : {0u, 4318u, 32902u}) {
             const auto directory = evidence.filePath(QString::number(vendor));
             QProcess process;
-            process.start(QCoreApplication::applicationDirPath() + "/FloraSampleLevelProbe.exe",
-                          {directory, QString::number(vendor)});
+            QStringList arguments{directory, QString::number(vendor)};
+            if (gradient)
+                arguments.push_back("--grad");
+            process.start(QCoreApplication::applicationDirPath() + "/FloraSampleLevelProbe.exe", arguments);
             if (!process.waitForFinished(60000)) {
                 process.kill();
                 process.waitForFinished(5000);
@@ -259,6 +293,25 @@ class DxbcSampleLevelTests final : public QObject {
             const auto report = readBytes(directory + "/results.json");
             references[vendor] = Json::parse(report);
             QCOMPARE(references[vendor]["validation_errors"].get<unsigned>(), 0u);
+            if (gradient)
+                for (uint32_t stage : {0u, 1u, 5u}) {
+                    const QString name = stage == 0 ? "ps" : stage == 1 ? "vs" : "cs";
+                    const auto path = evidence.filePath(QString("%1-%2-single").arg(vendor).arg(name));
+                    process.start(QCoreApplication::applicationDirPath() + "/FloraSampleLevelProbe.exe",
+                                  {path, QString::number(vendor), "--grad", name + "-single"});
+                    if (!process.waitForFinished(60000)) {
+                        process.kill();
+                        process.waitForFinished(5000);
+                        QFAIL("Independent graphics sampling probe timed out");
+                    }
+                    QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
+                             process.readAllStandardError().constData());
+                    auto &graphics = laneReferences[{vendor, stage}];
+                    graphics = Json::parse(readBytes(path + "/results.json"));
+                    QCOMPARE(graphics["validation_errors"].get<unsigned>(), 0u);
+                    QCOMPARE(graphics["adapter_luid"], references[vendor]["adapter_luid"]);
+                    QCOMPARE(graphics["stage"].get<std::string>(), name.toStdString());
+                }
         }
     }
     void hardware_data() {
@@ -285,19 +338,39 @@ class DxbcSampleLevelTests final : public QObject {
             auto input = inputs(item, gpu);
             const auto original = input.textures->resources.at(1).storage.bytes;
             uint64_t comparisons = 0;
+            bool lanesMatch = true;
             for (uint32_t stage : {0u, 1u, 5u}) {
+                const auto &stageItem =
+                    gradient ? laneReferences.at({vendor, stage}).at("cases").at(configuration) : item;
+                QCOMPARE(stageItem["observed_sampler_descriptor"], item["observed_sampler_descriptor"]);
                 const Program code(program(stage, item["offset"].get<unsigned>()));
-                for (const auto &observation : item["records"]) {
+                for (const auto &observation : stageItem["records"]) {
                     auto parameters = observation["parameters"].get<std::array<float, 4>>();
                     input.constantBuffers[0] = {
                         Value::known(std::bit_cast<std::array<uint32_t, 4>>(parameters))};
+                    if (gradient)
+                        for (auto key : {"ddx", "ddy"})
+                            input.constantBuffers[0].push_back(
+                                Value::known(std::bit_cast<std::array<uint32_t, 4>>(
+                                    observation[key].get<std::array<float, 4>>())));
                     Lane lane(code, input);
                     lane.step();
                     const auto step = lane.step();
                     QCOMPARE(step.memoryGpuAssisted, item["resource_bound"].get<bool>());
                     auto expected = observation["bits"].get<std::array<uint32_t, 4>>();
                     std::reverse(expected.begin(), expected.end());
-                    QCOMPARE(lane.value({stage == 5 ? 0u : 2u, {0}}), Value::known(expected));
+                    const auto actual = lane.value({stage == 5 ? 0u : 2u, {0}});
+                    if (actual != Value::known(expected))
+                        qInfo().noquote() << QString::fromStdString(Json{
+                            {"sampling_mismatch", true},
+                            {"vendor", vendor},
+                            {"configuration", configuration},
+                            {"stage", stage},
+                            {"input", observation},
+                            {"expected", expected},
+                            {"actual", actual.bits},
+                            {"valid", actual.valid}}.dump());
+                    lanesMatch = lanesMatch && actual == Value::known(expected);
                     QCOMPARE(step.changes.size(), size_t(1));
                     ++comparisons;
                 }
@@ -309,6 +382,12 @@ class DxbcSampleLevelTests final : public QObject {
                 const auto value = observation["parameters"].get<std::array<float, 4>>();
                 auto *first = reinterpret_cast<const uint8_t *>(value.data());
                 parameters.insert(parameters.end(), first, first + 16);
+                if (gradient)
+                    for (auto key : {"ddx", "ddy"}) {
+                        const auto derivative = observation[key].get<std::array<float, 4>>();
+                        const auto *data = reinterpret_cast<const uint8_t *>(derivative.data());
+                        parameters.insert(parameters.end(), data, data + 16);
+                    }
                 const auto bits = observation["bits"].get<std::array<uint32_t, 4>>();
                 first = reinterpret_cast<const uint8_t *>(bits.data());
                 expected.insert(expected.end(), first, first + 16);
@@ -319,28 +398,191 @@ class DxbcSampleLevelTests final : public QObject {
                 std::map<Register, BufferView>{{{7, {1}}, {2, 0, parameters.size(), 16}},
                                                {{30, {0}}, {3, 0, expected.size(), 16}}});
             const auto binary = readBytes(evidence.filePath(
-                QString("%1/sample-level-%2.dxbc").arg(vendor).arg(item["offset"].get<unsigned>())));
+                QString("%1/%2-%3.dxbc").arg(vendor).arg(shaderPrefix).arg(item["offset"].get<unsigned>())));
             const Program code(binary);
+            const auto beforeGroupOperations = gpu->operations();
             Group group(code, input);
             while (!group.finished())
                 group.step();
-            QCOMPARE(input.memory->buffers().at(3).bytes, expected);
+            if (gradient) {
+                QCOMPARE(group.samplingBatches(),
+                         item["resource_bound"].get<bool>() ? uint64_t(1) : uint64_t(0));
+                QCOMPARE(gpu->operations() - beforeGroupOperations, group.samplingBatches());
+            }
+            const bool groupMatches = input.memory->buffers().at(3).bytes == expected;
+            if (!groupMatches) {
+                Json differences = Json::array();
+                const auto &actual = input.memory->buffers().at(3).bytes;
+                for (size_t offset = 0; offset < expected.size(); offset += 4) {
+                    uint32_t a, b;
+                    std::memcpy(&a, actual.data() + offset, 4);
+                    std::memcpy(&b, expected.data() + offset, 4);
+                    if (a != b)
+                        differences.push_back({{"byte_offset", offset}, {"actual", a}, {"expected", b}});
+                }
+                qInfo().noquote() << QString::fromStdString(Json{
+                    {"group_sampling_mismatch", true},
+                    {"vendor", vendor},
+                    {"configuration", configuration},
+                    {"differences", differences}}.dump());
+            }
             QCOMPARE(input.textures->resources.at(1).storage.bytes, original);
             qInfo().noquote() << QString::fromStdString(Json{
-                {"sample_level_verified", true},
+                {"sample_level_verified", !gradient},
+                {"sample_grad_verified", gradient},
                 {"vendor", vendor},
                 {"configuration", configuration},
                 {"name", item["name"]},
                 {"offset", item["offset"]},
                 {"records", item["records"].size()},
                 {"lane_comparisons", comparisons},
-                {"group_output_verified", true},
+                {"group_output_verified", groupMatches},
+                {"group_sampling_batches", group.samplingBatches()},
+                {"group_execution_model", Group::executionModel},
+                {"lane_reference_invocations", gradient ? "single" : "batch"},
+                {"group_reference_invocations", "batch"},
+                {"lane_output_verified", lanesMatch},
+                {"reference_stages", gradient ? Json({"ps", "vs", "cs"}) : Json({"cs"})},
                 {"original_storage_unchanged", true},
                 {"helper", gpu->identity()}}.dump());
+            QVERIFY2(lanesMatch, "Native per-stage sampling values differ");
+            QVERIFY2(groupMatches, "Native complete CS group output differs");
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
     }
+#ifdef FLORA_SAMPLE_GRAD_TESTS
+    void batchCancellation_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void batchCancellation() {
+        QFETCH(uint32_t, vendor);
+        auto native = device(vendor);
+        unsigned checks = 0;
+        auto gpu = std::make_shared<GpuOperations>(native.Get(), !vendor, [&] { return ++checks == 2; });
+        checks = 0;
+        auto input = inputs(references.at(vendor).at("cases").at(0), gpu);
+        input.constantBuffers[0] = std::vector<Value>(3, Value::known({}));
+        const auto binary = program(5, 0);
+        auto instructions = readDxbcProgram(readDxbcParts(binary).front().second);
+        for (auto &words : instructions.instructions)
+            if ((words[0] & 2047) == 155)
+                words[1] = 64;
+        const Program code(makeDxbc({{ 0x58454853, writeDxbcProgram(instructions) }}));
+        const auto original = input.textures->resources.at(1).storage.bytes;
+        Group group(code, input);
+        for (unsigned i = 0; i < 64; ++i)
+            group.step();
+        std::vector<std::map<Register, Value>> before;
+        for (unsigned i = 0; i < 64; ++i)
+            before.push_back(group.lane(i).registers());
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, group.step());
+        QCOMPARE(checks, 2u);
+        QCOMPARE(group.samplingBatches(), uint64_t(0));
+        QCOMPARE(gpu->operations(), uint64_t(0));
+        for (unsigned i = 0; i < 64; ++i)
+            QCOMPARE(group.lane(i).registers(), before[i]);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, group.step());
+        input.gpu = std::make_shared<GpuOperations>(native.Get(), !vendor);
+        Group retry(code, input);
+        while (!retry.finished())
+            retry.step();
+        QCOMPARE(retry.samplingBatches(), uint64_t(1));
+        QCOMPARE(input.gpu->operations(), uint64_t(1));
+        for (unsigned i = 0; i < 64; ++i)
+            QCOMPARE(retry.lane(i).value({0, {0}}),
+                     Value::known({std::bit_cast<uint32_t>(1.f), 0, 0, std::bit_cast<uint32_t>(.25f)}));
+        QCOMPARE(input.textures->resources.at(1).storage.bytes, original);
+    }
+    void batchValidation() {
+        auto input = inputs(references.at(0).at("cases").at(0), {});
+        std::vector<SamplingInvocation> invocations(64);
+        invocations[0] = {Value::known({}), Value::known({}), Value::known({}), true};
+        bool assisted = true;
+        auto sample = [&](std::array<uint32_t, 3> size) {
+            return input.textures->sampleGradBatch({7, {0}}, {6, {3}}, 3, 0x5555, size, invocations,
+                                                   {0, 1, 2, 3}, 15, {}, nullptr, assisted);
+        };
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, sample({0, 1, 1}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, sample({1, 1, 65}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, sample({32, 1, 1}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, sample({64, 1, 1}));
+        invocations[0].ddx.valid = 1;
+        QVERIFY(!sample({64, 1, 1}).has_value());
+        QVERIFY(!assisted);
+        invocations[63] = invocations[0];
+        invocations[0].ddx.valid = 15;
+        QVERIFY(!sample({64, 1, 1}).has_value());
+        invocations[63].active = false;
+        invocations[0].active = false;
+        const auto inactive = sample({64, 1, 1});
+        QVERIFY(inactive.has_value());
+        QVERIFY(std::all_of(inactive->begin(), inactive->end(), [](const auto &v) { return v.valid == 0; }));
+        invocations[0].active = true;
+        input.textures->views.at({7, {0}}).resource.reset();
+        const auto unbound = sample({64, 1, 1});
+        QVERIFY(unbound.has_value());
+        QCOMPARE(unbound->front(), Value::known({}));
+        QVERIFY(!assisted);
+    }
+    void batch_data() { hardware_data(); }
+    void batch() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(unsigned, configuration);
+        const auto &item = references.at(vendor).at("cases").at(configuration);
+        auto native = device(vendor);
+        auto gpu = std::make_shared<GpuOperations>(native.Get(), !vendor);
+        auto input = inputs(item, gpu);
+        const auto original = input.textures->resources.at(1).storage.bytes;
+        std::vector<SamplingInvocation> invocations(64);
+        for (size_t index = 0; index < 63; ++index) {
+            const auto &record = item["records"][index];
+            auto value = [&](const char *key) {
+                return Value::known(
+                    std::bit_cast<std::array<uint32_t, 4>>(record[key].get<std::array<float, 4>>()));
+            };
+            invocations[index] = {value("parameters"), value("ddx"), value("ddy"), true};
+        }
+        bool assisted = false;
+        const std::array<int32_t, 3> offset =
+            item["offset"].get<unsigned>() ? std::array<int32_t, 3>{-1, 1, 0} : std::array<int32_t, 3>{};
+        const auto result =
+            input.textures->sampleGradBatch({7, {0}}, {6, {3}}, 3, 0x5555, {64, 1, 1}, invocations,
+                                            {0, 1, 2, 3}, 15, offset, gpu.get(), assisted);
+        QVERIFY(result.has_value());
+        QCOMPARE(assisted, item["resource_bound"].get<bool>());
+        QCOMPARE(result->size(), size_t(64));
+        for (size_t index = 0; index < 63; ++index) {
+            const auto expected = item["records"][index]["bits"].get<std::array<uint32_t, 4>>();
+            if ((*result)[index] != Value::known(expected))
+                qInfo().noquote() << QString::fromStdString(Json{
+                    {"batch_sampling_mismatch", true},
+                    {"vendor", vendor},
+                    {"configuration", configuration},
+                    {"record", index},
+                    {"actual", (*result)[index].bits},
+                    { "expected",
+                      expected }}.dump());
+            QCOMPARE((*result)[index], Value::known(expected));
+        }
+        QCOMPARE(result->back().valid, uint8_t(0));
+        if (assisted)
+            QCOMPARE(result->back().bits,
+                     (std::array<uint32_t, 4>{0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef}));
+        QCOMPARE(input.textures->resources.at(1).storage.bytes, original);
+        qInfo().noquote() << QString::fromStdString(Json{
+            {"native_sampling_batch_verified", true},
+            {"vendor", vendor},
+            {"configuration", configuration},
+            {"records", 63},
+            {"group_size", {64, 1, 1}},
+            {"active_lanes", 63},
+            { "helper",
+              gpu->identity() }}.dump());
+    }
+#endif
     void shapes_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("dimension");
@@ -381,7 +623,7 @@ class DxbcSampleLevelTests final : public QObject {
                 auto instructions = readDxbcProgram(readDxbcParts(binary).front().second);
                 // Unused offset axes are ignored by the instruction, not rejected.
                 for (auto &words : instructions.instructions)
-                    if ((words[0] & 2047) == 72) {
+                    if ((words[0] & 2047) == samplingOpcode) {
                         if (dimension == 2 || dimension == 7)
                             words[1] |= (1 << 13) | (2 << 17);
                         if (dimension == 3 || dimension == 8)
@@ -392,6 +634,38 @@ class DxbcSampleLevelTests final : public QObject {
                 lane.step();
                 QVERIFY(lane.step().memoryGpuAssisted);
                 QCOMPARE(lane.value({stage == 5 ? 0u : 2u, {0}}), Value::known({bits[0], 8, bits[2], 10}));
+                if (gradient) {
+                    auto selected = observed.inputs;
+                    const uint8_t required = dimension == 2 || dimension == 7   ? 1
+                                             : dimension == 3 || dimension == 8 ? 3
+                                                                                : 7;
+                    for (unsigned operand : {1u, 2u})
+                        selected.constantBuffers[0][operand].valid = required;
+                    Lane partial(code, selected);
+                    partial.step();
+                    QVERIFY(partial.step().memoryGpuAssisted);
+                    QCOMPARE(partial.value({stage == 5 ? 0u : 2u, {0}}),
+                             Value::known({bits[0], 8, bits[2], 10}));
+                    // Reverse and negate the stored derivative, then restore it
+                    // with DXBC source selection and a floating-point modifier.
+                    selected = observed.inputs;
+                    auto &derivative = selected.constantBuffers[0][1].bits;
+                    std::swap(derivative[0], derivative[2]);
+                    for (auto &component : derivative)
+                        component ^= 0x80000000;
+                    for (auto &words : instructions.instructions)
+                        if ((words[0] & 2047) == samplingOpcode) {
+                            words[11] = 0x80208c66;                 // cb0[1].zyxw with an extended operand.
+                            words.insert(words.begin() + 12, 0x41); // Negate.
+                            words[0] = (words[0] & 0x80ffffff) | (uint32_t(words.size()) << 24);
+                        }
+                    const Program modified(makeDxbc({{0x58454853, writeDxbcProgram(instructions)}}));
+                    Lane swizzled(modified, selected);
+                    swizzled.step();
+                    QVERIFY(swizzled.step().memoryGpuAssisted);
+                    QCOMPARE(swizzled.value({stage == 5 ? 0u : 2u, {0}}),
+                             Value::known({bits[0], 8, bits[2], 10}));
+                }
             }
             const Program code(observed.bytecode);
             Group group(code, observed.inputs);
@@ -401,6 +675,7 @@ class DxbcSampleLevelTests final : public QObject {
             QCOMPARE(replay.readTexture(4), original);
             qInfo().noquote() << QString::fromStdString(Json{
                 {"sample_shape_verified", true},
+                {"gradient", gradient},
                 {"vendor", vendor},
                 {"dimension", dimension},
                 {"format", format},
@@ -430,7 +705,7 @@ class DxbcSampleLevelTests final : public QObject {
         const auto &item = references.at(vendor).at("cases").at(0);
         auto input = inputs(item, gpu);
         const auto original = input.textures->resources.at(1).storage.bytes;
-        input.constantBuffers[0] = {Value::known({0, 0, 0, 0})};
+        input.constantBuffers[0] = std::vector<Value>(gradient ? 3 : 1, Value::known({0, 0, 0, 0}));
         const Program code(program(stage, 0));
         Lane lane(code, input);
         lane.step();
@@ -451,7 +726,7 @@ class DxbcSampleLevelTests final : public QObject {
     void unknownAndInvalid() {
         const auto &item = references.at(0).at("cases").at(0);
         auto input = inputs(item, {});
-        input.constantBuffers[0] = {Value::known({0, 0, 0, 0})};
+        input.constantBuffers[0] = std::vector<Value>(gradient ? 3 : 1, Value::known({0, 0, 0, 0}));
         const Program code(program(5, 0, 5));
         auto checkUnknown = [&] {
             Lane lane(code, input);
@@ -468,9 +743,17 @@ class DxbcSampleLevelTests final : public QObject {
         input.textures->resources.at(1).storage.valid[0] = 0;
         checkUnknown();
         input.textures->resources.at(1).storage.valid[0] = 1;
-        input.constantBuffers[0][0].valid = 3; // Missing LOD.
-        checkUnknown();
-        input.constantBuffers[0][0].valid = 15;
+        if (gradient) {
+            for (unsigned operand : {1u, 2u}) {
+                input.constantBuffers[0][operand].valid = 1; // Missing a required derivative component.
+                checkUnknown();
+                input.constantBuffers[0][operand].valid = 15;
+            }
+        } else {
+            input.constantBuffers[0][0].valid = 3; // Missing LOD.
+            checkUnknown();
+            input.constantBuffers[0][0].valid = 15;
+        }
         Lane missingGpu(code, input);
         missingGpu.step();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, missingGpu.step());

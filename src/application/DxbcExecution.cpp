@@ -513,6 +513,15 @@ uint32_t Program::stage() const { return data_->stage; }
 std::array<uint32_t, 3> Program::threadGroupSize() const { return data_->groupSize; }
 const std::map<uint32_t, SharedDeclaration> &Program::sharedDeclarations() const { return data_->shared; }
 
+struct SamplingRequest {
+    Register binding, sampler;
+    uint32_t dimension, returns;
+    Value address, lodOrDdx;
+    std::optional<Value> ddy;
+    std::array<uint32_t, 4> swizzle;
+    uint32_t mask;
+    std::array<int32_t, 3> offset;
+};
 struct Lane::State {
     std::shared_ptr<const ProgramData> program;
     Inputs inputs;
@@ -524,6 +533,7 @@ struct Lane::State {
     std::vector<std::pair<uint32_t, uint64_t>> loops;
     std::vector<size_t> callLoopDepths;
     std::map<uint64_t, std::set<uint32_t>> appendIndices;
+    std::optional<std::pair<Value, bool>> pendingSampling;
     bool inBounds(const Register &reg) const {
         if (reg.kind == 0)
             return reg.indices.size() == 1 && reg.indices[0] < program->temps;
@@ -590,7 +600,100 @@ struct Lane::State {
         }
         return result;
     }
+    SamplingRequest sampling() const {
+        const auto &s = *this;
+        const auto &p = *program;
+        const auto &instruction = p.instructions.at(pc);
+        const auto &args = p.operands.at(pc);
+        const auto op = instruction.opcode;
+        if (instruction.words[0] & 0x2000)
+            fail("Unexpected saturation on a DXBC sampling instruction");
+        const auto &destination = args[0], &resource = args[2], &sampler = args[3];
+        if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
+            resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
+            (op == 72 && args[4].components != 1 &&
+             !(args[4].components == 2 &&
+               (args[4].mode == 2 ||
+                (args[4].mode == 1 &&
+                 std::all_of(args[4].select.begin(), args[4].select.end(),
+                             [&](auto component) { return component == args[4].select[0]; }))))))
+            fail("Invalid DXBC explicit sampling operands");
+        const auto binding = s.address(resource), samplerBinding = s.address(sampler);
+        const auto declared = p.typedResources.find(binding);
+        const auto samplerDeclaration = p.samplers.find(samplerBinding);
+        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
+            samplerDeclaration->second != 0)
+            fail("Explicit sampling requires a texture and default sampler declaration");
+        const auto [dimension, returns] = declared->second;
+        std::array<int32_t, 3> offsets{};
+        std::set<uint32_t> extensions;
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+            const auto token = instruction.words.at(pos), kind = token & 63;
+            if (!extensions.insert(kind).second)
+                fail("Duplicate explicit sampling extension");
+            if (kind == 1) {
+                if (token & 0x7fe001c0)
+                    fail("Invalid explicit sampling offset extension");
+                for (unsigned c = 0; c < 3; ++c)
+                    offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
+            } else if (kind == 2) {
+                if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
+                    fail("Sampling dimension extension disagrees with its declaration");
+            } else if (kind == 3) {
+                if (((token >> 6) & 0xffff) != returns || (token & 0x7fc00000))
+                    fail("Sampling return extension disagrees with its declaration");
+            } else
+                fail("Unsupported explicit sampling extension");
+        }
+        return {binding,
+                samplerBinding,
+                dimension,
+                returns,
+                source(args[1], false),
+                source(args[4], false),
+                op == 73 ? std::optional<Value>(source(args[5], false)) : std::nullopt,
+                resource.select,
+                destination.mask,
+                offsets};
+    }
 };
+bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
+    auto &s = *state_;
+    if (s.done || s.waiting || s.pendingSampling || s.program->stage != 5 ||
+        s.program->instructions.at(s.pc).opcode != 73 || !s.inputs.textures || !s.inputs.gpu)
+        return false;
+    const auto selected = s.sampling();
+    std::vector<SamplingInvocation> invocations(lanes.size());
+    for (size_t i = 0; i < lanes.size(); ++i) {
+        const auto &other = *lanes[i]->state_;
+        if (other.done)
+            continue;
+        if (other.waiting || other.pendingSampling || other.program != s.program || other.pc != s.pc ||
+            other.calls != s.calls || other.loops != s.loops || other.callLoopDepths != s.callLoopDepths ||
+            other.inputs.textures != s.inputs.textures || other.inputs.gpu != s.inputs.gpu)
+            return false;
+        const auto request = other.sampling();
+        if (request.binding != selected.binding || request.sampler != selected.sampler ||
+            request.dimension != selected.dimension || request.returns != selected.returns ||
+            request.swizzle != selected.swizzle || request.mask != selected.mask ||
+            request.offset != selected.offset)
+            return false;
+        invocations[i] = {request.address, request.lodOrDdx, *request.ddy, true};
+    }
+    bool assisted = false;
+    const auto values = s.inputs.textures->sampleGradBatch(
+        selected.binding, selected.sampler, selected.dimension, selected.returns, s.program->groupSize,
+        invocations, selected.swizzle, selected.mask, selected.offset, s.inputs.gpu.get(), assisted);
+    if (!values)
+        return false;
+    // Every live lane is at this instruction; round-robin consumption completes
+    // before any lane can execute a following write or barrier.
+    for (size_t i = 0; i < lanes.size(); ++i)
+        if (invocations[i].active)
+            lanes[i]->state_->pendingSampling = std::make_pair((*values)[i], assisted);
+    return assisted;
+}
 Lane::Lane(const Program &program, Inputs inputs, uint64_t maxSteps) {
     if (!maxSteps)
         fail("DXBC execution step budget must be positive");
@@ -853,54 +956,20 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
-    } else if (op == 72) {
-        if (instruction.words[0] & 0x2000)
-            fail("Unexpected saturation on a DXBC sampling instruction");
-        const auto &destination = args[0], &resource = args[2], &sampler = args[3];
-        if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
-            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
-            resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
-            (args[4].components != 1 &&
-             !(args[4].components == 2 &&
-               (args[4].mode == 2 ||
-                (args[4].mode == 1 &&
-                 std::all_of(args[4].select.begin(), args[4].select.end(),
-                             [&](auto component) { return component == args[4].select[0]; }))))))
-            fail("Invalid DXBC explicit-LOD sampling operands");
-        const auto binding = s.address(resource), samplerBinding = s.address(sampler);
-        const auto declared = p.typedResources.find(binding);
-        const auto samplerDeclaration = p.samplers.find(samplerBinding);
-        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
-            samplerDeclaration->second != 0)
-            fail("Explicit-LOD sampling requires a texture and default sampler declaration");
-        const auto [dimension, returns] = declared->second;
-        std::array<int32_t, 3> offsets{};
-        std::set<uint32_t> extensions;
-        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
-            const auto token = instruction.words.at(pos), kind = token & 63;
-            if (!extensions.insert(kind).second)
-                fail("Duplicate explicit-LOD sampling extension");
-            if (kind == 1) {
-                if (token & 0x7fe001c0)
-                    fail("Invalid explicit-LOD sampling offset extension");
-                for (unsigned c = 0; c < 3; ++c)
-                    offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
-            } else if (kind == 2) {
-                if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
-                    fail("Sampling dimension extension disagrees with its declaration");
-            } else if (kind == 3) {
-                if (((token >> 6) & 0xffff) != returns || (token & 0x7fc00000))
-                    fail("Sampling return extension disagrees with its declaration");
-            } else
-                fail("Unsupported explicit-LOD sampling extension");
-        }
+    } else if (op == 72 || op == 73) {
+        const auto request = s.sampling();
+        const auto &destination = args[0];
         const auto target = s.address(destination);
-        const auto value = s.inputs.textures
-                               ? s.inputs.textures->sampleLevel(
-                                     p.stage, binding, samplerBinding, dimension, returns,
-                                     s.source(args[1], false), s.source(args[4], false), resource.select,
-                                     destination.mask, offsets, s.inputs.gpu.get(), result.memoryGpuAssisted)
-                               : Value{};
+        Value value;
+        if (s.pendingSampling) {
+            value = s.pendingSampling->first;
+            result.memoryGpuAssisted = s.pendingSampling->second;
+            s.pendingSampling.reset();
+        } else if (s.inputs.textures)
+            value = s.inputs.textures->sampleTexture(
+                p.stage, request.binding, request.sampler, request.dimension, request.returns,
+                request.address, request.lodOrDdx, request.swizzle, request.mask, request.offset,
+                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy);
         if (s.inBounds(target)) {
             const auto before = s.value(target);
             auto after = before;

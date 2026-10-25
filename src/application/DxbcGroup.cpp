@@ -5,12 +5,14 @@
 namespace flora::dxbc_exec {
 struct Group::State {
     std::vector<std::unique_ptr<Lane>> lanes;
+    std::vector<Lane *> participants;
     using Barrier =
         std::tuple<uint32_t, uint32_t, std::vector<uint32_t>, std::vector<std::pair<uint32_t, uint64_t>>>;
     std::vector<std::optional<Barrier>> barriers;
     std::shared_ptr<Memory> shared;
     CancelCheck cancelled;
     uint64_t sequence = 0, epoch = 0, maxSteps;
+    uint64_t samplingBatches = 0;
     uint32_t cursor = 0;
     bool failed = false;
 };
@@ -54,6 +56,7 @@ Group::Group(const Program &program, Inputs inputs, std::array<uint32_t, 3> grou
         inputs.registers[{34, {}}] = {{local[0], local[1], local[2], 0}, 7};
         inputs.registers[{36, {}}] = {{i, 0, 0, 0}, 1};
         s.lanes.push_back(std::make_unique<Lane>(program, inputs, maxSteps));
+        s.participants.push_back(s.lanes.back().get());
     }
 }
 Group::~Group() = default;
@@ -63,6 +66,7 @@ bool Group::finished() const {
 }
 const Lane &Group::lane(uint32_t index) const { return *state_->lanes.at(index); }
 const Memory &Group::sharedMemory() const { return *state_->shared; }
+uint64_t Group::samplingBatches() const { return state_->samplingBatches; }
 GroupStep Group::step() {
     auto &s = *state_;
     if (s.failed)
@@ -82,6 +86,8 @@ GroupStep Group::step() {
         }
         if (selected == count)
             throw std::runtime_error("DXBC thread group has no executable lane");
+        if (s.lanes[selected]->prepareSamplingBatch(s.participants))
+            ++s.samplingBatches;
         GroupStep result{s.sequence, s.epoch, selected, s.lanes[selected]->step(), false};
         if (result.step.syncFlags & 0x800)
             s.barriers[selected] = std::make_tuple(result.step.instruction, result.step.syncFlags,

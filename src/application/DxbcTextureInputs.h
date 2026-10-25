@@ -41,6 +41,10 @@ struct SamplerInput {
     // Observed D3D11 descriptor bits. Null is a verified unbound sampler.
     std::optional<std::array<uint32_t, 13>> descriptor;
 };
+struct SamplingInvocation {
+    Value address, ddx, ddy;
+    bool active = false;
+};
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
@@ -49,10 +53,16 @@ struct TextureInputs {
     // Missing entries are unavailable, distinct from observed null bindings.
     std::map<Register, SamplerInput> samplers;
     std::shared_ptr<const SampleQueryInput> rasterizerQueries;
-    Value sampleLevel(uint32_t stage, const Register &resource, const Register &sampler, uint32_t dimension,
-                      uint32_t returns, const Value &address, const Value &lod,
-                      const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                      const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted) const;
+    Value sampleTexture(uint32_t stage, const Register &resource, const Register &sampler, uint32_t dimension,
+                        uint32_t returns, const Value &address, const Value &lodOrDdx,
+                        const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                        const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted,
+                        const std::optional<Value> &ddy = {}) const;
+    std::optional<std::vector<Value>>
+    sampleGradBatch(const Register &resource, const Register &sampler, uint32_t dimension, uint32_t returns,
+                    const std::array<uint32_t, 3> &groupSize, const std::vector<SamplingInvocation> &,
+                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                    const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted) const;
     Value sampleQuery(const Register &, uint32_t dimension, bool position, bool integer, const Value &sample,
                       bool &assisted) const;
     static uint32_t loadReturnType(uint32_t format);
@@ -72,5 +82,12 @@ struct TextureInputs {
     Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
                GpuOperations *, bool &assisted) const;
+
+  private:
+    std::optional<Value> prepareSample(uint32_t stage, const Register &, const Register &, uint32_t dimension,
+                                       uint32_t returns, const Value &address, const Value &lodOrDdx,
+                                       const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                       const std::array<int32_t, 3> &offset,
+                                       const std::optional<Value> &ddy) const;
 };
 } // namespace flora::dxbc_exec

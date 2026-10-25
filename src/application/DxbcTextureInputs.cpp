@@ -59,12 +59,11 @@ uint32_t TextureInputs::loadReturnType(uint32_t format) {
     const auto description = loadFormat(format);
     return description ? description->returnType : 0;
 }
-Value TextureInputs::sampleLevel(uint32_t stage, const Register &binding, const Register &samplerBinding,
-                                 uint32_t dimension, uint32_t returns, const Value &address, const Value &lod,
-                                 const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                 const std::array<int32_t, 3> &offset, GpuOperations *gpu,
-                                 bool &assisted) const {
-    assisted = false;
+std::optional<Value>
+TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Register &samplerBinding,
+                             uint32_t dimension, uint32_t returns, const Value &address,
+                             const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                             const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy) const {
     const uint32_t native = dimension == 2    ? 2
                             : dimension == 3  ? 4
                             : dimension == 5  ? 8
@@ -75,34 +74,39 @@ Value TextureInputs::sampleLevel(uint32_t stage, const Register &binding, const 
                                               : 0;
     if (!native || binding.kind != 7 || samplerBinding.kind != 6 || mask > 15 ||
         (stage != 0 && stage != 1 && stage != 5))
-        throw std::runtime_error("Invalid native explicit-LOD sampling request");
+        throw std::runtime_error("Invalid native explicit sampling request");
     for (unsigned c = 0; c < 4; ++c)
         if (swizzle[c] > 3 || ((returns >> (4 * c)) & 15) < 1 ||
             (((returns >> (4 * c)) & 15) > 2 && ((returns >> (4 * c)) & 15) != 5))
-            throw std::runtime_error("Invalid explicit-LOD sampling return class or swizzle");
+            throw std::runtime_error("Invalid explicit sampling return class or swizzle");
     for (unsigned c = 0; c < 3; ++c)
         if (offset[c] < -8 || offset[c] > 7 || (offset[c] && (dimension == 6 || dimension == 10)))
-            throw std::runtime_error("Invalid explicit-LOD sampling offset");
+            throw std::runtime_error("Invalid explicit sampling offset");
     const auto selected = views.find(binding);
     const auto sampler = samplers.find(samplerBinding);
     if (selected == views.end() || sampler == samplers.end())
-        return {};
+        return Value{};
     const auto &view = selected->second;
     if (!view.resource)
         return Value::known({});
     if (view.dimension != native)
         throw std::runtime_error("Sampling declaration disagrees with its native view");
     if (sampler->second.descriptor && (((*sampler->second.descriptor)[0] & 0x180) == 0x80))
-        throw std::runtime_error("Explicit-LOD sampling requires a non-comparison sampler");
+        throw std::runtime_error("Explicit sampling requires a non-comparison sampler");
     const uint32_t required = dimension == 2                     ? 1
                               : dimension == 3 || dimension == 7 ? 3
                               : dimension == 10                  ? 15
                                                                  : 7;
-    if ((address.valid & required) != required || !(lod.valid & 1))
-        return {};
+    const uint32_t gradientMask = dimension == 2 || dimension == 7   ? 1
+                                  : dimension == 3 || dimension == 8 ? 3
+                                                                     : 7;
+    const uint32_t operandMask = ddy ? gradientMask : 1;
+    if ((address.valid & required) != required || (lodOrDdx.valid & operandMask) != operandMask ||
+        (ddy && (ddy->valid & gradientMask) != gradientMask))
+        return Value{};
     const auto found = resources.find(*view.resource);
     if (found == resources.end())
-        return {};
+        return Value{};
     const auto &texture = found->second;
     const auto info = textureInfo(texture.resource);
     const auto layout = textureSubresources(texture.resource);
@@ -129,12 +133,77 @@ Value TextureInputs::sampleLevel(uint32_t stage, const Register &binding, const 
     // dependency footprint is observed, never mark partially unknown storage known.
     if (!std::all_of(texture.storage.valid.begin(), texture.storage.valid.end(),
                      [](auto v) { return v == 1; }))
-        return {};
+        return Value{};
+    return std::nullopt;
+}
+Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, const Register &samplerBinding,
+                                   uint32_t dimension, uint32_t returns, const Value &address,
+                                   const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle,
+                                   uint32_t mask, const std::array<int32_t, 3> &offset, GpuOperations *gpu,
+                                   bool &assisted, const std::optional<Value> &ddy) const {
+    assisted = false;
+    if (const auto resolved = prepareSample(stage, binding, samplerBinding, dimension, returns, address,
+                                            lodOrDdx, swizzle, mask, offset, ddy))
+        return *resolved;
+    const auto &view = views.at(binding);
+    const auto &texture = resources.at(*view.resource);
+    const auto sampler = samplers.find(samplerBinding);
     if (!gpu)
         throw std::runtime_error("Native texture sampling requires GPU assistance");
-    auto result = gpu->sampleLevel(stage, texture, view, sampler->second, dimension, returns, address, lod,
-                                   swizzle, mask, offset);
+    auto result = gpu->sampleTexture(stage, texture, view, sampler->second, dimension, returns, address,
+                                     lodOrDdx, swizzle, mask, offset, ddy);
     result.valid = uint8_t(mask);
+    assisted = true;
+    return result;
+}
+std::optional<std::vector<Value>> TextureInputs::sampleGradBatch(
+    const Register &binding, const Register &samplerBinding, uint32_t dimension, uint32_t returns,
+    const std::array<uint32_t, 3> &groupSize, const std::vector<SamplingInvocation> &invocations,
+    const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
+    GpuOperations *gpu, bool &assisted) const {
+    assisted = false;
+    const uint64_t count = uint64_t(groupSize[0]) * groupSize[1] * groupSize[2];
+    if (!groupSize[0] || !groupSize[1] || !groupSize[2] || groupSize[0] > 1024 || groupSize[1] > 1024 ||
+        groupSize[2] > 64 || count > 1024 || count != invocations.size())
+        throw std::runtime_error("Invalid native sampling thread group");
+    std::vector<Value> result(invocations.size());
+    const auto first =
+        std::find_if(invocations.begin(), invocations.end(), [](const auto &v) { return v.active; });
+    if (first == invocations.end())
+        return result;
+    const uint32_t addressMask = dimension == 2                     ? 1
+                                 : dimension == 3 || dimension == 7 ? 3
+                                 : dimension == 10                  ? 15
+                                                                    : 7;
+    const uint32_t gradientMask = dimension == 2 || dimension == 7   ? 1
+                                  : dimension == 3 || dimension == 8 ? 3
+                                                                     : 7;
+    const auto unknown = std::find_if(invocations.begin(), invocations.end(), [&](const auto &lane) {
+        return lane.active && ((lane.address.valid & addressMask) != addressMask ||
+                               (lane.ddx.valid & gradientMask) != gradientMask ||
+                               (lane.ddy.valid & gradientMask) != gradientMask);
+    });
+    const auto &representative = unknown == invocations.end() ? *first : *unknown;
+    // Validate shared descriptors and potentially large storage once, not once
+    // per lane. Only the selected operands vary within this request.
+    const auto resolved =
+        prepareSample(5, binding, samplerBinding, dimension, returns, representative.address,
+                      representative.ddx, swizzle, mask, offset, representative.ddy);
+    if (resolved) {
+        if ((resolved->valid & mask) != mask)
+            return std::nullopt;
+        for (size_t i = 0; i < invocations.size(); ++i)
+            if (invocations[i].active)
+                result[i] = *resolved;
+        return result;
+    }
+    if (!gpu)
+        throw std::runtime_error("Native sampling group requires GPU assistance");
+    const auto &view = views.at(binding);
+    result = gpu->sampleGradBatch(resources.at(*view.resource), view, samplers.at(samplerBinding), dimension,
+                                  returns, groupSize, invocations, swizzle, mask, offset);
+    for (size_t i = 0; i < result.size(); ++i)
+        result[i].valid = invocations[i].active ? uint8_t(mask) : 0;
     assisted = true;
     return result;
 }

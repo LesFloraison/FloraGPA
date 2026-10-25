@@ -494,6 +494,16 @@ This supersedes the sampler-input checkpoint's lack of sampling execution;
 implicit sampling, gradient/comparison variants, quad/helper semantics and full
 debugger integration still block complete P6 acceptance.
 
+Explicit-gradient sampling now has single-invocation VS/PS/CS assistance and a
+coherent CS batch path under `dxbc-gpu/12` and `serial-round-robin/2`. Independent
+WARP observations required retaining invocation context: the group path preserves
+original flat indices, group dimensions and participation, then commits trace
+steps only after readback. The complete gradient suite passes 262 cases. See
+`DX11_DXBC_SAMPLE_GRAD.md` for exact same-context comparisons, retained failures,
+cancellation checks and remaining divergence/quad/format/performance scope.
+This supersedes the earlier checkpoint's lack of gradient execution but does
+not close full shader-debugger or release parity.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable

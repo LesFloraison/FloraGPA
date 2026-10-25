@@ -23,10 +23,16 @@ class GpuOperations {
                       uint32_t dimension, uint32_t returns, const Value &address,
                       const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                       const std::array<int32_t, 3> &offset);
-    Value sampleLevel(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
-                      const struct SamplerInput &, uint32_t dimension, uint32_t returns, const Value &address,
-                      const Value &lod, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                      const std::array<int32_t, 3> &offset);
+    Value sampleTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
+                        const struct SamplerInput &, uint32_t dimension, uint32_t returns,
+                        const Value &address, const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle,
+                        uint32_t mask, const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy);
+    std::vector<Value> sampleGradBatch(const struct TextureInput &, const struct TextureInputView &,
+                                       const struct SamplerInput &, uint32_t dimension, uint32_t returns,
+                                       const std::array<uint32_t, 3> &groupSize,
+                                       const std::vector<struct SamplingInvocation> &,
+                                       const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                       const std::array<int32_t, 3> &offset);
     Value loadTyped(uint32_t stage, const Buffer &, const BufferView &, uint32_t kind, uint32_t index,
                     uint32_t returns, const std::array<uint32_t, 4> &, uint32_t mask, bool literal);
     std::vector<uint8_t> storeTyped(const Buffer &, const BufferView &, uint32_t index, uint32_t returns,
