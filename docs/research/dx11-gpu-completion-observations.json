@@ -1,0 +1,1082 @@
+{
+  "schema": 1,
+  "scope": "independent_gpu_completion",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "production_wait_changed": false,
+  "performance_acceptance": false,
+  "cases": 2592,
+  "compared_words": 172606464,
+  "runs": [
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-final/0/results.json",
+        "sha256": "cb88b6226d62ed190cc76593a68e65c5ff6cf0566a1a98effb7eff30ea4d185b"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-final/0/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 0,
+      "adapter_luid": 73789,
+      "driver_version": 2814751477605871,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 12.4789,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 3.9932
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.0004,
+          "p95_ms": 6.4397,
+          "sum_ms": 116.6364,
+          "cpu_ms": 0.0,
+          "readback_retries": 29,
+          "sleeps": 29,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.05555,
+          "p95_ms": 0.1002,
+          "sum_ms": 1.9251,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.04955,
+          "p95_ms": 0.0716,
+          "sum_ms": 1.6671,
+          "cpu_ms": 0.0,
+          "readback_retries": 29,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.3733500000000003,
+          "p95_ms": 6.1959,
+          "sum_ms": 119.5737,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.43779999999999997,
+          "p95_ms": 0.6459,
+          "sum_ms": 14.989700000000001,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.4612,
+          "p95_ms": 0.6832,
+          "sum_ms": 15.7602,
+          "cpu_ms": 15.625,
+          "readback_retries": 32,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.05025,
+          "p95_ms": 8.1871,
+          "sum_ms": 140.3653,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.06605,
+          "p95_ms": 0.0995,
+          "sum_ms": 2.2156000000000002,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.05975,
+          "p95_ms": 0.1246,
+          "sum_ms": 2.0877,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.0581,
+          "p95_ms": 8.0144,
+          "sum_ms": 128.2244,
+          "cpu_ms": 0.0,
+          "readback_retries": 31,
+          "sleeps": 31,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.06520000000000001,
+          "p95_ms": 0.1241,
+          "sum_ms": 2.2613,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.060649999999999996,
+          "p95_ms": 0.0955,
+          "sum_ms": 2.0078,
+          "cpu_ms": 0.0,
+          "readback_retries": 30,
+          "sleeps": 0,
+          "query_retries": 0
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-final/4318/results.json",
+        "sha256": "9312c9e740e6ce4508c28a66cab13757b59fb73364d9f1a227038b6634e90cb0"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-final/4318/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 4318,
+      "adapter_luid": 68403,
+      "driver_version": 9007199255791310,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 12.5536,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 4.1701
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 8.29325,
+          "p95_ms": 8.4093,
+          "sum_ms": 264.1409,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.22305,
+          "p95_ms": 4.571,
+          "sum_ms": 139.4422,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 4.11525,
+          "p95_ms": 4.4591,
+          "sum_ms": 132.8975,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 8.135100000000001,
+          "p95_ms": 12.3862,
+          "sum_ms": 270.732,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.18585,
+          "p95_ms": 5.9722,
+          "sum_ms": 137.7179,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 4.0748,
+          "p95_ms": 4.4612,
+          "sum_ms": 130.3788,
+          "cpu_ms": 15.625,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 8.17835,
+          "p95_ms": 8.9216,
+          "sum_ms": 265.1234,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.1953499999999995,
+          "p95_ms": 4.4882,
+          "sum_ms": 134.9009,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 4.2505500000000005,
+          "p95_ms": 6.1128,
+          "sum_ms": 141.1479,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 8.282250000000001,
+          "p95_ms": 8.4289,
+          "sum_ms": 264.3298,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.15485,
+          "p95_ms": 4.6166,
+          "sum_ms": 137.4575,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 4.2277000000000005,
+          "p95_ms": 4.602,
+          "sum_ms": 139.1249,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-final/32902/results.json",
+        "sha256": "78ba422bcb280156ab84bcba1c00d851f4fcac6d35c7eaa3dec8088c8d3c6728"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-final/32902/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 32902,
+      "adapter_luid": 73907,
+      "driver_version": 9007199261368954,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 16.7574,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 3.61
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.92435,
+          "p95_ms": 4.1421,
+          "sum_ms": 119.5937,
+          "cpu_ms": 15.625,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.19225,
+          "p95_ms": 0.2701,
+          "sum_ms": 10.318,
+          "cpu_ms": 0.0,
+          "readback_retries": 1,
+          "sleeps": 1,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.17845,
+          "p95_ms": 1.653,
+          "sum_ms": 11.0482,
+          "cpu_ms": 0.0,
+          "readback_retries": 34,
+          "sleeps": 2,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.28535,
+          "p95_ms": 5.5975,
+          "sum_ms": 111.2686,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.51285,
+          "p95_ms": 3.4578,
+          "sum_ms": 32.6899,
+          "cpu_ms": 0.0,
+          "readback_retries": 4,
+          "sleeps": 4,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.4757,
+          "p95_ms": 3.6066,
+          "sum_ms": 28.6259,
+          "cpu_ms": 31.25,
+          "readback_retries": 35,
+          "sleeps": 3,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.8306,
+          "p95_ms": 4.1978,
+          "sum_ms": 117.354,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.26280000000000003,
+          "p95_ms": 4.3265,
+          "sum_ms": 20.1129,
+          "cpu_ms": 0.0,
+          "readback_retries": 3,
+          "sleeps": 3,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.23775000000000002,
+          "p95_ms": 3.8941,
+          "sum_ms": 21.8527,
+          "cpu_ms": 0.0,
+          "readback_retries": 36,
+          "sleeps": 4,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.80175,
+          "p95_ms": 4.271,
+          "sum_ms": 120.8271,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.2707,
+          "p95_ms": 4.154,
+          "sum_ms": 23.1276,
+          "cpu_ms": 0.0,
+          "readback_retries": 4,
+          "sleeps": 4,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.24014999999999997,
+          "p95_ms": 3.9185,
+          "sum_ms": 21.892599999999998,
+          "cpu_ms": 0.0,
+          "readback_retries": 36,
+          "sleeps": 4,
+          "query_retries": 0
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/0/results.json",
+        "sha256": "fe1c19dff25a122f3ce9e3eb0a68989a5f2e12f645a5253da31c088fcbf96177"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/0/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 0,
+      "adapter_luid": 73789,
+      "driver_version": 2814751477605871,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 12.5092,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 12.3772
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.0413,
+          "p95_ms": 8.4516,
+          "sum_ms": 133.1145,
+          "cpu_ms": 0.0,
+          "readback_retries": 31,
+          "sleeps": 31,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.05375,
+          "p95_ms": 0.1009,
+          "sum_ms": 1.9418,
+          "cpu_ms": 15.625,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.052750000000000005,
+          "p95_ms": 0.0762,
+          "sum_ms": 1.7434,
+          "cpu_ms": 15.625,
+          "readback_retries": 32,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 3.00185,
+          "p95_ms": 7.0384,
+          "sum_ms": 102.1025,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.4518,
+          "p95_ms": 0.8793,
+          "sum_ms": 16.4969,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.43174999999999997,
+          "p95_ms": 0.7402,
+          "sum_ms": 15.8974,
+          "cpu_ms": 31.25,
+          "readback_retries": 32,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.16005,
+          "p95_ms": 15.0451,
+          "sum_ms": 200.7013,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.07744999999999999,
+          "p95_ms": 0.145,
+          "sum_ms": 2.6701,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.0747,
+          "p95_ms": 0.1262,
+          "sum_ms": 2.3473,
+          "cpu_ms": 0.0,
+          "readback_retries": 31,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 8.2303,
+          "p95_ms": 15.4114,
+          "sum_ms": 272.7207,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.09215,
+          "p95_ms": 0.1705,
+          "sum_ms": 3.0494,
+          "cpu_ms": 0.0,
+          "readback_retries": 0,
+          "sleeps": 0,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.07555,
+          "p95_ms": 0.1283,
+          "sum_ms": 2.6253,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 0,
+          "query_retries": 0
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/4318/results.json",
+        "sha256": "a0d10592b0c96971c8ffacf851b78de81aef185d20fa6c0a4dd21a4afaaf5664"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/4318/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 4318,
+      "adapter_luid": 68403,
+      "driver_version": 9007199255791310,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 15.7992,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 15.5323
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 16.6252,
+          "p95_ms": 24.9646,
+          "sum_ms": 485.5425,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.40025,
+          "p95_ms": 15.6789,
+          "sum_ms": 251.24609999999998,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 8.425049999999999,
+          "p95_ms": 15.8061,
+          "sum_ms": 286.7365,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 16.646549999999998,
+          "p95_ms": 25.5888,
+          "sum_ms": 518.9696,
+          "cpu_ms": 15.625,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.402699999999999,
+          "p95_ms": 15.8012,
+          "sum_ms": 247.333,
+          "cpu_ms": 15.625,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 7.983,
+          "p95_ms": 15.9516,
+          "sum_ms": 266.1214,
+          "cpu_ms": 31.25,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 16.627850000000002,
+          "p95_ms": 24.943,
+          "sum_ms": 502.4242,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 4.7692499999999995,
+          "p95_ms": 15.433,
+          "sum_ms": 238.9403,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 4.42925,
+          "p95_ms": 15.6413,
+          "sum_ms": 215.869,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 17.8693,
+          "p95_ms": 26.5585,
+          "sum_ms": 550.289,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 64,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 5.3847000000000005,
+          "p95_ms": 16.6385,
+          "sum_ms": 250.9471,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 7.2842,
+          "p95_ms": 15.5713,
+          "sum_ms": 255.7043,
+          "cpu_ms": 0.0,
+          "readback_retries": 64,
+          "sleeps": 32,
+          "query_retries": 0
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/32902/results.json",
+        "sha256": "64f53754dccbd33b1c43b48e81623a7986d962689d55ec9434c00a27fd186184"
+      },
+      "shader": {
+        "path": "artifacts/dx11-native/gpu-completion-repeat/32902/compute.dxbc",
+        "sha256": "877213834a0af5ba3689ae6888ee3db936a25a1f111ed163e013d967b2a68ef0"
+      },
+      "vendor": 32902,
+      "adapter_luid": 73907,
+      "driver_version": 9007199261368954,
+      "fence_supported": true,
+      "cases": 432,
+      "compared_words": 28767744,
+      "recovery": {
+        "cancel_checks": 2,
+        "cancel_ms": 16.6496,
+        "cancelled": true,
+        "registered_events_drained": true,
+        "submitted_cancellation": true,
+        "subsequent_completion": true,
+        "timeout": true,
+        "timeout_ms": 3.743
+      },
+      "timings": [
+        {
+          "workload": 0,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.135400000000001,
+          "p95_ms": 15.227,
+          "sum_ms": 207.2247,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.33340000000000003,
+          "p95_ms": 7.8272,
+          "sum_ms": 44.3943,
+          "cpu_ms": 15.625,
+          "readback_retries": 5,
+          "sleeps": 5,
+          "query_retries": 0
+        },
+        {
+          "workload": 0,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.2117,
+          "p95_ms": 12.446,
+          "sum_ms": 47.4422,
+          "cpu_ms": 0.0,
+          "readback_retries": 36,
+          "sleeps": 4,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 5.57355,
+          "p95_ms": 15.0556,
+          "sum_ms": 236.3582,
+          "cpu_ms": 15.625,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.783,
+          "p95_ms": 8.2714,
+          "sum_ms": 50.2516,
+          "cpu_ms": 0.0,
+          "readback_retries": 5,
+          "sleeps": 5,
+          "query_retries": 0
+        },
+        {
+          "workload": 1,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.5662,
+          "p95_ms": 12.3231,
+          "sum_ms": 52.5125,
+          "cpu_ms": 0.0,
+          "readback_retries": 37,
+          "sleeps": 5,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.1173,
+          "p95_ms": 15.418,
+          "sum_ms": 212.1782,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.2905,
+          "p95_ms": 4.1925,
+          "sum_ms": 26.4003,
+          "cpu_ms": 0.0,
+          "readback_retries": 3,
+          "sleeps": 3,
+          "query_retries": 0
+        },
+        {
+          "workload": 2,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.27244999999999997,
+          "p95_ms": 10.2299,
+          "sum_ms": 51.8284,
+          "cpu_ms": 0.0,
+          "readback_retries": 36,
+          "sleeps": 5,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "poll",
+          "samples": 32,
+          "median_ms": 4.2713,
+          "p95_ms": 14.6648,
+          "sum_ms": 217.601,
+          "cpu_ms": 0.0,
+          "readback_retries": 32,
+          "sleeps": 32,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "fence",
+          "samples": 32,
+          "median_ms": 0.30925,
+          "p95_ms": 0.6227,
+          "sum_ms": 26.5657,
+          "cpu_ms": 0.0,
+          "readback_retries": 1,
+          "sleeps": 1,
+          "query_retries": 0
+        },
+        {
+          "workload": 3,
+          "mode": "map-fence",
+          "samples": 32,
+          "median_ms": 0.2469,
+          "p95_ms": 5.2441,
+          "sum_ms": 25.6737,
+          "cpu_ms": 0.0,
+          "readback_retries": 35,
+          "sleeps": 3,
+          "query_retries": 0
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/native/gpu_completion_probe.cpp",
+      "sha256": "c299845c8dd7b014096def05f49fd759441d8d698c4292ef2d069f7b234972c4"
+    },
+    {
+      "path": "tools/summarize_gpu_completion.py",
+      "sha256": "546b875332a77d1b2e804ec0aa2756c7f1b19c09d835f995b51542f053a9308b"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "0a55a17a4aecfada13262bfe821cfc3816849190e35a1a046f1cbe9980afc147"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGpuCompletionProbe.exe",
+      "sha256": "d42ac2ef48c543ebc5ae629bbfe910f18e6d1a593e2dc062d271beacff02e9c9"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/gpu-completion-final-build.txt",
+      "sha256": "b343b096ab4cb9922103781a17c2611815ef9f7981864f322b2ba067384d265d"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-initial-failure.json",
+      "sha256": "28b6dc070c3f94546db2034834634e79479e682ee60fca256fe9488f30c580f7"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-retry-identities.json",
+      "sha256": "eff7e705a5df790c91b5c5f58c972cf62c6a704b417af4cecaf937501f31a23a"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-negative.json",
+      "sha256": "b8a5ae7cf1a3c5583ed84eef1cb59f57b15adff315c178c161d80de6b9f01287"
+    }
+  ]
+}
