@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/pixel-derivative-final/0/results.json",
+      "sha256": "dc30985ce2ab36204684979f386da6996e575c921267010c1daaf487844b564f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-derivative-final/4318/results.json",
+      "sha256": "ea43bb2c8367eea736c69721d90990898e9ce16bc81decd65477a8eec1bc8ac6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-derivative-final/32902/results.json",
+      "sha256": "50205e046ff9caa82d58809c39b194ba6fce17b25a42b96de23a44066145bc96"
+    }
+  ],
+  "shader_sha256": {
+    "ddx-uniform": "0b7cc2cd8fc5feeca663e2c23b7fc405b1594e83e26f6d572dfeacf61b11002e",
+    "ddx-discard": "eb8f6a433b9d577a92f0cdda1fd654527d1540cdba330a53e6644f072fe75508",
+    "ddx-reconverge": "cdd772f33d43e3c9a1495646ff94294c829e0e29d8d0aff83df64d61e306708e",
+    "ddx-loop": "c7e7d531949b106d4e012aeeeb7047b2f684963aa58ced658a2809c5c8c33336",
+    "ddy-uniform": "6031567f02794c8f0e93f2d12858008bd145d651c868de7bb314ccd9923295de",
+    "ddy-discard": "60c14e7a4de18faaedcd8d371d85dbd8af7e81a779c12aead5fb3555175c7fa9",
+    "ddy-reconverge": "50eb13f7ce6abe9e3c1a105fb2ab34e01052f0bb58323db1edb280dfbfa579c6",
+    "ddy-loop": "981c2d36aa4924a8e00b166544fa162b12fdb2952680af98a35f22c503044291",
+    "ddx_coarse-uniform": "48e7e1a2a2be32dab7254a0cf9ed8f57b888141a1fa14cf681ee46d5502b242b",
+    "ddx_coarse-discard": "ef8157ea8bf5fb15e97b608961b36a76b88f2d79d1d6d8be9e918cebb073c23c",
+    "ddx_coarse-reconverge": "a6ef3ca7998dc770fbaffe52533b2b4e3efd020622a19cddb0877cb526231aac",
+    "ddx_coarse-loop": "8399b0ce070fa718c689cda802a0e0e160c0743bd35d6b6658a0b9c7e0a50551",
+    "ddx_fine-uniform": "ccd282df92ddca72124f713ab5766ffd15ca2c54c2180f3c755b59777c980b56",
+    "ddx_fine-discard": "76a0bcc98d898e52b917c07c46a9c1c57a40e91e2d14edc6061266d44bcf1fde",
+    "ddx_fine-reconverge": "2bc3504b0c70e21ed2c9c8baffc567c87462b55164045139ce92bf476404b1a4",
+    "ddx_fine-loop": "b3a2e92735857dc47b9bcfe40b58c4e74d933cee2db51bc9e4635d2660d98907",
+    "ddy_coarse-uniform": "e3ce2a5ae02fcd57a7a610357d052acd26cc499f5ea97c30b02ffa0a309ab35e",
+    "ddy_coarse-discard": "7a23dcab6a86f3f97be5796cd942a52e808e8abf0feb12139912a7d3dff92d1a",
+    "ddy_coarse-reconverge": "ad02f940f47cbcafb63475534cb8fb069d2bd3e0cf15b759785db8e566642f65",
+    "ddy_coarse-loop": "e1b89b34abb1ba982dda7309c78c6c55fb0fb3a32b8aeb4b9176bf9d25a233a3",
+    "ddy_fine-uniform": "c2e0a68773ec7aa8839ad7a78765af1b6194408a623c3742632049fd6334def2",
+    "ddy_fine-discard": "0d1cc85883ad575ec7445d06140c91d4c8f0cc02f2f5b2ea9e1c9b2963d1e6e5",
+    "ddy_fine-reconverge": "5cf14849e1c8ab4ca83b169472a45d045e763a7693ccb9469e837b4602b84f08",
+    "ddy_fine-loop": "8b946f43c14e4ed27956dda0983de3f8ed94e5d778949d694b36c1fecd8d4a8f"
+  },
+  "counts": {
+    "cases": 1008,
+    "compiler_rejections": 18,
+    "inactive_vectors": 2520,
+    "finite_fine_components": 1008,
+    "finite_coarse_components": 2016,
+    "special_active_vectors": 756
+  },
+  "observed_coarse_pairs": {
+    "0-ddx": [
+      0
+    ],
+    "0-ddy": [
+      0
+    ],
+    "0-ddx_coarse": [
+      0
+    ],
+    "0-ddy_coarse": [
+      0
+    ],
+    "4318-ddx": [
+      0
+    ],
+    "4318-ddy": [
+      0
+    ],
+    "4318-ddx_coarse": [
+      0
+    ],
+    "4318-ddy_coarse": [
+      0
+    ],
+    "32902-ddx": [
+      0
+    ],
+    "32902-ddy": [
+      0
+    ],
+    "32902-ddx_coarse": [
+      0
+    ],
+    "32902-ddy_coarse": [
+      0
+    ]
+  },
+  "coarse_pair_is_portable_guarantee": false,
+  "captured_quad_alignment_validated": false,
+  "helper_uav_side_effects_validated": false,
+  "complete_release_acceptance": false,
+  "probe_binary": {
+    "path": "build/vs2022/Release/FloraPixelDerivativeProbe.exe",
+    "sha256": "e7fafa6056e61d94005f9a41b700669c986d832374a4b59a6d9fb0e84aaa74be"
+  },
+  "probe_source": {
+    "path": "tools/native/pixel_derivative_probe.cpp",
+    "sha256": "334f8013b7c9a1d48202e3f2b7c849acdf8bfd2ea1653b1d06423d7eabd0ec14"
+  }
+}
