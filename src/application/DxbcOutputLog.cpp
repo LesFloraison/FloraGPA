@@ -152,7 +152,7 @@ class LogProgram {
                 throw std::runtime_error("Output write exceeds log register allocation");
             output = Destination{begin, pos, reg, mask, Row(row.begin() + begin, row.begin() + pos)};
         }
-        if (pos != row.size())
+        if (pos != row.size() && !dxbc_detail::samplePositionPadding(row, pos))
             throw std::runtime_error("Unsupported output log instruction layout " + std::to_string(opcode));
         return output;
     }

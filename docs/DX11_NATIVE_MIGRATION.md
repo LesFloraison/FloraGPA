@@ -463,8 +463,15 @@ debugger parity and P5/P7/P8 gates remain open.
 The follow-up also recognizes count-1 MS views by their actual SRV dimension.
 Independent sample-query research records the accepted count-1 load behavior
 and an unresolved Intel rasterizer/SRV center-position discrepancy in
-`DX11_SAMPLE_QUERY_RESEARCH.md`; sample-info/position interpreter execution is
-still pending.
+`DX11_SAMPLE_QUERY_RESEARCH.md`. The follow-up query executor supports
+`sampleinfo` and `samplepos` using separate native SRV/rasterizer observations,
+input identity `independent-replay-resource-inputs/6` and input-probe schema 5.
+The 375-test suite includes six CS/native-dispatch comparisons. No-target
+rasterizer values remain explicitly unknown: independent probes found
+order-dependent behavior on the local Intel and NVIDIA devices. Its 72
+unknown-propagation cases do not close that acceptance item. See
+`DX11_DXBC_SAMPLE_QUERY_IMPLEMENTATION.md` for the exact supported matrix and
+remaining forced-count, depth-only, stage and integration scope.
 
 ## Delivery constraints
 

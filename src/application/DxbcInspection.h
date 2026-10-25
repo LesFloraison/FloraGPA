@@ -12,5 +12,6 @@ nlohmann::json signature(Bytes bytes, bool streamed = false);
 Masks occupied(const nlohmann::json &signature, const DxbcProgram &program, unsigned kind);
 size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> &found, unsigned depth = 0,
                bool staticUavs = true);
+bool samplePositionPadding(const std::vector<uint32_t> &row, size_t operandEnd);
 std::set<unsigned> uavSlots(const DxbcProgram &program, Parts &parts);
 } // namespace flora::dxbc_detail

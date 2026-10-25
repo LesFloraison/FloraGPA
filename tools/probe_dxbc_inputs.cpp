@@ -21,6 +21,15 @@ std::string hash(Bytes bytes) {
 Bytes sampleBytes(const std::vector<std::array<uint32_t, 4>> &values) {
     return {reinterpret_cast<const uint8_t *>(values.data()), values.size() * 16};
 }
+template <class T> Json sampleQuery(const T &query) {
+    return {{"observed", query.observed},
+            {"count", query.count},
+            {"resource_samples", query.resourceSamples},
+            {"quality", query.quality},
+            {"forced_samples", query.forcedSamples},
+            {"multisample_enabled", query.multisampleEnabled},
+            {"positions", query.positions}};
+}
 uint64_t number(const QString &text) {
     bool ok = false;
     const auto result = text.toULongLong(&ok, 0);
@@ -40,7 +49,7 @@ int main(int argc, char **argv) {
         return 2;
     }
     Json report{
-        {"schema", 4},
+        {"schema", 5},
         {"scope", execute ? "native_dxbc_compute_group_probe" : "native_dxbc_resource_input_observation"},
         {"complete_release_acceptance", false},
         {"shader_execution_performed", false},
@@ -135,6 +144,7 @@ int main(int argc, char **argv) {
                                                 {"slice_pitch", sub.slicePitch}});
             report["textures"].push_back(item);
         }
+        report["sample_queries"] = Json::array();
         for (const auto &[reg, view] : snapshot.inputs.textures->views) {
             if (!view.resource)
                 continue;
@@ -156,6 +166,10 @@ int main(int argc, char **argv) {
             if (view.depthSlices)
                 item["depth_slices"] = *view.depthSlices;
             item["samples_available"] = bool(view.samples);
+            if (view.queries)
+                report["sample_queries"].push_back({{"kind", reg.kind},
+                                                    {"slot", reg.indices.at(0)},
+                                                    {"observation", sampleQuery(*view.queries)}});
             if (view.samples) {
                 const auto &samples = *view.samples;
                 if (!sampleHashes.contains(&samples)) {
@@ -180,6 +194,11 @@ int main(int argc, char **argv) {
             }
             report["texture_views"].push_back(item);
         }
+        if (snapshot.inputs.textures->rasterizerQueries)
+            report["sample_queries"].push_back(
+                {{"kind", 14},
+                 {"slot", nullptr},
+                 {"observation", sampleQuery(*snapshot.inputs.textures->rasterizerQueries)}});
         for (const auto &[id, counter] : snapshot.inputs.memory->counters()) {
             Json item{{"view", id},
                       {"kind", counter.kind == dxbc_exec::CounterKind::Ordered ? "ordered" : "append"},
@@ -273,7 +292,24 @@ int main(int argc, char **argv) {
                             if (comparisonTimer.elapsed() >= 30000)
                                 throw std::runtime_error("Native comparison timed out");
                         };
-                        auto checkBefore = [&](Replay &source) {
+                        auto checkBefore = [&](Replay &source, ID3D11DeviceContext *context) {
+                            for (const auto &item : report["sample_queries"]) {
+                                checkTime();
+                                if (!item["observation"]["observed"].get<bool>())
+                                    throw std::runtime_error(
+                                        "Native comparison has unresolved sample queries");
+                                Com<ID3D11ShaderResourceView> srv;
+                                if (item["kind"] == 7) {
+                                    context->CSGetShaderResources(item["slot"].get<UINT>(), 1, &srv);
+                                    if (!srv)
+                                        throw std::runtime_error(
+                                            "Native comparison sample query view is missing");
+                                }
+                                const auto actual = source.observeSampleQueries(
+                                    srv.Get(), [&] { return comparisonTimer.elapsed() >= 30000; });
+                                if (sampleQuery(actual) != item["observation"])
+                                    throw std::runtime_error("Native comparison sample query input mismatch");
+                            }
                             for (const auto &item : report["buffers"]) {
                                 checkTime();
                                 if (hash(source.readBuffer(item["resource"].get<uint64_t>())) !=
@@ -308,7 +344,9 @@ int main(int argc, char **argv) {
                                     throw std::runtime_error("Native comparison multisample input mismatch");
                             }
                         };
-                        checkBefore(replay);
+                        replay.inspectNativeState([&](ID3D11DeviceContext *context, const auto &) {
+                            checkBefore(replay, context);
+                        });
                         comparison["original_observed_resources_unchanged"] = true;
                         options.before = false;
                         Replay reference(frame, options);
@@ -330,13 +368,14 @@ int main(int argc, char **argv) {
                                                       desc.AdapterLuid.LowPart;
                                 if (luid != snapshot.adapterLuid)
                                     throw std::runtime_error("Native comparison adapter mismatch");
-                                checkBefore(reference);
+                                checkBefore(reference, context);
                                 beforeSeen = true;
                             });
                         if (!beforeSeen)
                             throw std::runtime_error("Native comparison did not observe the selected event");
                         comparison["matching_native_inputs"] = true;
                         comparison["multisample_inputs_checked"] = report["multisample_inputs"].size();
+                        comparison["sample_queries_checked"] = report["sample_queries"].size();
                         comparison["resources"] = Json::array();
                         auto compare = [&](uint64_t id, const auto &expected, auto actual) {
                             checkTime();

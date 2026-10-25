@@ -6,6 +6,51 @@
 #include <limits>
 
 namespace flora::dxbc_exec {
+Value TextureInputs::sampleQuery(const Register &binding, uint32_t dimension, bool position, bool integer,
+                                 const Value &sample, bool &assisted) const {
+    assisted = false;
+    const SampleQueryInput *query = nullptr;
+    if (binding.kind == 14) {
+        if (!binding.indices.empty() || dimension)
+            throw std::runtime_error("Invalid rasterizer sample query binding");
+        query = rasterizerQueries.get();
+    } else {
+        if (binding.kind != 7 || binding.indices.size() != 1 || (dimension != 4 && dimension != 9))
+            throw std::runtime_error("Invalid sample query resource binding");
+        const auto selected = views.find(binding);
+        if (selected == views.end())
+            return {};
+        const auto &view = selected->second;
+        if (!view.resource)
+            return Value::known({});
+        if (view.dimension != (dimension == 4 ? 6u : 7u))
+            throw std::runtime_error("Sample query dimension disagrees with its native view");
+        query = view.queries.get();
+    }
+    if (!query)
+        return {};
+    if (!query->observed) {
+        if (query->count || !query->positions.empty())
+            throw std::runtime_error("Unobserved sample query contains values");
+        Value result;
+        result.valid = position ? 12 : 14;
+        return result;
+    }
+    if (query->count > 32 || query->positions.size() != query->count)
+        throw std::runtime_error("Invalid sample query observation");
+    for (const auto &bits : query->positions)
+        if (bits[2] || bits[3])
+            throw std::runtime_error("Invalid sample position observation");
+    Value result = Value::known({});
+    if (!position)
+        result.bits[0] = integer ? query->count : std::bit_cast<uint32_t>(float(query->count));
+    else if (!(sample.valid & 1))
+        result.valid = 12;
+    else if (sample.bits[0] < query->count)
+        result.bits = query->positions.at(sample.bits[0]);
+    assisted = true;
+    return result;
+}
 Value TextureInputs::dimensions(const Register &binding, uint32_t dimension, const Value &mip, uint32_t mode,
                                 GpuOperations *gpu, bool &assisted) const {
     assisted = false;

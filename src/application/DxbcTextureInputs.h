@@ -13,6 +13,12 @@ struct TextureInput {
     float minLod = 0;
     std::vector<TextureSubresource> subresources;
 };
+struct SampleQueryInput {
+    bool observed = false;
+    uint32_t count = 0, resourceSamples = 1, quality = 0, forcedSamples = 0;
+    bool multisampleEnabled = false;
+    std::vector<std::array<uint32_t, 4>> positions;
+};
 struct TextureInputView {
     std::optional<uint64_t> resource; // Null is a verified unbound slot.
     uint32_t format = 0, dimension = 0;
@@ -27,12 +33,16 @@ struct TextureInputView {
         std::vector<std::array<uint32_t, 4>> values;
     };
     std::shared_ptr<const Samples> samples;
+    std::shared_ptr<const SampleQueryInput> queries;
 };
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
     // Native D3D11 SRV/UAV dimensions; missing resource storage stays unavailable.
     std::map<Register, TextureInputView> views;
+    std::shared_ptr<const SampleQueryInput> rasterizerQueries;
+    Value sampleQuery(const Register &, uint32_t dimension, bool position, bool integer, const Value &sample,
+                      bool &assisted) const;
     static uint32_t loadReturnType(uint32_t format);
     Value loadMultisample(const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                           const Value &sample, const std::array<uint32_t, 4> &swizzle, uint32_t mask,

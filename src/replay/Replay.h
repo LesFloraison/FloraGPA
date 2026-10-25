@@ -110,6 +110,12 @@ struct NativeTextureStorage {
     std::vector<uint8_t> bytes;
     float minLod = 0;
 };
+struct NativeSampleQueries {
+    bool observed = false;
+    uint32_t count = 0, resourceSamples = 1, quality = 0, forcedSamples = 0;
+    bool multisampleEnabled = false;
+    std::vector<std::array<uint32_t, 4>> positions;
+};
 struct PlanarWrite {
     Id event{}, resource{};
     uint32_t subresource{}, format{}, mapType{};
@@ -390,11 +396,15 @@ class Replay {
     std::vector<uint8_t> readTexture(Id id);
     NativeTextureStorage observeTextureStorage(Id id, uint64_t maxBytes, const CancelCheck &cancelled = {});
     NativeTextureMetadata observeTextureMetadata(Id id);
+    // A null SRV selects the current rasterizer. Results use private diagnostic outputs.
+    NativeSampleQueries observeSampleQueries(ID3D11ShaderResourceView *srv, const CancelCheck &cancelled = {},
+                                             uint32_t timeoutMs = 5000);
     // Typed sample bits in layer/y/x/sample order, followed by one spatial out-of-bounds value.
     // These are shader observations, not a reconstruction of multisampled storage bytes.
-    std::vector<std::array<uint32_t, 4>> observeTextureSamples(
-        Id id, const D3D11_SHADER_RESOURCE_VIEW_DESC &, uint32_t returnType, uint64_t maxBytes,
-        const CancelCheck &cancelled = {}, uint32_t timeoutMs = 30000);
+    std::vector<std::array<uint32_t, 4>> observeTextureSamples(Id id, const D3D11_SHADER_RESOURCE_VIEW_DESC &,
+                                                               uint32_t returnType, uint64_t maxBytes,
+                                                               const CancelCheck &cancelled = {},
+                                                               uint32_t timeoutMs = 30000);
     // Nullopt retains the complete-storage path for MSAA, depth and grouped formats.
     std::optional<std::vector<uint8_t>> readTexturePoint(Id id, uint32_t x, uint32_t y, uint32_t slice,
                                                          uint32_t mip, uint32_t layer);

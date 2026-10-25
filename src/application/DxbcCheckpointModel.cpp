@@ -384,7 +384,7 @@ InstructionOperands instructionOperands(const Words &row) {
         result.ranges.emplace_back(pos, end);
         pos = end;
     }
-    if (pos != row.size())
+    if (pos != row.size() && !dxbc_detail::samplePositionPadding(row, pos))
         fail("Unsupported shader checkpoint instruction layout");
     return result;
 }

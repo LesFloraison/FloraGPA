@@ -662,7 +662,17 @@ pass another 118 tests, with zero failures/skips across the three-suite run in
 67.37 seconds. The latest unique checkpoint total is 3,437; earlier results are
 retained. `DX11_SAMPLE_QUERY_RESEARCH.md` separately records 3,132 query/load
 observations and the unresolved Intel center-quality rasterizer query discrepancy.
-Sample-info/position instruction execution remains pending.
+The subsequent implementation adds sample-info/position execution, with 375
+passing tests and no failures/skips in 106.805 seconds. This includes 288 verified
+query matrix cases, six native CS comparisons and six cancellation/state checks;
+72 cases verify unknown propagation for unresolved no-target rasterizer queries.
+It does not treat those 72 cases as recovered native semantics. The expanded
+format suite passes 16 cases. Input identity is now
+`independent-replay-resource-inputs/6` and the input probe report is version 5.
+See `DX11_DXBC_SAMPLE_QUERY_IMPLEMENTATION.md` and its evidence ledger.
+The latest nine-suite checkpoint totals 1,639 passes with zero failures/skips;
+GUI, CLI and Worker Release builds pass. This count is a focused regression set,
+not a rerun of the entire baseline or a complete removal acceptance claim.
 
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency

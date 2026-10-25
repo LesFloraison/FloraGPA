@@ -1,4 +1,5 @@
 #include "DxbcInputSnapshot.h"
+#include "DxbcCheckpointModel.h"
 #include "DxbcGpuOperations.h"
 #include "DxbcTypedBuffer.h"
 #include "core/UavCounters.h"
@@ -33,6 +34,23 @@ class Snapshot {
     std::map<uint64_t, Counter> counters;
     std::shared_ptr<TextureInputs> textures = std::make_shared<TextureInputs>();
     InputSnapshot result;
+    bool queryResources = false, queryRasterizer = false;
+    std::shared_ptr<const SampleQueryInput> sampleQueries(ID3D11ShaderResourceView *srv) {
+        auto observed = replay.observeSampleQueries(srv, cancelled);
+        const auto bytes = observed.positions.size() * 16 + 21;
+        if (bytes > budget - used)
+            throw std::runtime_error("Sample query observation byte budget exceeded");
+        used += bytes;
+        auto query = std::make_shared<SampleQueryInput>();
+        query->observed = observed.observed;
+        query->count = observed.count;
+        query->resourceSamples = observed.resourceSamples;
+        query->quality = observed.quality;
+        query->forcedSamples = observed.forcedSamples;
+        query->multisampleEnabled = observed.multisampleEnabled;
+        query->positions = std::move(observed.positions);
+        return query;
+    }
     Id objectId(IUnknown *object, uint16_t type) const {
         if (!object)
             return 0;
@@ -391,6 +409,19 @@ class Snapshot {
             view({7, {slot}}, native, id, desc.Format, desc.ViewDimension, desc.BufferEx.FirstElement,
                  desc.BufferEx.NumElements,
                  desc.ViewDimension == D3D11_SRV_DIMENSION_BUFFEREX ? desc.BufferEx.Flags : 0, experimental);
+            if (queryResources && native &&
+                (desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2DMS ||
+                 desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY)) {
+                auto &selected = textures->views.at({7, {slot}});
+                for (const auto &[binding, other] : textures->views)
+                    if (other.queries && other.resource == selected.resource &&
+                        other.nativeDescriptor == selected.nativeDescriptor) {
+                        selected.queries = other.queries;
+                        break;
+                    }
+                if (!selected.queries)
+                    selected.queries = sampleQueries(native);
+            }
         }
         Objects<ID3D11UnorderedAccessView, 64> uavs;
         const UINT limit = replay.featureLevel() >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
@@ -447,8 +478,25 @@ class Snapshot {
             shader(context, &ID3D11DeviceContext::CSGetShader, 0x93);
             break;
         }
+        for (const auto &[tag, bytes] : readDxbcParts(result.bytecode))
+            if (tag == 0x58454853 || tag == 0x52444853)
+                for (const auto &words : readDxbcProgram(bytes).instructions)
+                    if ((words[0] & 2047) == 110 || (words[0] & 2047) == 111) {
+                        checkpoint::InstructionOperands operands;
+                        try {
+                            operands = checkpoint::instructionOperands(words);
+                        } catch (const std::exception &error) {
+                            throw std::runtime_error(std::string(error.what()) + ": " +
+                                                     nlohmann::json(words).dump());
+                        }
+                        const auto kind = (words.at(operands.ranges.at(1).first) >> 12) & 255;
+                        queryResources |= kind == 7;
+                        queryRasterizer |= kind == 14;
+                    }
         constants(context);
         resources(context);
+        if (queryRasterizer)
+            textures->rasterizerQueries = sampleQueries(nullptr);
         checkCancellation(cancelled);
         std::shared_ptr<GpuOperations> gpu;
         if ((!textures->metadata.empty() && replay.featureLevel() >= D3D_FEATURE_LEVEL_11_0) ||

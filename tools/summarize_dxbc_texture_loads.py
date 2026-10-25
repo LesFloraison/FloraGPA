@@ -49,10 +49,10 @@ def passed(run):
 
 def execution_report(path):
     report = json.loads(path.read_text(encoding="utf-8-sig"))
-    if report.get("schema") not in (3, 4) or report.get("scope") != "native_dxbc_compute_group_probe":
+    if report.get("schema") not in (3, 4, 5) or report.get("scope") != "native_dxbc_compute_group_probe":
         raise ValueError(f"Unexpected execution probe schema: {path}")
     return {**identity(path), **{key: report.get(key) for key in (
-        "schema", "capture", "event", "stage", "frame_sha256", "shader", "shader_sha256", "source", "multisample_inputs",
+        "schema", "capture", "event", "stage", "frame_sha256", "shader", "shader_sha256", "source", "multisample_inputs", "sample_queries",
         "adapter_vendor", "adapter_device", "adapter_luid", "observed", "error",
         "shader_execution_performed", "unavailable", "execution", "elapsed_ms")}}
 

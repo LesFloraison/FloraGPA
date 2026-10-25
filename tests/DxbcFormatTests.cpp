@@ -1,4 +1,5 @@
 #include "application/DxbcCheckpointModel.h"
+#include "application/DxbcExecution.h"
 #include "application/DxbcOutputLog.h"
 #include "application/DxbcSystemId.h"
 #include "application/HlslCompilation.h"
@@ -10,6 +11,72 @@ using Json = nlohmann::json;
 class DxbcFormatTests final : public QObject {
     Q_OBJECT
   private slots:
+    void samplePositionPadding_data() {
+        QTest::addColumn<uint32_t>("sample");
+        QTest::addColumn<bool>("vertex");
+        for (uint32_t sample : {0u, 1u, 3u, 4u, 5u})
+            for (bool vertex : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(sample).arg(vertex))) << sample << vertex;
+    }
+    void samplePositionPadding() {
+        QFETCH(uint32_t, sample);
+        QFETCH(bool, vertex);
+        try {
+            const std::string signature = vertex ? "float4 main(uint id:SV_VertexID):SV_Position{"
+                                                 : "float4 main(uint id:SV_PrimitiveID):SV_Target{";
+            const auto index = sample == 4 ? "index" : sample == 5 ? "id" : std::to_string(sample);
+            const auto compiled =
+                compileHlsl("Texture2DMS<float> t:register(t0);cbuffer Params{uint index;}" + signature +
+                                "return float4(t.GetSamplePosition(" + index + "),id,1);}",
+                            vertex ? "vs_5_0" : "ps_5_0")
+                    .bytecode;
+            dxbc_exec::Program accepted(compiled);
+            bool found = false;
+            for (auto parts = readDxbcParts(compiled); auto &[tag, bytes] : parts) {
+                if (tag != 0x58454853 && tag != 0x52444853)
+                    continue;
+                auto code = readDxbcProgram(bytes);
+                for (auto &instruction : code.instructions) {
+                    if ((instruction[0] & 2047) != 110)
+                        continue;
+                    found = true;
+                    const auto parsed = checkpoint::instructionOperands(instruction);
+                    QCOMPARE(parsed.ranges.size(), size_t(3));
+                    const auto end = parsed.ranges.back().second;
+                    QVERIFY(dxbc_detail::samplePositionPadding(instruction, end));
+                    if (sample < 4)
+                        QCOMPARE(instruction[end - 1], sample);
+                    auto malformed = instruction;
+                    malformed.back() = 1;
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpoint::instructionOperands(malformed));
+                    malformed = instruction;
+                    malformed.resize(end - 1);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpoint::instructionOperands(malformed));
+                    malformed = instruction;
+                    malformed[0] = (malformed[0] & ~2047u) | 54;
+                    QVERIFY(!dxbc_detail::samplePositionPadding(malformed, end));
+                    malformed = instruction;
+                    malformed.resize(parsed.ranges.back().first);
+                    malformed.insert(malformed.end(), {0x4002, 0, 0, 0, 0, 0});
+                    QVERIFY(!dxbc_detail::samplePositionPadding(malformed, malformed.size() - 1));
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpoint::instructionOperands(malformed));
+                    qInfo().noquote()
+                        << QString::fromStdString(Json{{"samplepos_tokens", instruction}}.dump());
+                    instruction.back() = 1;
+                    bytes = writeDxbcProgram(code);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, dxbc_exec::Program(makeDxbc(parts)));
+                }
+            }
+            QVERIFY(found);
+            const auto transformed =
+                vertex ? instrumentOutputWrites(offsetSystemId(compiled, 7, 6).bytes, 7, 32).bytes : compiled;
+            Com<ID3DBlob> text;
+            check(D3DDisassemble(transformed.data(), transformed.size(), 0, nullptr, &text),
+                  "Validate transformed sample positions");
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void feedbackOperands_data() {
         QTest::addColumn<uint32_t>("opcode");
         QTest::addColumn<uint32_t>("operands");

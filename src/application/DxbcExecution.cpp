@@ -332,7 +332,7 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
-            if (pos != words.size())
+            if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
         } else if (op == 88 || op == 156) {
             size_t pos = 1;
@@ -733,6 +733,66 @@ Step Lane::step() {
         if (condition(0)) {
             done = true;
             result.discarded = true;
+        }
+    } else if (op == 110 || op == 111) {
+        const bool position = op == 110;
+        const auto &destination = args[0], &resource = args[1];
+        if ((instruction.words[0] & (position ? 0x00fff800u : 0x00fff000u)) || destination.modifier ||
+            destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.modifier ||
+            resource.components != 2 || (resource.mode != 1 && resource.mode != 2) ||
+            (resource.kind != 7 && resource.kind != 14) ||
+            (resource.kind == 14 ? !resource.indices.empty()
+                                 : resource.indices.size() != 1 || resource.indices[0].relative))
+            fail("Invalid DXBC sample query operands");
+        const auto binding = s.address(resource);
+        uint32_t dimension = 0, returns = 0;
+        if (resource.kind == 7) {
+            const auto declaration = p.typedResources.find(binding);
+            if (declaration == p.typedResources.end() ||
+                (declaration->second.first != 4 && declaration->second.first != 9))
+                fail("Invalid DXBC sample query declaration");
+            dimension = declaration->second.first;
+            returns = declaration->second.second;
+        }
+        std::set<uint32_t> extensions;
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+            const auto token = instruction.words.at(pos), kind = token & 63;
+            if (!extensions.insert(kind).second || !dimension)
+                fail("Invalid DXBC sample query extension");
+            if (kind == 2) {
+                if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
+                    fail("Sample query dimension extension disagrees with its declaration");
+            } else if (kind == 3) {
+                if (((token >> 6) & 0xffff) != returns || (token & 0x7fc00000))
+                    fail("Sample query return extension disagrees with its declaration");
+            } else
+                fail("Unsupported DXBC sample query extension");
+        }
+        Value sample;
+        if (position) {
+            const auto &index = args[2];
+            if (index.modifier || (index.components != 1 && !(index.components == 2 && index.mode == 2)))
+                fail("Invalid DXBC sample position index");
+            sample = s.source(index, true);
+        }
+        const auto value = s.inputs.textures
+                               ? s.inputs.textures->sampleQuery(binding, dimension, position,
+                                                                (instruction.words[0] & 0x800u) != 0, sample,
+                                                                result.memoryGpuAssisted)
+                               : Value{};
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned c = 0; c < 4; ++c)
+                if ((destination.mask & (1u << c)) &&
+                    (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                    after.bits[c] = value.bits[resource.select[c]];
+                    after.valid = uint8_t((after.valid & ~(1u << c)) |
+                                          (((value.valid >> resource.select[c]) & 1u) << c));
+                }
+            result.changes.push_back({target, before, after});
         }
     } else if (op == 61) {
         const auto &destination = args[0], &level = args[1], &resource = args[2];

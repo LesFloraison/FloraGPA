@@ -371,7 +371,7 @@ class DxbcMultisampleTests final : public QObject {
             const auto report = nlohmann::json::parse(file.readAll().toStdString());
             QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
                      report.dump().c_str());
-            QCOMPARE(report.at("schema").get<unsigned>(), 4u);
+            QCOMPARE(report.at("schema").get<unsigned>(), 5u);
             QVERIFY(report.at("observed").get<bool>());
             QCOMPARE(report.at("adapter_luid").get<uint64_t>(), probeAdapters.at(vendor));
             QCOMPARE(report.at("multisample_inputs").size(), size_t(1));

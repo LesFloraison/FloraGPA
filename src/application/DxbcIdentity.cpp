@@ -177,6 +177,26 @@ size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> 
         throw std::runtime_error("Truncated DXBC operand");
     return pos;
 }
+bool samplePositionPadding(const std::vector<uint32_t> &row, size_t end) {
+    // D3DCompiler emits one trailing zero for SRV SAMPLE_POS, including dynamic indices.
+    if (row.empty() || (row[0] & 2047) != 110 || end < 2 || end + 1 != row.size() || row[end] != 0)
+        return false;
+    size_t start = 1;
+    try {
+        for (auto extended = row[0] >> 31; extended;)
+            extended = row.at(start++) >> 31;
+        std::set<unsigned> unused;
+        start = operand(row, start, unused, 0, false);
+        if (((row.at(start) >> 12) & 255) != 7)
+            return false;
+        start = operand(row, start, unused, 0, false);
+        const auto token = row.at(start);
+        const bool scalar = (token & 3) == 1 || ((token & 3) == 2 && ((token >> 2) & 3) == 2);
+        return scalar && operand(row, start, unused, 0, false) == end;
+    } catch (const std::exception &) {
+        return false;
+    }
+}
 std::set<unsigned> uavSlots(const DxbcProgram &program, Parts &parts) {
     std::set<unsigned> declared, used;
     const std::map<unsigned, unsigned> counts{
