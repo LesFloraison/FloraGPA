@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "scope": "independent_implicit_pixel_sampling",
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-independent/0/results.json",
+      "sha256": "8030c4d99b638397e46e265710aea1277859b86de361d7a7be9a5023bb712e0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-independent/4318/results.json",
+      "sha256": "0bd4dfbfa7edac7aa4eed4358bfca09683c2ef102698fb0475e59fad0b95b4dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-independent/32902/results.json",
+      "sha256": "d5a65a9c6462be593f5e32392867a31b628984f028a0b8f3caf43b41f9ba16c4"
+    }
+  ],
+  "shader_sha256": {
+    "sample-uniform-0.dxbc": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3",
+    "sample-discard-0.dxbc": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11",
+    "sample-reconverge-0.dxbc": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6",
+    "sample-loop-0.dxbc": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059",
+    "sample-uniform-1.dxbc": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910",
+    "sample-discard-1.dxbc": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c",
+    "sample-reconverge-1.dxbc": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35",
+    "sample-loop-1.dxbc": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630",
+    "sample_b-uniform-0.dxbc": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1",
+    "sample_b-discard-0.dxbc": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112",
+    "sample_b-reconverge-0.dxbc": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1",
+    "sample_b-loop-0.dxbc": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b",
+    "sample_b-uniform-1.dxbc": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df",
+    "sample_b-discard-1.dxbc": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58",
+    "sample_b-reconverge-1.dxbc": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7",
+    "sample_b-loop-1.dxbc": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6",
+    "sample_c-uniform-0.dxbc": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d",
+    "sample_c-discard-0.dxbc": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f",
+    "sample_c-reconverge-0.dxbc": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556",
+    "sample_c-loop-0.dxbc": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe",
+    "sample_c-uniform-1.dxbc": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2",
+    "sample_c-discard-1.dxbc": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873",
+    "sample_c-reconverge-1.dxbc": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4",
+    "sample_c-loop-1.dxbc": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+  },
+  "counts": {
+    "cases": 9408,
+    "defined_active_vectors": 17856,
+    "undefined_active_vectors": 372,
+    "untouched_vectors": 19404,
+    "analytical_point_vectors": 540,
+    "zero_resource_vectors": 1116
+  },
+  "coverage_differences": [],
+  "captured_invocations_validated": false,
+  "complete_release_acceptance": false,
+  "binary": {
+    "path": "build/vs2022/Release/FloraPixelSamplingProbe.exe",
+    "sha256": "9be96beef178e630b4360950d2a034645b5f3766d78c411ffaf9e9b0de574875"
+  },
+  "source": {
+    "path": "tools/native/pixel_sampling_probe.cpp",
+    "sha256": "6d1e08d5288d60f46e806e745170cec07cb70f9be559754eb1162576fe29ed1c"
+  }
+}
