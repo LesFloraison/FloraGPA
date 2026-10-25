@@ -50,3 +50,58 @@ The next acceptance step is exact whole-output comparison with the independently
 compiled shader executed by `dxbc_exec::Group`. Participation, branch identity,
 dynamic loop iteration, original flat lane index and group dimensions must be
 preserved. A matching scalar sample alone does not establish that acceptance.
+
+## Native execution checkpoint
+
+The initial six-flow WARP comparison passed four flows and failed the explicit
+branches and staggered arrival cases. The old scheduler issued 64 scalar GPU
+operations for the branch case, and 33 operations for staggered arrival. Their
+raw component differences remain in `sample-group-first.txt`; the independent
+oracle is unchanged.
+
+`bounded-sampling-rendezvous/3` now gathers runnable invocations at sampling
+boundaries, issues separate cohorts for distinct instruction/call/loop identities,
+and drains the staged results before allowing any subsequent instruction. Its
+4,096-instruction gathering limit permits a sampled value to unblock a polling
+thread. It remains a deterministic diagnostic schedule, not a reconstruction of
+the actual GPU schedule. Long divergence that exceeds the gathering bound,
+arbitrary calls and mixed dynamic bindings still need dedicated evidence.
+
+The complete comparison has 288 hardware rows. Every raw output component and
+validity byte must match, including untouched sentinel slots. Original input
+parameters and texture bytes/validity remain unchanged. Uniform, early-return and
+staggered cases use one private sampling dispatch, branches use two, and each
+loop case uses three. Barrier loops release exactly six barriers. Four group
+dimensions and the original flat indices are retained in every helper dispatch.
+
+Six additional cases test scheduler progress and cancellation on all three
+adapters. A producer samples and then sets a raw UAV flag; the consumer polls it
+with an atomic OR. This shader is executed only by the diagnostic scheduler; it
+is not dispatched as a hardware spin-wait test. Required sampling, loop and
+atomic opcodes are checked after compilation. All progress cases finish in
+4,112 instructions. Cancellation during gathering leaves the output unchanged,
+performs no GPU sample and rejects reuse of the failed group. A new group then
+completes successfully with the same private storage.
+
+The initial groupshared polling fixture was optimized away by the compiler and
+correctly failed the intended wait/cancellation assertions. The retained fixture
+uses externally observable UAV atomics and checks the compiled operation list.
+These fixture-development failures are kept under `sample-group-progress-*`.
+They are separate from the two executor mismatches above. No output tolerance or
+skip was added to make a case pass.
+
+Run `dxbc_sampling_group`, `dxbc_sample_grad`, `dxbc_group` and `dxbc_execution`
+serially after rebuilding their targets. The group evidence validator requires
+all 288 configurations, exact shader hashes and adapter LUIDs, batch counts,
+progress/cancellation records and all three regression suites. The independent
+validator rejects missing cases, changed input parameters/sampler descriptors
+and writes into untouched slots. Complete P6 and standalone release acceptance
+remain open.
+
+The final serial CTest run passes all four suites: 296 sampling group tests,
+262 explicit-gradient tests, 38 cooperative group tests and 375 scalar execution
+tests, totaling 971 passes with zero failures/skips in 284.94 seconds. GUI, CLI,
+Worker and all four test targets build in Release. The ledger is
+`research/dx11-dxbc-sampling-group-evidence.json`; raw logs remain in
+`artifacts/dx11-native/sample-group-*`. Negative checks reject altered batch
+counts, missing comparisons, changed shader hashes and failed retries.

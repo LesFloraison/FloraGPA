@@ -13,6 +13,7 @@ struct Group::State {
     CancelCheck cancelled;
     uint64_t sequence = 0, epoch = 0, maxSteps;
     uint64_t samplingBatches = 0;
+    uint32_t samplingWaitSteps = 0;
     uint32_t cursor = 0;
     bool failed = false;
 };
@@ -76,16 +77,39 @@ GroupStep Group::step() {
         if (s.sequence >= s.maxSteps)
             throw std::runtime_error("DXBC thread group step budget exceeded");
         const auto count = uint32_t(s.lanes.size());
-        uint32_t selected = count;
+        uint32_t selected = count, ordinary = count, sampling = count, pending = count;
         for (uint32_t i = 0; i < count; ++i) {
             const auto index = (s.cursor + i) % count;
             if (!s.lanes[index]->finished() && !s.lanes[index]->blocked()) {
-                selected = index;
-                break;
+                if (selected == count)
+                    selected = index;
+                if (s.lanes[index]->hasPendingSampling()) {
+                    if (pending == count)
+                        pending = index;
+                } else if (s.lanes[index]->samplingBoundary()) {
+                    if (sampling == count)
+                        sampling = index;
+                } else if (ordinary == count)
+                    ordinary = index;
             }
         }
         if (selected == count)
             throw std::runtime_error("DXBC thread group has no executable lane");
+        // Gather lanes at sampling boundaries without starving a lane whose
+        // result another thread may be polling. Every call still executes one
+        // real instruction and remains subject to the group cancellation/budget.
+        if (pending != count)
+            selected = pending;
+        else if (sampling != count) {
+            if (ordinary != count && s.samplingWaitSteps < 4096) {
+                selected = ordinary;
+                ++s.samplingWaitSteps;
+            } else {
+                selected = sampling;
+                s.samplingWaitSteps = 0;
+            }
+        } else
+            s.samplingWaitSteps = 0;
         if (s.lanes[selected]->prepareSamplingBatch(s.participants))
             ++s.samplingBatches;
         GroupStep result{s.sequence, s.epoch, selected, s.lanes[selected]->step(), false};

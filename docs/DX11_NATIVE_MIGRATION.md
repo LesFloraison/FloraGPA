@@ -506,6 +506,17 @@ not close full shader-debugger or release parity.
 
 ## Delivery constraints
 
+The subsequent compute sampling checkpoint uses
+`bounded-sampling-rendezvous/3`. It gathers original flat invocation indices at
+matching dynamic instructions and drains staged results before later writes.
+Independent output comparisons cover explicit branches, staggered arrival,
+early returns, uneven loops, barriers and four group dimensions. A bounded wait
+also permits progress when a consumer polls a flag written after a sample.
+See `DX11_SAMPLE_GROUP_RESEARCH.md`. This resolves the observed divergent WARP
+sampling mismatches; arbitrary long divergence and complete VS/PS/CS debugging
+remain unaccepted. Existing commands and product integration retain the staged
+migration status described above.
+
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable
 WARP paths, clean capture-only/replay-only/capture-full builds, runtime module and
 child-process auditing, bounded time/memory, and an installation without either

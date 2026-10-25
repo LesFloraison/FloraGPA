@@ -720,3 +720,20 @@ rejects altered invocation modes, batch counts and missing batch records.
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.
+
+### Sampling control-flow continuation
+
+The independent group probe adds 288 observations across four group dimensions,
+six flow families, two offsets and two filters on WARP/NVIDIA/Intel. It checks
+33,240 written and 58,920 untouched slots; 14,730 point-filtered samples have
+exact analytical checks. The original WARP branch and staggered-arrival failures
+are retained. `bounded-sampling-rendezvous/3` resolves both and matches all 288
+complete native outputs. The additional six progress/cancellation cases pass,
+for 296 tests including setup/cleanup. See `DX11_SAMPLE_GROUP_RESEARCH.md` for
+the independent evidence and the bounded gathering limitation. This checkpoint
+does not close arbitrary divergent execution, PS quad/helper behavior, GUI
+debugging or any release gate listed above.
+The final four-suite serial run passes 971 tests with zero failures/skips in
+284.94 seconds. Release GUI, CLI, Worker and the four test targets build.
+`research/dx11-dxbc-sampling-group-evidence.json` records all comparison gates,
+regressions, original failures, sources and binary identities.

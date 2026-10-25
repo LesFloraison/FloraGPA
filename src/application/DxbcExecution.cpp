@@ -658,10 +658,15 @@ struct Lane::State {
                 offsets};
     }
 };
+bool Lane::samplingBoundary() const {
+    const auto &s = *state_;
+    return !s.done && !s.waiting && !s.pendingSampling && s.program->stage == 5 &&
+           s.program->instructions.at(s.pc).opcode == 73 && s.inputs.textures && s.inputs.gpu;
+}
+bool Lane::hasPendingSampling() const { return state_->pendingSampling.has_value(); }
 bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
     auto &s = *state_;
-    if (s.done || s.waiting || s.pendingSampling || s.program->stage != 5 ||
-        s.program->instructions.at(s.pc).opcode != 73 || !s.inputs.textures || !s.inputs.gpu)
+    if (!samplingBoundary())
         return false;
     const auto selected = s.sampling();
     std::vector<SamplingInvocation> invocations(lanes.size());
@@ -672,13 +677,13 @@ bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
         if (other.waiting || other.pendingSampling || other.program != s.program || other.pc != s.pc ||
             other.calls != s.calls || other.loops != s.loops || other.callLoopDepths != s.callLoopDepths ||
             other.inputs.textures != s.inputs.textures || other.inputs.gpu != s.inputs.gpu)
-            return false;
+            continue;
         const auto request = other.sampling();
         if (request.binding != selected.binding || request.sampler != selected.sampler ||
             request.dimension != selected.dimension || request.returns != selected.returns ||
             request.swizzle != selected.swizzle || request.mask != selected.mask ||
             request.offset != selected.offset)
-            return false;
+            continue;
         invocations[i] = {request.address, request.lodOrDdx, *request.ddy, true};
     }
     bool assisted = false;
@@ -687,8 +692,8 @@ bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
         invocations, selected.swizzle, selected.mask, selected.offset, s.inputs.gpu.get(), assisted);
     if (!values)
         return false;
-    // Every live lane is at this instruction; round-robin consumption completes
-    // before any lane can execute a following write or barrier.
+    // The scheduler drains every staged result before executing any following
+    // instruction. Nonparticipating lanes retain their original flat indices.
     for (size_t i = 0; i < lanes.size(); ++i)
         if (invocations[i].active)
             lanes[i]->state_->pendingSampling = std::make_pair((*values)[i], assisted);

@@ -18,25 +18,37 @@ active-lane branch and one native dispatch. Inactive output records retain a
 sentinel and unknown validity. No original replay resource or context is bound
 for diagnostic execution.
 
-The scheduler batches only when every nonterminated lane is at the same program,
-PC, call stack and loop iteration, with the same texture/sampler selection and
-private resource context. Waiting lanes prevent batching. Operands are collected
-without advancing lanes; all GPU results are read before any register update.
-Round-robin consumption then completes for every participant before any lane can
-execute a following write or barrier. Cancellation during readback leaves every
-lane's registers unchanged and rejects reuse of the failed group/helper.
+The scheduler lets other runnable lanes reach sampling boundaries before issuing
+a batch. Each batch includes only lanes at the same program, PC, call stack and
+loop iteration, with the same texture/sampler selection and private resource
+context. Other branches, terminated lanes and barrier waiters remain inactive
+at their original flat indices. Operands are collected without advancing lanes;
+all GPU results are read before any register update. Staged results take priority
+over every other instruction until consumed, so no intervening write or barrier
+can change the inputs. Cancellation during readback leaves every lane's
+registers unchanged and rejects reuse of the failed group/helper.
+
+Gathering is bounded by 4,096 other executed instructions. It then releases the
+next ready sampling cohort even if other lanes have not arrived. This permits
+progress when another thread is polling a value written after the pending
+sample. The existing total step budget and per-step cancellation remain in
+force. Each public step still executes exactly one real instruction. The bound
+does not establish identical hardware invocation context for arbitrary long
+divergence; that case remains outside the verified matrix.
 
 The GPU helper identity is `dxbc-gpu/12`; the scheduler identity is
-`serial-round-robin/2`. Input snapshots remain version 7. The batch validates
+`bounded-sampling-rendezvous/3`. Input snapshots remain version 7. The batch validates
 shared descriptors/storage once and retains per-lane operand validity. Unknown
 active operands decline batching; existing scalar unknown propagation remains.
 Observed null resources still produce known zero. Ignored derivative components
 and array indices do not become extra required derivative dimensions.
 
-This is a conservative batching condition, not general GPU wave reconstruction.
-Divergent dynamic instructions, differing bindings, unknown participating inputs,
-PS quads and helper lanes still require broader context handling and validation.
-Those cases cannot inherit a claim of exact batch parity from this checkpoint.
+This is a deterministic diagnostic serialization, not a reconstruction of the
+captured GPU wave schedule. Six independently observed compute flow families
+are checked in [DX11_SAMPLE_GROUP_RESEARCH.md](DX11_SAMPLE_GROUP_RESEARCH.md).
+Arbitrary divergent loops/calls, differing dynamic bindings, unknown participating
+inputs, PS quads and helper lanes still require broader context handling and
+validation. Those cases cannot inherit exact parity from the verified matrix.
 
 ## Independent validation
 
@@ -88,6 +100,7 @@ Build both sampling targets and run `dxbc_sample_grad`, `dxbc_sample_level`,
 shape and cancellation matrices, exact full-group output, invocation modes,
 backend/scheduler identities and regression results. Historical explicit-LOD
 logs can be revalidated with their original `--backend dxbc-gpu/10` identity.
+Earlier coherent-gradient logs additionally use `--execution-model serial-round-robin/2`.
 Three negative validations reject a wrong group batch count, a wrong reference
 invocation mode and a missing direct-batch record. The final ledger retains
 source/build/binary hashes and the earlier failed iterations separately.

@@ -42,6 +42,7 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--grad", action="store_true")
     parser.add_argument("--backend", default="dxbc-gpu/12")
+    parser.add_argument("--execution-model", default="bounded-sampling-rendezvous/3")
     args = parser.parse_args()
     runs = [read(path, args.grad) for path in args.log]
     final = runs[-1]
@@ -72,7 +73,7 @@ def main():
                         and (not args.grad or (r.get("reference_stages") == ["ps", "vs", "cs"]
                             and r.get("lane_reference_invocations") == "single"
                             and r.get("group_reference_invocations") == "batch"
-                            and r.get("group_execution_model") == "serial-round-robin/2"
+                            and r.get("group_execution_model") == args.execution_model
                             and r.get("group_sampling_batches") == (0 if r["name"] == "null-resource" else 1)))
                         and r["lane_comparisons"] == 189 and r["original_storage_unchanged"]
                         and r["helper"]["backend"] == args.backend for r in hardware)

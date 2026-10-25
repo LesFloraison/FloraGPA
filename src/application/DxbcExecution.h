@@ -139,6 +139,8 @@ class Lane {
     std::unique_ptr<State> state_;
     friend class Group;
     void releaseBarrier();
+    bool samplingBoundary() const;
+    bool hasPendingSampling() const;
     bool prepareSamplingBatch(const std::vector<Lane *> &);
 
   public:
@@ -173,6 +175,6 @@ class Group {
     const Lane &lane(uint32_t index) const;
     const Memory &sharedMemory() const;
     uint64_t samplingBatches() const;
-    static constexpr const char *executionModel = "serial-round-robin/2";
+    static constexpr const char *executionModel = "bounded-sampling-rendezvous/3";
 };
 } // namespace flora::dxbc_exec

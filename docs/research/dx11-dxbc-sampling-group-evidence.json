@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_sampling_groups",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "initial": {
+    "path": "artifacts/dx11-native/sample-group-first.txt",
+    "sha256": "96608ad6057a2908712b6356f0613a79bfe601a40be6474d6d77073d73680d87",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 6,
+    "failed": 2,
+    "skipped": 0,
+    "elapsed_ms": 5762,
+    "failures": [
+      "DxbcSamplingGroupTests::hardware(0-9) 'differences.empty()' returned FALSE. (Native complete sampling group output differs)",
+      "DxbcSamplingGroupTests::hardware(0-21) 'differences.empty()' returned FALSE. (Native complete sampling group output differs)"
+    ],
+    "unit_cases": []
+  },
+  "final": {
+    "path": "artifacts/dx11-native/sample-group-final.txt",
+    "sha256": "2ac847c1daf815c2c38d8562637cf0008d1e427022dc38064f3e474ad6d38418",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 296,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 41058,
+    "failures": [],
+    "unit_cases": []
+  },
+  "comparisons": {
+    "cases": 288,
+    "raw_differences": 0,
+    "steps": 578592,
+    "gpu_operations": 528,
+    "by_vendor": {
+      "0": 96,
+      "4318": 96,
+      "32902": 96
+    },
+    "by_flow": {
+      "barrier-loop": 48,
+      "branches": 48,
+      "early-return": 48,
+      "staggered": 48,
+      "uneven-loop": 48,
+      "uniform": 48
+    }
+  },
+  "bounded_progress": [
+    {
+      "bounded_sampling_progress": true,
+      "sampling_batches": 1,
+      "steps": 4112,
+      "vendor": 0
+    },
+    {
+      "bounded_sampling_progress": true,
+      "sampling_batches": 1,
+      "steps": 4112,
+      "vendor": 4318
+    },
+    {
+      "bounded_sampling_progress": true,
+      "sampling_batches": 1,
+      "steps": 4112,
+      "vendor": 32902
+    }
+  ],
+  "cancelled": [
+    {
+      "checks": 1001,
+      "retry_finished": true,
+      "sampling_wait_cancelled": true,
+      "vendor": 0
+    },
+    {
+      "checks": 1001,
+      "retry_finished": true,
+      "sampling_wait_cancelled": true,
+      "vendor": 4318
+    },
+    {
+      "checks": 1001,
+      "retry_finished": true,
+      "sampling_wait_cancelled": true,
+      "vendor": 32902
+    }
+  ],
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/sample-group-regression-sample-grad.txt",
+      "sha256": "1ada52b9eaa64868f0c5df314958476af25c7cdc44edaae4c452d8b6dd640929",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 262,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 210059,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-regression-group.txt",
+      "sha256": "2a91320a4296ee941a69468ed051496c1b58710ceb0ebe3dd614b7e97ce26d9d",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 2049,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-regression-execution.txt",
+      "sha256": "b48f23f7c2aac8e4663fade235658cba65b18ab0c8bf63a4c0985f939bbd2c6b",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 30993,
+      "failures": [],
+      "unit_cases": []
+    }
+  ],
+  "references": [
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/0/results.json",
+      "sha256": "54bf424d45d3db92ac3f51238bfcc25e20677cbdebf9a8f3f34a0c6e9c4010ec"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/4318/results.json",
+      "sha256": "3291db8282ba901d30244a7c2f4e34c654bef4a2e3339832ae5ba67da2796d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/32902/results.json",
+      "sha256": "88476b58e45bd93769f601e14ea270195e413024344f60019d96f9f7a734724f"
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "68595e9be3375d7f541b88f1ac2e2f65eebcd77d0497c664a25cc99153258adf"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "sha256": "ed53031e54c8abb13670f309549505aa3221c1e97bae7656174ff0aa03e2f962"
+    },
+    {
+      "path": "src/application/DxbcGroup.cpp",
+      "sha256": "9b7cd0fd60ae4bc2136467644fce592e44a717eb6df412dc85ad0ae48b0401e0"
+    },
+    {
+      "path": "tests/DxbcSamplingGroupTests.cpp",
+      "sha256": "5e9aed4f69b219eb384eb304110a8048bd29db94286912a2f04303abb984e27c"
+    },
+    {
+      "path": "tools/summarize_dxbc_sampling_groups.py",
+      "sha256": "73e48ed01a0df890e8dd1d861504c780a285b2ab7d00f6b5b1eaf411d33143ff"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_level.py",
+      "sha256": "26f622c883871ed6c93115b600e8d867c95085bd4da8f4ae8fce85bc2b4f0c0d"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "9c6be5b36a5591506dc078a6ce3b6a4f3ac52fee9a7d34359f9f973d0e84e4b0"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/sample-group-all-targets-build.txt",
+      "sha256": "a891d6c3b49a77b5de2d51a8bdc74651b1976b7969f230624ca636a1a3562220"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-final-ctest.txt",
+      "sha256": "5bf31fa20a591a559247fdf53129262eca16e6eb64c4ab26b9c9659d896cb433"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcSamplingGroupTests.exe",
+      "sha256": "39e2d493871e7d42f5e136e3eeaa8f1d4232f1177c25d7eec5b153d785e61c7c"
+    },
+    {
+      "path": "build/vs2022/Release/FloraSampleGroupProbe.exe",
+      "sha256": "e87143221a1b46f94c540fb4d3357492751f26b495aad433228b51d0ab8db874"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "path": "docs/research/dx11-sample-group-observations.json",
+      "sha256": "d20e8d16c57b1cc7ffab1453b8e0779fff3689134debd62f71be763f06d95a2d"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-evidence-negative.json",
+      "sha256": "8ad19670fdaf25ec95f9544db1c5278c62c9f3c982ee833ead2938b387f63979"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-execution-negative.json",
+      "sha256": "1ec01e663e638fb7b3b66ab7a3bbadd005693130cf20a7b0b7a18dbdbce84d30"
+    }
+  ]
+}
