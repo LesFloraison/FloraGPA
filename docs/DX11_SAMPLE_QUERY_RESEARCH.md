@@ -37,8 +37,9 @@ whether the base resource has more than one sample. This is an actionable gap in
 the first MSAA interpreter checkpoint, to be fixed and tested separately.
 
 Null SRVs return count 0 and zero positions. With no render target or depth
-target, the tested rasterizer configuration returns count 1 and center position.
-Out-of-range sample-position queries return zero on all tested configurations.
+target, the original matrix returns count 1 and center position after preceding
+draws with a target. This is not evidence for a fresh device with no prior target.
+Out-of-range sample-position queries return zero in the original matrix.
 The probe does not infer raw values for undefined out-of-range `ld_ms` results;
 the emitted program masks their contribution out of the recorded load result.
 
@@ -52,6 +53,42 @@ coverage. Product rasterizer-query implementation must retain this distinction;
 it must not assume SRV positions and rasterizer positions are interchangeable.
 
 ## Reproduction and limits
+
+### No-target ordering correction
+
+The product diagnostic exposed a discrepancy that the initial matrix concealed:
+its unbound cases always followed bound draws. An additional independent probe
+sequence now runs either the first draw without any RTV/DSV, or draws once with
+a four-sample target before unbinding it. All other shader and rasterizer inputs
+remain the same. Twelve serial runs cover three devices and both multisample
+settings. The first sequence queries indices 0, 1 and UINT_MAX; the second queries
+0 through 4 and UINT_MAX. All 54 observations have zero API validation errors.
+
+On Intel, fresh no-target count is 0, while the count after a target draw is 1.
+On NVIDIA, fresh no-target positions for indices 0 and 1 are (-0.5,-0.5), while
+the same queries after a target draw are (0,0). WARP returns count 1 and center
+positions in both sequences. These are observations of these devices and shader
+forms, not a general vendor rule. Native diagnostic variants with looped and
+unrolled constant position queries also produced differing behavior; changing
+the loop alone did not resolve the Intel count discrepancy.
+
+Consequently an unbound rasterizer cannot yet be reconstructed from API bindings
+alone with demonstrated fidelity. Product snapshots must not silently substitute
+the earlier matrix's values, a synthetic target, or a vendor-specific constant.
+Unknown sample-query values must stay unknown until this path is closed. This is
+an open P6 acceptance item, including the forced-count/no-target combination.
+Existing baseline assertions and the original matrix ledger remain unchanged.
+
+```powershell
+build/vs2022/Release/FloraSampleQueryProbe.exe artifacts/dx11-native/sample-query-sequences/32902-0-1 32902 0 1
+build/vs2022/Release/FloraSampleQueryProbe.exe artifacts/dx11-native/sample-query-sequences/32902-0-2 32902 0 2
+python tools/summarize_sample_query_sequences.py --root artifacts/dx11-native/sample-query-sequences --binary build/vs2022/Release/FloraSampleQueryProbe.exe --out docs/research/dx11-sample-query-sequence-evidence.json
+```
+
+The last optional argument selects 0 (original matrix), 1 (fresh no-target), or
+2 (no-target after a four-sample draw). The new ledger pins all reports, shaders,
+probe sources and executable, preserving raw bits and order-sensitive differences.
+Its evidence-validation flag does not claim sample-query conformance.
 
 Build `FloraSampleQueryProbe` in Release. For each vendor 0, 4318 and 32902 and
 each rasterizer setting 0/1, run the executable with a new output directory:

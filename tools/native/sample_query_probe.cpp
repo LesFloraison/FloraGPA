@@ -48,8 +48,9 @@ void validate(ID3D11InfoQueue *queue) {
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 3 && argc != 4) {
-        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [MULTISAMPLE_ENABLE_0_OR_1]\n";
+    if (argc < 3 || argc > 5) {
+        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [MULTISAMPLE_ENABLE_0_OR_1] "
+                     "[NO_TARGET_SEQUENCE_0_MATRIX_1_FRESH_2_AFTER_FOUR_SAMPLES]\n";
         return 2;
     }
     try {
@@ -57,8 +58,9 @@ int wmain(int argc, wchar_t **argv) {
         if (!std::filesystem::create_directory(directory))
             throw std::runtime_error("Output directory must be new");
         const auto vendor = std::stoul(argv[2]);
-        const auto multisample = argc == 4 ? std::stoul(argv[3]) : 0;
-        if (multisample > 1)
+        const auto multisample = argc >= 4 ? std::stoul(argv[3]) : 0;
+        const auto firstNoTarget = argc == 5 ? std::stoul(argv[4]) : 0;
+        if (multisample > 1 || firstNoTarget > 2)
             throw std::runtime_error("Invalid rasterizer multisample setting");
         ComPtr<IDXGIAdapter1> adapter;
         if (vendor) {
@@ -102,6 +104,7 @@ int wmain(int argc, wchar_t **argv) {
                     {"feature_level", feature},
                     {"cases", Json::array()}};
         report["multisample_enable"] = bool(multisample);
+        report["no_target_sequence"] = firstNoTarget;
         D3D11_RASTERIZER_DESC rasterDesc{};
         rasterDesc.FillMode = D3D11_FILL_SOLID;
         rasterDesc.CullMode = D3D11_CULL_BACK;
@@ -157,6 +160,8 @@ int wmain(int argc, wchar_t **argv) {
                 UINT levels{};
                 check(device->CheckMultisampleQualityLevels(DXGI_FORMAT_R32_FLOAT, count, &levels));
                 for (unsigned mode = 0; mode < 6; ++mode) {
+                    if (firstNoTarget && (count != (firstNoTarget == 2 ? 4u : 1u) || quality || mode != 5))
+                        continue;
                     const auto shaderMode = mode % 3;
                     const bool unbound = mode >= 3;
                     Json item{{"count", count},     {"quality", quality}, {"quality_levels", levels},
@@ -225,6 +230,13 @@ int wmain(int argc, wchar_t **argv) {
                     context->PSSetConstantBuffers(0, 1, &cb);
                     context->PSSetShaderResources(0, 1, &view);
                     const bool noTarget = shaderMode == 2 && unbound;
+                    if (firstNoTarget == 2) {
+                        const std::array<UINT, 4> initial{};
+                        context->UpdateSubresource(constants.Get(), 0, nullptr, initial.data(), 0, 0);
+                        context->OMSetRenderTargetsAndUnorderedAccessViews(1, &renderTarget, nullptr, 1, 1,
+                                                                           &unordered, nullptr);
+                        context->Draw(3, 0);
+                    }
                     context->OMSetRenderTargetsAndUnorderedAccessViews(noTarget ? 0 : 1,
                                                                        noTarget ? nullptr : &renderTarget,
                                                                        nullptr, 1, 1, &unordered, nullptr);

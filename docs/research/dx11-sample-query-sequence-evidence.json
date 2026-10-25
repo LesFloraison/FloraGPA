@@ -1,0 +1,1151 @@
+{
+  "schema": 1,
+  "scope": "no_target_sample_query_sequences",
+  "evidence_validated": true,
+  "sequence_invariant": false,
+  "differences": [
+    {
+      "vendor": 4318,
+      "multisample_enable": false,
+      "fresh_bits": [
+        1,
+        3204448256,
+        3204448256,
+        0
+      ],
+      "after_target_bits": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "vendor": 4318,
+      "multisample_enable": true,
+      "fresh_bits": [
+        1,
+        3204448256,
+        3204448256,
+        0
+      ],
+      "after_target_bits": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": false,
+      "fresh_bits": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "after_target_bits": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "vendor": 32902,
+      "multisample_enable": true,
+      "fresh_bits": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "after_target_bits": [
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "complete_release_acceptance": false,
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/results.json",
+      "sha256": "788aaafdb9efefc6500be4b1d898a499b4285a8bafd9ca2b9bf10ea4f95554e6",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/results.json",
+      "sha256": "fae70a748385bbd29c8d1710914d6c307ec40e6e084f2429fdf075cd19120f37",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-0-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/results.json",
+      "sha256": "404ef4d4b283f25c463c5f58711672dec54c83992408a7c162799a3e3cdd4363",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/results.json",
+      "sha256": "32e66b5227fa72c4c26e44ce80a14277e4a822c0922c4285798cce5314827293",
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "adapter_vendor": 5140,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 0,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/0-1-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/results.json",
+      "sha256": "ee80f94028d7ad0df916ea64532363746a0d771fea7e38ca8a900903ff13de40",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                3204448256,
+                3204448256,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                3204448256,
+                3204448256,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/results.json",
+      "sha256": "a13d62cc31a2c049fe140a582994fccba37cd1dcc963acad2a583aa1ef1aad53",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-0-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/results.json",
+      "sha256": "9e544faf1c7b426e6009879bfb9a1e83aa350f8e1197085c151ee77ccc7edc85",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                3204448256,
+                3204448256,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                3204448256,
+                3204448256,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/results.json",
+      "sha256": "2f1cc7c7c9ce1aa9edfb4772fa5d687b3deacf8a681e00dc9e5dbcad8f7c4c05",
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "adapter_vendor": 4318,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 4318,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/4318-1-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/results.json",
+      "sha256": "1bcc89f721f20e69faba0547a796312b6ae3b5d293e4c72d878f0bedd2b93614",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/results.json",
+      "sha256": "750817ae4fce31c1d40b6ed1454c8d6c00ff01eeaf57fa3870984b5a1b7920bd",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": false,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-0-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/results.json",
+      "sha256": "7d218f09c352401b6a9072edc146ac4db7153b1ed4077325a7ea5efd16b48d26",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "cases": [
+        {
+          "count": 1,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 1,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-1/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/results.json",
+      "sha256": "14b1802b3fff61151759e15849dac19e458c32fd93f8e1c5ee7a6ab381edeed4",
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "adapter_vendor": 32902,
+      "cases": [
+        {
+          "count": 4,
+          "mode": 2,
+          "quality": 0,
+          "quality_levels": 1,
+          "records": [
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 0
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 1
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 2
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 3
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4
+            },
+            {
+              "bits": [
+                1,
+                0,
+                0,
+                0
+              ],
+              "sample": 4294967295
+            }
+          ],
+          "status": "observed",
+          "unbound": true
+        }
+      ],
+      "feature_level": 45056,
+      "multisample_enable": true,
+      "no_target_sequence": 2,
+      "schema": 1,
+      "scope": "independent_sample_queries",
+      "validation_errors": 0,
+      "vendor": 32902,
+      "shaders": [
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/vertex.dxbc",
+          "sha256": "d95336f99e8616daab96589e51f2a43588d654868c9f2b0dfe5586b9dff7637b"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/query-0.dxbc",
+          "sha256": "5510fb045c8eccf3ffcaa9e5b74de8048fcdac978d0de5047813082cc0ab05c2"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/query-1.dxbc",
+          "sha256": "8458b695ed4d26f85345fb30b738f5ce3632e9e4c25ad7efaf1c9a895d280b0d"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/query-2.dxbc",
+          "sha256": "9d8443f32974c29fccc898a35dd0ca6a8228f29aa6fe59bd9d24669f935e99ff"
+        },
+        {
+          "path": "artifacts/dx11-native/sample-query-sequences/32902-1-2/query-2.asm.txt",
+          "sha256": "c1697c1a21adc1804dea00628565eaca93e3f25af2796c599d4210c3381b0b5c"
+        }
+      ]
+    }
+  ],
+  "binary": {
+    "path": "build/vs2022/Release/FloraSampleQueryProbe.exe",
+    "sha256": "cd2fb588840df4157bad5fd8c95e3be814d162654e4c770c2f9718807b4aca69"
+  },
+  "sources": [
+    {
+      "path": "tools/native/sample_query_probe.cpp",
+      "sha256": "46f11e61486e71569418ac672d5e2035acd4b73c6f2d3f3a7afd79d305eba5fc"
+    },
+    {
+      "path": "tools/summarize_sample_query_sequences.py",
+      "sha256": "bde6a70c89972b7ea09072a00db4de94c90a6a519a419265f3167a01de3d5b47"
+    }
+  ]
+}
