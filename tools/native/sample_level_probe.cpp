@@ -46,12 +46,16 @@ struct Configuration {
 } // namespace
 int wmain(int argc, wchar_t **argv) {
     if (argc != 3 && ((argc != 4 && argc != 5) || std::wstring(argv[3]) != L"--grad")) {
-        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [--grad [ps|vs]]\n";
+        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP "
+                     "[--grad [cs|ps|vs|cs-single|ps-single|vs-single]]\n";
         return 2;
     }
     try {
         const bool gradient = argc >= 4;
-        const std::wstring stage = argc == 5 ? argv[4] : L"cs";
+        std::wstring stage = argc == 5 ? argv[4] : L"cs";
+        const bool single = stage.ends_with(L"-single");
+        if (single)
+            stage.resize(stage.size() - 7);
         if (stage != L"cs" && stage != L"ps" && stage != L"vs")
             throw std::runtime_error("Invalid sampling observation stage");
         const bool pixel = stage == L"ps", vertex = stage == L"vs";
@@ -114,6 +118,8 @@ int wmain(int argc, wchar_t **argv) {
         std::array<ComPtr<ID3D11GeometryShader>, 2> streams;
         if (gradient)
             report["stage"] = pixel ? "ps" : vertex ? "vs" : "cs";
+        if (single)
+            report["invocation_mode"] = "single";
         for (unsigned offset = 0; offset < 2; ++offset) {
             std::string source =
                 "Texture2D<float4> t:register(t0);StructuredBuffer<float4> p:register(t1);"
@@ -131,6 +137,19 @@ int wmain(int argc, wchar_t **argv) {
                                       : "uint4 main(uint i:SV_VertexID):TEXCOORD0{") +
                     "return asuint(t.SampleGrad(s,p[i*3].xy,p[i*3+1].xy,p[i*3+2].xy" +
                     std::string(offset ? ",int2(-1,1)" : "") + "));}";
+            if (single) {
+                source =
+                    "Texture2D<float4> t:register(t0);StructuredBuffer<float4> p:register(t1);"
+                    "SamplerState s:register(s3);cbuffer Index:register(b0){uint i;}" +
+                    std::string(
+                        pixel ? "uint4 main():SV_Target{"
+                        : vertex
+                            ? "uint4 main():TEXCOORD0{"
+                            : "RWStructuredBuffer<uint4> dst:register(u0);[numthreads(1,1,1)]void main(){") +
+                    std::string(pixel || vertex ? "return " : "dst[i]=") +
+                    "asuint(t.SampleGrad(s,p[i*3].xy,p[i*3+1].xy,p[i*3+2].xy" +
+                    std::string(offset ? ",int2(-1,1)" : "") + "));}";
+            }
             ComPtr<ID3DBlob> binary, errors;
             const auto hr =
                 D3DCompile(source.data(), source.size(), "Independent sample level", nullptr, nullptr, "main",
@@ -235,6 +254,11 @@ int wmain(int argc, wchar_t **argv) {
             desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
             check(device->CreateTexture2D(&desc, nullptr, &pixelReadback));
         }
+        ComPtr<ID3D11Buffer> invocationIndex;
+        if (single) {
+            const D3D11_BUFFER_DESC desc{16, D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            check(device->CreateBuffer(&desc, nullptr, &invocationIndex));
+        }
         std::array<std::vector<std::array<float, 4>>, 4> texels;
         std::array<D3D11_SUBRESOURCE_DATA, 4> subresources;
         for (unsigned mip = 0; mip < 4; ++mip) {
@@ -327,6 +351,13 @@ int wmain(int argc, wchar_t **argv) {
                 auto *state = sampler.Get();
                 auto *target = outputView.Get();
                 const UINT sentinel[]{0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef};
+                const auto dispatchSingle = [&](auto draw) {
+                    for (UINT index = 0; index < recordCount; ++index) {
+                        const UINT values[]{index, 0, 0, 0};
+                        context->UpdateSubresource(invocationIndex.Get(), 0, nullptr, values, 0, 0);
+                        draw(index);
+                    }
+                };
                 if (pixel) {
                     auto *rtv = pixelTarget.Get();
                     const float clear[]{-1, -1, -1, -1};
@@ -340,7 +371,16 @@ int wmain(int argc, wchar_t **argv) {
                     context->RSSetViewports(1, &viewport);
                     context->RSSetState(rasterizer.Get());
                     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                    context->Draw(3, 0);
+                    if (single) {
+                        auto *cb = invocationIndex.Get();
+                        context->PSSetConstantBuffers(0, 1, &cb);
+                        dispatchSingle([&](UINT index) {
+                            const D3D11_VIEWPORT one{float(index), 0, 1, 1, 0, 1};
+                            context->RSSetViewports(1, &one);
+                            context->Draw(3, 0);
+                        });
+                    } else
+                        context->Draw(3, 0);
                 } else if (vertex) {
                     auto *destination = output.Get();
                     const UINT start = 0;
@@ -350,14 +390,24 @@ int wmain(int argc, wchar_t **argv) {
                     context->GSSetShader(streams[offset].Get(), nullptr, 0);
                     context->SOSetTargets(1, &destination, &start);
                     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-                    context->Draw(UINT(recordCount), 0);
+                    if (single) {
+                        auto *cb = invocationIndex.Get();
+                        context->VSSetConstantBuffers(0, 1, &cb);
+                        dispatchSingle([&](UINT) { context->Draw(1, 0); });
+                    } else
+                        context->Draw(UINT(recordCount), 0);
                 } else {
                     context->ClearUnorderedAccessViewUint(target, sentinel);
                     context->CSSetShader(shaders[offset].Get(), nullptr, 0);
                     context->CSSetShaderResources(0, 2, views.data());
                     context->CSSetSamplers(3, 1, &state);
                     context->CSSetUnorderedAccessViews(0, 1, &target, nullptr);
-                    context->Dispatch(1, 1, 1);
+                    if (single) {
+                        auto *cb = invocationIndex.Get();
+                        context->CSSetConstantBuffers(0, 1, &cb);
+                        dispatchSingle([&](UINT) { context->Dispatch(1, 1, 1); });
+                    } else
+                        context->Dispatch(1, 1, 1);
                 }
                 context->ClearState();
                 auto *readback = pixel ? static_cast<ID3D11Resource *>(pixelReadback.Get()) : staging.Get();

@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--grad", action="store_true")
     parser.add_argument("--stage", choices=["cs", "ps", "vs"], default="cs")
+    parser.add_argument("--invocations", choices=["batch", "single"], default="batch")
     args = parser.parse_args()
     scope = "sample_grad" if args.grad else "sample_level"
     prefix = "sample-grad" if args.grad else "sample-level"
@@ -43,6 +44,7 @@ def main():
         report = json.loads(path.read_text())
         if (report["schema"] != 1 or report["scope"] != "independent_" + scope
                 or report.get("stage", "cs") != args.stage
+                or report.get("invocation_mode", "batch") != args.invocations
                 or report["vendor"] != vendor or report["validation_errors"]
                 or vendor and report["adapter_vendor"] != vendor):
             raise ValueError("Invalid sample-level probe identity or diagnostics")

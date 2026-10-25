@@ -74,3 +74,36 @@ output root. The updated CS, PS and VS ledgers are
 `research/dx11-sample-grad-{cs,ps,vs}-evidence.json`; the original compute-only
 ledger remains intact as historical evidence. These observations do not resolve
 all driver-dependent or nonfinite-input filtering behavior.
+
+## Invocation-dependent follow-up and unresolved execution gate
+
+Stage matching fixed the first observed input but did not fix the complete
+matrix. The probe additionally accepts `--grad ps-single`, `vs-single` and
+`cs-single`. These independently compiled programs select one parameter record
+through a constant buffer per draw/dispatch. PS writes one viewport pixel per
+draw, VS appends one stream-output record, and CS dispatches one thread per
+record. The batch programs and all their results remain available unchanged.
+
+Both invocation modes were observed on all three adapters and stages, producing
+19,278 records per mode. WARP anisotropic filtering differs in 68 lane records
+across the two offset configurations: six PS records and fourteen VS/CS records
+per offset. NVIDIA and Intel have no batch/single differences in this matrix.
+The independent executor's mismatches match the single-invocation results
+exactly, including both entire CS output buffers. Its serialized group execution
+does not reproduce the independent batch dispatch's raw results for these cases.
+This confirms a native invocation-dependent result; it does not establish that
+either invocation mode is a universal reference or explain WARP's internals.
+
+`tools/summarize_sample_grad_invocations.py` validates the complete independent
+matrix, identical state/inputs, all 68 executor mismatch records and both group
+outputs. The resulting ledger explicitly has `implementation_accepted: false`
+and `executor_matches_batch_invocations: false`. No tolerance, skip or replacement
+golden was introduced. The exact batch-output assertions remain failing. The
+subsequent tests collect all differences rather than stopping at the first lane.
+
+This changes the next implementation task: group/quad assistance must account
+for the invocation context, with an independently validated batch path, or a
+precisely justified semantic comparison must be established before acceptance.
+Merely changing the expected results to the single-invocation probe would hide
+the unresolved full-group comparison. The current scalar assistance is kept as
+work in progress; this research commit does not assert P6 parity.
