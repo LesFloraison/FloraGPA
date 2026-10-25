@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "scope": "independent_comparison_sampling",
+  "evidence_validated": true,
+  "implementation_accepted": false,
+  "complete_release_acceptance": false,
+  "defined_records": 61236,
+  "undefined_records": 2268,
+  "analytical_point_records": 18144,
+  "invocation_differences": [],
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/cs/0/results.json",
+      "sha256": "2a8a3f2787375da190e4875d8a5e058729d17fe659e5787221c9d0504f1a9605"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/cs/0/results.json",
+      "sha256": "dffc8d8cb872a8b163dcd23c790d03bd5c298a138ac8aee309dd7875dde87048"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/cs/4318/results.json",
+      "sha256": "6e564445fe3b5703e40c5e3c17ec9a0c8544cd1fd81dead432ec38b67b9fa461"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/cs/4318/results.json",
+      "sha256": "fff3519098d30c8ecac6e30bdd5c51f0834a1293b79e6d89fb738067660f2ad1"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/cs/32902/results.json",
+      "sha256": "6066d453918140f0dec1d5a5183416028db7468009a624ce84de0881412c2cd3"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/cs/32902/results.json",
+      "sha256": "03eb8d2926d79e3ddbedf1a06a6bc70931e37e806bb392783870b73182ab23d3"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/ps/0/results.json",
+      "sha256": "74344f718de25c49a288fe6d34b28a3e9f098cfbb7bd031a553568661d938392"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/ps/0/results.json",
+      "sha256": "a1928a3eb83567bcdeae8bd7083b0f294754e6096e12d572d55cee3abee4bb70"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/ps/4318/results.json",
+      "sha256": "9281fa3fe11a3b029973088ee9823be5bc783da55aedd45ee62e5f50b5e7b43a"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/ps/4318/results.json",
+      "sha256": "3bdce4399faf71a7e9c373df19cbfcfdfe120a02282ab36c6c875f3ea052eb6f"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/ps/32902/results.json",
+      "sha256": "4237f9c859d6f1788aa2f0244d23f6bcf539d978609c18fdc697060a36b021e9"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/ps/32902/results.json",
+      "sha256": "832e0551ba2c959ecfe3d25998944faaffbf819cff3ecd31716f25b2ee1e462b"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/vs/0/results.json",
+      "sha256": "deac76948fa39419883cb3548aae8f4412d8023f316c89451a7052b2febcb8bc"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/vs/0/results.json",
+      "sha256": "43cbfd1afc52103f3927db900f59ca33991bd7e4a01e30d7842ff1541fa3f9e4"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/vs/4318/results.json",
+      "sha256": "e2c62309727b69aa9aec72d47913408bc642795d228565e99cb7855fa7742ebb"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/vs/4318/results.json",
+      "sha256": "c9d4c3d590f9f00632fb88bee381d0c33b1eec15c4607e3b1f98f0491413ac04"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-batch/vs/32902/results.json",
+      "sha256": "a9898b85fa744afd8899dc6646b8508966109fa48d769a0a09deee56b49ff802"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-compare-final-single/vs/32902/results.json",
+      "sha256": "d703e3110d255488bf08457e3c5f6ec0575b98e09c5f21ea917c78eea5383e78"
+    }
+  ],
+  "shaders": {
+    "cs-batch-0": "ebc7b8efbfc33234242690cfed77410cdea989d5738fe97d8b3536f6de255cf7",
+    "cs-batch-1": "c79fb2bdb06b29e56fbbe07bafa248c831e62060552c8c6e3b6896e46587370f",
+    "cs-single-0": "ac93563d4cd62d19784e6dff53f6f42f378930dd0a831a6e57306783be6493cb",
+    "cs-single-1": "c8e1af1bc610ce4a6100bf73cf572e71dcc0823a5356812607f32c1a351aa947",
+    "ps-batch-0": "1ed51386b3c3ac2d37a2726beeb7f8ca99be9d40a16821408c38191b623dc3bb",
+    "ps-batch-1": "6117fe9b4f7b3c9d133d504c0533596ca483e04b7cd7e256d1fc36cabf64f76c",
+    "ps-single-0": "0420e9e0a80ab89aa4b99d3a2509e8cec85e4322ee91f22139a28ecee80d23bf",
+    "ps-single-1": "2391de0b5cf95ee284f1b3297a3c6ea0691e7af862c4a93298d71b0d84ab9a1f",
+    "vs-batch-0": "4801bc1e4414751836e9b9c521ba4be411740ee056ba92228bb78a980233e375",
+    "vs-batch-1": "bdb827ddd9ef6b433b7363369e3c8a8e0ea6fa536385531436b8fc968971dc0b",
+    "vs-single-0": "0dfcbf50c6a53d00d8038c37b64cd5be59839772304abbc23edab9a10c40aa04",
+    "vs-single-1": "331489510f9c1503ad1b7930f42b6f4b28808d1a48ca6d9f4e8f5c6b31eafe64"
+  },
+  "binary": {
+    "path": "build/vs2022/Release/FloraSampleCompareProbe.exe",
+    "sha256": "149d9d9d76426c9fa40ee765c9f6f0a5f0d20b80dbe73b10ae63b88a3da8603e"
+  },
+  "sources": [
+    {
+      "path": "tools/native/sample_compare_probe.cpp",
+      "sha256": "10b98f6b4ac6683d44e55343338f8ce123c145c74296c8a5b3d978e0b53c3cf1"
+    },
+    {
+      "path": "tools/summarize_sample_comparison.py",
+      "sha256": "900b7405c19302d7b6496a69266ef6921c05fc54a3e22864881fb84420afe96d"
+    }
+  ]
+}
