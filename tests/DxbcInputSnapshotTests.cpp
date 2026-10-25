@@ -2,8 +2,11 @@
 #include "application/DxbcInputSnapshot.h"
 #include "application/HlslCompilation.h"
 #include <QCryptographicHash>
+#include <QFile>
+#include <QProcess>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <bit>
 #include <d3d11sdklayers.h>
 using namespace flora;
 using namespace flora::dxbc_exec;
@@ -37,6 +40,69 @@ void buffer(testing::Capture &capture, Id id, Id data, UINT size, UINT bind, UIN
     for (uint32_t i = 0; i < size / 4; ++i)
         testing::append(bytes, base + i);
     capture.add(data, 9, 1, bytes);
+}
+using SamplerGetter = void (STDMETHODCALLTYPE ID3D11DeviceContext::*)(UINT, UINT, ID3D11SamplerState **);
+constexpr SamplerGetter samplerGetters[]{
+    &ID3D11DeviceContext::VSGetSamplers, &ID3D11DeviceContext::HSGetSamplers,
+    &ID3D11DeviceContext::DSGetSamplers, &ID3D11DeviceContext::GSGetSamplers,
+    &ID3D11DeviceContext::PSGetSamplers, &ID3D11DeviceContext::CSGetSamplers};
+std::optional<std::array<uint32_t, 13>> samplerDescriptor(ID3D11SamplerState *sampler) {
+    if (!sampler)
+        return {};
+    D3D11_SAMPLER_DESC native{};
+    sampler->GetDesc(&native);
+    std::array<uint32_t, 13> result{};
+    std::memcpy(result.data(), &native, sizeof native);
+    return result;
+}
+D3D11_SAMPLER_DESC samplerDescription(float bias = 2.f) {
+    D3D11_SAMPLER_DESC result{};
+    result.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    result.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    result.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+    result.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    result.MipLODBias = bias;
+    result.MaxAnisotropy = 16;
+    result.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    result.BorderColor[1] = .25f;
+    result.MinLOD = .5f;
+    result.MaxLOD = 3;
+    return result;
+}
+testing::Capture samplerInputs(unsigned stage, bool counters = true) {
+    auto capture = stage == 5 ? testing::computeCapture(true) : testing::graphicsCounterCapture(true);
+    State state{};
+    state.sampleMask = UINT32_MAX;
+    if (stage == 5) {
+        state.topology = 1;
+        state.omStart = 8;
+        state.stages[5].shader = 15;
+        state.stages[5].cb[0] = 2;
+        state.stages[5].srv[0] = 6;
+        state.csUav[0] = 9;
+        state.csUav[1] = counters ? 12 : 0;
+        state.csCount = counters ? 2 : 1;
+    } else {
+        state.topology = 4;
+        state.viewports = 22;
+        state.stages[0].shader = 30;
+        state.stages[4].shader = 32;
+        state.rtv[0] = 21;
+        state.rtv[1] = 12;
+        state.omStart = 1;
+        state.rtCount = 2;
+    }
+    for (Id id : {60u, 61u, 62u})
+        capture.add(id, 5, 0x88, testing::statePack(Id(0), Id(0), samplerDescription(id == 62 ? -1.f : 2.f)));
+    state.stages[stage].samplers[2] = 60;
+    state.stages[stage].samplers[3] = 61;
+    state.stages[stage].samplers[4] = 60;
+    const auto stateId = stage == 5 ? 17u : 34u;
+    std::erase_if(capture.entries, [&](const auto &entry) { return entry.id == stateId; });
+    capture.add(stateId, 3, 3, testing::snapshot(state));
+    capture.add(stage == 5 ? 85 : 185, 7, samplerSetterTypes[stage],
+                testing::statePack(Id(0), Id(1), 2u, 1u, uint8_t(1), Id(60)));
+    return capture;
 }
 void execute(const InputSnapshot &snapshot) {
     Program program(snapshot.bytecode);
@@ -88,6 +154,171 @@ void evidence(const InputSnapshot &snapshot, Replay &replay, const char *fixture
 class DxbcInputSnapshotTests final : public QObject {
     Q_OBJECT
   private slots:
+    void samplers_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<unsigned>("stage");
+        QTest::addColumn<unsigned>("mode");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (unsigned stage : {0u, 4u, 5u})
+                for (unsigned mode = 0; mode < 4; ++mode)
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(stage).arg(mode)))
+                        << vendor << stage << mode;
+    }
+    void samplers() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(unsigned, stage);
+        QFETCH(unsigned, mode);
+        try {
+            QTemporaryDir directory;
+            const auto path = directory.path() + "/samplers.gpa_frame";
+            samplerInputs(stage).save(path);
+            Frame frame(path.toStdWString());
+            const Id event = stage == 5 ? 100 : 200;
+            auto configuration = options(vendor, event);
+            if (mode == 1)
+                configuration.samplerSetters[stage == 5 ? 85 : 185] = {2, {62}};
+            if (mode == 2 || mode == 3)
+                configuration.samplerEdits[event][{stage, mode == 2 ? 2 : 15}] = samplerDescription(-3.f);
+            Replay replay(frame, configuration);
+            const auto snapshot = snapshotResourceInputs(replay, stage);
+            const auto &samplers = snapshot.inputs.textures->samplers;
+            QCOMPARE(samplers.size(), size_t(16));
+            QCOMPARE(samplers.at({6, {2}}).object, mode == 1 ? uint64_t(62) : uint64_t(60));
+            QCOMPARE(samplers.at({6, {3}}).object, uint64_t(61));
+            QCOMPARE(samplers.at({6, {15}}).object, uint64_t(0));
+            QCOMPARE(samplers.at({6, {2}}).experimental, mode == 2);
+            QCOMPARE(samplers.at({6, {15}}).experimental, mode == 3);
+            QVERIFY(!samplers.at({6, {0}}).descriptor);
+            QVERIFY(!samplers.contains({6, {16}}));
+            replay.inspectNativeState([&](ID3D11DeviceContext *context, const auto &objects) {
+                // Equal native objects must retain distinct, verified GPA binding IDs.
+                QCOMPARE(objects.at(60).Get(), objects.at(61).Get());
+                for (unsigned slot : {2u, 3u, 15u}) {
+                    Com<ID3D11SamplerState> actual;
+                    (context->*samplerGetters[stage])(slot, 1, &actual);
+                    Com<ID3D11SamplerState> expected;
+                    if (slot != 15)
+                        check(objects.at(slot == 3   ? 61
+                                         : mode == 1 ? 62
+                                                     : 60)
+                                  .As(&expected),
+                              "Read expected sampler");
+                    if ((mode == 2 && slot == 2) || (mode == 3 && slot == 15)) {
+                        const auto descriptor = samplerDescription(-3.f);
+                        check(replay.nativeDevice()->CreateSamplerState(&descriptor, &expected),
+                              "Create expected experimental sampler");
+                    }
+                    QCOMPARE(samplerDescriptor(actual.Get()), samplerDescriptor(expected.Get()));
+                    QCOMPARE(samplers.at({6, {slot}}).descriptor, samplerDescriptor(expected.Get()));
+                }
+            });
+            if (QTest::currentTestFailed())
+                return;
+            const auto &words = *samplers.at({6, {3}}).descriptor;
+            QCOMPARE(words[5], 0u); // The runtime canonicalizes unused anisotropy.
+            QCOMPARE(words[8], std::bit_cast<uint32_t>(.25f));
+            validate(replay);
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"sampler_inputs_verified", true},
+                                {"vendor", vendor},
+                                {"stage", stage},
+                                {"mode", mode},
+                                {"adapter_luid", snapshot.adapterLuid},
+                                {"source", InputSnapshot::source},
+                                {"slots", samplers.size()},
+                                {"deduplicated_identity_verified", true},
+                                {"selected_event_state_unchanged", true}})
+                    .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void samplerBudgetAndRetry() {
+        QTemporaryDir directory;
+        const auto path = directory.path() + "/sampler-budget.gpa_frame";
+        samplerInputs(5).save(path);
+        Frame frame(path.toStdWString());
+        auto configuration = options(0);
+        configuration.samplerEdits[100][{5, 2}] = samplerDescription(-3.f);
+        Replay replay(frame, configuration);
+        // Four 16-byte buffers and three 52-byte descriptors must fit atomically.
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, snapshotResourceInputs(replay, 5, 219));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.inspectNativeState([](auto *, const auto &) {}));
+        QCOMPARE(replay.readCounter(12), 0u);
+        QCOMPARE(testing::firstWord(replay, 7), 10u);
+        const auto snapshot = snapshotResourceInputs(replay, 5, 220);
+        QCOMPARE(snapshot.inputs.textures->samplers.size(), size_t(16));
+        QVERIFY(snapshot.inputs.textures->samplers.at({6, {2}}).experimental);
+        validate(replay);
+        const auto retry = snapshotResourceInputs(replay, 5, 220);
+        QCOMPARE(retry.inputs.textures->samplers.at({6, {2}}).descriptor,
+                 snapshot.inputs.textures->samplers.at({6, {2}}).descriptor);
+        Replay clean(frame, options(0));
+        const auto original = snapshotResourceInputs(clean, 5, 220);
+        QVERIFY(!original.inputs.textures->samplers.at({6, {2}}).experimental);
+        QCOMPARE(original.inputs.textures->samplers.at({6, {2}}).descriptor,
+                 original.inputs.textures->samplers.at({6, {3}}).descriptor);
+        QVERIFY(original.inputs.textures->samplers.at({6, {2}}).descriptor !=
+                snapshot.inputs.textures->samplers.at({6, {2}}).descriptor);
+        validate(clean);
+    }
+    void samplerNativeComparison_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void samplerNativeComparison() {
+        QFETCH(uint32_t, vendor);
+        try {
+            auto capture = samplerInputs(5, false);
+            replaceShader(capture, compileHlsl("StructuredBuffer<uint> src:register(t0);"
+                                               "RWStructuredBuffer<uint> dst:register(u0);"
+                                               "[numthreads(1,1,1)]void main(){dst[0]=src[0]+5;}",
+                                               "cs_5_0")
+                                       .bytecode);
+            QTemporaryDir directory;
+            const auto path = directory.filePath("sampler-comparison.gpa_frame");
+            const auto reportPath = directory.filePath("report.json");
+            capture.save(path);
+            QProcess process;
+            process.start(QCoreApplication::applicationDirPath() + "/FloraDxbcInputProbe.exe",
+                          {path, "100", "5", QString::number(vendor), reportPath, "--execute-group",
+                           "--compare-native"});
+            if (!process.waitForFinished(60000)) {
+                process.kill();
+                process.waitForFinished(5000);
+                QFAIL("Native sampler input comparison timed out");
+            }
+            QFile file(reportPath);
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            const auto report = nlohmann::json::parse(file.readAll().toStdString());
+            QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
+                     report.dump().c_str());
+            QCOMPARE(report.at("schema").get<unsigned>(), 6u);
+            QCOMPARE(report.at("source").get<std::string>(), std::string(InputSnapshot::source));
+            const auto &samplers = report.at("samplers");
+            QCOMPARE(samplers.size(), size_t(16));
+            QCOMPARE(samplers.at(2).at("object").get<uint64_t>(), uint64_t(60));
+            QCOMPARE(samplers.at(3).at("object").get<uint64_t>(), uint64_t(61));
+            QCOMPARE(samplers.at(2).at("descriptor"), samplers.at(3).at("descriptor"));
+            QVERIFY(samplers.at(15).at("descriptor").is_null());
+            const auto &execution = report.at("execution");
+            QVERIFY(execution.at("native_output_parity_verified").get<bool>());
+            const auto &comparison = execution.at("native_comparison");
+            QVERIFY(comparison.at("matching_native_inputs").get<bool>());
+            QVERIFY(comparison.at("original_observed_resources_unchanged").get<bool>());
+            QCOMPARE(comparison.at("samplers_checked").get<unsigned>(), 16u);
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"native_sampler_input_comparison", true},
+                                {"vendor", vendor},
+                                {"samplers", samplers},
+                                {"native_comparison", comparison},
+                                {"passed", true}})
+                    .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void compute_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<bool>("ordered");

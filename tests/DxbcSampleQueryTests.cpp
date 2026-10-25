@@ -279,7 +279,7 @@ class DxbcSampleQueryTests final : public QObject {
             const auto report = Json::parse(file.readAll().toStdString());
             QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
                      report.dump().c_str());
-            QCOMPARE(report.at("schema").get<unsigned>(), 5u);
+            QCOMPARE(report.at("schema").get<unsigned>(), 6u);
             QCOMPARE(report.at("source").get<std::string>(), std::string(InputSnapshot::source));
             QCOMPARE(report.at("adapter_luid"), references.at({vendor, false}).at("adapter_luid"));
             const auto &queries = report.at("sample_queries");

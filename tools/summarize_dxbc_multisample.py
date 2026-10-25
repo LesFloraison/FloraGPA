@@ -100,7 +100,7 @@ def main():
     extra_ok &= all(p["passed"] and p["test_passed"] and p["adapter_luid"] == adapters.get(p["vendor"])
                     for p in [*large, *clamps, *comparisons, *singles])
     success = complete and probe_ok and extra_ok and final["boundary_test_passed"] and final["passed"] == 105 and all(
-        p["passed"] and p["test_passed"] and p["source"] == "independent-replay-resource-inputs/6"
+        p["passed"] and p["test_passed"] and p["source"] == "independent-replay-resource-inputs/7"
         and p["adapter_luid"] == adapters.get(p["vendor"]) for p in cases) and all(
             r["completed"] and r["failed"] == 0 and r["skipped"] == 0 for r in [final, *regressions])
     builds = []

@@ -382,6 +382,7 @@ if(BUILD_TESTING)
   add_executable(FloraDxbcInputProbe tools/probe_dxbc_inputs.cpp)
   target_link_libraries(FloraDxbcInputProbe PRIVATE FloraExperiment Qt6::Core)
   target_link_libraries(FloraDxbcInputSnapshotTests PRIVATE FloraExperiment Qt6::Test)
+  add_dependencies(FloraDxbcInputSnapshotTests FloraDxbcInputProbe)
   add_test(NAME dxbc_input_snapshot COMMAND FloraDxbcInputSnapshotTests -o "${CMAKE_BINARY_DIR}/dxbc-input-snapshot-$<CONFIG>.txt,txt")
   set_tests_properties(dxbc_input_snapshot PROPERTIES RUN_SERIAL TRUE TIMEOUT 180
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")

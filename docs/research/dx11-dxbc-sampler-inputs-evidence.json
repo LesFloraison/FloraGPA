@@ -1,0 +1,2115 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_sampler_inputs",
+  "complete_release_acceptance": false,
+  "latest_validation_passed": true,
+  "sampler_matrix_complete": true,
+  "sampler_matrix_passed": true,
+  "native_comparisons_passed": true,
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-first.txt",
+      "sha256": "0ca51ec39218662c25f306711387723cb4c0642a32f070696ceaada971522fc0",
+      "completed": false,
+      "totals_present": true,
+      "unhandled_exception": true,
+      "passed": 10,
+      "failed": 28,
+      "skipped": 0,
+      "elapsed_ms": 2818,
+      "failures": [
+        "DxbcInputSnapshotTests::samplers(0-0-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(0-0-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(0-0-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(0-4-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(0-4-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(0-4-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(0-5-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(0-5-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(0-5-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-0-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(4318-0-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-0-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-4-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(4318-4-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-4-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-5-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(4318-5-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(4318-5-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-0-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(32902-0-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-0-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-4-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(32902-4-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-4-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-5-1) invalid map<K, T> key",
+        "DxbcInputSnapshotTests::samplers(32902-5-2) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplers(32902-5-3) Compared values are not the same",
+        "DxbcInputSnapshotTests::samplerBudgetAndRetry() Caught unhandled exception"
+      ],
+      "unit_cases": [],
+      "sampler_matrix": [
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": false
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "scoped_restore_verified": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": false
+        }
+      ],
+      "native_comparisons": [],
+      "recovery_passed": false
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-final.txt",
+      "sha256": "30abf0c8191322deb7d39ee189e311f9680aa1a09c445af92cd7f4131d90d167",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 7400,
+      "failures": [],
+      "unit_cases": [],
+      "sampler_matrix": [
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73789,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 68403,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 0,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 4,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 0,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 1,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 2,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "adapter_luid": 73907,
+          "deduplicated_identity_verified": true,
+          "mode": 3,
+          "sampler_inputs_verified": true,
+          "selected_event_state_unchanged": true,
+          "slots": 16,
+          "source": "independent-replay-resource-inputs/7",
+          "stage": 5,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "native_comparisons": [
+        {
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 2,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 0,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "native_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "resource": 2
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "native_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "resource": 4
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "native_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "resource": 7
+              }
+            ],
+            "sample_queries_checked": 0,
+            "samplers_checked": 16,
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "native_sampler_input_comparison": true,
+          "passed": true,
+          "samplers": [
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 0
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 1
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 2
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 61,
+              "slot": 3
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 4
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 5
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 6
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 7
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 8
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 9
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 10
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 11
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 12
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 13
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 14
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 15
+            }
+          ],
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 25,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 0,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "native_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "resource": 2
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "native_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "resource": 4
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "native_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "resource": 7
+              }
+            ],
+            "sample_queries_checked": 0,
+            "samplers_checked": 16,
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "native_sampler_input_comparison": true,
+          "passed": true,
+          "samplers": [
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 0
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 1
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 2
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 61,
+              "slot": 3
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 4
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 5
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 6
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 7
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 8
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 9
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 10
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 11
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 12
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 13
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 14
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 15
+            }
+          ],
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "native_comparison": {
+            "attempted": true,
+            "elapsed_ms": 43,
+            "matching_native_inputs": true,
+            "multisample_inputs_checked": 0,
+            "original_observed_resources_unchanged": true,
+            "passed": true,
+            "resources": [
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "native_sha256": "b1535c7783ea8829b6b0cf67704539798b4d16c39bf0bfe09494c5d9f12eee30",
+                "resource": 2
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "native_sha256": "8a10badd6e85a9e9294ca3fcc00bd3b9894197182b02cf49138c42707aaea824",
+                "resource": 4
+              },
+              {
+                "bytes": 16,
+                "equal": true,
+                "expected_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "native_sha256": "a64a5761bc0e57ccd66210ee52f6025ee9fff0beeeed623dbda9a319a3d42371",
+                "resource": 7
+              }
+            ],
+            "sample_queries_checked": 0,
+            "samplers_checked": 16,
+            "scope": "single_direct_dispatch_observed_resources"
+          },
+          "native_sampler_input_comparison": true,
+          "passed": true,
+          "samplers": [
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 0
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 1
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 2
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 61,
+              "slot": 3
+            },
+            {
+              "descriptor": [
+                21,
+                1,
+                2,
+                4,
+                1073741824,
+                0,
+                1,
+                0,
+                1048576000,
+                0,
+                0,
+                1056964608,
+                1077936128
+              ],
+              "experimental": false,
+              "object": 60,
+              "slot": 4
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 5
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 6
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 7
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 8
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 9
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 10
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 11
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 12
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 13
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 14
+            },
+            {
+              "descriptor": null,
+              "experimental": false,
+              "object": 0,
+              "slot": 15
+            }
+          ],
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "recovery_passed": true
+    }
+  ],
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-regression-queries.txt",
+      "sha256": "6db8c1e335f174b1e47c7a27292d71de52aca274f395f729d359fbfb438cec11",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 107162,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-regression-msaa.txt",
+      "sha256": "96aca20e59c34d5d29de72b2c64c199be968b362014008a5ec598a671f98f80a",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 105,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 28859,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-regression-textures.txt",
+      "sha256": "90d804b083a0f753ca21e18c6c285ce55e0d32b91737a06d0299e9d97cdba46e",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 8917,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-regression-samplers.txt",
+      "sha256": "53a6639def0ef079c9f99ead9b8e8f96f26e37ea1357f1555adf3fe1c267cbd9",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 833,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    }
+  ],
+  "capture_observations": [
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-gf2-vs.json",
+      "sha256": "0e39d737056d5685b8a8a47862e730363878efc04e2f1d123e5fd94380c03da2",
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "event": 113,
+      "stage": 0,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader": 100,
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "samplers": [
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 0
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 1
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 2
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 3
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 4
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 5
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 6
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 7
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 8
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 9
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 10
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 11
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 12
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 13
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 14
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 15
+        }
+      ],
+      "source": "independent-replay-resource-inputs/7",
+      "elapsed_ms": 363
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-gf2-ps.json",
+      "sha256": "95c22da1fa2ba1ca7b6803d5ebf7917a47dd9ff850c5061a56be3563d21aa008",
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "event": 113,
+      "stage": 4,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader": 102,
+      "shader_sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "samplers": [
+        {
+          "descriptor": [
+            20,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 90,
+          "slot": 0
+        },
+        {
+          "descriptor": [
+            20,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 90,
+          "slot": 1
+        },
+        {
+          "descriptor": [
+            85,
+            1,
+            1,
+            1,
+            0,
+            9,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 120,
+          "slot": 2
+        },
+        {
+          "descriptor": [
+            85,
+            1,
+            1,
+            1,
+            0,
+            9,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 120,
+          "slot": 3
+        },
+        {
+          "descriptor": [
+            20,
+            2,
+            2,
+            2,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 121,
+          "slot": 4
+        },
+        {
+          "descriptor": [
+            20,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 90,
+          "slot": 5
+        },
+        {
+          "descriptor": [
+            20,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 90,
+          "slot": 6
+        },
+        {
+          "descriptor": [
+            20,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4286578687,
+            2139095039
+          ],
+          "experimental": false,
+          "object": 90,
+          "slot": 7
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 8
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 9
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 10
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 11
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 12
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 13
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 14
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 15
+        }
+      ],
+      "source": "independent-replay-resource-inputs/7",
+      "elapsed_ms": 267
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-bf1-cs.json",
+      "sha256": "b6a2e74807bdd837c841b6a5eaaa50bb0acfc7d3f2cfcd7961ea4e3184cd3165",
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "event": 209,
+      "stage": 5,
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader": 190,
+      "shader_sha256": "b56ecaacbb781396de6116962c49ae2727b671c97d630d1c8231cb8353c76304",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "samplers": [
+        {
+          "descriptor": [
+            20,
+            4,
+            4,
+            3,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1098907648
+          ],
+          "experimental": false,
+          "object": 240,
+          "slot": 0
+        },
+        {
+          "descriptor": [
+            21,
+            3,
+            3,
+            3,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1098907648
+          ],
+          "experimental": false,
+          "object": 215,
+          "slot": 1
+        },
+        {
+          "descriptor": [
+            20,
+            1,
+            3,
+            3,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1098907648
+          ],
+          "experimental": false,
+          "object": 241,
+          "slot": 2
+        },
+        {
+          "descriptor": [
+            148,
+            3,
+            3,
+            3,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1098907648
+          ],
+          "experimental": false,
+          "object": 242,
+          "slot": 3
+        },
+        {
+          "descriptor": [
+            21,
+            3,
+            3,
+            3,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1098907648
+          ],
+          "experimental": false,
+          "object": 215,
+          "slot": 4
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 5
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 6
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 7
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 8
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 9
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 10
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 11
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 12
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 13
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 14
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 15
+        }
+      ],
+      "source": "independent-replay-resource-inputs/7",
+      "elapsed_ms": 2370
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-hd-cs.json",
+      "sha256": "96ac347b008491f14e84e441fb1af8a3f9ef5ddb0e8742f6d4e387027e10ba67",
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "event": 893,
+      "stage": 5,
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader": 891,
+      "shader_sha256": "6cbfe0c5403012739b9f6ed4de880f1a92abf5c3d87f519f8fc623252ec7cab8",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "samplers": [
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 0
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 1
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 2
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 3
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 4
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 5
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 6
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 7
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 8
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 9
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 10
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 11
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 12
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 13
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 14
+        },
+        {
+          "descriptor": null,
+          "experimental": false,
+          "object": 0,
+          "slot": 15
+        }
+      ],
+      "source": "independent-replay-resource-inputs/7",
+      "elapsed_ms": 2444
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "sha256": "8bff596474a1b63130f8f5caf5162e333a3968652c25937add612dd7ef300978"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "sha256": "042639ff7b571a3b9b8d6c20985c712f3d022e6ace2c4a7ada4b8a3c3a92763e"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "sha256": "b1d4d972ea213592c58bd355363957dd94ea136d24ffc1678b5ea66206fb2e6a"
+    },
+    {
+      "path": "tools/probe_dxbc_inputs.cpp",
+      "sha256": "056478f62032986cf4b414f1561fddadf25e3a9505f49aab8e1089580eb21ddd"
+    },
+    {
+      "path": "tests/DxbcInputSnapshotTests.cpp",
+      "sha256": "1aa4dbea500966d721a5ecf196c3495b955c1b37100271e2cc292b57a52e5d5c"
+    },
+    {
+      "path": "tools/summarize_dxbc_sampler_inputs.py",
+      "sha256": "cffdd2cf28065d7c68519b65ba035be5b23fc59035a5db69c84d521609fbde51"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-build.txt",
+      "sha256": "190f2e951774025b5baa320136159b4172783a50afc5d4226bbed66a03f423cc"
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-build-tests.txt",
+      "sha256": "11eebf2af6a5081a5b0e80f35da724c6fa784ca3af23f507741510dddfc29f4b"
+    },
+    {
+      "path": "artifacts/dx11-native/sampler-inputs-build-release.txt",
+      "sha256": "eeb7f1e107d73f92f7f52284daa996a3387a1b409d99e8aa45cbf425eb8dc024"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
+      "sha256": "582f03faf20663a04e04bb74b1dc7785a260804ba1542ad261507426bcc27190"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputSnapshotTests.exe",
+      "sha256": "fbd99135780476d5ca4a5a5a49c7f4425055efe491c07ffbf0a9173aa9d50a1b"
+    }
+  ]
+}

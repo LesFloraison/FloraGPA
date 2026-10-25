@@ -367,6 +367,52 @@ class Snapshot {
         readBuffer(buffer.Get(), metadata.resource);
         views.emplace(std::move(binding), storage);
     }
+    void samplers(ID3D11DeviceContext *context) {
+        using Getter = void (STDMETHODCALLTYPE ID3D11DeviceContext::*)(UINT, UINT, ID3D11SamplerState **);
+        static constexpr Getter getters[]{
+            &ID3D11DeviceContext::VSGetSamplers, &ID3D11DeviceContext::HSGetSamplers,
+            &ID3D11DeviceContext::DSGetSamplers, &ID3D11DeviceContext::GSGetSamplers,
+            &ID3D11DeviceContext::PSGetSamplers, &ID3D11DeviceContext::CSGetSamplers};
+        Objects<ID3D11SamplerState, 16> values;
+        (context->*getters[result.stage])(0, 16, values.data());
+        const auto &frame = effectiveFrame(replay.frame(), replay.options());
+        const auto event = frame.event(result.event);
+        const auto effective = effectiveSamplerBindings(frame, result.event, frame.state(event.state),
+                                                        replay.options().samplerSetters);
+        const auto edits = replay.options().samplerEdits.find(result.event);
+        for (uint32_t slot = 0; slot < 16; ++slot) {
+            checkCancellation(cancelled);
+            SamplerInput input;
+            input.object = effective.stages[result.stage].samplers[slot];
+            input.experimental =
+                edits != replay.options().samplerEdits.end() && edits->second.contains({result.stage, slot});
+            auto *native = values.values[slot];
+            // D3D11 may intern equal descriptors. Resolve aliases from the effective
+            // GPA binding, then verify the native object instead of guessing an ID.
+            if (input.object) {
+                validateSamplerResource(frame, input.object);
+                const auto original = objects.find(input.object);
+                if (original == objects.end() || !original->second)
+                    throw std::runtime_error("Missing native DXBC sampler provenance");
+                if (!input.experimental && identity(native).Get() != identity(original->second.Get()).Get())
+                    throw std::runtime_error("Native DXBC sampler disagrees with its GPA identity");
+            } else if (native && !input.experimental)
+                throw std::runtime_error("Unexpected native DXBC sampler at an unbound GPA slot");
+            if (input.experimental && !native)
+                throw std::runtime_error("Experimental DXBC sampler is unavailable");
+            if (native) {
+                D3D11_SAMPLER_DESC descriptor{};
+                static_assert(sizeof descriptor == 13 * sizeof(uint32_t));
+                if (sizeof descriptor > budget - used)
+                    throw std::runtime_error("DXBC sampler snapshot byte budget exceeded");
+                native->GetDesc(&descriptor);
+                input.descriptor.emplace();
+                std::memcpy(input.descriptor->data(), &descriptor, sizeof descriptor);
+                used += sizeof descriptor;
+            }
+            textures->samplers.emplace(Register{6, {slot}}, std::move(input));
+        }
+    }
     void resources(ID3D11DeviceContext *context) {
         using Getter =
             void (STDMETHODCALLTYPE ID3D11DeviceContext::*)(UINT, UINT, ID3D11ShaderResourceView **);
@@ -495,6 +541,7 @@ class Snapshot {
                     }
         constants(context);
         resources(context);
+        samplers(context);
         if (queryRasterizer)
             textures->rasterizerQueries = sampleQueries(nullptr);
         checkCancellation(cancelled);

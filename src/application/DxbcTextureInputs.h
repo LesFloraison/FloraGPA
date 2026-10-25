@@ -35,11 +35,19 @@ struct TextureInputView {
     std::shared_ptr<const Samples> samples;
     std::shared_ptr<const SampleQueryInput> queries;
 };
+struct SamplerInput {
+    uint64_t object = 0; // Effective GPA identity before a scoped descriptor experiment.
+    bool experimental = false;
+    // Observed D3D11 descriptor bits. Null is a verified unbound sampler.
+    std::optional<std::array<uint32_t, 13>> descriptor;
+};
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
     // Native D3D11 SRV/UAV dimensions; missing resource storage stays unavailable.
     std::map<Register, TextureInputView> views;
+    // Missing entries are unavailable, distinct from observed null bindings.
+    std::map<Register, SamplerInput> samplers;
     std::shared_ptr<const SampleQueryInput> rasterizerQueries;
     Value sampleQuery(const Register &, uint32_t dimension, bool position, bool integer, const Value &sample,
                       bool &assisted) const;

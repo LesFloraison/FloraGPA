@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
         return 2;
     }
     Json report{
-        {"schema", 5},
+        {"schema", 6},
         {"scope", execute ? "native_dxbc_compute_group_probe" : "native_dxbc_resource_input_observation"},
         {"complete_release_acceptance", false},
         {"shader_execution_performed", false},
@@ -145,6 +145,16 @@ int main(int argc, char **argv) {
             report["textures"].push_back(item);
         }
         report["sample_queries"] = Json::array();
+        report["samplers"] = Json::array();
+        for (const auto &[reg, sampler] : snapshot.inputs.textures->samplers) {
+            Json item{{"slot", reg.indices.at(0)},
+                      {"object", sampler.object},
+                      {"experimental", sampler.experimental},
+                      {"descriptor", nullptr}};
+            if (sampler.descriptor)
+                item["descriptor"] = *sampler.descriptor;
+            report["samplers"].push_back(item);
+        }
         for (const auto &[reg, view] : snapshot.inputs.textures->views) {
             if (!view.resource)
                 continue;
@@ -293,6 +303,22 @@ int main(int argc, char **argv) {
                                 throw std::runtime_error("Native comparison timed out");
                         };
                         auto checkBefore = [&](Replay &source, ID3D11DeviceContext *context) {
+                            for (const auto &item : report["samplers"]) {
+                                checkTime();
+                                Com<ID3D11SamplerState> sampler;
+                                context->CSGetSamplers(item["slot"].get<UINT>(), 1, &sampler);
+                                Json observed = nullptr;
+                                if (sampler) {
+                                    D3D11_SAMPLER_DESC descriptor{};
+                                    sampler->GetDesc(&descriptor);
+                                    std::array<uint32_t, 13> words{};
+                                    static_assert(sizeof descriptor == sizeof words);
+                                    std::memcpy(words.data(), &descriptor, sizeof descriptor);
+                                    observed = words;
+                                }
+                                if (observed != item["descriptor"])
+                                    throw std::runtime_error("Native comparison sampler input mismatch");
+                            }
                             for (const auto &item : report["sample_queries"]) {
                                 checkTime();
                                 if (!item["observation"]["observed"].get<bool>())
@@ -376,6 +402,7 @@ int main(int argc, char **argv) {
                         comparison["matching_native_inputs"] = true;
                         comparison["multisample_inputs_checked"] = report["multisample_inputs"].size();
                         comparison["sample_queries_checked"] = report["sample_queries"].size();
+                        comparison["samplers_checked"] = report["samplers"].size();
                         comparison["resources"] = Json::array();
                         auto compare = [&](uint64_t id, const auto &expected, auto actual) {
                             checkTime();

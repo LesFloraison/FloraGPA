@@ -674,6 +674,20 @@ The latest nine-suite checkpoint totals 1,639 passes with zero failures/skips;
 GUI, CLI and Worker Release builds pass. This count is a focused regression set,
 not a rerun of the entire baseline or a complete removal acceptance claim.
 
+The sampler input checkpoint expands the snapshot suite from 42 to 82 passing
+cases with no failures/skips. It captures all 16 selected-stage sampler slots,
+resolves aliased GPA identities against effective bindings and rechecks actual
+descriptors during native comparison. Input identity is now
+`independent-replay-resource-inputs/7`; input-probe schema is 6. Separate
+explicit-LOD research records 6,426 native observations, canonicalized descriptor
+fields and unresolved NVIDIA anisotropic/Intel MinLOD differences. See
+`DX11_DXBC_SAMPLER_INPUTS.md` and `DX11_SAMPLE_LEVEL_RESEARCH.md`. These results
+do not claim sampling instruction execution or final P6 parity.
+The five focused suites total 646 passes with zero failures/skips. Four NVIDIA
+input observations complete on the GF2/BF1/Helldivers captures; GUI, CLI and
+Worker Release builds pass. The sampler evidence ledger preserves the initial
+fixture failures and the final results separately.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

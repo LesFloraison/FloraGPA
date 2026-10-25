@@ -23,7 +23,7 @@ struct InputSnapshot {
     std::map<Register, InputBinding> bindings;
     std::map<Register, std::string> unavailable;
     std::map<uint64_t, std::string> unavailableCounters;
-    static constexpr const char *source = "independent-replay-resource-inputs/6";
+    static constexpr const char *source = "independent-replay-resource-inputs/7";
 };
 // Runs a before-event replay and copies the selected stage's actual bindings
 // inside its experiment scope. Resource bytes are observations of this replay,

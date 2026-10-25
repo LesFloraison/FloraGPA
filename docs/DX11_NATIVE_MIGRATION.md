@@ -473,6 +473,17 @@ unknown-propagation cases do not close that acceptance item. See
 `DX11_DXBC_SAMPLE_QUERY_IMPLEMENTATION.md` for the exact supported matrix and
 remaining forced-count, depth-only, stage and integration scope.
 
+Sampler observations now accompany resource snapshots under input identity
+`independent-replay-resource-inputs/7` and input-probe schema 6. All 16 stage
+slots retain effective GPA identities, actual descriptor bits and explicit
+unbound/experimental state. Native comparisons recheck those descriptors on
+both replay instances. The 82-test input suite covers sampler alias identities,
+experiments, budget recovery and three subprocess comparisons. See
+`DX11_DXBC_SAMPLER_INPUTS.md`. Independent explicit-LOD research records 6,426
+observations and two adapter-specific filtering/clamp differences in
+`DX11_SAMPLE_LEVEL_RESEARCH.md`; the sampler snapshot checkpoint does not yet
+implement sampling opcodes or close full shader-debugging acceptance.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable
