@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_sample_comparison_zero",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "final": {
+    "path": "artifacts/dx11-native/sample-comparison-final.txt",
+    "sha256": "10c7eacf31275e20a46f18ec651d83513967fb5f6f0c38e5cac0da41bb7ae66e",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 190,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 207158,
+    "failures": [],
+    "unit_cases": []
+  },
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/sample-comparison-regression-sample-grad.txt",
+      "sha256": "c8e109fc926c0b576a2f4a512944b970f519d35776b6ba68c7784fd10a5d0acd",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 262,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 115814,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-regression-sample-level.txt",
+      "sha256": "60a38c1d4cfbedeb54dd6a7c7c67f9b85e3091d680e4c4258c34c21c550ce3fc",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 156,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 129428,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-regression-sampling-group.txt",
+      "sha256": "0e678134a8a1454b4bc79e86a8b8f517a60be62968940482fb4578d220a07f10",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 32925,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-regression-group.txt",
+      "sha256": "0bb43ab50d838d72aa7217ab161c94844495390319abad1e54ac83edcc03b6c7",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 2490,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-regression-execution.txt",
+      "sha256": "0a27be07109bf83c2a0fab2f48aa90ec3863610d824a614558b1a4fb69e8284f",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 32131,
+      "failures": [],
+      "unit_cases": []
+    }
+  ],
+  "hardware_cases": 168,
+  "per_stage_vectors": 30618,
+  "complete_compute_groups": 162,
+  "undefined_sampler_rejections": 18,
+  "unit_cases": [
+    "cancellation(0-0)",
+    "cancellation(0-1)",
+    "cancellation(0-5)",
+    "cancellation(32902-0)",
+    "cancellation(32902-1)",
+    "cancellation(32902-5)",
+    "cancellation(4318-0)",
+    "cancellation(4318-1)",
+    "cancellation(4318-5)",
+    "modifiersAndMasks(0-0)",
+    "modifiersAndMasks(0-1)",
+    "modifiersAndMasks(0-5)",
+    "modifiersAndMasks(32902-0)",
+    "modifiersAndMasks(32902-1)",
+    "modifiersAndMasks(32902-5)",
+    "modifiersAndMasks(4318-0)",
+    "modifiersAndMasks(4318-1)",
+    "modifiersAndMasks(4318-5)",
+    "requestValidation()",
+    "unknownAndInvalid()"
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "accb3c90df67434cfac7ab7906849fac448e722160d8a9fa1906d6d308979e50"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "sha256": "c17b125fbecce84e9a26af28d3b7e8f9b93ab66020cff29c090ab7caaab1e45c"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "sha256": "16b0ae4e72d96757d58b53a49c4d8f85aca61c6e3eaed4411c103885e92e6a59"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.cpp",
+      "sha256": "b411b7ae234c640ba4edff284b15b396fc787f4158ff2a25bd4210bc8d953d1f"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "sha256": "c0d8c9a48f7cbb8e88cc4f30941ad48bb59ae9cb9dc5629d57c85ecf08af3d28"
+    },
+    {
+      "path": "tests/DxbcSampleComparisonTests.cpp",
+      "sha256": "afb34a59ca33189fe0b2c61c622a9e79a7b1919db74f988965b337fb5c1c882e"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_comparison.py",
+      "sha256": "61052ea3f6209212889cf3e7a36978dac18a32bb221204ddafff8840f694b09a"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_level.py",
+      "sha256": "37032e56c1ee4a480efd732e47ab904aed86c823d0bb35e627c33d9b81b93ef2"
+    },
+    {
+      "path": "tools/summarize_dxbc_sampling_groups.py",
+      "sha256": "74f98515aca60c878b186e138474bea3487cee167c38bd76fe611c4ee9010a9e"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "f6b4acac3fc248d240be039b5ba6e873bb9492c60a22c68711827e349d13aedd"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/sample-comparison-release-build.txt",
+      "sha256": "8fa1f71785f5dcad989f484b279f0371b3ef2e26dfe9d4a40501aa8aa4ba6f1b"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-final-ctest.txt",
+      "sha256": "981642812a614c30497aa96974640d2b3ad2dcf28e083d93e8ce0dcfc9246fe8"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcSampleComparisonTests.exe",
+      "sha256": "d08ef355d4b2802ca2d7535910f56b8a5463a779bdc93a16cd28692a2473acc3"
+    },
+    {
+      "path": "build/vs2022/Release/FloraSampleCompareProbe.exe",
+      "sha256": "149d9d9d76426c9fa40ee765c9f6f0a5f0d20b80dbe73b10ae63b88a3da8603e"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "path": "docs/research/dx11-sample-comparison-observations.json",
+      "sha256": "d7418ff852c845c3c07569de46499fc8365d8143ed8e65ad6e7277bba7d0ccb3"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-independent-negative.json",
+      "sha256": "148d3a077efb98ff5d2c5fc8b49cfd3f9b57dd3d62d1a4670f90ba05ec9489bc"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-execution-negative.json",
+      "sha256": "8f21e1f106d6acaed80c600a32345e1c7826d9b24a2755e2fe31e8a29225d33e"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-gradient-gate.json",
+      "sha256": "13ece471d548921cd00da9d6b1309e9e07083fcfed6c7e219874f009d852ee5e"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-level-gate.json",
+      "sha256": "958f0973a00f2c312dd439d5def5956c8225bf77a2757dffa5a2eaf4b43f7484"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-comparison-group-gate.json",
+      "sha256": "ba3e8ffe9e84b9449c4c28f2733787280e70714800f1f6811006532f4c0c33c7"
+    }
+  ]
+}

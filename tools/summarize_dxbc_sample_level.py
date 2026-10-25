@@ -41,7 +41,7 @@ def main():
         parser.add_argument("--" + name, type=Path, action="append", default=[], required=name == "log")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--grad", action="store_true")
-    parser.add_argument("--backend", default="dxbc-gpu/12")
+    parser.add_argument("--backend", default="dxbc-gpu/13")
     parser.add_argument("--execution-model", default="bounded-sampling-rendezvous/3")
     args = parser.parse_args()
     runs = [read(path, args.grad) for path in args.log]

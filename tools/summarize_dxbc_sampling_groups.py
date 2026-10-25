@@ -24,6 +24,7 @@ def main():
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("regression", "source", "build", "binary", "evidence"):
         parser.add_argument("--" + name, type=Path, action="append", default=[])
+    parser.add_argument("--backend", default="dxbc-gpu/13")
     args = parser.parse_args()
     rows = observations(args.log)
     groups = [r for r in rows if r.get("sampling_group")]
@@ -47,7 +48,7 @@ def main():
         if (row["differences"] or row["sampling_batches"] != batches or row["gpu_operations"] != batches
                 or row["barriers"] != (6 if row["flow"] == "barrier-loop" else 0)
                 or row["execution_model"] != "bounded-sampling-rendezvous/3"
-                or row["helper"]["backend"] != "dxbc-gpu/12" or luid != reports[vendor]["adapter_luid"]
+                or row["helper"]["backend"] != args.backend or luid != reports[vendor]["adapter_luid"]
                 or row["shader_sha256"] != identity(args.reference / str(vendor) / item["shader"])["sha256"]):
             raise ValueError("Invalid complete group comparison")
     progress = [r for r in rows if r.get("bounded_sampling_progress")]

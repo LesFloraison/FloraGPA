@@ -95,14 +95,15 @@ Words typedGraphicsKernel(uint32_t stage, uint32_t mask, uint32_t swizzle, uint3
     return result;
 }
 Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
-                    const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false) {
+                    const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false,
+                    bool comparison = false) {
     std::vector<Words> rows{row(89, {{0x208e46, 0,
                                       gradient   ? 3u
                                       : sampling ? 2u
                                                  : 1u}}),
                             row(88 | (dimension << 11), {dest(7, 0), {returns}})};
     if (sampling)
-        rows.push_back(row(90, {{0x106000, 0}}));
+        rows.push_back(row(90 | (comparison ? 0x800 : 0), {{0x106000, 0}}));
     const bool compute = stage == 5;
     if (compute) {
         rows.push_back(row(104, {{1}}));
@@ -127,12 +128,12 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
                                              {0x208e46, 0, 1},
                                              {0x208e46, 0, 2}}));
     else if (sampling)
-        rows.push_back(row(72 | 0x80000000, {{control},
-                                             dest(target, 0, mask),
-                                             {0x208e46, 0, 0},
-                                             source(7, 0, swizzle),
-                                             {0x106000, 0},
-                                             {0x20800a, 0, 1}}));
+        rows.push_back(row((comparison ? 71 : 72) | 0x80000000, {{control},
+                                                                 dest(target, 0, mask),
+                                                                 {0x208e46, 0, 0},
+                                                                 source(7, 0, swizzle),
+                                                                 {0x106000, 0},
+                                                                 {0x20800a, 0, 1}}));
     else
         rows.push_back(row(45 | 0x80000000,
                            {{control}, dest(target, 0, mask), {0x208e46, 0, 0}, source(7, 0, swizzle)}));
@@ -490,7 +491,8 @@ struct GpuOperations::State {
                                const SamplerInput *sampler = nullptr, const Value &lodOrDdx = {},
                                const std::optional<Value> &ddy = {},
                                const std::array<uint32_t, 3> &groupSize = {},
-                               const std::vector<SamplingInvocation> *batch = nullptr) {
+                               const std::vector<SamplingInvocation> *batch = nullptr,
+                               bool comparison = false) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -546,7 +548,9 @@ struct GpuOperations::State {
                 UINT support = 0;
                 check(device->CheckFormatSupport(DXGI_FORMAT(view.format), &support),
                       "Check native texture sampling support");
-                if (!(support & D3D11_FORMAT_SUPPORT_SHADER_SAMPLE))
+                const auto required = comparison ? D3D11_FORMAT_SUPPORT_SHADER_SAMPLE_COMPARISON
+                                                 : D3D11_FORMAT_SUPPORT_SHADER_SAMPLE;
+                if (!(support & required))
                     throw std::runtime_error("Selected device does not support sampling this texture format");
             }
             if (sampler && sampler->descriptor) {
@@ -558,7 +562,7 @@ struct GpuOperations::State {
             const auto words = batch
                                    ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize)
                                    : textureKernel(stage, dimension, returns, mask, swizzle, offset,
-                                                   sampler != nullptr, ddy.has_value());
+                                                   sampler != nullptr, ddy.has_value(), comparison);
             std::vector<std::array<uint32_t, 4>> values{address.bits};
             if (sampler)
                 values.push_back(lodOrDdx.bits);
@@ -879,7 +883,7 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/12"}};
+            {"backend", "dxbc-gpu/13"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
@@ -1288,13 +1292,14 @@ Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, co
                                    const SamplerInput &sampler, uint32_t dimension, uint32_t returns,
                                    const Value &address, const Value &lodOrDdx,
                                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                   const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy) {
+                                   const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
+                                   bool comparison) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
     return state_
         ->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler,
-                  lodOrDdx, ddy)
+                  lodOrDdx, ddy, {}, nullptr, comparison)
         .front();
 }
 std::vector<Value> GpuOperations::sampleGradBatch(const TextureInput &input, const TextureInputView &view,

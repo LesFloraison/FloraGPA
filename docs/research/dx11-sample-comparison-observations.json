@@ -107,7 +107,7 @@
     },
     {
       "path": "tools/summarize_sample_comparison.py",
-      "sha256": "900b7405c19302d7b6496a69266ef6921c05fc54a3e22864881fb84420afe96d"
+      "sha256": "2cb331b4741373c481400389e03f0495fa57f9fae839bd493b195e44d69ba38a"
     }
   ]
 }

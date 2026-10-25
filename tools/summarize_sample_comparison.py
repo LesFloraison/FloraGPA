@@ -46,6 +46,17 @@ def main():
             for configuration, item in enumerate(report["cases"]):
                 if len(item["records"]) != 63 or item["offset"] != configuration % 2:
                     raise ValueError("Incomplete comparison records")
+                names = ["point"]*8 + ["linear"]*8 + ["bias", "minimum", "maximum",
+                    "resource-minimum", "view-mips", "border", "wrap", "mirror", "mirror-once",
+                    "anisotropic", "null-sampler", "null-resource"]
+                selected = configuration // 2
+                if (item["name"] != names[selected]
+                        or item["comparison"] != (selected % 8 + 1 if selected < 16 else 4)
+                        or item["resource_bound"] != (selected != 27)
+                        or item["first_mip"] != (1 if selected == 20 else 0)
+                        or item["mip_count"] != (2 if selected == 20 else 4)
+                        or item["resource_min_lod"] != (1.25 if selected == 19 else 0)):
+                    raise ValueError("Comparison state matrix was changed")
                 undefined = item["name"] == "null-sampler"
                 if item["status"] != ("undefined_missing_comparison_sampler" if undefined else "observed"):
                     raise ValueError("Undefined comparison results were accepted")

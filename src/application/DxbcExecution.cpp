@@ -612,19 +612,22 @@ struct Lane::State {
         if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
             (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
             resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
-            (op == 72 && args[4].components != 1 &&
+            (op != 73 && args[4].components != 1 &&
              !(args[4].components == 2 &&
                (args[4].mode == 2 ||
                 (args[4].mode == 1 &&
                  std::all_of(args[4].select.begin(), args[4].select.end(),
                              [&](auto component) { return component == args[4].select[0]; }))))))
             fail("Invalid DXBC explicit sampling operands");
+        if (op == 71 && std::any_of(resource.select.begin(), resource.select.end(),
+                                    [](auto component) { return component != 0; }))
+            fail("Comparison sampling requires a replicated red resource selection");
         const auto binding = s.address(resource), samplerBinding = s.address(sampler);
         const auto declared = p.typedResources.find(binding);
         const auto samplerDeclaration = p.samplers.find(samplerBinding);
         if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
-            samplerDeclaration->second != 0)
-            fail("Explicit sampling requires a texture and default sampler declaration");
+            samplerDeclaration->second != (op == 71 ? 1u : 0u))
+            fail("Explicit sampling requires matching texture and sampler declarations");
         const auto [dimension, returns] = declared->second;
         std::array<int32_t, 3> offsets{};
         std::set<uint32_t> extensions;
@@ -961,7 +964,7 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
-    } else if (op == 72 || op == 73) {
+    } else if (op == 71 || op == 72 || op == 73) {
         const auto request = s.sampling();
         const auto &destination = args[0];
         const auto target = s.address(destination);
@@ -974,7 +977,7 @@ Step Lane::step() {
             value = s.inputs.textures->sampleTexture(
                 p.stage, request.binding, request.sampler, request.dimension, request.returns,
                 request.address, request.lodOrDdx, request.swizzle, request.mask, request.offset,
-                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy);
+                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71);
         if (s.inBounds(target)) {
             const auto before = s.value(target);
             auto after = before;

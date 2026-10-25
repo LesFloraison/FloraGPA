@@ -525,3 +525,16 @@ pass these gates. Main is not merged automatically.
 
 All implementation commits use Author and Committer
 `Floraison <181715567+LesFloraison@users.noreply.github.com>` and English messages.
+
+## Comparison sampling continuation
+
+`dxbc-gpu/13` adds native `sample_c_lz` execution in VS, PS and CS. It preserves
+comparison filtering, reference bits/modifiers, mask semantics and observed
+sampler/view/resource LOD controls. Missing comparison samplers are rejected as
+undefined instead of accepting incidental driver output. The R32_FLOAT 2D
+matrix covers all eight comparison functions, both invocation modes, NaN and
+infinite references, offsets and addressing variants. The executor comparison
+suite passes 190 tests, including 162 complete CS programs and cancellation.
+See `DX11_DXBC_SAMPLE_COMPARISON.md` and the independent research ledger.
+Additional shapes/depth-compatible formats, implicit comparison sampling and
+complete captured shader/debugger integration remain separate acceptance gates.

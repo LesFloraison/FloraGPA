@@ -36,7 +36,7 @@ force. Each public step still executes exactly one real instruction. The bound
 does not establish identical hardware invocation context for arbitrary long
 divergence; that case remains outside the verified matrix.
 
-The GPU helper identity is `dxbc-gpu/12`; the scheduler identity is
+The GPU helper identity is `dxbc-gpu/13`; the scheduler identity is
 `bounded-sampling-rendezvous/3`. Input snapshots remain version 7. The batch validates
 shared descriptors/storage once and retains per-lane operand validity. Unknown
 active operands decline batching; existing scalar unknown propagation remains.

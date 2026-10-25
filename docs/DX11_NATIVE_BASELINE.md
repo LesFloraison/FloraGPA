@@ -737,3 +737,25 @@ The final four-suite serial run passes 971 tests with zero failures/skips in
 284.94 seconds. Release GUI, CLI, Worker and the four test targets build.
 `research/dx11-dxbc-sampling-group-evidence.json` records all comparison gates,
 regressions, original failures, sources and binary identities.
+
+### Fixed-LOD comparison sampling continuation
+
+The independent comparison probe records 61,236 defined result vectors across
+VS/PS/CS, WARP/NVIDIA/Intel and batch/individual invocations. Another 2,268
+observations have the specific undefined missing-comparison-sampler diagnostic
+and are excluded from numerical oracles. All 18,144 analytical point-filtered
+comparisons pass; the defined invocation modes agree exactly.
+
+`dxbc-gpu/13` executes `sample_c_lz` using a native comparison instruction on a
+private selected-adapter device. The complete comparison suite passes 190 tests:
+168 configurations, nine modifier/mask cases, nine cancellation cases, two
+validity/request cases and setup/cleanup. It checks 30,618 per-stage vectors,
+162 complete original CS programs and 18 explicit undefined-sampler rejections.
+`DX11_DXBC_SAMPLE_COMPARISON.md` records implementation boundaries. This is an
+R32_FLOAT Texture2D checkpoint, not proof of additional shapes/depth formats,
+implicit comparison sampling, captured shader parity or complete debugger UI.
+The final six-suite serial run passes 1,317 tests, zero failures/skips, in 521.05
+seconds. GUI, CLI and Worker Release builds pass. Strict explicit-LOD, gradient
+and divergent-group evidence validators pass with helper identity `dxbc-gpu/13`.
+`research/dx11-dxbc-sample-comparison-evidence.json` records the exact comparison
+matrix, required regressions, independent observations and negative checks.
