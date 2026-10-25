@@ -19,19 +19,28 @@ def main():
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--grad", action="store_true")
     args = parser.parse_args()
+    scope = "sample_grad" if args.grad else "sample_level"
+    prefix = "sample-grad" if args.grad else "sample-level"
     names = ["point", "linear", "point-bias", "linear-bias", "anisotropic", "minimum", "maximum",
              "resource-minimum", "view-mips", "border", "wrap", "mirror", "mirror-once",
              "minimum-filter", "maximum-filter", "null-sampler", "null-resource"]
     expected = set(itertools.product(names, range(2)))
     parameters = set(itertools.product([-1.25, -.125, 0, .25, .5, 1, 1.25], [.375],
                                       [-2, 0, .25, .5, 1, 1.5, 2, 3, 5], [0]))
+    gradients = [(0, 0, 0, 0), (.03125, 0, 0, .03125), (.125, 0, 0, .125),
+                 (.25, 0, 0, .25), (1, 0, 0, 1), (-.25, 0, 0, -.25),
+                 (1, 0, 0, .03125), (0, 1, -.03125, 0), (.25, .125, -.125, .25)]
+    if args.grad:
+        parameters = {(u, .375, 0, 0, x, y, 0, 0, z, w, 0, 0)
+                      for u in [-1.25, -.125, 0, .25, .5, 1, 1.25] for x, y, z, w in gradients}
     runs, tables, shader_hashes = [], {}, {}
     for vendor in [0, 4318, 32902]:
         directory = args.root / str(vendor)
         path = directory / "results.json"
         report = json.loads(path.read_text())
-        if (report["schema"] != 1 or report["scope"] != "independent_sample_level"
+        if (report["schema"] != 1 or report["scope"] != "independent_" + scope
                 or report["vendor"] != vendor or report["validation_errors"]
                 or vendor and report["adapter_vendor"] != vendor):
             raise ValueError("Invalid sample-level probe identity or diagnostics")
@@ -48,7 +57,8 @@ def main():
                 summaries.append(case)
                 continue
             if (case["status"] != "observed" or len(records) != 63
-                    or {tuple(r["parameters"]) for r in records} != parameters):
+                    or {tuple(r["parameters"] + (r["ddx"] + r["ddy"] if args.grad else []))
+                        for r in records} != parameters):
                 raise ValueError("Incomplete sample-level input grid")
             requested, observed = case["sampler_descriptor"], case["observed_sampler_descriptor"]
             if case["name"] == "null-sampler":
@@ -78,6 +88,14 @@ def main():
                     raise ValueError("Null-resource sampling is not zero")
                 if case["name"] in ("point", "point-bias"):
                     u, v, lod, _ = row["parameters"]
+                    if args.grad:
+                        x, y = row["ddx"][:2]
+                        z, w = row["ddy"][:2]
+                        # Skewed gradients allow implementation-specific LOD approximation.
+                        if x and y or z and w:
+                            continue
+                        magnitude = max(abs(x), abs(y), abs(z), abs(w)) * 8
+                        lod = math.log2(magnitude) if magnitude else -100
                     mip = min(3, max(0, math.floor(lod + (2 if case["name"] == "point-bias" else 0) + .5)))
                     width = 8 >> mip
                     x = min(width - 1, max(0, math.floor(u * width) - case["offset"]))
@@ -92,12 +110,12 @@ def main():
                 raise ValueError("Null sampler disagrees with native linear/clamp state")
         shaders = []
         for offset, suffix in itertools.product(range(2), ["dxbc", "asm.txt"]):
-            shader = directory / f"sample-level-{offset}.{suffix}"
+            shader = directory / f"{prefix}-{offset}.{suffix}"
             record = identity(shader)
             if shader.name in shader_hashes and shader_hashes[shader.name] != record["sha256"]:
                 raise ValueError("Probe shader changed across adapters")
             shader_hashes[shader.name] = record["sha256"]
-            if suffix == "asm.txt" and "sample_l" not in shader.read_text():
+            if suffix == "asm.txt" and ("sample_d" if args.grad else "sample_l") not in shader.read_text():
                 raise ValueError("Explicit-LOD instruction is missing")
             shaders.append(record)
         runs.append({**identity(path), **{k: v for k, v in report.items() if k != "cases"},
@@ -108,12 +126,13 @@ def main():
             a, b = tables[0][key], tables[vendor][key]
             if a["status"] != "observed" or b["status"] != "observed":
                 continue
-            changed = [{"parameters": x["parameters"], "warp_bits": x["bits"], "native_bits": y["bits"]}
+            changed = [{**{k: v for k, v in x.items() if k != "bits"},
+                        "warp_bits": x["bits"], "native_bits": y["bits"]}
                        for x, y in zip(a["records"], b["records"]) if x["bits"] != y["bits"]]
             if changed:
                 differences.append({"vendor": vendor, "name": key[0], "offset": key[1],
                                     "different_records": len(changed), "examples": changed[:8]})
-    result = {"schema": 1, "scope": "independent_sample_level_research", "evidence_validated": True,
+    result = {"schema": 1, "scope": "independent_" + scope + "_research", "evidence_validated": True,
               "complete_release_acceptance": False, "adapter_results_identical": not differences,
               "cross_adapter_differences": differences,
               "observations": sum(len(c["records"]) for table in tables.values() for c in table.values()),
