@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "scope": "independent_sample_group",
+  "evidence_validated": true,
+  "implementation_accepted": false,
+  "complete_release_acceptance": false,
+  "cases": 288,
+  "written_slots": 33240,
+  "untouched_slots": 58920,
+  "analytical_point_samples": 14730,
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/0/results.json",
+      "sha256": "54bf424d45d3db92ac3f51238bfcc25e20677cbdebf9a8f3f34a0c6e9c4010ec"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/4318/results.json",
+      "sha256": "3291db8282ba901d30244a7c2f4e34c654bef4a2e3339832ae5ba67da2796d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-group-baseline/32902/results.json",
+      "sha256": "88476b58e45bd93769f601e14ea270195e413024344f60019d96f9f7a734724f"
+    }
+  ],
+  "shaders": {
+    "uniform-64-1-1-0.dxbc": "86ecb39ea012e9d061f671c9dc25475c705672e608801f90b2655ab17cc57dcb",
+    "uniform-64-1-1-1.dxbc": "ca1a99d7676cf83f9a9bd52d26eecb95a764e83fb4aacbdbcf28445b1f405658",
+    "early-return-64-1-1-0.dxbc": "e01145892234ef0ef999420c17206c1e23a4f4387efaeb9cccad6063aa261c9a",
+    "early-return-64-1-1-1.dxbc": "d581dac5b056ba488e740cad36750fe78c9b53f44a199b351b9afd2a7a651d74",
+    "branches-64-1-1-0.dxbc": "0bf70cd4bd05a349becd7a1ca388abbf7532b95a3b3d175abfc42ad1e3403d0d",
+    "branches-64-1-1-1.dxbc": "9e912afa866967dfb985c0cbd437ca1622aa356098d4888ec558b2d0b1d523e8",
+    "uneven-loop-64-1-1-0.dxbc": "f1179eee3ed33509ef7ee2b5ff45ff822922e174c050364a1bce916e0710b6e2",
+    "uneven-loop-64-1-1-1.dxbc": "f0fafa69bd531781c401f5dd35036d926cf6178b9c24059fed247e996b3c40af",
+    "barrier-loop-64-1-1-0.dxbc": "12163e9fc44f87996b6996b4b194a04b4c99c9fd9e50d794b0fe6b0fdc5537fd",
+    "barrier-loop-64-1-1-1.dxbc": "386df040623f4153cf2dc0c801265c3aa5163db02ce75737e37bccc088111348",
+    "staggered-64-1-1-0.dxbc": "1b2e7c89bd842094bde3aa5acdb54d318c9d03bf736d179a7861db375c4492ac",
+    "staggered-64-1-1-1.dxbc": "a94ef01036773c2baed5d52a4696209644be1b98834bf7f73565a00b11d478bc",
+    "uniform-8-4-2-0.dxbc": "506d08c58dd7c5198a5034bf9928e4e576bc5e5bbfc18074b5d4335034047808",
+    "uniform-8-4-2-1.dxbc": "3c1c72203b1cef995ee166f260e842375f26c24204ca32151d2fc558ea8b97d3",
+    "early-return-8-4-2-0.dxbc": "7ebbcc7743c5b4ad54ab001d93fb05b21621f54963509e15b2b89a18f6b1a419",
+    "early-return-8-4-2-1.dxbc": "7f9e5122dc1ff9f6f0fa376e931d8b05cc81bbe0beeb516b895f2345978d3635",
+    "branches-8-4-2-0.dxbc": "93bdfe986df4c27fd1054c68bffe9b5401bc6d17c9139c726c70bba232f479fa",
+    "branches-8-4-2-1.dxbc": "45d611c30bb9bd7b4a7c6a23ef8644ce7f457bd356c06e9be3fb08ff868b6870",
+    "uneven-loop-8-4-2-0.dxbc": "c5d27ddb2cfd5962ce76446f0d1db7dc4c69ebe9167e26d1db872a29be07a1dc",
+    "uneven-loop-8-4-2-1.dxbc": "cfeadc094e71f613f3825269ebc30e8d2b3bbc8840b4612780f5a596da166e4b",
+    "barrier-loop-8-4-2-0.dxbc": "5ef7a24fd6a05ffcf1e125263f23b2109e7693b152567dd79306e71cf7d556f5",
+    "barrier-loop-8-4-2-1.dxbc": "87f48a5ec2a834d445463834bbabbf5ef15d40ed0de8c1feb6ee32adf2ecc0a9",
+    "staggered-8-4-2-0.dxbc": "37fd4790382b0e60d389408c8ff0a306be2b7a90819e254c7b6c3b4ff9387e14",
+    "staggered-8-4-2-1.dxbc": "730658cc0a21af95e79446b294a2895d4d3bc4522eb1b0caf49c0c64b33867a0",
+    "uniform-4-4-4-0.dxbc": "5dc8a028daeb8626aea7c7a95f41e3990f4956f76a81dc2a8bdc255dbdcc4801",
+    "uniform-4-4-4-1.dxbc": "6657308f46f4d2d9845e93b8b82d7c8cfba794726e1e8c9f1c0d1e175e36ab4b",
+    "early-return-4-4-4-0.dxbc": "5d70964a8aba4d8b64b91bf8cbd1308729a74de7fe7e0b0612d0e3ac132d4f7a",
+    "early-return-4-4-4-1.dxbc": "0776c32c6b3e25cae17555944ee06bf3c304bf808f2ae814275f564de026e45a",
+    "branches-4-4-4-0.dxbc": "181a6f6b6991a48f1e2d2cdbdc486693a5056401e778f9a78e61b2b2ea77c0ef",
+    "branches-4-4-4-1.dxbc": "405e3ca296f5a47a557067e35742b732c91e3d72b4de6c4271972ef562f93e22",
+    "uneven-loop-4-4-4-0.dxbc": "339c35919c5519993ca175f40e49151dcafc417f0fc27f06cff9ffc07e3e5524",
+    "uneven-loop-4-4-4-1.dxbc": "944bb74c60a4082418b3e1f4fd9ac40f881d1c59e9691570661b76ae4094e451",
+    "barrier-loop-4-4-4-0.dxbc": "6c43e4185446aaa54b3801973c1d073e7b68731818d75a156609d9effad8d9fd",
+    "barrier-loop-4-4-4-1.dxbc": "a1cb81096416acdc0d86fd7ad70198998dd62ca2a9bde52dbcb6f02ebe9decc7",
+    "staggered-4-4-4-0.dxbc": "fa7e3b8336b843b1aa9c022101f91193b06753ed29dec5b32cdd36b0342c3d37",
+    "staggered-4-4-4-1.dxbc": "5506e95c3f3ad3bf06d025b9aa2f4e255b85ea94fce100a86f982fd604ec9299",
+    "uniform-32-2-2-0.dxbc": "897125fcd205e84dd9cbdae8be6f6860d439bc287cf023e5274d7ab646bf9589",
+    "uniform-32-2-2-1.dxbc": "d734322c91bc0ee02d3485b291e6db81768040b7460d3aadaaea94b5a0f9b6ea",
+    "early-return-32-2-2-0.dxbc": "8dba96ac412242e1665b1470ad24f17d7c8da5f9b063be3940dc3f3105c9fffe",
+    "early-return-32-2-2-1.dxbc": "3799505e22c82dd533cd430bdde18de6115892a9e4cacf43e980d1cf75992bb0",
+    "branches-32-2-2-0.dxbc": "d8914e8bba475e235dd470962857b11470866c880ab9b984846ba070c56c9d1c",
+    "branches-32-2-2-1.dxbc": "68eb48dc393adea6bcb39ba268cc5379da83bd9527bdb633f8742873368e3b04",
+    "uneven-loop-32-2-2-0.dxbc": "360f1afd0699952b8fb43dc341b97549a6b7572a3147eca1da67b6f9ae26d232",
+    "uneven-loop-32-2-2-1.dxbc": "b27aa3683e6ffe8e1c2258fe9b757abeaebff08b9b4a386ae746bafbc84c60fb",
+    "barrier-loop-32-2-2-0.dxbc": "84fffb98468ba0392204fc574932111b96847738b7c69c47316d6136127f39a0",
+    "barrier-loop-32-2-2-1.dxbc": "d054cfa659f1f774bb0172a48088327e4f82ae6b931f8a96e39db844c22050de",
+    "staggered-32-2-2-0.dxbc": "28cf81ee77c73b28cfbcac8d5c14ab673b34961fd35141689f240b45e463de54",
+    "staggered-32-2-2-1.dxbc": "311fe4eb31d3a5c936fbccf86ed9490539545cce723d439bc5b99e3a34a84449"
+  },
+  "binary": {
+    "path": "build/vs2022/Release/FloraSampleGroupProbe.exe",
+    "sha256": "e87143221a1b46f94c540fb4d3357492751f26b495aad433228b51d0ab8db874"
+  },
+  "sources": [
+    {
+      "path": "tools/native/sample_group_probe.cpp",
+      "sha256": "cf431142c3cd53517fee6a638900cc8288d2ae6a2974490cb0b382317e93819b"
+    },
+    {
+      "path": "tools/summarize_sample_groups.py",
+      "sha256": "950eaddb48e47ca26c7a82b036b6371f051cbb682baceed99709e930436570f7"
+    }
+  ]
+}
