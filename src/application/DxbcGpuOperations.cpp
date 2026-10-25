@@ -200,6 +200,7 @@ struct GpuOperations::State {
     };
     std::map<Words, VertexOperation> vertexShaders;
     std::map<Words, Com<ID3D11PixelShader>> pixelShaders;
+    std::map<uint32_t, std::pair<Words, std::vector<uint8_t>>> derivativeShaders;
     Com<ID3D11VertexShader> pixelVertex;
     Com<ID3D11RasterizerState> pixelRasterizer;
     DXGI_ADAPTER_DESC description{};
@@ -305,8 +306,9 @@ struct GpuOperations::State {
             throw;
         }
     }
-    Value pixel(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
-                ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr) {
+    std::array<Value, 4> pixels(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
+                                ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr,
+                                Bytes native = {}) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -340,7 +342,8 @@ struct GpuOperations::State {
                 std::vector<uint8_t> bytes(words.size() * 4);
                 std::memcpy(bytes.data(), words.data(), bytes.size());
                 parts.emplace_back(0x58454853, bytes);
-                const auto code = makeDxbc(parts);
+                const auto rebuilt = makeDxbc(parts);
+                const auto code = native.empty() ? Bytes(rebuilt) : native;
                 Com<ID3D11PixelShader> shader;
                 check(device->CreatePixelShader(code.data(), code.size(), nullptr, &shader),
                       "Create native pixel operation");
@@ -351,8 +354,9 @@ struct GpuOperations::State {
             const D3D11_SUBRESOURCE_DATA initial{values.data(), 0, 0};
             Com<ID3D11Buffer> constants;
             check(device->CreateBuffer(&cbDesc, &initial, &constants), "Create native pixel constants");
-            D3D11_TEXTURE2D_DESC desc{1,
-                                      1,
+            const UINT dimension = native.empty() ? 1 : 2;
+            D3D11_TEXTURE2D_DESC desc{dimension,
+                                      dimension,
                                       1,
                                       1,
                                       DXGI_FORMAT_R32G32B32A32_UINT,
@@ -375,7 +379,7 @@ struct GpuOperations::State {
             check(device->CreateQuery(&queryDesc, &coverage), "Create native pixel coverage query");
             auto *cb = constants.Get();
             auto *rtv = target.Get();
-            const D3D11_VIEWPORT viewport{0, 0, 1, 1, 0, 1};
+            const D3D11_VIEWPORT viewport{0, 0, float(dimension), float(dimension), 0, 1};
             context->VSSetShader(pixelVertex.Get(), nullptr, 0);
             context->PSSetShader(found->second.Get(), nullptr, 0);
             context->PSSetConstantBuffers(0, 1, &cb);
@@ -405,8 +409,12 @@ struct GpuOperations::State {
                     throw std::runtime_error("Native pixel operation timed out");
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-            Value result;
-            std::memcpy(result.bits.data(), mapped.pData, 16);
+            std::array<Value, 4> result;
+            for (UINT y = 0; y < dimension; ++y)
+                for (UINT x = 0; x < dimension; ++x)
+                    std::memcpy(result[y * dimension + x].bits.data(),
+                                static_cast<const uint8_t *>(mapped.pData) + y * mapped.RowPitch + x * 16,
+                                16);
             context->Unmap(staging.Get(), 0);
             UINT64 samples = 0;
             for (;;) {
@@ -420,8 +428,8 @@ struct GpuOperations::State {
                     throw std::runtime_error("Native pixel coverage timed out");
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-            if (samples != 1)
-                throw std::runtime_error("Native pixel assist did not cover exactly one sample");
+            if (samples != dimension * dimension)
+                throw std::runtime_error("Native pixel assist did not cover the requested samples");
             if (debug) {
                 Com<ID3D11InfoQueue> queue;
                 check(device.As(&queue), "Read native pixel validation queue");
@@ -443,6 +451,10 @@ struct GpuOperations::State {
             failed = true;
             throw;
         }
+    }
+    Value pixel(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
+                ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr) {
+        return pixels(words, values, resource, sampler)[0];
     }
     Value typedGraphics(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t index,
                         uint32_t returns, uint32_t swizzle, uint32_t mask, bool literal) {
@@ -883,9 +895,60 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/13"}};
+            {"backend", "dxbc-gpu/14"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
+std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
+    const std::map<uint32_t, std::string> operations{{11, "ddx"},         {12, "ddy"},
+                                                     {122, "ddx_coarse"}, {123, "ddx_fine"},
+                                                     {124, "ddy_coarse"}, {125, "ddy_fine"}};
+    if (!operations.contains(opcode))
+        throw std::invalid_argument("Invalid native pixel derivative opcode");
+    for (const auto &value : inputs)
+        if (value.valid > 15)
+            throw std::invalid_argument("Invalid pixel derivative input validity");
+    auto &s = *state_;
+    checkCancellation(s.cancelled);
+    if (s.failed)
+        throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+    auto found = s.derivativeShaders.find(opcode);
+    if (found == s.derivativeShaders.end()) {
+        const auto binary =
+            compileHlsl("cbuffer Inputs:register(b0){uint4 bits[4];}"
+                        "uint4 main(float4 p:SV_Position):SV_Target0{uint i=uint(p.x)+2*uint(p.y);"
+                        "return asuint(" +
+                            operations.at(opcode) + "(asfloat(bits[i])));}",
+                        opcode < 122 ? "ps_4_0" : "ps_5_0")
+                .bytecode;
+        Words words;
+        for (const auto &[kind, bytes] : readDxbcParts(binary))
+            if (kind == 0x58454853 || kind == 0x52444853) {
+                words.resize(bytes.size() / 4);
+                std::memcpy(words.data(), bytes.data(), bytes.size());
+            }
+        if (words.empty())
+            throw std::runtime_error("Missing native derivative shader program");
+        found = s.derivativeShaders.emplace(opcode, std::make_pair(std::move(words), binary)).first;
+    }
+    std::vector<std::array<uint32_t, 4>> bits;
+    for (const auto &value : inputs) {
+        auto sanitized = value.bits;
+        for (unsigned component = 0; component < 4; ++component)
+            if (!(value.valid & (1u << component)))
+                sanitized[component] = 0;
+        bits.push_back(sanitized);
+    }
+    auto results = s.pixels(found->second.first, bits, nullptr, nullptr, found->second.second);
+    for (unsigned lane = 0; lane < 4; ++lane) {
+        if (opcode == 123)
+            results[lane].valid = inputs[lane & ~1u].valid & inputs[lane | 1u].valid;
+        else if (opcode == 125)
+            results[lane].valid = inputs[lane & 1u].valid & inputs[(lane & 1u) + 2].valid;
+        else
+            results[lane].valid = inputs[0].valid & inputs[1].valid & inputs[2].valid & inputs[3].valid;
+    }
+    return results;
+}
 std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
                                                            const TextureInputView &view, uint32_t dimension,
                                                            uint32_t returns, const Value &address) {

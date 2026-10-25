@@ -534,6 +534,8 @@ struct Lane::State {
     std::vector<size_t> callLoopDepths;
     std::map<uint64_t, std::set<uint32_t>> appendIndices;
     std::optional<std::pair<Value, bool>> pendingSampling;
+    std::optional<Value> pendingDerivative;
+    bool quad = false, helper = false;
     bool inBounds(const Register &reg) const {
         if (reg.kind == 0)
             return reg.indices.size() == 1 && reg.indices[0] < program->temps;
@@ -765,6 +767,9 @@ Step Lane::step() {
     const auto &instruction = p.instructions.at(s.pc);
     const auto &args = p.operands.at(s.pc);
     const auto op = instruction.opcode;
+    const bool derivative = op == 11 || op == 12 || (op >= 122 && op <= 125);
+    if (s.quad && s.helper && op >= 163 && op <= 190)
+        fail("Pixel helper memory semantics require independent validation");
     Step result{s.sequence, s.pc, instruction.wordOffset, {}, s.calls, {}, false};
     uint32_t next = s.pc + 1;
     auto calls = s.calls;
@@ -852,7 +857,7 @@ Step Lane::step() {
         }
     } else if (op == 13) {
         if (condition(0)) {
-            done = true;
+            done = !s.quad;
             result.discarded = true;
         }
     } else if (op == 110 || op == 111) {
@@ -1266,7 +1271,12 @@ Step Lane::step() {
             values.push_back(s.source(args[i], integerSources(op)));
         std::array<Value, 2> outputs{};
         FloatEnvironment environment;
-        if (op >= 15 && op <= 17) {
+        if (derivative) {
+            if (!s.quad || !s.pendingDerivative || p.stage != 0 || values.size() != 1)
+                fail("DXBC derivatives require a coherent pixel quad");
+            outputs[0] = *s.pendingDerivative;
+            result.instructionGpuAssisted = true;
+        } else if (op >= 15 && op <= 17) {
             const auto count = op - 13;
             float sum = 0;
             bool valid = true;
@@ -1356,7 +1366,8 @@ Step Lane::step() {
                     if (target.kind == 3 && c >= p.arrays.at(target.indices[0]).second)
                         continue;
                     auto bits = outputs[i].bits[c];
-                    if (!result.instructionGpuAssisted && (instruction.words[0] & (1u << 13))) {
+                    if ((!result.instructionGpuAssisted || derivative) &&
+                        (instruction.words[0] & (1u << 13))) {
                         const auto number = floating(bits);
                         bits = floatBits(std::isnan(number) ? 0.f : std::clamp(number, 0.f, 1.f));
                     }
@@ -1388,11 +1399,120 @@ Step Lane::step() {
     s.loops = std::move(loops);
     s.callLoopDepths = std::move(callLoopDepths);
     s.pc = next;
+    if (derivative)
+        s.pendingDerivative.reset();
+    if (s.quad && result.discarded)
+        s.helper = true;
     s.done = done;
     s.waiting = (result.syncFlags & 0x800) != 0;
     ++s.sequence;
     if (!done)
         result.nextInstruction = next;
     return result;
+}
+struct PixelQuad::State {
+    std::array<std::unique_ptr<Lane>, 4> lanes;
+    CancelCheck cancelled;
+    uint64_t sequence = 0, maxSteps, batches = 0;
+    uint32_t cursor = 0, waitingSteps = 0;
+    uint8_t active;
+    bool failed = false;
+};
+PixelQuad::PixelQuad(const Program &program, std::array<Inputs, 4> inputs, uint8_t coverage,
+                     uint64_t maxSteps, CancelCheck cancelled)
+    : state_(std::make_unique<State>()) {
+    if (program.stage() != 0 || coverage > 15 || !maxSteps)
+        fail("Invalid DXBC pixel quad configuration");
+    auto &s = *state_;
+    s.maxSteps = maxSteps;
+    s.active = coverage;
+    s.cancelled = std::move(cancelled);
+    for (unsigned i = 1; i < 4; ++i)
+        if (inputs[i].gpu != inputs[0].gpu || inputs[i].memory != inputs[0].memory ||
+            inputs[i].textures != inputs[0].textures || inputs[i].sharedMemory)
+            fail("Pixel quad lanes require common private resources and GPU identity");
+    if (inputs[0].sharedMemory)
+        fail("Pixel quad cannot use compute shared memory");
+    for (unsigned i = 0; i < 4; ++i) {
+        checkCancellation(s.cancelled);
+        s.lanes[i] = std::make_unique<Lane>(program, std::move(inputs[i]), maxSteps);
+        s.lanes[i]->state_->quad = true;
+        s.lanes[i]->state_->helper = !(coverage & (1u << i));
+    }
+}
+PixelQuad::~PixelQuad() = default;
+bool PixelQuad::finished() const {
+    return !state_->failed && std::all_of(state_->lanes.begin(), state_->lanes.end(),
+                                          [](const auto &lane) { return lane->finished(); });
+}
+const Lane &PixelQuad::lane(uint32_t index) const { return *state_->lanes.at(index); }
+uint8_t PixelQuad::activeMask() const { return state_->active; }
+uint64_t PixelQuad::derivativeBatches() const { return state_->batches; }
+PixelQuadStep PixelQuad::step() {
+    auto &s = *state_;
+    if (s.failed)
+        fail("Recreate the DXBC pixel quad after a failed step");
+    try {
+        checkCancellation(s.cancelled);
+        if (s.sequence >= s.maxSteps)
+            fail("DXBC pixel quad step budget exceeded");
+        uint32_t ordinary = 4, boundary = 4, pending = 4;
+        for (unsigned n = 0; n < 4; ++n) {
+            const auto i = (s.cursor + n) % 4;
+            const auto &lane = *s.lanes[i]->state_;
+            if (lane.done)
+                continue;
+            if (lane.waiting)
+                fail("Pixel quad encountered a compute barrier");
+            const auto op = lane.program->instructions.at(lane.pc).opcode;
+            if (lane.pendingDerivative) {
+                if (pending == 4)
+                    pending = i;
+            } else if (op == 11 || op == 12 || (op >= 122 && op <= 125)) {
+                if (boundary == 4)
+                    boundary = i;
+            } else if (ordinary == 4)
+                ordinary = i;
+        }
+        auto selected = pending != 4 ? pending : ordinary;
+        if (pending == 4 && boundary != 4) {
+            if (ordinary != 4) {
+                if (++s.waitingSteps > 4096)
+                    fail("Pixel derivative rendezvous exceeded its progress budget");
+            } else {
+                const auto &first = *s.lanes[boundary]->state_;
+                std::array<Value, 4> values;
+                for (unsigned i = 0; i < 4; ++i) {
+                    const auto &other = *s.lanes[i]->state_;
+                    if (other.done || other.pc != first.pc || other.calls != first.calls ||
+                        other.loops != first.loops || other.callLoopDepths != first.callLoopDepths)
+                        fail("Pixel lanes did not reach the same dynamic derivative instruction");
+                    values[i] = other.source(other.program->operands.at(other.pc).at(1), false);
+                }
+                if (!first.inputs.gpu)
+                    fail("Pixel derivatives require the selected adapter GPU assist");
+                const auto results = first.inputs.gpu->pixelDerivatives(
+                    first.program->instructions.at(first.pc).opcode, values);
+                for (unsigned i = 0; i < 4; ++i)
+                    s.lanes[i]->state_->pendingDerivative = results[i];
+                ++s.batches;
+                selected = boundary;
+                s.waitingSteps = 0;
+            }
+        } else if (pending == 4)
+            s.waitingSteps = 0;
+        if (selected == 4)
+            fail("DXBC pixel quad has no executable lane");
+        const bool helper = s.lanes[selected]->state_->helper;
+        auto result = s.lanes[selected]->step();
+        if (result.discarded)
+            s.active &= uint8_t(~(1u << selected));
+        PixelQuadStep output{s.sequence++, selected, helper, s.active, std::move(result)};
+        s.cursor = (selected + 1) % 4;
+        return output;
+    } catch (...) {
+        s.failed = true;
+        throw;
+    }
 }
 } // namespace flora::dxbc_exec

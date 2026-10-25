@@ -1,0 +1,282 @@
+{
+  "final": {
+    "path": "artifacts/dx11-native/pixel-quad-final.txt",
+    "sha256": "68f2e286a88a04b48cdc04209c62647631067547b8add7aa4bf194b5d5e6ec2f",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 1022,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 43113,
+    "failures": [],
+    "unit_cases": []
+  },
+  "matrix_cases": 1008,
+  "compared_components": 6048,
+  "direct_raw_vectors": 144,
+  "steps": 49632,
+  "unit_cases": [
+    "cancellation(0)",
+    "cancellation(32902)",
+    "cancellation(4318)",
+    "directBits(0)",
+    "directBits(32902)",
+    "directBits(4318)",
+    "explicitFailures()",
+    "helperMemoryRejected()",
+    "rendezvousBudget()",
+    "validityAndModifiers(0)",
+    "validityAndModifiers(32902)",
+    "validityAndModifiers(4318)"
+  ],
+  "schema": 1,
+  "scope": "native_pixel_derivative_execution",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "captured_quad_inputs_validated": false,
+  "helper_memory_semantics_validated": false,
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-comparison.txt",
+      "sha256": "267e9066ec273ddeeb2f8aa7f8c7543176ff383b559d5af09247fbb0ce36f38a",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 190,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 698482,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-sample-grad.txt",
+      "sha256": "26aa31ed63cc5a9f9eb034f4161e89ddc4cf82dbbf5e6f5e57b57a53331d2a97",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 262,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 363129,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-sample-level.txt",
+      "sha256": "a9d5bd8bfceb448778bb83a03c8444c16b5ebd1724511926a4e1a59e42880ac9",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 156,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 383515,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-sampling-group.txt",
+      "sha256": "7b666ff9a88261c92872c2132e2fbe9ea642891c1b5240758d2754ab8e6f6549",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 40384,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-group.txt",
+      "sha256": "18d446e2167bee577e67a4b10098ed59667befb3a10308f5afed7fba40957511",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 2489,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-execution.txt",
+      "sha256": "0277845ec963705114c1e62ed9d057b022127116dbe9d7defd2c4fc44a01b69b",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 33070,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-regression-typed-pixel.txt",
+      "sha256": "607fddc4bf0127246e1a5e4409f46b876c323ad380b015a8dc5d9cb539a37629",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 62546,
+      "failures": [],
+      "unit_cases": []
+    }
+  ],
+  "performance": {
+    "current": {
+      "path": "artifacts/dx11-native/pixel-quad-final-ctest.txt",
+      "sha256": "81df3b78747595eb3960f027b6ed6ec116837ba2d7cffd5cc8ab085d9ee62aa3"
+    },
+    "baseline": {
+      "path": "artifacts/dx11-native/sample-comparison-final-ctest.txt",
+      "sha256": "981642812a614c30497aa96974640d2b3ad2dcf28e083d93e8ce0dcfc9246fe8"
+    },
+    "current_seconds": {
+      "dxbc_pixel_quad": 43.18,
+      "dxbc_sample_comparison": 698.65,
+      "dxbc_sampling_group": 40.61,
+      "dxbc_sample_grad": 363.36,
+      "dxbc_sample_level": 383.65,
+      "dxbc_typed_pixel": 62.86,
+      "dxbc_group": 2.54,
+      "dxbc_execution": 33.33
+    },
+    "baseline_seconds": {
+      "dxbc_sample_comparison": 207.31,
+      "dxbc_sampling_group": 33.15,
+      "dxbc_sample_grad": 116.04,
+      "dxbc_sample_level": 129.59,
+      "dxbc_group": 2.55,
+      "dxbc_execution": 32.4
+    },
+    "ratios": {
+      "dxbc_sample_comparison": 3.370073802517968,
+      "dxbc_sampling_group": 1.2250377073906487,
+      "dxbc_sample_grad": 3.1313340227507753,
+      "dxbc_sample_level": 2.9604907786094605,
+      "dxbc_group": 0.9960784313725491,
+      "dxbc_execution": 1.0287037037037037
+    },
+    "controlled_comparison": false,
+    "performance_acceptance": false
+  },
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "9d37e0e7692e5d9adedff38e6730417aa9c3f463f0e3ed5d5e5bd9794b41ce7d"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "d0f468489a1b107ee03c4c752b1333e6f1f81d23c0fabac1b4a7fa6c22fb7a9b"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "sha256": "3c616953131be09c45b8b7c7db3300cc8e8b22493d6d0bb53075ac0e2ec64c5f"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "sha256": "1c992f2d2cabbc1694012b4027c2447802f4d1dc1c572197d65c2acf82723a91"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "sha256": "f68c454af218993c89b0c0445dd209b2578d7febc5780994454772cee7aa034f"
+    },
+    {
+      "path": "tests/DxbcPixelQuadTests.cpp",
+      "sha256": "198559585092cedb395aec48dd501842685ee02971d10578d525a42a1827da44"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_quad.py",
+      "sha256": "526fa997b2686b4370dfcc1077b53434128b5439d640923a022c79631a24cd3b"
+    },
+    {
+      "path": "tools/summarize_pixel_derivatives.py",
+      "sha256": "14bb7c7b61e022bd7560ab9a781c61140ea7a2aeaf5c985498c99cdcaad07aba"
+    },
+    {
+      "path": "tools/native/pixel_derivative_probe.cpp",
+      "sha256": "334f8013b7c9a1d48202e3f2b7c849acdf8bfd2ea1653b1d06423d7eabd0ec14"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/pixel-quad-release-build.txt",
+      "sha256": "2ae7d9d977234e9ff590b713e3563c90d3d2690fc46709da3bc930d8435f24f2"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "sha256": "988999436435677257c22423e4ed1787111282316238e94a9e0c9c09af8a4d6a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "sha256": "6d39a2b6c88476a0ba44733a571e1976ec92aa1b13ce609a97c3a0d3e8f146bd"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "sha256": "e8bac916c77709ad594cd47086640fb8f4a0e149705f7635df2a72f1d6d104c6"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelQuadTests.exe",
+      "sha256": "3c628f48635558e35c5c57abd057ba0f1d526882e63ed7c7b44d9df9e35891c1"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPixelDerivativeProbe.exe",
+      "sha256": "e7fafa6056e61d94005f9a41b700669c986d832374a4b59a6d9fb0e84aaa74be"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-quad-first.txt",
+      "sha256": "391cc94c90ba3a7b837fd99fb920e4bcb5a31a2bc76cbace33d27692a5988468"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-second.txt",
+      "sha256": "98f6b4db863f429b988ec7eb3dff9a590e68f49b3a71793af366fe5b8e42ed85"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-negative.json",
+      "sha256": "7cad22349c67aa77ff77dd26c248ea130c60be7872706db666c4eec10f1a1006"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-derivative-negative.json",
+      "sha256": "f8a41d3488f37a3dc3d93f9de16b8004ad179540c359e165f77dc91bc7872c15"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-performance-context.json",
+      "sha256": "755c35f2e78046a31b29dd0c1b959204e278c7ceeeed1f636cfd90b68974cc0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-wait-context.json",
+      "sha256": "7a79e1ba64e3be95d1eaed93ace48e45102176ca7bb265f2a7baab3168262fbf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-gradient-gate.json",
+      "sha256": "ee583a2d2b3a1a5a798d022f24802f48729bc685ec85375fd0e146b2ee802503"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-level-gate.json",
+      "sha256": "9249eb9822e5a829363d6f730ac29bbb7002ba510ff9b39894e08e5b0d11a617"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-comparison-gate.json",
+      "sha256": "2ec3dbf217f575ce7c9d5a448d2d2060320d435641a5700e1fd13023dabd670d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-quad-sampling-group-gate.json",
+      "sha256": "0207a9bbfeafe6525255b7fa963dbc9763c9a4fd1a49fa5f1876b619158d9188"
+    },
+    {
+      "path": "docs/research/dx11-pixel-derivative-observations.json",
+      "sha256": "7377b62411d3066a521f4caf37c82d9ca3306103948a6640dcfae8025fc7ff52"
+    }
+  ]
+}

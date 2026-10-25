@@ -12,6 +12,7 @@ from summarize_dxbc_texture_uav import read_run
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--backend", default="dxbc-gpu/14")
     for name in ("log", "out"):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("regression", "source", "build", "binary", "evidence"):
@@ -32,7 +33,7 @@ def main():
         if (row["comparisons"] != (0 if undefined else 189)
                 or row["undefined_rejections"] != (3 if undefined else 0)
                 or row["complete_group_verified"] != (not undefined)
-                or row["helper"]["backend"] != "dxbc-gpu/13"):
+                or row["helper"]["backend"] != args.backend):
             raise ValueError("Comparison execution weakened defined or undefined-result assertions")
     units = {f"{name}({v}-{s})" for name, v, s in itertools.product(
         ("modifiersAndMasks", "cancellation"), (0, 4318, 32902), (0, 1, 5))}

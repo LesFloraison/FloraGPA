@@ -53,5 +53,8 @@ class GpuOperations {
     ~GpuOperations();
     nlohmann::json identity() const;
     uint64_t operations() const;
+    // Inputs are a proven row-major 2x2 pixel cohort, including helper values.
+    // Unknown components remain unknown; this does not discover captured quads.
+    std::array<Value, 4> pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &);
 };
 } // namespace flora::dxbc_exec

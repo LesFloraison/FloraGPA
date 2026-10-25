@@ -759,3 +759,29 @@ seconds. GUI, CLI and Worker Release builds pass. Strict explicit-LOD, gradient
 and divergent-group evidence validators pass with helper identity `dxbc-gpu/13`.
 `research/dx11-dxbc-sample-comparison-evidence.json` records the exact comparison
 matrix, required regressions, independent observations and negative checks.
+
+## Pixel derivative execution checkpoint
+
+The independent public-D3D11 pixel probe completes 1,008 cases on WARP, NVIDIA
+and Intel. It retains 18 specific divergent-gradient compiler rejections and
+validates scissored coverage, post-discard arithmetic, reconverged branches and
+unequal loop counts. The research ledger is
+`research/dx11-pixel-derivative-observations.json`.
+
+The new `PixelQuad` CPU scheduler and `dxbc-gpu/14` native derivative helper pass
+1,022 tests. They compare 6,048 output components from complete original shaders
+and 144 direct raw vectors, including special floating point values. The final
+eight-suite run passes 2,919 tests with zero failures/skips in 1,628.21 seconds;
+GUI, CLI and Worker Release builds pass. Existing typed pixel tests confirm
+reference resources and bindings remain unchanged. Negative evidence mutations,
+bounded waits, explicit unsupported helper operations, cancellation and fresh-job
+retry are checked. No existing golden output is changed.
+
+`DX11_DXBC_PIXEL_QUAD.md` and `research/dx11-dxbc-pixel-quad-evidence.json` retain
+source/build/binary identities, the initial new unit's incorrect signed-zero
+expectation, subsequent direct bit verification and the final suite evidence.
+Sampling suite wall times increased from the previous checkpoint while scalar
+and group times remained close. The report records the observed power/timer
+context without assigning a cause. This is a functional checkpoint, not a
+performance acceptance. Captured quad provenance, implicit sampling, helper
+memory semantics, debugger integration and the remaining P5-P8 gates stay open.

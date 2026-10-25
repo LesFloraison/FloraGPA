@@ -138,6 +138,7 @@ class Lane {
     struct State;
     std::unique_ptr<State> state_;
     friend class Group;
+    friend class PixelQuad;
     void releaseBarrier();
     bool samplingBoundary() const;
     bool hasPendingSampling() const;
@@ -176,5 +177,29 @@ class Group {
     const Memory &sharedMemory() const;
     uint64_t samplingBatches() const;
     static constexpr const char *executionModel = "bounded-sampling-rendezvous/3";
+};
+struct PixelQuadStep {
+    uint64_t sequence;
+    uint32_t lane;
+    bool helper;
+    uint8_t activeMask;
+    Step step;
+};
+class PixelQuad {
+    struct State;
+    std::unique_ptr<State> state_;
+
+  public:
+    // The caller supplies proven row-major quad inputs. Coverage does not remove
+    // helper lanes. Captured quad discovery and sample selection are separate.
+    PixelQuad(const Program &, std::array<Inputs, 4>, uint8_t coverage = 15, uint64_t maxSteps = 1000000,
+              CancelCheck cancelled = {});
+    ~PixelQuad();
+    bool finished() const;
+    PixelQuadStep step();
+    const Lane &lane(uint32_t index) const;
+    uint8_t activeMask() const;
+    uint64_t derivativeBatches() const;
+    static constexpr const char *executionModel = "coherent-pixel-derivatives/1";
 };
 } // namespace flora::dxbc_exec

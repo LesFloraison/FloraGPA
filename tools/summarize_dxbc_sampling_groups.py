@@ -24,7 +24,7 @@ def main():
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("regression", "source", "build", "binary", "evidence"):
         parser.add_argument("--" + name, type=Path, action="append", default=[])
-    parser.add_argument("--backend", default="dxbc-gpu/13")
+    parser.add_argument("--backend", default="dxbc-gpu/14")
     args = parser.parse_args()
     rows = observations(args.log)
     groups = [r for r in rows if r.get("sampling_group")]
