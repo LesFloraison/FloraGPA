@@ -688,6 +688,19 @@ input observations complete on the GF2/BF1/Helldivers captures; GUI, CLI and
 Worker Release builds pass. The sampler evidence ledger preserves the initial
 fixture failures and the final results separately.
 
+The subsequent explicit-LOD implementation adds `sample_l` using the private
+same-adapter helper `dxbc-gpu/10`, while retaining sampler input identity version 7.
+Its independent 2D matrix and synthetic GPA shape cases are documented in
+`DX11_DXBC_SAMPLE_LEVEL.md`. Unknown filtering footprints, additional sampling
+variants, real invocation selection and production performance remain open.
+The sample-level suite passes 156 cases, including 102 independent native
+configurations, 42 synthetic GPA shapes and nine cancellation/recovery variants.
+Five adjacent suites pass another 3,062 cases. The focused six-suite total is
+3,218 passes with zero failures/skips; GUI, CLI and Worker Release builds pass.
+The sample-level suite takes 442.870 seconds, so this checkpoint explicitly does
+not close production performance acceptance. Earlier filter-mode and cancellation
+fixture failures remain in the evidence ledger.
+
 Full history and VS/PS/CS debugging, GUI integration, typed result compatibility,
 all real-capture replay semantics, standalone packaging and the complete dependency
 audit remain open. No portable package or complete RenderDoc removal is claimed.

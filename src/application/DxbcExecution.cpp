@@ -285,6 +285,7 @@ struct ProgramData {
     std::vector<Value> immediate;
     std::map<Register, uint32_t> bufferStrides;
     std::map<Register, std::pair<uint32_t, uint32_t>> typedResources;
+    std::map<Register, uint32_t> samplers;
     std::map<Register, bool> orderedCounters;
     std::map<Register, uint32_t> counterOpcodes;
     std::array<uint32_t, 3> groupSize{};
@@ -334,6 +335,15 @@ Program::Program(Bytes dxbc) {
                 args.push_back(operand(words, pos));
             if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
+        } else if (op == 90) {
+            size_t pos = 1;
+            const auto arg = operand(words, pos);
+            const auto mode = (words[0] >> 11) & 15;
+            if (pos != words.size() || arg.kind != 6 || arg.components || arg.modifier ||
+                arg.indices.size() != 1 || arg.indices[0].relative || arg.indices[0].base >= 16 || mode > 2 ||
+                (words[0] & 0x80ff8000) ||
+                !data->samplers.emplace(Register{6, {uint32_t(arg.indices[0].base)}}, mode).second)
+                fail("Invalid or duplicate DXBC sampler declaration");
         } else if (op == 88 || op == 156) {
             size_t pos = 1;
             const auto arg = operand(words, pos);
@@ -840,6 +850,65 @@ Step Lane::step() {
                     after.bits[c] = value.bits[resource.select[c]];
                     after.valid = uint8_t((after.valid & ~(1u << c)) |
                                           (((value.valid >> resource.select[c]) & 1u) << c));
+                }
+            result.changes.push_back({target, before, after});
+        }
+    } else if (op == 72) {
+        if (instruction.words[0] & 0x2000)
+            fail("Unexpected saturation on a DXBC sampling instruction");
+        const auto &destination = args[0], &resource = args[2], &sampler = args[3];
+        if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
+            resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
+            (args[4].components != 1 &&
+             !(args[4].components == 2 &&
+               (args[4].mode == 2 ||
+                (args[4].mode == 1 &&
+                 std::all_of(args[4].select.begin(), args[4].select.end(),
+                             [&](auto component) { return component == args[4].select[0]; }))))))
+            fail("Invalid DXBC explicit-LOD sampling operands");
+        const auto binding = s.address(resource), samplerBinding = s.address(sampler);
+        const auto declared = p.typedResources.find(binding);
+        const auto samplerDeclaration = p.samplers.find(samplerBinding);
+        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
+            samplerDeclaration->second != 0)
+            fail("Explicit-LOD sampling requires a texture and default sampler declaration");
+        const auto [dimension, returns] = declared->second;
+        std::array<int32_t, 3> offsets{};
+        std::set<uint32_t> extensions;
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+            const auto token = instruction.words.at(pos), kind = token & 63;
+            if (!extensions.insert(kind).second)
+                fail("Duplicate explicit-LOD sampling extension");
+            if (kind == 1) {
+                if (token & 0x7fe001c0)
+                    fail("Invalid explicit-LOD sampling offset extension");
+                for (unsigned c = 0; c < 3; ++c)
+                    offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
+            } else if (kind == 2) {
+                if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
+                    fail("Sampling dimension extension disagrees with its declaration");
+            } else if (kind == 3) {
+                if (((token >> 6) & 0xffff) != returns || (token & 0x7fc00000))
+                    fail("Sampling return extension disagrees with its declaration");
+            } else
+                fail("Unsupported explicit-LOD sampling extension");
+        }
+        const auto target = s.address(destination);
+        const auto value = s.inputs.textures
+                               ? s.inputs.textures->sampleLevel(
+                                     p.stage, binding, samplerBinding, dimension, returns,
+                                     s.source(args[1], false), s.source(args[4], false), resource.select,
+                                     destination.mask, offsets, s.inputs.gpu.get(), result.memoryGpuAssisted)
+                               : Value{};
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned c = 0; c < 4; ++c)
+                if ((destination.mask & (1u << c)) &&
+                    (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                    after.bits[c] = value.bits[c];
+                    after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                 }
             result.changes.push_back({target, before, after});
         }

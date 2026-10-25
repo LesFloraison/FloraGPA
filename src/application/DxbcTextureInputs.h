@@ -49,6 +49,10 @@ struct TextureInputs {
     // Missing entries are unavailable, distinct from observed null bindings.
     std::map<Register, SamplerInput> samplers;
     std::shared_ptr<const SampleQueryInput> rasterizerQueries;
+    Value sampleLevel(uint32_t stage, const Register &resource, const Register &sampler, uint32_t dimension,
+                      uint32_t returns, const Value &address, const Value &lod,
+                      const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                      const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted) const;
     Value sampleQuery(const Register &, uint32_t dimension, bool position, bool integer, const Value &sample,
                       bool &assisted) const;
     static uint32_t loadReturnType(uint32_t format);

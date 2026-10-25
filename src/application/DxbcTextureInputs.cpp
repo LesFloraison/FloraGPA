@@ -59,6 +59,85 @@ uint32_t TextureInputs::loadReturnType(uint32_t format) {
     const auto description = loadFormat(format);
     return description ? description->returnType : 0;
 }
+Value TextureInputs::sampleLevel(uint32_t stage, const Register &binding, const Register &samplerBinding,
+                                 uint32_t dimension, uint32_t returns, const Value &address, const Value &lod,
+                                 const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                 const std::array<int32_t, 3> &offset, GpuOperations *gpu,
+                                 bool &assisted) const {
+    assisted = false;
+    const uint32_t native = dimension == 2    ? 2
+                            : dimension == 3  ? 4
+                            : dimension == 5  ? 8
+                            : dimension == 6  ? 9
+                            : dimension == 7  ? 3
+                            : dimension == 8  ? 5
+                            : dimension == 10 ? 10
+                                              : 0;
+    if (!native || binding.kind != 7 || samplerBinding.kind != 6 || mask > 15 ||
+        (stage != 0 && stage != 1 && stage != 5))
+        throw std::runtime_error("Invalid native explicit-LOD sampling request");
+    for (unsigned c = 0; c < 4; ++c)
+        if (swizzle[c] > 3 || ((returns >> (4 * c)) & 15) < 1 ||
+            (((returns >> (4 * c)) & 15) > 2 && ((returns >> (4 * c)) & 15) != 5))
+            throw std::runtime_error("Invalid explicit-LOD sampling return class or swizzle");
+    for (unsigned c = 0; c < 3; ++c)
+        if (offset[c] < -8 || offset[c] > 7 || (offset[c] && (dimension == 6 || dimension == 10)))
+            throw std::runtime_error("Invalid explicit-LOD sampling offset");
+    const auto selected = views.find(binding);
+    const auto sampler = samplers.find(samplerBinding);
+    if (selected == views.end() || sampler == samplers.end())
+        return {};
+    const auto &view = selected->second;
+    if (!view.resource)
+        return Value::known({});
+    if (view.dimension != native)
+        throw std::runtime_error("Sampling declaration disagrees with its native view");
+    if (sampler->second.descriptor && (((*sampler->second.descriptor)[0] & 0x180) == 0x80))
+        throw std::runtime_error("Explicit-LOD sampling requires a non-comparison sampler");
+    const uint32_t required = dimension == 2                     ? 1
+                              : dimension == 3 || dimension == 7 ? 3
+                              : dimension == 10                  ? 15
+                                                                 : 7;
+    if ((address.valid & required) != required || !(lod.valid & 1))
+        return {};
+    const auto found = resources.find(*view.resource);
+    if (found == resources.end())
+        return {};
+    const auto &texture = found->second;
+    const auto info = textureInfo(texture.resource);
+    const auto layout = textureSubresources(texture.resource);
+    const bool cube = dimension == 6 || dimension == 10;
+    if (texture.resource.id != *view.resource || loadReturnType(view.format) != 5 || info.samples != 1 ||
+        texture.storage.bytes.size() != layout.back().offset + layout.back().size ||
+        texture.storage.valid.size() != texture.storage.bytes.size() || !view.mipCount || !view.layerCount ||
+        view.firstMip >= info.mips || view.mipCount > info.mips - view.firstMip ||
+        view.firstLayer >= info.layers || view.layerCount > info.layers - view.firstLayer ||
+        !std::isfinite(texture.minLod) || texture.minLod < 0 || texture.minLod > info.mips ||
+        (cube && (!(texture.resource.desc.back() & 4) || view.firstLayer % 6 || view.layerCount % 6)))
+        throw std::runtime_error("Invalid native sampling storage or view range");
+    if (view.nativeDescriptor.size() != 6 || view.nativeDescriptor[0] != view.format ||
+        view.nativeDescriptor[1] != native || view.nativeDescriptor[2] != view.firstMip ||
+        (view.nativeDescriptor[3] == UINT32_MAX ? info.mips - view.firstMip : view.nativeDescriptor[3]) !=
+            view.mipCount ||
+        (dimension == 7 || dimension == 8 || dimension == 10
+             ? view.nativeDescriptor[4] != view.firstLayer ||
+                   uint64_t(view.nativeDescriptor[5]) * (cube ? 6 : 1) != view.layerCount
+             : view.firstLayer != 0 || view.layerCount != (cube ? 6u : 1u)) ||
+        (texture.minLod != 0 && !(texture.resource.desc.back() & 0x80)))
+        throw std::runtime_error("Native sampling descriptor and snapshot metadata disagree");
+    // Filtering may combine multiple mips, faces and anisotropic taps. Until a
+    // dependency footprint is observed, never mark partially unknown storage known.
+    if (!std::all_of(texture.storage.valid.begin(), texture.storage.valid.end(),
+                     [](auto v) { return v == 1; }))
+        return {};
+    if (!gpu)
+        throw std::runtime_error("Native texture sampling requires GPU assistance");
+    auto result = gpu->sampleLevel(stage, texture, view, sampler->second, dimension, returns, address, lod,
+                                   swizzle, mask, offset);
+    result.valid = uint8_t(mask);
+    assisted = true;
+    return result;
+}
 Value TextureInputs::loadMultisample(const Register &binding, uint32_t dimension, uint32_t returns,
                                      const Value &address, const Value &sample,
                                      const std::array<uint32_t, 4> &swizzle, uint32_t mask,

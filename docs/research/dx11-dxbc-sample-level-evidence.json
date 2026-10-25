@@ -1,0 +1,6287 @@
+{
+  "schema": 1,
+  "scope": "native_dxbc_sample_level",
+  "complete_release_acceptance": false,
+  "latest_validation_passed": true,
+  "hardware_matrix_complete": true,
+  "shape_matrix_complete": true,
+  "independent_native_records": 6426,
+  "runs": [
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-first.txt",
+      "sha256": "635bac1f7cae8d7fd32a777ee27b7b72972e6e2db8e780b294a6c0fba7df7010",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 99,
+      "failed": 6,
+      "skipped": 0,
+      "elapsed_ms": 423631,
+      "failures": [
+        "DxbcSampleLevelTests::hardware(0-28) Explicit-LOD sampling requires a non-comparison sampler",
+        "DxbcSampleLevelTests::hardware(0-29) Explicit-LOD sampling requires a non-comparison sampler",
+        "DxbcSampleLevelTests::hardware(4318-28) Explicit-LOD sampling requires a non-comparison sampler",
+        "DxbcSampleLevelTests::hardware(4318-29) Explicit-LOD sampling requires a non-comparison sampler",
+        "DxbcSampleLevelTests::hardware(32902-28) Explicit-LOD sampling requires a non-comparison sampler",
+        "DxbcSampleLevelTests::hardware(32902-29) Explicit-LOD sampling requires a non-comparison sampler"
+      ],
+      "unit_cases": [
+        "unknownAndInvalid()"
+      ],
+      "hardware": [
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "shapes": []
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-expanded-smoke.txt",
+      "sha256": "be309c2a5d8785cc891400c620124d5bf3a0aa64fe0b4b0d9b62d592ae9cdcf5",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 52,
+      "failed": 3,
+      "skipped": 0,
+      "elapsed_ms": 14279,
+      "failures": [
+        "DxbcSampleLevelTests::cancellation(0-5) Expected exception of type std::runtime_error to be thrown but no exception caught",
+        "DxbcSampleLevelTests::cancellation(4318-5) Expected exception of type std::runtime_error to be thrown but no exception caught",
+        "DxbcSampleLevelTests::cancellation(32902-5) Expected exception of type std::runtime_error to be thrown but no exception caught"
+      ],
+      "unit_cases": [
+        "cancellation(0-0)",
+        "cancellation(0-1)",
+        "cancellation(4318-0)",
+        "cancellation(4318-1)",
+        "cancellation(32902-0)",
+        "cancellation(32902-1)",
+        "unknownAndInvalid()"
+      ],
+      "hardware": [
+        {
+          "configuration": 28,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        }
+      ],
+      "shapes": [
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028341760,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020005388,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031274496,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1022949625,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028341760,
+            1039507456,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020005388,
+            1031181975,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018232832,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1009889714,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028341760,
+            1018232832,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020005388,
+            1009889714,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028341760,
+            1039507456,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020005388,
+            1031181975,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028390912,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020051661,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031405568,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1023082747,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028521984,
+            1039532032,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020182735,
+            1031205111,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018429440,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1010090165,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028390912,
+            1018429440,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020051661,
+            1010090165,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028521984,
+            1039532032,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020182735,
+            1031205111,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1010119989,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028472832,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020136974,
+            1010119989,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031405568,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1023081211,
+            1010119989,
+            0,
+            1050187928
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028472832,
+            1039572992,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020136974,
+            1031247768,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018462208,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1010119989,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028472832,
+            1018462208,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020136974,
+            1010119989,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028472832,
+            1039572992,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020136974,
+            1031247768,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-final.txt",
+      "sha256": "0767a42473fbaae0230f9f29ef128b899a1278241dd898b339280c8e2df5b302",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 156,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 442870,
+      "failures": [],
+      "unit_cases": [
+        "cancellation(0-0)",
+        "cancellation(0-1)",
+        "cancellation(0-5)",
+        "cancellation(4318-0)",
+        "cancellation(4318-1)",
+        "cancellation(4318-5)",
+        "cancellation(32902-0)",
+        "cancellation(32902-1)",
+        "cancellation(32902-5)",
+        "unknownAndInvalid()"
+      ],
+      "hardware": [
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 28,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 29,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 28,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 29,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "configuration": 0,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 1,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 2,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 3,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 4,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 5,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "point-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 6,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 7,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "linear-bias",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 8,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 9,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "anisotropic",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 10,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 11,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 12,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 13,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 14,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 15,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "resource-minimum",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 16,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 17,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "view-mips",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 18,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 19,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "border",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 20,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 21,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "wrap",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 22,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 23,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 24,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 25,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "mirror-once",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 26,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 27,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "minimum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 28,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 29,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "maximum-filter",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 30,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 31,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-sampler",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 32,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 0,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "configuration": 33,
+          "group_output_verified": true,
+          "helper": {
+            "backend": "dxbc-gpu/10",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45056,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "lane_comparisons": 189,
+          "name": "null-resource",
+          "offset": 1,
+          "original_storage_unchanged": true,
+          "records": 63,
+          "sample_level_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ],
+      "shapes": [
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028341760,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020005388,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031274496,
+            1018232832,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1022949625,
+            1009889714,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028341760,
+            1039507456,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020005388,
+            1031181975,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018232832,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1009889714,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028341760,
+            1018232832,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020005388,
+            1009889714,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028341760,
+            1039507456,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020005388,
+            1031181975,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 0,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028390912,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020051661,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031405568,
+            1018429440,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1023082747,
+            1010090165,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028521984,
+            1039532032,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020182735,
+            1031205111,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018429440,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1010090165,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028390912,
+            1018429440,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020051661,
+            1010090165,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028521984,
+            1039532032,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020182735,
+            1031205111,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 4318,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "914975428b6e4abd83885dcb4a753f1b72d2ed510337de28510f1d8c3fa72cee",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 2,
+          "expected": [
+            0,
+            1010119989,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b70b6a9f2cc5275c1978acdc835b24641032521199a8cc22b6dcd9324e518422",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1028472832,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "5d16a88170acc14777bbe4b9f46491a4e5c3897878796f56d13e30974abb1970",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 3,
+          "expected": [
+            1020136974,
+            1010119989,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b540f83c360414d0240eeb8d0caab060ded1224f852dd59f8e597515580b4c5c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1031405568,
+            1018462208,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "c56b73d36ccaa8082ca3dad59a4113cb9879022460665c9485114cc7c70ac8da",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 5,
+          "expected": [
+            1023081211,
+            1010119989,
+            0,
+            1050187928
+          ],
+          "format": 28,
+          "frame_sha256": "1669924b89bb1f7aa6df89d49cedc1f60226cca6fd146f8d53b3639b9375ad3c",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1028472832,
+            1039572992,
+            0,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "684623f1442a0643bcc9d69791c9870c456926b525ba776d7503af3c5525f12a",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 6,
+          "expected": [
+            1020136974,
+            1031247768,
+            0,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "b63d58f49bfed6ab37b9e834a7cee060f332d75658ed49ef51e1d4e8d9b22f1f",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1018462208,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "bc42f686f942fa8570b0136847bacd85189cc9addebf3b2244f2d9de880c1209",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 7,
+          "expected": [
+            0,
+            1010119989,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "e7bdd262cc357515f747b4aad1a65b0dfc9bf76a042c3be6ef9029d216c361e0",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1028472832,
+            1018462208,
+            1040187392,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d3169b9391b8bc9401c9e91b5a977dc575ff060e944eaa79c836508b3b5014e",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 8,
+          "expected": [
+            1020136974,
+            1010119989,
+            1040220289,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "9a0290b118a59f31e70b003bf33e4707420ecdf36c17cab8797d5364c2cb77c9",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1028472832,
+            1039572992,
+            1052770304,
+            1074266112
+          ],
+          "format": 2,
+          "frame_sha256": "6d5e299e19ac9fd8de8834c2ff7912ad5475aa2dbbc360e7171df22e914ee044",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        },
+        {
+          "dimension": 10,
+          "expected": [
+            1020136974,
+            1031247768,
+            1052819649,
+            1050187929
+          ],
+          "format": 28,
+          "frame_sha256": "475729fe7d87bd40737e68395cb36fda3a343dfc076e522ef2ee5e2edf34db57",
+          "group_output_verified": true,
+          "masked_stages": [
+            "ps",
+            "vs",
+            "cs"
+          ],
+          "sample_shape_verified": true,
+          "vendor": 32902,
+          "test_passed": true
+        }
+      ]
+    }
+  ],
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/sample-level-regression-texture-load.txt",
+      "sha256": "ce264e8c76a0ecb665eeac0351359f731f71c0da518a1559ca06502f99212c83",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 1445,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 282769,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-regression-typed-pixel.txt",
+      "sha256": "aa157cffa1964995b6d5da05d980154943e7455d32271b32b3524978ceb6e52c",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 60537,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-regression-typed-vertex.txt",
+      "sha256": "127edf015f1d77bbdf900ba6dfdee18978942c92a1e5fa5d7ed82fdbeb870e0a",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 59812,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-regression-input-snapshot.txt",
+      "sha256": "3455ec664aaa2dcf43af2810630d9a37852bab20d2747ba1d397c2a1fd340b0a",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 7546,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-regression-execution.txt",
+      "sha256": "8b9c55b325e7a79a4c77c75454ffdb4cde70ec993158e1f4ade9a7349209ec21",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 33845,
+      "failures": [],
+      "unit_cases": [],
+      "probe_count": 0
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "sha256": "9d41344ba3a2a4813a99d47e4ea9e6ee8f5e319aae5d5143a2beda11dfa95b3b"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "sha256": "28f30c1cc93365d55bda6f22219fade082c2ec5139defece1af92cf6b28669e7"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "sha256": "8d466fd5a704843faba83de1e96c0dec733f5473836956f4daf12a91ab7074b7"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "sha256": "4c4b0632b9981d1be311a2cd56e0419ab52d15790da630cedd1e1bb7d4cf777c"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.cpp",
+      "sha256": "4e4b59704214e9563b3ee23aa5ee1c365aac7ed70d8945cc2f3cf756091a5cda"
+    },
+    {
+      "path": "tests/DxbcSampleLevelTests.cpp",
+      "sha256": "f62a22d6ff8a7f1a2ecd5ca895be98dd1c7bc019021539b6f622e63eacc9f288"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_level.py",
+      "sha256": "9b5da051be583269546e35f5dead86662a76a74094c91340016a175727964f9d"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "227fb6a3338977c731a44e1a94a26012f1840c67f4c3fb76c2dde288611b40df"
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-build.txt",
+      "sha256": "eb5d227a8a6d382468793af7583a196c1cf9b905547bbb22ad45572326918fc0"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-build-expanded.txt",
+      "sha256": "0562b9eec760e25a1d0fc2c7181a7bb12da0fc21fc5aaa867ead99eeaebdad6e"
+    },
+    {
+      "path": "artifacts/dx11-native/sample-level-execution-build-release.txt",
+      "sha256": "f50256ba8f13492e73911cc565c780f41fe76629ac93aab5a1c269bf29f5fb04"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcSampleLevelTests.exe",
+      "sha256": "e9190715da94bb43a2cfd050465548d34519850f796e05d4b314bc513cd41d6a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraSampleLevelProbe.exe",
+      "sha256": "2067dff436893b3cfd006e7d715c9ab03c7a7eab170b8b02707e982262caf5d7"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "path": "docs/research/dx11-sample-level-evidence.json",
+      "sha256": "60f29b7348a6af6831e5313ca2964b3147a0440f9bbe9d13dd6e351738320bf1"
+    }
+  ]
+}

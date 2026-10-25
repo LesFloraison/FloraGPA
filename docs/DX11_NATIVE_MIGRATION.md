@@ -484,6 +484,16 @@ observations and two adapter-specific filtering/clamp differences in
 `DX11_SAMPLE_LEVEL_RESEARCH.md`; the sampler snapshot checkpoint does not yet
 implement sampling opcodes or close full shader-debugging acceptance.
 
+The subsequent explicit-LOD checkpoint adds `sample_l` to the independent
+VS/PS/CS executor. It uses observed sampler inputs and private same-adapter
+operations under helper identity `dxbc-gpu/10`. It preserves raw filtered values,
+view mip/array ranges, resource clamps and result masks. See
+`DX11_DXBC_SAMPLE_LEVEL.md` for the independent execution matrix, synthetic GPA
+captures, cancellation recovery and remaining validity/performance gaps.
+This supersedes the sampler-input checkpoint's lack of sampling execution;
+implicit sampling, gradient/comparison variants, quad/helper semantics and full
+debugger integration still block complete P6 acceptance.
+
 ## Delivery constraints
 
 GPU tests run serially. Final validation must include NVIDIA, Intel and applicable
