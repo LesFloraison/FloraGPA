@@ -49,3 +49,28 @@ and compiler disassembly remain outside Git. A first build failed because the
 conditional HLSL string lacked a concatenation operator; the corrected build and
 the original diagnostic remain in `artifacts/dx11-native/sample-grad-probe-build*.txt`.
 This research checkpoint does not complete shader debugging or release acceptance.
+
+## Stage-specific follow-up
+
+The first executor comparison found two failures when its PS results were compared
+to the compute-only oracle. The standalone probe now also accepts `--grad ps` and
+`--grad vs`. It uses a rasterized fullscreen triangle with an integer render
+target for PS, and vertex-ID selection plus stream output for VS. Both use
+independently compiled HLSL, the same texture/state matrix and debug-layer checks.
+There are now 19,278 independent observations across three stages and adapters;
+each stage has a separate evidence ledger and explicit stage identity.
+
+Only WARP has cross-stage differences in this matrix: eight anisotropic records
+per offset differ between PS and CS/VS. The executor's initially failing PS
+values match the independent PS values exactly. For example, at coordinates
+`(-1.25, 0.375)` with gradients `(-0.25, 0)` and `(0, -0.25)`, the texture's blue
+channel is raw `1040187392` in PS and `1040154624` in CS/VS without an offset.
+This is evidence to compare the same native stage, not a reason to weaken the
+bit-exact assertions or replace the shader stage with CS. The full initial
+154-pass/two-failure executor log and focused mismatch diagnostic are retained.
+
+Run the same validator with `--stage ps` or `--stage vs` and the corresponding
+output root. The updated CS, PS and VS ledgers are
+`research/dx11-sample-grad-{cs,ps,vs}-evidence.json`; the original compute-only
+ledger remains intact as historical evidence. These observations do not resolve
+all driver-dependent or nonfinite-input filtering behavior.

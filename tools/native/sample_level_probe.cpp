@@ -45,12 +45,16 @@ struct Configuration {
 };
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 3 && (argc != 4 || std::wstring(argv[3]) != L"--grad")) {
-        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [--grad]\n";
+    if (argc != 3 && ((argc != 4 && argc != 5) || std::wstring(argv[3]) != L"--grad")) {
+        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [--grad [ps|vs]]\n";
         return 2;
     }
     try {
-        const bool gradient = argc == 4;
+        const bool gradient = argc >= 4;
+        const std::wstring stage = argc == 5 ? argv[4] : L"cs";
+        if (stage != L"cs" && stage != L"ps" && stage != L"vs")
+            throw std::runtime_error("Invalid sampling observation stage");
+        const bool pixel = stage == L"ps", vertex = stage == L"vs";
         const std::string prefix = gradient ? "sample-grad-" : "sample-level-";
         const auto directory = std::filesystem::absolute(argv[1]);
         if (!std::filesystem::create_directory(directory))
@@ -105,18 +109,35 @@ int wmain(int argc, wchar_t **argv) {
                     {"min_max_filtering", minMax},
                     {"cases", Json::array()}};
         std::array<ComPtr<ID3D11ComputeShader>, 2> shaders;
+        std::array<ComPtr<ID3D11VertexShader>, 2> vertexShaders;
+        std::array<ComPtr<ID3D11PixelShader>, 2> pixelShaders;
+        std::array<ComPtr<ID3D11GeometryShader>, 2> streams;
+        if (gradient)
+            report["stage"] = pixel ? "ps" : vertex ? "vs" : "cs";
         for (unsigned offset = 0; offset < 2; ++offset) {
-            const std::string source =
+            std::string source =
                 "Texture2D<float4> t:register(t0);StructuredBuffer<float4> p:register(t1);"
                 "SamplerState s:register(s3);RWStructuredBuffer<uint4> dst:register(u0);"
                 "[numthreads(64,1,1)]void main(uint3 id:SV_DispatchThreadID){if(id.x<63)" +
-                std::string(gradient ? "dst[id.x]=asuint(t.SampleGrad(s,p[id.x*3].xy,p[id.x*3+1].xy,p[id.x*3+2].xy"
-                                     : "dst[id.x]=asuint(t.SampleLevel(s,p[id.x].xy,p[id.x].z") +
+                std::string(gradient
+                                ? "dst[id.x]=asuint(t.SampleGrad(s,p[id.x*3].xy,p[id.x*3+1].xy,p[id.x*3+2].xy"
+                                : "dst[id.x]=asuint(t.SampleLevel(s,p[id.x].xy,p[id.x].z") +
                 std::string(offset ? ",int2(-1,1)" : "") + "));}";
+            if (pixel || vertex)
+                source =
+                    "Texture2D<float4> t:register(t0);StructuredBuffer<float4> p:register(t1);"
+                    "SamplerState s:register(s3);" +
+                    std::string(pixel ? "uint4 main(float4 pos:SV_Position):SV_Target{uint i=uint(pos.x);"
+                                      : "uint4 main(uint i:SV_VertexID):TEXCOORD0{") +
+                    "return asuint(t.SampleGrad(s,p[i*3].xy,p[i*3+1].xy,p[i*3+2].xy" +
+                    std::string(offset ? ",int2(-1,1)" : "") + "));}";
             ComPtr<ID3DBlob> binary, errors;
             const auto hr =
                 D3DCompile(source.data(), source.size(), "Independent sample level", nullptr, nullptr, "main",
-                           "cs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &binary, &errors);
+                           pixel    ? "ps_5_0"
+                           : vertex ? "vs_5_0"
+                                    : "cs_5_0",
+                           D3DCOMPILE_ENABLE_STRICTNESS, 0, &binary, &errors);
             if (FAILED(hr) && errors)
                 throw std::runtime_error(std::string(static_cast<const char *>(errors->GetBufferPointer()),
                                                      errors->GetBufferSize()));
@@ -125,14 +146,47 @@ int wmain(int argc, wchar_t **argv) {
             ComPtr<ID3DBlob> text;
             check(D3DDisassemble(binary->GetBufferPointer(), binary->GetBufferSize(), 0, nullptr, &text));
             save(directory / (prefix + std::to_string(offset) + ".asm.txt"), text.Get());
-            check(device->CreateComputeShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr,
-                                              &shaders[offset]));
+            if (pixel)
+                check(device->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr,
+                                                &pixelShaders[offset]));
+            else if (vertex) {
+                check(device->CreateVertexShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr,
+                                                 &vertexShaders[offset]));
+                const D3D11_SO_DECLARATION_ENTRY declaration{0, "TEXCOORD", 0, 0, 4, 0};
+                const UINT stride = 16;
+                check(device->CreateGeometryShaderWithStreamOutput(
+                    binary->GetBufferPointer(), binary->GetBufferSize(), &declaration, 1, &stride, 1,
+                    D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &streams[offset]));
+            } else
+                check(device->CreateComputeShader(binary->GetBufferPointer(), binary->GetBufferSize(),
+                                                  nullptr, &shaders[offset]));
+        }
+        ComPtr<ID3D11VertexShader> fullscreen;
+        ComPtr<ID3D11RasterizerState> rasterizer;
+        if (pixel) {
+            const std::string source = "float4 main(uint i:SV_VertexID):SV_Position{"
+                                       "return float4(i==1?3:-1,i==2?3:-1,0,1);}";
+            ComPtr<ID3DBlob> binary;
+            check(D3DCompile(source.data(), source.size(), "Independent fullscreen triangle", nullptr,
+                             nullptr, "main", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &binary, nullptr));
+            check(device->CreateVertexShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr,
+                                             &fullscreen));
+            D3D11_RASTERIZER_DESC desc{};
+            desc.FillMode = D3D11_FILL_SOLID;
+            desc.CullMode = D3D11_CULL_NONE;
+            desc.DepthClipEnable = true;
+            check(device->CreateRasterizerState(&desc, &rasterizer));
         }
         std::vector<std::array<float, 4>> parameters;
-        const std::array<std::array<float, 4>, 9> gradients{{
-            {0, 0, 0, 0}, {.03125f, 0, 0, .03125f}, {.125f, 0, 0, .125f},
-            {.25f, 0, 0, .25f}, {1, 0, 0, 1}, {-.25f, 0, 0, -.25f},
-            {1, 0, 0, .03125f}, {0, 1, -.03125f, 0}, {.25f, .125f, -.125f, .25f}}};
+        const std::array<std::array<float, 4>, 9> gradients{{{0, 0, 0, 0},
+                                                             {.03125f, 0, 0, .03125f},
+                                                             {.125f, 0, 0, .125f},
+                                                             {.25f, 0, 0, .25f},
+                                                             {1, 0, 0, 1},
+                                                             {-.25f, 0, 0, -.25f},
+                                                             {1, 0, 0, .03125f},
+                                                             {0, 1, -.03125f, 0},
+                                                             {.25f, .125f, -.125f, .25f}}};
         for (float u : {-1.25f, -.125f, 0.f, .25f, .5f, 1.f, 1.25f})
             if (gradient)
                 for (const auto &g : gradients) {
@@ -157,12 +211,30 @@ int wmain(int argc, wchar_t **argv) {
         check(device->CreateShaderResourceView(params.Get(), nullptr, &parameterView));
         bd.Usage = D3D11_USAGE_DEFAULT;
         bd.ByteWidth = UINT(recordCount * 16);
-        bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+        bd.BindFlags = vertex ? D3D11_BIND_STREAM_OUTPUT : D3D11_BIND_UNORDERED_ACCESS;
+        if (vertex) {
+            bd.MiscFlags = 0;
+            bd.StructureByteStride = 0;
+        }
         check(device->CreateBuffer(&bd, nullptr, &output));
         ComPtr<ID3D11UnorderedAccessView> outputView;
-        check(device->CreateUnorderedAccessView(output.Get(), nullptr, &outputView));
+        if (!vertex)
+            check(device->CreateUnorderedAccessView(output.Get(), nullptr, &outputView));
         bd = {UINT(recordCount * 16), D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
         check(device->CreateBuffer(&bd, nullptr, &staging));
+        ComPtr<ID3D11Texture2D> pixelOutput, pixelReadback;
+        ComPtr<ID3D11RenderTargetView> pixelTarget;
+        if (pixel) {
+            D3D11_TEXTURE2D_DESC desc{
+                UINT(recordCount),        1, 1, 1, DXGI_FORMAT_R32G32B32A32_UINT, {1, 0}, D3D11_USAGE_DEFAULT,
+                D3D11_BIND_RENDER_TARGET, 0, 0};
+            check(device->CreateTexture2D(&desc, nullptr, &pixelOutput));
+            check(device->CreateRenderTargetView(pixelOutput.Get(), nullptr, &pixelTarget));
+            desc.Usage = D3D11_USAGE_STAGING;
+            desc.BindFlags = 0;
+            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            check(device->CreateTexture2D(&desc, nullptr, &pixelReadback));
+        }
         std::array<std::vector<std::array<float, 4>>, 4> texels;
         std::array<D3D11_SUBRESOURCE_DATA, 4> subresources;
         for (unsigned mip = 0; mip < 4; ++mip) {
@@ -255,20 +327,48 @@ int wmain(int argc, wchar_t **argv) {
                 auto *state = sampler.Get();
                 auto *target = outputView.Get();
                 const UINT sentinel[]{0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef};
-                context->ClearUnorderedAccessViewUint(target, sentinel);
-                context->CSSetShader(shaders[offset].Get(), nullptr, 0);
-                context->CSSetShaderResources(0, 2, views.data());
-                context->CSSetSamplers(3, 1, &state);
-                context->CSSetUnorderedAccessViews(0, 1, &target, nullptr);
-                context->Dispatch(1, 1, 1);
+                if (pixel) {
+                    auto *rtv = pixelTarget.Get();
+                    const float clear[]{-1, -1, -1, -1};
+                    context->ClearRenderTargetView(rtv, clear);
+                    context->OMSetRenderTargets(1, &rtv, nullptr);
+                    context->VSSetShader(fullscreen.Get(), nullptr, 0);
+                    context->PSSetShader(pixelShaders[offset].Get(), nullptr, 0);
+                    context->PSSetShaderResources(0, 2, views.data());
+                    context->PSSetSamplers(3, 1, &state);
+                    const D3D11_VIEWPORT viewport{0, 0, float(recordCount), 1, 0, 1};
+                    context->RSSetViewports(1, &viewport);
+                    context->RSSetState(rasterizer.Get());
+                    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                    context->Draw(3, 0);
+                } else if (vertex) {
+                    auto *destination = output.Get();
+                    const UINT start = 0;
+                    context->VSSetShader(vertexShaders[offset].Get(), nullptr, 0);
+                    context->VSSetShaderResources(0, 2, views.data());
+                    context->VSSetSamplers(3, 1, &state);
+                    context->GSSetShader(streams[offset].Get(), nullptr, 0);
+                    context->SOSetTargets(1, &destination, &start);
+                    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+                    context->Draw(UINT(recordCount), 0);
+                } else {
+                    context->ClearUnorderedAccessViewUint(target, sentinel);
+                    context->CSSetShader(shaders[offset].Get(), nullptr, 0);
+                    context->CSSetShaderResources(0, 2, views.data());
+                    context->CSSetSamplers(3, 1, &state);
+                    context->CSSetUnorderedAccessViews(0, 1, &target, nullptr);
+                    context->Dispatch(1, 1, 1);
+                }
                 context->ClearState();
-                context->CopyResource(staging.Get(), output.Get());
+                auto *readback = pixel ? static_cast<ID3D11Resource *>(pixelReadback.Get()) : staging.Get();
+                context->CopyResource(readback, pixel ? static_cast<ID3D11Resource *>(pixelOutput.Get())
+                                                      : output.Get());
                 context->Flush();
                 const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
                 D3D11_MAPPED_SUBRESOURCE mapped{};
                 for (;;) {
                     const auto hr =
-                        context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                        context->Map(readback, 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
                     if (hr == S_OK)
                         break;
                     if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
@@ -279,9 +379,10 @@ int wmain(int argc, wchar_t **argv) {
                 }
                 std::vector<std::array<uint32_t, 4>> values(recordCount);
                 std::memcpy(values.data(), mapped.pData, values.size() * 16);
-                context->Unmap(staging.Get(), 0);
+                context->Unmap(readback, 0);
                 for (size_t index = 0; index < recordCount; ++index) {
-                    Json record{{"parameters", parameters[index * (gradient ? 3 : 1)]}, {"bits", values[index]}};
+                    Json record{{"parameters", parameters[index * (gradient ? 3 : 1)]},
+                                {"bits", values[index]}};
                     if (gradient) {
                         record["ddx"] = parameters[index * 3 + 1];
                         record["ddy"] = parameters[index * 3 + 2];
