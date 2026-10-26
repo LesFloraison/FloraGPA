@@ -859,3 +859,15 @@ The legacy debug UI remains active. Predicate hints, complete instruction and
 invocation coverage, full Pixel History and standalone removal gates remain open.
 The measured approximately 1.7 GiB Worker peaks are reported, not accepted as a
 completed performance gate.
+
+## Native trace reader checkpoint
+
+The owned journal now has a bounded C++ reader with complete delta-chain
+validation, digest verification, a locked file handle, reversible whole-group
+state and selected-thread instruction boundaries. Four affected suites pass
+188 tests with no failures or skips. BF1 and Helldivers projection states match
+the independent Python validator at initial, final and every selected boundary;
+ten reader-report corruptions and ten journal corruptions are rejected. See
+`DX11_DXBC_TRACE_READER.md` and
+`research/dx11-dxbc-trace-reader-evidence.json`. Debug UI, full shader/fragment
+coverage and standalone release acceptance remain pending.

@@ -51,6 +51,11 @@ ABI or enum values. The format does not depend on RenderDoc headers or types.
 
 ## Limits and failure behavior
 
+The matching bounded C++ reader and its exact state projection contract are
+documented in `DX11_DXBC_TRACE_READER.md`. New version-one headers include
+`constant_buffer_lengths`; older journals remain readable with unknown values
+for unrecorded elements whose buffer length was not captured.
+
 The writer streams records through `QSaveFile`, with direct-write fallback
 disabled. It requires a new destination and publishes only after successful
 execution and completion-record writing. Exceptions, cancellation and byte or

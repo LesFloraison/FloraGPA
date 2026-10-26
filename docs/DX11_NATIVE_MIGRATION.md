@@ -593,3 +593,14 @@ seven affected suites pass 263 tests after restoring original-corpus coverage;
 real BF1/Helldivers CLI jobs and eleven negative result checks also pass.
 See `DX11_NATIVE_COMPUTE_DEBUG.md`. The debugger UI, complete shader/fragment
 semantics and P7/P8 gates remain open; this does not retire any legacy UI feature.
+
+## Native trace reader continuation
+
+`ExecutionTraceReader` validates the accepted journal digest and complete state
+chains, retains a Windows read lock, and supports reversible whole-group state
+projection with explicit selected-thread boundaries. It preserves raw bits,
+validity, exact source records and unknown constant input. Four affected suites
+pass 188 tests; BF1 and Helldivers initial/final/selected-boundary states match
+the independent Python projector. See `DX11_DXBC_TRACE_READER.md`. This is the
+native debug model's state layer; legacy debug UI and full removal gates remain
+open.

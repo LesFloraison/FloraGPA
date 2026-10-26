@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "checkpoint": "native-dxbc-execution-trace-reader",
+  "created_utc": "2026-10-26T15:26:29.879806+00:00",
+  "base_commit": "e87634527112a3c9bde76b21ca82301bb58635e8",
+  "complete_release_acceptance": false,
+  "trace_format": "flora.dxbc-execution-trace/1",
+  "passed": 188,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "dxbc-execution-trace-reader",
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/trace-reader-regression-dxbc-execution-trace-reader.txt",
+        "bytes": 4509,
+        "sha256": "677b069820f43620b261a70ad015384523618ce81b467a1ac93b88507e0ad1ed"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/trace-reader-regression-dxbc-execution-trace.txt",
+        "bytes": 2781,
+        "sha256": "d4c99eaa7907c451d9da550d179f40f5cd96601334ff334a4812efd724a180aa"
+      }
+    },
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/trace-reader-regression-native-compute-debug.txt",
+        "bytes": 4046,
+        "sha256": "bace4a7c9746e15e1d8f4614358e371b9c10ab98d254a0373ecf96d97450c299"
+      }
+    },
+    {
+      "name": "native-analysis",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/trace-reader-regression-native-analysis.txt",
+        "bytes": 2569,
+        "sha256": "8f2ee96f2b11558d97d5cccd0af39b09bd8150947558c5baab001374bc3e478f"
+      }
+    }
+  ],
+  "captures": [
+    {
+      "name": "bf1",
+      "steps": 14992,
+      "selected_steps": 52,
+      "read_validate_rewind_ms": 1173,
+      "projection_total_ms_before_report_write": 3133,
+      "trace": {
+        "path": "artifacts/dx11-native/execution-trace-bf1.jsonl",
+        "bytes": 13643505,
+        "sha256": "8db74d43e9746d8ed9b6c625ccc8d6e3326de20d57a5b548e8efbe2a16195e48"
+      },
+      "reference_probe": {
+        "path": "artifacts/dx11-native/execution-trace-bf1.json",
+        "bytes": 11850,
+        "sha256": "6c3e9a0abaa2bf94fe6b1d66a50b75285402c51332b8d048ed6662de0b9e0e1b"
+      },
+      "reader_probe": {
+        "path": "artifacts/dx11-native/trace-reader-bf1.json",
+        "bytes": 12706,
+        "sha256": "fa4dd99252e3430cb71dc6e1c7122c46247b11670c39b0ba40dc313dfc66e299"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/trace-reader-bf1-validation.json",
+        "bytes": 1660,
+        "sha256": "6095788ff5023a0320f6b870a1cb65aed37a764cdcd7f0dfd649fbc4cdb0b976"
+      },
+      "probe_log": {
+        "path": "artifacts/dx11-native/trace-reader-bf1-probe.txt",
+        "bytes": 63,
+        "sha256": "d24305e9b9c5a32df6b2b75ff2602bf316533e3c82e086af7dfe88fe086f0794"
+      }
+    },
+    {
+      "name": "hd",
+      "steps": 384,
+      "selected_steps": 6,
+      "read_validate_rewind_ms": 46,
+      "projection_total_ms_before_report_write": 77,
+      "trace": {
+        "path": "artifacts/dx11-native/execution-trace-hd.jsonl",
+        "bytes": 322754,
+        "sha256": "8448df533ff2e9a9d907198829bfcfdc1477d82142945b26548abd0930f4bf5b"
+      },
+      "reference_probe": {
+        "path": "artifacts/dx11-native/execution-trace-hd.json",
+        "bytes": 4952,
+        "sha256": "9b8b3f3c58d0dcc3c34e7ca14ff9ffbb00a8c516db66525bd6f904d5eef9a5f2"
+      },
+      "reader_probe": {
+        "path": "artifacts/dx11-native/trace-reader-hd.json",
+        "bytes": 3541,
+        "sha256": "9232933add130e92cd0595ac4a7bc6c1d3b9e9d82776f9be2fa28b72c68b5de9"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/trace-reader-hd-validation.json",
+        "bytes": 1645,
+        "sha256": "1d344f25433962f21fb6cf43aefefbb7d6e8b78dd2ee955da8c4ef8c98042de3"
+      },
+      "probe_log": {
+        "path": "artifacts/dx11-native/trace-reader-hd-probe.txt",
+        "bytes": 58,
+        "sha256": "07322ec5a33d466bdc516780474e50a922920d5969b82def788622f6cb89bfba"
+      }
+    }
+  ],
+  "negative_checks": [
+    {
+      "cases": 10,
+      "report": {
+        "path": "artifacts/dx11-native/trace-reader-negative.json",
+        "bytes": 1289,
+        "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+      }
+    },
+    {
+      "cases": 10,
+      "report": {
+        "path": "artifacts/dx11-native/trace-reader-journal-negative.json",
+        "bytes": 1254,
+        "sha256": "89f036ded1a46f2b79d136e6dda62a4a0f7d75c7d8e22730d2e16a1aec7cd411"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 114402,
+      "sha256": "9d503149e9afc9f6675003b7e5c35bf13723144dedfb4a14f6941ea43a81d2fb"
+    },
+    {
+      "path": "src/application/DxbcExecutionTrace.cpp",
+      "bytes": 16750,
+      "sha256": "add9f9255a5119c778b7a8a3846169c0ad03dc75a73cb202418fd552f3bcf63f"
+    },
+    {
+      "path": "src/application/DxbcExecutionTraceReader.cpp",
+      "bytes": 26362,
+      "sha256": "8277ed29725055ad66b5b668fd2904abc2b875b4a4ea576098b26492f6b86db8"
+    },
+    {
+      "path": "src/application/DxbcExecutionTraceReader.h",
+      "bytes": 2468,
+      "sha256": "69c97b0d5f4d777f71311158a41a0fa511947db4e8a23ba47e96818340566328"
+    },
+    {
+      "path": "tests/DxbcExecutionTraceReaderTests.cpp",
+      "bytes": 22363,
+      "sha256": "c3c88a955b1f1852f3aa87684c0b05b6be0fae98db58a9cb4e5f5710c3256a1d"
+    },
+    {
+      "path": "tools/probe_dxbc_trace_reader.cpp",
+      "bytes": 4751,
+      "sha256": "659167a4dd90a9e9a0eac141e0838a27e09f551afdb49ad9066cb04df638a992"
+    },
+    {
+      "path": "tools/validate_dxbc_execution_trace.py",
+      "bytes": 20531,
+      "sha256": "1ac7f1e3611df6a77c5d6efbed7f94aff55eb043598ec69e79f4d8f00fad2e77"
+    }
+  ],
+  "final_build": {
+    "path": "artifacts/dx11-native/trace-reader-final-build-3.txt",
+    "bytes": 10587,
+    "sha256": "0e1a7dffe6c929f24df170ce067d2c1abce3132cec5f06a1ff295c9df7610e8b"
+  },
+  "final_ctest": {
+    "path": "artifacts/dx11-native/trace-reader-regression-ctest.txt",
+    "bytes": 644,
+    "sha256": "d849fb6661b9376428440c52855adcd0e9dbc99b113167facb81ed0f70907b69"
+  },
+  "earlier_runs": [
+    {
+      "path": "artifacts/dx11-native/trace-reader-first-build.txt",
+      "bytes": 2811,
+      "sha256": "ab6ae2fa1c69f6a677d2b1dab36bf5bf49308a66cc9adecadfc5d2d8a982f814"
+    },
+    {
+      "path": "artifacts/dx11-native/trace-reader-first-ctest.txt",
+      "bytes": 435,
+      "sha256": "9844001318c43084144aeb1e184905a8773f3ac7c06430b9452178d39866dfa3"
+    },
+    {
+      "path": "artifacts/dx11-native/trace-reader-final-build.txt",
+      "bytes": 2975,
+      "sha256": "758dcdc3753e3f4b22feb7a233635bdbf14994e4d478e29d80bfca7b021392d5"
+    },
+    {
+      "path": "artifacts/dx11-native/trace-reader-final-build-2.txt",
+      "bytes": 10586,
+      "sha256": "619999281f27a47151eb2896a64cc6dad261d9557465c90893372f9a18a54a05"
+    }
+  ],
+  "corrected_build_failure": "The first reader probe build had an ambiguous hash overload; an explicit byte-hash helper resolved it. The failed log is retained.",
+  "products": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4507648,
+      "sha256": "ed81f16e4e92c0d711a83b47c3944d5b41870d30a3dad09afb33577215a33109"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5465088,
+      "sha256": "320075913996f45baa7d52074a7520675906b71adb2d866f02d9a99545d2fe61"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5465088,
+      "sha256": "320075913996f45baa7d52074a7520675906b71adb2d866f02d9a99545d2fe61"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 205824,
+      "sha256": "8234aee73f2236f957ea811b8dbe0e50a060156dc80b0f27f13df3466bcbf3d5"
+    }
+  ],
+  "limits": {
+    "file_bytes": 268435456,
+    "record_bytes": 268435456,
+    "storage_payload_bytes": 268435456,
+    "steps": 1000000,
+    "records": 4000000,
+    "objects_per_collection": 1000000,
+    "lanes": 1024,
+    "json_depth": 64,
+    "total_rss_budget_claimed": false
+  },
+  "scope": "Journal integrity and reversible all-lane state projection, not instruction semantics, invocation eligibility or debug UI parity.",
+  "open_gates": [
+    "Native source/debug model and UI integration",
+    "Remaining shader instruction and VS/PS input semantics",
+    "Predicate-hint execution eligibility",
+    "Complete fragment history",
+    "P7 dependency retirement",
+    "P8 standalone packaging, module audit and performance acceptance"
+  ]
+}

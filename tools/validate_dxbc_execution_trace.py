@@ -51,7 +51,7 @@ def counter(raw):
     return raw["kind"], raw["value"]
 
 
-def validate(path, report):
+def validate(path, report, reader_report=None):
     path = Path(path)
     require(path.stat().st_size <= 256 * 1024 * 1024, "Validator trace size limit exceeded")
     storage, initialized, registers, counters, instructions = {}, {}, {}, {}, {}
@@ -63,6 +63,29 @@ def validate(path, report):
     texture_writes = texture_bytes = 0
     changed_registers = set()
     memory_total = 0
+
+    def canonical_hash(raw):
+        return digest(json.dumps(raw, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8"))
+
+    def projected_state():
+        register_rows = [{"lane": lane, "dxbc_operand_kind": kind, "indices": list(indices),
+                          "bits": list(bits), "valid_components": valid}
+                         for (lane, (kind, indices)), (bits, valid) in sorted(registers.items())]
+        spaces = {"buffer": 0, "shared": 1, "texture": 2}
+        storage_rows = [{"space": space, "resource": resource, "bytes": len(data),
+                         "sha256": digest(data), "validity_sha256": digest(valid)}
+                        for (space, resource), (data, valid) in sorted(
+                            storage.items(), key=lambda item: (spaces[item[0][0]], item[0][1]))]
+        counter_rows = [{"view": view, "kind": kind, "value": count}
+                        for view, (kind, count) in sorted(counters.items())]
+        return {"registers_sha256": canonical_hash(register_rows), "registers": len(register_rows),
+                "storage": storage_rows, "counters": counter_rows}
+
+    if reader_report is not None:
+        require(reader_report["format"] == "flora.dxbc-trace-reader-probe" and reader_report["version"] == 1,
+                "Unexpected C++ reader report format")
+        require(reader_report["trace_sha256"] == digest(path.read_bytes()), "C++ reader trace digest mismatch")
+        require(reader_report["round_trip"] is True, "C++ reader did not confirm exact restoration")
 
     def storage_hashes():
         return {key: (digest(data), digest(valid)) for key, (data, valid) in storage.items()}
@@ -128,6 +151,8 @@ def validate(path, report):
                     require(all(initialized[k] == len(v[0]) for k, v in storage.items()), "Incomplete initial storage")
                     initial_hashes = storage_hashes()
                     initial_registers, initial_counters = registers.copy(), counters.copy()
+                    if reader_report is not None:
+                        require(reader_report["initial"] == projected_state(), "C++ reader initial state mismatch")
                     for space, items in (("buffer", report["buffers"]), ("texture", report["textures"])):
                         for item in items:
                             require(initial_hashes[(space, item["resource"])] ==
@@ -141,6 +166,11 @@ def validate(path, report):
                 if row["next_instruction"] is not None:
                     require(row["next_instruction"] in instructions, "Unknown next instruction")
                 require(all(v in instructions for v in row["return_instruction_stack"]), "Unknown return instruction")
+                if reader_report is not None and lane == header["selected_lane"]:
+                    boundary = reader_report["selected_boundaries"][selected_steps]
+                    require(boundary == {"position": len(offsets), "instruction": row["instruction"],
+                                         "state_sha256": canonical_hash(projected_state())},
+                            "C++ reader selected boundary state mismatch")
                 selected_steps += lane == header["selected_lane"]
                 texture_writes += len(row["texture_changes"])
                 texture_bytes += sum(len(binary(c["after_hex"])) for c in row["texture_changes"])
@@ -184,6 +214,12 @@ def validate(path, report):
                                      "texture_metadata", "sampler", "sample_queries", "texture_view",
                                      "multisample_observation", "multisample_values", "texture_subresource"}, "Unknown trace record")
         require(complete is not None and offsets, "Missing execution completion")
+        if reader_report is not None:
+            require(reader_report["header"] == header and reader_report["completion"] == complete,
+                    "C++ reader metadata mismatch")
+            require(len(reader_report["selected_boundaries"]) == selected_steps,
+                    "C++ reader selected boundary count mismatch")
+            require(reader_report["final"] == projected_state(), "C++ reader final state mismatch")
         require(file.tell() == report["trace"]["bytes"] <= header["max_bytes"], "Trace byte count mismatch")
         require(records == report["trace"]["records"], "Trace record count mismatch")
         for key in ("steps", "selected_steps", "gpu_operations", "sampling_batches", "gpu"):
@@ -259,19 +295,65 @@ def negative_checks(path, report):
     return {"passed": True, "cases": results}
 
 
+def reader_negative_checks(path, report, reader_report):
+    results = []
+    for name in ("format", "digest", "round_trip", "initial_registers", "final_validity",
+                 "selected_state", "selected_position", "missing_selected", "header", "completion"):
+        candidate = copy.deepcopy(reader_report)
+        if name == "format":
+            candidate["format"] = "unknown"
+        elif name == "digest":
+            candidate["trace_sha256"] = "0" * 64
+        elif name == "round_trip":
+            candidate["round_trip"] = False
+        elif name == "initial_registers":
+            candidate["initial"]["registers_sha256"] = "0" * 64
+        elif name == "final_validity":
+            candidate["final"]["storage"][0]["validity_sha256"] = "0" * 64
+        elif name == "selected_state":
+            candidate["selected_boundaries"][0]["state_sha256"] = "0" * 64
+        elif name == "selected_position":
+            candidate["selected_boundaries"][0]["position"] += 1
+        elif name == "missing_selected":
+            candidate["selected_boundaries"].pop()
+        elif name == "header":
+            candidate["header"]["selected_lane"] += 1
+        elif name == "completion":
+            candidate["completion"]["steps"] += 1
+        try:
+            validate(path, report, candidate)
+        except (ValueError, KeyError, IndexError) as error:
+            results.append({"case": name, "rejected": True, "reason": str(error)})
+        else:
+            raise ValueError("Corrupt C++ reader report accepted: " + name)
+    return {"passed": True, "cases": results}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trace", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--negative-out", type=Path)
+    parser.add_argument("--reader-report", type=Path,
+                        help="Also compare the C++ reader's exact initial, final and selected boundary states")
+    parser.add_argument("--reader-negative-out", type=Path)
     args = parser.parse_args()
+    if args.reader_negative_out and not args.reader_report:
+        parser.error("--reader-negative-out requires --reader-report")
     report = json.loads(args.report.read_text(encoding="utf-8"))
-    result = validate(args.trace, report)
+    reader_report = json.loads(args.reader_report.read_text(encoding="utf-8")) if args.reader_report else None
+    result = validate(args.trace, report, reader_report)
+    if args.reader_report:
+        result["reader_report_sha256"] = digest(args.reader_report.read_bytes())
+        result["reader_states_match"] = True
     result["report_sha256"] = digest(args.report.read_bytes())
     args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     if args.negative_out:
         args.negative_out.write_text(json.dumps(negative_checks(args.trace, report), indent=2) + "\n", encoding="utf-8")
+    if args.reader_negative_out:
+        args.reader_negative_out.write_text(
+            json.dumps(reader_negative_checks(args.trace, report, reader_report), indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"passed": result["passed"], "steps": result["steps"], "rewound": result["rewound"]}))
 
 

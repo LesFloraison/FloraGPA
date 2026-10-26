@@ -150,6 +150,9 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
             .toHex()
             .toStdString();
     Journal journal(path, options.maxBytes, cancelled);
+    Json constantLengths = Json::array();
+    for (const auto &[slot, values] : snapshot.inputs.constantBuffers)
+        constantLengths.push_back({{"slot", slot}, {"elements", values.size()}});
     journal.write({{"record", "header"},
                    {"format", "flora.dxbc-execution-trace"},
                    {"version", 1},
@@ -173,6 +176,7 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
                    {"selected_lane", selected},
                    {"group_size", size},
                    {"max_steps", options.maxSteps},
+                   {"constant_buffer_lengths", constantLengths},
                    {"max_bytes", options.maxBytes}});
     const auto source = shaderSourceLines(snapshot.bytecode);
     journal.write({{"record", "source"}, {"data", source}});
