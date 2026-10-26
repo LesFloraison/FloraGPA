@@ -53,13 +53,16 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
     require(Json::parse(artifacts["debug.json"].toStdString()) == data,
             "Native debug metadata disagrees with the analysis result");
     require(data.at("format") == (vertex ? "flora.native-vertex-debug" : "flora.native-compute-debug") &&
-                data.at("version") == 1 && data.at("trace_format") == "flora.dxbc-execution-trace/1" &&
+                (data.at("version") == 1 || (vertex && data.at("version") == 2)) &&
+                data.at("trace_format") == "flora.dxbc-execution-trace/1" &&
                 data.at("trace_file") == "trace.jsonl" && data.at("shader_file") == "shader.dxbc" &&
                 data.at("captured_gpu_schedule") == false,
             "Unsupported native debug result");
     const auto &invocation = data.at("invocation");
     const auto &options = job_.at("options");
-    require(invocation.at("status") == "eligible_in_observed_replay" &&
+    const bool overrideIndex = vertex && data.at("version") == 2 && options.contains("index");
+    require(invocation.at("status") ==
+                    (overrideIndex ? "explicit_vertex_index_override" : "eligible_in_observed_replay") &&
                 invocation.at("predicate").at("allows_execution") == true &&
                 invocation.at("gpa_event") == options.at("gpa_event"),
             "Native debug invocation is not eligible for the requested event");
@@ -76,6 +79,30 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
                 "Native vertex invocation is outside the draw");
         if (options.contains("index"))
             require(invocation.at("vertex_index") == options.at("index"), "Native vertex index mismatch");
+        if (data.at("version") == 2) {
+            require(invocation.at("index_override") == options.value("index", Json(nullptr)) &&
+                        invocation.at("vertex_index_source") ==
+                            (overrideIndex ? "explicit_override" : "draw"),
+                    "Native vertex override provenance mismatch");
+            const auto vertexId = number(invocation.at("vertex_id"));
+            require(vertexId <= UINT32_MAX, "Invalid native vertex system ID");
+            int64_t offset = 0;
+            if (draw.contains("index_count")) {
+                const auto base = draw.at("base_vertex");
+                require(base.is_number_integer() && base >= Json(INT32_MIN) && base <= Json(INT32_MAX),
+                        "Invalid native vertex base offset");
+                offset = base.get<int32_t>();
+            } else {
+                const auto start = number(draw.at("start_vertex"));
+                require(start <= UINT32_MAX && vertexId == number(invocation.at("input_reference")),
+                        "Invalid native vertex start or system ID");
+                offset = int64_t(start);
+            }
+            const Json observed = int64_t(vertexId) + offset;
+            require(invocation.at("observed_vertex_index") == observed &&
+                        invocation.at("vertex_index") == (overrideIndex ? options.at("index") : observed),
+                    "Native vertex attribute address provenance mismatch");
+        }
     } else {
         for (const auto *name : {"group", "thread"})
             require(invocation.at(name) == options.value(name, Json({0, 0, 0})),
@@ -122,6 +149,12 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
                : std::vector<const char *>{"gpa_event", "group", "thread", "group_size"};
     for (const auto *name : selectionFields)
         require(header.at(name) == invocation.at(name), "Native debug trace invocation mismatch");
+    if (vertex) {
+        const Json expected = data.at("version") == 2 ? invocation.at("index_override") : Json(nullptr);
+        require(header.value("index_override", Json(nullptr)) == expected &&
+                    (data.at("version") != 2 || header.contains("index_override")),
+                "Native vertex trace index override mismatch");
+    }
     const auto &adapter = result_.at("context").at("adapter");
     const auto &highValue = adapter.at("luid_high");
     require(highValue.is_number_integer() && highValue >= Json(INT32_MIN) && highValue <= Json(INT32_MAX),

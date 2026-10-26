@@ -196,6 +196,8 @@ VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes
             e.classification > 1 || (!e.classification && e.stepRate))
             throw std::runtime_error("Invalid vertex input layout element");
     std::optional<std::array<uint32_t, 2>> systemIds;
+    if (!draw.indexFormat && (!draw.indices.empty() || draw.indexOffset || draw.baseVertex))
+        throw std::runtime_error("Non-indexed vertex input request has index state");
     std::vector<uint8_t> selectedIndex;
     if (selected) {
         if (selected->reference >= draw.count || selected->instance >= draw.instances)
@@ -217,10 +219,22 @@ VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes
                                  draw.indices.begin() + size_t(offset) + width);
             draw.indices = selectedIndex;
             draw.indexOffset = draw.start = 0;
-        } else {
+        } else if (!selected->actualIndex) {
             if (uint64_t(draw.start) + selected->reference > UINT32_MAX)
                 throw std::runtime_error("Selected vertex input start overflows UINT32");
             draw.start += selected->reference;
+        }
+        if (selected->actualIndex) {
+            // Use one private R32 index. For UINT32_MAX, base vertex one
+            // avoids both a cut index and non-indexed start/count overflow.
+            const auto actual = *selected->actualIndex;
+            const uint32_t raw = actual == UINT32_MAX ? actual - 1 : actual;
+            selectedIndex.resize(4);
+            std::memcpy(selectedIndex.data(), &raw, 4);
+            draw.indexFormat = DXGI_FORMAT_R32_UINT;
+            draw.indexOffset = draw.start = 0;
+            draw.indices = selectedIndex;
+            draw.baseVertex = actual == UINT32_MAX ? 1 : 0;
         }
         // Rebase each instance slot independently, then keep its original
         // StartInstanceLocation with a zero step rate. A single point has
@@ -327,6 +341,8 @@ VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes
         result.identity["system_ids"] = *systemIds;
         result.identity["system_ids_source"] = "draw-relative-selection";
         result.identity["attributes_source"] = "native-input-assembler";
+        result.identity["index_override"] =
+            selected->actualIndex ? nlohmann::json(*selected->actualIndex) : nlohmann::json(nullptr);
     }
     if (!rowCount)
         return result;

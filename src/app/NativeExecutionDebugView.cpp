@@ -97,13 +97,27 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     thread_ = new QLineEdit("0,0,0");
     thread_->setObjectName("nativeDebugThread");
     select->addWidget(thread_);
-    connect(stage_, &QComboBox::currentIndexChanged, this, [this, firstLabel, secondLabel](int index) {
-        firstLabel->setText(index ? "Input reference " : "Group ");
-        secondLabel->setText(index ? " Instance " : " Thread ");
-        group_->setText(index ? "0" : "0,0,0");
-        thread_->setText(index ? "0" : "0,0,0");
-        invalidate();
-    });
+    auto indexLabel = new QLabel(" Actual index ");
+    select->addWidget(indexLabel);
+    index_ = new QLineEdit;
+    index_->setObjectName("nativeDebugIndex");
+    index_->setPlaceholderText("From draw");
+    index_->setToolTip("Override the per-vertex attribute index after all draw offsets; system IDs remain "
+                       "selected from the draw");
+    select->addWidget(index_);
+    indexLabel->hide();
+    index_->hide();
+    connect(stage_, &QComboBox::currentIndexChanged, this,
+            [this, firstLabel, secondLabel, indexLabel](int index) {
+                firstLabel->setText(index ? "Input reference " : "Group ");
+                secondLabel->setText(index ? " Instance " : " Thread ");
+                group_->setText(index ? "0" : "0,0,0");
+                thread_->setText(index ? "0" : "0,0,0");
+                index_->clear();
+                indexLabel->setVisible(index != 0);
+                index_->setVisible(index != 0);
+                invalidate();
+            });
     steps_ = new QToolBar;
     layout->addWidget(steps_);
     navigation_ = new QComboBox;
@@ -231,6 +245,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     });
     connect(group_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(thread_, &QLineEdit::textChanged, this, [this] { invalidate(); });
+    connect(index_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(&operation_, &NativeDebugOperationController::finished, this,
             [this](const NativeDebugOperationOutcome &result) {
                 const bool current = operationRequest_ == requestId_ && bool(session_);
@@ -315,6 +330,7 @@ void NativeExecutionDebugView::updateActions() {
     line_->setEnabled(!occupied && bool(session_));
     group_->setEnabled(!occupied);
     thread_->setEnabled(!occupied);
+    index_->setEnabled(!occupied);
     stage_->setEnabled(!occupied);
 }
 std::string NativeExecutionDebugView::action() const {
@@ -327,11 +343,14 @@ NativeExecutionDebugView::Json NativeExecutionDebugView::request() const {
             const auto n = value.toULongLong(&valid);
             if (!valid || n > UINT32_MAX || value != value.trimmed() || value.startsWith('+') ||
                 value.startsWith('-'))
-                throw std::runtime_error("Enter an unsigned draw-relative reference or instance");
+                throw std::runtime_error("Enter an unsigned 32-bit reference, instance or actual index");
             return n;
         };
-        return {
+        Json selection = {
             {"gpa_event", event_}, {"vertex", scalar(group_->text())}, {"instance", scalar(thread_->text())}};
+        if (!index_->text().isEmpty())
+            selection["index"] = scalar(index_->text());
+        return selection;
     }
     return {{"gpa_event", event_}, {"group", triple(group_->text())}, {"thread", triple(thread_->text())}};
 }
@@ -351,6 +370,9 @@ bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSe
     const auto selection = request();
     if (session->job().at("action") != action())
         throw std::runtime_error("Native debug stage changed");
+    if (stage_->currentIndex() &&
+        session->job().at("options").value("index", Json(nullptr)) != selection.value("index", Json(nullptr)))
+        throw std::runtime_error("Native debug index override changed");
     for (const auto &[key, value] : selection.items())
         if (session->job().at("options").value(key, key == "gpa_event"       ? Json(nullptr)
                                                     : stage_->currentIndex() ? Json(0)
@@ -466,6 +488,7 @@ NativeExecutionDebugView::Json NativeExecutionDebugView::exportReport() {
     auto report = model()->exportReport();
     report["analysis_context"] = session_->result().at("context");
     report["analysis_context_id"] = session_->result().at("context_id");
+    report["invocation"] = session_->result().at("data").at("invocation");
     return report;
 }
 void NativeExecutionDebugView::exportResult(const QString &path) {

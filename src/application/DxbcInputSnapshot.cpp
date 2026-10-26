@@ -122,9 +122,10 @@ class Snapshot {
             if (vertexId == (width == 2 ? 0xffffu : UINT32_MAX))
                 throw std::runtime_error("Selected vertex input is a cut index");
         }
-        auto captured = captureVertexInputs(replay.nativeDevice(), replay.options().warp, result.bytecode,
-                                            elements, inputBuffers, draw, budget - used, cancelled, 5000,
-                                            VertexInputInvocation{selection.reference, selection.instance});
+        auto captured = captureVertexInputs(
+            replay.nativeDevice(), replay.options().warp, result.bytecode, elements, inputBuffers, draw,
+            budget - used, cancelled, 5000,
+            VertexInputInvocation{selection.reference, selection.instance, selection.actualIndex});
         if (captured.rows.size() != 1)
             throw std::runtime_error("Selected vertex input was not observed");
         result.inputs.registers = std::move(captured.rows.front());
@@ -153,6 +154,12 @@ class Snapshot {
                         {"source", predicate.source},
                         {"allows_execution", true},
                         {"original_query_recovered", false}}}};
+        invocation["observed_vertex_index"] = invocation.at("vertex_index");
+        invocation["index_override"] =
+            selection.actualIndex ? nlohmann::json(*selection.actualIndex) : nlohmann::json(nullptr);
+        invocation["vertex_index_source"] = selection.actualIndex ? "explicit_override" : "draw";
+        if (selection.actualIndex)
+            invocation["vertex_index"] = *selection.actualIndex;
     }
     std::shared_ptr<const SampleQueryInput> sampleQueries(ID3D11ShaderResourceView *srv) {
         auto observed = replay.observeSampleQueries(srv, cancelled);

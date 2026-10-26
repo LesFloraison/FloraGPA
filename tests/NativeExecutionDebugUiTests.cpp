@@ -7,6 +7,7 @@
 #include "app/NativeExecutionDebugView.h"
 #include <QAction>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalSpy>
@@ -40,6 +41,7 @@ class NativeExecutionDebugUiTests final : public QObject {
         test::NativeDebugFixture f(true);
         auto selected = std::make_shared<NativeDebugSession>(f.job, f.result, f.artifacts);
         QVERIFY(view.finish(view.requestId(), selected));
+        QCOMPARE(view.exportReport().at("invocation"), f.result.at("data").at("invocation"));
         const auto initial = view.model()->registerValues();
         trigger(view, "nativeDebugNext");
         QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
@@ -52,6 +54,35 @@ class NativeExecutionDebugUiTests final : public QObject {
         QVERIFY(!view.model());
         QVERIFY(!view.finish(stale, selected));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), selected));
+    }
+    void vertexIndexSelection() {
+        NativeExecutionDebugView view;
+        view.setContext("vertex-index", 19);
+        auto stage = view.findChild<QComboBox *>("nativeDebugStage");
+        auto index = view.findChild<QLineEdit *>("nativeDebugIndex");
+        QVERIFY(stage && index);
+        stage->setCurrentIndex(1);
+        const auto before = view.requestId();
+        index->setText("0");
+        QVERIFY(view.requestId() != before);
+        QCOMPARE(view.request().at("index"), Json(0));
+        test::NativeDebugFixture f(true);
+        auto selected = std::make_shared<NativeDebugSession>(f.job, f.result, f.artifacts);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), selected));
+        for (const auto *bad : {"-1", "+1", "4294967296", " 1", "1 ", "x"}) {
+            index->setText(bad);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
+        }
+        index->setText("4294967295");
+        QCOMPARE(view.request().at("index"), Json(UINT32_MAX));
+        view.setWorkerBusy(true);
+        QVERIFY(!index->isEnabled());
+        view.setWorkerBusy(false);
+        index->clear();
+        QVERIFY(!view.request().contains("index"));
+        QVERIFY(view.finish(view.requestId(), selected));
+        stage->setCurrentIndex(0);
+        QVERIFY(!view.request().contains("index"));
     }
     void initTestCase() {
         QSettings::setDefaultFormat(QSettings::IniFormat);

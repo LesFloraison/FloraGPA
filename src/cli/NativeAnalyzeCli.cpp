@@ -40,9 +40,8 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"group", "Compute group X Y Z", "coordinates"});
         parser.addOption({"thread", "Compute local thread X Y Z", "coordinates"});
         parser.addOption({"vertex", "Draw-relative VS input reference before cut removal", "integer"});
-        parser.addOption({"index",
-                          "Expected effective vertex index; native index override remains unsupported",
-                          "integer"});
+        parser.addOption(
+            {"index", "Override the per-vertex attribute index after all draw offsets", "integer"});
         parser.addOption(
             {"history-scope", "Event snapshots: events; fragment history remains pending", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",

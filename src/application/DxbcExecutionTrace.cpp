@@ -190,11 +190,13 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
     if (vertex) {
         for (const auto *key : {"group", "thread", "group_size"})
             header.erase(key);
-        header.update({{"stage", "vs"},
-                       {"scope", "one_vertex"},
-                       {"execution_model", vertexExecutionModel},
-                       {"input_reference", selection.reference},
-                       {"instance", selection.instance}});
+        header.update(
+            {{"stage", "vs"},
+             {"scope", "one_vertex"},
+             {"execution_model", vertexExecutionModel},
+             {"input_reference", selection.reference},
+             {"instance", selection.instance},
+             {"index_override", selection.actualIndex ? Json(*selection.actualIndex) : Json(nullptr)}});
     }
     journal.write(header);
     const auto source = shaderSourceLines(snapshot.bytecode);

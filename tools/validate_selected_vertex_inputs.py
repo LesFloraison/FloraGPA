@@ -44,6 +44,8 @@ def main():
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--captures", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--identity-index-override", action="store_true",
+                        help="Exercise explicit index transport using the observed effective vertex index")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
     cases = [("GF2_Exilium_2026_03_03__00_19_35.gpa_frame", 113),
@@ -77,6 +79,8 @@ def main():
             command = [args.bin / "FloraGPA.Cli.exe", "analyze", args.captures / capture, "debug-vertex",
                        "--gpa-event", event, "--vertex", 0, "--instance", 0, "--out", job]
             command += ["--gpu-vendor", vendor] if vendor else ["--warp"]
+            if args.identity_index_override:
+                command += ["--index", before["invocation"]["vertex_index"]]
             cli = run(command, args.out / (stem + "-cli.log"))
             validation = args.out / (stem + "-validation.json")
             validate(job, report_path, args.bin / "FloraNativeDebugSessionProbe.exe", validation)

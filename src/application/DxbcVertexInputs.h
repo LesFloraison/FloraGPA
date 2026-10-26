@@ -40,6 +40,7 @@ struct VertexInputCapture {
 };
 struct VertexInputInvocation {
     uint32_t reference = 0, instance = 0;
+    std::optional<uint32_t> actualIndex;
 };
 // Copies supplied snapshots to a separate device on the exact reference
 // adapter, preserving native IA format conversion and draw offsets. Rows are

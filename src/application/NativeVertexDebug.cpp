@@ -7,7 +7,7 @@ namespace flora {
 nlohmann::json debugNativeVertex(Replay &replay, const QString &tracePath,
                                  const dxbc_exec::VertexTraceOptions &selection, uint64_t maxInputBytes,
                                  const CancelCheck &cancelled, const QString &shaderPath,
-                                 std::optional<uint32_t> expectedIndex) {
+                                 std::optional<uint32_t> actualIndex) {
     checkCancellation(cancelled);
     if (!shaderPath.isEmpty() &&
         (QFileInfo::exists(shaderPath) ||
@@ -15,13 +15,17 @@ nlohmann::json debugNativeVertex(Replay &replay, const QString &tracePath,
                  .absoluteFilePath()
                  .compare(QFileInfo(tracePath).absoluteFilePath(), Qt::CaseInsensitive) == 0))
         throw std::runtime_error("Native debug shader export requires a distinct new path");
-    auto snapshot = dxbc_exec::snapshotVertexInputs(replay, selection.selection, maxInputBytes, cancelled);
+    auto options = selection;
+    if (actualIndex) {
+        if (options.selection.actualIndex && options.selection.actualIndex != actualIndex)
+            throw std::runtime_error("Conflicting native vertex index overrides");
+        options.selection.actualIndex = actualIndex;
+    }
+    auto snapshot = dxbc_exec::snapshotVertexInputs(replay, options.selection, maxInputBytes, cancelled);
     auto &invocation = snapshot.invocation;
-    if (expectedIndex && invocation.at("vertex_index") != *expectedIndex)
-        throw std::runtime_error(
-            "Explicit index differs from the observed vertex; native index override is not implemented");
-    invocation["status"] = "eligible_in_observed_replay";
-    auto trace = dxbc_exec::exportVertexExecutionTrace(tracePath, snapshot.resources, selection, cancelled);
+    invocation["status"] =
+        options.selection.actualIndex ? "explicit_vertex_index_override" : "eligible_in_observed_replay";
+    auto trace = dxbc_exec::exportVertexExecutionTrace(tracePath, snapshot.resources, options, cancelled);
     const auto &resources = snapshot.resources;
     if (!shaderPath.isEmpty()) {
         checkCancellation(cancelled);
@@ -38,7 +42,7 @@ nlohmann::json debugNativeVertex(Replay &replay, const QString &tracePath,
             throw std::runtime_error("Cannot publish the effective native debug shader");
     }
     return {{"format", "flora.native-vertex-debug"},
-            {"version", 1},
+            {"version", 2},
             {"invocation", invocation},
             {"trace", trace},
             {"trace_format", "flora.dxbc-execution-trace/1"},

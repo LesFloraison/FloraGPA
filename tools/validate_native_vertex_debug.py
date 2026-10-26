@@ -21,13 +21,22 @@ def validate(directory, reference_path, session_probe, output):
     require(result["ok"] is True and result["request_id"] == job["request_id"], "Stale or incomplete job")
     require(job["action"] == result["context"]["action"] == "debug-vertex", "Wrong analysis action")
     data, invocation = result["data"], result["data"]["invocation"]
-    require(data["format"] == "flora.native-vertex-debug" and data["version"] == 1, "Wrong VS result format")
+    require(data["format"] == "flora.native-vertex-debug" and data["version"] in (1, 2), "Wrong VS result format")
     require(data["effective_frame_sha256"] == reference["frame_sha256"] and
             data["shader_sha256"] == reference["shader_sha256"], "Reference shader or frame differs")
     require(reference["status"] == "ok" and reference["execution_complete"] is True and
             reference["native_comparison"]["exact"] is True, "Reference did not match native shader execution")
-    require(invocation["status"] == "eligible_in_observed_replay" and
+    override = job["options"].get("index") if data["version"] == 2 else None
+    expected_status = "explicit_vertex_index_override" if override is not None else "eligible_in_observed_replay"
+    require(invocation["status"] == expected_status and
             invocation["predicate"]["allows_execution"] is True, "Missing invocation eligibility")
+    if data["version"] == 2:
+        require(invocation["index_override"] == override and
+                invocation["vertex_index_source"] == ("explicit_override" if override is not None else "draw"),
+                "Wrong VS index override provenance")
+        require(invocation["observed_vertex_index"] == reference["invocation"].get(
+                    "observed_vertex_index", reference["invocation"]["vertex_index"]),
+                "Observed vertex index differs from reference")
     for key in ("gpa_event", "gpa_shader", "input_reference", "instance", "vertex_index", "vertex_id",
                 "draw_parameters", "index_buffer", "index_offset", "index_format", "layout", "topology"):
         require(invocation[key] == reference["invocation"][key], "Invocation differs: " + key)
@@ -42,6 +51,7 @@ def validate(directory, reference_path, session_probe, output):
         require(header["stage"] == "vs" and header["scope"] == "one_vertex" and header["selected_lane"] == 0,
                 "Wrong trace invocation scope")
         require(not {"group", "thread", "group_size"}.intersection(header), "VS trace has compute coordinates")
+        require(header.get("index_override") == override, "VS journal index override differs")
         require(header["adapter"] == {"luid": reference["adapter_luid"], "vendor": reference["adapter_vendor"],
                                       "device": reference["adapter_device"]}, "Reference adapter differs")
         for raw in stream:

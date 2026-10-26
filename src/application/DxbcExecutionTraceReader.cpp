@@ -291,6 +291,8 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                         "Invalid vertex trace invocation");
                 number(row.at("input_reference"), UINT32_MAX);
                 number(row.at("instance"), UINT32_MAX);
+                if (row.contains("index_override") && !row.at("index_override").is_null())
+                    number(row.at("index_override"), UINT32_MAX);
                 s.lanes = 1;
                 s.selectedLane = 0;
             } else {

@@ -51,7 +51,7 @@ class NativeExecutionDebugView final : public QWidget {
     Json snapshot_;
     uint64_t operationRequest_ = 0;
     QAction *read_, *cancel_, *export_;
-    QLineEdit *group_, *thread_;
+    QLineEdit *group_, *thread_, *index_;
     QSpinBox *position_, *line_;
     QComboBox *stage_, *navigation_, *interpretation_, *files_;
     QToolBar *steps_;

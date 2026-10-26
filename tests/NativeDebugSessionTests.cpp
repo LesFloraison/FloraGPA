@@ -9,6 +9,69 @@ using Json = nlohmann::json;
 class NativeDebugSessionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void vertexIndexProvenance_data() {
+        QTest::addColumn<QString>("mutation");
+        for (const auto *name :
+             {"valid", "observed", "source", "status", "value", "request", "missing", "header",
+              "header-missing", "header-negative", "header-overflow", "header-boolean"})
+            QTest::newRow(name) << QString(name);
+    }
+    void vertexIndexProvenance() {
+        QFETCH(QString, mutation);
+        test::NativeDebugFixture f(true);
+        f.job["options"]["index"] = 4;
+        f.result["context"]["options"] = f.job["options"];
+        f.result["data"]["version"] = 2;
+        auto &invocation = f.result["data"]["invocation"];
+        invocation["index_override"] = 4;
+        invocation["vertex_index"] = 4;
+        invocation["observed_vertex_index"] = 0;
+        invocation["vertex_id"] = 0;
+        invocation["vertex_index_source"] = "explicit_override";
+        invocation["status"] = "explicit_vertex_index_override";
+        if (mutation == "observed")
+            invocation["observed_vertex_index"] = 1;
+        if (mutation == "source")
+            invocation["vertex_index_source"] = "draw";
+        if (mutation == "status")
+            invocation["status"] = "eligible_in_observed_replay";
+        if (mutation == "value")
+            invocation["index_override"] = 3;
+        if (mutation == "missing")
+            invocation.erase("index_override");
+        if (mutation == "request") {
+            f.job["options"].erase("index");
+            f.result["context"]["options"] = f.job["options"];
+        }
+        QByteArray raw;
+        for (const auto &line : f.artifacts["trace.jsonl"].split('\n')) {
+            if (line.isEmpty())
+                continue;
+            auto row = Json::parse(line.toStdString());
+            if (row.at("record") == "header") {
+                row["index_override"] = 4;
+                if (mutation == "header")
+                    row["index_override"] = 3;
+                if (mutation == "header-missing")
+                    row.erase("index_override");
+                if (mutation == "header-negative")
+                    row["index_override"] = -1;
+                if (mutation == "header-overflow")
+                    row["index_override"] = uint64_t(UINT32_MAX) + 1;
+                if (mutation == "header-boolean")
+                    row["index_override"] = true;
+            }
+            raw += QByteArray::fromStdString(row.dump()) + '\n';
+        }
+        f.artifacts["trace.jsonl"] = raw;
+        f.result["data"]["trace"]["bytes"] = raw.size();
+        f.seal();
+        if (mutation == "valid") {
+            NativeDebugSession session(f.job, f.result, f.artifacts);
+            QCOMPARE(session.job().at("options").at("index"), Json(4));
+        } else
+            QVERIFY_THROWS_EXCEPTION(std::exception, NativeDebugSession(f.job, f.result, f.artifacts));
+    }
     void vertexTraceBoundaries_data() {
         QTest::addColumn<QString>("mutation");
         for (const auto *name : {"group", "lane", "scope", "model", "discard", "shared", "release", "sync"})

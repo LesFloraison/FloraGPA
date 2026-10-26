@@ -40,6 +40,9 @@ struct VertexInputSelection {
     // Zero-based draw input reference, before removing cut indices. Instance
     // is relative to the draw, independently of StartInstanceLocation.
     uint32_t reference = 0, instance = 0;
+    // Overrides only the effective per-vertex attribute address. System IDs
+    // and per-instance inputs retain the selected original draw identity.
+    std::optional<uint32_t> actualIndex;
 };
 struct VertexInputSnapshot {
     InputSnapshot resources;

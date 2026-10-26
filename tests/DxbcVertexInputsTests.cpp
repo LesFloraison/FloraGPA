@@ -155,73 +155,93 @@ class DxbcVertexInputsTests final : public QObject {
             const std::string edited = "float4 main(float4 a:DATA,uint v:SV_VertexID,uint i:SV_InstanceID)"
                                        ":SV_Position{return a+float4(v,i,0,0)*2;}";
             for (bool indirect : {false, true}) {
-                QTemporaryDir dir;
-                const auto capture = dir.filePath("frame.gpa_frame");
-                frameFixture(indirect, code).save(capture);
-                Frame frame(capture.toStdWString());
-                Experiment experiment(frame);
-                experiment.setShader(frame, 30, compile(edited), edited, "main");
-                experiment.setBuffer(frame, 1000, 9010, 32, testing::statePack(100.f));
-                experiment.save(dir.filePath("experiment.json"));
-                Json selection{{"gpa_event", 1000}, {"vertex", 3}, {"instance", 1}};
-                if (vendor)
-                    selection["gpu_vendor"] = vendor;
-                else
-                    selection["warp"] = true;
-                const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
-                auto job = prepareNativeAnalysisJob(capture, "debug-vertex", dir.filePath("worker"), worker,
-                                                    selection, dir.filePath("experiment.json"));
-                const auto result = Json::parse(load(runNativeAnalysisJob(job, worker, 30)).toStdString());
-                NativeArtifactBytes artifacts;
-                for (const auto *name : {"debug.json", "trace.jsonl", "shader.dxbc"})
-                    artifacts[name] = load(dir.filePath("worker/") + name);
-                NativeDebugSession session(job, result, artifacts);
-                QCOMPARE(result.at("data").at("invocation").at("input_reference"), Json(3));
-                QCOMPARE(result.at("data").at("invocation").at("instance"), Json(1));
-                auto &model = session.model();
-                const auto initial = model.registerValues();
-                model.move(model.size());
-                bool output = false;
-                for (const auto &r : model.registerValues())
-                    if (r.at("name") == "o0") {
-                        const std::array expected{102.f, 14.f, 22.f, 32.f};
-                        for (unsigned c = 0; c < 4; ++c)
-                            QCOMPARE(r.at("bits")[c], Json(std::bit_cast<uint32_t>(expected[c])));
-                        QCOMPARE(r.at("valid_components"), Json(15));
-                        output = true;
+                for (int overrideIndex : {-1, 0, 4}) {
+                    QTemporaryDir dir;
+                    const auto capture = dir.filePath("frame.gpa_frame");
+                    frameFixture(indirect, code).save(capture);
+                    Frame frame(capture.toStdWString());
+                    Experiment experiment(frame);
+                    experiment.setShader(frame, 30, compile(edited), edited, "main");
+                    experiment.setBuffer(frame, 1000, 9010, 32, testing::statePack(100.f));
+                    experiment.save(dir.filePath("experiment.json"));
+                    Json selection{{"gpa_event", 1000}, {"vertex", 3}, {"instance", 1}};
+                    if (overrideIndex >= 0)
+                        selection["index"] = overrideIndex;
+                    if (vendor)
+                        selection["gpu_vendor"] = vendor;
+                    else
+                        selection["warp"] = true;
+                    const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
+                    auto job = prepareNativeAnalysisJob(capture, "debug-vertex", dir.filePath("worker"),
+                                                        worker, selection, dir.filePath("experiment.json"));
+                    const auto result =
+                        Json::parse(load(runNativeAnalysisJob(job, worker, 30)).toStdString());
+                    NativeArtifactBytes artifacts;
+                    for (const auto *name : {"debug.json", "trace.jsonl", "shader.dxbc"})
+                        artifacts[name] = load(dir.filePath("worker/") + name);
+                    NativeDebugSession session(job, result, artifacts);
+                    QCOMPARE(result.at("data").at("invocation").at("input_reference"), Json(3));
+                    QCOMPARE(result.at("data").at("invocation").at("instance"), Json(1));
+                    const auto &invocation = result.at("data").at("invocation");
+                    QCOMPARE(result.at("data").at("version"), Json(2));
+                    QCOMPARE(invocation.at("observed_vertex_index"), Json(2));
+                    QCOMPARE(invocation.at("vertex_index"), Json(overrideIndex < 0 ? 2 : overrideIndex));
+                    QCOMPARE(invocation.at("vertex_id"), Json(1));
+                    QCOMPARE(invocation.at("status"),
+                             Json(overrideIndex < 0 ? "eligible_in_observed_replay"
+                                                    : "explicit_vertex_index_override"));
+                    auto &model = session.model();
+                    const auto initial = model.registerValues();
+                    model.move(model.size());
+                    bool output = false;
+                    for (const auto &r : model.registerValues())
+                        if (r.at("name") == "o0") {
+                            const auto expected =
+                                overrideIndex < 0
+                                    ? std::array{102.f, 14.f, 22.f, 32.f}
+                                    : std::array{float(overrideIndex + 2), float(overrideIndex + 12),
+                                                 float(overrideIndex + 20), float(overrideIndex + 30)};
+                            for (unsigned c = 0; c < 4; ++c)
+                                QCOMPARE(r.at("bits")[c], Json(std::bit_cast<uint32_t>(expected[c])));
+                            QCOMPARE(r.at("valid_components"), Json(15));
+                            output = true;
+                        }
+                    QVERIFY(output);
+                    model.move(0);
+                    QCOMPARE(model.registerValues(), initial);
+                    for (const auto &module : result.at("execution").at("loaded_modules")) {
+                        const auto path = QString::fromStdString(module.get<std::string>()).toLower();
+                        QVERIFY(!path.contains("renderdoc") && !path.contains("intelswtools\\gpa\\"));
                     }
-                QVERIFY(output);
-                model.move(0);
-                QCOMPARE(model.registerValues(), initial);
-                for (const auto &module : result.at("execution").at("loaded_modules")) {
-                    const auto path = QString::fromStdString(module.get<std::string>()).toLower();
-                    QVERIFY(!path.contains("renderdoc") && !path.contains("intelswtools\\gpa\\"));
+                    QProcess cli;
+                    QStringList args{"analyze",
+                                     capture,
+                                     "debug-vertex",
+                                     "--gpa-event",
+                                     "1000",
+                                     "--vertex",
+                                     "3",
+                                     "--instance",
+                                     "1",
+                                     "--experiment",
+                                     dir.filePath("experiment.json"),
+                                     "--out",
+                                     dir.filePath("cli")};
+                    if (vendor)
+                        args << "--gpu-vendor" << QString::number(vendor);
+                    else
+                        args << "--warp";
+                    if (overrideIndex >= 0)
+                        args << "--index" << QString::number(overrideIndex);
+                    cli.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", args);
+                    QVERIFY(cli.waitForFinished(30000));
+                    QCOMPARE(cli.exitCode(), 0);
+                    const auto cliResult = Json::parse(load(dir.filePath("cli/result.json")).toStdString());
+                    QCOMPARE(cliResult.at("data").at("shader_sha256"), result.at("data").at("shader_sha256"));
+                    QCOMPARE(cliResult.at("data").at("trace").at("steps"),
+                             result.at("data").at("trace").at("steps"));
+                    QCOMPARE(cliResult.at("data").at("invocation"), invocation);
                 }
-                QProcess cli;
-                QStringList args{"analyze",
-                                 capture,
-                                 "debug-vertex",
-                                 "--gpa-event",
-                                 "1000",
-                                 "--vertex",
-                                 "3",
-                                 "--instance",
-                                 "1",
-                                 "--experiment",
-                                 dir.filePath("experiment.json"),
-                                 "--out",
-                                 dir.filePath("cli")};
-                if (vendor)
-                    args << "--gpu-vendor" << QString::number(vendor);
-                else
-                    args << "--warp";
-                cli.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", args);
-                QVERIFY(cli.waitForFinished(30000));
-                QCOMPARE(cli.exitCode(), 0);
-                const auto cliResult = Json::parse(load(dir.filePath("cli/result.json")).toStdString());
-                QCOMPARE(cliResult.at("data").at("shader_sha256"), result.at("data").at("shader_sha256"));
-                QCOMPARE(cliResult.at("data").at("trace").at("steps"),
-                         result.at("data").at("trace").at("steps"));
             }
         } catch (const std::exception &e) {
             QFAIL(e.what());
@@ -248,6 +268,8 @@ class DxbcVertexInputsTests final : public QObject {
                 options.maxSteps = 1;
             if (mode == 3)
                 options.maxBytes = 10;
+            if (mode == 4)
+                options.selection.actualIndex = 2;
             const auto path = dir.filePath(QString("failure%1.jsonl").arg(mode));
             QVERIFY_THROWS_EXCEPTION(
                 std::runtime_error,
@@ -526,6 +548,60 @@ class DxbcVertexInputsTests final : public QObject {
     }
     void selectedLargeDraw_data() { adapters(); }
     void selectedBoundaries_data() { adapters(); }
+    void indexOverride_data() { adapters(); }
+    void indexOverride() {
+        QFETCH(uint32_t, vendor);
+        try {
+            Device device(vendor);
+            const auto code = compile("uint4 main(uint4 a:DATA,uint4 b:INSTANCE,uint v:SV_VertexID,uint "
+                                      "i:SV_InstanceID):VALUE{return a^b^v^i;}");
+            const std::vector<VertexInputElement> layout{
+                {"DATA", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 0},
+                {"INSTANCE", 0, DXGI_FORMAT_R32G32B32A32_UINT, 1, 0, 1, 2}};
+            std::vector<uint8_t> bytes;
+            for (unsigned v = 0; v < 12; ++v)
+                append(bytes, words(v, 0));
+            std::vector<uint8_t> indices;
+            append(indices, uint16_t(4));
+            append(indices, uint16_t(2));
+            for (const bool indexed : {false, true}) {
+                VertexInputDraw draw;
+                draw.count = 2;
+                draw.instances = 4;
+                draw.startInstance = 1;
+                if (indexed) {
+                    draw.indexFormat = DXGI_FORMAT_R16_UINT;
+                    draw.indices = indices;
+                    draw.baseVertex = -1;
+                } else
+                    draw.start = 3;
+                for (const uint32_t actual : {0u, 7u, UINT32_MAX}) {
+                    const auto result =
+                        captureVertexInputs(device.device.Get(), !vendor, code, layout,
+                                            {{0, {bytes, 16, 0}}, {1, {bytes, 16, 0}}}, draw, 65536, {}, 5000,
+                                            VertexInputInvocation{1, 3, actual});
+                    QCOMPARE(result.rows.size(), size_t(1));
+                    for (const auto &s : signature(code)) {
+                        const auto value = input(result.rows.front(), s);
+                        if (s.SystemValueType == D3D_NAME_VERTEX_ID ||
+                            s.SystemValueType == D3D_NAME_INSTANCE_ID) {
+                            QCOMPARE(value.bits[std::countr_zero(unsigned(s.Mask))],
+                                     s.SystemValueType == D3D_NAME_VERTEX_ID ? (indexed ? 2u : 1u) : 3u);
+                        } else {
+                            QCOMPARE(value.valid, uint8_t(15));
+                            const bool instance = s.Register == signature(code).at(1).Register;
+                            const auto expected = instance               ? words(2, 0)
+                                                  : actual == UINT32_MAX ? std::array<uint32_t, 4>{}
+                                                                         : words(actual, 0);
+                            QCOMPARE(value.bits, expected);
+                        }
+                    }
+                }
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
     void selectedBoundaries() {
         QFETCH(uint32_t, vendor);
         try {
