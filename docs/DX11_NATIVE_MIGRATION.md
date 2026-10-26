@@ -708,3 +708,16 @@ screen-coordinate alignment as a contract. This establishes a transport method,
 not captured PS inputs, original fragment identity or completed pixel debugging.
 See `research/DX11_PIXEL_QUAD_TRANSPORT_RESEARCH.md` for reconstruction, scope,
 the retained signed-zero diagnostic failure and the next integration gates.
+
+## Selected-pixel native acquisition continuation
+
+Private native raster acquisition now joins the validated geometry bridge and
+original PS input declarations. It retains target/view/sampling state, owns its
+record UAV independently of application bindings, and reports empty or ambiguous
+pre-depth observations explicitly. The input suite passes 125 checks, including
+cancellation/retry and array-view contracts; 1,190 quad/sampling regressions also
+pass. Nine real GF2/BF1/Helldivers capture/adapter runs observe 33 input registers.
+See `research/DX11_PIXEL_RASTER_INPUTS.md` for exact comparisons and reproducible
+evidence. Original fragment eligibility, cross-register ambiguous-record identity,
+input-free PS invocation selection, full history/debugger parity and standalone
+RenderDoc removal remain acceptance gates.

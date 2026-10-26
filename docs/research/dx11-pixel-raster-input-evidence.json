@@ -1,0 +1,887 @@
+{
+  "schema": 1,
+  "checkpoint": "private-selected-pixel-raster-inputs",
+  "base_commit": "ae6a132ff6d9df39fcf5004e143327cc3866cef4",
+  "implementation_commit": "7d86701be201d667f39b8e662738c9a19bfdce57",
+  "created_utc": "2026-10-26T21:06:41.723065+00:00",
+  "complete_release_acceptance": false,
+  "tests": {
+    "dxbc_pixel_inputs": 125,
+    "dxbc_pixel_quad": 1022,
+    "dxbc_pixel_sampling": 168,
+    "failed": 0,
+    "skipped": 0
+  },
+  "validations": {
+    "input": {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-input-validation.json",
+        "bytes": 850975,
+        "sha256": "4f4c1806ce1bdfaf2a56b14974e9f3e635d26b1a401bdc7a4e54ab64b90af022"
+      },
+      "summary": {
+        "schema": 1,
+        "direct_components": 129600,
+        "neighbor_components": 518400,
+        "negative_controls": {
+          "reference.bin": "Direct input bits differ",
+          "oracle-0.bin": "Independent quad input bits differ",
+          "target-0.bin": "Direct input bits differ",
+          "target-4.bin": "Invalid pixel/role",
+          "target-5.bin": "Sample identity differs",
+          "target-7.bin": "Invalid orientation derivatives"
+        },
+        "cases": 102
+      }
+    },
+    "geometry": {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-geometry-validation.json",
+        "bytes": 1002987,
+        "sha256": "ea9ec778b7943a7a3301ed2960b9c2f47af39f5fdf178ab24a542b7ec2e579f3"
+      },
+      "summary": {
+        "schema": 1,
+        "components": 2907,
+        "gpu_roundtrip_components": 675,
+        "negative_controls": {
+          "source": "Bridge changed source bits",
+          "payload": "Bridge changed source bits",
+          "gpu": "GPU roundtrip changed source bits",
+          "offset": "Incorrect source byte offset",
+          "component": "Invalid component remapping",
+          "ordinal": "Invalid source geometry size/selection"
+        }
+      }
+    },
+    "record": {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-record-validation.json",
+        "bytes": 1004563,
+        "sha256": "8355d53131d613624f8bbd77cc8385e67a2bac7ff6f3dd19fab4446a721545cd"
+      },
+      "summary": {
+        "schema": 1,
+        "synthetic_cases": 102,
+        "real_registers": 33,
+        "real_capture_adapters": 9,
+        "records": 135,
+        "exact_mrt_components": 3264,
+        "negative_controls": {
+          "overflow": "Record count/overflow differs",
+          "reserved_header": "Reserved header was written",
+          "pixel": "Invalid pixel/quad role",
+          "orientation": "Invalid quad orientation",
+          "layer": "Invalid record layer/sample",
+          "unused_record": "Unallocated record storage was written",
+          "input_bits": "Private record differs from full MRT observation 0"
+        }
+      }
+    }
+  },
+  "verified_artifact_files": 4311,
+  "real_runs": [
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-bf1-0/report.json",
+        "bytes": 2596,
+        "sha256": "28f792b456adc3ec5e5e0d6e3bdab649a12b2cd8ddbc67436eead7cd0edb1457"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "selection": [
+        751,
+        433,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 1804,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 4,
+          "roundtrip_components": 12,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-0/input-1/records.json",
+          "bytes": 4339,
+          "sha256": "7b5feb8c2e8a7e3be302e17bcb969fcc0d317e51c9509eeb12de3b50cc6b9948"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-0/input-2/records.json",
+          "bytes": 4339,
+          "sha256": "2b14910b334dcf248b012253dd55342beb737e1962ff75ace2f986337e029cef"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-0/input-3/records.json",
+          "bytes": 4339,
+          "sha256": "2b24ae63838cdbcdf7d96b8932443aaebf5f0b7bf942c98f85c172732fcd82c1"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-0/input-4/records.json",
+          "bytes": 3537,
+          "sha256": "5d45fbe13a0d016f29ae284a88bcea0a2552fb2591d6d8e8834aeed70847b20a"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902/report.json",
+        "bytes": 2599,
+        "sha256": "930ce13f73125a39d8fda1807349636f4d058df7551da1e83cac31d0a51c6214"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "selection": [
+        751,
+        433,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 2087,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 4,
+          "roundtrip_components": 12,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902/input-1/records.json",
+          "bytes": 4343,
+          "sha256": "f9efb139a446e6050f09afdc268fd19daa83a47e146519952d37a9746a3c2ba6"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902/input-2/records.json",
+          "bytes": 4343,
+          "sha256": "67dfb0f144cf9d43ae81cd1059d5c808414e65e9d6e8e5c69aebe2afe846cc2e"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902/input-3/records.json",
+          "bytes": 4343,
+          "sha256": "a5ae50e701eb1d125e61c600ec700f9d5bbfa7d1d31dccd5973687add20031c1"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902/input-4/records.json",
+          "bytes": 3541,
+          "sha256": "da48c20bde6ff55a5088cdcf05fd1f46dc52b52cca41e97e55c5e244a3b319db"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318/report.json",
+        "bytes": 2598,
+        "sha256": "c9833e76ffab03a044be4ecc8d06f9828290aa7c7726868f307bf0edd05579ae"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "selection": [
+        751,
+        433,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 1744,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 4,
+          "roundtrip_components": 12,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318/input-1/records.json",
+          "bytes": 4342,
+          "sha256": "bda13f137f6682302806b021004e648463d8b81a890360da17997085739b912e"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318/input-2/records.json",
+          "bytes": 4342,
+          "sha256": "1a4fccd11ecabd77e571c9d0a8e6f9bcde014bc9497cf25593d0fd27fb0aa848"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318/input-3/records.json",
+          "bytes": 4342,
+          "sha256": "6c62b824ece69d15d356137f8f056256f2cd67f39c291e11c6141a2f7c27003f"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318/input-4/records.json",
+          "bytes": 3540,
+          "sha256": "bcd13a82b4a71201817b80237aa2c71a49ed49208b3bb2e1912b845d87a442a6"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-gf2-0/report.json",
+        "bytes": 1589,
+        "sha256": "94fd934c57253d01a476ab4d551dd49886307f88bb0aa80189ca57ce0f86d3fb"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "selection": [
+        799,
+        480,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 562,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 18,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-0/input-1/records.json",
+          "bytes": 3448,
+          "sha256": "89451f768635442a93080d1e9a3fe5a0881491137712b0fa8dad2f2d15d53a44"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-0/input-2/records.json",
+          "bytes": 3181,
+          "sha256": "fda9a6fd5edb65c89348143f588c3c40e4b16ebbc8ddd9c4f0f2f6848f22993a"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-0/input-3/records.json",
+          "bytes": 3450,
+          "sha256": "6f7bd25c577429ccbca0ba44402ad2935bf5cbf5763eb53fde20bdb79249cf5d"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-gf2-32902/report.json",
+        "bytes": 1592,
+        "sha256": "2398bfedf790707be7b175460dd41d89036f21019d90c83b6f6b9db7ff9e8eeb"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "selection": [
+        799,
+        480,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 929,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 18,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-32902/input-1/records.json",
+          "bytes": 3452,
+          "sha256": "4fd726071e80461f385eddd1d023ed2d08c0105456a8effb9da0c7cec0656662"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-32902/input-2/records.json",
+          "bytes": 3185,
+          "sha256": "0beee99b66e79a40e1de55b2a50a7bcda9a2595f110089931897767426663ffa"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-32902/input-3/records.json",
+          "bytes": 3454,
+          "sha256": "1aa9ea0a620a59fea02d4070986d4300e0135467d1d0effd541d1e6ecb6c352a"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-gf2-4318/report.json",
+        "bytes": 1591,
+        "sha256": "6d6c237bcfe1c77a655a0e9cabe9dbeea565cc7e82dc4c6a9eb89a28b69a8f62"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "selection": [
+        799,
+        480,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 925,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 18,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 24,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-4318/input-1/records.json",
+          "bytes": 3451,
+          "sha256": "e33dd7ee192aa637de9c78e40450cb48e38d4bcdf5111778608e5d3dfe21e244"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-4318/input-2/records.json",
+          "bytes": 3184,
+          "sha256": "16f271676e268c8ccc9b8cd5a50357176efc249af0232f21dcad2a0050011cd1"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-gf2-4318/input-3/records.json",
+          "bytes": 3453,
+          "sha256": "c93fd65825a6792a6f4f1705019b9e6b4b4db2847811fe8ba088a8f2f7ab8a94"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-hd-0/report.json",
+        "bytes": 1695,
+        "sha256": "bfae9085af63ff351d2ce503fd7368edfc966e98254733032609035c2e74bda3"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "selection": [
+        168,
+        183,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 1541,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 0,
+          "roundtrip_components": 12,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 21,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 18,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-0/input-0/records.json",
+          "bytes": 2635,
+          "sha256": "9d79c8ae6990b207c56279d4e95d83e5595974aca5ec390b0431ea1800331858"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-0/input-1/records.json",
+          "bytes": 3437,
+          "sha256": "5154a3ab4b3ed1bd8a08e82b8fa4042940e05103e1f0d7a6fb7343d192caf07f"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-0/input-2/records.json",
+          "bytes": 3299,
+          "sha256": "6028a0227325fc5f927935b2c41df76328a928f492e29af54eb446c6905c5bf8"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-0/input-3/records.json",
+          "bytes": 3167,
+          "sha256": "029a55bb5e59bdb22e3f229b990b8151102fd315b78442c3ca9b7e8167a0b25b"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-hd-32902/report.json",
+        "bytes": 1698,
+        "sha256": "0861e99fdac3bf5c02493320862e87c1e43bb52592a3ae67d310d1405e5ebbb6"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "selection": [
+        168,
+        183,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 2323,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 0,
+          "roundtrip_components": 12,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 21,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 18,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-32902/input-0/records.json",
+          "bytes": 2639,
+          "sha256": "34d8db41d7d3e6d4acbe960154ec441e047e8b714dd868dd4b1e756b1148ed42"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-32902/input-1/records.json",
+          "bytes": 3441,
+          "sha256": "302467003753593fb6bc53d3dbee77a115b1fc679bd8ee4167cf1d7fcf7abc6e"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-32902/input-2/records.json",
+          "bytes": 3303,
+          "sha256": "563b4d87fa7f0538f98a44725456534d7904798b7bc1e077ebf5a48575654c84"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-32902/input-3/records.json",
+          "bytes": 3171,
+          "sha256": "bc9edafd4efdcc8315314f3fe2a9f2ee744371e79b51b850460693134bc8ee79"
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-raster-real-hd-4318/report.json",
+        "bytes": 1697,
+        "sha256": "48031e01ba3a2e1fe3478f4a690ff82eacfddcc251e13dab214f32af3a7fec6d"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "selection": [
+        168,
+        183,
+        0,
+        0
+      ],
+      "selection_source": "projected_primitive_centroid_candidate",
+      "elapsed_ms": 1737,
+      "cases": [
+        {
+          "input_records": 1,
+          "register": 0,
+          "roundtrip_components": 12,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 1,
+          "roundtrip_components": 24,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 2,
+          "roundtrip_components": 21,
+          "status": "ok"
+        },
+        {
+          "input_records": 1,
+          "register": 3,
+          "roundtrip_components": 18,
+          "status": "ok"
+        }
+      ],
+      "records": [
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-4318/input-0/records.json",
+          "bytes": 2638,
+          "sha256": "5b8a6f623508594eeeeea46dfe680a3a7de4b1e9e1a1ab1e95007cb77d2602a2"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-4318/input-1/records.json",
+          "bytes": 3440,
+          "sha256": "cd7aeb3a9e030b2ffae2f249f5d734995f93ec34c66a7e6fa3f157f1d4fa94e7"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-4318/input-2/records.json",
+          "bytes": 3302,
+          "sha256": "a4a3f85ee269a3e61d093b1e9a6d9773d74ef76d962827637b06c7d2ba14fc62"
+        },
+        {
+          "path": "artifacts/dx11-native/pixel-raster-real-hd-4318/input-3/records.json",
+          "bytes": 3170,
+          "sha256": "0feb0c9b34bedfe2f10fd95a7f20b5099ce10f91e738230f683759ff046322d4"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 119198,
+      "sha256": "32f41e097d398472e4111739a609117143dd1fb85e81a7e24d37e5dcd0cccfea"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.cpp",
+      "bytes": 19424,
+      "sha256": "d868455b840274e90012e1ff90ceb19d14a0bed717a3067d8ae2a13ba32755b1"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.h",
+      "bytes": 1962,
+      "sha256": "389c120f4b111429c4bddf537def3ab4c7f64346565473241ba575d8cdc3f439"
+    },
+    {
+      "path": "src/application/DxbcPixelRaster.cpp",
+      "bytes": 28237,
+      "sha256": "8ab5bd168ec5977d4ec10b2eaee1bf44eb7d691ae55c9e303da8359b34245adf"
+    },
+    {
+      "path": "src/application/DxbcPixelRaster.h",
+      "bytes": 2003,
+      "sha256": "aca28704c7771fa438c69c011f0c47af1f002a196e67a4c2bf586390b88f473e"
+    },
+    {
+      "path": "tests/DxbcPixelInputsTests.cpp",
+      "bytes": 48784,
+      "sha256": "e2cc8b23f46e518a0c8918ec25e33aff75e97c43a5951b10652cb31c034bbac4"
+    },
+    {
+      "path": "tools/probe_dxbc_pixel_geometry.cpp",
+      "bytes": 17936,
+      "sha256": "c64fc9753b2bdbd5f2f71bac0760238e08a3cba7f0d3d029c6f3f0ee730fa423"
+    },
+    {
+      "path": "tools/validate_pixel_raster.py",
+      "bytes": 7830,
+      "sha256": "0f9ca74694db7857edb8f16a81614c4a35033c78ec9f1039d14a3ecc6c9e9c17"
+    },
+    {
+      "path": "tools/validate_pixel_input_capture.py",
+      "bytes": 5897,
+      "sha256": "7e04e6b9079a814f6863bb18c96fe1681ffb4574e028aaa59e7bf2efef890b2c"
+    },
+    {
+      "path": "tools/validate_pixel_geometry.py",
+      "bytes": 7862,
+      "sha256": "3939840f5081a8be2a216ed01f7654463a762154a730a064e12d104aaf57a59d"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelInputsTests.exe",
+      "bytes": 500224,
+      "sha256": "53245706acee4269bf69ecfc57bce86421816a5f543d74c727407a9a8fca0983"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 1925120,
+      "sha256": "6943ab2541f051a175160628758d5d64e943bcac7556445037c9c24d91090329"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelQuadTests.exe",
+      "bytes": 540672,
+      "sha256": "8b03e1ebf2e02acd814d422a1a59cd1858150a71e8b00426e9a1dc2db504479c"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 546304,
+      "sha256": "80bd0d5f14c49e142b1a0fad36e089c1fb83f8d2dd07a8a1f613b7e6259885e0"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4962816,
+      "sha256": "9b37fb9cfa09e152907dd9b636f92501788882d933df631741e9f3285b976413"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5530112,
+      "sha256": "30e5547e36020e8cd46185fe0033c9d92d2f0b325e4b7a1e372675b3ca57871d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5530112,
+      "sha256": "714bc43a53af49e4627c99db77df7cbfc85de9c79f24607c1f98911a9a3ceb10"
+    }
+  ],
+  "logs": [
+    {
+      "path": "artifacts/dx11-native/pixel-raster-contract-build.txt",
+      "bytes": 1096,
+      "sha256": "ec97d20dfdd7fc490d5194fa25c6b6019c3c222e44d3bf4b691f12f6b9a1df62"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-contract-test.txt",
+      "bytes": 740,
+      "sha256": "a4c7c44fe6f4c673b23abde424932d507c587d699e398e5c34fc6712f45c57d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-final-build.txt",
+      "bytes": 6267,
+      "sha256": "260c24e79658a6e2a3bcd5927f95ccd10a4a771c31216536c3da6960b148bdbf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-final-tests.txt",
+      "bytes": 7423,
+      "sha256": "537d201cd1446ea1fc5ed6a1fdec8f845f9cb03f8574195e09ec25156e25d0c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-first-build.txt",
+      "bytes": 1687,
+      "sha256": "49ea7e4553512b9f8fce4c6c2374e439341d5dcaab4c6c51f02eb16cad5bb00c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-first-test.txt",
+      "bytes": 594,
+      "sha256": "2f488a406d8e7d337b29e0d431559ea020963e7268313760aea9b882ea89268a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-matrix-first.txt",
+      "bytes": 7266,
+      "sha256": "7f6bd76ef6093fa39a72c2d4b097f73760c75839b7ca56012e585ab659812f32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-probe-build.txt",
+      "bytes": 2034,
+      "sha256": "8870332a65e751ef95d085925516cffc8638f13a0733597c593d6b802f7ce2b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-quad-regression.txt",
+      "bytes": 420876,
+      "sha256": "64037ad8e6a24f6e05709caaa3720a606db5ca1b129465c302d118976ac6fe6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-bf1-0.txt",
+      "bytes": 2778,
+      "sha256": "72c287916cf9162dc3f1702f33652ca52ac53899904e228f54072e3b2fde34ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-bf1-32902.txt",
+      "bytes": 2781,
+      "sha256": "04888fa7e61ac7d37ce1f24514ea8e8fcaa0fe48d72a0828edbb2ad4f52ac4cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-bf1-4318.txt",
+      "bytes": 2780,
+      "sha256": "82974d2ae3d480528c1073fb2f8c0d603e837ae4bb8e9130c127f0973169cd8f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-gf2-0.txt",
+      "bytes": 1675,
+      "sha256": "da047249a1c8667c2270dbf26bb4733d1d83569fc0bf1f369561b4089d6d2005"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-gf2-32902.txt",
+      "bytes": 1678,
+      "sha256": "d4698fd604f7f5250c9aa1df1d5b3ebe56e963c3c34c91753e9ac9b7103c483b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-gf2-4318.txt",
+      "bytes": 1677,
+      "sha256": "b60732d227a4c6d9fff599feda804eafc688596d57282db17aac8b69b773a6ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-hd-0.txt",
+      "bytes": 1787,
+      "sha256": "045ad54279f7df7150b603d2bda0cdbe4770a9f4e66ffec159e52b1ad7ce5372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-hd-32902.txt",
+      "bytes": 1790,
+      "sha256": "72d49b33b24335e73e9f8a7d95b7bde3ca008db00378a4377275aef0bb2eed78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-real-hd-4318.txt",
+      "bytes": 1789,
+      "sha256": "cae98f096ffb47d688c4a66804b4309fa51d0884dbc5201c4c8423491b7b6d60"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-regression-build.txt",
+      "bytes": 2196,
+      "sha256": "b3a15cb861b911b6773660799cd6c78d45b224771e48e63a9baa00a4ac6f2021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-sampling-regression.txt",
+      "bytes": 79899,
+      "sha256": "a312ed97dfdab95283672557f3580d3c2e2cdc23804ac4b3de19da3a88061afd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-uniform-build.txt",
+      "bytes": 995,
+      "sha256": "29d9d7b036c6bf4b0363616283e69588efd672aef4992111d09c21843c1ce2fb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-uniform-qt.txt",
+      "bytes": 465,
+      "sha256": "d8424c1d414d099b6b06e89eccb2c0224df16eeeb7ce0306a548a14b5ce8a021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-raster-uniform-test.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limits": [
+    "Records are isolated-primitive pre-depth inputs, not original fragment eligibility or ordering.",
+    "Real acquisition is observed on nine capture/adapter pairs; independent original-PS input equivalence is established only by synthetic GPU fixtures.",
+    "No-input PS invocation acquisition, ambiguous cross-register matching, broad raster semantics and native pixel job/UI integration remain open.",
+    "Full Pixel History, GPA debugger-engine recovery, dependency deletion and standalone package acceptance remain open."
+  ],
+  "retained_development_failure": "pixel-raster-first-test.txt rejects derivatives sunk into a conditional branch; later accepted variants retain the check.",
+  "empty_stdout_log": "pixel-raster-uniform-test.txt contains no Qt logger output and is excluded as test evidence; pixel-raster-uniform-qt.txt records the explicit Qt file logger result."
+}

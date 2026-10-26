@@ -1015,3 +1015,20 @@ components and rejects six further corruptions. GUI, CLI and Worker build. See
 `research/DX11_PIXEL_GEOMETRY_BRIDGE.md` and its evidence ledger. Actual fragment
 selection, complete rasterization scope, helper provenance, native pixel debugging,
 full history and standalone dependency removal remain open.
+
+## Private selected-pixel raster input checkpoint
+
+`DxbcPixelRaster` now captures selected pixel/sample/layer input records through
+a private same-adapter device and final-geometry bridge. Native target-view and
+raster state are preserved, and an intersected private scissor bounds work
+without translating viewport coordinates. The observation PS owns its private
+UAV; application UAV capacity does not constrain this path. The input suite
+passes 125 checks, with 102 GPU fixtures, 3,264 exact record/MRT components and
+unchanged 129,600 direct plus 518,400 quad component assertions. Quad/sampling
+regressions add 1,190 passing checks. Nine real capture/adapter probes observe
+33 declared input registers; seven additional evidence corruptions are rejected.
+GUI, CLI and Worker Release targets build. See
+`research/DX11_PIXEL_RASTER_INPUTS.md` and its evidence ledger. These are isolated
+pre-depth observations, not complete original fragment qualification or native
+pixel-debugger integration. Full history, GPA debugger-engine recovery and P7/P8
+acceptance remain open.
