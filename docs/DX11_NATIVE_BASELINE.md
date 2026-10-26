@@ -970,3 +970,17 @@ match native outputs and reload sessions; three existing version 1 real sessions
 load, rewind and export. See `DX11_VERTEX_INDEX_OVERRIDE.md` and its evidence
 ledger. This does not establish cut/missing-index override parity, complete
 debugger semantics, fragment history or standalone removal acceptance.
+
+## Lossless pixel quad transport research checkpoint
+
+An independent D3D11 probe exports arbitrary four-lane uint32 data through a
+writing pixel without a pixel UAV. Byte decomposition avoids floating-point
+loss, and direction is measured through fine derivatives. NVIDIA, Intel and
+WARP pass 384 synthetic cases and 297,024 exact neighbor components, including
+12,492 nonwriting-neighbor observations. An independent raw-storage verifier
+rejects 18 corruptions; import/module audits cover the probe only. Initial WARP
+orientation failures were computed signed-zero distinctions, with original raw
+input words unchanged and exact. See
+`research/DX11_PIXEL_QUAD_TRANSPORT_RESEARCH.md` and its evidence ledger. Actual
+GPA PS input/fragment selection, helper validity, debugger integration and the
+remaining full-history/removal/release gates remain open.

@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS journals, Worker jobs, sessions and UI are integrated; CPU execution, private buffers, GPU assistance, cooperative CS groups and pixel quad sampling are tested; captured PS inputs, remaining semantics, index override and full source/feature parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; pixel quad execution/sampling and lossless synthetic quad transport are tested; captured PS input/fragment selection, boundary compatibility and full semantic/source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -698,3 +698,13 @@ nine identity-override real jobs retain exact native output comparisons and
 session/module checks, and three old real sessions load and rewind. See
 `DX11_VERTEX_INDEX_OVERRIDE.md`. Selected cut/missing/out-of-range index behavior,
 complete semantic/source parity, fragment history and P7/P8 remain open.
+
+## Pixel quad input transport research continuation
+
+Four-lane raw register transport now has an independent no-PS-UAV GPU proof:
+384 cases, 297,024 exact neighbor components and 18 rejected evidence corruptions
+across NVIDIA, Intel and WARP. Measured lane direction avoids treating even
+screen-coordinate alignment as a contract. This establishes a transport method,
+not captured PS inputs, original fragment identity or completed pixel debugging.
+See `research/DX11_PIXEL_QUAD_TRANSPORT_RESEARCH.md` for reconstruction, scope,
+the retained signed-zero diagnostic failure and the next integration gates.

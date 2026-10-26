@@ -1,0 +1,356 @@
+{
+  "schema": 1,
+  "checkpoint": "independent-lossless-pixel-quad-transport",
+  "base_commit": "d11bc3799fc8963160be3e0236fcb9b16bd21c26",
+  "implementation_commit": "0465d7315d0f377020d16b397b9c1750b6d4d4d8",
+  "created_utc": "2026-10-26T19:42:19.225654+00:00",
+  "complete_release_acceptance": false,
+  "cases": 384,
+  "neighbor_components": 297024,
+  "nonwriting_neighbors": 12492,
+  "negative_controls": 18,
+  "unsupported_sample_counts": [],
+  "runs": [
+    {
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "driver_version": 9007199255791310,
+      "cases": 128,
+      "written_samples": 6188,
+      "neighbor_components": 99008,
+      "nonwriting_neighbors": 4164,
+      "unsupported_sample_counts": [],
+      "negative_controls": {
+        "neighbor_bits": "Neighbor raw bits differ",
+        "quad_role": "Invalid measured position or quad role",
+        "orientation": "Orientation derivative is not a unit direction or numeric zero",
+        "sample_identity": "Neighbor outside fixture domain",
+        "reference_output": "Current lane differs from direct shader output",
+        "input_fixture": "Input bit fixture changed"
+      },
+      "report": {
+        "path": "artifacts/dx11-native/quad-transport-audited-4318/report.json",
+        "bytes": 73393,
+        "sha256": "462263f7cf7b0d120850006d075317b4cf2c4508790f95277ab58e3cf7433008"
+      },
+      "loaded_modules": [
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraPixelQuadTransportProbe.exe",
+        "C:\\Windows\\SYSTEM32\\ntdll.dll",
+        "C:\\Windows\\System32\\KERNEL32.DLL",
+        "C:\\Windows\\System32\\KERNELBASE.dll",
+        "C:\\Windows\\System32\\ucrtbase.dll",
+        "C:\\Windows\\SYSTEM32\\d3d11.dll",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+        "C:\\Windows\\SYSTEM32\\dxgi.dll",
+        "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+        "C:\\Windows\\System32\\msvcp_win.dll",
+        "C:\\Windows\\System32\\msvcrt.dll",
+        "C:\\Windows\\System32\\win32u.dll",
+        "C:\\Windows\\System32\\ADVAPI32.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+        "C:\\Windows\\System32\\sechost.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+        "C:\\Windows\\System32\\RPCRT4.dll",
+        "C:\\Windows\\SYSTEM32\\powrprof.dll",
+        "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+        "C:\\Windows\\System32\\gdi32.dll",
+        "C:\\Windows\\System32\\gdi32full.dll",
+        "C:\\Windows\\System32\\USER32.dll",
+        "C:\\Windows\\System32\\IMM32.DLL",
+        "C:\\Windows\\SYSTEM32\\dxcore.dll",
+        "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+        "C:\\Windows\\System32\\combase.dll",
+        "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+        "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+        "C:\\Windows\\System32\\bcryptPrimitives.dll",
+        "C:\\Windows\\SYSTEM32\\DXGIDebug.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvldumdx.dll",
+        "C:\\Windows\\System32\\SHELL32.dll",
+        "C:\\Windows\\SYSTEM32\\VERSION.dll",
+        "C:\\Windows\\SYSTEM32\\msasn1.dll",
+        "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+        "C:\\Windows\\System32\\CRYPT32.dll",
+        "C:\\Windows\\SYSTEM32\\cryptbase.dll",
+        "C:\\Windows\\SYSTEM32\\wldp.dll",
+        "C:\\Windows\\SYSTEM32\\drvstore.dll",
+        "C:\\Windows\\SYSTEM32\\devobj.dll",
+        "C:\\Windows\\System32\\wintrust.dll",
+        "C:\\Windows\\System32\\imagehlp.dll",
+        "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+        "C:\\Windows\\system32\\rsaenh.dll",
+        "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvgpucomp64.dll",
+        "C:\\Windows\\System32\\ole32.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\NvMemMapStoragex.dll",
+        "C:\\Windows\\SYSTEM32\\WINMM.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvwgf2umx.dll",
+        "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+        "C:\\Windows\\System32\\SHCORE.dll",
+        "C:\\Windows\\System32\\shlwapi.dll",
+        "C:\\Windows\\system32\\nvspcap64.dll",
+        "C:\\Windows\\SYSTEM32\\profapi.dll",
+        "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+        "C:\\Windows\\SYSTEM32\\D3D11_3SDKLayers.dll",
+        "C:\\Windows\\system32\\uxtheme.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll"
+      ],
+      "observed_lane_roles": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_observed_origins_even": true,
+      "command": [
+        "build/vs2022/Release/FloraPixelQuadTransportProbe.exe",
+        "artifacts\\dx11-native\\quad-transport-audited-4318",
+        "4318",
+        "tools/native/pixel_quad_transport.hlsl"
+      ]
+    },
+    {
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "driver_version": 9007199261368954,
+      "cases": 128,
+      "written_samples": 6188,
+      "neighbor_components": 99008,
+      "nonwriting_neighbors": 4164,
+      "unsupported_sample_counts": [],
+      "negative_controls": {
+        "neighbor_bits": "Neighbor raw bits differ",
+        "quad_role": "Invalid measured position or quad role",
+        "orientation": "Orientation derivative is not a unit direction or numeric zero",
+        "sample_identity": "Neighbor outside fixture domain",
+        "reference_output": "Current lane differs from direct shader output",
+        "input_fixture": "Input bit fixture changed"
+      },
+      "report": {
+        "path": "artifacts/dx11-native/quad-transport-audited-32902/report.json",
+        "bytes": 73265,
+        "sha256": "f4218c1fb5c83baa6984ab0e42ae1582ae5668a1b40e1738b1aa6910fda75e26"
+      },
+      "loaded_modules": [
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraPixelQuadTransportProbe.exe",
+        "C:\\Windows\\SYSTEM32\\ntdll.dll",
+        "C:\\Windows\\System32\\KERNEL32.DLL",
+        "C:\\Windows\\System32\\KERNELBASE.dll",
+        "C:\\Windows\\System32\\ucrtbase.dll",
+        "C:\\Windows\\SYSTEM32\\d3d11.dll",
+        "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+        "C:\\Windows\\System32\\msvcp_win.dll",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+        "C:\\Windows\\SYSTEM32\\dxgi.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+        "C:\\Windows\\System32\\win32u.dll",
+        "C:\\Windows\\System32\\msvcrt.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+        "C:\\Windows\\System32\\ADVAPI32.dll",
+        "C:\\Windows\\System32\\sechost.dll",
+        "C:\\Windows\\SYSTEM32\\powrprof.dll",
+        "C:\\Windows\\System32\\RPCRT4.dll",
+        "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+        "C:\\Windows\\System32\\gdi32.dll",
+        "C:\\Windows\\System32\\gdi32full.dll",
+        "C:\\Windows\\System32\\USER32.dll",
+        "C:\\Windows\\System32\\IMM32.DLL",
+        "C:\\Windows\\SYSTEM32\\dxcore.dll",
+        "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+        "C:\\Windows\\System32\\combase.dll",
+        "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+        "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+        "C:\\Windows\\System32\\bcryptPrimitives.dll",
+        "C:\\Windows\\SYSTEM32\\DXGIDebug.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igd10iumd64.dll",
+        "C:\\Windows\\SYSTEM32\\apphelp.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igd10umt64xe.DLL",
+        "C:\\Windows\\System32\\SHLWAPI.dll",
+        "C:\\Windows\\System32\\ole32.dll",
+        "C:\\Windows\\System32\\SHELL32.dll",
+        "C:\\Windows\\System32\\OLEAUT32.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igc64.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igdgmm2_64.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igdgmm64.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igdgmmstaging_64.dll",
+        "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+        "C:\\Windows\\System32\\SHCORE.dll",
+        "C:\\Windows\\SYSTEM32\\profapi.dll",
+        "C:\\Windows\\SYSTEM32\\ControlLib.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\IntelControlLib.dll",
+        "C:\\Windows\\SYSTEM32\\D3D11_3SDKLayers.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igdml64.dll",
+        "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\iga64.dll"
+      ],
+      "observed_lane_roles": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_observed_origins_even": true,
+      "command": [
+        "build/vs2022/Release/FloraPixelQuadTransportProbe.exe",
+        "artifacts\\dx11-native\\quad-transport-audited-32902",
+        "32902",
+        "tools/native/pixel_quad_transport.hlsl"
+      ]
+    },
+    {
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "driver_version": 2814751477605871,
+      "cases": 128,
+      "written_samples": 6188,
+      "neighbor_components": 99008,
+      "nonwriting_neighbors": 4164,
+      "unsupported_sample_counts": [],
+      "negative_controls": {
+        "neighbor_bits": "Neighbor raw bits differ",
+        "quad_role": "Invalid measured position or quad role",
+        "orientation": "Orientation derivative is not a unit direction or numeric zero",
+        "sample_identity": "Neighbor outside fixture domain",
+        "reference_output": "Current lane differs from direct shader output",
+        "input_fixture": "Input bit fixture changed"
+      },
+      "report": {
+        "path": "artifacts/dx11-native/quad-transport-audited-0/report.json",
+        "bytes": 71959,
+        "sha256": "62658be97b44f743bdefcc32e4c7d7c314b9e61f8a139fcdf3322c4191ff518d"
+      },
+      "loaded_modules": [
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraPixelQuadTransportProbe.exe",
+        "C:\\Windows\\SYSTEM32\\ntdll.dll",
+        "C:\\Windows\\System32\\KERNEL32.DLL",
+        "C:\\Windows\\System32\\KERNELBASE.dll",
+        "C:\\Windows\\System32\\ucrtbase.dll",
+        "C:\\Windows\\SYSTEM32\\d3d11.dll",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+        "C:\\Windows\\SYSTEM32\\dxgi.dll",
+        "C:\\Windows\\System32\\msvcp_win.dll",
+        "C:\\Windows\\System32\\msvcrt.dll",
+        "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+        "C:\\Windows\\System32\\win32u.dll",
+        "C:\\Windows\\System32\\ADVAPI32.dll",
+        "C:\\Windows\\System32\\sechost.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+        "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+        "C:\\Windows\\System32\\RPCRT4.dll",
+        "C:\\Windows\\SYSTEM32\\powrprof.dll",
+        "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+        "C:\\Windows\\System32\\gdi32.dll",
+        "C:\\Windows\\System32\\gdi32full.dll",
+        "C:\\Windows\\System32\\USER32.dll",
+        "C:\\Windows\\System32\\IMM32.DLL",
+        "C:\\Windows\\SYSTEM32\\DXGIDebug.dll",
+        "C:\\Windows\\System32\\combase.dll",
+        "C:\\Windows\\SYSTEM32\\D3D10Warp.dll",
+        "C:\\Windows\\SYSTEM32\\dxcore.dll",
+        "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+        "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+        "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+        "C:\\Windows\\System32\\bcryptPrimitives.dll",
+        "C:\\Windows\\SYSTEM32\\D3D11_3SDKLayers.dll",
+        "C:\\Windows\\system32\\uxtheme.dll"
+      ],
+      "observed_lane_roles": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_observed_origins_even": true,
+      "command": [
+        "build/vs2022/Release/FloraPixelQuadTransportProbe.exe",
+        "artifacts\\dx11-native\\quad-transport-audited-0",
+        "0",
+        "tools/native/pixel_quad_transport.hlsl"
+      ]
+    }
+  ],
+  "build": {
+    "path": "artifacts/dx11-native/quad-transport-audit-build.txt",
+    "bytes": 217,
+    "sha256": "0c033233b5304042597fa81440c21f008556b7401d9dae52688d6d3067529830"
+  },
+  "probe": {
+    "path": "build/vs2022/Release/FloraPixelQuadTransportProbe.exe",
+    "bytes": 121344,
+    "sha256": "d5229cf7354b53861b974585bc4c4d5f255bcc139095ac0d736d4277f11d3790"
+  },
+  "sources": [
+    {
+      "path": "tools/native/pixel_quad_transport_probe.cpp",
+      "bytes": 24128,
+      "sha256": "8fe21438ed2af09d65c53a399c7604b421d30695f91ce5b88f58b3a4165004ba"
+    },
+    {
+      "path": "tools/native/pixel_quad_transport.hlsl",
+      "bytes": 3557,
+      "sha256": "38c6505966496241e3bce50d55bd9e1c6995dc0bcbe81fb3a02e23fb279a99d7"
+    },
+    {
+      "path": "tools/validate_pixel_quad_transport.py",
+      "bytes": 9398,
+      "sha256": "71ccefa8379542e6035c5bc22826e84f2a86574f3d87dd270153bb24d2c8a9a1"
+    }
+  ],
+  "independent_validation_manifest": {
+    "path": "artifacts/dx11-native/quad-transport-audited-validation.json",
+    "bytes": 1162726,
+    "sha256": "c3c269eb1a49d0820f7f8c59b6713dbb52862a61fbe871cc66cae317755fa8bb"
+  },
+  "imports": {
+    "path": "artifacts/dx11-native/quad-transport-imports.txt",
+    "bytes": 13811,
+    "sha256": "7c4004f0ae90f30c9454a8883f9889de00043b34949dba5431599d87974c3a41"
+  },
+  "initial_failure": {
+    "original_report": {
+      "path": "artifacts/dx11-native/quad-transport-first-warp/report.json",
+      "bytes": 144870,
+      "sha256": "6ba1587644c2b1c40b20fef9c70092085692273eb456df279139bd3092d8832c"
+    },
+    "original_failed_cases": 96,
+    "reevaluated_cases": 128,
+    "raw_neighbor_components": 99008,
+    "method": "Use the final independent byte verifier with numeric-zero orientation semantics. Exclude the original producer status/mismatch list from this diagnostic reevaluation only. Original report and raw files remain unchanged and retain their failures.",
+    "representative_orientation": {
+      "path": "artifacts/dx11-native/quad-transport-first-warp/1-0-0-0-target-7.bin",
+      "bytes": 4096,
+      "sha256": "9cf0340d67e3c122d51db83df71ef1f21ca5710f924e1e269874251295cec442"
+    },
+    "representative_location": {
+      "path": "artifacts/dx11-native/quad-transport-first-warp/1-0-0-0-target-4.bin",
+      "bytes": 4096,
+      "sha256": "7f6051728a100f97eb2e8d30ae02cd82e87c5424d027e7c1908522347a6187a0"
+    }
+  },
+  "initial_diagnostic_report": {
+    "path": "artifacts/dx11-native/quad-transport-initial-diagnostic.json",
+    "bytes": 1028,
+    "sha256": "1975d035f7020bc6948d73a16ca8cca302bdb53c48f51604aab7c12e86c07738"
+  },
+  "scope": "Synthetic arbitrary uint32 register transport at uniform PS entry, using constant-buffer-defined words and positive fixture coordinates. Native write footprints and direct current-lane shader results are independent controls. This is not original GPA PS input extraction, fragment selection, helper classification, original debugger recovery or product/package acceptance.",
+  "sources_of_contract": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/deriv-rtx-fine--sm5---asm-",
+      "claim": "Fine derivatives use the current quad row/column; no even-coordinate alignment guarantee."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-rasterizer-stage-rules",
+      "claim": "Pixel derivatives require extra invocations around primitive coverage."
+    }
+  ],
+  "remaining_gates": [
+    "Original PS DXBC signature/declaration transformation and interpolation/minimum precision preservation",
+    "Full input signatures and native sample-frequency trigger preservation",
+    "Original GPA primitive/fragment selection and private replay state restoration",
+    "Observed coverage/input validity integration with PixelQuad and helper memory semantics",
+    "Actual shader output/source/trace/Worker/GUI parity",
+    "Full fragment history and remaining GPA engine evidence",
+    "P7 complete dependency removal and P8 standalone release acceptance"
+  ]
+}

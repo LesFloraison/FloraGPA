@@ -95,3 +95,15 @@ the native GPU polling loop. These facts are retained as investigation context,
 not a causal attribution or excuse to relax latency gates. Performance acceptance
 remains false; controlled operation latency, replay count and peak memory
 measurements are still required for release.
+
+## Input transport research continuation
+
+An independent public-D3D11 probe now exports four lanes' arbitrary uint32
+register values through a covered pixel without a PS UAV. Byte decomposition
+keeps derivative-based reconstruction exact, while measured direction avoids
+assuming even-coordinate quad origins. NVIDIA, Intel and WARP pass 384 cases,
+297,024 exact neighbor components and 18 independent corruption controls.
+This proves the bounded synthetic transport experiment, not captured PS input
+discovery or helper classification. See
+`research/DX11_PIXEL_QUAD_TRANSPORT_RESEARCH.md` for the algorithm, evidence and
+remaining original-signature/fragment integration gates.
