@@ -1,0 +1,1820 @@
+{
+  "schema": 1,
+  "checkpoint": "native-vertex-execution-jobs",
+  "base_commit": "1137997ab2e40090bdcc1cd7d7aec6e984d7bdb4",
+  "implementation_commit": "60fa065cf8d57e97da5c2d655231e30866dd66d8",
+  "created_utc": "2026-10-26T18:42:29.962504+00:00",
+  "complete_release_acceptance": false,
+  "passed": 296,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "dxbc-vertex-inputs",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 9004,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-dxbc-vertex-inputs-tests.txt",
+        "bytes": 2574,
+        "sha256": "fe57d3a1f712bb76af523a302565f45da9d21d05a8fd78a388d67159df7d1aa9"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 742,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-dxbc-execution-trace-tests.txt",
+        "bytes": 2781,
+        "sha256": "afca7c85812c2d93292d3956cc6786807aba590f99606139c722b559bc6cefa2"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace-reader",
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 164,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-dxbc-execution-trace-reader-tests.txt",
+        "bytes": 4509,
+        "sha256": "6598b46159a2aacccd4f0c43af73e92f44f23b43697623cfb3a8230780738116"
+      }
+    },
+    {
+      "name": "native-execution-debug-model",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 222,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-execution-debug-model-tests.txt",
+        "bytes": 1046,
+        "sha256": "d1a9ada15e0248d31e1904e2d5719b5023139246d0d9a397b9d052e360c663f6"
+      }
+    },
+    {
+      "name": "native-debug-session",
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 960,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-debug-session-tests.txt",
+        "bytes": 2679,
+        "sha256": "5df0dc740182c7d20c9e5b30132031dc728241e6f17eece030cc302eee83bfee"
+      }
+    },
+    {
+      "name": "native-execution-debug-ui",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 15447,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-execution-debug-ui-tests.txt",
+        "bytes": 1367,
+        "sha256": "9040039d88e6dbdbcb1de31794485ffa0b06b1a991579eb8ae1444ba4c7216f4"
+      }
+    },
+    {
+      "name": "native-analysis",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 15234,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-analysis-tests.txt",
+        "bytes": 2569,
+        "sha256": "25aa611611be86fe0ba4d813011c9c71e90935eef4342ea680b12e7123bff4a3"
+      }
+    },
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 9496,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-compute-debug-tests.txt",
+        "bytes": 4046,
+        "sha256": "545c2d20f60cfc87dfef9e243bd84c842ee7ad42518c306a76c6f06c1f6b0fe5"
+      }
+    },
+    {
+      "name": "native-debug-operations",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 391,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-debug-native-debug-operations-tests.txt",
+        "bytes": 865,
+        "sha256": "c9e4d945e8ef4acc97cb1e40dd1e2d0b43aa45dfa96adb09ea269900adc21c57"
+      }
+    }
+  ],
+  "selected_jobs": [
+    {
+      "case": "0-4318",
+      "event": 113,
+      "vendor": 4318,
+      "context_id": "d2447c23df28bbc8ae5c8160ea9c72c2e145d9689a045f8faee172d52fc82140",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": false
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 446,
+      "peak_working_set_bytes": 257675264,
+      "cli_wall_seconds": 1.5,
+      "steps": 12,
+      "gpu_operations": 6,
+      "journal_bytes": 565426,
+      "output_components": 14,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 46,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.9363,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 0.8283,
+          "name": "terminal",
+          "position": 12
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.4024,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 1.4024,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.713,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 0.6254,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 4.5672,
+          "exported": true,
+          "heartbeat_count": 4,
+          "maximum_heartbeat_gap_ms": 1.4978,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318/job.json",
+          "bytes": 619,
+          "sha256": "b9d66b3c94eb99aa1e299551e3f0b9a5ceaa22a658252f577475ec61158433eb"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318/result.json",
+          "bytes": 7387,
+          "sha256": "58fdc3cb028919eb02df109cd0e2fd75c7395ac676d56d6abe3f034740e12d3d"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318/debug.json",
+          "bytes": 2153,
+          "sha256": "017b0974f978403d5f313da5bed6915dd611d7fb9e6bdab50907a426a818abd4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318/shader.dxbc",
+          "bytes": 852,
+          "sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318/trace.jsonl",
+          "bytes": 565426,
+          "sha256": "7f10b8fd0c71d4709c07996b2f99ca37b982bf4b61a590b66f4c4c403e9307a9"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-validation.json",
+          "bytes": 1862,
+          "sha256": "551636fb0353b216d8c76a46736278c24778504d9d677350d1bcb04344b924f1"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-validation.session.json",
+          "bytes": 408,
+          "sha256": "ca0dcdd9200d777b445ffd8e583c9650e5991c29bc6b14bef801fe0b332d8f2e"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-validation.zip",
+          "bytes": 609870,
+          "sha256": "28c0f5abd222eec8a539ef997ee1006284f9f5babf23065103af4adcd38999b5"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-operations.json",
+          "bytes": 1119,
+          "sha256": "8813a6262603fddd6b801cb54610252d988b72ce41ac373b75525f8d45091e35"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-operations.zip",
+          "bytes": 610986,
+          "sha256": "75909f52e6a146ea82fe359abcd40b4322c64744d1fe1f84f7960cf824857dd0"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-4318-operations-validation.json",
+          "bytes": 937,
+          "sha256": "738bc92be48a62b9bff3b0e2e0cdfcf3bc34ec31b88cef82295e0398bb4bbba0"
+        }
+      ]
+    },
+    {
+      "case": "0-32902",
+      "event": 113,
+      "vendor": 32902,
+      "context_id": "083b7533f2e1887a24d34561900370f99a16035b54c75087803823a6944b1c09",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": false
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "worker_elapsed_ms": 384,
+      "peak_working_set_bytes": 321331200,
+      "cli_wall_seconds": 1.452999999979511,
+      "steps": 12,
+      "gpu_operations": 6,
+      "journal_bytes": 565428,
+      "output_components": 14,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 47,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.7136,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 1.0097,
+          "name": "terminal",
+          "position": 12
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.5594,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 0.862,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.8555,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.8555,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 4.9985,
+          "exported": true,
+          "heartbeat_count": 5,
+          "maximum_heartbeat_gap_ms": 1.5219,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902/job.json",
+          "bytes": 621,
+          "sha256": "7f4cfbe513d0e2e020a645c1beea5986695c773ba570c002dc141e3f91026aba"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902/result.json",
+          "bytes": 7048,
+          "sha256": "71644469c13c2d39c1e8155092bba54e014048b0006287b05fe755443552d7e0"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902/debug.json",
+          "bytes": 2155,
+          "sha256": "1498a550d32cdb9eb912bd854caa44e0edf6db157b98e646c5b871a6bbc40aa4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902/shader.dxbc",
+          "bytes": 852,
+          "sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902/trace.jsonl",
+          "bytes": 565428,
+          "sha256": "b8c365416f0cb948df2afd1780981c072cf6e9fe68268d13dc66907a68da1287"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-validation.json",
+          "bytes": 1862,
+          "sha256": "53eb12e4dd67ba3beb7cda0c270efdab0e7bfe565f177b0d40df4d7973a5278b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-validation.session.json",
+          "bytes": 408,
+          "sha256": "bf2478ec8b5b8c2e7f3b73cea87359af1fcb94a9d749ec5a315ee60152d75983"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-validation.zip",
+          "bytes": 609538,
+          "sha256": "95dff9e97080c845cc153cdd2ef8be3cf0d67f44ae673bcb104eaf5f6ea6d453"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-operations.json",
+          "bytes": 1119,
+          "sha256": "860953745aaf444541e4230adcfd92e9d4d4df44d5118fd7b1551fff4aea661b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-operations.zip",
+          "bytes": 610637,
+          "sha256": "22622e9e70cd60d0b5cbb36c20e4674c33496cf9ee292fca8e79a7065e9f45b2"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-32902-operations-validation.json",
+          "bytes": 937,
+          "sha256": "d227a4a87afd6f4b56fe1e22f451afb3b63c810beb7c4d0d9b8f2a6968976927"
+        }
+      ]
+    },
+    {
+      "case": "0-0",
+      "event": 113,
+      "vendor": 0,
+      "context_id": "e64729fef73761989175d318873ee04325cd4300b3cf6cc29ef910b89bd3e3e6",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": true
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "worker_elapsed_ms": 132,
+      "peak_working_set_bytes": 195641344,
+      "cli_wall_seconds": 1.2040000000270084,
+      "steps": 12,
+      "gpu_operations": 6,
+      "journal_bytes": 565421,
+      "output_components": 14,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 51,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.965,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 0.9108,
+          "name": "terminal",
+          "position": 12
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 1.0834,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 1.0834,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.7264,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.7264,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 4.7349,
+          "exported": true,
+          "heartbeat_count": 3,
+          "maximum_heartbeat_gap_ms": 2.0191,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0/job.json",
+          "bytes": 610,
+          "sha256": "517a366d7b97c13014681a31cb54710eb73270da66b3f4f9f4d657101aecdff5"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0/result.json",
+          "bytes": 6625,
+          "sha256": "03d889335c4d05b7e0842130b495fc33e6651d9a6434a0a6e30cbeb6bda79821"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0/debug.json",
+          "bytes": 2147,
+          "sha256": "4b96faf79f7f7db9d69390712204ff95de81d2865449900337ffb62a81fdb8c7"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0/shader.dxbc",
+          "bytes": 852,
+          "sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0/trace.jsonl",
+          "bytes": 565421,
+          "sha256": "6bc47e4807de705fc1228d8d1c1901c7ab8ed9ead3c47581f0db6fbd11dbb68c"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-validation.json",
+          "bytes": 1862,
+          "sha256": "f38ad3571fcd238b0b67f2efbc2614d7a3e01bf0c350437a63667a7ecc09be55"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-validation.session.json",
+          "bytes": 408,
+          "sha256": "ed0b05278d3ab431a18241c7014edcef49a2f1c80286ea83f5c8344b2cfddace"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-validation.zip",
+          "bytes": 609086,
+          "sha256": "cb3e6d0ef28e9b96f5bcefa9ec21f8a19d08fa50ba3d155ce69e3e0228bf0e46"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-operations.json",
+          "bytes": 1119,
+          "sha256": "7b478d0e889db12855884bb8767d2b2724018f53f40cb0984b72762657bfa9c1"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-operations.zip",
+          "bytes": 610177,
+          "sha256": "9412bb5ed9d4f2d75efd0454658b02f820b1d00a88629355d82cb02fa8db9404"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/0-0-operations-validation.json",
+          "bytes": 937,
+          "sha256": "a7df4b70f88e074f20947624004632c7addab40dff51714e57fd58a181749d62"
+        }
+      ]
+    },
+    {
+      "case": "1-4318",
+      "event": 876,
+      "vendor": 4318,
+      "context_id": "f9c210b64aabe8aeb9421b1f2246321fb1738cb5ca8c4d32bfd24054f4cb025a",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": false
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 1483,
+      "peak_working_set_bytes": 1774788608,
+      "cli_wall_seconds": 12.547000000020489,
+      "steps": 58,
+      "gpu_operations": 45,
+      "journal_bytes": 5663846,
+      "output_components": 4,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 176,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.6464,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 1.9241,
+          "name": "terminal",
+          "position": 58
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.0882,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 2.0125,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.993,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 0.9927,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 26.283,
+          "exported": true,
+          "heartbeat_count": 25,
+          "maximum_heartbeat_gap_ms": 1.5372,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318/job.json",
+          "bytes": 611,
+          "sha256": "d88840872da06f9237effe27c4ad84c65a1ed6cba2347ccd97ba71a058af4cb8"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318/result.json",
+          "bytes": 7473,
+          "sha256": "479f78f9b8d8aa071245d0461fa7534d2ccc9aa089dffe351f8d0e76114bc1b0"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318/debug.json",
+          "bytes": 2239,
+          "sha256": "3407861784e47ebaf66055d542c42b3dc09bcee04e409a9ec97c0b54f0d34400"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318/shader.dxbc",
+          "bytes": 5784,
+          "sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318/trace.jsonl",
+          "bytes": 5663846,
+          "sha256": "009315896f848b0e4dab1bbfbae6227d004a3018e37fa5ea9faccab45b375adf"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-validation.json",
+          "bytes": 1865,
+          "sha256": "c4789e6dc3dad2f7048439167354772e3d1c8301e8959b5d00e30f2306c07688"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-validation.session.json",
+          "bytes": 410,
+          "sha256": "60ada9e59ef37ea712f6981818c6b5d8f74235cb796f115db2ab81a350ed1c21"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-validation.zip",
+          "bytes": 5737159,
+          "sha256": "5f661a422ac99a65865cbc80bbb871ab9340a3c125a686f8fa5ec2bed7344470"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-operations.json",
+          "bytes": 1120,
+          "sha256": "600401f6d82b33fa756c3bd91328b99be2c8308517e5f350f7362f924f007308"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-operations.zip",
+          "bytes": 5738267,
+          "sha256": "290b5db90cad4b22a859843694854cbed4c0eea0537c63d1ba880fbb98a05b50"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-4318-operations-validation.json",
+          "bytes": 939,
+          "sha256": "66e4cd77105302cd51368399772face0fa01fe3dda4f9ce14454e8c0a4ea1376"
+        }
+      ]
+    },
+    {
+      "case": "1-32902",
+      "event": 876,
+      "vendor": 32902,
+      "context_id": "0ab81016b461ea1a4e4522c27906ed658fe8de7bcd2c1722315196df21e7dd63",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": false
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "worker_elapsed_ms": 1161,
+      "peak_working_set_bytes": 1881899008,
+      "cli_wall_seconds": 11.031000000075437,
+      "steps": 58,
+      "gpu_operations": 45,
+      "journal_bytes": 5663848,
+      "output_components": 4,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 179,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.4447,
+          "exported": false,
+          "heartbeat_count": 4,
+          "maximum_heartbeat_gap_ms": 1.0228,
+          "name": "terminal",
+          "position": 58
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.0763,
+          "exported": false,
+          "heartbeat_count": 3,
+          "maximum_heartbeat_gap_ms": 1.1413,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.9841,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.9841,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 26.8775,
+          "exported": true,
+          "heartbeat_count": 25,
+          "maximum_heartbeat_gap_ms": 1.594,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902/job.json",
+          "bytes": 613,
+          "sha256": "caa56bee307382b511668928d87c7bdf3589805ccd1239c80b3ad40d11225e57"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902/result.json",
+          "bytes": 7134,
+          "sha256": "98bb2fd0b6dbf4e9e23a68dfd5466387ec40193d2720f6093aa16499504380cc"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902/debug.json",
+          "bytes": 2241,
+          "sha256": "aa76c5e391a5848ed709323789823909cdd3666f28d3fbeb4f06d263f5302c3f"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902/shader.dxbc",
+          "bytes": 5784,
+          "sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902/trace.jsonl",
+          "bytes": 5663848,
+          "sha256": "89429e5b567a51924f9a6729b7f40afc988e7e3e3fb35d602e0501dd29bdc84c"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-validation.json",
+          "bytes": 1865,
+          "sha256": "b804addb70766d2d93f246dc9dddc82fb97065c2508d684c7bccb4a729013536"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-validation.session.json",
+          "bytes": 410,
+          "sha256": "4eefaf74d12048f888f9f26fb587cd5967325f05e68a96a2efec99806671901b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-validation.zip",
+          "bytes": 5736827,
+          "sha256": "0c384017fcf336d0f808ff29dac6367801ef7da881c3317126da19a06bfd9e43"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-operations.json",
+          "bytes": 1121,
+          "sha256": "8e75aa086532ccc4a09350a3fdf4d7bbb2f8bca3934e90e52d3dd325c384bb3e"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-operations.zip",
+          "bytes": 5737918,
+          "sha256": "da978756e73105401367690daa788c4d9575809da026f5e6d199c9531509f0dc"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-32902-operations-validation.json",
+          "bytes": 939,
+          "sha256": "3d3b20838110abb12f78dda72df4caf5a60f2ce0e6249bd259d73809051874cd"
+        }
+      ]
+    },
+    {
+      "case": "1-0",
+      "event": 876,
+      "vendor": 0,
+      "context_id": "83b65edf10b7e02691eb1849a1a01367ce9771e130456dd99e14eb08a70767d9",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": true
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "worker_elapsed_ms": 876,
+      "peak_working_set_bytes": 1732161536,
+      "cli_wall_seconds": 10.73499999998603,
+      "steps": 58,
+      "gpu_operations": 45,
+      "journal_bytes": 5663841,
+      "output_components": 4,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 179,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.5838,
+          "exported": false,
+          "heartbeat_count": 4,
+          "maximum_heartbeat_gap_ms": 1.022,
+          "name": "terminal",
+          "position": 58
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 3.1691,
+          "exported": false,
+          "heartbeat_count": 3,
+          "maximum_heartbeat_gap_ms": 1.0545,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.8944,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.8944,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 26.2071,
+          "exported": true,
+          "heartbeat_count": 24,
+          "maximum_heartbeat_gap_ms": 2.5406,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0/job.json",
+          "bytes": 602,
+          "sha256": "725fc63c299e9a92103c8929bdaf24c67ec86c2d51f9b3acb69e01acf0b9f255"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0/result.json",
+          "bytes": 6710,
+          "sha256": "54d386731121a27a1b98f2903bee87cb966e1f5f012420373e3cc0fd04925fe4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0/debug.json",
+          "bytes": 2233,
+          "sha256": "0d25e47214a005aa975e35aad6828546c15fb7bb394a7fa0ac3a783328dd4d0b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0/shader.dxbc",
+          "bytes": 5784,
+          "sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0/trace.jsonl",
+          "bytes": 5663841,
+          "sha256": "2078fdec488583d3e8b251dbdccdb68f451dbd422730a6154abe36c5afbf5f49"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-validation.json",
+          "bytes": 1865,
+          "sha256": "fa2d63e80e75c1d78b9307486e209308dc3f39e495b0311b121af1f51cc25cea"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-validation.session.json",
+          "bytes": 410,
+          "sha256": "b56de1ec4928f72ea529a4218831bbb5d541c67b253845ceb73b764928ae3d8e"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-validation.zip",
+          "bytes": 5736374,
+          "sha256": "980a67b7ffce79f2d10232382cf108abd7581b470e205dcdf1dfc07eb50f4158"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-operations.json",
+          "bytes": 1121,
+          "sha256": "2441ddc42e22ddf85c7827ceb1a82c72165ff6092b405136dc4778be5f3f5d03"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-operations.zip",
+          "bytes": 5737457,
+          "sha256": "fbf2f5e677b5b3832cf33cd0933c328a6c57f12e56650df02b87d175ae95e36e"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/1-0-operations-validation.json",
+          "bytes": 939,
+          "sha256": "d1741a163d0ec153ac97e28474f848ac394f7444ab25c5e4b44906aee267cf26"
+        }
+      ]
+    },
+    {
+      "case": "2-4318",
+      "event": 200,
+      "vendor": 4318,
+      "context_id": "aab4c5e07771d7c8954a23885b716f02761a6f49dbfe1aebab8fd6e4bce158aa",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": false
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "worker_elapsed_ms": 1592,
+      "peak_working_set_bytes": 1774329856,
+      "cli_wall_seconds": 11.687999999965541,
+      "steps": 42,
+      "gpu_operations": 24,
+      "journal_bytes": 38832130,
+      "output_components": 13,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 1027,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.9178,
+          "exported": false,
+          "heartbeat_count": 3,
+          "maximum_heartbeat_gap_ms": 0.9845,
+          "name": "terminal",
+          "position": 42
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.4427,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 1.3757,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.8178,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.8178,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 99.5445,
+          "exported": true,
+          "heartbeat_count": 93,
+          "maximum_heartbeat_gap_ms": 2.1215,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318/job.json",
+          "bytes": 619,
+          "sha256": "9c95954c0259dc619d67cfbbcee6c3bf3fe73ed113a793ae7c9afa7d1ef65025"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318/result.json",
+          "bytes": 7601,
+          "sha256": "6e4f5c921f647ada08e726f0b0ad4ca4cee36fc53d8094a1c1233dc79fc9c1f4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318/debug.json",
+          "bytes": 2346,
+          "sha256": "46c2bfd3ddf0d0f6ae86007fe029c8a659117ee32d5bc72f9ecadffee0315a7b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318/shader.dxbc",
+          "bytes": 9408,
+          "sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318/trace.jsonl",
+          "bytes": 38832130,
+          "sha256": "86cfc55582e74a92320d230ce4c62e091471cba172676876f707030e057efd35"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-validation.json",
+          "bytes": 1870,
+          "sha256": "c01f424cebfd09bd427bbc52ac4c61df09a884a5f97e64117e66f389f5456c64"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-validation.session.json",
+          "bytes": 412,
+          "sha256": "efa3537c4b9ea7f9bf76713a87918d8926d24f053579cb206d84c6b3064b3eb4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-validation.zip",
+          "bytes": 38908108,
+          "sha256": "bb5117a44a7d0efd9ef9aa7336bedcc8656484820658a30cffe7df9555fe83c4"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-operations.json",
+          "bytes": 1122,
+          "sha256": "58244c78a5be03b5a13b78d84c00b49b7b0ff27d079f74b4b3cf4f4b7ec452cc"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-operations.zip",
+          "bytes": 38909224,
+          "sha256": "4e9d717319cf9640ea13c6fe52224f68faf06bddd03aa751f21b95238cd11425"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-4318-operations-validation.json",
+          "bytes": 941,
+          "sha256": "2feb7796ccfdfbab2c0dec166ed5f4edac23f8bf25834809cbce29974a8fb3bc"
+        }
+      ]
+    },
+    {
+      "case": "2-32902",
+      "event": 200,
+      "vendor": 32902,
+      "context_id": "5a692d5d0f4cf7cf7e2fc4d11ea8d92a3768b6f930e46a19623be08783a5dcae",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": false
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "worker_elapsed_ms": 1450,
+      "peak_working_set_bytes": 1871937536,
+      "cli_wall_seconds": 11.5,
+      "steps": 42,
+      "gpu_operations": 24,
+      "journal_bytes": 38832132,
+      "output_components": 13,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 1056,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.6829,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 1.452,
+          "name": "terminal",
+          "position": 42
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.866,
+          "exported": false,
+          "heartbeat_count": 2,
+          "maximum_heartbeat_gap_ms": 1.6871,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.9584,
+          "exported": false,
+          "heartbeat_count": 0,
+          "maximum_heartbeat_gap_ms": 0.9584,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 100.0823,
+          "exported": true,
+          "heartbeat_count": 95,
+          "maximum_heartbeat_gap_ms": 1.5494,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902/job.json",
+          "bytes": 621,
+          "sha256": "aa9ce40296799350789e93cddf1ae9980c40872227c036c9a1daeeb3f97e1a4b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902/result.json",
+          "bytes": 7262,
+          "sha256": "27c511c83a10cb42bdf15b8f29070b431b16be08ecac5a6905ef3908ce24789e"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902/debug.json",
+          "bytes": 2348,
+          "sha256": "8e20c210c2afc04bb97ff514b935afb303e3a77471e86e32009de053a07a0f07"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902/shader.dxbc",
+          "bytes": 9408,
+          "sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902/trace.jsonl",
+          "bytes": 38832132,
+          "sha256": "a87203ae8b4b7c956e3eb56f613ea6b9624a313f900447fa43584ba8e3781d09"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-validation.json",
+          "bytes": 1870,
+          "sha256": "0f7691b1f0905d5c9078ed940fc0d277ee7a60d2cbc732375a3e9ebc728ea570"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-validation.session.json",
+          "bytes": 412,
+          "sha256": "326577eba002087a8099eb77f45605c71db8c5fc488211360184abb75a20d17c"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-validation.zip",
+          "bytes": 38907776,
+          "sha256": "e8dc6879f208897fba250fd7869ee7244a7b561626d338c27d4535326c8e1f9f"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-operations.json",
+          "bytes": 1121,
+          "sha256": "ca0972f66b7e065797bfdf9def37d9f603d27e58e35486872fac04b15455d57b"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-operations.zip",
+          "bytes": 38908875,
+          "sha256": "eece9d85cb47e35129f6cb01291e53a7f9d95f6327734d08e8584b508728a862"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-32902-operations-validation.json",
+          "bytes": 941,
+          "sha256": "900e28faacdcd4ff4d1a94f15e6b6ac1217f8a1e9d18cebce8bae92fd50b4727"
+        }
+      ]
+    },
+    {
+      "case": "2-0",
+      "event": 200,
+      "vendor": 0,
+      "context_id": "3cd405d4bc6c80456955406fd6fafd20e6159e30324d2a241aa9c670818fe8f8",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": true
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "status": "eligible_in_observed_replay",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "worker_elapsed_ms": 1175,
+      "peak_working_set_bytes": 1726685184,
+      "cli_wall_seconds": 11.234000000054948,
+      "steps": 42,
+      "gpu_operations": 24,
+      "journal_bytes": 38832125,
+      "output_components": 13,
+      "raw_registers_match": true,
+      "input_register_round_trip": true,
+      "mapped_source_steps": 0,
+      "session_load_ms": 1040,
+      "operations": [
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.8456,
+          "exported": false,
+          "heartbeat_count": 4,
+          "maximum_heartbeat_gap_ms": 0.996,
+          "name": "terminal",
+          "position": 42
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 2.3328,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 1.1679,
+          "name": "cancel_rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 0.8429,
+          "exported": false,
+          "heartbeat_count": 1,
+          "maximum_heartbeat_gap_ms": 0.6501,
+          "name": "rewind",
+          "position": 0
+        },
+        {
+          "cancelled": false,
+          "elapsed_ms": 99.0362,
+          "exported": true,
+          "heartbeat_count": 98,
+          "maximum_heartbeat_gap_ms": 1.5401,
+          "name": "export",
+          "position": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0/job.json",
+          "bytes": 610,
+          "sha256": "667898924c3df6e3c896efe4f3d4922a399ab2cd8021a5d6ef9f29dbeaa0ffb2"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0/result.json",
+          "bytes": 6839,
+          "sha256": "538cc2ffc4529da2761dc085a65fbd9c4fe7f3bfbd05805a62caea4b7f878355"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0/debug.json",
+          "bytes": 2340,
+          "sha256": "7b6dbcd23cfd46773fe632d891c5bf0f6f54ad842174161511691fc1c17da62f"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0/shader.dxbc",
+          "bytes": 9408,
+          "sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0/trace.jsonl",
+          "bytes": 38832125,
+          "sha256": "ecaf78636a2b33933c62e1f9e7c774bffb86459a4b5ae4a0e4d6369ac5d0e3dd"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-validation.json",
+          "bytes": 1870,
+          "sha256": "862f55c2c4e467dc8fbf09f45e2405dd1c70363aa6dae158c61f2bea1d89ffd9"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-validation.session.json",
+          "bytes": 412,
+          "sha256": "2c4c1a30b81029ba6101f02b56546274572e39ab2d76202ad5baa38ccc5c7da5"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-validation.zip",
+          "bytes": 38907324,
+          "sha256": "b76be2c26a5749aedd1a9a0f35255d149b05563915bb8246cd916f25e235af67"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-operations.json",
+          "bytes": 1121,
+          "sha256": "6dd67e646cae4e550621ad7c33f62b8c12d40d79788f97ef11fa5084ae860c54"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-operations.zip",
+          "bytes": 38908415,
+          "sha256": "bc7cfa8a0f6c19888fd58f83b8c1d138f9e73bee5f43779ada766e8cca415434"
+        },
+        {
+          "path": "artifacts/dx11-native/vertex-debug-real/2-0-operations-validation.json",
+          "bytes": 941,
+          "sha256": "158f96e88fc5ef2bdd0d4128d0bfddddc00ca126126f543f2ca1dffd00963865"
+        }
+      ]
+    }
+  ],
+  "build": {
+    "path": "artifacts/dx11-native/vertex-debug-restored-build.txt",
+    "bytes": 16206,
+    "sha256": "ebbe0d0bc407fb3150a792e8efb7cc81c90bfc66788ee4f99ca9892719c657da"
+  },
+  "additional_boundary_test_build": {
+    "path": "artifacts/dx11-native/vertex-debug-boundary-build.txt",
+    "bytes": 1311,
+    "sha256": "3d66277448268d9707a357ddd4596b1bd59a33225286135f56ac5a34461de52b"
+  },
+  "ctest": {
+    "path": "artifacts/dx11-native/vertex-debug-final-tests.txt",
+    "bytes": 1193,
+    "sha256": "fe38177dadefd02c7d99243a3658396230c9d95839eaa8109592ceb2375e14d6"
+  },
+  "validation_order": "Nine suites passed with 288 checks; eight additional malformed VS journal cases were then added and the complete session suite passed 38 checks. The final aggregate is 296. No product behavior changed after the nine-suite pass.",
+  "intermediate_failures": {
+    "cause": "Setting prepareBeforeDraw only for VS incorrectly disabled the established CS preparation default. Unchanged CS Worker and main-window tests detected it. The assignment was removed and both VS and CS paths passed the final run.",
+    "logs": [
+      {
+        "path": "artifacts/dx11-native/vertex-debug-first-tests.txt",
+        "bytes": 2321,
+        "sha256": "0210d3a09b9d8f572435af0ba71def87d1449ff43e1930ed6df53f5b50cfcc77"
+      },
+      {
+        "path": "artifacts/dx11-native/vertex-debug-first-compute-tests.txt",
+        "bytes": 3989,
+        "sha256": "b0e9911903e30e27af5b678dc94826da2652033348ddee55b2ec3205f848ccf6"
+      },
+      {
+        "path": "artifacts/dx11-native/vertex-debug-first-ui-tests.txt",
+        "bytes": 1797,
+        "sha256": "31bc56c7ac56813d287205dcc48e6b7addb812a73902f4e580917c14e17b40d4"
+      }
+    ]
+  },
+  "remaining_gates": [
+    "Arbitrary actual vertex index override",
+    "Selected-only bounded VS input acquisition",
+    "Full DXBC, precision and legacy source/configuration parity",
+    "Real shaders with source information beyond the synthetic VS fixture",
+    "Repeated performance and memory growth comparisons against the P0 baseline",
+    "Native PS input/quad discovery and complete fragment history",
+    "Remaining GPA debugger engine recovery evidence",
+    "P7 complete dependency removal and P8 standalone package acceptance"
+  ],
+  "performance_scope": "Single complete jobs and loaded-session background operations. Worker peak working set includes replay/capture state. CLI wall time includes input validation and process coordination outside the Worker analysis timer. All real rewind probes finished before their 5 ms cancellation request; cancellation is established separately by synthetic tests, not those short real operations."
+}

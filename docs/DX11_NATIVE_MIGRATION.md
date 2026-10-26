@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | CPU execution, private buffers, GPU assistance, cooperative CS groups, hidden counters, pixel quad derivatives and implicit sampling tested; captured quad inputs, helper memory semantics, production debugger integration and full parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS journals, Worker jobs, sessions and UI are integrated; CPU execution, private buffers, GPU assistance, cooperative CS groups and pixel quad sampling are tested; captured PS inputs, remaining semantics, index override and full source/feature parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -138,12 +138,14 @@ FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs --out mesh
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-index --instance 0 --out mesh-identities
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-inputs --instance 0 --out mesh-inputs
 FloraGPA.Cli analyze frame.gpa_frame debug-thread --gpa-event 893 --group 0 0 0 --thread 0 0 0 --out compute-debug
+FloraGPA.Cli analyze frame.gpa_frame debug-vertex --gpa-event 876 --vertex 0 --instance 0 --out vertex-debug
 ```
 
 The native entry point never recaptures to RDC or selects an external replay
 backend. Event history requires `--history-scope events`; `debug-thread` uses the
-native compute job described in `DX11_NATIVE_COMPUTE_DEBUG.md`. Complete fragment
-history and VS/PS debug actions still fail explicitly until implemented.
+native compute job described in `DX11_NATIVE_COMPUTE_DEBUG.md`. `debug-vertex`
+uses the observed draw inputs described in `DX11_NATIVE_VERTEX_DEBUG.md`.
+Complete fragment history and PS debug actions still fail explicitly until implemented.
 During this stage the legacy command is still present for baseline comparison;
 its final retirement and GUI cutover remain separate gates.
 
@@ -662,3 +664,15 @@ GF2/BF1/Helldivers comparisons match, and ten suites record 2,762 passes without
 failures or skips. See `DX11_DXBC_PRECISION.md` for the bounded scope, rejected
 precision combinations, validation order and evidence ledger. VS journals and
 UI dispatch, remaining shader/fragment semantics and P7/P8 remain open.
+
+## Native vertex debug job continuation
+
+The native Worker and CLI now expose `debug-vertex`, with explicit draw-relative
+input reference/instance identity, bounded reversible journals and effective
+shader artifacts. The native VS/CS tab uses the shared source, watch, breakpoint,
+session and background-operation paths. Nine suites pass 296 checks; nine real
+capture jobs pass exact register/output comparisons and session reloads. The
+initial CS preparation regression was caught and corrected without changing
+existing assertions. See `DX11_NATIVE_VERTEX_DEBUG.md`. Arbitrary index override,
+selected-only input acquisition, broad VS/source parity and the remaining PS,
+fragment history and P7/P8 gates still prevent complete removal acceptance.

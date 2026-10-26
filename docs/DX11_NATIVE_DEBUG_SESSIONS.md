@@ -2,10 +2,12 @@
 
 ## Scope
 
-The `Native CS` tab now submits `debug-thread` directly through the native
+The native debugger tab submits `debug-thread` directly through the native
 Worker. It does not recapture an RDC or invoke an external debugger. Existing
 VS/PS/CS tabs remain available during migration. This checkpoint does not claim
 complete shader debugging, Pixel History, or standalone release acceptance.
+The tab is now named `Native VS/CS`; its vertex continuation and validation are
+documented separately in `DX11_NATIVE_VERTEX_DEBUG.md`.
 
 `NativeAnalysisController` performs hashing, isolated Worker execution, artifact
 verification and model construction in its background operation. The same

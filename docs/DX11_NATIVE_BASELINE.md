@@ -930,3 +930,17 @@ GUI, CLI and Worker Release builds pass. See `DX11_DXBC_PRECISION.md` and
 `research/dx11-native-precision-evidence.json`. This does not close arbitrary
 shader/intermediate-state parity, VS session integration, complete Pixel History
 or standalone dependency removal. Earlier baseline observations remain recorded.
+
+## Native vertex debug job checkpoint
+
+Native VS inputs now feed bounded journals and verified sessions through the
+Worker, CLI `analyze debug-vertex` and native VS/CS debugger tab. Nine affected
+suites pass 296 checks without failures or skips. All nine selected real capture
+jobs match independent final registers and native shader outputs, restore input
+state and reload their exported sessions. Source behavior is tested with a
+debug-enabled synthetic VS; the selected real shaders have no source mappings.
+Whole Worker peak memory reaches about 1.75 GiB and complete CLI jobs reach about
+12.55 seconds in these single measurements. See `DX11_NATIVE_VERTEX_DEBUG.md`
+and `research/dx11-native-vertex-debug-evidence.json` for exact scope and evidence.
+Arbitrary index override, selected-only acquisition, full semantic/source parity
+and the remaining fragment/dependency/release gates are still open.

@@ -121,8 +121,10 @@ of local logs/reports and summarizes the observed outcomes:
   unbound/missing IA inputs, dynamic class execution, original undefined values,
   atomic schedules and all deferred/DrawAuto experiment combinations still need
   explicit coverage. Existing resource-snapshot restrictions continue to apply.
-- Native VS trace journaling, source/debug session and CLI/GUI dispatch remain
-  pending. Full PS input/quad discovery, fragment history, remaining executor
-  semantics and P7/P8 standalone release acceptance remain open.
+- Native VS trace journaling, source/debug sessions and CLI/GUI dispatch are now
+  available through the continuation in `DX11_NATIVE_VERTEX_DEBUG.md`. Arbitrary
+  index override and full VS parity remain open, together with PS input/quad
+  discovery, fragment history, remaining executor semantics and P7/P8 standalone
+  release acceptance.
 
 Original successes must still be preserved before retiring any legacy feature.
