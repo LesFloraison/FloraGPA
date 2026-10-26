@@ -1032,3 +1032,17 @@ GUI, CLI and Worker Release targets build. See
 pre-depth observations, not complete original fragment qualification or native
 pixel-debugger integration. Full history, GPA debugger-engine recovery and P7/P8
 acceptance remain open.
+
+## Native pixel execution journal checkpoint
+
+Unique per-register raster inputs now feed the native pixel quad executor and
+versioned reversible journal. Helper/active transitions, shader identity, native
+PS configuration and terminal quad state are preserved by the common debug model.
+Selected suites pass 245 checks. GF2/BF1 complete six capture/adapter runs with
+381 selected and 1,524 global steps; independent C++/Python projection agrees and
+120 evidence corruptions are rejected. Helldivers fails on all three adapters at
+minimum-precision `sample`, opcode 69, word 506; it remains an explicit parity
+gap with no published trace. GUI/CLI/Worker build. See
+`research/DX11_PIXEL_EXECUTION_TRACES.md`. Public PS job/session/UI integration,
+original fragment qualification, full semantics/source parity, full history and
+P7/P8 acceptance remain open.

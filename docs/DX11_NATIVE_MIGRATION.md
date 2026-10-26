@@ -721,3 +721,14 @@ See `research/DX11_PIXEL_RASTER_INPUTS.md` for exact comparisons and reproducibl
 evidence. Original fragment eligibility, cross-register ambiguous-record identity,
 input-free PS invocation selection, full history/debugger parity and standalone
 RenderDoc removal remain acceptance gates.
+
+## Native pixel execution journal continuation
+
+Selected private raster inputs now connect to reversible four-lane PS execution
+journals and the native debug model, including helper state and PS-specific
+configuration identity. GF2/BF1 execute and rewind on all three adapters; the
+Helldivers minimum-precision sample instruction remains a failed parity gate.
+See `research/DX11_PIXEL_EXECUTION_TRACES.md` for tests and independent projection
+evidence. This does not switch the public pixel-debug job or retire its existing
+backend. Fragment qualification, complete semantics, source/UI parity, history
+and standalone removal acceptance still require implementation and validation.
