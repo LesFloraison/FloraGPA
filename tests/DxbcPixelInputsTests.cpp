@@ -1,4 +1,5 @@
 #include "application/DxbcGpuCompletion.h"
+#include "application/DxbcPixelGeometry.h"
 #include "application/DxbcPixelInputs.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
@@ -95,6 +96,51 @@ struct Target {
     Com<ID3D11RenderTargetView> rtv;
     Com<ID3D11ShaderResourceView> srv;
 };
+PostTransformGeometry captureGeometry(Device &d, Bytes vs) {
+    auto layout = postTransformLayout(vs, 0);
+    const auto stride = layout.at("stride").get<uint32_t>();
+    std::vector<D3D11_SO_DECLARATION_ENTRY> entries;
+    for (const auto &a : layout.at("attributes"))
+        entries.push_back({0, a.at("semantic").get_ref<const std::string &>().c_str(),
+                           a.at("index").get<UINT>(), BYTE(a.at("components").at(0).get<unsigned>()),
+                           BYTE(a.at("component_count").get<unsigned>()), 0});
+    Com<ID3D11GeometryShader> so;
+    check(d.device->CreateGeometryShaderWithStreamOutput(vs.data(), vs.size(), entries.data(),
+                                                         UINT(entries.size()), &stride, 1,
+                                                         D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &so),
+          "Create geometry fixture SO shader");
+    Com<ID3D11Buffer> output, staging;
+    D3D11_BUFFER_DESC bd{stride * 3, D3D11_USAGE_DEFAULT, D3D11_BIND_STREAM_OUTPUT, 0, 0, 0};
+    check(d.device->CreateBuffer(&bd, nullptr, &output), "Create geometry fixture SO buffer");
+    bd.Usage = D3D11_USAGE_STAGING;
+    bd.BindFlags = 0;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    check(d.device->CreateBuffer(&bd, nullptr, &staging), "Create geometry fixture staging");
+    d.context->GSSetShader(so.Get(), nullptr, 0);
+    UINT offset = 0;
+    d.context->SOSetTargets(1, output.GetAddressOf(), &offset);
+    d.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    d.context->Draw(3, 0);
+    d.context->SOSetTargets(0, nullptr, nullptr);
+    d.context->GSSetShader(nullptr, nullptr, 0);
+    d.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    d.context->CopyResource(staging.Get(), output.Get());
+    GpuCompletion completion(d.device.Get(), d.context.Get());
+    completion.submit();
+    const auto mapped = completion.map(staging.Get());
+    PostTransformGeometry result;
+    result.bytes.resize(stride * 3);
+    std::memcpy(result.bytes.data(), mapped.pData, result.bytes.size());
+    d.context->Unmap(staging.Get(), 0);
+    result.report = std::move(layout);
+    result.report.update({{"geometry_stage", "final_pre_rasterization"},
+                          {"vertices", 3},
+                          {"primitives", 1},
+                          {"vertices_per_primitive", 3},
+                          {"statistics_only", false}});
+    d.validate();
+    return result;
+}
 std::vector<Words> read(Device &d, Target &target, unsigned samples) {
     const auto declaration =
         samples == 1 ? "Texture2D<uint4> input:register(t0);" : "Texture2DMS<uint4> input:register(t0);";
@@ -179,11 +225,6 @@ class DxbcPixelInputsTests : public QObject {
                                        value + ";return o;}";
             const auto vs =
                 compile("struct O{float4 p:SV_Position;" + type + " v:DATA;};" + vsBody, "vs_5_0");
-            const auto compactVs = compile((mode.startsWith("position")
-                                                ? "struct O{float4 p:SV_Position;" + type + " v:DATA;};"
-                                                : "struct O{" + type + " v:DATA;float4 p:SV_Position;};") +
-                                               vsBody,
-                                           "vs_5_0");
             std::string psSource;
             if (mode.startsWith("position"))
                 psSource = "uint4 main(float4 p:SV_Position):SV_Target{return asuint(" +
@@ -232,8 +273,6 @@ class DxbcPixelInputsTests : public QObject {
             Com<ID3D11PixelShader> reference, capture, oracle;
             check(d.device->CreateVertexShader(vs.data(), vs.size(), nullptr, &vertex),
                   "Create input fixture VS");
-            check(d.device->CreateVertexShader(compactVs.data(), compactVs.size(), nullptr, &compactVertex),
-                  "Create compact input fixture VS");
             check(d.device->CreatePixelShader(ps.data(), ps.size(), nullptr, &reference),
                   "Create input reference PS");
             check(d.device->CreatePixelShader(oracleCode.data(), oracleCode.size(), nullptr, &oracle),
@@ -270,6 +309,29 @@ class DxbcPixelInputsTests : public QObject {
             d.context->RSSetViewports(1, &viewport);
             d.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             d.context->VSSetShader(vertex.Get(), nullptr, 0);
+            const auto geometry = captureGeometry(d, vs);
+            const auto bridge = pixelGeometryBridge(geometry, helper, 0);
+            const auto &compactVs = bridge.vertexShader;
+            Com<ID3D11GeometryShader> bridgeGs;
+            Com<ID3D11InputLayout> bridgeLayout;
+            Com<ID3D11Buffer> bridgeBuffer;
+            check(d.device->CreateVertexShader(compactVs.data(), compactVs.size(), nullptr, &compactVertex),
+                  "Create native compact geometry VS");
+            check(d.device->CreateGeometryShader(bridge.geometryShader.data(), bridge.geometryShader.size(),
+                                                 nullptr, &bridgeGs),
+                  "Create native compact geometry GS");
+            std::vector<D3D11_INPUT_ELEMENT_DESC> bridgeElements;
+            for (UINT slot = 0; slot < bridge.stride / 16; ++slot)
+                bridgeElements.push_back({"FLORA_GEOMETRY", slot, DXGI_FORMAT_R32G32B32A32_UINT, 0, slot * 16,
+                                          D3D11_INPUT_PER_VERTEX_DATA, 0});
+            check(d.device->CreateInputLayout(bridgeElements.data(), UINT(bridgeElements.size()),
+                                              compactVs.data(), compactVs.size(), &bridgeLayout),
+                  "Create native compact geometry layout");
+            const D3D11_BUFFER_DESC bridgeDesc{
+                UINT(bridge.vertices.size()), D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0, 0, 0};
+            const D3D11_SUBRESOURCE_DATA bridgeData{bridge.vertices.data(), 0, 0};
+            check(d.device->CreateBuffer(&bridgeDesc, &bridgeData, &bridgeBuffer),
+                  "Create native compact geometry buffer");
             auto draw = [&](ID3D11PixelShader *shader, unsigned count) {
                 std::array<ID3D11RenderTargetView *, 8> views{};
                 const float clear[]{16777216, 16777216, 16777216, 16777216};
@@ -291,6 +353,10 @@ class DxbcPixelInputsTests : public QObject {
                 neighbors[i] = read(d, targets[i], samples);
             d.validate();
             d.context->VSSetShader(compactVertex.Get(), nullptr, 0);
+            d.context->GSSetShader(bridgeGs.Get(), nullptr, 0);
+            d.context->IASetInputLayout(bridgeLayout.Get());
+            const UINT bridgeOffset = 0;
+            d.context->IASetVertexBuffers(0, 1, bridgeBuffer.GetAddressOf(), &bridge.stride, &bridgeOffset);
             draw(capture.Get(), 8);
             std::array<std::vector<Words>, 8> observed;
             for (unsigned i = 0; i < 8; ++i)
@@ -316,6 +382,12 @@ class DxbcPixelInputsTests : public QObject {
                 };
                 shader("original-vs", vs);
                 shader("compact-vs", compactVs);
+                shader("bridge-gs", bridge.geometryShader);
+                save("source-geometry.bin", geometry.bytes.data(), geometry.bytes.size());
+                save("bridge-geometry.bin", bridge.vertices.data(), bridge.vertices.size());
+                const auto sourceGeometry = geometry.report.dump(2), bridgeIdentity = bridge.identity.dump(2);
+                save("source-geometry.json", sourceGeometry.data(), sourceGeometry.size());
+                save("bridge-geometry.json", bridgeIdentity.data(), bridgeIdentity.size());
                 shader("original-ps", ps);
                 shader("helper-ps", helper.bytecode);
                 shader("oracle-ps", oracleCode);
@@ -440,6 +512,105 @@ class DxbcPixelInputsTests : public QObject {
                       "Create full-signature selected input PS");
             }
             d.validate();
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void geometryContract_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("factor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t factor : {1u, 2u, 3u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(factor))) << vendor << factor;
+    }
+    void geometryContract() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, factor);
+        try {
+            Device device(vendor);
+            PostTransformGeometry geometry;
+            nlohmann::json attrs = nlohmann::json::array();
+            uint32_t stride = 0;
+            auto attribute = [&](std::string name, uint32_t index, uint32_t system, uint32_t type,
+                                 uint32_t count) {
+                std::vector<uint32_t> components;
+                for (uint32_t c = 0; c < count; ++c)
+                    components.push_back(c);
+                attrs.push_back({{"semantic", name},
+                                 {"index", index},
+                                 {"system_value", system},
+                                 {"component_type", type},
+                                 {"offset", stride},
+                                 {"component_count", count},
+                                 {"components", components}});
+                stride += count * 4;
+            };
+            attribute("SV_Position", 0, 1, 3, 4);
+            attribute("DATA", 0, 0, 3, 2);
+            attribute("DATA", 1, 0, 3, 2);
+            attribute("SV_ClipDistance", 0, 2, 3, 2);
+            attribute("SV_CullDistance", 0, 3, 3, 2);
+            attribute("SV_RenderTargetArrayIndex", 0, 4, 1, 1);
+            attribute("SV_ViewportArrayIndex", 0, 5, 1, 1);
+            geometry.report = {{"geometry_stage", "final_pre_rasterization"},
+                               {"stride", stride},
+                               {"vertices_per_primitive", factor},
+                               {"primitives", 2},
+                               {"vertices", 2 * factor},
+                               {"attributes", attrs}};
+            geometry.bytes.resize(2 * factor * stride);
+            for (uint32_t i = 0; i < geometry.bytes.size() / 4; ++i) {
+                const uint32_t value = 0x3f000000 + i;
+                std::memcpy(geometry.bytes.data() + i * 4, &value, 4);
+            }
+            const auto ps = compile("float4 main(float4 p:SV_Position,float2 a:DATA0,float2 "
+                                    "b:DATA1):SV_Target{return float4(a,b);}");
+            const auto pixel = pixelInputShader(ps, inputRegister(ps, "DATA"));
+            const auto bridge = pixelGeometryBridge(geometry, pixel, 1);
+            QCOMPARE(bridge.verticesPerPrimitive, factor);
+            QCOMPARE(bridge.identity.at("primitive_ordinal").get<uint64_t>(), uint64_t(1));
+            std::set<uint32_t> systems;
+            unsigned userFields = 0;
+            for (const auto &field : bridge.identity.at("output_mapping")) {
+                systems.insert(field.at("system_value").get<uint32_t>());
+                if (field.at("system_value") == 0)
+                    ++userFields;
+                for (uint32_t vertex = 0; vertex < factor; ++vertex)
+                    for (const auto &c : field.at("components")) {
+                        const auto source =
+                            (factor + vertex) * stride + c.at("source_byte_offset").get<uint32_t>();
+                        const auto target = vertex * bridge.stride + field.at("slot").get<uint32_t>() * 16 +
+                                            c.at("output_component").get<uint32_t>() * 4;
+                        QCOMPARE(Reader(Bytes(bridge.vertices).subspan(target)).read<uint32_t>(),
+                                 Reader(Bytes(geometry.bytes).subspan(source)).read<uint32_t>());
+                    }
+            }
+            QCOMPARE(userFields, 2u);
+            QVERIFY(systems == std::set<uint32_t>({0, 1, 2, 3, 4, 5}));
+            Com<ID3D11GeometryShader> gs;
+            check(device.device->CreateGeometryShader(bridge.geometryShader.data(),
+                                                      bridge.geometryShader.size(), nullptr, &gs),
+                  "Create rasterization-output bridge GS");
+            const auto idPs =
+                compile("uint4 main(float4 p:SV_Position,uint id:SV_PrimitiveID):SV_Target{return id;}");
+            const auto idInput = pixelInputShader(idPs, inputRegister(idPs, "SV_PrimitiveID"));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(geometry, idInput, 1));
+            const auto supplied = pixelGeometryBridge(geometry, idInput, 1, 42);
+            check(device.device->CreateGeometryShader(supplied.geometryShader.data(),
+                                                      supplied.geometryShader.size(), nullptr, &gs),
+                  "Create explicit primitive-ID bridge GS");
+            QCOMPARE(Reader(Bytes(supplied.vertices)).read<uint32_t>(), 42u);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(geometry, pixel, 2));
+            auto malformed = geometry;
+            malformed.bytes.pop_back();
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(malformed, pixel, 0));
+            malformed = geometry;
+            malformed.report["attributes"][1]["semantic"] = "MISSING";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(malformed, pixel, 0));
+            malformed = geometry;
+            malformed.report["geometry_stage"] = "selected_shader_output";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(malformed, pixel, 0));
+            device.validate();
         } catch (const std::exception &e) {
             QFAIL(e.what());
         }
