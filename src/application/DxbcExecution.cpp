@@ -285,6 +285,7 @@ uint32_t scalar(uint32_t op, uint32_t a, uint32_t b, uint32_t c) {
 } // namespace
 struct ProgramData {
     uint32_t stage = 0, first = 0, temps = 0;
+    bool refactoringAllowed = false;
     std::vector<Instruction> instructions;
     std::vector<std::vector<Operand>> operands;
     std::vector<uint32_t> jump, breakTarget, continueTarget;
@@ -324,6 +325,8 @@ Program::Program(Bytes dxbc) {
     uint64_t arrayElements = 0, sharedBytes = 0;
     for (const auto &words : code->instructions) {
         const auto op = words[0] & 2047;
+        if (op == 106)
+            data->refactoringAllowed = (words[0] & (1u << 11)) != 0;
         const bool decl = declaration(op);
         if (decl && executable)
             fail("DXBC declaration follows executable instructions");
@@ -347,7 +350,22 @@ Program::Program(Bytes dxbc) {
                 data->stage == 0 && (op == 69 || op == 70 || op == 74) && args[0].kind != 2 &&
                 args[2].precision == 0 && args[3].precision == 0 &&
                 std::all_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision <= 2; });
-            if (!precisionArithmetic(op) && !precisionSampling &&
+            const bool precisionLoad = [&] {
+                if ((op != 45 && !(op == 163 && data->stage == 5)) ||
+                    (args[0].kind != 0 && args[0].kind != 3 && !(args[0].kind == 2 && !args[0].precision)) ||
+                    args[2].precision || args[2].indices.size() != 1 || args[2].indices[0].relative ||
+                    args[2].indices[0].base > UINT32_MAX ||
+                    (args[1].precision && args[1].precision != 4 && args[1].precision != 5))
+                    return false;
+                const auto resource =
+                    data->typedResources.find({args[2].kind, {uint32_t(args[2].indices[0].base)}});
+                return resource != data->typedResources.end() && resource->second.first == 1;
+            }();
+            const bool precisionStore =
+                data->stage == 5 && (op == 166 || op == 168) &&
+                (args.back().kind == 0 || args.back().kind == 3) && !args.back().modifier &&
+                std::all_of(args.begin(), args.end() - 1, [](const Operand &arg) { return !arg.precision; });
+            if (!precisionArithmetic(op) && !precisionSampling && !precisionLoad && !precisionStore &&
                 std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
                 throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
                                          " at word " + std::to_string(data->instructions.back().wordOffset) +
@@ -1073,12 +1091,13 @@ Step Lane::step() {
             const auto target = s.address(destination);
             Value value;
             if (dimension == 1)
-                value = s.inputs.memory
-                            ? s.inputs.memory->loadTyped(p.stage, binding, address.bits[0],
-                                                         declaration->second.second, resource.select,
-                                                         destination.mask, args[1].kind == 4,
-                                                         result.memoryGpuAssisted)
-                            : Value{};
+                value =
+                    s.inputs.memory
+                        ? s.inputs.memory->loadTyped(
+                              p.stage, binding, address.bits[0], declaration->second.second, resource.select,
+                              destination.mask, args[1].kind == 4, result.memoryGpuAssisted,
+                              {destination.precision, args[1].precision}, p.refactoringAllowed)
+                        : Value{};
             else {
                 if (!multisample && dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 &&
                     dimension != 8)
@@ -1162,6 +1181,8 @@ Step Lane::step() {
             if (resource.components != 2 || resource.mode != 0 || !memory)
                 fail("Unavailable or invalid DXBC memory store");
             const auto value = s.source(args.back(), false);
+            // Register values already contain the observed, widened GPU bits.
+            // Raw and structured stores transfer those bits without another narrowing.
             auto &changes = resource.kind == 31 ? result.sharedMemoryChanges : result.memoryChanges;
             changes = memory->store(binding, structured, indexValue.bits[0], offsetValue.bits[0], value,
                                     resource.mask, structured && args[1].kind == 4,

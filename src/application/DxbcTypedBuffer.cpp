@@ -36,8 +36,8 @@ TypedBufferFormat validate(const BufferView &view, uint32_t returns) {
 }
 } // namespace
 Value Memory::loadTyped(uint32_t stage, const Register &binding, uint32_t index, uint32_t returns,
-                        const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literal,
-                        bool &assisted) const {
+                        const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literal, bool &assisted,
+                        const std::array<uint32_t, 2> &precision, bool refactoringAllowed) const {
     const auto found = views_.find(binding);
     if (found == views_.end())
         return {};
@@ -45,10 +45,18 @@ Value Memory::loadTyped(uint32_t stage, const Register &binding, uint32_t index,
     if (!view.resource)
         return Value::known({});
     const auto format = validate(view, returns);
+    if ((precision[1] != 0 && precision[1] != 4 && precision[1] != 5) ||
+        (precision[0] && (format.returnType == 5   ? precision[0] != 1 && precision[0] != 2
+                          : format.returnType == 4 ? precision[0] != 5
+                                                   : precision[0] != 4)))
+        throw std::runtime_error("Typed buffer precision disagrees with the value or address type");
     if (!gpu_)
         throw std::runtime_error("DXBC typed buffer access requires native GPU assistance");
     const auto &buffer = buffers_.at(*view.resource);
-    auto result = gpu_->loadTyped(stage, buffer, view, binding.kind, index, returns, swizzle, mask, literal);
+    // The helper returns the effective integer index as well as the loaded value.
+    // Validity must follow the address after native precision conversion.
+    auto result = gpu_->loadTyped(stage, buffer, view, binding.kind, index, returns, swizzle, mask, literal,
+                                  precision, refactoringAllowed);
     assisted = true;
     const auto offset = uint64_t(index) * format.bytes;
     if (offset >= view.size) {

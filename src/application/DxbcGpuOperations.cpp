@@ -29,6 +29,13 @@ Words source(uint32_t kind, uint32_t index, uint32_t swizzle = 0xe4) {
     return {0x100006 | (kind << 12) | (swizzle << 4), index};
 }
 Words immediate(uint32_t value) { return {0x4001, value}; }
+Words withPrecision(Words value, uint32_t precision) {
+    if (precision) {
+        value[0] |= 0x80000000u;
+        value.insert(value.begin() + 1, 1u | (precision << 14));
+    }
+    return value;
+}
 DXGI_ADAPTER_DESC adapter(ID3D11Device *device, Com<IDXGIAdapter> &object) {
     Com<IDXGIDevice> dxgi;
     check(device->QueryInterface(IID_PPV_ARGS(&dxgi)), "Get memory assist DXGI device");
@@ -63,18 +70,25 @@ Words kernel(bool store, uint32_t stride, uint32_t kind, uint32_t mask, uint32_t
     return result;
 }
 Words typedKernel(bool store, uint32_t kind, uint32_t mask, uint32_t swizzle, uint32_t index, bool literal,
-                  uint32_t returns) {
-    std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
+                  uint32_t returns, const std::array<uint32_t, 2> &precision, bool refactoringAllowed) {
+    std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{2}}), row(155, {{1, 1, 1}}),
                             row((kind == 7 ? 88u : 156u) | 0x800, {dest(kind, 0), {returns}})};
     const Words element = literal ? immediate(index) : Words{0x20800a, 0, 0};
     if (store)
         rows.push_back(row(164, {dest(30, 0), element, {0x208e46, 0, 1}}));
     else {
         rows.push_back(row(158, {dest(30, 1), {16}}));
-        rows.push_back(row(54, {dest(0, 0), immediate(0)}));
-        rows.push_back(row(kind == 7 ? 45u : 163u, {dest(0, 0, mask), element, source(kind, 0, swizzle)}));
-        rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}));
+        rows.push_back(
+            row((kind == 7 ? 45u : 163u) | 0x80000000u, {{0x80000042u, 3u | (returns << 6)},
+                                                         withPrecision(dest(0, 0, mask), precision[0]),
+                                                         withPrecision(element, precision[1]),
+                                                         source(kind, 0, swizzle)}));
+        rows.push_back(row(54, {dest(0, 1), immediate(0)}));
+        rows.push_back(row(54, {dest(0, 1, mask), withPrecision(source(0, 0), precision[0])}));
+        rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 1)}));
     }
+    if (precision[0] || precision[1])
+        rows.insert(rows.begin(), row(106 | (1u << 16) | (refactoringAllowed ? 1u << 11 : 0u), {}));
     rows.push_back(row(62, {}));
     const auto bytes = writeDxbcProgram({{0x50050, 0}, rows});
     Words result(bytes.size() / 4);
@@ -82,13 +96,23 @@ Words typedKernel(bool store, uint32_t kind, uint32_t mask, uint32_t swizzle, ui
     return result;
 }
 Words typedGraphicsKernel(uint32_t stage, uint32_t mask, uint32_t swizzle, uint32_t index, bool literal,
-                          uint32_t returns) {
+                          uint32_t returns, const std::array<uint32_t, 2> &precision,
+                          bool refactoringAllowed) {
     const Words address = literal ? immediate(index) : Words{0x20800a, 0, 0};
-    const auto code =
-        writeDxbcProgram({{(stage << 16) | 0x50, 0},
-                          {row(89, {{0x208e46, 0, 1}}), row(88 | 0x800, {dest(7, 0), {returns}}),
-                           row(101, {dest(2, 0)}), row(54, {dest(2, 0), immediate(0)}),
-                           row(45, {dest(2, 0, mask), address, source(7, 0, swizzle)}), row(62, {})}});
+    std::vector<Words> rows{row(89, {{0x208e46, 0, 1}}),
+                            row(88 | 0x800, {dest(7, 0), {returns}}),
+                            row(101, {dest(2, 0)}),
+                            row(104, {{1}}),
+                            row(45 | 0x80000000u, {{0x80000042u, 3u | (returns << 6)},
+                                                   withPrecision(dest(0, 0, mask), precision[0]),
+                                                   withPrecision(address, precision[1]),
+                                                   source(7, 0, swizzle)}),
+                            row(54, {dest(2, 0), immediate(0)}),
+                            row(54, {dest(2, 0, mask), withPrecision(source(0, 0), precision[0])}),
+                            row(62, {})};
+    if (precision[0] || precision[1])
+        rows.insert(rows.begin(), row(106 | (1u << 16) | (refactoringAllowed ? 1u << 11 : 0u), {}));
+    const auto code = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
     Words result(code.size() / 4);
     std::memcpy(result.data(), code.data(), code.size());
     return result;
@@ -499,7 +523,8 @@ struct GpuOperations::State {
         return pixels(words, values, resource, sampler)[0];
     }
     Value typedGraphics(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t index,
-                        uint32_t returns, uint32_t swizzle, uint32_t mask, bool literal) {
+                        uint32_t returns, uint32_t swizzle, uint32_t mask, bool literal,
+                        const std::array<uint32_t, 2> &precision, bool refactoringAllowed) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native memory assist after a failed operation");
@@ -529,7 +554,8 @@ struct GpuOperations::State {
             Com<ID3D11ShaderResourceView> native;
             check(device->CreateShaderResourceView(resource.Get(), &srv, &native),
                   "Create private graphics buffer view");
-            const auto words = typedGraphicsKernel(stage, mask, swizzle, index, literal, returns);
+            const auto words = typedGraphicsKernel(stage, mask, swizzle, index, literal, returns, precision,
+                                                   refactoringAllowed);
             if (stage == 0)
                 return pixel(words, {{index, 0, 0, 0}}, native.Get());
             return vertex(words, {Value::known({index, 0, 0, 0})}, native.Get());
@@ -873,7 +899,8 @@ struct GpuOperations::State {
     std::vector<uint8_t> execute(const Buffer &buffer, const BufferView &view, bool store, uint32_t kind,
                                  uint32_t index, uint32_t offset, const Value &value, uint32_t mask,
                                  uint32_t swizzle, bool literalIndex, bool literalOffset,
-                                 uint32_t returns = 0) {
+                                 uint32_t returns = 0, const std::array<uint32_t, 2> &precision = {},
+                                 bool refactoringAllowed = false) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native memory assist after a failed operation");
@@ -903,7 +930,8 @@ struct GpuOperations::State {
                         throw std::runtime_error("Selected device does not support this typed UAV operation");
                 }
             }
-            const auto words = typed ? typedKernel(store, kind, mask, swizzle, index, literalIndex, returns)
+            const auto words = typed ? typedKernel(store, kind, mask, swizzle, index, literalIndex, returns,
+                                                   precision, refactoringAllowed)
                                      : kernel(store, view.stride, kind, mask, swizzle, index, offset,
                                               literalIndex, literalOffset);
             auto found = shaders.find(words);
@@ -1055,7 +1083,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/18"}};
+            {"backend", "dxbc-gpu/19"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1520,17 +1548,27 @@ std::vector<Value> GpuOperations::sampleGradBatch(const TextureInput &input, con
                            groupSize, &batch);
 }
 Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t kind,
-                               uint32_t index, uint32_t returns, const std::array<uint32_t, 4> &swizzle,
-                               uint32_t mask, bool literal) {
+                               uint32_t &index, uint32_t returns, const std::array<uint32_t, 4> &swizzle,
+                               uint32_t mask, bool literal, const std::array<uint32_t, 2> &precision,
+                               bool refactoringAllowed) {
+    if (precision[1]) {
+        const auto operand = withPrecision(literal ? immediate(index) : source(0, 1), precision[1]);
+        Instruction conversion{54, 0, false, row(54, {dest(0, 0), operand})};
+        index = instruction(stage, conversion, {{0, {0}}}, {15}, {Value::known({index, index, index, index})},
+                            {Value{}})
+                    .at(0)
+                    .bits[0];
+    }
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (c * 2);
     if ((stage == 0 || stage == 1) && kind == 7)
-        return state_->typedGraphics(stage, buffer, view, index, returns, selection, mask, literal);
+        return state_->typedGraphics(stage, buffer, view, index, returns, selection, mask, literal, precision,
+                                     refactoringAllowed);
     if (stage != 5)
         throw std::runtime_error("Unsupported native typed buffer shader stage");
-    const auto bytes =
-        state_->execute(buffer, view, false, kind, index, 0, {}, mask, selection, literal, false, returns);
+    const auto bytes = state_->execute(buffer, view, false, kind, index, 0, {}, mask, selection, literal,
+                                       false, returns, precision, refactoringAllowed);
     Value result;
     std::memcpy(result.bits.data(), bytes.data(), 16);
     return result;

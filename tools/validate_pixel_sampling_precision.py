@@ -16,14 +16,14 @@ def identity(path):
     return {"path": str(path), "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
 
 
-def verify(reference, observed):
+def verify(reference, observed, backend="dxbc-gpu/18"):
     require(reference["scope"] == "independent_pixel_sampling", "Wrong reference scope")
     require(observed["scope"] == "native_pixel_sampling_execution", "Wrong execution scope")
     for key in ("schema", "vendor", "adapter_vendor", "adapter_device", "adapter_luid", "precision_scenario"):
         require(reference[key] == observed[key], "Changed identity: " + key)
     helper = observed["helper"]
     luid = ((helper["luid_high"] & 0xffffffff) << 32) | helper["luid_low"]
-    require(helper["backend"] == "dxbc-gpu/18", "Wrong precision backend")
+    require(helper["backend"] == backend, "Wrong precision backend")
     require(helper["vendor_id"] == reference["adapter_vendor"] and
             helper["device_id"] == reference["adapter_device"] and luid == reference["adapter_luid"],
             "Different execution adapter")
@@ -51,6 +51,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--backend", default="dxbc-gpu/18")
     args = parser.parse_args()
     runs, artifacts, seen, controls = [], set(), set(), {}
     for path in sorted(args.directory.glob("precision-*")):
@@ -59,7 +60,7 @@ def main():
         key = reference["vendor"], reference["precision_scenario"]
         require(key not in seen, "Duplicate precision run")
         seen.add(key)
-        components = verify(reference, observed)
+        components = verify(reference, observed, args.backend)
         runs.append({"vendor": key[0], "scenario": key[1], "components": components, "path": str(path)})
         artifacts.update(p for p in path.iterdir() if p.is_file())
         for name in ("bits", "validity", "shader", "coverage", "scenario", "adapter", "missing_case"):
@@ -79,7 +80,7 @@ def main():
             else:
                 changed["cases"].pop()
             try:
-                verify(reference, changed)
+                verify(reference, changed, args.backend)
             except ValueError as error:
                 controls[f"{key[0]}-{key[1]}-{name}"] = str(error)
             else:
