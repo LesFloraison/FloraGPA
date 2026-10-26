@@ -905,3 +905,15 @@ observed controller heartbeat gaps below 2.5 ms. This is a scoped response
 measurement, not full UI performance acceptance. See
 `DX11_NATIVE_DEBUG_OPERATIONS.md` and
 `research/dx11-native-debug-operation-evidence.json`.
+
+## Native vertex input checkpoint
+
+Actual prepared GPA draw inputs now feed an independent VS input-copy shader on
+a private device with the exact adapter identity. Raw bits and validity reach
+the C++ executor without running the original VS body during acquisition. Tests
+cover full register pressure, IA conversion and offsets, direct/indirect GPA
+selection, experiment restoration and retry. GF2 native output comparison is
+exact; BF1 float differences and a Helldivers execution operand extension remain
+open. See `DX11_NATIVE_VERTEX_INPUTS.md` and
+`research/dx11-native-vertex-input-evidence.json`. This checkpoint does not alter
+historical failures or certify full VS/debug/RenderDoc-removal parity.

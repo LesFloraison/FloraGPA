@@ -637,3 +637,16 @@ corpus skips. BF1/Helldivers model and state checks and fourteen result mutation
 pass. See `DX11_NATIVE_EXECUTION_DEBUG_MODEL.md`. UI dispatch/presentation,
 remaining source/shader/fragment semantics and standalone removal gates remain
 open.
+
+## Native vertex input continuation
+
+The independent VS input path now retains the effective input signature and
+uses a private device on the exact adapter to observe IA-converted raw registers.
+It supports full 32-register signatures without spare UAV/output slots and
+connects actual GPA bindings and experiment edits to the C++ executor. GF2 and
+BF1 execute selected VS inputs; Helldivers input acquisition succeeds while
+execution rejects an unsupported operand extension. GF2 native output comparison
+is exact; BF1 floating differences remain unresolved. See
+`DX11_NATIVE_VERTEX_INPUTS.md` and its evidence ledger. Whole-draw acquisition
+budgets, remaining semantics, VS session/UI integration and full removal gates
+remain open.

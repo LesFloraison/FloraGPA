@@ -1,0 +1,1393 @@
+{
+  "schema": 1,
+  "checkpoint": "native-vertex-input-observation",
+  "base_commit": "0124d477d6d6b11be62e37bfe864988201b7056b",
+  "implementation_commit": "fbad1a0bfd01800612bf1e96c08db2800ce31bdc",
+  "created_utc": "2026-10-26T17:41:01.567116+00:00",
+  "complete_release_acceptance": false,
+  "passed": 235,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "vertex-inputs",
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-input-final-tests.txt",
+        "bytes": 2363,
+        "sha256": "91829320c76b30fbab4c4f612d73eef0d260549fd36c63537fd9676d6114f4bd"
+      }
+    },
+    {
+      "name": "resource-snapshots",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-input-final-snapshot-tests.txt",
+        "bytes": 45944,
+        "sha256": "e4976a9b8d7ef5f125c59de3513b186a763e86ce7f05b5c4bdb184e9e2a46316"
+      }
+    },
+    {
+      "name": "mesh-input-references",
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-input-final-mesh-input-tests.txt",
+        "bytes": 3971,
+        "sha256": "e6e89121e14e0629bc35dd53202f211edbebd4f5dcddf1685970060c8ddf2f5a"
+      }
+    },
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-input-compute-regression-tests.txt",
+        "bytes": 4046,
+        "sha256": "24bc7932b1ce9ee3d42fb30499f1d99b5e69a9f51ed1e1db28964d484d129b36"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "case": "gf2",
+      "requested_vendor": 4318,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-gf2-4318.json",
+        "bytes": 7434,
+        "sha256": "cbb26c4e33bdd0ccdc36c7d220c5f62b53453e77397d2ad4d450e412c19c414a"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": false
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 3,
+      "input_observation_complete": true,
+      "input_observation_ms": 255.8377,
+      "execution_complete": true,
+      "execution_steps": 12,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3246850048,
+            "executor_valid": true,
+            "native_bits": 3246850048,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3245342720,
+            "executor_valid": true,
+            "native_bits": 3245342720,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1048904791,
+            "executor_valid": true,
+            "native_bits": 1048904791,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1097859072,
+            "executor_valid": true,
+            "native_bits": 1097859072,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3294691328,
+            "executor_valid": true,
+            "native_bits": 3294691328,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3286302720,
+            "executor_valid": true,
+            "native_bits": 3286302720,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 3,
+            "type": 3
+          }
+        ],
+        "different_components": 0,
+        "exact": true,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 292.4328
+    },
+    {
+      "case": "bf1",
+      "requested_vendor": 4318,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-bf1-4318.json",
+        "bytes": 6619,
+        "sha256": "de36e4d621bd7953747a866b674f62ce22c77b30aa8757fc427d1ff189feda6a"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": false
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 6,
+      "input_observation_complete": true,
+      "input_observation_ms": 1000.2992,
+      "execution_complete": true,
+      "execution_steps": 58,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 1.4901161193847656e-08,
+            "component": 0,
+            "exact": false,
+            "executor_bits": 1045694705,
+            "executor_valid": true,
+            "native_bits": 1045694704,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 1.1920928955078125e-07,
+            "component": 1,
+            "exact": false,
+            "executor_bits": 3214294327,
+            "executor_valid": true,
+            "native_bits": 3214294326,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1031127883,
+            "executor_valid": true,
+            "native_bits": 1031127883,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 3.259629011154175e-08,
+            "component": 3,
+            "exact": false,
+            "executor_bits": 987853696,
+            "executor_valid": true,
+            "native_bits": 987853416,
+            "register": 0,
+            "type": 3
+          }
+        ],
+        "different_components": 3,
+        "exact": false,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 1372.8411
+    },
+    {
+      "case": "hd",
+      "requested_vendor": 4318,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-hd-4318.json",
+        "bytes": 2675,
+        "sha256": "7e63a7ca01c41341be48dd09bc812076ad4b1b4318f0bf43d31756214d455f77"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 11352,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 68403,
+          "adapter_vendor": 4318,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": false
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "input_register_count": 4,
+      "input_observation_complete": true,
+      "input_observation_ms": 983.5908,
+      "execution_complete": false,
+      "execution_steps": null,
+      "native_comparison": null,
+      "error": "Unsupported DXBC execution operand extension",
+      "elapsed_ms": 1187.2226
+    },
+    {
+      "case": "gf2",
+      "requested_vendor": 32902,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-gf2-32902.json",
+        "bytes": 7436,
+        "sha256": "85cae98ff6f13c72a67996b64478a757de470225168727171aaadc9cd7604055"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": false
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 3,
+      "input_observation_complete": true,
+      "input_observation_ms": 285.8133,
+      "execution_complete": true,
+      "execution_steps": 12,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3246850048,
+            "executor_valid": true,
+            "native_bits": 3246850048,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3245342720,
+            "executor_valid": true,
+            "native_bits": 3245342720,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1048904791,
+            "executor_valid": true,
+            "native_bits": 1048904791,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1097859072,
+            "executor_valid": true,
+            "native_bits": 1097859072,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3294691328,
+            "executor_valid": true,
+            "native_bits": 3294691328,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3286302720,
+            "executor_valid": true,
+            "native_bits": 3286302720,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 3,
+            "type": 3
+          }
+        ],
+        "different_components": 0,
+        "exact": true,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 325.5851
+    },
+    {
+      "case": "bf1",
+      "requested_vendor": 32902,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-bf1-32902.json",
+        "bytes": 6619,
+        "sha256": "90b8876b72fe497dcd43e8483ad55de8dfe117fb30564ba9f1ad52c4b34b306a"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": false
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 6,
+      "input_observation_complete": true,
+      "input_observation_ms": 936.231,
+      "execution_complete": true,
+      "execution_steps": 58,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 1.4901161193847656e-08,
+            "component": 0,
+            "exact": false,
+            "executor_bits": 1045694705,
+            "executor_valid": true,
+            "native_bits": 1045694704,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 1.1920928955078125e-07,
+            "component": 1,
+            "exact": false,
+            "executor_bits": 3214294327,
+            "executor_valid": true,
+            "native_bits": 3214294326,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1031127883,
+            "executor_valid": true,
+            "native_bits": 1031127883,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 3.259629011154175e-08,
+            "component": 3,
+            "exact": false,
+            "executor_bits": 987853696,
+            "executor_valid": true,
+            "native_bits": 987853416,
+            "register": 0,
+            "type": 3
+          }
+        ],
+        "different_components": 3,
+        "exact": false,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 1275.6582
+    },
+    {
+      "case": "hd",
+      "requested_vendor": 32902,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-hd-32902.json",
+        "bytes": 2677,
+        "sha256": "ed74b15cd7ce5e30075d54bf734e2c1f9e39e7bb399c1128d9a8df8d6a7bc0bd"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 32103,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73907,
+          "adapter_vendor": 32902,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": false
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "input_register_count": 4,
+      "input_observation_complete": true,
+      "input_observation_ms": 903.7057,
+      "execution_complete": false,
+      "execution_steps": null,
+      "native_comparison": null,
+      "error": "Unsupported DXBC execution operand extension",
+      "elapsed_ms": 1175.7194
+    },
+    {
+      "case": "gf2",
+      "requested_vendor": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-gf2-0.json",
+        "bytes": 7428,
+        "sha256": "db9ee976e0b3bf69466e35e6ac31e1b832afa239c9f5e5029f3a07df8ab3bda5"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 6,
+          "start_index": 0
+        },
+        "gpa_event": 113,
+        "gpa_shader": 100,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 119376,
+          "input_references": 6,
+          "instances": 1,
+          "records": 6,
+          "records_per_instance": 6,
+          "stride": 40,
+          "warp": true
+        },
+        "index_buffer": 41,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 95,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 22,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 3,
+      "input_observation_complete": true,
+      "input_observation_ms": 82.0091,
+      "execution_complete": true,
+      "execution_steps": 12,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3246850048,
+            "executor_valid": true,
+            "native_bits": 3246850048,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3245342720,
+            "executor_valid": true,
+            "native_bits": 3245342720,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1048904791,
+            "executor_valid": true,
+            "native_bits": 1048904791,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1097859072,
+            "executor_valid": true,
+            "native_bits": 1097859072,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 1,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 2,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 3294691328,
+            "executor_valid": true,
+            "native_bits": 3294691328,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3286302720,
+            "executor_valid": true,
+            "native_bits": 3286302720,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 0,
+            "executor_valid": true,
+            "native_bits": 0,
+            "register": 3,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 1065353216,
+            "executor_valid": true,
+            "native_bits": 1065353216,
+            "register": 3,
+            "type": 3
+          }
+        ],
+        "different_components": 0,
+        "exact": true,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 106.1439
+    },
+    {
+      "case": "bf1",
+      "requested_vendor": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-bf1-0.json",
+        "bytes": 6553,
+        "sha256": "6898ecf7fa73b6880960be069456b744b06b9abffb9be33e33fd35986e870d2b"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 0,
+          "index_count": 19290,
+          "instance_count": 1,
+          "start_index": 19290,
+          "start_instance": 0
+        },
+        "gpa_event": 876,
+        "gpa_shader": 839,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 33654376,
+          "input_references": 19290,
+          "instances": 1,
+          "records": 19290,
+          "records_per_instance": 19290,
+          "stride": 64,
+          "warp": true
+        },
+        "index_buffer": 875,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 845,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 164604,
+            "resource": 857,
+            "slot": 0,
+            "stride": 24
+          }
+        ],
+        "vertex_id": 0,
+        "vertex_index": 0
+      },
+      "input_register_count": 6,
+      "input_observation_complete": true,
+      "input_observation_ms": 781.1301,
+      "execution_complete": true,
+      "execution_steps": 58,
+      "native_comparison": {
+        "components": [
+          {
+            "absolute_difference": 0.0,
+            "component": 0,
+            "exact": true,
+            "executor_bits": 1045694705,
+            "executor_valid": true,
+            "native_bits": 1045694705,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 1,
+            "exact": true,
+            "executor_bits": 3214294327,
+            "executor_valid": true,
+            "native_bits": 3214294327,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 2,
+            "exact": true,
+            "executor_bits": 1031127883,
+            "executor_valid": true,
+            "native_bits": 1031127883,
+            "register": 0,
+            "type": 3
+          },
+          {
+            "absolute_difference": 0.0,
+            "component": 3,
+            "exact": true,
+            "executor_bits": 987853696,
+            "executor_valid": true,
+            "native_bits": 987853696,
+            "register": 0,
+            "type": 3
+          }
+        ],
+        "different_components": 0,
+        "exact": true,
+        "original_schedule_recovered": false,
+        "reference": "original-shader-native-point-output",
+        "unknown_components": 0
+      },
+      "error": null,
+      "elapsed_ms": 1022.3165
+    },
+    {
+      "case": "hd",
+      "requested_vendor": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-input-final-hd-0.json",
+        "bytes": 2670,
+        "sha256": "33d784e1486b622b0681e9d8a5642a1235993a3884bf6e8fe6be03dbe8e11ef8"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "invocation": {
+        "draw_parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "gpa_event": 200,
+        "gpa_shader": 153,
+        "helper": {
+          "adapter_device": 140,
+          "adapter_luid_high": 0,
+          "adapter_luid_low": 73789,
+          "adapter_vendor": 5140,
+          "backend": "dxbc-vertex-inputs/1",
+          "budgeted_bytes": 17427112,
+          "input_references": 1164,
+          "instances": 12,
+          "records": 13968,
+          "records_per_instance": 1164,
+          "stride": 36,
+          "warp": true
+        },
+        "index_buffer": 193,
+        "index_format": 57,
+        "index_offset": 0,
+        "indirect": null,
+        "input_reference": 0,
+        "instance": 0,
+        "layout": 195,
+        "original_invocation_order_recovered": false,
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "original_query_recovered": false,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "source": "independent-replay-vertex-inputs/1",
+        "topology": 4,
+        "vertex_buffers": [
+          {
+            "offset": 0,
+            "resource": 197,
+            "slot": 0,
+            "stride": 24
+          },
+          {
+            "offset": 0,
+            "resource": 198,
+            "slot": 1,
+            "stride": 4
+          }
+        ],
+        "vertex_id": 38,
+        "vertex_index": 39562
+      },
+      "input_register_count": 4,
+      "input_observation_complete": true,
+      "input_observation_ms": 872.4175,
+      "execution_complete": false,
+      "execution_steps": null,
+      "native_comparison": null,
+      "error": "Unsupported DXBC execution operand extension",
+      "elapsed_ms": 1046.8917
+    }
+  ],
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/vertex-input-final-build.txt",
+      "bytes": 8982,
+      "sha256": "019ce0d76590794a620a48e09aca4a9c862e2586d364ee3a15fa1ea426da39f2"
+    },
+    {
+      "path": "artifacts/dx11-native/vertex-input-compute-regression-build.txt",
+      "bytes": 1694,
+      "sha256": "7c93074ea105cfa6a1a900529b66fe70f51224a6625c8038571c951ab4bac22a"
+    },
+    {
+      "path": "artifacts/dx11-native/vertex-input-indirect-edit-build.txt",
+      "bytes": 1004,
+      "sha256": "6a02ed58c694dbe86f31db838d892150683506bd68f1ce93d8a2295e20d7fa71"
+    }
+  ],
+  "executables": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcVertexInputsTests.exe",
+      "bytes": 1572864,
+      "sha256": "1aa22d525e9945b2b361674ee51b1f2ed2e0766c7984b184caa6ff1a2b109920"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcVertexInputProbe.exe",
+      "bytes": 2180096,
+      "sha256": "cb90468a002b369b93cc46791fb6d0d7631333c83174adb34558f097706b9eaf"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputSnapshotTests.exe",
+      "bytes": 1653248,
+      "sha256": "1da00a71f420dfd453d34db2f55d1d9fbd8768665e0be1446411216cb8217f6e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeVertexInputsTests.exe",
+      "bytes": 2030592,
+      "sha256": "20c362f897362e88587bbd4c9482ffbe1f0194fd72100c3dc3db7eee721c9a6e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeComputeDebugTests.exe",
+      "bytes": 2613760,
+      "sha256": "ad7dbe01a97e687054ee4beb4b7f165f0e991ab7f0947b283aadd3799d38226f"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4954112,
+      "sha256": "af92494bfd9895195c29b5b210f3345f4fb4c5ebc002ad4fb12d4166f1b830d7"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5502464,
+      "sha256": "8ea2e44952027e83b9f3b3f32b4cbf4354cd10fa66fe045b44d9baba8429bbb3"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5502464,
+      "sha256": "33cbe075e23aa73d8f59fb255f52dce5f0c2324c47352dc206e121446cc9ad18"
+    }
+  ],
+  "open_gates": [
+    "BF1 native output floating differences on NVIDIA and Intel",
+    "Helldivers unsupported execution operand extension",
+    "Bounded selected-input acquisition for large draws",
+    "Full IA boundary, class and invocation semantic coverage",
+    "Native VS journal, source/session and CLI/GUI integration",
+    "Full fragment history and remaining VS/PS/CS parity",
+    "P7 dependency removal and P8 standalone release acceptance"
+  ]
+}
