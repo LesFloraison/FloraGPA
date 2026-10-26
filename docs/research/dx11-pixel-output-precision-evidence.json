@@ -1,0 +1,411 @@
+{
+  "schema": 1,
+  "checkpoint": "native-pixel-output-minimum-precision",
+  "base_commit": "ab8a29c0af3fdb20ecd1bb87d6faa5b2ba91eeac",
+  "implementation_commit": "c109b040d485b2333eddfa92e1a6d5fc17c36008",
+  "created_utc": "2026-10-26T23:34:25.401396+00:00",
+  "complete_release_acceptance": false,
+  "helper_backend": "dxbc-gpu/20",
+  "suites": {
+    "first": {
+      "passed": 3027,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 323077,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-output-precision-first-tests.txt",
+        "bytes": 1839505,
+        "sha256": "ca676ee9bb33ae7e64d0d53da3c3a919895b8fa198352a5c10efb78ea79f224c"
+      }
+    },
+    "first-execution": {
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 39874,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-output-precision-first-execution-tests.txt",
+        "bytes": 389008,
+        "sha256": "4d978571ff0f8d14ee75e95159b2e9c31de0a882ba24b5e19998e6a5659c66d1"
+      }
+    },
+    "group": {
+      "passed": 182,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 14785,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-output-precision-group-tests.txt",
+        "bytes": 134384,
+        "sha256": "f394c24def99720f353cffa565b2fbc9af866b57b2c4d39135b403ce6379b53a"
+      }
+    },
+    "typed-regression": {
+      "passed": 1155,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 178730,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-output-precision-typed-regression-tests.txt",
+        "bytes": 2563137,
+        "sha256": "37e6a17255182a7be74746a5712bd716edd04e2f7501041cca4ff436d9db20d5"
+      }
+    },
+    "sampling-regression": {
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 363422,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-output-precision-sampling-regression-tests.txt",
+        "bytes": 3904,
+        "sha256": "d6ee62f1980ffca06d4f40d1abb531704bc3bb58d14f9f2483b936bd82f3e37d"
+      }
+    }
+  },
+  "suite_scope": "Typed and sampling regressions run the minimum-precision selections; they are not complete suite reruns.",
+  "matrices": {
+    "final": {
+      "cases": 3024,
+      "exact_components": 12096,
+      "negative_controls": 108,
+      "report": {
+        "path": "artifacts/dx11-native/pixel-output-precision-final-validation.json",
+        "bytes": 1339593,
+        "sha256": "b03adfff15990377dc17be82875793d45484a392a2bbcf37b936f001c017e1d5"
+      }
+    },
+    "typed": {
+      "cases": 5760,
+      "exact_components": 23040,
+      "negative_controls": 72,
+      "report": {
+        "path": "artifacts/dx11-native/pixel-output-precision-typed-validation.json",
+        "bytes": 5328428,
+        "sha256": "fa1d62f021f0b659aae5b7386daa40bcbe8157da7265df39746864f128cbd6ad"
+      }
+    },
+    "sampling": {
+      "cases": 10368,
+      "exact_components": 80352,
+      "negative_controls": 126,
+      "report": {
+        "path": "artifacts/dx11-native/pixel-output-precision-sampling-validation.json",
+        "bytes": 244862,
+        "sha256": "2b1de11e74349830cc5f5783878a1bfd4a8380983dc1268fb0ff35eab14549cd"
+      }
+    }
+  },
+  "compute_refactoring_cases": 144,
+  "real_probes": {
+    "completed": 9,
+    "failed": 0,
+    "selected_steps": 1368,
+    "global_steps": 5472,
+    "negative_controls": 180,
+    "original_fragment_eligibility": false,
+    "independent_complete_ps_output_comparison": false,
+    "report": {
+      "path": "artifacts/dx11-native/pixel-output-precision-real-validation.json",
+      "bytes": 192674,
+      "sha256": "cfcbef40e4cfbcccdcc6aa2925d5331ed603ae9a8e7f3ecea78a9b2bdd8bd22f"
+    },
+    "runs": [
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-0/report.json",
+          "bytes": 3291,
+          "sha256": "1a150bcce4f5a403d2f4da3c3399e6816e25cd3ac78335ee756095b934454e93"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-0/trace-reader.json",
+          "bytes": 47200,
+          "sha256": "c6e5146cc63bcf348e973c0d6215c5ac65f5608b1fa44288fe8c9a806613e7cb"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "selected_steps": 102,
+        "global_steps": 408,
+        "initial_reader_ms": 133,
+        "full_probe_ms": 2187,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 7446706
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-32902/report.json",
+          "bytes": 3298,
+          "sha256": "b3778d4075900531ebd4c98f221586e55af93a54498e32de05456f03b22a6391"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-32902/trace-reader.json",
+          "bytes": 47223,
+          "sha256": "a9dc39e910bb399f607eab2893e0a8bea7fd823afd1359206236b2aab17f4897"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "selected_steps": 102,
+        "global_steps": 408,
+        "initial_reader_ms": 154,
+        "full_probe_ms": 2311,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 7446879
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-4318/report.json",
+          "bytes": 3296,
+          "sha256": "7d0731c2e52d0a8119c45617118d1a442c79df65b0a6e6d698787a69749c4951"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-bf1-4318/trace-reader.json",
+          "bytes": 47217,
+          "sha256": "07e6a6d0e188feb0f6e5d230901549a43adfcc41c5c9700e1019c60d49d9edf4"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "selected_steps": 102,
+        "global_steps": 408,
+        "initial_reader_ms": 149,
+        "full_probe_ms": 2423,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 7446767
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-0/report.json",
+          "bytes": 2280,
+          "sha256": "eb7a4f45eeb57af0108284e87e0289a34ddf9fb8c3d7bf0ef84e60669fae5663"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-0/trace-reader.json",
+          "bytes": 24536,
+          "sha256": "9506897be29df37200368c92e2f7e808f4e3440237c86739a7f1bb9014dd7810"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "selected_steps": 25,
+        "global_steps": 100,
+        "initial_reader_ms": 25,
+        "full_probe_ms": 42,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 245298
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-32902/report.json",
+          "bytes": 2287,
+          "sha256": "1b4f4b87a8c292096ea2800aa5c632f3bd2cc7ec4a4856b547f87f66f19ff203"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-32902/trace-reader.json",
+          "bytes": 24555,
+          "sha256": "4cf2d0b689fc7b6ac2e16a423a4323e2726a281f0eadf0feb801eeb6c00db8b2"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "selected_steps": 25,
+        "global_steps": 100,
+        "initial_reader_ms": 23,
+        "full_probe_ms": 40,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 245317
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-4318/report.json",
+          "bytes": 2285,
+          "sha256": "de103a6ceb68368450c637956ceff9603d0e13a6aafb1418d11d2dfe91e5e394"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-4318/trace-reader.json",
+          "bytes": 24550,
+          "sha256": "e5b22cdd08f6ecb32f2ae20f932c882def3d7973526a4a30fc2f41daa58d4663"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "selected_steps": 25,
+        "global_steps": 100,
+        "initial_reader_ms": 24,
+        "full_probe_ms": 44,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 245312
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-0/report.json",
+          "bytes": 2396,
+          "sha256": "f69957f706d5bb77ef87db6bc0d0d022293209f94b78db9d66cd3aa39fb9b126"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-0/trace-reader.json",
+          "bytes": 77307,
+          "sha256": "2d408f1dfc78640d43b32931d2e185aa8fbb75c7c5adbe87c6dc37e129fadf1d"
+        },
+        "status": "ok",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "selected_steps": 329,
+        "global_steps": 1316,
+        "initial_reader_ms": 4174,
+        "full_probe_ms": 252172,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 260287993
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-32902/report.json",
+          "bytes": 2404,
+          "sha256": "4d6c3bd57c3cf3836b14093967b2b3676740bce4733444d3b15bcdc13ed44746"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-32902/trace-reader.json",
+          "bytes": 77330,
+          "sha256": "6b64b2a1e18c9ce9845907f5e2b0a1fc7b79f786ee49bba960e3eba29aef3892"
+        },
+        "status": "ok",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "selected_steps": 329,
+        "global_steps": 1316,
+        "initial_reader_ms": 4396,
+        "full_probe_ms": 252891,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 260288012
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-4318/report.json",
+          "bytes": 2402,
+          "sha256": "d8c49031b41f2e5b29f99f043eee855c5341ebafeb5b282931606e6480356cc3"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-output-precision-real-hd-4318/trace-reader.json",
+          "bytes": 77324,
+          "sha256": "b508c9eaec4e0da4ad2b1d76cd4740c30fe6e1cc81e6a295af4a6fddff24af9f"
+        },
+        "status": "ok",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "selected_steps": 329,
+        "global_steps": 1316,
+        "initial_reader_ms": 4229,
+        "full_probe_ms": 272631,
+        "source_symbol_status": "unavailable",
+        "trace_bytes": 260287924
+      }
+    ]
+  },
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/pixel-output-precision-build1.txt",
+      "bytes": 3455,
+      "sha256": "e1270cbcb51588c02af387f4581254beb03bc91554cfd207400d6420f55ffd08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-output-precision-build2.txt",
+      "bytes": 1000,
+      "sha256": "db7dfa95bad4483f0811965f65b7c54ab507c34b5e13b5f3e25082de6f501e38"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-output-precision-build3.txt",
+      "bytes": 8354,
+      "sha256": "41f1f31f7fe74213042261ced2e1e3949f884cd20fffeb3bf1111e5cc03f95a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-output-precision-build4.txt",
+      "bytes": 976,
+      "sha256": "65db1322a9e78f6c8aea255c6b404f32508b7e664379b1588cca77298c34c68e"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4966400,
+      "sha256": "2edc8570bdab4562c76028c082fcfd48c2e2dc3c47a35c33d0329d6f54ba44a7"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5555712,
+      "sha256": "7b3c28c619432a9ae882b3447565e6f5971fab6458b3cb1227e5e49e517d1714"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5555712,
+      "sha256": "919b90e83343211d469557d25f8d156a51c84b6b33d86f9ba379260561834843"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelOutputTests.exe",
+      "bytes": 460800,
+      "sha256": "f5ad6bc6e169809b56863b9ad3c207b28cd5c8080034395ec0593480c76ae5cf"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 543232,
+      "sha256": "f9551606ad100b4739786bcfc18f1262797583a19c954b33bdc413898ecc5e1f"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcGroupTests.exe",
+      "bytes": 543232,
+      "sha256": "230125f8ec045ebf6958d302bd9e642ad56dec6b0a9d11770c86603c4ad866fc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTypedPixelTests.exe",
+      "bytes": 513536,
+      "sha256": "4e2083d3f21dd88a581a8f8c81185242ccf5596b0f2ce701758cf34300d38743"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 575488,
+      "sha256": "d82ab03dc010af5b361be1f86a9cd83f338b54140f8abf8f841dc6a9668e7000"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 2867712,
+      "sha256": "f7bbee142c4e3a8ab746ed440c508d137595eeccbe534a3d760136ccccd3fe23"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 927744,
+      "sha256": "1d265016ce40515f70be273cecfb9faad6fc64aecbbf703c11d5700a11b68b9a"
+    }
+  ],
+  "verified_artifact_files": 30702,
+  "remaining_gates": [
+    "Original fragment qualification and complete Pixel History",
+    "Remaining precision, memory and helper-lane semantics",
+    "Public PS jobs and source/debugger parity",
+    "Resource snapshot and journal performance acceptance",
+    "RenderDoc consumer/build/package removal",
+    "Independent clean-profile release acceptance"
+  ]
+}

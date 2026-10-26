@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision implicit sampling and typed-buffer loads are tested; GF2/BF1 traces complete on three adapters, while Helldivers reaches the minimum-precision PS output restriction; fragment qualification, helper memory behavior and semantic/source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads and outputs are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, helper memory behavior, public PS sessions and semantic/source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -743,3 +743,14 @@ Helldivers advances to the remaining minimum-precision PS output restriction.
 See `research/DX11_TYPED_LOAD_PRECISION.md` for scope, retained failed attempts,
 raw evidence and reproduction. This does not close P6 or remove the existing
 RenderDoc backend; full history/debugger parity and P7/P8 remain required.
+
+## Pixel output precision continuation
+
+`dxbc-gpu/20` preserves single PS output precision and the original refactoring
+permission for assisted arithmetic. Independent draws validate 3,024 output
+cases, with compute, execution, typed-load and sampling regressions passing.
+All nine GF2/BF1/Helldivers selected private quad journals now execute and rewind
+on NVIDIA, Intel and WARP. See `research/DX11_PIXEL_OUTPUT_PRECISION.md` for
+evidence and limits, including the large Helldivers journal and unavailable
+source symbols. Original fragment qualification, remaining semantics, public PS
+sessions, source/UI parity and complete history remain required before P7/P8.
