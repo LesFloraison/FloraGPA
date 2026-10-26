@@ -417,6 +417,16 @@ class Replay {
         uint32_t predicateValue{};
     };
     PredicateResult readPredicateResult(Id resource, unsigned timeoutMs = 1000);
+    struct PredicateExecution {
+        Id resource{};
+        uint32_t comparison{}, flags{};
+        std::string source = "unbound";
+        std::optional<bool> queryValue;
+        std::optional<bool> allowsExecution = true;
+    };
+    // Observes the currently bound replay predicate, including native baseline
+    // carriers. This never claims to recover the original application's query.
+    PredicateExecution observeBoundPredicate(const CancelCheck & = {}, unsigned timeoutMs = 5000);
     const auto &unresolvedQueryCompletions() const { return unresolvedQueryCompletions_; }
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
     // Borrowed native objects, valid only during the callback. The observer must not mutate state.

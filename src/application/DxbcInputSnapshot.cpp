@@ -559,7 +559,8 @@ class Snapshot {
 };
 } // namespace
 InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
-                                     const CancelCheck &cancelled) {
+                                     const CancelCheck &cancelled,
+                                     const std::function<void()> &beforeSnapshot) {
     checkCancellation(cancelled);
     const auto id = replay.options().until;
     if (stage >= 6 || !maxBytes || !id || !replay.options().before || !replay.options().prepareBeforeDraw ||
@@ -575,6 +576,8 @@ InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t ma
                        return;
                    if (result)
                        throw std::runtime_error("Duplicate DXBC input replay boundary");
+                   if (beforeSnapshot)
+                       beforeSnapshot();
                    result = Snapshot(replay, objects, stage, maxBytes, cancelled).read(context);
                });
     checkCancellation(cancelled);

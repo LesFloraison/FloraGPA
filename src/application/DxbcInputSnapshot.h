@@ -30,7 +30,10 @@ struct InputSnapshot {
 // not proof of original-capture initialization or defined shader behavior.
 InputSnapshot snapshotBufferInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
                                    const CancelCheck &cancelled = {});
+// The optional check runs once inside the prepared event's experiment scope,
+// before private input allocation. It must not mutate bindings or resources.
 InputSnapshot snapshotResourceInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
-                                     const CancelCheck &cancelled = {});
+                                     const CancelCheck &cancelled = {},
+                                     const std::function<void()> &beforeSnapshot = {});
 } // namespace dxbc_exec
 } // namespace flora

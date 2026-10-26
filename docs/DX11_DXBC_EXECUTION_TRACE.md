@@ -12,8 +12,9 @@ The journal is a low-level execution artifact. It does not prove that a selected
 group was in a dispatch's bounds or passed predication. The header explicitly
 reports `invocation_eligibility: not_established_by_trace_writer`. A product
 debug request must establish those facts at the effective event boundary before
-using this writer. This checkpoint does not enable the reserved `debug-thread`
-CLI action or replace the existing debug UI.
+using this writer. The CLI/Worker eligibility layer is documented in
+`DX11_NATIVE_COMPUTE_DEBUG.md`; the low-level writer does not replace the existing
+debug UI.
 
 Header identity includes the effective frame and shader SHA-256, GPA event and
 shader IDs, replay generation, actual adapter LUID/vendor/device, input source,
@@ -118,9 +119,9 @@ capture files stay outside Git. The compact ledger is
 
 ## Remaining integration
 
-The next product boundary must validate direct/indirect dispatch dimensions,
-experiment edits, predication and deferred execution, and bind trace identity to
-the native Worker job context. A native reader/model must preserve source stepping,
+The native compute job layer now checks effective dispatch dimensions, experiment
+inputs and known replay predication, and binds artifacts to the Worker context.
+Predicate-hint eligibility remains unresolved. A native reader/model must preserve source stepping,
 breakpoints, watches, forward/reverse movement and configuration migration before
 switching the UI. Actual VS/PS invocation inputs, helper memory semantics, complete
 Pixel History and the P7/P8 removal and standalone acceptance gates remain open.

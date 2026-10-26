@@ -1,0 +1,764 @@
+{
+  "schema": 1,
+  "checkpoint": "native-compute-analysis-jobs",
+  "backend": "dx11-native/3",
+  "created_utc": "2026-10-26T14:54:43.413789+00:00",
+  "base_commit": "1183d7df2556d9b46fd14730a1b021d7675aa8e8",
+  "complete_release_acceptance": false,
+  "passed": 263,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-native-compute-debug.txt",
+        "bytes": 4046,
+        "sha256": "b726e52c18a074f1bad6edb4e3c34006cf092b306736dcb5252618ac7e296129"
+      }
+    },
+    {
+      "name": "native-analysis",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-native-analysis.txt",
+        "bytes": 2569,
+        "sha256": "eb91638fbfc27402babd1116e023cfcda4c0505bec32a309a7ce8a6dd87ed00f"
+      }
+    },
+    {
+      "name": "native-counter-ui",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-native-counter-ui.txt",
+        "bytes": 935,
+        "sha256": "b747c2d4b8449963dffe653a4d9abd1fa6e567323fdba5a17b8525c16d4af94e"
+      }
+    },
+    {
+      "name": "predication",
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-predication.txt",
+        "bytes": 2344,
+        "sha256": "bf62f3bd86bb9bae21178fe27c47b55b679add9f526e700a507dc1773ba66edd"
+      }
+    },
+    {
+      "name": "normalized-predication",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-normalized-originals.txt",
+        "bytes": 749,
+        "sha256": "bde9be06de723611be8bfb5e1431b797e0146293ff4ed59487ae0ceaf6a47e7f"
+      }
+    },
+    {
+      "name": "dxbc-input-snapshot",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-dxbc-input-snapshot.txt",
+        "bytes": 45944,
+        "sha256": "23f5643eb951187cf78088e9ff429b17b69df62e8770a725e820fa332e2ee7e3"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/native-compute-debug-regression-dxbc-execution-trace.txt",
+        "bytes": 2781,
+        "sha256": "0a5a6ca9e93f8a84300b4e46c56c0aa9642bad4d07392bd7e83b484089e27da2"
+      }
+    }
+  ],
+  "initial_skip": {
+    "reason": "Original predicate corpus absent; existing test requested FLORA_INITIAL_PREDICATE_CAPTURES",
+    "log": {
+      "path": "artifacts/dx11-native/native-compute-debug-regression-normalized-predication.txt",
+      "bytes": 873,
+      "sha256": "528fc204e37cdd740210df3d251521ad5983390ced5606253daa0363207f5e31"
+    },
+    "resolution": "Regenerate the existing independent original-GPA corpus and rerun the unchanged full suite",
+    "rerun": {
+      "path": "artifacts/dx11-native/native-compute-debug-normalized-originals-ctest.txt",
+      "bytes": 325,
+      "sha256": "058094938a540db8872bf71294c1d09ce5238ad3700b674b68cb650373d9d7cd"
+    }
+  },
+  "predicate_corpus": {
+    "modes": 16,
+    "runs": 32,
+    "verified_frames": 384,
+    "manifest": {
+      "path": "artifacts/dx11-native/native-compute-predicate-corpus/manifest.json",
+      "bytes": 120899,
+      "sha256": "b4c1820fab617c623a2b97d03ee9a097af8185608308231c99c87f4c160bca90"
+    },
+    "producer_files": {
+      "capture_initial_predicates.py": "439384bca1d0e8ebb4b7458f2353e9516f594922a6bdac700060e0b0b46f215a",
+      "FloraInitialPredicateProbe.exe": "9f7f519033e8d22bdafa3c96879b05af99184beec24bb5532963ca167d1e4fa2",
+      "initial_predicate_probe.cpp": "97affba504d5e609df04328e868acb497c29fdf0155a699a86f2b811050bf57f",
+      "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+      "present_capture_probe.cpp": "5ec2b85f85585cbf27551d47e75a8e935b642369293037f33c18a49d57112269",
+      "texture_probe_helpers.h": "9be1661981e0196c660748ac8f4bd182feb6f1e8dff79091d3568d943e58be5b"
+    },
+    "reference_gpa_sha256": {
+      "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+      "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+      "dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+    },
+    "cases": [
+      {
+        "id": "initial_predicate_0",
+        "path": "0/capture.gpa_frame",
+        "sha256": "8e625a1d6da76027ae6cfdfe71cdac2b21176a3124cbce88e17a2e2613b0e01c",
+        "bytes": 57721,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "preframe-only predicate result",
+          "query=False, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_1",
+        "path": "1/capture.gpa_frame",
+        "sha256": "4d0944456a7d7221a1695b6f9b71c47eaf120092ebddfa9a99cc97e0a125da92",
+        "bytes": 57721,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "preframe-only predicate result",
+          "query=True, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_2",
+        "path": "2/capture.gpa_frame",
+        "sha256": "0e96a669dd28a6acc89aae134223c6e8e44da3f7c41c25c7903d4b0c341bc93d",
+        "bytes": 57721,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "preframe-only predicate result",
+          "query=False, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_3",
+        "path": "3/capture.gpa_frame",
+        "sha256": "310f4b9a14f8a88bb4c816d338172ec4346b0cc984e111009a358ab1587ef1ca",
+        "bytes": 57721,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "preframe-only predicate result",
+          "query=True, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_4",
+        "path": "4/capture.gpa_frame",
+        "sha256": "070234654d05940e2ccc0995467dbd9bd4050224fc55bfe2784cca3bfd007d7c",
+        "bytes": 80656,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "captured Begin/End refresh",
+          "query=False, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_5",
+        "path": "5/capture.gpa_frame",
+        "sha256": "7642b234c955e925b037b1530aef43ef7ff25793cd2e7aaf2af839a34d43235d",
+        "bytes": 80656,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "captured Begin/End refresh",
+          "query=True, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_6",
+        "path": "6/capture.gpa_frame",
+        "sha256": "9687b22f9e59dd5a7f233a077e329e6410d5bb37172d2586db40a43b0fc19441",
+        "bytes": 80656,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "captured Begin/End refresh",
+          "query=False, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_7",
+        "path": "7/capture.gpa_frame",
+        "sha256": "85112aaf83573a68cd54bed311e3e6cbc7f09e404b2b6ebafd76c0f07da13d63",
+        "bytes": 80656,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "captured Begin/End refresh",
+          "query=True, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_8",
+        "path": "8/capture.gpa_frame",
+        "sha256": "7a917dbf0ef5cc709d9dff6a7635dca220f5e72a5169515bc1c6c01fb29e7a3f",
+        "bytes": 57786,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "saved GetData observation",
+          "query=False, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_9",
+        "path": "9/capture.gpa_frame",
+        "sha256": "1c3ca9fdb3f214dd0efe72312012c55f30006c6bf4d0f2298e239d52052027ad",
+        "bytes": 57786,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "saved GetData observation",
+          "query=True, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_10",
+        "path": "10/capture.gpa_frame",
+        "sha256": "29816c9827d4abe8f3609d36ed940722964bba29f6cc84022af5e9a340592ebb",
+        "bytes": 57786,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "saved GetData observation",
+          "query=False, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_11",
+        "path": "11/capture.gpa_frame",
+        "sha256": "933cd5915baba828a02b21e1e307e4b5ea4cc4d6ee30f0b5d04755f4e5c677f4",
+        "bytes": 57786,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "saved GetData observation",
+          "query=True, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_12",
+        "path": "12/capture.gpa_frame",
+        "sha256": "9c05f6dd595252329c4a72bb03a41f5c0fb6e486c00130819a949dc9eb94a773",
+        "bytes": 103298,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "first use before later Begin/End",
+          "query=False, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_13",
+        "path": "13/capture.gpa_frame",
+        "sha256": "b2fba4d44e0f2bf236c0cae37efff66813cb110a3fd09294631751e7e2918530",
+        "bytes": 103298,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "first use before later Begin/End",
+          "query=True, comparison=False"
+        ]
+      },
+      {
+        "id": "initial_predicate_14",
+        "path": "14/capture.gpa_frame",
+        "sha256": "730b00f8e83d30bb91e4a415e1216848a1356b270a20350eb78ebf6e02469344",
+        "bytes": 103298,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "first use before later Begin/End",
+          "query=False, comparison=True"
+        ]
+      },
+      {
+        "id": "initial_predicate_15",
+        "path": "15/capture.gpa_frame",
+        "sha256": "9afc5053b45cd8c9a26b86b99902a4ef97fde9defd132222a5e74269ee14d423",
+        "bytes": 103298,
+        "family": "initial_predicate",
+        "origin": "self_owned_original_gpa_capture",
+        "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+        "source_manifests": [],
+        "device_scope": "Default hardware producer; original player device not identified.",
+        "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+        "comparison_policy": "exact_golden",
+        "boundaries": [],
+        "controls": [],
+        "covers": [
+          "first use before later Begin/End",
+          "query=True, comparison=True"
+        ]
+      }
+    ]
+  },
+  "captures": [
+    {
+      "name": "bf1",
+      "context_id": "e9d60def763857a3e53e40d29d7c49ce6aefabec3df8009475a4044ce3b91640",
+      "invocation": {
+        "argument_buffer": 0,
+        "argument_offset": null,
+        "dispatch_groups": [
+          2,
+          2,
+          1
+        ],
+        "dispatch_kind": "direct",
+        "gpa_event": 209,
+        "group": [
+          0,
+          0,
+          0
+        ],
+        "group_size": [
+          16,
+          16,
+          1
+        ],
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "flags": 0,
+          "original_query_recovered": false,
+          "query_value": null,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "status": "eligible_in_observed_replay",
+        "thread": [
+          0,
+          0,
+          0
+        ]
+      },
+      "steps": 14992,
+      "gpu_operations": 2000,
+      "trace_bytes": 13643506,
+      "worker_elapsed_ms": 8720,
+      "peak_working_set_bytes": 1759690752,
+      "result": {
+        "path": "artifacts/dx11-native/native-compute-debug-bf1/result.json",
+        "bytes": 6584,
+        "sha256": "336ad01fabda61ccb82e8105e3f632d9701698574dc06512a6467de619525611"
+      },
+      "job": {
+        "path": "artifacts/dx11-native/native-compute-debug-bf1/job.json",
+        "bytes": 672,
+        "sha256": "072db69709692607491c6b30e70f16d858874ff5ad09d18c957d17aef6f67dad"
+      },
+      "journal": {
+        "path": "artifacts/dx11-native/native-compute-debug-bf1/trace.jsonl",
+        "bytes": 13643506,
+        "sha256": "0add84251827eeaa5645e93f8bcc2fba5063a8fe0899c9ea886abcaf16bcc51a"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/native-compute-debug-bf1-validation.json",
+        "bytes": 6128,
+        "sha256": "d6fba78dd99154e1916c6823072fb4b0e54e77a8a3da73df42fb417567df1354"
+      },
+      "reference": {
+        "path": "artifacts/dx11-native/execution-trace-bf1.json",
+        "bytes": 11850,
+        "sha256": "6c3e9a0abaa2bf94fe6b1d66a50b75285402c51332b8d048ed6662de0b9e0e1b"
+      }
+    },
+    {
+      "name": "hd",
+      "context_id": "71700b486a1bdc07f051775d6efdf7c4e495371245ec7632ba991e85ed9e2aec",
+      "invocation": {
+        "argument_buffer": 0,
+        "argument_offset": null,
+        "dispatch_groups": [
+          1,
+          1,
+          1
+        ],
+        "dispatch_kind": "direct",
+        "gpa_event": 893,
+        "group": [
+          0,
+          0,
+          0
+        ],
+        "group_size": [
+          8,
+          8,
+          1
+        ],
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "flags": 0,
+          "original_query_recovered": false,
+          "query_value": null,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "status": "eligible_in_observed_replay",
+        "thread": [
+          0,
+          0,
+          0
+        ]
+      },
+      "steps": 384,
+      "gpu_operations": 64,
+      "trace_bytes": 322755,
+      "worker_elapsed_ms": 1096,
+      "peak_working_set_bytes": 1744084992,
+      "result": {
+        "path": "artifacts/dx11-native/native-compute-debug-hd/result.json",
+        "bytes": 6529,
+        "sha256": "91e6f88ef53426c14adf14a14134eef5b2b3da60baa12335119a0bb730a48c5c"
+      },
+      "job": {
+        "path": "artifacts/dx11-native/native-compute-debug-hd/job.json",
+        "bytes": 679,
+        "sha256": "ee9021c2ca1384c5f6e0d6d71c541fbc4be1abd50fdae05c05332a5f063e3661"
+      },
+      "journal": {
+        "path": "artifacts/dx11-native/native-compute-debug-hd/trace.jsonl",
+        "bytes": 322755,
+        "sha256": "404358b083292b302a4419583d17fdf412e5eab82b2892afa5e930d77d9e18df"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/native-compute-debug-hd-validation.json",
+        "bytes": 6059,
+        "sha256": "8959fddf3197750c7206878eb29167223efd5453e03e964da31d7583f2504294"
+      },
+      "reference": {
+        "path": "artifacts/dx11-native/execution-trace-hd.json",
+        "bytes": 4952,
+        "sha256": "9b8b3f3c58d0dcc3c34e7ca14ff9ffbb00a8c516db66525bd6f904d5eef9a5f2"
+      }
+    }
+  ],
+  "negative_checks": {
+    "passed": true,
+    "cases": [
+      {
+        "case": "backend",
+        "rejected": true,
+        "reason": "Invalid native result"
+      },
+      {
+        "case": "request",
+        "rejected": true,
+        "reason": "Request identity mismatch"
+      },
+      {
+        "case": "context_digest",
+        "rejected": true,
+        "reason": "Context digest mismatch"
+      },
+      {
+        "case": "adapter",
+        "rejected": true,
+        "reason": "Actual adapter mismatch"
+      },
+      {
+        "case": "worker_digest",
+        "rejected": true,
+        "reason": "Worker binary mismatch"
+      },
+      {
+        "case": "trace_path",
+        "rejected": true,
+        "reason": "Unexpected native trace path"
+      },
+      {
+        "case": "query_claim",
+        "rejected": true,
+        "reason": "Invalid captured query claim"
+      },
+      {
+        "case": "shader",
+        "rejected": true,
+        "reason": "Shader identity mismatch"
+      },
+      {
+        "case": "eligibility",
+        "rejected": true,
+        "reason": "Missing eligibility evidence"
+      },
+      {
+        "case": "external_module",
+        "rejected": true,
+        "reason": "External analysis module loaded"
+      },
+      {
+        "case": "artifact_bytes",
+        "rejected": true,
+        "reason": "Artifact digest mismatch"
+      }
+    ]
+  },
+  "negative_log": {
+    "path": "artifacts/dx11-native/native-compute-debug-negative.json",
+    "bytes": 1304,
+    "sha256": "02c13652857b6dfb3878b9211064bcd47ac402c90678e702d5e6812ae6012585"
+  },
+  "ctest": {
+    "path": "artifacts/dx11-native/native-compute-debug-regression-ctest.txt",
+    "bytes": 961,
+    "sha256": "00170a7f29f1bbefb4dd4f0625d2bb5215643fc938c5e55e5ac31e36bc8c9a0d"
+  },
+  "build_logs": [
+    {
+      "path": "artifacts/dx11-native/native-compute-debug-first-build.txt",
+      "bytes": 13305,
+      "sha256": "43419b35ddaddadb1557a554f051240c3562cb068846f73af3604e4c1df3e11a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-compute-debug-final-build.txt",
+      "bytes": 3361,
+      "sha256": "3098f244a10338eb9892aa5c85c474389a46710548e438dcf05494bcdcb0ccff"
+    },
+    {
+      "path": "artifacts/dx11-native/native-compute-debug-predicate-probe-build.txt",
+      "bytes": 273,
+      "sha256": "fa25f98eb29105b580140bb4041891187d1be9c4823eef7ad279759aba2429dd"
+    }
+  ],
+  "build_warnings": [
+    "C4838 in unchanged DxbcGpuOperations.cpp:664",
+    "C4457 in unchanged DxbcGpuOperations.cpp:694"
+  ],
+  "source_files": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 113626,
+      "sha256": "dc1ad6907feda2d5c0eed1fbc5ba1ecae17d0cb7f7d67da468e3079f114190a2"
+    },
+    {
+      "path": "src/replay/Replay.h",
+      "bytes": 21707,
+      "sha256": "be3e39c8a6c835986510776cb3e5f606d61b93756d4b5bb46d374088c7d38c61"
+    },
+    {
+      "path": "src/replay/Predication.cpp",
+      "bytes": 13436,
+      "sha256": "14cf48c580634e786e87a838478168632e9b6c4b5a3c7bc08346bc40affdaaf4"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "bytes": 1798,
+      "sha256": "11c05ba8548a10b7dd640357f946234864a706ce8c4cbf2432206a0e130e0d7c"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "bytes": 31203,
+      "sha256": "e3bc3f7a24ae058bcb818f74cb4265825e9270d6fad9ba8eb6bf5c200e84c6a5"
+    },
+    {
+      "path": "src/application/NativeComputeDebug.h",
+      "bytes": 438,
+      "sha256": "2d23a69f335f7050224522ff64d7f0d7d265298c206315fba357c319ac6cf72d"
+    },
+    {
+      "path": "src/application/NativeComputeDebug.cpp",
+      "bytes": 4400,
+      "sha256": "abf0efa3e62bcade5f172324a1a7c1ce2d0bfde1ab67304bb7f93a0a3f88ec1e"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 960,
+      "sha256": "9a17ec8f78d946de642b430ad61b739f05e2bc0d0b9d47001318250f9ac19a79"
+    },
+    {
+      "path": "src/application/NativeAnalysis.cpp",
+      "bytes": 20775,
+      "sha256": "29c8c6e5138dfaa39b45d33478add9a2e48a2fbaafe3d126f27d44c822ef2876"
+    },
+    {
+      "path": "src/cli/NativeAnalyzeCli.cpp",
+      "bytes": 5400,
+      "sha256": "9bb2b607555380b8ebc2b0f70fd6e6757bd8d5e3b465e187e7cb38ee9476e407"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "bytes": 14077,
+      "sha256": "616ee24ba531180c956164a6d5835bdb880a40d396c37ac21a0c8d8fe0a7223a"
+    },
+    {
+      "path": "tools/validate_native_compute_debug.py",
+      "bytes": 8593,
+      "sha256": "36d3655deb74042c8ee72af787698881ce53b561812822e903a08a7d3c43ffda"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4507648,
+      "sha256": "92621e210cfb3620dda12b586f7857ed320c33175233486977befcd82a2928f8"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5463552,
+      "sha256": "4a8727dd00ed62e417b7ad58f186667c866c36015dd0c8f9d93acd18ca993b6d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5463552,
+      "sha256": "4a8727dd00ed62e417b7ad58f186667c866c36015dd0c8f9d93acd18ca993b6d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeComputeDebugTests.exe",
+      "bytes": 2179584,
+      "sha256": "51be5a7a9cdf021b37280592fb7a4e325914722220400930bb99ecc06702bdbf"
+    },
+    {
+      "path": "build/vs2022/Release/FloraInitialPredicateProbe.exe",
+      "bytes": 78848,
+      "sha256": "9f7f519033e8d22bdafa3c96879b05af99184beec24bb5532963ca167d1e4fa2"
+    }
+  ],
+  "remaining_gates": [
+    "Native debugger UI and configuration migration",
+    "Predicate-hint eligibility",
+    "Remaining DXBC instructions, shapes and helper memory semantics",
+    "Captured VS/PS invocation discovery",
+    "Complete pixel history",
+    "RenderDoc dependency removal",
+    "Standalone release and performance acceptance"
+  ]
+}

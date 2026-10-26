@@ -137,10 +137,13 @@ FloraGPA.Cli analyze frame.gpa_frame texture --resource 20 --gpa-event 2000 --ou
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs --out mesh
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-index --instance 0 --out mesh-identities
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-inputs --instance 0 --out mesh-inputs
+FloraGPA.Cli analyze frame.gpa_frame debug-thread --gpa-event 893 --group 0 0 0 --thread 0 0 0 --out compute-debug
 ```
 
 The native entry point never recaptures to RDC or selects an external replay
-backend. History/debug actions are reserved but fail explicitly until implemented.
+backend. Event history requires `--history-scope events`; `debug-thread` uses the
+native compute job described in `DX11_NATIVE_COMPUTE_DEBUG.md`. Complete fragment
+history and VS/PS debug actions still fail explicitly until implemented.
 During this stage the legacy command is still present for baseline comparison;
 its final retirement and GUI cutover remain separate gates.
 
@@ -579,3 +582,14 @@ The independent validator reconstructs and rewinds real captured group execution
 `DX11_DXBC_EXECUTION_TRACE.md`. Invocation eligibility and Worker/UI integration
 are separate required steps; no existing debug action is switched or removed by
 this checkpoint, and no full debugger/history or release gate is closed.
+
+## Native compute Worker continuation
+
+The native `debug-thread` CLI action now produces a checked invocation report
+and project-owned execution journal through the existing Worker. It supports
+actual direct/indirect arguments, scoped buffer/shader experiments and known
+replay predication, with explicit errors for unknown hint eligibility. The
+seven affected suites pass 263 tests after restoring original-corpus coverage;
+real BF1/Helldivers CLI jobs and eleven negative result checks also pass.
+See `DX11_NATIVE_COMPUTE_DEBUG.md`. The debugger UI, complete shader/fragment
+semantics and P7/P8 gates remain open; this does not retire any legacy UI feature.

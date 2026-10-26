@@ -28,7 +28,7 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addPositionalArgument("capture", "DX11 .gpa_frame file");
         parser.addPositionalArgument(
             "action", "inventory | events | texture | mesh | counters | history --history-scope events "
-                      "(fragment history and debugging pending parity)");
+                      "| debug-thread (fragment history and full debugger parity remain pending)");
         parser.addOption({"out", "New or empty output directory", "path"});
         parser.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
         parser.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
@@ -40,9 +40,9 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"thread", "Compute local thread X Y Z", "coordinates"});
         parser.addOption(
             {"history-scope", "Event snapshots: events; fragment history remains pending", "scope"});
-        for (const auto key :
-             {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer", "slice",
-              "sample", "typed-format", "instance", "vertex", "index", "stream", "max-bytes", "max-records"})
+        for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
+                               "slice", "sample", "typed-format", "instance", "vertex", "index", "stream",
+                               "max-bytes", "max-records", "max-steps", "max-trace-bytes"})
             parser.addOption({key, "Native analysis selection", "integer"});
         if (!parser.parse(normalized))
             throw std::invalid_argument(parser.errorText().toStdString());

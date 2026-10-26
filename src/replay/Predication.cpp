@@ -226,6 +226,48 @@ Replay::PredicateResult Replay::readPredicateResult(Id id, unsigned timeoutMs) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
+Replay::PredicateExecution Replay::observeBoundPredicate(const CancelCheck &cancelled, unsigned timeoutMs) {
+    checkCancellation(cancelled);
+    if (!timeoutMs || timeoutMs > 60000)
+        throw std::runtime_error("Invalid predicate observation deadline");
+    PredicateExecution result;
+    Com<ID3D11Predicate> predicate;
+    BOOL comparison = FALSE;
+    context_->GetPredication(&predicate, &comparison);
+    result.resource = boundPredicate_;
+    result.comparison = uint32_t(comparison);
+    if (predicate.Get() != get<ID3D11Predicate>(boundPredicate_) || uint32_t(comparison) != predicateValue_)
+        throw std::runtime_error("Native predication disagrees with replay binding provenance");
+    if (!predicate)
+        return result;
+    result.allowsExecution.reset();
+    D3D11_QUERY_DESC desc{};
+    predicate->GetDesc(&desc);
+    result.flags = desc.MiscFlags;
+    if (desc.MiscFlags & D3D11_QUERY_MISC_PREDICATEHINT) {
+        result.source = "predicate_hint_execution_unresolved";
+        return result;
+    }
+    result.source = conditionPredicates_.contains(boundPredicate_) ? "captured_normalized_condition_carrier"
+                    : baselinePredicates_.contains(boundPredicate_) ? "native_replay_initialization"
+                                                                    : "replayed_gpu_query";
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    context_->Flush();
+    for (;;) {
+        checkCancellation(cancelled);
+        if (std::chrono::steady_clock::now() >= deadline)
+            throw std::runtime_error("Predicate execution observation timed out");
+        BOOL value = FALSE;
+        const auto hr = context_->GetData(predicate.Get(), &value, sizeof value, D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        check(hr, "Observe bound replay predicate");
+        if (hr == S_OK) {
+            result.queryValue = bool(value);
+            result.allowsExecution = bool(value) != bool(comparison);
+            return result;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
 Replay::PredicateIsolation::PredicateIsolation(Replay &replay) : replay_(replay) {
     if (!replay_.predicateIsolationDepth_) {
         // Allocate all replacements before ending a live query.

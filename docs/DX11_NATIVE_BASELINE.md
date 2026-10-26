@@ -841,3 +841,21 @@ real BF1 and Helldivers group traces; ten corruptions are rejected. See
 This low-level writer does not establish dispatch bounds or predication and does
 not enable product debug actions. Native Worker/UI integration, full fragment
 history and standalone dependency-removal acceptance remain open.
+
+## Native compute job checkpoint
+
+`dx11-native/3` exposes `analyze ... debug-thread` through the existing isolated
+Worker. It checks effective direct/indirect dimensions, scoped argument edits,
+selected group/thread and observed predication before private cooperative
+execution. Source and shader experiments remain part of the job identity.
+Seven affected suites finish with 263 passes and no failures/skips after
+regenerating the absent original-predicate development corpus and rerunning its
+unchanged test. The initial skip remains recorded. Real BF1 and Helldivers CLI
+outputs pass independent artifact and reversible-trace validation; eleven
+corruptions are rejected. See `DX11_NATIVE_COMPUTE_DEBUG.md` and
+`research/dx11-native-compute-debug-evidence.json`.
+
+The legacy debug UI remains active. Predicate hints, complete instruction and
+invocation coverage, full Pixel History and standalone removal gates remain open.
+The measured approximately 1.7 GiB Worker peaks are reported, not accepted as a
+completed performance gate.

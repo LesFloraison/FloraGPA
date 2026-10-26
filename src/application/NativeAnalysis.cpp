@@ -4,6 +4,7 @@
 #include "Experiment.h"
 #include "GpuStatistics.h"
 #include "NativeArtifacts.h"
+#include "NativeComputeDebug.h"
 #include "NativeCounters.h"
 #include "NativeHistory.h"
 #include "PostTransform.h"
@@ -95,7 +96,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
           "max_bytes", "max_records"}},
         {"debug-vertex", {"gpa_event", "instance", "vertex", "index"}},
         {"debug-pixel", {"gpa_event", "x", "y", "sample"}},
-        {"debug-thread", {"gpa_event", "group", "thread"}}};
+        {"debug-thread", {"gpa_event", "group", "thread", "max_bytes", "max_steps", "max_trace_bytes"}}};
     const auto selected = fields.find(action);
     if (selected == fields.end())
         throw std::invalid_argument("Unknown native analysis action: " + action);
@@ -127,9 +128,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
                     number(coordinate, UINT32_MAX, key);
             } else {
                 const bool wide = key == "resource" || key == "gpa_event" || key == "start_event" ||
-                                  key == "end_event" || key == "max_bytes";
+                                  key == "end_event" || key == "max_bytes" || key == "max_trace_bytes";
                 number(value, wide ? UINT64_MAX : UINT32_MAX, key);
-                if ((wide || key == "max_records") && value == 0)
+                if ((wide || key == "max_records" || key == "max_steps") && value == 0)
                     throw std::invalid_argument("Analysis identifier or limit must be nonzero: " + key);
             }
         }
@@ -184,7 +185,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     const auto request = nativeAnalysisRequest(job.at("action"), job.at("options"));
     // Reserved actions fail explicitly until their parity gates pass. Never switch backend implicitly.
     if ((request.action == "history" && !request.options.contains("history_scope")) ||
-        request.action.starts_with("debug-"))
+        request.action == "debug-vertex" || request.action == "debug-pixel")
         throw std::runtime_error("Native " + request.action +
                                  " is not implemented; migration parity gate remains open");
     const auto &selection = request.options;
@@ -206,7 +207,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     for (const auto key : {"gpa_event", "start_event", "end_event"})
         if (selection.contains(key) && frame.entry(selection.at(key).get<Id>()).category != 7)
             throw std::invalid_argument("Analysis event does not identify a GPA API command");
-    options.before = request.action == "mesh";
+    options.before = request.action == "mesh" || request.action == "debug-thread";
     const bool allCounters = request.action == "counters" && !selection.contains("gpa_event") &&
                              !selection.contains("start_event");
     if (request.action == "counters" && !allCounters) {
@@ -277,9 +278,20 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
         if (job.contains("expected_adapter") && job.at("expected_adapter") != context.at("adapter"))
             throw std::runtime_error("Actual analysis adapter differs from the requested context");
         // Unpositioned texture inspection means capture-initial data, matching the existing inspector.
-        if (!allCounters && request.action != "history" && (request.action != "texture" || options.until))
+        if (!allCounters && request.action != "history" && request.action != "debug-thread" &&
+            (request.action != "texture" || options.until))
             replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); });
-        if (request.action == "counters") {
+        if (request.action == "debug-thread") {
+            dxbc_exec::GroupTraceOptions inspect;
+            inspect.group = selection.value("group", inspect.group);
+            inspect.thread = selection.value("thread", inspect.thread);
+            inspect.maxSteps = selection.value("max_steps", inspect.maxSteps);
+            inspect.maxBytes = selection.value("max_trace_bytes", inspect.maxBytes);
+            data = debugNativeCompute(replay, directory.filePath("trace.jsonl"), inspect,
+                                      selection.value("max_bytes", uint64_t(256) * 1024 * 1024), cancelled);
+            data["trace_file"] = "trace.jsonl";
+            save(directory.filePath("debug.json"), data);
+        } else if (request.action == "counters") {
             if (allCounters) {
                 data = collectNativeEventCounters(replay, cancelled);
                 exportNativeEventCounters(data, output.toStdWString());
