@@ -288,8 +288,10 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
             inspect.maxSteps = selection.value("max_steps", inspect.maxSteps);
             inspect.maxBytes = selection.value("max_trace_bytes", inspect.maxBytes);
             data = debugNativeCompute(replay, directory.filePath("trace.jsonl"), inspect,
-                                      selection.value("max_bytes", uint64_t(256) * 1024 * 1024), cancelled);
+                                      selection.value("max_bytes", uint64_t(256) * 1024 * 1024), cancelled,
+                                      directory.filePath("shader.dxbc"));
             data["trace_file"] = "trace.jsonl";
+            data["shader_file"] = "shader.dxbc";
             save(directory.filePath("debug.json"), data);
         } else if (request.action == "counters") {
             if (allCounters) {

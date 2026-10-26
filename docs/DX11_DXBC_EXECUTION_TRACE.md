@@ -42,6 +42,9 @@ Records contain:
   return-instruction stack, reversible register/storage/counter deltas, barrier
   epoch, loop epoch, atomic flag and GPU-assistance flags. The return stack is
   not fabricated into HLSL function names or source frames.
+  The return stack is sampled before the instruction executes; register/storage
+  deltas and `next_instruction` describe its effects. Native consumers must not
+  shift that stack to a previous instruction when displaying an input boundary.
 - A final completion record with group and selected-lane step counts, sampling
   batches, GPU operation count and actual helper identity.
 

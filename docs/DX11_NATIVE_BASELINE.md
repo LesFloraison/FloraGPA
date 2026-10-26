@@ -871,3 +871,15 @@ ten reader-report corruptions and ten journal corruptions are rejected. See
 `DX11_DXBC_TRACE_READER.md` and
 `research/dx11-dxbc-trace-reader-evidence.json`. Debug UI, full shader/fragment
 coverage and standalone release acceptance remain pending.
+
+## Native execution debug model checkpoint
+
+`NativeExecutionDebugModel` verifies shader and original mappings, projects
+selected-thread boundaries with complete group state, and reuses native source,
+expression and configuration components. Worker results include the effective
+shader artifact. Nine suites record 231 passes, no failures and five unchanged
+optional UI corpus skips. BF1/Helldivers raw models and fourteen result mutations
+pass independent validation; neither captured shader contains source metadata.
+See `DX11_NATIVE_EXECUTION_DEBUG_MODEL.md` and
+`research/dx11-native-execution-debug-model-evidence.json`. Native UI and complete
+source/shader/fragment and P7/P8 acceptance remain open.

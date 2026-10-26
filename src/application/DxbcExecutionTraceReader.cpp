@@ -510,6 +510,10 @@ const std::map<TraceRegisterKey, Value> &ExecutionTraceReader::registers() const
     state_->healthy();
     return state_->registers;
 }
+const std::map<std::pair<uint32_t, uint32_t>, Value> &ExecutionTraceReader::constants() const {
+    state_->healthy();
+    return state_->constants;
+}
 const std::map<TraceStorageKey, Buffer> &ExecutionTraceReader::storage() const {
     state_->healthy();
     return state_->storage;

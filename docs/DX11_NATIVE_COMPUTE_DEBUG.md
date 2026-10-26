@@ -1,5 +1,9 @@
 # Native compute analysis jobs
 
+The subsequent native debug model checkpoint adds `shader.dxbc` to the
+manifested exports, with `shader_file` and `shader_sha256` in the result. See
+`DX11_NATIVE_EXECUTION_DEBUG_MODEL.md` for source/model identity and validation.
+
 ## Product entry point
 
 The native analysis Worker accepts `debug-thread` under `dx11-native/3`:

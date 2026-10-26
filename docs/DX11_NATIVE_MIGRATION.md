@@ -604,3 +604,14 @@ pass 188 tests; BF1 and Helldivers initial/final/selected-boundary states match
 the independent Python projector. See `DX11_DXBC_TRACE_READER.md`. This is the
 native debug model's state layer; legacy debug UI and full removal gates remain
 open.
+
+## Native execution model continuation
+
+The native model now connects shader-verified journal state to source values,
+navigation, watches, conditional/hit-count and instruction breakpoints, and
+native configuration. Worker jobs export the actual experiment shader. Nine
+affected suites record 231 passes, zero failures and five existing optional UI
+corpus skips. BF1/Helldivers model and state checks and fourteen result mutations
+pass. See `DX11_NATIVE_EXECUTION_DEBUG_MODEL.md`. UI dispatch/presentation,
+remaining source/shader/fragment semantics and standalone removal gates remain
+open.

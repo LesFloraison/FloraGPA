@@ -1,4 +1,5 @@
 #include "application/DxbcExecutionTraceReader.h"
+#include "application/NativeExecutionDebugModel.h"
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QElapsedTimer>
@@ -54,7 +55,9 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     try {
         const auto args = app.arguments();
-        require(args.size() == 4, "Usage: FloraDxbcTraceReaderProbe <trace.jsonl> <sha256> <report.json>");
+        require(
+            args.size() == 4 || (args.size() == 6 && args[4] == "--shader"),
+            "Usage: FloraDxbcTraceReaderProbe <trace.jsonl> <sha256> <report.json> [--shader <shader.dxbc>]");
         QElapsedTimer timer;
         timer.start();
         ExecutionTraceReader trace(args[1], args[2].toStdString());
@@ -86,6 +89,38 @@ int main(int argc, char **argv) {
             {"total_ms", timer.elapsed()},
             {"scope",
              "journal_integrity_and_state_projection_not_instruction_semantics_or_invocation_eligibility"}};
+        if (args.size() == 6) {
+            QFile shaderFile(args[5]);
+            require(shaderFile.open(QIODevice::ReadOnly) && shaderFile.size() <= 64 * 1024 * 1024,
+                    "Cannot read a bounded native debug shader");
+            const auto shader = shaderFile.readAll();
+            NativeExecutionDebugModel model(
+                args[1], args[2].toStdString(),
+                Bytes(reinterpret_cast<const uint8_t *>(shader.constData()), shader.size()));
+            const auto initialRegisters = model.registerValues();
+            size_t mapped = 0, sourceValues = 0;
+            for (size_t i = 0; i < model.size(); ++i) {
+                model.move(i);
+                mapped += !model.location().is_null();
+                sourceValues += model.sourceValues().size();
+            }
+            model.move(model.size());
+            const auto terminal = model.instructionState();
+            model.move(0);
+            require(model.registerValues() == initialRegisters,
+                    "Native model did not restore initial registers");
+            const auto config = model.configuration();
+            model.importConfiguration(config);
+            require(model.configuration() == config, "Native model configuration did not round-trip");
+            report["debug_model"] = {{"shader_sha256", model.result().at("shader_sha256")},
+                                     {"selected_steps", model.size()},
+                                     {"mapped_steps", mapped},
+                                     {"source_value_records", sourceValues},
+                                     {"symbol_status", model.result().at("source_variables").at("status")},
+                                     {"terminal", terminal},
+                                     {"register_round_trip", true},
+                                     {"configuration_round_trip", true}};
+        }
         QSaveFile file(args[3]);
         file.setDirectWriteFallback(false);
         require(file.open(QIODevice::WriteOnly), "Cannot open reader probe report");

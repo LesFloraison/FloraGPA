@@ -45,6 +45,7 @@ class ExecutionTraceReader {
     void moveTo(uint64_t completedSteps, const CancelCheck & = {});
     Value registerValue(uint32_t lane, const Register &) const;
     Value constant(uint32_t slot, uint32_t element) const;
+    const std::map<std::pair<uint32_t, uint32_t>, Value> &constants() const;
     const std::map<TraceRegisterKey, Value> &registers() const;
     const std::map<TraceStorageKey, Buffer> &storage() const;
     const std::map<uint64_t, Counter> &counters() const;

@@ -13,7 +13,7 @@ import tempfile
 from validate_dxbc_execution_trace import digest, require, validate
 
 
-def validate_job(directory, reference, expected_groups, worker):
+def validate_job(directory, reference, expected_groups, worker, reader_report=None):
     directory = Path(directory)
     result = json.loads((directory / "result.json").read_text(encoding="utf-8"))
     job = json.loads((directory / "job.json").read_text(encoding="utf-8"))
@@ -34,13 +34,16 @@ def validate_job(directory, reference, expected_groups, worker):
     require(data["format"] == "flora.native-compute-debug" and data["version"] == 1, "Unsupported compute result")
     require(data["captured_gpu_schedule"] is False, "Invalid original schedule claim")
     require(data["trace_file"] == "trace.jsonl", "Unexpected native trace path")
-    require(set(result["artifacts"]) == {"trace.jsonl", "debug.json"}, "Unexpected native artifacts")
+    require(data["shader_file"] == "shader.dxbc", "Unexpected native shader path")
+    require(set(result["artifacts"]) == {"trace.jsonl", "debug.json", "shader.dxbc"}, "Unexpected native artifacts")
     for name, metadata in result["artifacts"].items():
         raw = (directory / name).read_bytes()
         require(len(raw) == metadata["bytes"] and digest(raw) == metadata["sha256"], "Artifact digest mismatch")
     require(json.loads((directory / "debug.json").read_text(encoding="utf-8")) == data, "Debug metadata mismatch")
     require(context["frame_sha256"] == reference["frame_sha256"] == data["effective_frame_sha256"], "Frame provenance mismatch")
     require(data["gpa_shader"] == reference["shader"], "Shader identity mismatch")
+    require(data["shader_sha256"] == reference["shader_sha256"] == digest((directory / "shader.dxbc").read_bytes()),
+            "Effective shader artifact identity mismatch")
     invocation = data["invocation"]
     require(invocation["gpa_event"] == reference["event"] == context["options"]["gpa_event"], "Event identity mismatch")
     require(invocation["status"] == "eligible_in_observed_replay", "Missing eligibility evidence")
@@ -56,7 +59,14 @@ def validate_job(directory, reference, expected_groups, worker):
                 "External analysis module loaded")
     expected = copy.deepcopy(reference)
     expected["trace"].update(data["trace"])
-    validation = validate(directory / "trace.jsonl", expected)
+    validation = validate(directory / "trace.jsonl", expected, reader_report)
+    if reader_report is not None:
+        model = reader_report["debug_model"]
+        require(model["shader_sha256"] == data["shader_sha256"] and
+                model["selected_steps"] == data["trace"]["selected_steps"] and
+                model["terminal"] == {"state_boundary": "terminal_group", "global_step": data["trace"]["steps"],
+                                      "instruction": None} and model["register_round_trip"] is True and
+                model["configuration_round_trip"] is True, "Native debug model identity or restoration mismatch")
     return {"schema": 1, "passed": True, "complete_release_acceptance": False,
             "scope": "native_cli_identity_and_captured_group_trace_continuity",
             "result_sha256": digest((directory / "result.json").read_bytes()),
@@ -67,12 +77,13 @@ def validate_job(directory, reference, expected_groups, worker):
 def negative_checks(directory, reference, expected_groups, worker):
     directory = Path(directory)
     names = ("backend", "request", "context_digest", "adapter", "worker_digest", "trace_path",
-             "query_claim", "shader", "eligibility", "external_module", "artifact_bytes")
+             "query_claim", "shader", "eligibility", "external_module", "artifact_bytes",
+             "shader_path", "shader_digest", "shader_bytes")
     results = []
     with tempfile.TemporaryDirectory(prefix="flora-compute-negative-") as temporary:
         output = Path(temporary)
         for name in names:
-            for filename in ("result.json", "debug.json", "job.json", "trace.jsonl"):
+            for filename in ("result.json", "debug.json", "job.json", "trace.jsonl", "shader.dxbc"):
                 (output / filename).write_bytes((directory / filename).read_bytes())
             result = json.loads((output / "result.json").read_text(encoding="utf-8"))
             job = json.loads((output / "job.json").read_text(encoding="utf-8"))
@@ -85,6 +96,12 @@ def negative_checks(directory, reference, expected_groups, worker):
             elif name == "trace_path": result["data"]["trace_file"] = "../trace.jsonl"
             elif name == "query_claim": result["data"]["invocation"]["predicate"]["original_query_recovered"] = True
             elif name == "shader": result["data"]["gpa_shader"] += 1
+            elif name == "shader_path": result["data"]["shader_file"] = "../shader.dxbc"
+            elif name == "shader_digest": result["data"]["shader_sha256"] = "0" * 64
+            elif name == "shader_bytes":
+                raw = (output / "shader.dxbc").read_bytes() + b"changed"
+                (output / "shader.dxbc").write_bytes(raw)
+                result["artifacts"]["shader.dxbc"] = {"bytes": len(raw), "sha256": digest(raw)}
             elif name == "eligibility": result["data"]["invocation"]["status"] = "unknown"
             elif name == "external_module": result["execution"]["loaded_modules"].append("C:/tools/renderdoc.dll")
             elif name == "artifact_bytes":
@@ -92,7 +109,7 @@ def negative_checks(directory, reference, expected_groups, worker):
             if name in ("adapter", "worker_digest"):
                 canonical = json.dumps(result["context"], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
                 result["context_id"] = digest(canonical.encode("utf-8"))
-            if name in ("trace_path", "query_claim", "shader", "eligibility"):
+            if name in ("trace_path", "query_claim", "shader", "eligibility", "shader_path", "shader_digest"):
                 raw = json.dumps(result["data"]).encode("utf-8")
                 (output / "debug.json").write_bytes(raw)
                 result["artifacts"]["debug.json"] = {"bytes": len(raw), "sha256": digest(raw)}
@@ -115,9 +132,14 @@ def main():
     parser.add_argument("--worker", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--negative-out", type=Path)
+    parser.add_argument("--reader-report", type=Path)
     args = parser.parse_args()
     reference = json.loads(args.reference.read_text(encoding="utf-8"))
-    result = validate_job(args.directory, reference, args.dispatch_groups, args.worker)
+    reader_report = json.loads(args.reader_report.read_text(encoding="utf-8")) if args.reader_report else None
+    result = validate_job(args.directory, reference, args.dispatch_groups, args.worker, reader_report)
+    if args.reader_report:
+        result["reader_model_sha256"] = digest(args.reader_report.read_bytes())
+        result["reader_model_states_match"] = True
     result["reference_sha256"] = digest(args.reference.read_bytes())
     args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     if args.negative_out:

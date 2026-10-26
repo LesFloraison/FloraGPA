@@ -3,6 +3,7 @@
 #include "application/HlslCompilation.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeComputeDebug.h"
+#include "application/NativeExecutionDebugModel.h"
 #include <QFile>
 #include <QProcess>
 #include <QTemporaryDir>
@@ -245,6 +246,21 @@ class NativeComputeDebugTests : public QObject {
         QCOMPARE(result.at("data").at("invocation").at("group_size"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("trace_file"), Json("trace.jsonl"));
         QVERIFY(result.at("artifacts").contains("trace.jsonl"));
+        QCOMPARE(result.at("data").at("shader_file"), Json("shader.dxbc"));
+        QVERIFY(result.at("artifacts").contains("shader.dxbc"));
+        QFile shaderFile(dir.filePath("worker/shader.dxbc"));
+        QVERIFY(shaderFile.open(QIODevice::ReadOnly));
+        const auto shaderBytes = shaderFile.readAll();
+        const Bytes effectiveShader(reinterpret_cast<const uint8_t *>(shaderBytes.constData()),
+                                    shaderBytes.size());
+        QCOMPARE(result.at("data").at("shader_sha256"), Json(sha256(effectiveShader)));
+        NativeExecutionDebugModel model(dir.filePath("worker/trace.jsonl"),
+                                        result.at("artifacts").at("trace.jsonl").at("sha256"),
+                                        effectiveShader);
+        QCOMPARE(model.size(), result.at("data").at("trace").at("selected_steps").get<size_t>());
+        QCOMPARE(model.result().at("execution_context").at("group_size"), Json({2, 2, 1}));
+        model.move(model.size());
+        model.move(0);
         for (const auto &module : result.at("execution").at("loaded_modules")) {
             const auto name = QFileInfo(QString::fromStdString(module)).fileName().toLower();
             QVERIFY(!name.contains("renderdoc"));

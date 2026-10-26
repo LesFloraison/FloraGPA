@@ -1,13 +1,21 @@
 #include "NativeComputeDebug.h"
 #include "replay/Replay.h"
+#include <QFileInfo>
+#include <QSaveFile>
 #include <algorithm>
 
 namespace flora {
 using Json = nlohmann::json;
 Json debugNativeCompute(Replay &replay, const QString &tracePath,
                         const dxbc_exec::GroupTraceOptions &selection, uint64_t maxInputBytes,
-                        const CancelCheck &cancelled) {
+                        const CancelCheck &cancelled, const QString &shaderPath) {
     checkCancellation(cancelled);
+    if (!shaderPath.isEmpty() &&
+        (QFileInfo::exists(shaderPath) ||
+         QFileInfo(shaderPath)
+                 .absoluteFilePath()
+                 .compare(QFileInfo(tracePath).absoluteFilePath(), Qt::CaseInsensitive) == 0))
+        throw std::runtime_error("Native debug shader export requires a distinct new path");
     const auto event = replay.frame().event(replay.options().until);
     if (event.type != 0x35 && event.type != 0x36)
         throw std::runtime_error("Native thread debugging requires a GPA Dispatch event");
@@ -62,6 +70,20 @@ Json debugNativeCompute(Replay &replay, const QString &tracePath,
                         {"original_query_recovered", false}}}};
     });
     auto trace = dxbc_exec::exportGroupExecutionTrace(tracePath, snapshot, selection, cancelled);
+    if (!shaderPath.isEmpty()) {
+        checkCancellation(cancelled);
+        if (QFileInfo::exists(shaderPath))
+            throw std::runtime_error("Native debug shader export requires a new path");
+        QSaveFile file(shaderPath);
+        file.setDirectWriteFallback(false);
+        if (!file.open(QIODevice::WriteOnly) ||
+            file.write(reinterpret_cast<const char *>(snapshot.bytecode.data()),
+                       qint64(snapshot.bytecode.size())) != qint64(snapshot.bytecode.size()))
+            throw std::runtime_error("Cannot write the effective native debug shader");
+        checkCancellation(cancelled);
+        if (!file.commit())
+            throw std::runtime_error("Cannot publish the effective native debug shader");
+    }
     const dxbc_exec::Program program(snapshot.bytecode);
     invocation["group_size"] = program.threadGroupSize();
     return {{"format", "flora.native-compute-debug"},
@@ -70,6 +92,7 @@ Json debugNativeCompute(Replay &replay, const QString &tracePath,
             {"trace", trace},
             {"trace_format", "flora.dxbc-execution-trace/1"},
             {"gpa_shader", snapshot.shader},
+            {"shader_sha256", sha256(snapshot.bytecode)},
             {"effective_frame_sha256", snapshot.frameSha256},
             {"execution_model", dxbc_exec::Group::executionModel},
             {"captured_gpu_schedule", false}};
