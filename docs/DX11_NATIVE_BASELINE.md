@@ -944,3 +944,16 @@ Whole Worker peak memory reaches about 1.75 GiB and complete CLI jobs reach abou
 and `research/dx11-native-vertex-debug-evidence.json` for exact scope and evidence.
 Arbitrary index override, selected-only acquisition, full semantic/source parity
 and the remaining fragment/dependency/release gates are still open.
+
+## Selected vertex input checkpoint
+
+The VS input helper now emits one selected record. All nine real capture/adapter
+checks retain the full-draw baseline input/final register bits and native output
+values. Original whole-draw helper assertions remain; the GPA fixture explicitly
+expects the new one-record contract. Seven affected suites pass 335 checks with
+zero failures or skips, including existing CS, resource snapshot, mesh input,
+session and UI paths. The largest measured Worker peak is 1,858,854,912 bytes;
+the helper allocation reduction is not a complete process-memory or latency
+acceptance result. See `DX11_SELECTED_VERTEX_INPUTS.md` and
+`research/dx11-selected-vertex-input-evidence.json`. Full buffer snapshots,
+arbitrary index override and the remaining P5–P8 gates remain open.

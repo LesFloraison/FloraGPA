@@ -676,3 +676,14 @@ initial CS preparation regression was caught and corrected without changing
 existing assertions. See `DX11_NATIVE_VERTEX_DEBUG.md`. Arbitrary index override,
 selected-only input acquisition, broad VS/source parity and the remaining PS,
 fragment history and P7/P8 gates still prevent complete removal acceptance.
+
+## Selected vertex input continuation
+
+Native VS jobs now submit only the selected input reference and instance to the
+private acquisition helper. Per-instance rates are rebased independently, with
+explicit draw-relative system ID provenance; original full-draw acquisition
+remains a comparison path. Seven suites pass 335 checks without failures or
+skips, and nine real capture/adapter jobs retain exact input/final register and
+native output comparisons, module audits and session reloads. See
+`DX11_SELECTED_VERTEX_INPUTS.md`. Complete bound buffer snapshots, arbitrary
+index override, broader semantic/source parity and P7/P8 acceptance remain open.

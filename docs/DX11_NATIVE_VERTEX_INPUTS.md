@@ -113,10 +113,11 @@ of local logs/reports and summarizes the observed outcomes:
   output components on NVIDIA, Intel and WARP. See `DX11_DXBC_PRECISION.md` and
   `research/dx11-native-precision-evidence.json` for encoding, independent probes,
   raw comparison evidence and remaining precision limitations.
-- The current helper captures all input references for the draw before selecting
-  one row. Its byte budget bounds private buffers and decoded rows; large draws
-  can exceed that budget. A bounded selected-input acquisition path is still
-  required before full support/performance parity is claimed.
+- The selected-input continuation now submits one point and allocates one output
+  record, while retaining whole-draw acquisition as a comparison path. Complete
+  bound buffer snapshots are still retained and copied; large resources can
+  exceed the byte budget. See `DX11_SELECTED_VERTEX_INPUTS.md` for provenance,
+  address limits, validation and remaining performance gates.
 - Out-of-bounds index snapshots are rejected; their complete runtime semantics,
   unbound/missing IA inputs, dynamic class execution, original undefined values,
   atomic schedules and all deferred/DrawAuto experiment combinations still need

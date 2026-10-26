@@ -103,9 +103,9 @@ artifact hashes and intermediate failures are in
 
 ## Remaining gates
 
-The current input helper still captures the draw's complete input reference set
-before selecting one invocation; its resource budget bounds allocation but a
-selected-only acquisition path remains necessary. Arbitrary index override,
+The input helper now submits only the selected point and retains whole-draw
+acquisition for comparison; complete bound buffer snapshots remain budgeted.
+See `DX11_SELECTED_VERTEX_INPUTS.md`. Arbitrary index override,
 remaining DXBC semantics and precision combinations, complete legacy debugger
 configuration migration and broad source/behavior parity are not established by
 this checkpoint. Full PS input/quad discovery, fragment history, P7 dependency
