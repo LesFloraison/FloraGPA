@@ -616,6 +616,17 @@ BF1/Helldivers jobs and a source fixture pass independent archive/reload checks.
 See `DX11_NATIVE_DEBUG_SESSIONS.md` for exact scope and remaining UI/semantic
 gates. Legacy tabs and RenderDoc dependencies remain until full parity is proved.
 
+## Cancellable native debug operations
+
+Interactive native stepping, source searches and session export now run in a
+background controller. Snapshot presentation avoids trace seeks on the UI
+thread; cancelled operations retain the previous display and can be retried.
+Source encounter caches publish atomically, and ZIP cancellation preserves the
+old destination. Nine suites record 95 passes, no failures and five unchanged
+optional corpus skips. Actual BF1/Helldivers journals remain responsive during
+movement and export and pass independent archive reloads. See
+`DX11_NATIVE_DEBUG_OPERATIONS.md` for measurements and remaining parity/P8 gates.
+
 ## Native execution model continuation
 
 The native model now connects shader-verified journal state to source values,

@@ -42,8 +42,10 @@ class NativeExecutionDebugUiTests final : public QObject {
         QVERIFY(view.model());
         const auto initial = view.model()->registerValues();
         trigger(view, "nativeDebugNext");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->position(), size_t(1));
         trigger(view, "nativeDebugPrevious");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->position(), size_t(0));
         QCOMPARE(view.model()->registerValues(), initial);
         auto source = view.findChild<QPlainTextEdit *>("nativeDebugSource");
@@ -51,6 +53,7 @@ class NativeExecutionDebugUiTests final : public QObject {
         size_t selected = 0;
         for (size_t i = 0; i < view.model()->size(); ++i) {
             view.move(i);
+            QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
             bool found = false;
             for (const auto &value : view.model()->sourceValues())
                 found |= value.at("name") == "total" && value.at("status") == "available";
@@ -76,8 +79,10 @@ class NativeExecutionDebugUiTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::exception, controls->importConfiguration(invalid));
         QCOMPARE(controls->configuration(), config);
         const auto exported = qEnvironmentVariable("FLORA_NATIVE_DEBUG_EXPORT");
-        if (!exported.isEmpty())
+        if (!exported.isEmpty()) {
             view.exportArchive(exported);
+            QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        }
         const auto screenshot = qEnvironmentVariable("FLORA_NATIVE_DEBUG_SCREENSHOT");
         if (!screenshot.isEmpty()) {
             view.resize(1500, 850);
@@ -86,9 +91,11 @@ class NativeExecutionDebugUiTests final : public QObject {
         auto locals = view.findChild<QTreeWidget *>("nativeDebugLocals");
         QVERIFY(locals->topLevelItemCount() > 0);
         view.move(view.model()->size());
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QVERIFY(controls->watchResults().at(0).at("status") == "unavailable");
         QVERIFY(view.findChild<QLabel *>("nativeDebugSummary")->text().contains("Terminal"));
         view.move(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->registerValues(), initial);
         QTemporaryDir directory;
         view.exportResult(directory.filePath("state.json"));
@@ -105,15 +112,20 @@ class NativeExecutionDebugUiTests final : public QObject {
         QVERIFY(view.finish(view.requestId(), retained));
         retained.reset();
         view.move(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         trigger(view, "nativeDebugBreakpoint");
         view.move(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         trigger(view, "nativeDebugContinue");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->position(), size_t(1));
         auto controls = view.findChild<NativeDebugControls *>();
         controls->settings().instructions.clear();
         controls->settings().source.setRule(0, 6, "total == 11", "always", 1);
         view.move(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         trigger(view, "nativeDebugContinue");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->evaluate(view.model()->position(), "total").text(), std::string("11"));
         const auto token = view.requestId();
         view.setContext("different-experiment", 19);
@@ -136,6 +148,29 @@ class NativeExecutionDebugUiTests final : public QObject {
         QTest::newRow("warp") << 0u;
         QTest::newRow("nvidia") << 0x10deu;
         QTest::newRow("intel") << 0x8086u;
+    }
+    void navigationInvalidation() {
+        NativeExecutionDebugView view;
+        view.setContext("original", 19);
+        auto retained = session();
+        const auto path = retained->tracePath();
+        QVERIFY(view.finish(view.requestId(), retained));
+        retained.reset();
+        QSignalSpy completed(&view, &NativeExecutionDebugView::operationFinished);
+        view.move(view.model()->size());
+        QVERIFY(view.operationActive());
+        QVERIFY(!view.model());
+        QVERIFY(view.findChild<QAction *>("nativeDebugCancel")->isEnabled());
+        view.setContext("replacement", 19);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QVERIFY(!view.model());
+        QCOMPARE(completed.size(), 1);
+        QVERIFY(!completed[0][0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!QFileInfo::exists(path), 10000);
+        QVERIFY(view.finish(view.requestId(), session()));
+        view.move(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QCOMPARE(view.model()->position(), size_t(1));
     }
     void mainWindow() {
         QFETCH(unsigned, vendor);

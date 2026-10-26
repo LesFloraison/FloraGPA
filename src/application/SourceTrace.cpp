@@ -9,7 +9,7 @@ SourceTrace::SourceTrace(Json result, Json rows, ValueLoader loader)
     const auto checkpoint = result_.value("checkpoint_instruction", Json(nullptr));
     if (!checkpoint.is_null() && checkpoint.contains("instruction") &&
         !checkpoint.at("instruction").is_null())
-        checkpoint_ = checkpoint.at("instruction").get<uint64_t>();
+        checkpointInstruction_ = checkpoint.at("instruction").get<uint64_t>();
     for (const auto &r : result_.at("catalog")) {
         if (r.contains("source_location") && !r.at("source_location").is_null() &&
             !r.at("source_location").empty() && r.at("checkpoint_allowed") == true &&
@@ -22,7 +22,7 @@ SourceTrace::SourceTrace(Json result, Json rows, ValueLoader loader)
 std::optional<uint64_t> SourceTrace::instruction(size_t i) const {
     const auto &row = rows_.at(i);
     if (!row.contains("instruction"))
-        return checkpoint_;
+        return checkpointInstruction_;
     if (row.at("instruction").is_null())
         return {};
     return row.at("instruction").get<uint64_t>();
@@ -43,6 +43,7 @@ bool SourceTrace::same(size_t a, size_t b) const {
            left.value("hs_phase", Json(nullptr)) == right.value("hs_phase", Json(nullptr));
 }
 SourceTrace::Json SourceTrace::stack(size_t i) {
+    check();
     const auto key = std::pair{offset(i), rows_.at(i).value("call_depth", 0u)};
     if (!stacks_.contains(key))
         stacks_[key] =
@@ -73,6 +74,7 @@ size_t SourceTrace::next(size_t index, int direction) {
     const auto start = location(index);
     for (int64_t target = int64_t(index) + direction; target >= 0 && uint64_t(target) < rows_.size();
          target += direction) {
+        check();
         const auto i = size_t(target);
         if (!same(index, i))
             break;
@@ -92,6 +94,7 @@ size_t SourceTrace::functionStep(size_t index, bool out) {
         throw std::runtime_error("Cannot step out of the source entry function");
     const auto start = location(index);
     for (size_t i = index + 1; i < rows_.size(); ++i) {
+        check();
         if (!same(index, i))
             break;
         if (breakpointEntry(i))
@@ -185,6 +188,7 @@ void SourceTrace::copyRules(const SourceTrace &source) {
     }
 }
 DebugEnvironment SourceTrace::environment(size_t i, const std::optional<std::string> &frame) {
+    check();
     const auto symbols = result_.value("source_variables", Json::object());
     const auto &row = rows_.at(i);
     if (symbols.value("format", "") == "SDBG assignments") {
@@ -224,6 +228,7 @@ size_t SourceTrace::seek(size_t index) {
     if (breakpoints_.empty())
         throw std::runtime_error("Set a source breakpoint first");
     for (size_t i = index + 1; i < rows_.size(); ++i) {
+        check();
         if (!same(index, i))
             break;
         if (breakpointEntry(i))
@@ -243,15 +248,20 @@ size_t SourceTrace::encounterCount(size_t index, Point point) {
     const auto key = std::tuple{invocation, point};
     if (!entries_.contains(key)) {
         std::vector<size_t> indices;
-        for (size_t i = 0; i < rows_.size(); ++i)
+        for (size_t i = 0; i < rows_.size(); ++i) {
+            check();
             if (rows_.at(i).at("invocation") == invocation)
                 indices.push_back(i);
+        }
         if (indices.empty() || rows_.at(indices.front()).at("hit") != 0)
             throw ExpressionError("The visible preview lacks this invocation's beginning");
-        auto &entries = entries_[key];
-        for (const auto i : indices)
+        std::vector<size_t> entries;
+        for (const auto i : indices) {
+            check();
             if (lineEntry(i, point))
                 entries.push_back(i);
+        }
+        entries_.emplace(key, std::move(entries));
     }
     const auto &entries = entries_.at(key);
     return size_t(std::upper_bound(entries.begin(), entries.end(), index) - entries.begin());
@@ -259,6 +269,7 @@ size_t SourceTrace::encounterCount(size_t index, Point point) {
 bool SourceTrace::breakpointEntry(size_t index) {
     std::vector<Point> points;
     for (const auto &point : breakpoints_) {
+        check();
         if (!lineEntry(index, point))
             continue;
         if (counts_.contains(point)) {

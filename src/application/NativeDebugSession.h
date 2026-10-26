@@ -16,10 +16,12 @@ class NativeDebugSession final {
     NativeExecutionDebugModel &model() { return *model_; }
     QString tracePath() const { return directory_.filePath("trace.jsonl"); }
     const QByteArray &shader() const { return shader_; }
-    void exportArchive(const QString &path, const Json &state) const;
+    const Json &initialSnapshot() const { return initialSnapshot_; }
+    void exportArchive(const QString &path, const Json &state, const CancelCheck &cancelled = {}) const;
 
   private:
     Json job_, result_;
+    Json initialSnapshot_;
     // Declaration order ensures the reader closes its file before cleanup.
     QTemporaryDir directory_;
     QByteArray shader_, metadata_;

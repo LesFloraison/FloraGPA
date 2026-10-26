@@ -69,12 +69,17 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
         summary_->setText("Reading compute execution…");
         emit readRequested();
     });
-    cancel_ = action(bar, "nativeDebugCancel", "Cancel", [this] { emit cancelRequested(); });
+    cancel_ = action(bar, "nativeDebugCancel", "Cancel", [this] {
+        if (operationActive())
+            cancelOperation();
+        else
+            emit cancelRequested();
+    });
     export_ = action(bar, "nativeDebugExport", "Export session…", [this] {
         const auto path = QFileDialog::getSaveFileName(this, "Export native debug session",
                                                        "debug-session.zip", "Debug session (*.zip)");
         if (!path.isEmpty())
-            exportArchive(path);
+            startOperation(NativeDebugCommand::Position, model()->position(), path);
     });
     auto select = new QToolBar;
     layout->addWidget(select);
@@ -95,23 +100,26 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     action(steps_, "nativeDebugPrevious", "Previous", [this] {
         if (!model() || model()->position() == 0)
             return;
-        move(navigation_->currentIndex() == 0 || model()->position() == model()->size()
-                 ? model()->position() - 1
-                 : model()->source().next(model()->position(), -1));
+        if (navigation_->currentIndex() == 0 || model()->position() == model()->size())
+            move(model()->position() - 1);
+        else
+            startOperation(NativeDebugCommand::PreviousSource, model()->position());
     });
     action(steps_, "nativeDebugNext", "Step", [this] {
         if (!model() || model()->position() == model()->size())
             return;
-        move(navigation_->currentIndex() == 0 ? model()->position() + 1
-                                              : model()->source().next(model()->position(), 1));
+        if (navigation_->currentIndex() == 0)
+            move(model()->position() + 1);
+        else
+            startOperation(NativeDebugCommand::NextSource, model()->position());
     });
     action(steps_, "nativeDebugOver", "Over", [this] {
         if (model())
-            move(model()->source().functionStep(model()->position()));
+            startOperation(NativeDebugCommand::Over, model()->position());
     });
     action(steps_, "nativeDebugOut", "Out", [this] {
         if (model())
-            move(model()->source().functionStep(model()->position(), true));
+            startOperation(NativeDebugCommand::Out, model()->position());
     });
     action(steps_, "nativeDebugBreakpoint", "Breakpoint", [this] {
         if (!model())
@@ -122,7 +130,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
             if (model()->position() == model()->size())
                 throw std::runtime_error("Terminal state has no instruction breakpoint");
             auto &breakpoints = controls_->settings().instructions;
-            const auto instruction = model()->instructionState().at("instruction").get<uint64_t>();
+            const auto instruction = snapshot_.at("state").at("instruction").get<uint64_t>();
             if (!breakpoints.erase(instruction))
                 breakpoints.insert(instruction);
         }
@@ -132,8 +140,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     action(steps_, "nativeDebugContinue", "Continue", [this] {
         if (!model())
             return;
-        model()->importConfiguration(controls_->configuration());
-        move(model()->seek(model()->position()));
+        startOperation(NativeDebugCommand::Continue, model()->position());
     });
     position_ = new QSpinBox;
     position_->setObjectName("nativeDebugPosition");
@@ -197,7 +204,10 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
         if (!rendering_)
             invoke([&] { move(size_t(value)); });
     });
-    connect(interpretation_, &QComboBox::currentIndexChanged, this, [this] { invoke([&] { render(); }); });
+    connect(interpretation_, &QComboBox::currentIndexChanged, this, [this] {
+        if (model())
+            invoke([&] { move(model()->position()); });
+    });
     connect(files_, &QComboBox::currentIndexChanged, this, [this] {
         if (!rendering_)
             showSource();
@@ -208,7 +218,41 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     });
     connect(group_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(thread_, &QLineEdit::textChanged, this, [this] { invalidate(); });
+    connect(&operation_, &NativeDebugOperationController::finished, this,
+            [this](const NativeDebugOperationOutcome &result) {
+                const bool current = operationRequest_ == requestId_ && bool(session_);
+                bool accepted = false;
+                try {
+                    if (current) {
+                        if (result.error.isEmpty()) {
+                            snapshot_ = result.snapshot;
+                            render();
+                            if (!result.exported.isEmpty())
+                                summary_->setText("Session exported: " + result.exported);
+                            accepted = true;
+                        } else {
+                            // The previous snapshot remains visible and the operation can be retried.
+                            const QSignalBlocker block(position_);
+                            const QSignalBlocker interpretationBlock(interpretation_);
+                            position_->setValue(snapshot_.at("position").get<int>());
+                            interpretation_->setCurrentText(text(snapshot_.at("interpretation")));
+                            summary_->setText(result.error);
+                            if (!result.cancelled)
+                                emit error(result.error);
+                        }
+                    }
+                } catch (const std::exception &e) {
+                    emit error(QString::fromUtf8(e.what()));
+                }
+                updateActions();
+                emit activityChanged(false);
+                emit operationFinished(accepted);
+            });
     updateActions();
+}
+NativeExecutionDebugView::~NativeExecutionDebugView() {
+    operation_.disconnect(this);
+    operation_.cancel();
 }
 void NativeExecutionDebugView::invoke(const std::function<void()> &fn) {
     try {
@@ -230,8 +274,10 @@ void NativeExecutionDebugView::setWorkerBusy(bool busy) {
 }
 void NativeExecutionDebugView::invalidate() {
     ++requestId_;
+    operation_.cancel();
     controls_->clear();
     session_.reset();
+    snapshot_ = Json();
     const QScopedValueRollback guard(rendering_, true);
     registers_->clear();
     locals_->clear();
@@ -245,13 +291,17 @@ void NativeExecutionDebugView::invalidate() {
     updateActions();
 }
 void NativeExecutionDebugView::updateActions() {
-    read_->setEnabled(!busy_ && event_ && !key_.isEmpty());
-    cancel_->setEnabled(busy_);
-    export_->setEnabled(!busy_ && bool(session_));
-    steps_->setEnabled(!busy_ && bool(session_));
-    controls_->setEnabled(!busy_ && bool(session_));
-    group_->setEnabled(!busy_);
-    thread_->setEnabled(!busy_);
+    const bool occupied = busy_ || operationActive();
+    read_->setEnabled(!occupied && event_ && !key_.isEmpty());
+    cancel_->setEnabled(occupied);
+    export_->setEnabled(!occupied && bool(session_));
+    steps_->setEnabled(!occupied && bool(session_));
+    controls_->setEnabled(!occupied && bool(session_));
+    interpretation_->setEnabled(!occupied);
+    files_->setEnabled(!occupied && bool(session_));
+    line_->setEnabled(!occupied && bool(session_));
+    group_->setEnabled(!occupied);
+    thread_->setEnabled(!occupied);
 }
 NativeExecutionDebugView::Json NativeExecutionDebugView::request() const {
     return {{"gpa_event", event_}, {"group", triple(group_->text())}, {"thread", triple(thread_->text())}};
@@ -267,18 +317,19 @@ bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSe
     }
     if (!session)
         throw std::runtime_error("Native compute analysis returned no debug session");
+    if (operationActive())
+        throw std::runtime_error("Wait for the previous native debug operation to finish");
     const auto selection = request();
     for (const auto &[key, value] : selection.items())
         if (session->job().at("options").value(key, key == "gpa_event" ? Json(nullptr) : Json({0, 0, 0})) !=
             value)
             throw std::runtime_error("Native debug selection changed");
     session_ = std::move(session);
-    const std::weak_ptr<NativeDebugSession> weak = session_;
-    controls_->reset(model()->result(), model()->rows(), [weak](size_t i) {
-        const auto retained = weak.lock();
-        if (!retained)
-            throw std::runtime_error("Native debug session expired");
-        return retained->model().sourceValuesAt(i);
+    snapshot_ = session_->initialSnapshot();
+    controls_->reset(model()->result(), model()->rows(), [this](size_t i) {
+        if (snapshot_.is_null() || snapshot_.at("position") != i)
+            throw std::runtime_error("Native source values are not loaded at this position");
+        return snapshot_.at("source_values");
     });
     {
         const QScopedValueRollback guard(rendering_, true);
@@ -288,27 +339,37 @@ bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSe
         assembly_->setPlainText(text(model()->result().at("disassembly")));
         position_->setRange(0, int(model()->size()));
     }
-    move(0);
+    render();
     updateActions();
     emit inspectionFinished(true);
     return true;
 }
 void NativeExecutionDebugView::move(size_t position) {
-    if (!model())
+    startOperation(NativeDebugCommand::Position, position);
+}
+void NativeExecutionDebugView::startOperation(NativeDebugCommand command, size_t position,
+                                              const QString &archive) {
+    if (operationActive())
+        throw std::runtime_error("A native debug operation is already running");
+    if (!session_)
         return;
-    model()->move(position);
-    render();
+    operationRequest_ = requestId_;
+    operation_.start(session_, command, position, controls_->configuration(),
+                     interpretation_->currentText().toStdString(), archive);
+    updateActions();
+    emit activityChanged(true);
 }
 void NativeExecutionDebugView::render() {
     if (!model())
         return;
     const QScopedValueRollback guard(rendering_, true);
-    const auto state = model()->instructionState();
-    const bool terminal = model()->position() == model()->size();
-    position_->setValue(int(model()->position()));
+    const auto state = snapshot_.at("state");
+    const auto position = snapshot_.at("position").get<size_t>();
+    const bool terminal = position == model()->size();
+    position_->setValue(int(position));
     summary_->setText(terminal ? "Terminal group state · no source instruction"
                                : QString("Step %1 / %2 · before DXBC instruction %3 · global step %4%5")
-                                     .arg(model()->position())
+                                     .arg(position)
                                      .arg(model()->size())
                                      .arg(text(state.at("instruction")))
                                      .arg(text(state.at("global_step")))
@@ -317,8 +378,8 @@ void NativeExecutionDebugView::render() {
                                               ? " · breakpoint"
                                               : ""));
     registers_->clear();
-    const auto raw = model()->registerValues();
-    const auto rows = model()->registerRows(interpretation_->currentText().toStdString());
+    const auto &raw = snapshot_.at("registers");
+    const auto &rows = snapshot_.at("register_rows");
     for (size_t i = 0; i < rows.size(); ++i) {
         QStringList words;
         QString validity;
@@ -334,19 +395,19 @@ void NativeExecutionDebugView::render() {
             item->setToolTip(column, item->text(column));
     }
     locals_->clear();
-    for (const auto &v : model()->sourceValues())
+    for (const auto &v : snapshot_.at("source_values"))
         new QTreeWidgetItem(
             locals_, {text(v.value("name", Json())), text(v.value("type", Json())),
                       text(v.value("value", Json()).is_null() ? v.value("status", Json()) : v.at("value"))});
-    stack_->setPlainText(QString::fromStdString(model()->stack().dump(2)) + "\n\n" +
+    stack_->setPlainText(QString::fromStdString(snapshot_.at("source_stack").dump(2)) + "\n\n" +
                          QString::fromStdString(state.dump(2)));
-    const auto location = model()->location();
+    const auto location = snapshot_.at("location");
     if (!location.is_null()) {
         files_->setCurrentIndex(location.at("file"));
         line_->setValue(location.at("line_start"));
     }
     showSource();
-    controls_->setRecord(terminal ? std::nullopt : std::optional<size_t>(model()->position()));
+    controls_->setRecord(terminal ? std::nullopt : std::optional<size_t>(position));
 }
 void NativeExecutionDebugView::showSource() {
     if (!model() || files_->currentIndex() < 0) {
@@ -383,7 +444,8 @@ void NativeExecutionDebugView::exportResult(const QString &path) {
         throw std::runtime_error("Cannot export native debug state");
 }
 void NativeExecutionDebugView::exportArchive(const QString &path) {
-    const auto state = exportReport();
-    session_->exportArchive(path, state);
+    if (!model())
+        throw std::runtime_error("Read an idle native trace before exporting");
+    startOperation(NativeDebugCommand::Position, model()->position(), path);
 }
 } // namespace flora

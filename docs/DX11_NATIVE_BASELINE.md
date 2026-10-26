@@ -894,3 +894,14 @@ BF1/Helldivers artifacts and a compiled source fixture's current watch state.
 See `DX11_NATIVE_DEBUG_SESSIONS.md` and
 `research/dx11-native-debug-session-evidence.json`. This does not retire legacy
 debug features or close complete semantic and standalone release gates.
+
+## Native debug operation checkpoint
+
+Native movement/source search and session export are now cancellable background
+operations with snapshot-only UI presentation. Nine suites pass 95 tests with
+five unchanged optional corpus skips. Real saved BF1/Helldivers journals pass
+cancel/retry/register restoration and asynchronous archive reload checks, with
+observed controller heartbeat gaps below 2.5 ms. This is a scoped response
+measurement, not full UI performance acceptance. See
+`DX11_NATIVE_DEBUG_OPERATIONS.md` and
+`research/dx11-native-debug-operation-evidence.json`.

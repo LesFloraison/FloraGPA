@@ -3,6 +3,7 @@
 #include "SourceStack.h"
 #include "SourceVariables.h"
 #include "SystemDisassembly.h"
+#include <QScopedValueRollback>
 #include <QString>
 #include <algorithm>
 #include <bit>
@@ -130,6 +131,7 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
     }
     settings_ = std::make_unique<NativeDebugSettings>(
         NativeDebugSettings{SourceTrace(result_, rows_, [this](size_t i) { return valuesAt(i); }), {}, {}});
+    settings_->source.setCheckpoint([this] { checkCancellation(operationCancelled_); });
     move(0, cancelled);
 }
 NativeExecutionDebugModel::~NativeExecutionDebugModel() = default;
@@ -140,13 +142,17 @@ void NativeExecutionDebugModel::move(size_t position, const CancelCheck &cancell
 }
 Json NativeExecutionDebugModel::registersAt(size_t position) {
     require(position <= size(), "Native debug position is outside the invocation");
-    trace_.moveTo(trace_.selectedBoundary(position));
+    trace_.moveTo(trace_.selectedBoundary(position), operationCancelled_);
     Json result = Json::array();
-    for (const auto &[key, v] : trace_.registers())
+    for (const auto &[key, v] : trace_.registers()) {
+        checkCancellation(operationCancelled_);
         if (key.first == lane_)
             result.push_back(registerRecord(key.second, v));
-    for (const auto &[key, v] : trace_.constants())
+    }
+    for (const auto &[key, v] : trace_.constants()) {
+        checkCancellation(operationCancelled_);
         result.push_back(registerRecord({8, {key.first, key.second}}, v));
+    }
     return result;
 }
 Json NativeExecutionDebugModel::registerValues() { return registersAt(position_); }
@@ -156,6 +162,7 @@ Json NativeExecutionDebugModel::registerRows(const std::string &interpretation) 
             "Unsupported native register interpretation");
     Json result = Json::array();
     for (const auto &row : registerValues()) {
+        checkCancellation(operationCancelled_);
         std::string text;
         for (size_t i = 0; i < 4; ++i) {
             if (i)
@@ -246,10 +253,13 @@ ExpressionValue NativeExecutionDebugModel::evaluate(size_t position, const std::
 Json NativeExecutionDebugModel::watchResults() {
     Json result = Json::array();
     for (const auto &watch : settings_->watches) {
+        checkCancellation(operationCancelled_);
         Json row{{"expression", watch.text()}};
         try {
             const auto value = evaluate(position_, watch.text());
             row.update({{"status", "available"}, {"type", value.kind}, {"value", value.text()}});
+        } catch (const OperationCancelled &) {
+            throw;
         } catch (const std::exception &e) {
             row.update({{"status", "unavailable"}, {"error", e.what()}});
         }
@@ -262,6 +272,46 @@ void NativeExecutionDebugModel::importConfiguration(const Json &configuration) {
     auto replacement =
         prepareNativeDebugConfig(result_, rows_, [this](size_t i) { return valuesAt(i); }, configuration);
     settings_ = std::make_unique<NativeDebugSettings>(std::move(replacement));
+    settings_->source.setCheckpoint([this] { checkCancellation(operationCancelled_); });
+}
+Json NativeExecutionDebugModel::inspect(NativeDebugCommand command, size_t position,
+                                        const Json &configuration, const std::string &interpretation,
+                                        bool includeReport, const CancelCheck &cancelled) {
+    const auto original = position_;
+    const QScopedValueRollback guard(operationCancelled_, cancelled);
+    try {
+        checkCancellation(cancelled);
+        require(command >= NativeDebugCommand::Position && command <= NativeDebugCommand::Continue,
+                "Unknown native debug command");
+        if (configuration != this->configuration())
+            importConfiguration(configuration);
+        size_t target = position;
+        if (command == NativeDebugCommand::PreviousSource || command == NativeDebugCommand::NextSource)
+            target = source().next(position, command == NativeDebugCommand::PreviousSource ? -1 : 1);
+        else if (command == NativeDebugCommand::Over || command == NativeDebugCommand::Out)
+            target = source().functionStep(position, command == NativeDebugCommand::Out);
+        else if (command == NativeDebugCommand::Continue)
+            target = seek(position, cancelled);
+        move(target, cancelled);
+        Json result{{"position", position_},
+                    {"interpretation", interpretation},
+                    {"state", instructionState()},
+                    {"registers", registerValues()},
+                    {"register_rows", registerRows(interpretation)},
+                    {"source_values", sourceValues()},
+                    {"location", location()},
+                    {"source_stack", stack()},
+                    {"watches", watchResults()}};
+        if (includeReport)
+            result["report"] = exportReport();
+        checkCancellation(cancelled);
+        return result;
+    } catch (...) {
+        // Do not perform an unbounded rewind after cancellation. All readers
+        // explicitly restore this displayed boundary before returning values.
+        position_ = original;
+        throw;
+    }
 }
 Json NativeExecutionDebugModel::exportReport() {
     return {{"format", "flora.native-execution-debug-report"},

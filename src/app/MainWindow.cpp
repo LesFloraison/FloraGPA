@@ -1219,6 +1219,10 @@ void MainWindow::buildUi() {
     connect(nativeDebug_, &NativeExecutionDebugView::readRequested, this, &MainWindow::readNativeDebug);
     connect(nativeDebug_, &NativeExecutionDebugView::cancelRequested, this, &MainWindow::cancel);
     connect(nativeDebug_, &NativeExecutionDebugView::error, this, &MainWindow::showError);
+    connect(nativeDebug_, &NativeExecutionDebugView::activityChanged, this, [this](bool active) {
+        nativeDebugOperation_ = active;
+        setBusy(busy());
+    });
     debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
     auto rightTabs = new QTabWidget;
@@ -1420,7 +1424,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || nativeDebugOperation_ || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1821,6 +1825,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
 }
 void MainWindow::cancel() {
     nativeAnalysis_.cancel();
+    if (nativeDebug_)
+        nativeDebug_->cancelOperation();
     if (exportCancel_) {
         exportCancel_->store(true);
         cancelAction_->setEnabled(false);

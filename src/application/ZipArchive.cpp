@@ -32,13 +32,16 @@ uint32_t crc(uint32_t value, const QByteArray &bytes) {
     return value;
 }
 } // namespace
-void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &entries) {
+void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &entries,
+                     const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     QSaveFile output(destination);
     if (!output.open(QIODevice::WriteOnly))
         throw std::runtime_error("Cannot create checkpoint archive");
     QByteArray central;
     std::set<QString> names;
     for (const auto &entry : entries) {
+        checkCancellation(cancelled);
         const auto name = entry.name.toUtf8();
         const auto parts = entry.name.split('/');
         const bool invalidPath = std::any_of(parts.begin(), parts.end(), [](const QString &part) {
@@ -81,6 +84,7 @@ void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &en
         uint64_t copied = 0;
         if (input.isOpen()) {
             while (copied < size) {
+                checkCancellation(cancelled);
                 const auto bytes = input.read(qint64(std::min(uint64_t(1024 * 1024), size - copied)));
                 if (bytes.isEmpty() || input.error() != QFileDevice::NoError)
                     throw std::runtime_error("Truncated checkpoint archive member");
@@ -91,8 +95,12 @@ void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &en
             if (!input.atEnd())
                 throw std::runtime_error("Checkpoint archive member changed while exporting");
         } else {
-            checksum = crc(checksum, entry.bytes);
-            write(output, entry.bytes);
+            for (qsizetype byteOffset = 0; byteOffset < entry.bytes.size(); byteOffset += 1024 * 1024) {
+                checkCancellation(cancelled);
+                const auto bytes = entry.bytes.mid(byteOffset, 1024 * 1024);
+                checksum = crc(checksum, bytes);
+                write(output, bytes);
+            }
         }
         checksum ^= UINT32_MAX;
         QByteArray descriptor;
@@ -163,6 +171,7 @@ void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &en
     append(end, std::min(offset, uint64_t(UINT32_MAX)), 4);
     append(end, 0, 2);
     write(output, end);
+    checkCancellation(cancelled);
     if (!output.commit())
         throw std::runtime_error("Cannot commit checkpoint archive");
 }

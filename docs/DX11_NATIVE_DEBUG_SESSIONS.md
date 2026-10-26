@@ -101,9 +101,10 @@ capture payloads remain outside Git.
 
 ## Remaining gates
 
-Large-trace interactive navigation/export still executes synchronously after
-asynchronous loading; cancellable navigation/export and responsiveness under
-large journals remain required. Archive import UI, full call-frame selection,
+The subsequent `DX11_NATIVE_DEBUG_OPERATIONS.md` checkpoint moves interactive
+navigation/export to a cancellable background controller and records actual
+journal response measurements. Maximum-size UI/memory acceptance remains open.
+Archive import UI, full call-frame selection,
 assembly instruction selection/run-to, legacy configuration migration, remaining
 CS source semantics, native VS/PS invocation integration and full shader/fragment
 parity remain open. Existing debugger features must remain until their native

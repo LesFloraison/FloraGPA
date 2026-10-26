@@ -50,7 +50,7 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active(); }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || nativeDebugOperation_; }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -166,6 +166,7 @@ class MainWindow final : public QMainWindow {
     NativeCountersView *nativeCounters_ = nullptr;
     NativeExecutionDebugView *nativeDebug_ = nullptr;
     bool runningNativeDebug_ = false;
+    bool nativeDebugOperation_ = false;
     NativeAnalysisController nativeAnalysis_;
     void readNativeCounters();
     void readNativeDebug();

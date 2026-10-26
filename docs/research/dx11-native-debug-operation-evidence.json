@@ -1,0 +1,456 @@
+{
+  "schema": 1,
+  "checkpoint": "cancellable-native-debug-operations",
+  "base_commit": "f04bd2c632b427da49a55d3f8a73825830420a6c",
+  "created_utc": "2026-10-26T17:06:52.676002+00:00",
+  "complete_release_acceptance": false,
+  "passed": 95,
+  "failed": 0,
+  "skipped": 5,
+  "suites": [
+    {
+      "name": "native-debug-operations",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-native-debug-operations.txt",
+        "bytes": 865,
+        "sha256": "f2ed506a2a03fd0f2e9a608bd0a7faf850a89fdaf2780a1edce83136cead1343"
+      }
+    },
+    {
+      "name": "native-execution-debug-ui",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-native-execution-debug-ui.txt",
+        "bytes": 810,
+        "sha256": "d800fc7168c087ab52ac00b890930ac2826e8dd466f8790c2ca5d1c9eef2d1a0"
+      }
+    },
+    {
+      "name": "native-debug-session",
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-native-debug-session.txt",
+        "bytes": 2113,
+        "sha256": "bb68110f594d43caa7f3e6582c17456ec3dfb318a12e6bd6a5c514c133226ea9"
+      }
+    },
+    {
+      "name": "native-execution-debug-model",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-native-execution-debug-model.txt",
+        "bytes": 1046,
+        "sha256": "079d7d7d7f6237433535f20904a590496d95fb5ca5bedbe8e5c969a568f01406"
+      }
+    },
+    {
+      "name": "checkpoint-model",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-checkpoint-model.txt",
+        "bytes": 2236,
+        "sha256": "6f7e036dfdf2a533322677b6fd85713cf8f752388d8b9555c8b2e633172d21f2"
+      }
+    },
+    {
+      "name": "checkpoint-ui",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 1,
+      "skip_records": [
+        "SKIP   : CheckpointUiTests::recoveredCaptures() Set FLORA_CHECKPOINT_FIXTURES for original SPDB/SDBG capture view checks"
+      ],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-checkpoint-ui.txt",
+        "bytes": 971,
+        "sha256": "73e2e2dfeba7071dd97ec73b1dcfa4afce4ba593990bbdf5641645f3412d05d5"
+      }
+    },
+    {
+      "name": "replay-debug-model",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-replay-debug-model.txt",
+        "bytes": 661,
+        "sha256": "538bfa2bc9daeeb410a3582b7d37892316ccae57972679d54ec14e54d637507d"
+      }
+    },
+    {
+      "name": "replay-debug-ui",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 4,
+      "skip_records": [
+        "SKIP   : ReplayDebugUiTests::backendReports() Set FLORA_REPLAY_DEBUG_REPORTS to the native shader debug corpus",
+        "SKIP   : ReplayDebugUiTests::sourceRulesAndConfig() Set FLORA_REPLAY_DEBUG_REPORTS to the native shader debug corpus",
+        "SKIP   : ReplayDebugUiTests::independentFrame(hardware) Set FLORA_DEBUG_SOURCE_CAPTURE to the original shader_sources capture",
+        "SKIP   : ReplayDebugUiTests::independentFrame(warp) Set FLORA_DEBUG_SOURCE_CAPTURE to the original shader_sources capture"
+      ],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-replay-debug-ui.txt",
+        "bytes": 1254,
+        "sha256": "63c45baf47e9723a639259e84a6383c7d27611c814004b122c596096ae430328"
+      }
+    },
+    {
+      "name": "native-counter-ui",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "skip_records": [],
+      "log": {
+        "path": "artifacts/dx11-native/debug-operation-final-native-counter-ui.txt",
+        "bytes": 665,
+        "sha256": "0de913664b32392c71399f97c143b0e125cc207c6605098ac457b924b106a552"
+      }
+    }
+  ],
+  "scope": [
+    "asynchronous exclusive session operations",
+    "snapshot-only native view presentation",
+    "cancelled hit-count cache construction and retry",
+    "cancelled projection retains original display boundary",
+    "archive cancellation preserves existing destination",
+    "published archive wins cancellation before delivery",
+    "destruction and stale context cleanup",
+    "NVIDIA Intel WARP MainWindow regression"
+  ],
+  "measurements": {
+    "bf1": {
+      "input_origin": "Recorded execution-model checkpoint Worker job; no new captured GPU execution",
+      "operation_probe": {
+        "complete_release_acceptance": false,
+        "context_id": "6521dcb05bcebf0e94647c48ae0e0c5a9da4b4022857c4eabf4cf262a118f564",
+        "format": "flora.native-debug-operation-probe",
+        "operations": [
+          {
+            "cancelled": false,
+            "elapsed_ms": 584.9682,
+            "exported": false,
+            "heartbeat_count": 551,
+            "maximum_heartbeat_gap_ms": 2.0239,
+            "name": "terminal",
+            "position": 52
+          },
+          {
+            "cancelled": true,
+            "elapsed_ms": 5.9608,
+            "exported": false,
+            "heartbeat_count": 5,
+            "maximum_heartbeat_gap_ms": 1.5151,
+            "name": "cancel_rewind",
+            "position": 52
+          },
+          {
+            "cancelled": false,
+            "elapsed_ms": 706.5328,
+            "exported": false,
+            "heartbeat_count": 700,
+            "maximum_heartbeat_gap_ms": 2.4567,
+            "name": "rewind",
+            "position": 0
+          },
+          {
+            "cancelled": false,
+            "elapsed_ms": 46.3159,
+            "exported": true,
+            "heartbeat_count": 43,
+            "maximum_heartbeat_gap_ms": 1.5161,
+            "name": "export",
+            "position": 0
+          }
+        ],
+        "passed": true,
+        "register_round_trip": true,
+        "selected_steps": 52,
+        "version": 1
+      },
+      "archive_validation": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "17d82af31c5c3fa4b896a4be02d217cfb0276345dc09ba3069ca72aaf2412994",
+        "context_id": "6521dcb05bcebf0e94647c48ae0e0c5a9da4b4022857c4eabf4cf262a118f564",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "6521dcb05bcebf0e94647c48ae0e0c5a9da4b4022857c4eabf4cf262a118f564",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 1531,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 52,
+          "terminal": {
+            "global_step": 14992,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 2744,
+          "version": 1
+        }
+      }
+    },
+    "hd": {
+      "input_origin": "Recorded execution-model checkpoint Worker job; no new captured GPU execution",
+      "operation_probe": {
+        "complete_release_acceptance": false,
+        "context_id": "07892954cc6ecc4da77d0006069279fb41df0e72c604b4edeba8f5e542899f27",
+        "format": "flora.native-debug-operation-probe",
+        "operations": [
+          {
+            "cancelled": false,
+            "elapsed_ms": 15.3984,
+            "exported": false,
+            "heartbeat_count": 14,
+            "maximum_heartbeat_gap_ms": 1.539,
+            "name": "terminal",
+            "position": 6
+          },
+          {
+            "cancelled": true,
+            "elapsed_ms": 5.7753,
+            "exported": false,
+            "heartbeat_count": 5,
+            "maximum_heartbeat_gap_ms": 1.5358,
+            "name": "cancel_rewind",
+            "position": 6
+          },
+          {
+            "cancelled": false,
+            "elapsed_ms": 8.5217,
+            "exported": false,
+            "heartbeat_count": 7,
+            "maximum_heartbeat_gap_ms": 1.4729,
+            "name": "rewind",
+            "position": 0
+          },
+          {
+            "cancelled": false,
+            "elapsed_ms": 13.7477,
+            "exported": true,
+            "heartbeat_count": 13,
+            "maximum_heartbeat_gap_ms": 1.5234,
+            "name": "export",
+            "position": 0
+          }
+        ],
+        "passed": true,
+        "register_round_trip": true,
+        "selected_steps": 6,
+        "version": 1
+      },
+      "archive_validation": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "311d6420c4ab3fe788823a523093123d2e976d0aa41a26d32d4f2807d96ae119",
+        "context_id": "07892954cc6ecc4da77d0006069279fb41df0e72c604b4edeba8f5e542899f27",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "07892954cc6ecc4da77d0006069279fb41df0e72c604b4edeba8f5e542899f27",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 68,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 6,
+          "terminal": {
+            "global_step": 384,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 124,
+          "version": 1
+        }
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/debug-operation-first-build.txt",
+      "bytes": 16950,
+      "sha256": "9eb5ec7e1eac7cc8e4ba7b85686e553ef0292c8d5c88fb9ea6e26194eb5cc590"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-final-build.txt",
+      "bytes": 17087,
+      "sha256": "43324426d57235aa913d4432d325d19bb9968657f698a69acdafd0e81830a5cb"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-boundary-build.txt",
+      "bytes": 13077,
+      "sha256": "acae8c09ffd0f1ecd6ac49e12b6f2271950ab2153b5b296552f09dd9b0350ab3"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-first-tests.txt",
+      "bytes": 789,
+      "sha256": "7cc4c23d20f132d84ce86fd88bbcdae800dd80277ce197c49a9b14d9555dfb03"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-first-ui.txt",
+      "bytes": 810,
+      "sha256": "0accf6166e5ee21027e349b5a397b1de3478b85669bfee276fe8c3ed421e1ae4"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-ui.png",
+      "bytes": 57695,
+      "sha256": "2252bca3d8807cc4a548d8a05e7e123c67c27ae73b4f9870b8cd8c5fd6da9488"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-source.zip",
+      "bytes": 103755,
+      "sha256": "4b97d46416ce840d0edd49f4cf5bc1a68d4547699c096198b7f0059bb12ecdf7"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-bf1.zip",
+      "bytes": 13686285,
+      "sha256": "17d82af31c5c3fa4b896a4be02d217cfb0276345dc09ba3069ca72aaf2412994"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-hd.zip",
+      "bytes": 344635,
+      "sha256": "311d6420c4ab3fe788823a523093123d2e976d0aa41a26d32d4f2807d96ae119"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-bf1.json",
+      "bytes": 1130,
+      "sha256": "96a0e0ba39020023a079d48edbf93f7f10d5a2437c74ecce05458f174c55f947"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-hd.json",
+      "bytes": 1120,
+      "sha256": "10ea5c5da3f708eb575f66b795af19804b11f16473fbcae2e5d21fadb088b532"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-bf1-archive-validation.json",
+      "bytes": 943,
+      "sha256": "457db3202f8ae832da28bedf65fc9d749d1bb6d446eadf78dd8139eb09e07cac"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-hd-archive-validation.json",
+      "bytes": 937,
+      "sha256": "2fa95c8ab9ff39526bcf171c77f8ba4aef5d193d676a839285cad6c53ab77932"
+    },
+    {
+      "path": "artifacts/dx11-native/debug-operation-source-archive-validation.json",
+      "bytes": 1064,
+      "sha256": "8c2f3c3a817978649159dac293150393b5e32fcb177a1853ee53b89b5d1d006a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4954112,
+      "sha256": "f6249e83d29a9293b805d95a741ce4a5a3d39cf83c7fdd13880742104b95dfbe"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5466624,
+      "sha256": "a65b75c579cbf5fb483863a54fe01d98d3267c3304ee6de9f2eed898ae6afe0b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5466624,
+      "sha256": "e7304bcf2983c8c15bf846e42da3dedd3f20469866c3480be43f809b4d9ebcce"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeDebugOperationProbe.exe",
+      "bytes": 4925952,
+      "sha256": "c1e43a62731a50b6b0e11df21e3a9681d3f6037cedd012964762bae2bf1f113e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeDebugSessionProbe.exe",
+      "bytes": 1126912,
+      "sha256": "c88263f5079ac9916bde15322b77a68049f8d57470f59d89f3528a9efca4b852"
+    }
+  ],
+  "remaining_gates": [
+    "maximum-size metadata/widget cost peak memory and full UI performance",
+    "native archive import and assembly/call-frame selection",
+    "legacy debug configuration migration",
+    "complete VS PS CS input and shader semantics",
+    "full pixel history",
+    "RenderDoc dependency deletion and independent release acceptance"
+  ],
+  "source_archive_validation": {
+    "schema": 1,
+    "passed": true,
+    "complete_release_acceptance": false,
+    "archive_sha256": "4b97d46416ce840d0edd49f4cf5bc1a68d4547699c096198b7f0059bb12ecdf7",
+    "context_id": "b816a6fff2c204ddab38c3a2ad737e1769db992710d697f27ad0d5303b09cb44",
+    "entries": [
+      "debug.json",
+      "job.json",
+      "result.json",
+      "shader.dxbc",
+      "state.json",
+      "trace.jsonl"
+    ],
+    "original_artifacts_compared": false,
+    "position": 2,
+    "watches": [
+      {
+        "expression": "total + 1",
+        "status": "available",
+        "type": "uint",
+        "value": "11"
+      }
+    ],
+    "reload": {
+      "context_id": "b816a6fff2c204ddab38c3a2ad737e1769db992710d697f27ad0d5303b09cb44",
+      "format": "flora.native-debug-session-probe",
+      "load_ms": 43,
+      "mapped_steps": 31,
+      "passed": true,
+      "register_round_trip": true,
+      "resumed": true,
+      "selected_steps": 31,
+      "terminal": {
+        "global_step": 62,
+        "instruction": null,
+        "state_boundary": "terminal_group"
+      },
+      "total_ms": 58,
+      "version": 1
+    }
+  }
+}

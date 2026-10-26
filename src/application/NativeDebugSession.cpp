@@ -134,15 +134,21 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
     summary.erase("bytes");
     summary.erase("records");
     require(summary == model_->completion(), "Native debug trace completion mismatch");
+    initialSnapshot_ =
+        model_->inspect(NativeDebugCommand::Position, 0, model_->configuration(), "float", false, cancelled);
     checkCancellation(cancelled);
 }
-void NativeDebugSession::exportArchive(const QString &path, const Json &state) const {
+void NativeDebugSession::exportArchive(const QString &path, const Json &state,
+                                       const CancelCheck &cancelled) const {
+    checkCancellation(cancelled);
     const auto bytes = [](const Json &value) { return QByteArray::fromStdString(value.dump(2)); };
-    writeZipArchive(path, {{"job.json", {}, bytes(job_)},
-                           {"result.json", {}, bytes(result_)},
-                           {"debug.json", {}, metadata_},
-                           {"shader.dxbc", {}, shader_},
-                           {"trace.jsonl", tracePath(), {}},
-                           {"state.json", {}, bytes(state)}});
+    writeZipArchive(path,
+                    {{"job.json", {}, bytes(job_)},
+                     {"result.json", {}, bytes(result_)},
+                     {"debug.json", {}, metadata_},
+                     {"shader.dxbc", {}, shader_},
+                     {"trace.jsonl", tracePath(), {}},
+                     {"state.json", {}, bytes(state)}},
+                    cancelled);
 }
 } // namespace flora

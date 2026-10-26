@@ -4,6 +4,7 @@
 #include "SdbgVariables.h"
 
 namespace flora {
+enum class NativeDebugCommand { Position, PreviousSource, NextSource, Over, Out, Continue };
 // Instruction boundaries in a selected invocation, backed by complete group
 // state. This model does not accept legacy debugger numeric types or enums.
 class NativeExecutionDebugModel {
@@ -42,6 +43,11 @@ class NativeExecutionDebugModel {
     Json configuration() const;
     void importConfiguration(const Json &);
     Json exportReport();
+    // Execute exclusively, typically on a background thread. Cancellation keeps
+    // the displayed boundary unchanged; the internal projection may be a prefix.
+    Json inspect(NativeDebugCommand command, size_t position, const Json &configuration,
+                 const std::string &interpretation, bool includeReport = false,
+                 const CancelCheck &cancelled = {});
 
   private:
     dxbc_exec::ExecutionTraceReader trace_;
@@ -50,6 +56,7 @@ class NativeExecutionDebugModel {
     std::unique_ptr<NativeDebugSettings> settings_;
     uint32_t lane_ = 0;
     size_t position_ = 0;
+    CancelCheck operationCancelled_;
     Json registersAt(size_t position);
     Json valuesAt(size_t position);
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include "core/Cancellation.h"
 #include <QByteArray>
 #include <QString>
 #include <vector>
@@ -12,5 +13,6 @@ struct ZipEntry {
 // Member names may use relative forward-slash paths; empty, dot, parent,
 // absolute, drive-qualified and duplicate paths are rejected.
 // Streams source files and writes ZIP64 metadata when sizes/offsets require it.
-void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &entries);
+void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &entries,
+                     const CancelCheck &cancelled = {});
 } // namespace flora

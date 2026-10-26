@@ -9,6 +9,9 @@ class SourceTrace {
     using Point = std::pair<int64_t, int64_t>;
     using ValueLoader = std::function<Json(size_t)>;
     SourceTrace(Json result, Json rows, ValueLoader loader = {});
+    // Called during potentially long scans. A throwing callback must not leave
+    // partially populated encounter caches visible to subsequent navigation.
+    void setCheckpoint(std::function<void()> checkpoint) { checkpoint_ = std::move(checkpoint); }
     Json location(size_t index) const;
     bool same(size_t a, size_t b) const;
     Json stack(size_t index);
@@ -32,7 +35,12 @@ class SourceTrace {
   private:
     Json result_, rows_;
     ValueLoader loader_;
-    std::optional<uint64_t> checkpoint_;
+    std::optional<uint64_t> checkpointInstruction_;
+    std::function<void()> checkpoint_;
+    void check() const {
+        if (checkpoint_)
+            checkpoint_();
+    }
     std::map<uint64_t, Json> locations_;
     std::map<uint64_t, uint64_t> offsets_;
     std::set<Point> breakpoints_;
