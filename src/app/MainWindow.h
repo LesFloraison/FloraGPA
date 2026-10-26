@@ -40,6 +40,7 @@ class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
 class NativeCountersView;
+class NativeExecutionDebugView;
 class ReplayMeshView;
 class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
@@ -163,8 +164,11 @@ class MainWindow final : public QMainWindow {
     std::array<ReplayDebugView *, 3> replayDebug_{};
     ReplayDebugView *runningDebug_ = nullptr;
     NativeCountersView *nativeCounters_ = nullptr;
+    NativeExecutionDebugView *nativeDebug_ = nullptr;
+    bool runningNativeDebug_ = false;
     NativeAnalysisController nativeAnalysis_;
     void readNativeCounters();
+    void readNativeDebug();
     uint64_t nativeRequestId_{};
     QString nativeContextKey_;
     ReplayMeshView *replayMesh_ = nullptr;

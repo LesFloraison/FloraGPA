@@ -12,6 +12,7 @@ class NativeDebugControls final : public QWidget {
   public:
     using Json = nlohmann::json;
     explicit NativeDebugControls(QWidget *parent = nullptr);
+    void clear();
     void reset(Json result, Json rows, SourceTrace::ValueLoader loader, bool retain = false);
     NativeDebugSettings &settings();
     Json configuration() const;

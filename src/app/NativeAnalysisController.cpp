@@ -1,5 +1,6 @@
 #include "NativeAnalysisController.h"
 #include "application/NativeAnalysisJobs.h"
+#include "application/NativeDebugSession.h"
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -48,7 +49,7 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
         const CancelCheck cancelled = [&] {
             if (token->load())
                 return true;
-            if (elapsed.elapsed() >= timeoutSeconds * 1000)
+            if (elapsed.nsecsElapsed() >= timeoutSeconds * 1000000000)
                 throw std::runtime_error("Native analysis timed out");
             return false;
         };
@@ -77,6 +78,12 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
             validateNativeAnalysisResult(outcome.job, outcome.result);
             outcome.artifacts = readNativeArtifacts(directory->filePath("result"),
                                                     outcome.result.at("artifacts"), maximumBytes, cancelled);
+            if (action == "debug-thread") {
+                outcome.debugSession = std::make_shared<NativeDebugSession>(
+                    outcome.job, outcome.result, outcome.artifacts, maximumBytes, cancelled);
+                // The session retains the shader and a locked private journal.
+                outcome.artifacts.clear();
+            }
             checkCancellation(cancelled);
         } catch (const OperationCancelled &) {
             outcome = {};
@@ -93,5 +100,44 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
         }
         return outcome;
     }));
+}
+void NativeAnalysisController::loadDebugSession(nlohmann::json job, nlohmann::json result,
+                                                NativeArtifactBytes artifacts, double timeoutSeconds,
+                                                uint64_t maximumBytes) {
+    if (active())
+        throw std::runtime_error("A native analysis is already running");
+    if (!std::isfinite(timeoutSeconds) || timeoutSeconds <= 0 || timeoutSeconds > double(INT_MAX) / 1000)
+        throw std::invalid_argument("Invalid native analysis deadline");
+    auto token = std::make_shared<std::atomic_bool>(false);
+    cancelled_ = token;
+    watcher_.setFuture(
+        QtConcurrent::run([job = std::move(job), result = std::move(result), artifacts = std::move(artifacts),
+                           token, timeoutSeconds, maximumBytes] {
+            NativeAnalysisOutcome outcome;
+            QElapsedTimer elapsed;
+            elapsed.start();
+            const CancelCheck cancelled = [&] {
+                if (token->load())
+                    return true;
+                if (elapsed.nsecsElapsed() >= timeoutSeconds * 1000000000)
+                    throw std::runtime_error("Native analysis timed out");
+                return false;
+            };
+            try {
+                outcome.debugSession =
+                    std::make_shared<NativeDebugSession>(job, result, artifacts, maximumBytes, cancelled);
+                outcome.job = job;
+                outcome.result = result;
+                checkCancellation(cancelled);
+            } catch (const OperationCancelled &) {
+                outcome = {};
+                outcome.cancelled = true;
+                outcome.error = "Native analysis cancelled";
+            } catch (const std::exception &error) {
+                outcome = {};
+                outcome.error = QString::fromUtf8(error.what());
+            }
+            return outcome;
+        }));
 }
 } // namespace flora

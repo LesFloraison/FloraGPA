@@ -605,6 +605,17 @@ the independent Python projector. See `DX11_DXBC_TRACE_READER.md`. This is the
 native debug model's state layer; legacy debug UI and full removal gates remain
 open.
 
+## Native compute session and UI continuation
+
+The parallel `Native CS` tab now loads verified Worker results asynchronously,
+retains a locked session journal, displays native stepping/source/watch state,
+rejects stale selections and exports a complete session archive. Six affected
+suites record 65 passes, no failures and five unchanged external-corpus skips;
+MainWindow execution/cancel/retry passes on NVIDIA, Intel and WARP. Recorded
+BF1/Helldivers jobs and a source fixture pass independent archive/reload checks.
+See `DX11_NATIVE_DEBUG_SESSIONS.md` for exact scope and remaining UI/semantic
+gates. Legacy tabs and RenderDoc dependencies remain until full parity is proved.
+
 ## Native execution model continuation
 
 The native model now connects shader-verified journal state to source values,

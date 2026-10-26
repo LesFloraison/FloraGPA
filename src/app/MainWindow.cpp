@@ -24,6 +24,7 @@
 #include "QuadView.h"
 #include "RasterizerDialog.h"
 #include "NativeCountersView.h"
+#include "NativeExecutionDebugView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
@@ -358,13 +359,21 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(outcome.error.toStdString());
             if (outcome.result.at("context").at("frame_sha256") != frame_->sha256())
                 throw std::runtime_error("Native analysis frame changed");
-            const auto report = outcome.artifacts.value("counters.json");
-            if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
-                throw std::runtime_error("Native counter artifact disagrees with the result");
-            accepted = nativeCounters_->finish(nativeRequestId_, outcome.result);
-            statusBar()->showMessage(accepted ? "Replay metrics ready" : "Analysis context changed", 3000);
+            if (runningNativeDebug_) {
+                accepted = nativeDebug_->finish(nativeRequestId_, outcome.debugSession);
+                statusBar()->showMessage(accepted ? "Native compute trace ready" : "Analysis context changed", 3000);
+            } else {
+                const auto report = outcome.artifacts.value("counters.json");
+                if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
+                    throw std::runtime_error("Native counter artifact disagrees with the result");
+                accepted = nativeCounters_->finish(nativeRequestId_, outcome.result);
+                statusBar()->showMessage(accepted ? "Replay metrics ready" : "Analysis context changed", 3000);
+            }
         } catch (const std::exception &error) {
-            nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+            if (runningNativeDebug_)
+                nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
+            else
+                nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
             if (!outcome.workerLog.isEmpty())
                 log_->appendPlainText(QString::fromUtf8(outcome.workerLog));
             if (!outcome.cancelled)
@@ -372,6 +381,7 @@ MainWindow::MainWindow() : loader_(this) {
             else
                 statusBar()->showMessage("Native analysis cancelled", 3000);
         }
+        runningNativeDebug_ = false;
         emit taskFinished(accepted);
     });
     connect(&process_, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
@@ -1204,6 +1214,11 @@ void MainWindow::buildUi() {
         debugTabs->removeTab(index);
         debugTabs->insertTab(i, stageOrder[i], label);
     }
+    nativeDebug_ = new NativeExecutionDebugView;
+    debugTabs->addTab(nativeDebug_, "Native CS");
+    connect(nativeDebug_, &NativeExecutionDebugView::readRequested, this, &MainWindow::readNativeDebug);
+    connect(nativeDebug_, &NativeExecutionDebugView::cancelRequested, this, &MainWindow::cancel);
+    connect(nativeDebug_, &NativeExecutionDebugView::error, this, &MainWindow::showError);
     debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
     auto rightTabs = new QTabWidget;
@@ -1418,6 +1433,8 @@ void MainWindow::setBusy(bool busy) {
         history_->setWorkerBusy(busy);
     if (nativeCounters_)
         nativeCounters_->setWorkerBusy(busy);
+    if (nativeDebug_)
+        nativeDebug_->setWorkerBusy(busy);
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
@@ -1481,6 +1498,8 @@ void MainWindow::updateCheckpointContext() {
         history_->setContext(historyContextKey(), selectedEvent_);
     if (nativeCounters_)
         nativeCounters_->setContext(historyContextKey(), selectedEvent_);
+    if (nativeDebug_)
+        nativeDebug_->setContext(historyContextKey(), selectedEvent_);
     if (replayMesh_)
         replayMesh_->setContext(historyContextKey(), selectedEvent_);
     for (auto view : replayDebug_)
@@ -1561,6 +1580,7 @@ void MainWindow::readNativeCounters() {
     if (busy() || !frame_)
         return;
     nativeRequestId_ = nativeCounters_->requestId();
+    runningNativeDebug_ = false;
     nativeContextKey_ = historyContextKey();
     try {
         replayTimer_.stop();
@@ -1577,6 +1597,32 @@ void MainWindow::readNativeCounters() {
         statusBar()->showMessage("Measuring replay counters…");
     } catch (const std::exception &error) {
         nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+        showError(QString::fromUtf8(error.what()));
+        emit taskFinished(false);
+    }
+}
+void MainWindow::readNativeDebug() {
+    if (busy() || !frame_)
+        return;
+    nativeRequestId_ = nativeDebug_->requestId();
+    nativeContextKey_ = historyContextKey();
+    runningNativeDebug_ = true;
+    try {
+        replayTimer_.stop();
+        textureTimer_.stop();
+        bufferTimer_.stop();
+        auto options = nativeDebug_->request();
+        if (adapter_->currentIndex() == 1)
+            options["warp"] = true;
+        else if (const auto vendor = selectedReplayVendor(*adapter_))
+            options["gpu_vendor"] = *vendor;
+        nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                              "debug-thread", options, experiment_ ? experiment_->document() : nlohmann::json());
+        setBusy(true);
+        statusBar()->showMessage("Reading native compute execution…");
+    } catch (const std::exception &error) {
+        runningNativeDebug_ = false;
+        nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
         showError(QString::fromUtf8(error.what()));
         emit taskFinished(false);
     }

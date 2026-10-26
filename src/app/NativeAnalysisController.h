@@ -6,9 +6,11 @@
 #include <memory>
 
 namespace flora {
+class NativeDebugSession;
 struct NativeAnalysisOutcome {
     nlohmann::json job, result;
     NativeArtifactBytes artifacts;
+    std::shared_ptr<NativeDebugSession> debugSession;
     QString error;
     QByteArray workerLog;
     bool cancelled = false;
@@ -24,6 +26,9 @@ class NativeAnalysisController final : public QObject {
                const nlohmann::json &options, const nlohmann::json &experiment, double timeoutSeconds = 180,
                uint64_t maximumBytes = 256ull * 1024 * 1024);
     void cancel();
+    // Revalidate a saved job and its payloads using the same asynchronous loader.
+    void loadDebugSession(nlohmann::json job, nlohmann::json result, NativeArtifactBytes artifacts,
+                          double timeoutSeconds = 180, uint64_t maximumBytes = 256ull * 1024 * 1024);
   signals:
     void finished(const flora::NativeAnalysisOutcome &outcome);
 

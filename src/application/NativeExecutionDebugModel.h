@@ -16,6 +16,7 @@ class NativeExecutionDebugModel {
     NativeExecutionDebugModel &operator=(const NativeExecutionDebugModel &) = delete;
     const Json &result() const { return result_; }
     const Json &rows() const { return rows_; }
+    Json completion() const { return trace_.completion(); }
     const Json &files() const { return result_.at("source_lines").at("files"); }
     size_t size() const { return rows_.size(); }
     // size() denotes the terminal whole-group state. No source location is
@@ -25,6 +26,8 @@ class NativeExecutionDebugModel {
     Json registerValues();
     Json registerRows(const std::string &interpretation = "float");
     Json sourceValues();
+    // Queries another boundary without changing the displayed position.
+    Json sourceValuesAt(size_t position) { return valuesAt(position); }
     Json location() const;
     Json stack();
     Json instructionState() const;

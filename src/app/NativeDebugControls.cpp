@@ -169,6 +169,17 @@ NativeDebugSettings &NativeDebugControls::settings() {
         throw std::runtime_error("Read the shader instruction catalog first");
     return *settings_;
 }
+void NativeDebugControls::clear() {
+    setEnabled(false);
+    settings_.reset();
+    loader_ = {};
+    result_ = rows_ = Json();
+    points_ = watchResults_ = Json::array();
+    record_.reset();
+    frame_.reset();
+    rules_->clear();
+    values_->clear();
+}
 void NativeDebugControls::reset(Json result, Json rows, SourceTrace::ValueLoader loader, bool retain) {
     auto replacement = retain && settings_ ? prepareNativeDebugConfig(result, rows, loader, configuration())
                                            : NativeDebugSettings{SourceTrace(result, rows, loader), {}, {}};

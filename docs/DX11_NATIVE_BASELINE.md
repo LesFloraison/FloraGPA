@@ -883,3 +883,14 @@ pass independent validation; neither captured shader contains source metadata.
 See `DX11_NATIVE_EXECUTION_DEBUG_MODEL.md` and
 `research/dx11-native-execution-debug-model-evidence.json`. Native UI and complete
 source/shader/fragment and P7/P8 acceptance remain open.
+
+## Native debug session and UI checkpoint
+
+Native compute Worker results now load asynchronously into owned debug sessions
+and a parallel `Native CS` view. Six affected suites pass 65 tests with five
+unchanged optional corpus skips. Actual GUI dispatch/cancel/retry passes on all
+three local adapters. Independent archive/reload checks preserve recorded
+BF1/Helldivers artifacts and a compiled source fixture's current watch state.
+See `DX11_NATIVE_DEBUG_SESSIONS.md` and
+`research/dx11-native-debug-session-evidence.json`. This does not retire legacy
+debug features or close complete semantic and standalone release gates.

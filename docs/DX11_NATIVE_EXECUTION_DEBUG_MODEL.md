@@ -1,5 +1,9 @@
 # Native execution debug model
 
+The subsequent session/UI integration is documented in
+`DX11_NATIVE_DEBUG_SESSIONS.md`. The evidence below records the model checkpoint;
+the parallel native CS tab now consumes this model without retiring legacy tabs.
+
 ## Contract and scope
 
 `NativeExecutionDebugModel` connects owned compute journals to the existing
