@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "checkpoint": "native-dxbc-execution-journal",
+  "created_utc": "2026-10-26T14:18:15.444469+00:00",
+  "base_commit": "02940a01568ea7161f4bf30c7342c2c2203cb1c2",
+  "complete_release_acceptance": false,
+  "scope": "bounded project-owned CS group journals and independent reversible state projection",
+  "trace_format": "flora.dxbc-execution-trace/1",
+  "passed": 516,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "suite": "final",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/execution-trace-final.txt",
+        "bytes": 2781,
+        "sha256": "192603206655ed806a72a1fe76474e3bb8a77764ef5801f56aec357c3d3c7870"
+      }
+    },
+    {
+      "suite": "input-snapshot",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/execution-trace-input-snapshot.txt",
+        "bytes": 45944,
+        "sha256": "5fe6f0b5dcc41243ea906796203b93673e94f57eabda741e1bff8d0a71dbc640"
+      }
+    },
+    {
+      "suite": "group",
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/execution-trace-group.txt",
+        "bytes": 25026,
+        "sha256": "eeb6455ffc5055de4368e58cafe00a4a5010a0d39f310afead526b4bc4263e62"
+      }
+    },
+    {
+      "suite": "execution",
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/execution-trace-execution.txt",
+        "bytes": 357356,
+        "sha256": "b7037ba1828bfcd7d8eec5ad239325da691e29540f9feeb5df925384e433a1a4"
+      }
+    }
+  ],
+  "captures": [
+    {
+      "capture": "bf1",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 209,
+      "shader": 190,
+      "shader_sha256": "b56ecaacbb781396de6116962c49ae2727b671c97d630d1c8231cb8353c76304",
+      "steps": 14992,
+      "selected_steps": 52,
+      "texture_writes": 1488,
+      "texture_write_bytes": 11904,
+      "trace_bytes": 13643505,
+      "trace_records": 16794,
+      "trace_elapsed_ms": 2655,
+      "probe_elapsed_ms": 3862,
+      "helper": {
+        "backend": "dxbc-gpu/16",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "gpu_operations": 2000,
+      "rewound": true,
+      "same_final_storage_as_gpu_completion_checkpoint": true,
+      "report": {
+        "path": "artifacts/dx11-native/execution-trace-bf1.json",
+        "bytes": 11850,
+        "sha256": "6c3e9a0abaa2bf94fe6b1d66a50b75285402c51332b8d048ed6662de0b9e0e1b"
+      },
+      "journal": {
+        "path": "artifacts/dx11-native/execution-trace-bf1.jsonl",
+        "bytes": 13643505,
+        "sha256": "8db74d43e9746d8ed9b6c625ccc8d6e3326de20d57a5b548e8efbe2a16195e48"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/execution-trace-bf1-validation.json",
+        "bytes": 1533,
+        "sha256": "8d6e980443be6194fd6308080392c2df9121c04960cdebf12bcd184c355e5d11"
+      },
+      "previous_report": {
+        "path": "artifacts/dx11-native/gpu-completion-captured-bf1.json",
+        "bytes": 12385,
+        "sha256": "f371cb0c319d0b8f7f4cce88d92e934a9e4c33d5dae933765b57ab33f45e35b1"
+      }
+    },
+    {
+      "capture": "hd",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 893,
+      "shader": 891,
+      "shader_sha256": "6cbfe0c5403012739b9f6ed4de880f1a92abf5c3d87f519f8fc623252ec7cab8",
+      "steps": 384,
+      "selected_steps": 6,
+      "texture_writes": 64,
+      "texture_write_bytes": 256,
+      "trace_bytes": 322754,
+      "trace_records": 1074,
+      "trace_elapsed_ms": 61,
+      "probe_elapsed_ms": 1161,
+      "helper": {
+        "backend": "dxbc-gpu/16",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "gpu_operations": 64,
+      "rewound": true,
+      "same_final_storage_as_gpu_completion_checkpoint": true,
+      "report": {
+        "path": "artifacts/dx11-native/execution-trace-hd.json",
+        "bytes": 4952,
+        "sha256": "9b8b3f3c58d0dcc3c34e7ca14ff9ffbb00a8c516db66525bd6f904d5eef9a5f2"
+      },
+      "journal": {
+        "path": "artifacts/dx11-native/execution-trace-hd.jsonl",
+        "bytes": 322754,
+        "sha256": "8448df533ff2e9a9d907198829bfcfdc1477d82142945b26548abd0930f4bf5b"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/execution-trace-hd-validation.json",
+        "bytes": 1518,
+        "sha256": "e39d29bfab60723c3f4c12b83c31f18032aad02a82c4fdfc43dd458ef851fb64"
+      },
+      "previous_report": {
+        "path": "artifacts/dx11-native/gpu-completion-captured-hd.json",
+        "bytes": 6002,
+        "sha256": "f29b3551b7437c4c2e306deec99a43da14b0a49d0a3fc074acc0bbbf89ec8367"
+      }
+    }
+  ],
+  "negative_checks": {
+    "passed": true,
+    "cases": [
+      {
+        "case": "version",
+        "rejected": true,
+        "reason": "Unsupported trace schema"
+      },
+      {
+        "case": "shader_identity",
+        "rejected": true,
+        "reason": "Trace provenance mismatch: shader_sha256"
+      },
+      {
+        "case": "sequence",
+        "rejected": true,
+        "reason": "Noncontiguous group sequence"
+      },
+      {
+        "case": "register_before",
+        "rejected": true,
+        "reason": "Register delta chain mismatch"
+      },
+      {
+        "case": "invalid_mask",
+        "rejected": true,
+        "reason": "Invalid unsigned trace integer"
+      },
+      {
+        "case": "missing_chunk",
+        "rejected": true,
+        "reason": "Incomplete initial storage"
+      },
+      {
+        "case": "missing_completion",
+        "rejected": true,
+        "reason": "Missing execution completion"
+      },
+      {
+        "case": "truncated_record",
+        "rejected": true,
+        "reason": "Truncated or oversized trace record"
+      },
+      {
+        "case": "final_digest",
+        "rejected": true,
+        "reason": "Final storage digest mismatch"
+      },
+      {
+        "case": "completion_steps",
+        "rejected": true,
+        "reason": "Incomplete execution"
+      }
+    ]
+  },
+  "negative_log": {
+    "path": "artifacts/dx11-native/execution-trace-negative.json",
+    "bytes": 1254,
+    "sha256": "89f036ded1a46f2b79d136e6dda62a4a0f7d75c7d8e22730d2e16a1aec7cd411"
+  },
+  "ctest": {
+    "path": "artifacts/dx11-native/execution-trace-regression-ctest.txt",
+    "bytes": 625,
+    "sha256": "c10024fd99f601324eb9029a9222fd28a56294355dc79e8938c19ed5c45c001c"
+  },
+  "build": {
+    "path": "artifacts/dx11-native/execution-trace-final-build.txt",
+    "bytes": 9355,
+    "sha256": "9bdff76ed82929873114e845bb6a93f435b35cd4c134e84dee01ef13d015723d"
+  },
+  "source_files": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 112987,
+      "sha256": "06fe8031c350de6b710cba99faf1d8ace9c6fdd374034ed8c1c4c66579c171f3"
+    },
+    {
+      "path": "src/application/DxbcExecutionTrace.h",
+      "bytes": 1001,
+      "sha256": "cb3d8304442ddfe3b1278cd3d703083ee7bfd4b80e677ea762a57b960c0e2698"
+    },
+    {
+      "path": "src/application/DxbcExecutionTrace.cpp",
+      "bytes": 16490,
+      "sha256": "5c3b2d1fb8eae7b893624781aae9600f9da9dd698ef73c392f9cb7b727d3601c"
+    },
+    {
+      "path": "tests/DxbcExecutionTraceTests.cpp",
+      "bytes": 19737,
+      "sha256": "e2ba321f225fc78f995f98c8f1bf42d1a86221a2aa3221d9f2e28f9c1f235bf6"
+    },
+    {
+      "path": "tools/probe_dxbc_inputs.cpp",
+      "bytes": 27496,
+      "sha256": "cbe74bd413ca0ef5f2c265537261d456d62569f5a5a5ab661c46a2ae23deac27"
+    },
+    {
+      "path": "tools/validate_dxbc_execution_trace.py",
+      "bytes": 15496,
+      "sha256": "0d4d69fd40ac3b12036ae079b63e3ebd40355884e9f2a7ab903bbd026f592f81"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4507648,
+      "sha256": "16118d2b5e01be4d240b7409d53b0205fcb5bc8ff6dd95902488da6ce0add89b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5076992,
+      "sha256": "273d75d1ebbba6dc19861950621cee66c4eb442c4be0ec982249b811cc31c8e3"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5076992,
+      "sha256": "c65a1206b81cbda85bf411772f947d9c4e56517bfb192b6d130742fb2f4e62d9"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
+      "bytes": 1549824,
+      "sha256": "87e60136a66deaf50c0a5ac28ea67db96d32571bbbb31b514a584ece30ed7197"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1615872,
+      "sha256": "254c08da320f4df19808e5f0d79d7c57110cc603ba5ee7400f7e6d8ebdac8d1d"
+    }
+  ],
+  "remaining_gates": [
+    "effective dispatch bounds and predication",
+    "native debug Worker and UI integration",
+    "captured VS/PS invocation discovery and helper memory semantics",
+    "complete pixel history",
+    "RenderDoc dependency removal",
+    "standalone release acceptance"
+  ]
+}

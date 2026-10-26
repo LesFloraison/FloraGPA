@@ -826,3 +826,18 @@ execution ledger is `research/dx11-dxbc-gpu-completion-evidence.json`.
 Application performance, actual unsupported-driver/older-OS execution, device
 removal, full fragment history, debugger integration and standalone release gates
 remain open.
+
+## Native execution journal checkpoint
+
+The project-owned version-one DXBC journal preserves raw register bits and
+validity, cooperative lane scheduling, original instruction/source identities,
+private storage and counter deltas. Atomic publication and explicit step/byte
+limits protect failed or cancelled exports. The four affected suites pass 516
+tests with no failures/skips. Independent forward/reverse projection validates
+real BF1 and Helldivers group traces; ten corruptions are rejected. See
+`DX11_DXBC_EXECUTION_TRACE.md` and
+`research/dx11-dxbc-execution-trace-evidence.json`.
+
+This low-level writer does not establish dispatch bounds or predication and does
+not enable product debug actions. Native Worker/UI integration, full fragment
+history and standalone dependency-removal acceptance remain open.

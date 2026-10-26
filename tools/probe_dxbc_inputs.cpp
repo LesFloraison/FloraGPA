@@ -1,3 +1,4 @@
+#include "application/DxbcExecutionTrace.h"
 #include "application/DxbcGpuOperations.h"
 #include "application/DxbcInputSnapshot.h"
 #include "replay/Replay.h"
@@ -43,17 +44,19 @@ int main(int argc, char **argv) {
     const auto args = app.arguments();
     const bool compareNative = args.size() == 8 && args[7] == "--compare-native";
     const bool execute = (args.size() == 7 || compareNative) && args[6] == "--execute-group";
-    if (args.size() != 6 && !execute) {
+    const bool trace = args.size() == 8 && args[6] == "--export-trace";
+    if (args.size() != 6 && !execute && !trace) {
         std::cerr << "Usage: FloraDxbcInputProbe <frame> <event> <native-stage-0..5> <vendor-or-0-for-WARP> "
-                     "<report.json> [--execute-group [--compare-native]]\n";
+                     "<report.json> [--execute-group [--compare-native] | --export-trace <trace.jsonl>]\n";
         return 2;
     }
-    Json report{
-        {"schema", 6},
-        {"scope", execute ? "native_dxbc_compute_group_probe" : "native_dxbc_resource_input_observation"},
-        {"complete_release_acceptance", false},
-        {"shader_execution_performed", false},
-        {"capture", args[1].toStdString()}};
+    Json report{{"schema", 6},
+                {"scope", trace     ? "native_dxbc_group_trace_probe"
+                          : execute ? "native_dxbc_compute_group_probe"
+                                    : "native_dxbc_resource_input_observation"},
+                {"complete_release_acceptance", false},
+                {"shader_execution_performed", false},
+                {"capture", args[1].toStdString()}};
     QElapsedTimer timer;
     timer.start();
     int status = 0;
@@ -61,7 +64,7 @@ int main(int argc, char **argv) {
         const auto event = number(args[2]), stage = number(args[3]), vendor = number(args[4]);
         if (stage > 5 || vendor > UINT32_MAX)
             throw std::runtime_error("Probe stage or vendor out of range");
-        if (execute && stage != 5)
+        if ((execute || trace) && stage != 5)
             throw std::runtime_error("Group execution requires a compute shader");
         report["event"] = event;
         report["stage"] = stage;
@@ -220,6 +223,26 @@ int main(int argc, char **argv) {
             report["counters"].push_back(item);
         }
         report["observed"] = true;
+        if (trace) {
+            executionTimer.start();
+            dxbc_exec::GroupTraceOptions selection;
+            selection.maxSteps = 100000;
+            report["trace"] = dxbc_exec::exportGroupExecutionTrace(args[7], snapshot, selection, cancelled);
+            report["trace"]["path"] = args[7].toStdString();
+            report["trace"]["elapsed_ms"] = executionTimer.elapsed();
+            report["shader_execution_performed"] = true;
+            report["trace"]["buffers_after"] = Json::array();
+            report["trace"]["textures_after"] = Json::array();
+            for (const auto &[id, buffer] : snapshot.inputs.memory->buffers())
+                report["trace"]["buffers_after"].push_back({{"resource", id},
+                                                            {"sha256", hash(buffer.bytes)},
+                                                            {"validity_sha256", hash(buffer.valid)}});
+            for (const auto &[id, texture] : snapshot.inputs.textures->resources)
+                report["trace"]["textures_after"].push_back(
+                    {{"resource", id},
+                     {"sha256", hash(texture.storage.bytes)},
+                     {"validity_sha256", hash(texture.storage.valid)}});
+        }
         if (execute) {
             auto &execution = report["execution"];
             execution = {{"attempted", true},

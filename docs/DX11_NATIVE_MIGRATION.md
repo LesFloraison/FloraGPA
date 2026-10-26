@@ -569,3 +569,13 @@ captured BF1 group execution and Helldivers single-dispatch resource comparison
 also pass. See `DX11_DXBC_GPU_COMPLETION.md`. This checkpoint does not enable the
 currently reserved native debug actions or close any full debugger/history or
 standalone release gate.
+
+## Native execution journal continuation
+
+`flora.dxbc-execution-trace` version 1 adds bounded, atomically published CS group
+journals with project-owned types and reversible register/resource/counter state.
+The independent validator reconstructs and rewinds real captured group execution;
+516 affected tests and ten negative journal checks pass. See
+`DX11_DXBC_EXECUTION_TRACE.md`. Invocation eligibility and Worker/UI integration
+are separate required steps; no existing debug action is switched or removed by
+this checkpoint, and no full debugger/history or release gate is closed.
