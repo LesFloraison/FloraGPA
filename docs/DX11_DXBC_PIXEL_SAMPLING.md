@@ -1,5 +1,9 @@
 # Native implicit pixel sampling
 
+The later [minimum-precision checkpoint](research/DX11_PIXEL_SAMPLING_PRECISION.md)
+extends temporary destinations and source operands and records current validation.
+The counts and backend identity below describe this document's original checkpoint.
+
 `PixelQuad` now executes `sample`, `sample_b` and `sample_c` with the original
 implicit hardware instruction on the selected adapter. CPU lanes retain control
 flow, registers, source operands, trace changes and discard/helper state. The

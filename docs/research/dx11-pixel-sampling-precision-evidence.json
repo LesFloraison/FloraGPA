@@ -1,0 +1,1086 @@
+{
+  "schema": 1,
+  "checkpoint": "native-pixel-sampling-minimum-precision",
+  "base_commit": "faf5339ce641f7efdfbecb9692479bf400c80d39",
+  "implementation_commit": "84ddc8f18b80167acca61b984388f2bacce707bd",
+  "created_utc": "2026-10-26T22:09:07.769795+00:00",
+  "complete_release_acceptance": false,
+  "helper_backend": "dxbc-gpu/18",
+  "suites": {
+    "pixel_sampling": {
+      "passed": 186,
+      "failed": 0,
+      "skipped": 0,
+      "milliseconds": 401546,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-sampling-precision-final-tests-2.txt",
+        "bytes": 83379,
+        "sha256": "1fcf9bb81f40fb12f3de5b656265743663711ac9fc056b0d0da6c0da275015cd"
+      }
+    },
+    "dxbc_execution": {
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "milliseconds": 38831,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-sampling-precision-execution-tests.txt",
+        "bytes": 389008,
+        "sha256": "95d0f8e7cf6119023a680450a5d6794ee7e5931e4036f86c01fd55a6613ce347"
+      }
+    }
+  },
+  "minimum_precision": {
+    "runs": 18,
+    "cases": 10368,
+    "exact_components": 80352,
+    "negative_controls": 126,
+    "report": {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-independent-validation.json",
+      "bytes": 243896,
+      "sha256": "5feadef8e35957f61e47d05eaedc5c9f575056cc5f32e5b04ac6e8498e758e51"
+    }
+  },
+  "existing_sampling": {
+    "cases": 9408,
+    "exact_components": 71424,
+    "undefined_sampler_rejections": 192,
+    "log_validation": {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-log-validation.json",
+      "bytes": 2754,
+      "sha256": "abee2b5134fa28b5166692416e70b78da630024d05a9377a1588f5795f7895fa"
+    }
+  },
+  "real_probes": {
+    "completed": 6,
+    "failed": 3,
+    "selected_steps": 381,
+    "global_steps": 1524,
+    "corruption_controls": 24,
+    "original_fragment_eligibility": false,
+    "independent_complete_ps_output_comparison": false,
+    "report": {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-validation.json",
+      "bytes": 189311,
+      "sha256": "210e03a0ee073cbfce5a4d2bf7c6d535f342953f11a32404598137440dd47327"
+    },
+    "runs": [
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-0/report.json",
+          "bytes": 3291,
+          "sha256": "3c81bc3c4b3bbecc683bfb29e3ce8a57ddddc16269cc38c51eaec676f0a55e69"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "error": null,
+        "trace": {
+          "bytes": 7446706,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 0,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "gpu_operations": 39,
+          "record": "complete",
+          "records": 1534,
+          "sampling_batches": 3,
+          "selected_steps": 102,
+          "steps": 408
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-32902/report.json",
+          "bytes": 3298,
+          "sha256": "acddfb702222a6e15cb46149b3a7a6d086d21d41f454ecc539d2ab2acba3ad95"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "error": null,
+        "trace": {
+          "bytes": 7446879,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 0,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "gpu_operations": 39,
+          "record": "complete",
+          "records": 1534,
+          "sampling_batches": 3,
+          "selected_steps": 102,
+          "steps": 408
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-4318/report.json",
+          "bytes": 3296,
+          "sha256": "9ad1ad6bf0476432db554b8eb64caed876b8554402a25fc884fb159c2c523a70"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "error": null,
+        "trace": {
+          "bytes": 7446767,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 0,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "gpu_operations": 39,
+          "record": "complete",
+          "records": 1534,
+          "sampling_batches": 3,
+          "selected_steps": 102,
+          "steps": 408
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-0/report.json",
+          "bytes": 2280,
+          "sha256": "03d00476bea603e6c4e108d40cfa4ef6630ac6095627f74f638592a6fde90360"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "error": null,
+        "trace": {
+          "bytes": 245298,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 15,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 140,
+            "driver_version": 2814751477605871,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 73789,
+            "vendor_id": 5140,
+            "warp": true
+          },
+          "gpu_operations": 1,
+          "record": "complete",
+          "records": 634,
+          "sampling_batches": 1,
+          "selected_steps": 25,
+          "steps": 100
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-32902/report.json",
+          "bytes": 2287,
+          "sha256": "7fbcb1dda8797c8458c113f1e8ba021615058b685db6d24d8d019c208233ebb2"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "error": null,
+        "trace": {
+          "bytes": 245317,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 15,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 32103,
+            "driver_version": 9007199261368954,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 73907,
+            "vendor_id": 32902,
+            "warp": false
+          },
+          "gpu_operations": 1,
+          "record": "complete",
+          "records": 634,
+          "sampling_batches": 1,
+          "selected_steps": 25,
+          "steps": 100
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-4318/report.json",
+          "bytes": 2285,
+          "sha256": "3515767dc9d4149f46d229aae0823bef090e7e96f10d603ab638a9b3331d5b21"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "error": null,
+        "trace": {
+          "bytes": 245312,
+          "completed": true,
+          "derivative_batches": 0,
+          "final_active_mask": 15,
+          "gpu": {
+            "backend": "dxbc-gpu/18",
+            "completion_wait": "fence-event/1",
+            "device_id": 11352,
+            "driver_version": 9007199255791310,
+            "feature_level": 45312,
+            "luid_high": 0,
+            "luid_low": 68403,
+            "vendor_id": 4318,
+            "warp": false
+          },
+          "gpu_operations": 1,
+          "record": "complete",
+          "records": 634,
+          "sampling_batches": 1,
+          "selected_steps": 25,
+          "steps": 100
+        },
+        "trace_rewind_verified": true
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-0/report.json",
+          "bytes": 1785,
+          "sha256": "bf18ec6f9a348a4cf096a3cf32efa7f56a05f7e1fcaf64b3749ce3d9283c9150"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "error": "Minimum precision on DXBC opcode 45 at word 1853 is not implemented",
+        "trace": null,
+        "trace_rewind_verified": false
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-32902/report.json",
+          "bytes": 1788,
+          "sha256": "09be1b2243c399a6f64de0e47722d265339bd4831614b5994d7cd8072441bfe1"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "error": "Minimum precision on DXBC opcode 45 at word 1853 is not implemented",
+        "trace": null,
+        "trace_rewind_verified": false
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-4318/report.json",
+          "bytes": 1787,
+          "sha256": "1c3a6e54c4ba7b1fec986b4b39bf0c0d3912154f4e550a7260d48613e290a405"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "error": "Minimum precision on DXBC opcode 45 at word 1853 is not implemented",
+        "trace": null,
+        "trace_rewind_verified": false
+      }
+    ]
+  },
+  "verified_artifact_files": 1611,
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 119577,
+      "sha256": "3af07b290ca77f004fe6dbbc97c605bf797cfcbbd4e85b6efa9b84435d725d2a"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 83067,
+      "sha256": "9c2fd953e6e1d2e7d66380e4defea407080a8ce0c869e8a3bd3b206a836867ec"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 97618,
+      "sha256": "fcf33d2c5cadaa332de8dce6c611e2a04080e139a9b0caf72c3fc14268725eea"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "bytes": 4981,
+      "sha256": "cbb642f8e41ae57d85306bd77426675c45469862e9d899400913d2ad7c6988bd"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.cpp",
+      "bytes": 26327,
+      "sha256": "70d1b11266d470ac070c6905fac78a2a3e5c252be80e753ed9cdaf4be1503ad0"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "bytes": 5973,
+      "sha256": "2813e139d1fd171a8f8cd40ae6f0641841a50e997391f00e45bca364c65ae00a"
+    },
+    {
+      "path": "tests/DxbcPixelSamplingTests.cpp",
+      "bytes": 24095,
+      "sha256": "3b3fccc6516f65cfd12c23b2e5071effbd5b03914cb5816558acd09c20bf0afc"
+    },
+    {
+      "path": "tools/native/pixel_sampling_probe.cpp",
+      "bytes": 27645,
+      "sha256": "802a61a65cfb51fc4a4320df3739418e3e0618defcb13f83a4291f23080a6c63"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_sampling.py",
+      "bytes": 7147,
+      "sha256": "50c01aa0c554b3c88632e8f66741d6e219c4306f4b92de02a9ef0912c80a3147"
+    },
+    {
+      "path": "tools/validate_pixel_sampling_precision.py",
+      "bytes": 4874,
+      "sha256": "e0f66033ba9d6741822184b88ef71c6b7d2acc6b91a25c022d4c152b3cb9c6e5"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965888,
+      "sha256": "806a5423c07fd718a67fe7d66b5be93825de15764ae7b47ce313f4b2b1c303dc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5549056,
+      "sha256": "e9b83b5692fe252b15536143a0f1eb3d666b38b7676d0ab407e5b7fcd8c06b5b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5549056,
+      "sha256": "ba68c86f43280925b489dd3c9ba0d6ed566d8ba641570ef8b26f58b706638947"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPixelSamplingProbe.exe",
+      "bytes": 131584,
+      "sha256": "758dc7599ee2d67c83061a1c921a3d4f6757426998309236f144e1846611d3df"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 568320,
+      "sha256": "f78ab34f131b55c2e3e83e88268eb0569e8d3a6ff2bf011cf864ad98580c8994"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 535552,
+      "sha256": "6774e3038a3444ccc89a5e7efacdbb9fb069c379ba4c7c5f6e5cccc668142462"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 2861568,
+      "sha256": "7551d3773f0fa8f637e4c5726bc9bcb8f6a8e6529ecbcb972c73a104f52f6c51"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 926720,
+      "sha256": "9d9c9015f66e2544222c0de02220577afcbe14103ab69fb3160249e32cd508ce"
+    }
+  ],
+  "logs": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-build-2.txt",
+      "bytes": 3962,
+      "sha256": "208fb9e2864d576247311c10099de428ee7515316d692518858a38fb41ed49ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-build-3.txt",
+      "bytes": 1709,
+      "sha256": "d4ecd432eb5188bcfa87ffce8d3f220cedfdedd8cdc4d64a962c4365d27a0d7b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-build-4.txt",
+      "bytes": 1117,
+      "sha256": "0baf500498b488a241be6939a7eeb76c9588f980f9406d8fc5db33f783a2d462"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-build.txt",
+      "bytes": 3011,
+      "sha256": "d859a4b92de658fa7af92ddc55ff89da4e3ec109ef5a7b41c48de6e711ca275e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-execution-tests.txt",
+      "bytes": 389008,
+      "sha256": "95d0f8e7cf6119023a680450a5d6794ee7e5931e4036f86c01fd55a6613ce347"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-final-tests-2.txt",
+      "bytes": 83379,
+      "sha256": "1fcf9bb81f40fb12f3de5b656265743663711ac9fc056b0d0da6c0da275015cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-final-tests.txt",
+      "bytes": 84269,
+      "sha256": "57c1bbe6804e1bb2fb663fd03135e9cbacdfa0da1af6782253c37e5f4f2d3a0d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-first-tests.txt",
+      "bytes": 750,
+      "sha256": "67f5318591cb96ba94633f5f418cf3d00abef778444e320891e3c35f0f9ccf80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-matrix-2.txt",
+      "bytes": 4602,
+      "sha256": "e06f2260f1888e9e9f0977a8eb5ee2939b46b5d16e55aae368644bb7b3e5995d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-matrix-first.txt",
+      "bytes": 1648,
+      "sha256": "c1f8f44f9310986f9e00bd4b49541f3a4d9db59ca44e43a3589b51e915aa653c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-probe-build-2.txt",
+      "bytes": 201,
+      "sha256": "90ca3b376a2cedada2c63b31f3ae4122aaa4a4582300e10fb8ffa005844e1986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-probe-build-3.txt",
+      "bytes": 201,
+      "sha256": "90ca3b376a2cedada2c63b31f3ae4122aaa4a4582300e10fb8ffa005844e1986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-probe-build.txt",
+      "bytes": 201,
+      "sha256": "90ca3b376a2cedada2c63b31f3ae4122aaa4a4582300e10fb8ffa005844e1986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-product-build.txt",
+      "bytes": 4289,
+      "sha256": "bf2698984ddf5bb26cc8733a20826aa9f79b0b17fe04f394e8f487ffc3e1c190"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-reader-build.txt",
+      "bytes": 972,
+      "sha256": "6ae0c58a1d35d92708c27651e340d49289502f04eb29ec5425492bce73dc047a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-0.txt",
+      "bytes": 3499,
+      "sha256": "b62050453e9c6ac2c42371b1640c2acf94ad8074e9d3b49dfe7704132a356d15"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-32902.txt",
+      "bytes": 3506,
+      "sha256": "a1c7ea3794facd8f02afed329ea1a9a7ae2d5980ee9f69ece89efb07bac34c2a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-bf1-4318.txt",
+      "bytes": 3504,
+      "sha256": "85c9f55023a111de9b2977b331e051c2d008ea6f23e59326731b20f60a17a761"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-0.txt",
+      "bytes": 2392,
+      "sha256": "e3305ca41473bc6c0a11f286a87773bd813cea98f81767688e87b4b62fc1f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-32902.txt",
+      "bytes": 2399,
+      "sha256": "5173788a6fc169d0cbf2a273705361eb183328dd1124b5641a20826ee63e4b7f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-gf2-4318.txt",
+      "bytes": 2397,
+      "sha256": "747144053ce7434ef1339719b092ea95ef1515adb43f4c2b5bb99a8c2c00d6ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-0.txt",
+      "bytes": 1878,
+      "sha256": "21542a3a6d4a47433991120c4f656de7a0b3e6f8c56b31b5555e36b09bb09900"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-32902.txt",
+      "bytes": 1881,
+      "sha256": "2df87f8351b5033f239aacfa78cc3d9f5e74d75fab3636fadc4e5fe46d0dcec9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-real-hd-4318.txt",
+      "bytes": 1880,
+      "sha256": "a41934bf41a5898d306659b49096305a34c39841a9422119ac40d57ad6d7f15d"
+    }
+  ],
+  "retained_attempt_artifacts": [
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/results.json",
+      "bytes": 934968,
+      "sha256": "2c0732a1063934e00d2586e11ded3c619fe0231aef7571b6b2aea95862c11b4d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-discard-0.asm.txt",
+      "bytes": 2093,
+      "sha256": "3af45797f969a1a2dd59cb8dc3c96600d4c6b6f64c95e147b334ff3beaf491e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-discard-0.dxbc",
+      "bytes": 1284,
+      "sha256": "1547ecb641c058349abde8d0c3645cc933d2b262d3d3e8065f5e1b4b5c380f78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-discard-1.asm.txt",
+      "bytes": 2110,
+      "sha256": "1fd05753c35ab50314117cee5be1fbc872e8a69fc25b5920672d8fa32c0bf5ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-discard-1.dxbc",
+      "bytes": 1288,
+      "sha256": "d1a6b20a05df730a0fc8b030bd4ef3a2e16b6683e2e0f624e481beec7fc93e88"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-loop-0.asm.txt",
+      "bytes": 2091,
+      "sha256": "480daa8bde49addf5e5e4cac33625335b6e70a0b575a89d6fd72c02e68c1204a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-loop-0.dxbc",
+      "bytes": 1252,
+      "sha256": "aacd5dbcbd4399ae6d62d60c7977f8d3f851c66c4fe08d70147fbbcb804dcf17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-loop-1.asm.txt",
+      "bytes": 2108,
+      "sha256": "16613c615f458318f24e5b7773bf743c4e07e9dc38d78fd00575e1f4e8093582"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-loop-1.dxbc",
+      "bytes": 1256,
+      "sha256": "c87603a2e0ef21978f5606f0fb3ca34b6d9b7d60bcd99b41a777c0fb87cdab46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-reconverge-0.asm.txt",
+      "bytes": 2100,
+      "sha256": "308ccca5a5874fe6609fe506f8aa631745f32896206f2a7c3088531224b245b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-reconverge-0.dxbc",
+      "bytes": 1232,
+      "sha256": "0f66055b53baa7b72729c4b123e328dff666d1665abec59d5c17310ccfa70bb2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-reconverge-1.asm.txt",
+      "bytes": 2117,
+      "sha256": "b0edb93b4276af7da4d890da695a1727f380d30a29798b41ca9632371d35c1dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-reconverge-1.dxbc",
+      "bytes": 1236,
+      "sha256": "ac2a7474af79979221566e4e7a2768164280cf5fb24771d93881e32d7415beec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-uniform-0.asm.txt",
+      "bytes": 1913,
+      "sha256": "5cc3482c7a8b8e22f3d00cc53ba825371f0f6a9d571edca8371d530c70660fec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-uniform-0.dxbc",
+      "bytes": 1096,
+      "sha256": "e88db7868de98ab0d10cb33ebd60be845b0ff6aa588ea0115ce874c20b2a7294"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-uniform-1.asm.txt",
+      "bytes": 1930,
+      "sha256": "e349ce75855913788f36cee374294611ac8679749b9a325fb7d1e6d88e6c1ab2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample-uniform-1.dxbc",
+      "bytes": 1100,
+      "sha256": "57831905039c46f1dd093d6bc9b88fe468214ab67fae71ce62596cb2150c879d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-discard-0.asm.txt",
+      "bytes": 2112,
+      "sha256": "5c837ead226d659f7c79e7e4b5167713dc21bbdc24c7c9d886ed43de2d12c703"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-discard-0.dxbc",
+      "bytes": 1300,
+      "sha256": "a22e75c9b943669caffc5e6d7a36da982d9114c55594bd2bf4d6391f103367a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-discard-1.asm.txt",
+      "bytes": 2129,
+      "sha256": "cd75af9485ca2693543d085cf82e6759d46ae5b4665e72d566ffa37d354258eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-discard-1.dxbc",
+      "bytes": 1304,
+      "sha256": "ec86614f03cc492c9692b18b155d9e009458eb89d7c911033bed06a3f63df6a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-loop-0.asm.txt",
+      "bytes": 2110,
+      "sha256": "537972446a8ca8116f68d758374bea8e8bc5043ec60f5bfd2789434004e2fcdf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-loop-0.dxbc",
+      "bytes": 1268,
+      "sha256": "a2705344162ec5a843809b3eaa716029fdcea53677a3f1b1a19d2de4f1e1dbc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-loop-1.asm.txt",
+      "bytes": 2127,
+      "sha256": "8c7902af90a0a584f99ffac6c854a4b499eec017bd2bf30d96a3613784ae09ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-loop-1.dxbc",
+      "bytes": 1272,
+      "sha256": "5201beeaa04936021610e4924a74ccb12140b657020b5584e808fda5f5395ccb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-reconverge-0.asm.txt",
+      "bytes": 2119,
+      "sha256": "35f2ab0d93d03acc7b3a24c1366b8df42460b1fd971297075533a242774084ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-reconverge-0.dxbc",
+      "bytes": 1248,
+      "sha256": "41750404bac0c52957b08315d5fd8218023890aaeec1758ad03f10987011c763"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-reconverge-1.asm.txt",
+      "bytes": 2136,
+      "sha256": "7e7197a9a58998949d38cb6290c9c798f4248e172da6031949a2e82fd142b27e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-reconverge-1.dxbc",
+      "bytes": 1252,
+      "sha256": "1e17ee052325e75f88cf0b866c480a2f82614025a1cb3f03e747fc305b0de1d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-uniform-0.asm.txt",
+      "bytes": 1932,
+      "sha256": "50880f79dc1da4fcfce85e03024142bb9cfd78f984cef77c73a4471ff5ceba35"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-uniform-0.dxbc",
+      "bytes": 1112,
+      "sha256": "a2165f120765271590d0308b190ddba3d8f4b8afde01eedcd0e3ba59ea797bd8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-uniform-1.asm.txt",
+      "bytes": 1949,
+      "sha256": "e66e876a909d7e5b85944fa3deefcf5e73378467eacfd666a93b6d1d7f2bee6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_b-uniform-1.dxbc",
+      "bytes": 1116,
+      "sha256": "099de8056784121f5e12c02db18d0cb8582e6c6ea83d8ce33dec87e649c5257a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-0.asm.txt",
+      "bytes": 2124,
+      "sha256": "9474ccedcc0060999908fdfa72fef2273ca980aaf4535f95570271d92a62fe99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-0.compiler.dxbc",
+      "bytes": 1292,
+      "sha256": "6cca4127046ffee5afb465e763a76bca411694c5d0a496f1794dc3fd75aa711e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-0.dxbc",
+      "bytes": 1296,
+      "sha256": "b31585b5a5643cb2ce9aa5027a2898ab9f370acf17f832d7194111b29737d9dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-1.asm.txt",
+      "bytes": 2141,
+      "sha256": "fd140e49e21320a12fe6814bb27039372800d67d80cba2d4577ea094ae8f9688"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-1.compiler.dxbc",
+      "bytes": 1296,
+      "sha256": "9153af1becb100bf461b28524cf316dac4b7fe653c3a4a1e817c38215cb2492a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-discard-1.dxbc",
+      "bytes": 1300,
+      "sha256": "d3cbfcdfe954b148ae7983c34cb9ec6db273a34ececf8dc34996562310567397"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-0.asm.txt",
+      "bytes": 2122,
+      "sha256": "14471b2a4322617bb94dfe7949a9cd6289866fc242bfc713d833a0f76ab7aa3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-0.compiler.dxbc",
+      "bytes": 1260,
+      "sha256": "12e0142758d697bdc0b324f48e408d950c59489d2c3394958013f26e6d185056"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-0.dxbc",
+      "bytes": 1264,
+      "sha256": "1531a5f82aed30ddfbe02de9d37bc7e0fc4ac3ff53fb4606a87ce3b86b14dfef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-1.asm.txt",
+      "bytes": 2139,
+      "sha256": "89024628420ac3530bd741243e43fc39ca1479c5296c415248671a54b6626085"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-1.compiler.dxbc",
+      "bytes": 1264,
+      "sha256": "868c73b0138b1820e975f7160213e0bc383980dfbf607c8278bf259aaa047f92"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-loop-1.dxbc",
+      "bytes": 1268,
+      "sha256": "49c837f80dd44121f3c76eed899b13a66713b21ea5227e34180027cda5943c8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-0.asm.txt",
+      "bytes": 2131,
+      "sha256": "aab0e5ea6061c714259aba8806bc9f63e89a788c585df88a12b13d2724a3d287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-0.compiler.dxbc",
+      "bytes": 1240,
+      "sha256": "da411caa8d4d499d7a08a42397a2015f43772e17b932c41f81f37239b4ddb33a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-0.dxbc",
+      "bytes": 1244,
+      "sha256": "7764fcc1e90550d98bf771ac09fcebcaf80450f363a6bddfb4b234910d687fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-1.asm.txt",
+      "bytes": 2148,
+      "sha256": "9353606a7485959d6410b016fcb0cfc26ecadd281d1feec7ceb60c3fb582a384"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-1.compiler.dxbc",
+      "bytes": 1244,
+      "sha256": "1985eca960c67fefcb8a4b425cef0c90ecc224617a70587e8380787a78927cc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-reconverge-1.dxbc",
+      "bytes": 1248,
+      "sha256": "ea2b2231d72e462cbf611b10886af66e59f19a23eca8042037c5351c5f5c8322"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-0.asm.txt",
+      "bytes": 1944,
+      "sha256": "99f25c008197679577207acb4f95f98cbae7f6b8353cf933cb1a7eb0095fd8c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-0.compiler.dxbc",
+      "bytes": 1104,
+      "sha256": "1f550f6778c4a76f67b51ae5e46c47ae0a078e071eb96fa9bfefc03125727739"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-0.dxbc",
+      "bytes": 1108,
+      "sha256": "f836d62f970ff9f13aa954e27181ca853454abd66239db0ee8416d28caba9c22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-1.asm.txt",
+      "bytes": 1961,
+      "sha256": "b6bf9507f55ce9eb73a39acdd2525e7968f625acd3cbaa0217147f0ef3e1dba5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-1.compiler.dxbc",
+      "bytes": 1108,
+      "sha256": "5561429e96bc987ae8f17e38ea64e3313c33c1cb23475c5e1c0aadcc59d695f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/default-precision-reader/sample_c-uniform-1.dxbc",
+      "bytes": 1112,
+      "sha256": "044124ca7bc4ffc9195cc611e99d192d653de23da20021ba0c9a21c2f7661ffd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/results.json",
+      "bytes": 918667,
+      "sha256": "1113be7572818d87601406387cc7d2cad147e12f7eeb4abf9ad1976a0fa45c31"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-discard-0.asm.txt",
+      "bytes": 1993,
+      "sha256": "ce8f24b79debc36257e74fb23aeb780c83a44ed41b1e3c344c4b39046b3c289b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-discard-0.dxbc",
+      "bytes": 1236,
+      "sha256": "fb70b9e55d3286bb4b1487d09c8717209d338548ca81ce6e265ac273a926ae01"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-discard-1.asm.txt",
+      "bytes": 2010,
+      "sha256": "cc71b170e7ebf1fe2fbfeae72b53a088377e5c81725b5e0f65514d9ccde02f9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-discard-1.dxbc",
+      "bytes": 1240,
+      "sha256": "eaeffbea18dc6ce19c4c31e2080fec3ac00156c41fe222a02b6fac6e0a76e5d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-loop-0.asm.txt",
+      "bytes": 1991,
+      "sha256": "460367c52419dfb93c9cb30d7ba8a50e11ce7f56f8090bb73de7271888705b3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-loop-0.dxbc",
+      "bytes": 1204,
+      "sha256": "b1f576cff1d1fdd7fd8607de05cfacbf1677eb0ebba8c2deef6b8eaba838c426"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-loop-1.asm.txt",
+      "bytes": 2008,
+      "sha256": "c6dfaeaf36a8a0971972e1bc35e6f3982a9d27e308ec075ff92564cf75624877"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-loop-1.dxbc",
+      "bytes": 1208,
+      "sha256": "655572f215fcca3dc7794e566f1f022634242c773e67869d0aadf46cee7e1f50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-reconverge-0.asm.txt",
+      "bytes": 2000,
+      "sha256": "db61be31661d535e9c1ea4e6d566b55d8f5a1423d2b03dc9c1cc34ea8b8b5df2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-reconverge-0.dxbc",
+      "bytes": 1184,
+      "sha256": "9eb131713a25cdf187e2a0f6a7618871315a831e05a4b07499051cfe9b17007d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-reconverge-1.asm.txt",
+      "bytes": 2017,
+      "sha256": "7d10c6dc760799d4bba1aaef715e300f3bb23b855b9657a38fe461d121fdf134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-reconverge-1.dxbc",
+      "bytes": 1188,
+      "sha256": "269e6a6e49730270b284904662b336b9817bbce00c147550ff7912f7a9892cad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-uniform-0.asm.txt",
+      "bytes": 1813,
+      "sha256": "96816101fdb8dbddcb3aeb22ed61ceae031d27f2395c903eaf45bcadd749a26f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-uniform-0.dxbc",
+      "bytes": 1048,
+      "sha256": "19a6eb504ea88b7d3c8630860ecbbb4837290939616dfdcc7c33d8dd28d04e46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-uniform-1.asm.txt",
+      "bytes": 1830,
+      "sha256": "b6c0bf716f58728569b67c558310bd056bb42b54d9a173565d96b6b915a5f32d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample-uniform-1.dxbc",
+      "bytes": 1052,
+      "sha256": "5274797f0ab9a7fd33cfe8642a617629671c798281c8c5e20a76732d42e832bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-discard-0.asm.txt",
+      "bytes": 2012,
+      "sha256": "29e14ee12a44a8ca5c1c114fb2dc67fd5277ffc8dce33e04858be8335a671dbe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "dbd9b50a1b9cf94b1d8a70ed36dde964ce6526cb424793a0ae6e861b32d0590f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-discard-1.asm.txt",
+      "bytes": 2029,
+      "sha256": "fb99cbddb2bf309f173a08944da32dad64dbe9f8d2f94eca189a057fa8ada121"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-discard-1.dxbc",
+      "bytes": 1256,
+      "sha256": "1124c599ef77032ef973b8ae2ddf74fe5a4531be3930785ddd004a105984c613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-loop-0.asm.txt",
+      "bytes": 2010,
+      "sha256": "1bf4b11ea9004426609eb38cd42b9834add69019971c99564abca41c4a48dfdf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-loop-0.dxbc",
+      "bytes": 1220,
+      "sha256": "39871d589da777c5adcf83c755b5c8e4798ceb796cec7f3747554560e8fea48e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-loop-1.asm.txt",
+      "bytes": 2027,
+      "sha256": "311a23c481819deb3e875b92a170cf6faf9e50ac02f91a4bdd0f28b1174ffc13"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-loop-1.dxbc",
+      "bytes": 1224,
+      "sha256": "9e2555dc63e505a4bf705691245ee6a97df633ed48cd541da3075ba56a59fa8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-reconverge-0.asm.txt",
+      "bytes": 2019,
+      "sha256": "ada4b6617cead2bff5e698092a9dca5f1f91d3843acade94c53e7c1c98b650da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-reconverge-0.dxbc",
+      "bytes": 1200,
+      "sha256": "20d8d4af14522e52085caa5c6f0cb76274054ea9db942ecf5af68f3e64187548"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-reconverge-1.asm.txt",
+      "bytes": 2036,
+      "sha256": "bd082b04b523120de45e81c88e9a06ea81627e4930d4ff943eabdbaa5aff7068"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-reconverge-1.dxbc",
+      "bytes": 1204,
+      "sha256": "9b227cf2afe0f5147fbb956576974181e893418d147e7607dc50fd09ba4e1a9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-uniform-0.asm.txt",
+      "bytes": 1832,
+      "sha256": "c1cb06416c44c68c1da02217f24f17cbc8802de5116e43accb5ca1c7bc466d9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-uniform-0.dxbc",
+      "bytes": 1064,
+      "sha256": "b5a00bd5deaac6555abbee8c5a45059d1bb306bdbf4ec9596465b1a314ed59c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-uniform-1.asm.txt",
+      "bytes": 1849,
+      "sha256": "a6861777c022ff3baef9df4918ad58b29530eee8101099d00c34345cada798cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_b-uniform-1.dxbc",
+      "bytes": 1068,
+      "sha256": "fb2dad09dce07354d65810e796cb71c01a4987444cc79439d813710d1f6e5b87"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-sampling-precision-attempts/missing-sample-tag/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    }
+  ],
+  "intermediate_attempts": [
+    {
+      "log": "pixel-sampling-precision-first-tests.txt",
+      "outcome": "Passed but did not establish minimum precision because casts were optimized away."
+    },
+    {
+      "log": "pixel-sampling-precision-matrix-first.txt",
+      "outcome": "Stopped after discovering absent precision annotations; not accepted as validation."
+    },
+    {
+      "log": "pixel-sampling-precision-matrix-2.txt",
+      "outcome": "Six annotation failures exposed promoted comparison sample destinations."
+    },
+    {
+      "log": "pixel-sampling-precision-final-tests.txt",
+      "outcome": "185 passes and one NVIDIA failure in an explicit fixture that changed the destination but retained a default-precision source read."
+    }
+  ],
+  "remaining_gates": [
+    "Minimum-precision typed-buffer loads, including the Helldivers word 1853 guard",
+    "Minimum-precision PS output registers and explicit sampling",
+    "Original fragment qualification, helper memory semantics and additional shapes/formats",
+    "Public PS analysis jobs, sessions and source-debug parity",
+    "P5, remaining P1 research, complete P7 removal and P8 independent release acceptance"
+  ],
+  "performance_acceptance": false,
+  "module_audit_performed": false
+}

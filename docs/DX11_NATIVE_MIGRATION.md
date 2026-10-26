@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; pixel quad execution/sampling, input declaration transport and a final-geometry bridge are tested, including three real captures on three adapters; captured fragment selection, full private rasterization scope, boundary compatibility and semantic/source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals and minimum-precision implicit sampling are tested; GF2/BF1 traces complete on three adapters, while Helldivers still rejects minimum-precision typed-buffer loads; fragment qualification, helper memory behavior and semantic/source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
