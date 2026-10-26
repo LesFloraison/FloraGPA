@@ -276,27 +276,41 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
         const auto kind = row.at("record").get<std::string>();
         if (records == 1) {
             require(kind == "header" && row.at("format") == "flora.dxbc-execution-trace" &&
-                        number(row.at("version")) == 1 && row.at("stage") == "cs" &&
-                        row.at("scope") == "one_cooperative_group" &&
+                        number(row.at("version")) == 1 &&
+                        ((row.at("stage") == "cs" && row.at("scope") == "one_cooperative_group") ||
+                         (row.at("stage") == "vs" && row.at("scope") == "one_vertex")) &&
                         !boolean(row.at("captured_gpu_schedule")),
                     "Unsupported execution trace header");
             require(number(row.at("max_steps")) > 0 && number(row.at("max_bytes")) >= uint64_t(s.file.size()),
                     "Trace exceeds its declared limits");
-            const auto &size = array(row.at("group_size")), &thread = array(row.at("thread"));
-            require(size.size() == 3 && thread.size() == 3 && array(row.at("group")).size() == 3,
-                    "Invalid trace group dimensions");
-            uint64_t lanes = 1, selected = 0;
-            for (size_t i = 0; i < 3; ++i) {
-                const auto dimension = number(size[i], 1024);
-                require(dimension > 0, "Empty trace group dimension");
-                selected += lanes * number(thread[i], dimension - 1);
-                lanes *= dimension;
-                require(lanes <= 1024, "Trace exceeds the DX11 group lane limit");
-                number(row.at("group")[i], UINT32_MAX);
+            if (row.at("stage") == "vs") {
+                require(row.at("execution_model") == "independent-vertex-invocation/1",
+                        "Unsupported vertex trace execution model");
+                require(!row.contains("group_size") && !row.contains("group") && !row.contains("thread") &&
+                            number(row.at("selected_lane")) == 0,
+                        "Invalid vertex trace invocation");
+                number(row.at("input_reference"), UINT32_MAX);
+                number(row.at("instance"), UINT32_MAX);
+                s.lanes = 1;
+                s.selectedLane = 0;
+            } else {
+                const auto &size = array(row.at("group_size")), &thread = array(row.at("thread"));
+                require(size.size() == 3 && thread.size() == 3 && array(row.at("group")).size() == 3,
+                        "Invalid trace group dimensions");
+                uint64_t lanes = 1, selected = 0;
+                for (size_t i = 0; i < 3; ++i) {
+                    const auto dimension = number(size[i], 1024);
+                    require(dimension > 0, "Empty trace group dimension");
+                    selected += lanes * number(thread[i], dimension - 1);
+                    lanes *= dimension;
+                    require(lanes <= 1024, "Trace exceeds the DX11 group lane limit");
+                    number(row.at("group")[i], UINT32_MAX);
+                }
+                require(number(row.at("selected_lane")) == selected,
+                        "Trace selected lane disagrees with thread");
+                s.lanes = uint32_t(lanes);
+                s.selectedLane = uint32_t(selected);
             }
-            require(number(row.at("selected_lane")) == selected, "Trace selected lane disagrees with thread");
-            s.lanes = uint32_t(lanes);
-            s.selectedLane = uint32_t(selected);
             laneSteps.resize(s.lanes);
             nextInstructions.resize(s.lanes);
             s.header = row;
@@ -365,6 +379,11 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                  {"discarded", "atomic", "memory_gpu_assisted", "instruction_gpu_assisted"})
                 boolean(row.at(flag));
             number(row.at("sync_flags"), UINT32_MAX);
+            if (s.header.at("stage") == "vs")
+                require(!boolean(row.at("discarded")) && !boolean(row.at("released_barrier")) &&
+                            number(row.at("barrier_epoch")) == 0 && number(row.at("sync_flags")) == 0 &&
+                            array(row.at("shared_changes")).empty(),
+                        "Vertex trace contains pixel or group execution state");
             s.apply(row, true, sequence);
             s.steps.push_back(offset);
             ++s.position;
@@ -413,6 +432,8 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
         } else if (kind == "storage") {
             const auto size = number(row.at("bytes"), limits.maxStorageBytes - storageBytes);
             const TraceStorageKey key{space(row.at("space")), number(row.at("resource"))};
+            require(s.header.at("stage") != "vs" || key.first != TraceSpace::Shared,
+                    "Vertex trace contains group shared storage");
             require(s.storage.size() < limits.maxRegisters && !s.storage.contains(key),
                     "Duplicate or excessive trace storage");
             s.storage.emplace(key, Buffer{std::vector<uint8_t>(size), std::vector<uint8_t>(size)});

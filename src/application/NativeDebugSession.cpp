@@ -23,8 +23,10 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
       directory_(QDir::tempPath() + "/FloraGPA-debug-session-XXXXXX") {
     checkCancellation(cancelled);
     validateNativeAnalysisResult(job_, result_);
-    require(job_.at("action") == "debug-thread", "Native debug session requires a compute analysis");
-    nativeAnalysisRequest("debug-thread", job_.at("options"));
+    const bool vertex = job_.at("action") == "debug-vertex";
+    require(vertex || job_.at("action") == "debug-thread",
+            "Native debug session requires an execution analysis");
+    nativeAnalysisRequest(job_.at("action"), job_.at("options"));
     require(directory_.isValid(), "Cannot create native debug session directory");
     const auto &manifest = result_.at("artifacts");
     const QStringList names{"debug.json", "shader.dxbc", "trace.jsonl"};
@@ -50,8 +52,8 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
     const auto &data = result_.at("data");
     require(Json::parse(artifacts["debug.json"].toStdString()) == data,
             "Native debug metadata disagrees with the analysis result");
-    require(data.at("format") == "flora.native-compute-debug" && data.at("version") == 1 &&
-                data.at("trace_format") == "flora.dxbc-execution-trace/1" &&
+    require(data.at("format") == (vertex ? "flora.native-vertex-debug" : "flora.native-compute-debug") &&
+                data.at("version") == 1 && data.at("trace_format") == "flora.dxbc-execution-trace/1" &&
                 data.at("trace_file") == "trace.jsonl" && data.at("shader_file") == "shader.dxbc" &&
                 data.at("captured_gpu_schedule") == false,
             "Unsupported native debug result");
@@ -61,17 +63,32 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
                 invocation.at("predicate").at("allows_execution") == true &&
                 invocation.at("gpa_event") == options.at("gpa_event"),
             "Native debug invocation is not eligible for the requested event");
-    for (const auto *name : {"group", "thread"})
-        require(invocation.at(name) == options.value(name, Json({0, 0, 0})),
-                "Native debug invocation selection mismatch");
-    for (const auto *name : {"group", "thread", "group_size", "dispatch_groups"})
-        require(invocation.at(name).is_array() && invocation.at(name).size() == 3,
-                "Invalid native debug invocation dimensions");
-    for (size_t axis = 0; axis < 3; ++axis) {
-        const auto groups = number(invocation.at("dispatch_groups")[axis]);
-        require(groups <= 65535 && number(invocation.at("group")[axis]) < groups &&
-                    number(invocation.at("thread")[axis]) < number(invocation.at("group_size")[axis]),
-                "Native debug invocation is outside the dispatch");
+    if (vertex) {
+        require(invocation.at("input_reference") == options.value("vertex", 0u) &&
+                    invocation.at("instance") == options.value("instance", 0u) &&
+                    invocation.at("gpa_shader") == data.at("gpa_shader"),
+                "Native vertex invocation selection mismatch");
+        const auto &draw = invocation.at("draw_parameters");
+        require(number(invocation.at("input_reference")) <
+                        number(draw.at(draw.contains("index_count") ? "index_count" : "vertex_count")) &&
+                    number(invocation.at("instance")) <
+                        (draw.contains("instance_count") ? number(draw.at("instance_count")) : 1),
+                "Native vertex invocation is outside the draw");
+        if (options.contains("index"))
+            require(invocation.at("vertex_index") == options.at("index"), "Native vertex index mismatch");
+    } else {
+        for (const auto *name : {"group", "thread"})
+            require(invocation.at(name) == options.value(name, Json({0, 0, 0})),
+                    "Native debug invocation selection mismatch");
+        for (const auto *name : {"group", "thread", "group_size", "dispatch_groups"})
+            require(invocation.at(name).is_array() && invocation.at(name).size() == 3,
+                    "Invalid native debug invocation dimensions");
+        for (size_t axis = 0; axis < 3; ++axis) {
+            const auto groups = number(invocation.at("dispatch_groups")[axis]);
+            require(groups <= 65535 && number(invocation.at("group")[axis]) < groups &&
+                        number(invocation.at("thread")[axis]) < number(invocation.at("group_size")[axis]),
+                    "Native debug invocation is outside the dispatch");
+        }
     }
     require(data.at("shader_sha256") == manifest.at("shader.dxbc").at("sha256"),
             "Native debug shader identity mismatch");
@@ -99,7 +116,11 @@ NativeDebugSession::NativeDebugSession(Json job, Json result, const NativeArtifa
                 header.at("gpa_shader") == data.at("gpa_shader") &&
                 header.at("execution_model") == data.at("execution_model"),
             "Native debug trace provenance mismatch");
-    for (const auto *name : {"gpa_event", "group", "thread", "group_size"})
+    require(header.at("stage") == (vertex ? "vs" : "cs"), "Native debug trace stage mismatch");
+    const std::vector<const char *> selectionFields =
+        vertex ? std::vector<const char *>{"gpa_event", "input_reference", "instance"}
+               : std::vector<const char *>{"gpa_event", "group", "thread", "group_size"};
+    for (const auto *name : selectionFields)
         require(header.at(name) == invocation.at(name), "Native debug trace invocation mismatch");
     const auto &adapter = result_.at("context").at("adapter");
     const auto &highValue = adapter.at("luid_high");

@@ -10,10 +10,12 @@ namespace {
 using Json = nlohmann::json;
 constexpr size_t maxBytes = 1024 * 1024;
 [[noreturn]] void fail(const char *message) { throw std::runtime_error(message); }
-const std::map<std::string, std::string> formats{{"gs-checkpoint", "FloraGPA native GS debug config 1"},
-                                                 {"ds-checkpoint", "FloraGPA native DS debug config 1"},
-                                                 {"hs-checkpoint", "FloraGPA native HS debug config 1"},
-                                                 {"debug-thread", "FloraGPA native CS execution debug config 1"}};
+const std::map<std::string, std::string> formats{
+    {"gs-checkpoint", "FloraGPA native GS debug config 1"},
+    {"debug-vertex", "FloraGPA native VS execution debug config 1"},
+    {"ds-checkpoint", "FloraGPA native DS debug config 1"},
+    {"hs-checkpoint", "FloraGPA native HS debug config 1"},
+    {"debug-thread", "FloraGPA native CS execution debug config 1"}};
 bool fields(const Json &value, const std::set<std::string> &names) {
     if (!value.is_object() || value.size() != names.size())
         return false;

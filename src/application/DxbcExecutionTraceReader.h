@@ -14,7 +14,7 @@ struct TraceReadLimits {
 };
 // Owns a read lock for the journal's lifetime. The caller supplies the digest
 // from the accepted job's artifact manifest and separately validates job identity.
-// Positions count completed global steps; zero is the initial group state.
+// Positions count completed global steps; zero is the initial invocation state.
 class ExecutionTraceReader {
     struct State;
     std::unique_ptr<State> state_;
@@ -39,7 +39,7 @@ class ExecutionTraceReader {
     uint64_t position() const;
     uint64_t selectedSize() const;
     // The state immediately before selected step i, or the terminal group state
-    // for i == selectedSize(). Intervening work by every lane is included.
+    // for i == selectedSize(). Intervening work by every CS lane is included.
     uint64_t selectedBoundary(uint64_t index) const;
     // Cancellation occurs between complete steps and leaves a coherent prefix.
     void moveTo(uint64_t completedSteps, const CancelCheck & = {});

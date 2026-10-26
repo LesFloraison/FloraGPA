@@ -1215,7 +1215,7 @@ void MainWindow::buildUi() {
         debugTabs->insertTab(i, stageOrder[i], label);
     }
     nativeDebug_ = new NativeExecutionDebugView;
-    debugTabs->addTab(nativeDebug_, "Native CS");
+    debugTabs->addTab(nativeDebug_, "Native VS/CS");
     connect(nativeDebug_, &NativeExecutionDebugView::readRequested, this, &MainWindow::readNativeDebug);
     connect(nativeDebug_, &NativeExecutionDebugView::cancelRequested, this, &MainWindow::cancel);
     connect(nativeDebug_, &NativeExecutionDebugView::error, this, &MainWindow::showError);
@@ -1621,9 +1621,9 @@ void MainWindow::readNativeDebug() {
         else if (const auto vendor = selectedReplayVendor(*adapter_))
             options["gpu_vendor"] = *vendor;
         nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
-                              "debug-thread", options, experiment_ ? experiment_->document() : nlohmann::json());
+                              nativeDebug_->action(), options, experiment_ ? experiment_->document() : nlohmann::json());
         setBusy(true);
-        statusBar()->showMessage("Reading native compute execution…");
+        statusBar()->showMessage("Reading native shader execution…");
     } catch (const std::exception &error) {
         runningNativeDebug_ = false;
         nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));

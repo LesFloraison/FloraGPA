@@ -27,8 +27,9 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addHelpOption();
         parser.addPositionalArgument("capture", "DX11 .gpa_frame file");
         parser.addPositionalArgument(
-            "action", "inventory | events | texture | mesh | counters | history --history-scope events "
-                      "| debug-thread (fragment history and full debugger parity remain pending)");
+            "action",
+            "inventory | events | texture | mesh | counters | history --history-scope events "
+            "| debug-vertex | debug-thread (fragment history and full debugger parity remain pending)");
         parser.addOption({"out", "New or empty output directory", "path"});
         parser.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
         parser.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
@@ -38,11 +39,15 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"stage", "Mesh stage: final, vs, vs-index, vs-inputs, hs, ds or gs", "stage"});
         parser.addOption({"group", "Compute group X Y Z", "coordinates"});
         parser.addOption({"thread", "Compute local thread X Y Z", "coordinates"});
+        parser.addOption({"vertex", "Draw-relative VS input reference before cut removal", "integer"});
+        parser.addOption({"index",
+                          "Expected effective vertex index; native index override remains unsupported",
+                          "integer"});
         parser.addOption(
             {"history-scope", "Event snapshots: events; fragment history remains pending", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
-                               "slice", "sample", "typed-format", "instance", "vertex", "index", "stream",
-                               "max-bytes", "max-records", "max-steps", "max-trace-bytes"})
+                               "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
+                               "max-records", "max-steps", "max-trace-bytes"})
             parser.addOption({key, "Native analysis selection", "integer"});
         if (!parser.parse(normalized))
             throw std::invalid_argument(parser.errorText().toStdString());

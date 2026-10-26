@@ -1,3 +1,4 @@
+#include "DepthStencilCapture.h"
 #include "NativeDebugFixture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
@@ -5,6 +6,7 @@
 #include "app/NativeDebugControls.h"
 #include "app/NativeExecutionDebugView.h"
 #include <QAction>
+#include <QComboBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalSpy>
@@ -27,6 +29,30 @@ std::shared_ptr<NativeDebugSession> session() {
 class NativeExecutionDebugUiTests final : public QObject {
     Q_OBJECT
   private slots:
+    void vertexSelectionAndNavigation() {
+        NativeExecutionDebugView view;
+        view.setContext("vertex", 19);
+        auto stage = view.findChild<QComboBox *>("nativeDebugStage");
+        QVERIFY(stage);
+        stage->setCurrentIndex(1);
+        QCOMPARE(view.action(), std::string("debug-vertex"));
+        QCOMPARE(view.request(), Json({{"gpa_event", 19}, {"vertex", 0}, {"instance", 0}}));
+        test::NativeDebugFixture f(true);
+        auto selected = std::make_shared<NativeDebugSession>(f.job, f.result, f.artifacts);
+        QVERIFY(view.finish(view.requestId(), selected));
+        const auto initial = view.model()->registerValues();
+        trigger(view, "nativeDebugNext");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QCOMPARE(view.model()->position(), size_t(1));
+        trigger(view, "nativeDebugPrevious");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QCOMPARE(view.model()->registerValues(), initial);
+        const auto stale = view.requestId();
+        stage->setCurrentIndex(0);
+        QVERIFY(!view.model());
+        QVERIFY(!view.finish(stale, selected));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), selected));
+    }
     void initTestCase() {
         QSettings::setDefaultFormat(QSettings::IniFormat);
         QCoreApplication::setOrganizationName("FloraGPA");
@@ -145,9 +171,13 @@ class NativeExecutionDebugUiTests final : public QObject {
     }
     void mainWindow_data() {
         QTest::addColumn<unsigned>("vendor");
-        QTest::newRow("warp") << 0u;
-        QTest::newRow("nvidia") << 0x10deu;
-        QTest::newRow("intel") << 0x8086u;
+        QTest::addColumn<bool>("vertex");
+        QTest::newRow("warp") << 0u << false;
+        QTest::newRow("nvidia") << 0x10deu << false;
+        QTest::newRow("intel") << 0x8086u << false;
+        QTest::newRow("vertex-warp") << 0u << true;
+        QTest::newRow("vertex-nvidia") << 0x10deu << true;
+        QTest::newRow("vertex-intel") << 0x8086u << true;
     }
     void navigationInvalidation() {
         NativeExecutionDebugView view;
@@ -174,9 +204,10 @@ class NativeExecutionDebugUiTests final : public QObject {
     }
     void mainWindow() {
         QFETCH(unsigned, vendor);
+        QFETCH(bool, vertex);
         QTemporaryDir directory;
         const auto capture = directory.filePath("frame.gpa_frame");
-        testing::computeCapture(true).save(capture);
+        (vertex ? testing::depthStencilCapture() : testing::computeCapture(true)).save(capture);
         MainWindow window;
         QSignalSpy loaded(&window, &MainWindow::captureLoaded);
         window.openCapture(capture);
@@ -191,12 +222,13 @@ class NativeExecutionDebugUiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         auto view = window.findChild<NativeExecutionDebugView *>();
         QVERIFY(view);
+        view->findChild<QComboBox *>("nativeDebugStage")->setCurrentIndex(vertex ? 1 : 0);
         auto tabs = window.findChild<QTabWidget *>("checkpointStageTabs");
         tabs->setCurrentWidget(view);
         auto api = window.findChild<QTableView *>("apiLog");
         bool selected = false;
         for (int i = 0; i < api->model()->rowCount(); ++i)
-            if (api->model()->index(i, 0).data(Qt::UserRole).toULongLong() == 100) {
+            if (api->model()->index(i, 0).data(Qt::UserRole).toULongLong() == (vertex ? 1000 : 100)) {
                 api->setCurrentIndex(api->model()->index(i, 0));
                 selected = true;
                 break;

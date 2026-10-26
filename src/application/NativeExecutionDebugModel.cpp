@@ -56,7 +56,9 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
     require(header.at("shader_sha256") == shaderHash,
             "Native debug shader does not match the execution trace");
     const dxbc_exec::Program program(shader);
-    require(program.stage() == 5 && header.at("group_size") == Json(program.threadGroupSize()) &&
+    const bool vertex = header.at("stage") == "vs";
+    require((vertex ? program.stage() == 1
+                    : program.stage() == 5 && header.at("group_size") == Json(program.threadGroupSize())) &&
                 program.instructions().size() == trace_.instructionCount(),
             "Native debug program identity mismatch");
     lane_ = header.at("selected_lane");
@@ -91,7 +93,7 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
                               {"components", instruction.words[3]}});
         }
     }
-    registerMetadata_ = {{"shader_stage", "cs"}, {"indexable_temporaries", arrays}};
+    registerMetadata_ = {{"shader_stage", vertex ? "vs" : "cs"}, {"indexable_temporaries", arrays}};
     for (uint64_t i = 0; i < trace_.selectedSize(); ++i) {
         checkCancellation(cancelled);
         const auto global = trace_.selectedBoundary(i);
@@ -112,7 +114,7 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
     require(!rows_.empty(), "Native debug invocation has no execution steps");
     result_ = {{"format", "flora.native-execution-debug-model"},
                {"version", 1},
-               {"action", "debug-thread"},
+               {"action", vertex ? "debug-vertex" : "debug-thread"},
                {"shader_sha256", shaderHash},
                {"trace_sha256", digest},
                {"trace", true},
@@ -122,7 +124,8 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
                {"source_variables", symbols},
                {"source_stack", stack},
                {"disassembly", systemDisassembly(shader)},
-               {"state_boundary", "before_selected_instruction_or_terminal_group"}};
+               {"state_boundary", vertex ? "before_selected_instruction_or_terminal_vertex"
+                                         : "before_selected_instruction_or_terminal_group"}};
     if (symbols.value("format", "") == "SDBG assignments" && symbols.value("status", "") == "available") {
         sdbg_ = std::make_unique<SdbgTraceValues>(result_, rows_, [this, &cancelled](size_t i) {
             checkCancellation(cancelled);
@@ -208,7 +211,9 @@ Json NativeExecutionDebugModel::stack() {
 Json NativeExecutionDebugModel::instructionState() const {
     if (position_ == size())
         return {
-            {"state_boundary", "terminal_group"}, {"global_step", trace_.size()}, {"instruction", nullptr}};
+            {"state_boundary", result_.at("action") == "debug-vertex" ? "terminal_vertex" : "terminal_group"},
+            {"global_step", trace_.size()},
+            {"instruction", nullptr}};
     auto result = rows_.at(position_);
     result["execution"] = trace_.step(result.at("global_step").get<uint64_t>());
     return result;

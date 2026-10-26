@@ -22,6 +22,7 @@ class NativeExecutionDebugView final : public QWidget {
     void setWorkerBusy(bool busy);
     uint64_t requestId() const { return requestId_; }
     Json request() const;
+    std::string action() const;
     bool finish(uint64_t request, std::shared_ptr<NativeDebugSession> session, const QString &error = {});
     NativeExecutionDebugModel *model() const {
         return session_ && !operationActive() ? &session_->model() : nullptr;
@@ -52,7 +53,7 @@ class NativeExecutionDebugView final : public QWidget {
     QAction *read_, *cancel_, *export_;
     QLineEdit *group_, *thread_;
     QSpinBox *position_, *line_;
-    QComboBox *navigation_, *interpretation_, *files_;
+    QComboBox *stage_, *navigation_, *interpretation_, *files_;
     QToolBar *steps_;
     QLabel *summary_;
     QPlainTextEdit *source_, *assembly_, *stack_;

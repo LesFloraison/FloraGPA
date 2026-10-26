@@ -9,6 +9,110 @@ using Json = nlohmann::json;
 class NativeDebugSessionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void vertexTraceBoundaries_data() {
+        QTest::addColumn<QString>("mutation");
+        for (const auto *name : {"group", "lane", "scope", "model", "discard", "shared", "release", "sync"})
+            QTest::newRow(name) << QString(name);
+    }
+    void vertexTraceBoundaries() {
+        QFETCH(QString, mutation);
+        test::NativeDebugFixture f(true);
+        QByteArray raw;
+        bool changed = false;
+        for (const auto &line : f.artifacts["trace.jsonl"].split('\n')) {
+            if (line.isEmpty())
+                continue;
+            auto row = Json::parse(line.toStdString());
+            const auto kind = row.at("record");
+            if (!changed && kind == "header") {
+                if (mutation == "group") {
+                    row["group_size"] = {1, 1, 1};
+                    changed = true;
+                }
+                if (mutation == "lane") {
+                    row["selected_lane"] = 1;
+                    changed = true;
+                }
+                if (mutation == "scope") {
+                    row["scope"] = "one_cooperative_group";
+                    changed = true;
+                }
+                if (mutation == "model") {
+                    row["execution_model"] = "other";
+                    changed = true;
+                }
+            }
+            if (!changed && kind == "storage" && mutation == "shared") {
+                row["space"] = "shared";
+                changed = true;
+            }
+            if (!changed && kind == "step") {
+                if (mutation == "discard") {
+                    row["discarded"] = true;
+                    changed = true;
+                }
+                if (mutation == "release") {
+                    row["released_barrier"] = true;
+                    changed = true;
+                }
+                if (mutation == "sync") {
+                    row["sync_flags"] = 1;
+                    changed = true;
+                }
+            }
+            raw += QByteArray::fromStdString(row.dump()) + '\n';
+        }
+        QVERIFY(changed);
+        f.artifacts["trace.jsonl"] = raw;
+        f.result["data"]["trace"]["bytes"] = raw.size();
+        f.seal();
+        QVERIFY_THROWS_EXCEPTION(std::exception, NativeDebugSession(f.job, f.result, f.artifacts));
+    }
+    void vertexSession() {
+        test::NativeDebugFixture f(true);
+        NativeDebugSession session(f.job, f.result, f.artifacts);
+        auto &model = session.model();
+        QCOMPARE(model.result().at("action"), Json("debug-vertex"));
+        QVERIFY(!model.result().at("execution_context").contains("group_size"));
+        const auto initial = model.registerValues();
+        bool sourceSeen = false;
+        model.addWatch("total");
+        for (size_t i = 0; i < model.size(); ++i) {
+            model.move(i);
+            for (const auto &value : model.sourceValues())
+                sourceSeen |= value.at("name") == "total" && value.at("status") == "available";
+        }
+        QVERIFY(sourceSeen);
+        model.move(model.size());
+        QCOMPARE(model.instructionState().at("state_boundary"), Json("terminal_vertex"));
+        bool outputSeen = false;
+        for (const auto &r : model.registerValues())
+            if (r.at("name") == "o0") {
+                QCOMPARE(r.at("bits"), Json({13, 0, 0, 1}));
+                QCOMPARE(r.at("valid_components"), Json(15));
+                outputSeen = true;
+            }
+        QVERIFY(outputSeen);
+        model.move(0);
+        QCOMPARE(model.registerValues(), initial);
+        const auto config = model.configuration();
+        model.importConfiguration(config);
+        QCOMPARE(model.configuration(), config);
+        for (const auto *key :
+             {"input_reference", "instance", "vertex_index", "gpa_shader", "instance_count"}) {
+            test::NativeDebugFixture invalid(true);
+            if (std::string(key) == "vertex_index") {
+                invalid.job["options"]["index"] = 9;
+                invalid.result["context"]["options"] = invalid.job["options"];
+            } else if (std::string(key) == "instance_count")
+                invalid.result["data"]["invocation"]["draw_parameters"][key] = -1;
+            else
+                invalid.result["data"]["invocation"][key] = 9;
+            invalid.seal();
+            QVERIFY_THROWS_EXCEPTION(std::exception,
+                                     NativeDebugSession(invalid.job, invalid.result, invalid.artifacts));
+        }
+    }
     void ownershipAndLock() {
         test::NativeDebugFixture fixture;
         auto session = std::make_shared<NativeDebugSession>(fixture.job, fixture.result, fixture.artifacts);

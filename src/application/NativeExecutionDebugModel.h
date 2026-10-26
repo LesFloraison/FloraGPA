@@ -5,7 +5,7 @@
 
 namespace flora {
 enum class NativeDebugCommand { Position, PreviousSource, NextSource, Over, Out, Continue };
-// Instruction boundaries in a selected invocation, backed by complete group
+// Instruction boundaries in a selected invocation, backed by complete execution
 // state. This model does not accept legacy debugger numeric types or enums.
 class NativeExecutionDebugModel {
   public:
@@ -20,7 +20,7 @@ class NativeExecutionDebugModel {
     Json completion() const { return trace_.completion(); }
     const Json &files() const { return result_.at("source_lines").at("files"); }
     size_t size() const { return rows_.size(); }
-    // size() denotes the terminal whole-group state. No source location is
+    // size() denotes the terminal VS invocation or whole CS group. No source location is
     // invented for that boundary.
     size_t position() const { return position_; }
     void move(size_t position, const CancelCheck & = {});

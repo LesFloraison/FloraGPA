@@ -78,7 +78,7 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
             validateNativeAnalysisResult(outcome.job, outcome.result);
             outcome.artifacts = readNativeArtifacts(directory->filePath("result"),
                                                     outcome.result.at("artifacts"), maximumBytes, cancelled);
-            if (action == "debug-thread") {
+            if (action == "debug-thread" || action == "debug-vertex") {
                 outcome.debugSession = std::make_shared<NativeDebugSession>(
                     outcome.job, outcome.result, outcome.artifacts, maximumBytes, cancelled);
                 // The session retains the shader and a locked private journal.

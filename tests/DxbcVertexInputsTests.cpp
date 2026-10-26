@@ -1,8 +1,13 @@
 #include "DepthStencilCapture.h"
 #include "application/DxbcInputSnapshot.h"
 #include "application/DxbcVertexInputs.h"
+#include "application/Experiment.h"
+#include "application/NativeAnalysisJobs.h"
+#include "application/NativeDebugSession.h"
+#include "application/NativeVertexDebug.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
+#include <QProcess>
 #include <QTemporaryDir>
 #include <QtTest>
 #include <bit>
@@ -134,6 +139,130 @@ testing::Capture frameFixture(bool indirect, Bytes shader) {
 class DxbcVertexInputsTests final : public QObject {
     Q_OBJECT
   private slots:
+    void executionJobs_data() { adapters(); }
+    void executionJobs() {
+        QFETCH(uint32_t, vendor);
+        using Json = nlohmann::json;
+        const auto load = [](const QString &path) {
+            QFile file(path);
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Cannot read vertex job artifact");
+            return file.readAll();
+        };
+        try {
+            const auto code = compile("float4 main(float4 a:DATA,uint v:SV_VertexID,uint i:SV_InstanceID)"
+                                      ":SV_Position{return a+float4(v,i,0,0);}");
+            const std::string edited = "float4 main(float4 a:DATA,uint v:SV_VertexID,uint i:SV_InstanceID)"
+                                       ":SV_Position{return a+float4(v,i,0,0)*2;}";
+            for (bool indirect : {false, true}) {
+                QTemporaryDir dir;
+                const auto capture = dir.filePath("frame.gpa_frame");
+                frameFixture(indirect, code).save(capture);
+                Frame frame(capture.toStdWString());
+                Experiment experiment(frame);
+                experiment.setShader(frame, 30, compile(edited), edited, "main");
+                experiment.setBuffer(frame, 1000, 9010, 32, testing::statePack(100.f));
+                experiment.save(dir.filePath("experiment.json"));
+                Json selection{{"gpa_event", 1000}, {"vertex", 3}, {"instance", 1}};
+                if (vendor)
+                    selection["gpu_vendor"] = vendor;
+                else
+                    selection["warp"] = true;
+                const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
+                auto job = prepareNativeAnalysisJob(capture, "debug-vertex", dir.filePath("worker"), worker,
+                                                    selection, dir.filePath("experiment.json"));
+                const auto result = Json::parse(load(runNativeAnalysisJob(job, worker, 30)).toStdString());
+                NativeArtifactBytes artifacts;
+                for (const auto *name : {"debug.json", "trace.jsonl", "shader.dxbc"})
+                    artifacts[name] = load(dir.filePath("worker/") + name);
+                NativeDebugSession session(job, result, artifacts);
+                QCOMPARE(result.at("data").at("invocation").at("input_reference"), Json(3));
+                QCOMPARE(result.at("data").at("invocation").at("instance"), Json(1));
+                auto &model = session.model();
+                const auto initial = model.registerValues();
+                model.move(model.size());
+                bool output = false;
+                for (const auto &r : model.registerValues())
+                    if (r.at("name") == "o0") {
+                        const std::array expected{102.f, 14.f, 22.f, 32.f};
+                        for (unsigned c = 0; c < 4; ++c)
+                            QCOMPARE(r.at("bits")[c], Json(std::bit_cast<uint32_t>(expected[c])));
+                        QCOMPARE(r.at("valid_components"), Json(15));
+                        output = true;
+                    }
+                QVERIFY(output);
+                model.move(0);
+                QCOMPARE(model.registerValues(), initial);
+                for (const auto &module : result.at("execution").at("loaded_modules")) {
+                    const auto path = QString::fromStdString(module.get<std::string>()).toLower();
+                    QVERIFY(!path.contains("renderdoc") && !path.contains("intelswtools\\gpa\\"));
+                }
+                QProcess cli;
+                QStringList args{"analyze",
+                                 capture,
+                                 "debug-vertex",
+                                 "--gpa-event",
+                                 "1000",
+                                 "--vertex",
+                                 "3",
+                                 "--instance",
+                                 "1",
+                                 "--experiment",
+                                 dir.filePath("experiment.json"),
+                                 "--out",
+                                 dir.filePath("cli")};
+                if (vendor)
+                    args << "--gpu-vendor" << QString::number(vendor);
+                else
+                    args << "--warp";
+                cli.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", args);
+                QVERIFY(cli.waitForFinished(30000));
+                QCOMPARE(cli.exitCode(), 0);
+                const auto cliResult = Json::parse(load(dir.filePath("cli/result.json")).toStdString());
+                QCOMPARE(cliResult.at("data").at("shader_sha256"), result.at("data").at("shader_sha256"));
+                QCOMPARE(cliResult.at("data").at("trace").at("steps"),
+                         result.at("data").at("trace").at("steps"));
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void executionRejection() {
+        QTemporaryDir dir;
+        const auto code = compile("float4 main(float4 a:DATA):SV_Position{return a;}");
+        const auto capture = dir.filePath("frame.gpa_frame");
+        frameFixture(false, code).save(capture);
+        Frame frame(capture.toStdWString());
+        ReplayOptions config;
+        config.until = 1000;
+        config.before = config.prepareBeforeDraw = config.warp = true;
+        Replay replay(frame, config);
+        for (unsigned mode = 0; mode < 5; ++mode) {
+            VertexTraceOptions options;
+            options.selection = {3, 1};
+            if (mode == 0)
+                options.selection.reference = 2;
+            if (mode == 1)
+                options.selection.instance = 2;
+            if (mode == 2)
+                options.maxSteps = 1;
+            if (mode == 3)
+                options.maxBytes = 10;
+            const auto path = dir.filePath(QString("failure%1.jsonl").arg(mode));
+            QVERIFY_THROWS_EXCEPTION(
+                std::runtime_error,
+                debugNativeVertex(replay, path, options, 1048576, {}, {},
+                                  mode == 4 ? std::optional<uint32_t>(99) : std::nullopt));
+            QVERIFY(!QFileInfo::exists(path));
+        }
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, debugNativeVertex(replay, dir.filePath("cancel.jsonl"),
+                                                                       {}, 1048576, [] { return true; }));
+        QVERIFY(!QFileInfo::exists(dir.filePath("cancel.jsonl")));
+        VertexTraceOptions valid;
+        valid.selection = {3, 1};
+        const auto result = debugNativeVertex(replay, dir.filePath("retry.jsonl"), valid, 1048576);
+        QVERIFY(result.at("trace").at("completed") == true);
+    }
     void fullSignature_data() { adapters(); }
     void fullSignature() {
         QFETCH(uint32_t, vendor);

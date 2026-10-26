@@ -502,8 +502,8 @@ class NativeAnalysisTests final : public QObject {
         const auto retry =
             prepareNativeAnalysisJob(capture, "inventory", directory.filePath("retry"), worker());
         QVERIFY(load(runNativeAnalysisJob(retry, worker(), 30)).at("ok") == true);
-        auto unsupported = prepareNativeAnalysisJob(
-            capture, "debug-vertex", directory.filePath("unsupported"), worker(), {{"gpa_event", 1000}});
+        auto unsupported = prepareNativeAnalysisJob(capture, "debug-pixel", directory.filePath("unsupported"),
+                                                    worker(), {{"gpa_event", 1000}});
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, runNativeAnalysisJob(unsupported, worker(), 30));
         QVERIFY(!QFileInfo::exists(directory.filePath("unsupported/result.json")));
         auto changed =

@@ -7,6 +7,7 @@
 #include "NativeComputeDebug.h"
 #include "NativeCounters.h"
 #include "NativeHistory.h"
+#include "NativeVertexDebug.h"
 #include "PostTransform.h"
 #include "TextureInspector.h"
 #include <Psapi.h>
@@ -94,7 +95,8 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"history",
          {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
           "max_bytes", "max_records"}},
-        {"debug-vertex", {"gpa_event", "instance", "vertex", "index"}},
+        {"debug-vertex",
+         {"gpa_event", "instance", "vertex", "index", "max_bytes", "max_steps", "max_trace_bytes"}},
         {"debug-pixel", {"gpa_event", "x", "y", "sample"}},
         {"debug-thread", {"gpa_event", "group", "thread", "max_bytes", "max_steps", "max_trace_bytes"}}};
     const auto selected = fields.find(action);
@@ -185,7 +187,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     const auto request = nativeAnalysisRequest(job.at("action"), job.at("options"));
     // Reserved actions fail explicitly until their parity gates pass. Never switch backend implicitly.
     if ((request.action == "history" && !request.options.contains("history_scope")) ||
-        request.action == "debug-vertex" || request.action == "debug-pixel")
+        request.action == "debug-pixel")
         throw std::runtime_error("Native " + request.action +
                                  " is not implemented; migration parity gate remains open");
     const auto &selection = request.options;
@@ -207,7 +209,8 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     for (const auto key : {"gpa_event", "start_event", "end_event"})
         if (selection.contains(key) && frame.entry(selection.at(key).get<Id>()).category != 7)
             throw std::invalid_argument("Analysis event does not identify a GPA API command");
-    options.before = request.action == "mesh" || request.action == "debug-thread";
+    options.before =
+        request.action == "mesh" || request.action == "debug-thread" || request.action == "debug-vertex";
     const bool allCounters = request.action == "counters" && !selection.contains("gpa_event") &&
                              !selection.contains("start_event");
     if (request.action == "counters" && !allCounters) {
@@ -279,9 +282,23 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
             throw std::runtime_error("Actual analysis adapter differs from the requested context");
         // Unpositioned texture inspection means capture-initial data, matching the existing inspector.
         if (!allCounters && request.action != "history" && request.action != "debug-thread" &&
-            (request.action != "texture" || options.until))
+            request.action != "debug-vertex" && (request.action != "texture" || options.until))
             replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); });
-        if (request.action == "debug-thread") {
+        if (request.action == "debug-vertex") {
+            dxbc_exec::VertexTraceOptions inspect;
+            inspect.selection = {selection.value("vertex", 0u), selection.value("instance", 0u)};
+            inspect.maxSteps = selection.value("max_steps", inspect.maxSteps);
+            inspect.maxBytes = selection.value("max_trace_bytes", inspect.maxBytes);
+            data = debugNativeVertex(replay, directory.filePath("trace.jsonl"), inspect,
+                                     selection.value("max_bytes", uint64_t(256) * 1024 * 1024), cancelled,
+                                     directory.filePath("shader.dxbc"),
+                                     selection.contains("index")
+                                         ? std::optional<uint32_t>(selection.at("index").get<uint32_t>())
+                                         : std::nullopt);
+            data["trace_file"] = "trace.jsonl";
+            data["shader_file"] = "shader.dxbc";
+            save(directory.filePath("debug.json"), data);
+        } else if (request.action == "debug-thread") {
             dxbc_exec::GroupTraceOptions inspect;
             inspect.group = selection.value("group", inspect.group);
             inspect.thread = selection.value("thread", inspect.thread);

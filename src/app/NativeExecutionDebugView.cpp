@@ -66,7 +66,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
             return;
         request();
         invalidate();
-        summary_->setText("Reading compute execution…");
+        summary_->setText("Reading native execution…");
         emit readRequested();
     });
     cancel_ = action(bar, "nativeDebugCancel", "Cancel", [this] {
@@ -83,14 +83,27 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     });
     auto select = new QToolBar;
     layout->addWidget(select);
-    select->addWidget(new QLabel("Group "));
+    stage_ = new QComboBox;
+    stage_->setObjectName("nativeDebugStage");
+    stage_->addItems({"CS", "VS"});
+    select->addWidget(stage_);
+    auto firstLabel = new QLabel("Group ");
+    select->addWidget(firstLabel);
     group_ = new QLineEdit("0,0,0");
     group_->setObjectName("nativeDebugGroup");
     select->addWidget(group_);
-    select->addWidget(new QLabel(" Thread "));
+    auto secondLabel = new QLabel(" Thread ");
+    select->addWidget(secondLabel);
     thread_ = new QLineEdit("0,0,0");
     thread_->setObjectName("nativeDebugThread");
     select->addWidget(thread_);
+    connect(stage_, &QComboBox::currentIndexChanged, this, [this, firstLabel, secondLabel](int index) {
+        firstLabel->setText(index ? "Input reference " : "Group ");
+        secondLabel->setText(index ? " Instance " : " Thread ");
+        group_->setText(index ? "0" : "0,0,0");
+        thread_->setText(index ? "0" : "0,0,0");
+        invalidate();
+    });
     steps_ = new QToolBar;
     layout->addWidget(steps_);
     navigation_ = new QComboBox;
@@ -286,8 +299,8 @@ void NativeExecutionDebugView::invalidate() {
     assembly_->clear();
     stack_->clear();
     position_->setRange(0, 0);
-    summary_->setText(event_ ? "Ready to inspect the selected compute invocation"
-                             : "Select a Dispatch event");
+    summary_->setText(event_ ? "Ready to inspect the selected invocation"
+                             : "Select a Draw or Dispatch event");
     updateActions();
 }
 void NativeExecutionDebugView::updateActions() {
@@ -302,8 +315,24 @@ void NativeExecutionDebugView::updateActions() {
     line_->setEnabled(!occupied && bool(session_));
     group_->setEnabled(!occupied);
     thread_->setEnabled(!occupied);
+    stage_->setEnabled(!occupied);
+}
+std::string NativeExecutionDebugView::action() const {
+    return stage_->currentIndex() ? "debug-vertex" : "debug-thread";
 }
 NativeExecutionDebugView::Json NativeExecutionDebugView::request() const {
+    if (stage_->currentIndex()) {
+        const auto scalar = [](const QString &value) {
+            bool valid = false;
+            const auto n = value.toULongLong(&valid);
+            if (!valid || n > UINT32_MAX || value != value.trimmed() || value.startsWith('+') ||
+                value.startsWith('-'))
+                throw std::runtime_error("Enter an unsigned draw-relative reference or instance");
+            return n;
+        };
+        return {
+            {"gpa_event", event_}, {"vertex", scalar(group_->text())}, {"instance", scalar(thread_->text())}};
+    }
     return {{"gpa_event", event_}, {"group", triple(group_->text())}, {"thread", triple(thread_->text())}};
 }
 bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSession> session,
@@ -316,13 +345,16 @@ bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSe
         return false;
     }
     if (!session)
-        throw std::runtime_error("Native compute analysis returned no debug session");
+        throw std::runtime_error("Native analysis returned no debug session");
     if (operationActive())
         throw std::runtime_error("Wait for the previous native debug operation to finish");
     const auto selection = request();
+    if (session->job().at("action") != action())
+        throw std::runtime_error("Native debug stage changed");
     for (const auto &[key, value] : selection.items())
-        if (session->job().at("options").value(key, key == "gpa_event" ? Json(nullptr) : Json({0, 0, 0})) !=
-            value)
+        if (session->job().at("options").value(key, key == "gpa_event"       ? Json(nullptr)
+                                                    : stage_->currentIndex() ? Json(0)
+                                                                             : Json({0, 0, 0})) != value)
             throw std::runtime_error("Native debug selection changed");
     session_ = std::move(session);
     snapshot_ = session_->initialSnapshot();
@@ -367,7 +399,7 @@ void NativeExecutionDebugView::render() {
     const auto position = snapshot_.at("position").get<size_t>();
     const bool terminal = position == model()->size();
     position_->setValue(int(position));
-    summary_->setText(terminal ? "Terminal group state · no source instruction"
+    summary_->setText(terminal ? "Terminal invocation state · no source instruction"
                                : QString("Step %1 / %2 · before DXBC instruction %3 · global step %4%5")
                                      .arg(position)
                                      .arg(model()->size())
@@ -429,7 +461,7 @@ void NativeExecutionDebugView::showSource() {
 }
 NativeExecutionDebugView::Json NativeExecutionDebugView::exportReport() {
     if (!model())
-        throw std::runtime_error("Read a native compute trace before exporting");
+        throw std::runtime_error("Read a native execution trace before exporting");
     model()->importConfiguration(controls_->configuration());
     auto report = model()->exportReport();
     report["analysis_context"] = session_->result().at("context");

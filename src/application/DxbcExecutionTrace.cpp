@@ -131,17 +131,26 @@ Json executionTraceStep(const GroupStep &group) {
             {"sync_loop_iterations", s.syncLoopIterations},
             {"atomic", s.atomic}};
 }
-Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapshot,
-                               const GroupTraceOptions &options, const CancelCheck &cancelled) {
+static Json exportExecutionTrace(const QString &path, const InputSnapshot &snapshot,
+                                 const GroupTraceOptions &options, bool vertex,
+                                 const VertexInputSelection &selection, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    if (snapshot.stage != 5 || !snapshot.event || !snapshot.shader || !options.maxSteps || !options.maxBytes)
-        throw std::runtime_error("Invalid compute execution trace request");
+    if (snapshot.stage != (vertex ? 0u : 5u) || !snapshot.event || !snapshot.shader || !options.maxSteps ||
+        !options.maxBytes)
+        throw std::runtime_error("Invalid native execution trace request");
     const Program program(snapshot.bytecode);
-    const auto size = program.threadGroupSize();
+    if (program.stage() != (vertex ? 1u : 5u) || (vertex && !program.sharedDeclarations().empty()))
+        throw std::runtime_error("Execution trace shader stage mismatch");
+    const auto size = vertex ? std::array<uint32_t, 3>{1, 1, 1} : program.threadGroupSize();
     for (size_t i = 0; i < 3; ++i)
         if (options.thread[i] >= size[i])
             throw std::runtime_error("Execution trace thread is outside the shader thread group");
-    Group group(program, snapshot.inputs, options.group, options.maxSteps, cancelled);
+    std::unique_ptr<Group> group;
+    std::unique_ptr<Lane> vertexLane;
+    if (vertex)
+        vertexLane = std::make_unique<Lane>(program, snapshot.inputs, options.maxSteps);
+    else
+        group = std::make_unique<Group>(program, snapshot.inputs, options.group, options.maxSteps, cancelled);
     const uint32_t selected = options.thread[0] + size[0] * (options.thread[1] + size[1] * options.thread[2]);
     const auto shaderHash =
         QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char *>(snapshot.bytecode.data()),
@@ -153,31 +162,41 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
     Json constantLengths = Json::array();
     for (const auto &[slot, values] : snapshot.inputs.constantBuffers)
         constantLengths.push_back({{"slot", slot}, {"elements", values.size()}});
-    journal.write({{"record", "header"},
-                   {"format", "flora.dxbc-execution-trace"},
-                   {"version", 1},
-                   {"stage", "cs"},
-                   {"scope", "one_cooperative_group"},
-                   {"invocation_eligibility", "not_established_by_trace_writer"},
-                   {"execution_model", Group::executionModel},
-                   {"captured_gpu_schedule", false},
-                   {"input_source", InputSnapshot::source},
-                   {"frame_sha256", snapshot.frameSha256},
-                   {"shader_sha256", shaderHash},
-                   {"gpa_event", snapshot.event},
-                   {"gpa_shader", snapshot.shader},
-                   {"replay_generation", snapshot.replayGeneration},
-                   {"adapter",
-                    {{"luid", snapshot.adapterLuid},
-                     {"vendor", snapshot.adapterVendor},
-                     {"device", snapshot.adapterDevice}}},
-                   {"group", options.group},
-                   {"thread", options.thread},
-                   {"selected_lane", selected},
-                   {"group_size", size},
-                   {"max_steps", options.maxSteps},
-                   {"constant_buffer_lengths", constantLengths},
-                   {"max_bytes", options.maxBytes}});
+    Json header{{"record", "header"},
+                {"format", "flora.dxbc-execution-trace"},
+                {"version", 1},
+                {"stage", "cs"},
+                {"scope", "one_cooperative_group"},
+                {"invocation_eligibility", "not_established_by_trace_writer"},
+                {"execution_model", Group::executionModel},
+                {"captured_gpu_schedule", false},
+                {"input_source", InputSnapshot::source},
+                {"frame_sha256", snapshot.frameSha256},
+                {"shader_sha256", shaderHash},
+                {"gpa_event", snapshot.event},
+                {"gpa_shader", snapshot.shader},
+                {"replay_generation", snapshot.replayGeneration},
+                {"adapter",
+                 {{"luid", snapshot.adapterLuid},
+                  {"vendor", snapshot.adapterVendor},
+                  {"device", snapshot.adapterDevice}}},
+                {"group", options.group},
+                {"thread", options.thread},
+                {"selected_lane", selected},
+                {"group_size", size},
+                {"max_steps", options.maxSteps},
+                {"constant_buffer_lengths", constantLengths},
+                {"max_bytes", options.maxBytes}};
+    if (vertex) {
+        for (const auto *key : {"group", "thread", "group_size"})
+            header.erase(key);
+        header.update({{"stage", "vs"},
+                       {"scope", "one_vertex"},
+                       {"execution_model", vertexExecutionModel},
+                       {"input_reference", selection.reference},
+                       {"instance", selection.instance}});
+    }
+    journal.write(header);
     const auto source = shaderSourceLines(snapshot.bytecode);
     journal.write({{"record", "source"}, {"data", source}});
     const auto locations = shaderLinesByOffset(source);
@@ -211,7 +230,7 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
             journal.write(
                 {{"record", "constant"}, {"slot", slot}, {"element", i}, {"value", value(values[i])}});
     for (uint32_t lane = 0; lane < size[0] * size[1] * size[2]; ++lane)
-        for (const auto &[r, v] : group.lane(lane).registers())
+        for (const auto &[r, v] : (vertex ? vertexLane->registers() : group->lane(lane).registers()))
             journal.write(
                 {{"record", "register"}, {"lane", lane}, {"register", reg(r)}, {"value", value(v)}});
     if (snapshot.inputs.memory) {
@@ -220,8 +239,9 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
         for (const auto &[id, c] : snapshot.inputs.memory->counters())
             journal.write({{"record", "counter"}, {"view", id}, {"value", counter(c)}});
     }
-    for (const auto &[id, b] : group.sharedMemory().buffers())
-        journal.buffer("shared", id, b);
+    if (group)
+        for (const auto &[id, b] : group->sharedMemory().buffers())
+            journal.buffer("shared", id, b);
     if (snapshot.inputs.textures) {
         const auto &textures = *snapshot.inputs.textures;
         for (const auto &[id, metadata] : textures.metadata)
@@ -307,9 +327,9 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
     }
     uint64_t steps = 0, selectedSteps = 0;
     const auto gpuStart = snapshot.inputs.gpu ? snapshot.inputs.gpu->operations() : 0;
-    while (!group.finished()) {
+    while (vertex ? !vertexLane->finished() : !group->finished()) {
         checkCancellation(cancelled);
-        const auto step = group.step();
+        const auto step = vertex ? GroupStep{steps, 0, 0, vertexLane->step(), false} : group->step();
         journal.write(executionTraceStep(step));
         ++steps;
         selectedSteps += step.lane == selected;
@@ -317,7 +337,7 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
     Json summary{{"record", "complete"},
                  {"steps", steps},
                  {"selected_steps", selectedSteps},
-                 {"sampling_batches", group.samplingBatches()},
+                 {"sampling_batches", group ? group->samplingBatches() : 0},
                  {"completed", true},
                  {"gpu_operations", snapshot.inputs.gpu ? snapshot.inputs.gpu->operations() - gpuStart : 0},
                  {"gpu", snapshot.inputs.gpu ? snapshot.inputs.gpu->identity() : Json(nullptr)}};
@@ -326,5 +346,16 @@ Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapsho
     summary["bytes"] = journal.bytes;
     summary["records"] = journal.records;
     return summary;
+}
+Json exportGroupExecutionTrace(const QString &path, const InputSnapshot &snapshot,
+                               const GroupTraceOptions &options, const CancelCheck &cancelled) {
+    return exportExecutionTrace(path, snapshot, options, false, {}, cancelled);
+}
+Json exportVertexExecutionTrace(const QString &path, const InputSnapshot &snapshot,
+                                const VertexTraceOptions &options, const CancelCheck &cancelled) {
+    GroupTraceOptions common;
+    common.maxSteps = options.maxSteps;
+    common.maxBytes = options.maxBytes;
+    return exportExecutionTrace(path, snapshot, common, true, options.selection, cancelled);
 }
 } // namespace flora::dxbc_exec
