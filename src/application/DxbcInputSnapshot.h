@@ -1,6 +1,7 @@
 #pragma once
 #include "DxbcExecution.h"
 #include "DxbcTextureInputs.h"
+#include <nlohmann/json.hpp>
 
 namespace flora {
 class Replay;
@@ -35,5 +36,17 @@ InputSnapshot snapshotBufferInputs(Replay &, unsigned stage, uint64_t maxBytes =
 InputSnapshot snapshotResourceInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
                                      const CancelCheck &cancelled = {},
                                      const std::function<void()> &beforeSnapshot = {});
+struct VertexInputSelection {
+    // Zero-based draw input reference, before removing cut indices. Instance
+    // is relative to the draw, independently of StartInstanceLocation.
+    uint32_t reference = 0, instance = 0;
+};
+struct VertexInputSnapshot {
+    InputSnapshot resources;
+    nlohmann::json invocation;
+};
+VertexInputSnapshot snapshotVertexInputs(Replay &, const VertexInputSelection &,
+                                         uint64_t maxBytes = 256 * 1024 * 1024,
+                                         const CancelCheck &cancelled = {});
 } // namespace dxbc_exec
 } // namespace flora

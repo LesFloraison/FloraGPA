@@ -1,10 +1,13 @@
 #include "DxbcInputSnapshot.h"
+#include "DrawParameters.h"
 #include "DxbcCheckpointModel.h"
 #include "DxbcGpuOperations.h"
 #include "DxbcTypedBuffer.h"
+#include "DxbcVertexInputs.h"
 #include "core/UavCounters.h"
 #include "replay/Replay.h"
 #include <algorithm>
+#include <set>
 
 namespace flora::dxbc_exec {
 namespace {
@@ -35,6 +38,134 @@ class Snapshot {
     std::shared_ptr<TextureInputs> textures = std::make_shared<TextureInputs>();
     InputSnapshot result;
     bool queryResources = false, queryRasterizer = false;
+    void vertexInputs(ID3D11DeviceContext *context, const VertexInputSelection &selection,
+                      nlohmann::json &invocation) {
+        const auto event = replay.frame().event(result.event);
+        if (event.argumentBuffer && replay.frame().resource(event.argumentBuffer).desc.at(0) > budget - used)
+            throw std::runtime_error("Vertex input indirect arguments exceed byte budget");
+        const auto resolved = resolveDrawParameters(replay, event);
+        const auto &parameters = resolved.parameters;
+        const bool indexed = resolved.direct.type == 0x39 || resolved.direct.type == 0x3a;
+        VertexInputDraw draw;
+        draw.count = parameters.at(indexed ? "index_count" : "vertex_count");
+        draw.instances = parameters.value("instance_count", 1u);
+        draw.start = parameters.at(indexed ? "start_index" : "start_vertex");
+        draw.startInstance = parameters.value("start_instance", 0u);
+        draw.baseVertex = parameters.value("base_vertex", int32_t(0));
+        if (selection.reference >= draw.count || selection.instance >= draw.instances)
+            throw std::runtime_error("Selected vertex input is outside the effective draw");
+        const auto predicate = replay.observeBoundPredicate(cancelled);
+        if (!predicate.allowsExecution)
+            throw std::runtime_error("Vertex input eligibility is unknown: " + predicate.source);
+        if (!*predicate.allowsExecution)
+            throw std::runtime_error("Selected draw is skipped by the observed replay predicate");
+        Com<ID3D11InputLayout> nativeLayout;
+        context->IAGetInputLayout(&nativeLayout);
+        const auto layoutId = objectId(nativeLayout.Get(), 0x82);
+        std::vector<VertexInputElement> elements;
+        std::set<unsigned> slots;
+        if (layoutId) {
+            Reader resource(replay.frame().payload(layoutId, 5, 0x82));
+            resource.skip(16);
+            Reader layout(replay.frame().payload(resource.read<Id>(), 9, 0x84));
+            resource.end();
+            const auto count = layout.read<uint32_t>();
+            if (count > 32)
+                throw std::runtime_error("Vertex input layout exceeds 32 elements");
+            for (uint32_t i = 0; i < count; ++i) {
+                const auto name = replay.frame().data(layout.read<Id>());
+                if (name.empty() || name.back() ||
+                    std::find(name.begin(), name.end() - 1, 0) != name.end() - 1)
+                    throw std::runtime_error("Invalid captured vertex input semantic");
+                const auto fields = layout.array<uint32_t, 6>();
+                if (fields[2] >= 32)
+                    throw std::runtime_error("Invalid captured vertex input slot");
+                elements.push_back({std::string(reinterpret_cast<const char *>(name.data()), name.size() - 1),
+                                    fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]});
+                slots.insert(fields[2]);
+            }
+            layout.skip(layout.read<uint32_t>());
+            layout.end();
+        }
+        Objects<ID3D11Buffer, 32> vertexBuffers;
+        std::array<UINT, 32> strides{}, offsets{};
+        context->IAGetVertexBuffers(0, 32, vertexBuffers.data(), strides.data(), offsets.data());
+        std::map<uint32_t, VertexInputBuffer> inputBuffers;
+        nlohmann::json bindings = nlohmann::json::array();
+        for (const auto slot : slots) {
+            const auto id = objectId(vertexBuffers.values[slot], 0x83);
+            bindings.push_back(
+                {{"slot", slot}, {"resource", id}, {"stride", strides[slot]}, {"offset", offsets[slot]}});
+            if (id) {
+                const auto &bytes = readBuffer(vertexBuffers.values[slot], id).bytes;
+                inputBuffers.emplace(slot, VertexInputBuffer{bytes, strides[slot], offsets[slot]});
+            }
+        }
+        Id indexId = 0;
+        uint64_t ordinal = selection.reference;
+        uint32_t vertexId = selection.reference;
+        uint64_t references = draw.count;
+        if (indexed) {
+            Com<ID3D11Buffer> indexBuffer;
+            DXGI_FORMAT format{};
+            context->IAGetIndexBuffer(&indexBuffer, &format, &draw.indexOffset);
+            indexId = objectId(indexBuffer.Get(), 0x83);
+            if (!indexId || (format != DXGI_FORMAT_R16_UINT && format != DXGI_FORMAT_R32_UINT))
+                throw std::runtime_error("Vertex input requires a valid bound index buffer");
+            draw.indexFormat = format;
+            draw.indices = readBuffer(indexBuffer.Get(), indexId).bytes;
+            const auto width = format == DXGI_FORMAT_R16_UINT ? 2u : 4u;
+            const auto begin = uint64_t(draw.indexOffset) + uint64_t(draw.start) * width;
+            if (begin > draw.indices.size() || uint64_t(draw.count) * width > draw.indices.size() - begin)
+                throw std::runtime_error("Vertex input index references exceed the observed buffer");
+            Reader indices(draw.indices.subspan(size_t(begin), size_t(draw.count) * width));
+            for (uint32_t i = 0; i < draw.count; ++i) {
+                if (!(i % 4096))
+                    checkCancellation(cancelled);
+                const auto index = width == 2 ? indices.read<uint16_t>() : indices.read<uint32_t>();
+                if (i == selection.reference)
+                    vertexId = index;
+                if (index == (width == 2 ? 0xffffu : UINT32_MAX)) {
+                    if (i == selection.reference)
+                        throw std::runtime_error("Selected vertex input is a cut index");
+                    if (i < selection.reference)
+                        --ordinal;
+                    --references;
+                }
+            }
+        }
+        auto captured = captureVertexInputs(replay.nativeDevice(), replay.options().warp, result.bytecode,
+                                            elements, inputBuffers, draw, budget - used, cancelled);
+        const auto row = selection.instance * references + ordinal;
+        if (row >= captured.rows.size())
+            throw std::runtime_error("Selected vertex input was not observed");
+        result.inputs.registers = std::move(captured.rows[size_t(row)]);
+        D3D11_PRIMITIVE_TOPOLOGY topology{};
+        context->IAGetPrimitiveTopology(&topology);
+        invocation = {{"source", "independent-replay-vertex-inputs/1"},
+                      {"gpa_event", event.id},
+                      {"gpa_shader", result.shader},
+                      {"input_reference", selection.reference},
+                      {"instance", selection.instance},
+                      {"vertex_id", vertexId},
+                      {"vertex_index", int64_t(vertexId) + (indexed ? int64_t(draw.baseVertex) : draw.start)},
+                      {"draw_parameters", parameters},
+                      {"indirect", resolved.indirect},
+                      {"layout", layoutId},
+                      {"vertex_buffers", bindings},
+                      {"index_buffer", indexId},
+                      {"index_format", draw.indexFormat},
+                      {"index_offset", draw.indexOffset},
+                      {"topology", unsigned(topology)},
+                      {"helper", captured.identity},
+                      {"original_invocation_order_recovered", false},
+                      {"predicate",
+                       {{"resource", predicate.resource},
+                        {"comparison", predicate.comparison},
+                        {"source", predicate.source},
+                        {"allows_execution", true},
+                        {"original_query_recovered", false}}}};
+    }
     std::shared_ptr<const SampleQueryInput> sampleQueries(ID3D11ShaderResourceView *srv) {
         auto observed = replay.observeSampleQueries(srv, cancelled);
         const auto bytes = observed.positions.size() * 16 + 21;
@@ -503,7 +634,8 @@ class Snapshot {
                 identities[identity(object.Get()).Get()].push_back(id);
         }
     }
-    InputSnapshot read(ID3D11DeviceContext *context) {
+    InputSnapshot read(ID3D11DeviceContext *context, const VertexInputSelection *vertex = nullptr,
+                       nlohmann::json *invocation = nullptr) {
         switch (result.stage) {
         case 0:
             shader(context, &ID3D11DeviceContext::VSGetShader, 0x90);
@@ -524,6 +656,8 @@ class Snapshot {
             shader(context, &ID3D11DeviceContext::CSGetShader, 0x93);
             break;
         }
+        if (vertex)
+            vertexInputs(context, *vertex, *invocation);
         for (const auto &[tag, bytes] : readDxbcParts(result.bytecode))
             if (tag == 0x58454853 || tag == 0x52444853)
                 for (const auto &words : readDxbcProgram(bytes).instructions)
@@ -558,9 +692,10 @@ class Snapshot {
     }
 };
 } // namespace
-InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
-                                     const CancelCheck &cancelled,
-                                     const std::function<void()> &beforeSnapshot) {
+static InputSnapshot snapshotInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                    const CancelCheck &cancelled, const std::function<void()> &beforeSnapshot,
+                                    const VertexInputSelection *vertex = nullptr,
+                                    nlohmann::json *invocation = nullptr) {
     checkCancellation(cancelled);
     const auto id = replay.options().until;
     if (stage >= 6 || !maxBytes || !id || !replay.options().before || !replay.options().prepareBeforeDraw ||
@@ -570,16 +705,17 @@ InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t ma
     if (compute != (stage == 5))
         throw std::runtime_error("DXBC input stage disagrees with the selected work event");
     std::optional<InputSnapshot> result;
-    replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); },
-               [&](Id event, bool after, ID3D11DeviceContext *context, const auto &objects) {
-                   if (event != id || after)
-                       return;
-                   if (result)
-                       throw std::runtime_error("Duplicate DXBC input replay boundary");
-                   if (beforeSnapshot)
-                       beforeSnapshot();
-                   result = Snapshot(replay, objects, stage, maxBytes, cancelled).read(context);
-               });
+    replay.run(
+        [&](Id, size_t, size_t) { checkCancellation(cancelled); },
+        [&](Id event, bool after, ID3D11DeviceContext *context, const auto &objects) {
+            if (event != id || after)
+                return;
+            if (result)
+                throw std::runtime_error("Duplicate DXBC input replay boundary");
+            if (beforeSnapshot)
+                beforeSnapshot();
+            result = Snapshot(replay, objects, stage, maxBytes, cancelled).read(context, vertex, invocation);
+        });
     checkCancellation(cancelled);
     if (!result)
         throw std::runtime_error("Selected DXBC input boundary was not observed");
@@ -591,6 +727,19 @@ InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t ma
     result->adapterVendor = adapter.VendorId;
     result->adapterDevice = adapter.DeviceId;
     return std::move(*result);
+}
+InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                     const CancelCheck &cancelled,
+                                     const std::function<void()> &beforeSnapshot) {
+    return snapshotInputs(replay, stage, maxBytes, cancelled, beforeSnapshot);
+}
+VertexInputSnapshot snapshotVertexInputs(Replay &replay, const VertexInputSelection &selection,
+                                         uint64_t maxBytes, const CancelCheck &cancelled) {
+    if (replay.options().disabled.contains(replay.options().until))
+        throw std::runtime_error("Selected draw is disabled by the experiment");
+    VertexInputSnapshot result;
+    result.resources = snapshotInputs(replay, 0, maxBytes, cancelled, {}, &selection, &result.invocation);
+    return result;
 }
 InputSnapshot snapshotBufferInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
                                    const CancelCheck &cancelled) {
