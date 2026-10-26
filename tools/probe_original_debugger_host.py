@@ -10,11 +10,80 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import struct
 import subprocess
 import sys
+import uuid
 
 PLAYER_SHA256 = "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
 P, U, Q = c.c_void_p, c.c_uint32, c.c_uint64
+
+
+def call_method(obj, slot, result, *params):
+    table = Q.from_address(obj).value
+    return c.WINFUNCTYPE(result, P, *params)(Q.from_address(table + 8 * slot).value)
+
+
+def replay_adapter(base, host, capture):
+    """Read the existing context's public DXGI identity after a successful replay."""
+    with capture.open("rb") as stream:
+        header = stream.read(0xfc)
+        count, = struct.unpack_from("<I", header, 12)
+        table, = struct.unpack_from("<Q", header, 0xf4)
+        if not 0 < count <= 10000000 or table + count * 24 > capture.stat().st_size:
+            raise ValueError("Invalid capture entry table")
+        stream.seek(table)
+        contexts = [row[0] for row in struct.iter_unpack("<QQIBBH", stream.read(count * 24))
+                    if row[4] == 5 and row[5] == 0x127]
+    if len(contexts) != 1:
+        raise ValueError("Adapter probe requires exactly one saved immediate context")
+    read = lambda address: Q.from_address(address).value
+    manager = read(host + 0x1b8)
+    cache = read(manager + 0x48) + 0x48
+    versions = c.WINFUNCTYPE(P, P, U)(base + 0x9b350)(cache, contexts[0])
+    shared = call_method(versions, 2, P, U)(versions, 0)
+    context = read(read(shared) + 0x38)
+    device, dxgi, adapter = P(), P(), P()
+    try:
+        call_method(context, 3, None, P)(context, c.byref(device))
+        guid = c.create_string_buffer(uuid.UUID("54ec77fa-1377-44e6-8c32-88fd5f44c84c").bytes_le)
+        if call_method(device.value, 0, c.c_long, P, P)(device, guid, c.byref(dxgi)) < 0:
+            raise ValueError("Replay device does not expose IDXGIDevice")
+        if call_method(dxgi.value, 7, c.c_long, P)(dxgi, c.byref(adapter)) < 0:
+            raise ValueError("Cannot read replay adapter")
+        desc = c.create_string_buffer(304)
+        if call_method(adapter.value, 8, c.c_long, P)(adapter, desc) < 0:
+            raise ValueError("Cannot read replay adapter description")
+        raw = desc.raw
+        return dict(vendor=struct.unpack_from("<I", raw, 256)[0],
+                    device=struct.unpack_from("<I", raw, 260)[0],
+                    luid=struct.unpack_from("<Q", raw, 296)[0],
+                    name=raw[:256].decode("utf-16-le").split("\0", 1)[0],
+                    context_event=contexts[0])
+    finally:
+        for obj in (adapter, dxgi, device):
+            if obj.value:
+                call_method(obj.value, 2, U)(obj)
+
+
+def select_gpu(fn, vendor):
+    """Copy a pinned GPA enumeration ID; never infer the ID from a vendor value."""
+    vector = (Q * 3)()
+    try:
+        fn(0x11bd30, P, P)(c.byref(vector))
+        start, end, capacity = vector
+        if not start or not start <= end <= capacity or (end - start) % 0x178 or end - start > 0x178 * 128:
+            raise ValueError("Invalid original GPU enumeration")
+        rows = [dict(vendor=U.from_address(p + 0x80).value,
+                     device=U.from_address(p + 0x84).value,
+                     gpu_id=list((U * 3).from_address(p + 0x94)))
+                for p in range(start, end, 0x178)]
+        selected = [row for row in rows if row["vendor"] == vendor and row["gpu_id"][0] == 1]
+        if len(selected) != 1:
+            raise ValueError("Expected exactly one original DXGI GPU for the requested vendor")
+        return rows, selected[0]
+    finally:
+        fn(0x4f440, None, P)(c.byref(vector))
 
 
 def digest(path):
@@ -64,6 +133,9 @@ def child(args):
                   adapter_selection="Original default with undefined GpuId; no product adapter assertion",
                   event=args.event, snapshots=[], requests=[], playbacks=[], errors=[], observer_errors=[],
                   field_write_watch=False, engine_recovered=False, shader_debug_parity=False)
+    if args.vendor is not None:
+        report["adapter_selection"] = "Explicit original enumeration ID with replay-device verification"
+        report["requested_vendor"] = args.vendor
     def save():
         (args.out / "dispatch.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     save()
@@ -113,6 +185,11 @@ def child(args):
         try:
             snapshot("loaded")
             filename, gpu = Wide(str(args.capture.resolve())), (U * 4)()
+            if args.vendor is not None:
+                enumeration, selected = select_gpu(fn, args.vendor)
+                report.update(gpu_enumeration=enumeration, selected_gpu=selected)
+                gpu[:3] = selected["gpu_id"]
+                save()
             status = fn(0x87c10, U, *([P] * 8))(
                 filename.ptr, None, None, None, c.byref(gpu), None, None, c.byref(error))
             report["open"] = dict(status=status, error=hex(error.value))
@@ -121,6 +198,13 @@ def child(args):
                 raise ValueError("Original open failed")
             playback("before_requests")
             snapshot("replayed")
+            if args.vendor is not None:
+                actual = replay_adapter(base, host, args.capture)
+                report["replay_adapter"] = actual
+                save()
+                if (actual["vendor"] != selected["vendor"] or actual["device"] != selected["device"] or
+                        actual["luid"] != gpu[1] | (gpu[2] << 32)):
+                    raise ValueError("Original replay adapter differs from the explicit selection")
             # The request carries eight raw uint32 selection words. The native
             # dispatcher compares word 1 to an ERG identity. Other word semantics
             # remain unproven and are retained verbatim, not named as shader fields.
@@ -183,6 +267,10 @@ def child(args):
                 raise ValueError("Expected one synchronous debugger request execution")
             playback("after_requests")
             snapshot("replayed_after_requests")
+            if args.vendor is not None:
+                report["replay_adapter_after"] = replay_adapter(base, host, args.capture)
+                if report["replay_adapter_after"] != report["replay_adapter"]:
+                    raise ValueError("Original replay adapter changed during the requests")
         finally:
             fn(0x86fc0, None)()
             snapshot("closed")
@@ -206,6 +294,8 @@ def main():
     parser.add_argument("--timeout", type=float, default=120)
     parser.add_argument("--original-initialization", action="store_true",
                         help="Retain original query-manager and initial-playback defaults")
+    parser.add_argument("--vendor", type=int, choices=(4318, 32902),
+                        help="Select one enumerated NVIDIA or Intel GPU and verify the replay device")
     parser.add_argument("--child", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not 0 < args.event <= 0xffffffff or not 0 < args.timeout <= 600:
