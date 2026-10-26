@@ -397,7 +397,7 @@ struct GpuOperations::State {
     }
     std::array<Value, 4> pixels(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
                                 ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr,
-                                Bytes native = {}) {
+                                Bytes native = {}, uint32_t outputPrecision = 0) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -423,7 +423,11 @@ struct GpuOperations::State {
                 if (pixelShaders.size() >= 256)
                     pixelShaders.clear();
                 // DxbcParts borrows chunk bytes; keep both owners alive through makeDxbc.
-                const auto signature = compileHlsl("uint4 main():SV_Target0{return 0;}", "ps_5_0").bytecode;
+                const std::map<uint32_t, std::string> types{
+                    {0, "uint"}, {1, "min16float"}, {2, "min10float"}, {4, "min16int"}, {5, "min16uint"}};
+                const auto signature =
+                    compileHlsl(types.at(outputPrecision) + "4 main():SV_Target0{return 0;}", "ps_5_0")
+                        .bytecode;
                 auto parts = readDxbcParts(signature);
                 std::erase_if(parts, [](const auto &part) {
                     return part.first == 0x58454853 || part.first == 0x52444853 || part.first == 0x54415453;
@@ -448,7 +452,10 @@ struct GpuOperations::State {
                                       dimension,
                                       1,
                                       1,
-                                      DXGI_FORMAT_R32G32B32A32_UINT,
+                                      outputPrecision == 1 || outputPrecision == 2
+                                          ? DXGI_FORMAT_R32G32B32A32_FLOAT
+                                      : outputPrecision == 4 ? DXGI_FORMAT_R32G32B32A32_SINT
+                                                             : DXGI_FORMAT_R32G32B32A32_UINT,
                                       {1, 0},
                                       D3D11_USAGE_DEFAULT,
                                       D3D11_BIND_RENDER_TARGET,
@@ -519,8 +526,9 @@ struct GpuOperations::State {
         }
     }
     Value pixel(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
-                ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr) {
-        return pixels(words, values, resource, sampler)[0];
+                ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr,
+                uint32_t outputPrecision = 0) {
+        return pixels(words, values, resource, sampler, {}, outputPrecision)[0];
     }
     Value typedGraphics(uint32_t stage, const Buffer &buffer, const BufferView &view, uint32_t index,
                         uint32_t returns, uint32_t swizzle, uint32_t mask, bool literal,
@@ -1083,7 +1091,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/19"}};
+            {"backend", "dxbc-gpu/20"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1581,7 +1589,7 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
                                               const std::vector<Register> &targets,
                                               const std::vector<uint32_t> &masks,
                                               const std::vector<Value> &sources,
-                                              const std::vector<Value> &before) {
+                                              const std::vector<Value> &before, bool refactoringAllowed) {
     if (stage != 0 && stage != 1 && stage != 5)
         throw std::runtime_error("Native instruction assistance requires a VS, PS or CS");
     const auto operands = checkpoint::instructionOperands(instruction.words);
@@ -1597,11 +1605,11 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
     for (size_t i = 0; i < operands.ranges.size(); ++i)
         minimumPrecision |= precision(i) != 0;
     const bool remapTemps = minimumPrecision || stage == 5;
-    // Preserve VS output precision instead of introducing a narrowing temporary.
-    const bool preserveOutput = stage == 1 && targets.size() == 1 && targets[0].kind == 2;
+    // Keep output-register precision and type through the native stage's output path.
+    const bool preserveOutput = (stage == 0 || stage == 1) && targets.size() == 1 && targets[0].kind == 2;
     for (size_t i = 0; i < targets.size(); ++i)
         if (targets[i].kind == 2 && precision(i) && !preserveOutput)
-            throw std::runtime_error("Minimum-precision output requires a single VS destination");
+            throw std::runtime_error("Minimum-precision output requires a single VS or PS destination");
     auto annotate = [](Words value, uint32_t bits) {
         if (bits) {
             value[0] |= 0x80000000u;
@@ -1663,8 +1671,10 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
             rows.push_back(row(158, {dest(30, 0), {16}}));
         } else
             rows.push_back(row(101, {annotate(dest(2, 0), preserveOutput ? precision(selected) : 0)}));
-        if (minimumPrecision)
-            rows.insert(rows.begin(), row(106 | (1u << 16), {}));
+        if (minimumPrecision || refactoringAllowed)
+            rows.insert(
+                rows.begin(),
+                row(106 | (minimumPrecision ? 1u << 16 : 0u) | (refactoringAllowed ? 1u << 11 : 0u), {}));
         // Initialize only components the operation does not write. Literal
         // operands remain literal to preserve the driver's instruction lowering.
         for (size_t i = 0; i < targets.size(); ++i) {
@@ -1701,7 +1711,8 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
             std::vector<std::array<uint32_t, 4>> bits;
             for (const auto &value : constants)
                 bits.push_back(value.bits);
-            result.push_back(state_->pixel(words, bits, nullptr));
+            result.push_back(
+                state_->pixel(words, bits, nullptr, nullptr, preserveOutput ? precision(selected) >> 14 : 0));
         } else
             result.push_back(state_->vertex(words, constants, nullptr, nullptr,
                                             preserveOutput ? precision(selected) >> 14 : 0));

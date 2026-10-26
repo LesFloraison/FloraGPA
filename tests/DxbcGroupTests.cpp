@@ -1,4 +1,5 @@
 #include "application/DxbcExecution.h"
+#include "application/DxbcGpuOperations.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -198,6 +199,109 @@ uint32_t word(const std::vector<uint8_t> &bytes, size_t offset) {
 class DxbcGroupTests final : public QObject {
     Q_OBJECT
   private slots:
+    void minimumPrecisionRefactoring_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("precision");
+        QTest::addColumn<QString>("operation");
+        QTest::addColumn<bool>("refactoring");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t precision : {1u, 2u, 4u, 5u})
+                for (const QString operation : {"add", "multiply", "mad", "minimum", "maximum", "select"})
+                    for (bool refactoring : {false, true})
+                        QTest::newRow(qPrintable(QString("%1-%2-%3-%4")
+                                                     .arg(vendor)
+                                                     .arg(precision)
+                                                     .arg(operation)
+                                                     .arg(refactoring)))
+                            << vendor << precision << operation << refactoring;
+    }
+    void minimumPrecisionRefactoring() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, precision);
+        QFETCH(QString, operation);
+        QFETCH(bool, refactoring);
+        try {
+            const std::string type = precision < 4 ? "float" : precision == 4 ? "int" : "uint";
+            const auto minimum = std::string(precision == 2 ? "min10" : "min16") + type + "4";
+            const auto decode = [&](unsigned offset) {
+                const auto load = "output.Load4(" + std::to_string(offset) + ")";
+                return minimum + "(" + (precision == 5 ? load : "as" + type + "(" + load + ")") + ")";
+            };
+            const std::map<QString, std::string> expressions{{"add", "a+b"},          {"multiply", "a*b"},
+                                                             {"mad", "mad(a,b,c)"},   {"minimum", "min(a,b)"},
+                                                             {"maximum", "max(a,b)"}, {"select", "a>b?a:c"}};
+            const auto value = precision == 5 ? "uint4(value)" : "asuint(" + type + "4(value))";
+            const auto compiled =
+                compileHlsl("RWByteAddressBuffer output:register(u0);[numthreads(1,1,1)]void main(){" +
+                                minimum + " a=" + decode(0) + ",b=" + decode(16) + ",c=" + decode(32) + ";" +
+                                minimum + " value=" + expressions.at(operation) + ";output.Store4(48," +
+                                value + ");}",
+                            "cs_5_0")
+                    .bytecode;
+            auto parts = readDxbcParts(compiled);
+            std::vector<uint8_t> programBytes;
+            unsigned flags = 0;
+            for (auto &[tag, bytes] : parts)
+                if (tag == 0x58454853 || tag == 0x52444853) {
+                    auto program = readDxbcProgram(bytes);
+                    for (auto &row : program.instructions)
+                        if ((row[0] & 2047) == 106) {
+                            ++flags;
+                            row[0] = (row[0] & ~(1u << 11)) | (refactoring ? 1u << 11 : 0u);
+                        }
+                    programBytes = writeDxbcProgram(program);
+                    bytes = programBytes;
+                }
+            QCOMPARE(flags, 1u);
+            const auto shader = makeDxbc(parts);
+            const std::array<std::array<uint32_t, 4>, 4> values =
+                precision < 4
+                    ? std::array<std::array<uint32_t, 4>, 4>{{{0x3eaaaaab, 0xbf000000, 0x3f801001,
+                                                               0x80000000},
+                                                              {0x3f000000, 0x3e800000, 0x3f000001,
+                                                               0x3eaaaaab},
+                                                              {0x3e000000, 0x3f000000, 0xbf000000, 0},
+                                                              {0, 0, 0, 0}}}
+                    : std::array<std::array<uint32_t, 4>, 4>{
+                          {{0, 17, precision == 4 ? uint32_t(-19) : 19, 127},
+                           {7, 15, 23, 5},
+                           {31, 37, 41, 43},
+                           {0, 0, 0, 0}}};
+            std::vector<uint8_t> initial(sizeof values);
+            std::memcpy(initial.data(), values.data(), initial.size());
+            Device device(vendor);
+            const auto expected = device.run(shader, initial, {1, 1, 1});
+            Inputs inputs;
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), vendor == 0);
+            inputs.memory = std::make_shared<Memory>(
+                std::map<uint64_t, Buffer>{{1, Buffer::known(initial)}},
+                std::map<Register, BufferView>{{{30, {0}}, {1, 0, initial.size(), 0}}});
+            const Program program(shader);
+            Group group(program, inputs, {0, 0, 0});
+            const auto trace = execute(group);
+            QVERIFY(std::any_of(trace.begin(), trace.end(),
+                                [](const GroupStep &step) { return step.step.instructionGpuAssisted; }));
+            const auto &actual = inputs.memory->buffers().at(1);
+            qInfo().noquote() << QString::fromStdString(nlohmann::json{
+                {"scope", "compute_minimum_precision_refactoring"},
+                {"vendor", vendor},
+                {"precision", precision},
+                {"operation", operation.toStdString()},
+                {"refactoring_allowed", refactoring},
+                {"helper", inputs.gpu->identity()},
+                {"actual",
+                 {word(actual.bytes, 48), word(actual.bytes, 52), word(actual.bytes, 56),
+                  word(actual.bytes, 60)}},
+                {"expected",
+                 {word(expected, 48), word(expected, 52), word(expected, 56),
+                  word(expected, 60)}}}.dump());
+            QCOMPARE(actual.bytes, expected);
+            QVERIFY(
+                std::all_of(actual.valid.begin(), actual.valid.end(), [](auto value) { return value == 1; }));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void hardware_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("fixture");

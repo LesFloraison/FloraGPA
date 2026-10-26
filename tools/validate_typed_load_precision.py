@@ -37,7 +37,7 @@ def shader_rows(data):
     return words[0] >> 16, rows
 
 
-def verify(report, shader, compiled, storage):
+def verify(report, shader, compiled, storage, backend="dxbc-gpu/19"):
     require(report["probe"] == "typed-load-precision", "Wrong probe")
     require(digest(shader) == report["shader_sha256"], "Changed shader")
     require(digest(compiled) == report["compiler_sha256"], "Changed compiler bytes")
@@ -46,7 +46,7 @@ def verify(report, shader, compiled, storage):
     require(len(report["cpu"]) == len(report["gpu"]) == 4, "Incomplete output")
     require(report["cpu"] == report["gpu"], "Output bits differ")
     helper = report["helper"]
-    require(helper["backend"] == "dxbc-gpu/19", "Wrong helper version")
+    require(helper["backend"] == backend, "Wrong helper version")
     require(helper["warp"] == (report["vendor"] == 0), "Wrong adapter selection")
     require(all(helper[key] == value for key, value in report["reference_adapter"].items()),
             "Different reference adapter")
@@ -91,6 +91,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--backend", default="dxbc-gpu/19")
     args = parser.parse_args()
     seen, artifacts, controls = set(), [], {}
     components = 0
@@ -102,7 +103,7 @@ def main():
         require(key not in seen, "Duplicate case")
         seen.add(key)
         inputs = [path.with_suffix(suffix).read_bytes() for suffix in (".dxbc", ".compiler.dxbc", ".bin")]
-        components += verify(report, *inputs)
+        components += verify(report, *inputs, args.backend)
         for artifact in (path, *(path.with_suffix(suffix) for suffix in (".dxbc", ".compiler.dxbc", ".bin"))):
             data = artifact.read_bytes()
             artifacts.append({"path": str(artifact), "bytes": len(data), "sha256": digest(data)})
@@ -129,7 +130,7 @@ def main():
             else:
                 changed["steps"] = changed["steps"][:-1]
             try:
-                verify(changed, *inputs)
+                verify(changed, *inputs, args.backend)
             except ValueError as error:
                 controls[f"{key[0]}-{key[1]}-{name}"] = str(error)
             else:

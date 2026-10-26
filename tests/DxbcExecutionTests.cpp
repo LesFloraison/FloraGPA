@@ -695,9 +695,17 @@ class DxbcExecutionTests final : public QObject {
                 {{(stage << 16) | 0x50, 0}, {op(104, {{1}}), op(101, {dst(2, 0)}), operation, op(62)}});
             const Program unsupported(makeDxbc({{0x58454853, bytes}}));
             Lane lane(unsupported, inputs);
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
-            QVERIFY(lane.registers().empty());
-            QCOMPARE(inputs.gpu->operations(), uint64_t(0));
+            const auto count = inputs.gpu->operations();
+            if (stage == 0) {
+                QVERIFY(lane.step().instructionGpuAssisted);
+                QCOMPARE(lane.value({2, {0}}).bits,
+                         (std::array<uint32_t, 4>{0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000}));
+                QCOMPARE(lane.value({2, {0}}).valid, uint8_t(15));
+            } else {
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+                QVERIFY(lane.registers().empty());
+                QCOMPARE(inputs.gpu->operations(), count);
+            }
         }
     }
     void precisionStages_data() {

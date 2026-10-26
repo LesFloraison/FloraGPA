@@ -49,7 +49,7 @@ class GpuOperations {
                                     const Value &, bool literal);
     std::vector<Value> instruction(uint32_t stage, const Instruction &, const std::vector<Register> &,
                                    const std::vector<uint32_t> &, const std::vector<Value> &,
-                                   const std::vector<Value> &);
+                                   const std::vector<Value> &, bool refactoringAllowed = false);
     Value load(const Buffer &, const BufferView &, uint32_t kind, uint32_t index, uint32_t offset,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex, bool literalOffset);
     std::vector<uint8_t> store(const Buffer &, const BufferView &, uint32_t index, uint32_t offset,

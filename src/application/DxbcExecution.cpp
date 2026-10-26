@@ -1397,8 +1397,8 @@ Step Lane::step() {
                 masks.push_back(args[i].mask);
                 before.push_back(s.value(targets[i]));
             }
-            const auto native =
-                s.inputs.gpu->instruction(p.stage, instruction, targets, masks, values, before);
+            const auto native = s.inputs.gpu->instruction(p.stage, instruction, targets, masks, values,
+                                                          before, p.refactoringAllowed);
             const bool known =
                 std::all_of(values.begin(), values.end(), [](const Value &v) { return v.valid == 15; });
             for (size_t i = 0; i < destinations; ++i) {
