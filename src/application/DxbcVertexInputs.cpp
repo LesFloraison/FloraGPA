@@ -37,7 +37,7 @@ DXGI_ADAPTER_DESC describe(ID3D11Device *device, Com<IDXGIAdapter> &adapter) {
     return desc;
 }
 } // namespace
-VertexInputShader vertexInputShader(Bytes original) {
+VertexInputShader vertexInputShader(Bytes original, std::optional<std::array<uint32_t, 2>> systemIds) {
     Bytes input, code;
     uint32_t inputTag = 0, codeTag = 0;
     std::set<uint32_t> tags;
@@ -92,6 +92,7 @@ VertexInputShader vertexInputShader(Bytes original) {
     if (count > 32 || input.size() < 8 || uint64_t(count) * rowSize > input.size() - 8)
         throw std::runtime_error("Vertex input signature row bounds");
     std::vector<uint8_t> inputCopy(input.begin(), input.end());
+    std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>> systemComponents;
     for (uint32_t i = 0; i < count; ++i) {
         const size_t base = 8 + i * rowSize + (inputTag == ISG1 ? 4 : 0);
         const auto name = word(input, base), reg = word(input, base + 16), type = word(input, base + 12);
@@ -103,6 +104,10 @@ VertexInputShader vertexInputShader(Bytes original) {
             throw std::runtime_error("Invalid vertex input signature row");
         signature[reg] |= mask;
         inputCopy[base + 21] = uint8_t(declared[reg] & mask);
+        const auto system = word(input, base + 8);
+        if (systemIds && (system == D3D_NAME_VERTEX_ID || system == D3D_NAME_INSTANCE_ID))
+            systemComponents[reg].push_back(
+                {declared[reg] & mask, (*systemIds)[system == D3D_NAME_INSTANCE_ID ? 1 : 0]});
     }
     VertexInputShader result;
     for (uint32_t reg = 0; reg < 32; ++reg) {
@@ -141,6 +146,13 @@ VertexInputShader vertexInputShader(Bytes original) {
         else
             args.insert(args.end(), {0x101e46, result.fields[i].reg});
         program.instructions.push_back(instruction(54, std::move(args)));
+        if (!result.fields.empty())
+            for (const auto &[systemMask, value] : systemComponents[result.fields[i].reg])
+                if (systemMask) {
+                    auto replacement = dest(2, i, systemMask);
+                    replacement.insert(replacement.end(), {0x4001, value});
+                    program.instructions.push_back(instruction(54, std::move(replacement)));
+                }
     }
     program.instructions.push_back({0x100003e}); // ret
     if (!result.stride)
@@ -168,14 +180,78 @@ std::map<Register, Value> VertexInputShader::decode(Bytes bytes) const {
 }
 
 VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes original,
-                                       const std::vector<VertexInputElement> &elements,
-                                       const std::map<uint32_t, VertexInputBuffer> &buffers,
-                                       const VertexInputDraw &draw, uint64_t maxBytes, CancelCheck cancelled,
-                                       uint32_t timeoutMs) {
+                                       const std::vector<VertexInputElement> &originalElements,
+                                       const std::map<uint32_t, VertexInputBuffer> &originalBuffers,
+                                       const VertexInputDraw &originalDraw, uint64_t maxBytes,
+                                       CancelCheck cancelled, uint32_t timeoutMs,
+                                       std::optional<VertexInputInvocation> selected) {
     checkCancellation(cancelled);
+    auto elements = originalElements;
+    auto buffers = originalBuffers;
+    auto draw = originalDraw;
     if (!reference || !maxBytes || !timeoutMs || elements.size() > 32 || buffers.size() > 32)
         throw std::runtime_error("Invalid vertex input capture limits/device");
-    const auto shader = vertexInputShader(original);
+    for (const auto &e : elements)
+        if (e.semantic.empty() || e.semantic.find('\0') != std::string::npos || e.slot >= 32 ||
+            e.classification > 1 || (!e.classification && e.stepRate))
+            throw std::runtime_error("Invalid vertex input layout element");
+    std::optional<std::array<uint32_t, 2>> systemIds;
+    std::vector<uint8_t> selectedIndex;
+    if (selected) {
+        if (selected->reference >= draw.count || selected->instance >= draw.instances)
+            throw std::runtime_error("Selected vertex input is outside the effective draw");
+        uint32_t vertexId = selected->reference;
+        if (draw.indexFormat) {
+            const auto width = draw.indexFormat == DXGI_FORMAT_R16_UINT ? 2u : 4u;
+            const auto offset =
+                uint64_t(draw.indexOffset) + (uint64_t(draw.start) + selected->reference) * width;
+            if ((draw.indexFormat != DXGI_FORMAT_R16_UINT && draw.indexFormat != DXGI_FORMAT_R32_UINT) ||
+                draw.indexOffset % width || offset > draw.indices.size() ||
+                width > draw.indices.size() - offset)
+                throw std::runtime_error("Selected vertex input index snapshot bounds/format");
+            Reader index(draw.indices.subspan(size_t(offset), width));
+            vertexId = width == 2 ? index.read<uint16_t>() : index.read<uint32_t>();
+            if (vertexId == (width == 2 ? 0xffffu : UINT32_MAX))
+                throw std::runtime_error("Selected vertex input is a cut index");
+            selectedIndex.assign(draw.indices.begin() + size_t(offset),
+                                 draw.indices.begin() + size_t(offset) + width);
+            draw.indices = selectedIndex;
+            draw.indexOffset = draw.start = 0;
+        } else {
+            if (uint64_t(draw.start) + selected->reference > UINT32_MAX)
+                throw std::runtime_error("Selected vertex input start overflows UINT32");
+            draw.start += selected->reference;
+        }
+        // Rebase each instance slot independently, then keep its original
+        // StartInstanceLocation with a zero step rate. A single point has
+        // draw-relative IDs of zero, so the copy shader writes the original
+        // selected system IDs without running the application's shader body.
+        std::map<uint32_t, std::pair<uint32_t, uint32_t>> slots;
+        for (const auto &element : elements) {
+            const auto description = std::make_pair(element.classification, element.stepRate);
+            const auto [it, inserted] = slots.emplace(element.slot, description);
+            if (!inserted && it->second != description)
+                throw std::runtime_error("Vertex input slot has conflicting instance classifications");
+        }
+        for (const auto &[slot, description] : slots)
+            if (description.first && description.second) {
+                const auto it = buffers.find(slot);
+                if (it != buffers.end()) {
+                    const uint64_t offset =
+                        uint64_t(it->second.offset) +
+                        uint64_t(it->second.stride) * (selected->instance / description.second);
+                    if (offset > UINT32_MAX)
+                        throw std::runtime_error("Selected vertex input instance offset overflows UINT32");
+                    it->second.offset = uint32_t(offset);
+                }
+            }
+        for (auto &element : elements)
+            if (element.classification)
+                element.stepRate = 0;
+        systemIds = std::array<uint32_t, 2>{vertexId, selected->instance};
+        draw.count = draw.instances = 1;
+    }
+    const auto shader = vertexInputShader(original, systemIds);
     uint64_t references = draw.count;
     if (draw.indexFormat) {
         const auto width = draw.indexFormat == DXGI_FORMAT_R16_UINT ? 2u : 4u;
@@ -209,14 +285,11 @@ VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes
     };
     reserve(draw.indices.size());
     for (const auto &[slot, buffer] : buffers) {
-        if (slot >= 32 || buffer.bytes.empty() || buffer.stride > 2048 || buffer.offset > buffer.bytes.size())
+        if (slot >= 32 || buffer.bytes.empty() || buffer.stride > 2048 ||
+            originalBuffers.at(slot).offset > buffer.bytes.size())
             throw std::runtime_error("Invalid vertex input buffer snapshot");
         reserve(buffer.bytes.size());
     }
-    for (const auto &e : elements)
-        if (e.semantic.empty() || e.semantic.find('\0') != std::string::npos || e.slot >= 32 ||
-            e.classification > 1 || (!e.classification && e.stepRate))
-            throw std::runtime_error("Invalid vertex input layout element");
     Com<IDXGIAdapter> expectedAdapter;
     const auto expected = describe(reference, expectedAdapter);
     Com<ID3D11Device> device;
@@ -245,6 +318,16 @@ VertexInputCapture captureVertexInputs(ID3D11Device *reference, bool warp, Bytes
                        {"records", rowCount},
                        {"stride", shader.stride},
                        {"budgeted_bytes", used}};
+    if (selected) {
+        result.identity["backend"] = "dxbc-selected-vertex-inputs/1";
+        result.identity["input_reference"] = selected->reference;
+        result.identity["instance"] = selected->instance;
+        result.identity["original_input_references"] = originalDraw.count;
+        result.identity["original_instances"] = originalDraw.instances;
+        result.identity["system_ids"] = *systemIds;
+        result.identity["system_ids_source"] = "draw-relative-selection";
+        result.identity["attributes_source"] = "native-input-assembler";
+    }
     if (!rowCount)
         return result;
     checkCancellation(cancelled);

@@ -102,9 +102,7 @@ class Snapshot {
             }
         }
         Id indexId = 0;
-        uint64_t ordinal = selection.reference;
         uint32_t vertexId = selection.reference;
-        uint64_t references = draw.count;
         if (indexed) {
             Com<ID3D11Buffer> indexBuffer;
             DXGI_FORMAT format{};
@@ -115,31 +113,21 @@ class Snapshot {
             draw.indexFormat = format;
             draw.indices = readBuffer(indexBuffer.Get(), indexId).bytes;
             const auto width = format == DXGI_FORMAT_R16_UINT ? 2u : 4u;
-            const auto begin = uint64_t(draw.indexOffset) + uint64_t(draw.start) * width;
-            if (begin > draw.indices.size() || uint64_t(draw.count) * width > draw.indices.size() - begin)
+            const auto begin =
+                uint64_t(draw.indexOffset) + (uint64_t(draw.start) + selection.reference) * width;
+            if (begin > draw.indices.size() || width > draw.indices.size() - begin)
                 throw std::runtime_error("Vertex input index references exceed the observed buffer");
-            Reader indices(draw.indices.subspan(size_t(begin), size_t(draw.count) * width));
-            for (uint32_t i = 0; i < draw.count; ++i) {
-                if (!(i % 4096))
-                    checkCancellation(cancelled);
-                const auto index = width == 2 ? indices.read<uint16_t>() : indices.read<uint32_t>();
-                if (i == selection.reference)
-                    vertexId = index;
-                if (index == (width == 2 ? 0xffffu : UINT32_MAX)) {
-                    if (i == selection.reference)
-                        throw std::runtime_error("Selected vertex input is a cut index");
-                    if (i < selection.reference)
-                        --ordinal;
-                    --references;
-                }
-            }
+            Reader index(draw.indices.subspan(size_t(begin), width));
+            vertexId = width == 2 ? index.read<uint16_t>() : index.read<uint32_t>();
+            if (vertexId == (width == 2 ? 0xffffu : UINT32_MAX))
+                throw std::runtime_error("Selected vertex input is a cut index");
         }
         auto captured = captureVertexInputs(replay.nativeDevice(), replay.options().warp, result.bytecode,
-                                            elements, inputBuffers, draw, budget - used, cancelled);
-        const auto row = selection.instance * references + ordinal;
-        if (row >= captured.rows.size())
+                                            elements, inputBuffers, draw, budget - used, cancelled, 5000,
+                                            VertexInputInvocation{selection.reference, selection.instance});
+        if (captured.rows.size() != 1)
             throw std::runtime_error("Selected vertex input was not observed");
-        result.inputs.registers = std::move(captured.rows[size_t(row)]);
+        result.inputs.registers = std::move(captured.rows.front());
         D3D11_PRIMITIVE_TOPOLOGY topology{};
         context->IAGetPrimitiveTopology(&topology);
         invocation = {{"source", "independent-replay-vertex-inputs/1"},

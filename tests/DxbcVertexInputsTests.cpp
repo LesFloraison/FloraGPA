@@ -292,6 +292,10 @@ class DxbcVertexInputsTests final : public QObject {
             const auto captured =
                 captureVertexInputs(device.device.Get(), !vendor, code, layout, {{0, {bytes, 512, 0}}}, draw);
             QCOMPARE(captured.rows.size(), size_t(3));
+            const auto selected =
+                captureVertexInputs(device.device.Get(), !vendor, code, layout, {{0, {bytes, 512, 0}}}, draw,
+                                    65536, {}, 5000, VertexInputInvocation{2, 0});
+            QCOMPARE(selected.rows.at(0), captured.rows.at(2));
             const auto sig = signature(code);
             QCOMPARE(sig.size(), size_t(32));
             for (unsigned v = 0; v < 3; ++v)
@@ -357,6 +361,22 @@ class DxbcVertexInputsTests final : public QObject {
                 indexed ? std::vector<unsigned>{2, 0, 1, 2, 3} : std::vector<unsigned>{0, 1, 2, 3};
             QCOMPARE(captured.rows.size(), vertices.size() * 4);
             const auto sig = signature(code);
+            for (const auto instance : {0u, 1u, 3u}) {
+                const auto reference = indexed ? 5u : 3u;
+                const auto selected =
+                    captureVertexInputs(device.device.Get(), !vendor, code, layout,
+                                        {{0, {bytes, 48, 16}}, {1, {instances, 16, 16}}}, draw, 64 * 1024, {},
+                                        5000, VertexInputInvocation{reference, instance});
+                QCOMPARE(selected.rows.size(), size_t(1));
+                QCOMPARE(selected.identity.at("records"), nlohmann::json(1));
+                for (const auto &s : sig) {
+                    const auto actual = input(selected.rows.front(), s);
+                    const auto expected =
+                        input(captured.rows[instance * vertices.size() + vertices.size() - 1], s);
+                    QCOMPARE(actual.valid, expected.valid);
+                    QCOMPARE(actual.bits, expected.bits);
+                }
+            }
             for (unsigned instance = 0; instance < 4; ++instance)
                 for (unsigned v = 0; v < vertices.size(); ++v)
                     for (const auto &s : sig) {
@@ -407,6 +427,10 @@ class DxbcVertexInputsTests final : public QObject {
                 draw.count = 1;
                 const auto captured = captureVertexInputs(device.device.Get(), !vendor, code, layout,
                                                           {{0, {bytes, 20, 0}}}, draw);
+                const auto selected =
+                    captureVertexInputs(device.device.Get(), !vendor, code, layout, {{0, {bytes, 20, 0}}},
+                                        draw, 65536, {}, 5000, VertexInputInvocation{0, 0});
+                QCOMPARE(selected.rows, captured.rows);
                 const std::array expected{std::array{0.f, 0.f, 1.f, 1.f}, std::array{1.f, -2.f, 0.f, 1.f},
                                           std::array{3.f, 4.f, 5.f, 1.f}};
                 for (const auto &s : signature(code)) {
@@ -469,6 +493,10 @@ class DxbcVertexInputsTests final : public QObject {
                                                           {{"DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0}},
                                                           {{0, {bytes, 16, 0}}}, draw);
                 const auto value = captured.rows.at(0).at(Register{1, {0}});
+                const auto selected = captureVertexInputs(
+                    device.device.Get(), !vendor, code, {{"DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0}},
+                    {{0, {bytes, 16, 0}}}, draw, 65536, {}, 5000, VertexInputInvocation{0, 0});
+                QCOMPARE(selected.rows, captured.rows);
                 QCOMPARE(value.valid, uint8_t(10));
                 QCOMPARE(value.bits[1], values[1]);
                 QCOMPARE(value.bits[3], values[3]);
@@ -495,6 +523,100 @@ class DxbcVertexInputsTests final : public QObject {
         auto truncated = code;
         truncated.resize(20);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, vertexInputShader(truncated));
+    }
+    void selectedLargeDraw_data() { adapters(); }
+    void selectedBoundaries_data() { adapters(); }
+    void selectedBoundaries() {
+        QFETCH(uint32_t, vendor);
+        try {
+            Device device(vendor);
+            const auto code =
+                compile("float4 main(float4 a:DATA0,uint4 b:DATA1,float4 c:DATA2,float4 d:DATA3,"
+                        "float4 e:DATA4,float f:DATA5,uint v:SV_VertexID,uint i:SV_InstanceID):SV_Position"
+                        "{return a+asfloat(b)+c+d+e+f+v+i;}");
+            const std::vector<VertexInputElement> layout{
+                {"DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0},
+                {"DATA", 1, DXGI_FORMAT_R32G32B32A32_UINT, 1, 0, 1, 2},
+                {"DATA", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 0, 1, 1},
+                {"DATA", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, 1, 0},
+                {"DATA", 4, DXGI_FORMAT_R32G32B32A32_FLOAT, 4, 0},
+                {"DATA", 5, DXGI_FORMAT_R32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT}};
+            std::vector<uint8_t> bytes;
+            for (unsigned v = 0; v < 4; ++v)
+                append(bytes, words(v, 0));
+            const std::map<uint32_t, VertexInputBuffer> buffers{
+                {0, {bytes, 20, 0}}, {1, {bytes, 16, 0}}, {2, {bytes, 16, 0}}, {4, {bytes, 0, 0}}};
+            for (const auto format : {0u, uint32_t(DXGI_FORMAT_R16_UINT), uint32_t(DXGI_FORMAT_R32_UINT)}) {
+                std::vector<uint8_t> indices;
+                VertexInputDraw draw;
+                draw.count = 2;
+                draw.instances = 4;
+                draw.startInstance = 1;
+                draw.indexFormat = format;
+                if (format) {
+                    if (format == DXGI_FORMAT_R16_UINT) {
+                        append(indices, uint16_t(3));
+                        append(indices, uint16_t(2));
+                    } else {
+                        append(indices, uint32_t(3));
+                        append(indices, uint32_t(2));
+                    }
+                    draw.indices = indices;
+                    draw.baseVertex = -1;
+                } else
+                    draw.start = 1;
+                const auto full =
+                    captureVertexInputs(device.device.Get(), !vendor, code, layout, buffers, draw);
+                for (const auto reference : {0u, 1u}) {
+                    const auto selected =
+                        captureVertexInputs(device.device.Get(), !vendor, code, layout, buffers, draw, 65536,
+                                            {}, 5000, VertexInputInvocation{reference, 3});
+                    QCOMPARE(selected.rows.size(), size_t(1));
+                    for (const auto &s : signature(code)) {
+                        const auto actual = input(selected.rows.front(), s);
+                        const auto expected = input(full.rows.at(6 + reference), s);
+                        QCOMPARE(actual.valid, expected.valid);
+                        QCOMPARE(actual.bits, expected.bits);
+                    }
+                }
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void selectedLargeDraw() {
+        QFETCH(uint32_t, vendor);
+        try {
+            Device device(vendor);
+            const auto code =
+                compile("uint4 main(uint v:SV_VertexID,uint i:SV_InstanceID):DATA{return uint4(v,i,0,0);}");
+            VertexInputDraw draw;
+            draw.count = draw.instances = UINT32_MAX;
+            draw.startInstance = 17;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, captureVertexInputs(device.device.Get(), !vendor,
+                                                                             code, {}, {}, draw, 4096));
+            const auto selected =
+                captureVertexInputs(device.device.Get(), !vendor, code, {}, {}, draw, 4096, {}, 5000,
+                                    VertexInputInvocation{UINT32_MAX - 1, UINT32_MAX - 2});
+            QCOMPARE(selected.rows.size(), size_t(1));
+            QVERIFY(selected.identity.at("budgeted_bytes").get<uint64_t>() < 4096);
+            for (const auto &s : signature(code)) {
+                const auto value = input(selected.rows.front(), s);
+                const auto component = std::countr_zero(unsigned(s.Mask));
+                QCOMPARE(value.bits[component],
+                         s.SystemValueType == D3D_NAME_VERTEX_ID ? UINT32_MAX - 1 : UINT32_MAX - 2);
+            }
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     captureVertexInputs(device.device.Get(), !vendor, code, {}, {}, draw,
+                                                         4096, {}, 5000,
+                                                         VertexInputInvocation{UINT32_MAX, 0}));
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     captureVertexInputs(
+                                         device.device.Get(), !vendor, code, {}, {}, draw, 4096,
+                                         [] { return true; }, 5000, VertexInputInvocation{0, 0}));
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
     }
     void frameInputs_data() { adapters(); }
     void frameInputs() {
@@ -527,7 +649,9 @@ class DxbcVertexInputsTests final : public QObject {
                 QCOMPARE(snapshot.invocation.at("vertex_id"), nlohmann::json(1));
                 QCOMPARE(snapshot.invocation.at("vertex_index"), nlohmann::json(2));
                 QCOMPARE(snapshot.invocation.at("layout"), nlohmann::json(9002));
-                QCOMPARE(snapshot.invocation.at("helper").at("records"), nlohmann::json(6));
+                QCOMPARE(snapshot.invocation.at("helper").at("records"), nlohmann::json(1));
+                QCOMPARE(snapshot.invocation.at("helper").at("original_input_references"), nlohmann::json(4));
+                QCOMPARE(snapshot.invocation.at("helper").at("original_instances"), nlohmann::json(2));
                 QCOMPARE(snapshot.invocation.at("indirect").is_null(), !indirect);
                 Program program(snapshot.resources.bytecode);
                 Lane lane(program, snapshot.resources.inputs);
