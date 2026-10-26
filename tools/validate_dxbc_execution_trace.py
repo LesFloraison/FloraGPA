@@ -134,16 +134,22 @@ def validate(path, report, reader_report=None):
                 require(kind == "header", "Missing trace header")
                 header = row
                 require(row["format"] == "flora.dxbc-execution-trace" and row["version"] == 1, "Unsupported trace schema")
-                require(row["stage"] == "cs" and row["scope"] == "one_cooperative_group", "Unexpected trace scope")
+                pixel = row["stage"] == "ps"
+                require((pixel and row["scope"] == "one_pixel_quad") or
+                        (row["stage"] == "cs" and row["scope"] == "one_cooperative_group"), "Unexpected trace scope")
                 require(row["captured_gpu_schedule"] is False, "Invalid captured schedule claim")
                 require(row["invocation_eligibility"] == "not_established_by_trace_writer", "Unsupported eligibility claim")
                 for key, probe_key in (("frame_sha256", "frame_sha256"), ("shader_sha256", "shader_sha256"),
                                        ("gpa_event", "event"), ("gpa_shader", "shader")):
                     require(row[key] == report[probe_key], "Trace provenance mismatch: " + key)
                 require(row["adapter"]["luid"] == report["adapter_luid"], "Trace adapter mismatch")
-                count = 1
-                for axis in row["group_size"]:
-                    count *= integer(axis, 1024)
+                count = 4 if pixel else 1
+                if pixel:
+                    require(row["execution_model"] == "coherent-pixel-sampling/2", "Unknown pixel execution model")
+                    active = integer(row["initial_active_mask"], 15)
+                else:
+                    for axis in row["group_size"]:
+                        count *= integer(axis, 1024)
                 require(0 < count <= 1024 and row["selected_lane"] < count, "Invalid lane count")
                 continue
             if kind == "step":
@@ -163,6 +169,17 @@ def validate(path, report, reader_report=None):
                 lanes[lane] = row["lane_sequence"] + 1
                 inst = instructions[row["instruction"]]
                 require(inst["word_offset"] == row["word_offset"] and not inst["declaration"], "Instruction identity mismatch")
+                if pixel:
+                    helper = not bool(active & (1 << lane))
+                    require(row["helper_before"] is helper, "Pixel helper chain mismatch")
+                    if row["discarded"]:
+                        require(inst["dxbc_opcode"] == 13, "Discard on a different opcode")
+                        active &= ~(1 << lane)
+                    require(row["active_mask_after"] == active, "Pixel active-mask chain mismatch")
+                    require(row["barrier_epoch"] == 0 and row["released_barrier"] is False
+                            and row["sync_flags"] == 0 and not row["shared_changes"], "Compute state in pixel trace")
+                    require(not helper or not any(row[k] for k in ("buffer_changes", "texture_changes", "counter_changes")),
+                            "Pixel helper has side effects")
                 if row["next_instruction"] is not None:
                     require(row["next_instruction"] in instructions, "Unknown next instruction")
                 require(all(v in instructions for v in row["return_instruction_stack"]), "Unknown return instruction")
@@ -181,6 +198,8 @@ def validate(path, report, reader_report=None):
                 require(row["completed"] is True and row["steps"] == len(offsets), "Incomplete execution")
                 require(row["selected_steps"] == selected_steps, "Selected lane count mismatch")
                 require(len(offsets) <= header["max_steps"], "Step budget exceeded")
+                if pixel:
+                    require(row["final_active_mask"] == active, "Pixel terminal mask differs")
             else:
                 require(not offsets, "Input record after execution started")
                 if kind == "instruction":

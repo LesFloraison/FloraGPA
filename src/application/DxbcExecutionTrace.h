@@ -12,6 +12,13 @@ struct VertexTraceOptions {
     VertexInputSelection selection;
     uint64_t maxSteps = 1000000, maxBytes = 256 * 1024 * 1024;
 };
+struct PixelTraceOptions {
+    std::array<std::map<Register, Value>, 4> registers;
+    uint32_t selectedLane = 0;
+    uint8_t activeMask = 15;
+    nlohmann::json inputProvenance = nlohmann::json::object();
+    uint64_t maxSteps = 1000000, maxBytes = 256 * 1024 * 1024;
+};
 inline constexpr const char *vertexExecutionModel = "independent-vertex-invocation/1";
 // Project-owned, lossless execution records. DXBC operand kinds and opcodes are
 // explicitly ISA identities, never external debugger enum values.
@@ -24,4 +31,8 @@ nlohmann::json exportGroupExecutionTrace(const QString &path, const InputSnapsho
                                          const GroupTraceOptions & = {}, const CancelCheck & = {});
 nlohmann::json exportVertexExecutionTrace(const QString &path, const InputSnapshot &,
                                           const VertexTraceOptions & = {}, const CancelCheck & = {});
+// Input acquisition and original fragment qualification remain caller duties.
+// All four lanes share the snapshot's private resources; helpers stay executable.
+nlohmann::json exportPixelExecutionTrace(const QString &path, const InputSnapshot &,
+                                         const PixelTraceOptions &, const CancelCheck & = {});
 } // namespace flora::dxbc_exec

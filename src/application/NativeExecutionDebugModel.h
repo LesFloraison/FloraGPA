@@ -20,7 +20,7 @@ class NativeExecutionDebugModel {
     Json completion() const { return trace_.completion(); }
     const Json &files() const { return result_.at("source_lines").at("files"); }
     size_t size() const { return rows_.size(); }
-    // size() denotes the terminal VS invocation or whole CS group. No source location is
+    // size() denotes the terminal VS invocation, PS quad or CS group. No source location is
     // invented for that boundary.
     size_t position() const { return position_; }
     void move(size_t position, const CancelCheck & = {});

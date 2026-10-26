@@ -1,6 +1,8 @@
 #include "application/DxbcGpuCompletion.h"
 #include "application/DxbcPixelGeometry.h"
 #include "application/DxbcPixelRaster.h"
+#include "application/DxbcPixelTraceInputs.h"
+#include "application/NativeExecutionDebugModel.h"
 #include "core/Dxbc.h"
 #include "core/StreamOutput.h"
 #include "replay/Replay.h"
@@ -138,10 +140,13 @@ std::vector<uint8_t> roundtrip(ID3D11Device *device, const PixelGeometryBridge &
 } // namespace
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
-    const auto args = app.arguments();
+    auto args = app.arguments();
+    const bool tracing = args.size() > 6 && args.back() == "trace";
+    if (tracing)
+        args.removeLast();
     if (args.size() != 6 && args.size() != 10 && !(args.size() == 7 && args[6] == "centroid")) {
         std::cerr << "Usage: FloraDxbcPixelGeometryProbe <frame> <event> <primitive-ordinal> "
-                     "<vendor-or-0-for-WARP> <new-directory> [centroid | x y sample layer]\n";
+                     "<vendor-or-0-for-WARP> <new-directory> [centroid | x y sample layer] [trace]\n";
         return 2;
     }
     try {
@@ -161,15 +166,24 @@ int main(int argc, char **argv) {
         if (vendor)
             options.vendor = uint32_t(vendor);
         Replay replay(frame, options);
-        replay.run([&](Id, size_t, size_t) {
-            if (timer.elapsed() > 120000)
-                throw std::runtime_error("Geometry probe replay deadline");
-        });
+        std::optional<InputSnapshot> resourceInputs;
+        if (tracing) {
+            if (args.size() == 6)
+                throw std::runtime_error("Pixel trace requires a raster selection");
+            resourceInputs = snapshotResourceInputs(replay, 4, 256ull * 1024 * 1024,
+                                                    [&] { return timer.elapsed() > 120000; });
+        } else
+            replay.run([&](Id, size_t, size_t) {
+                if (timer.elapsed() > 120000)
+                    throw std::runtime_error("Geometry probe replay deadline");
+            });
         PixelRasterState rasterState;
         replay.inspectNativeState(
             [&](auto *context, const auto &) { rasterState = pixelRasterState(context); });
         const auto state = frame.state(frame.event(event).state);
         const auto ps = frame.shader(frame.resource(state.stages[4].shader).data);
+        if (resourceInputs && resourceInputs->bytecode != std::vector<uint8_t>(ps.begin(), ps.end()))
+            throw std::runtime_error("Pixel trace resource shader differs from geometry input shader");
         PostTransformOptions geometryOptions;
         if (state.stages[3].shader)
             if (const auto declaration = shaderStreamOutput(frame, state.stages[3].shader))
@@ -283,6 +297,7 @@ int main(int argc, char **argv) {
         }
         bool complete = true;
         bool observed = true;
+        std::map<uint32_t, PixelRasterInputs> rasterInputs;
         for (auto reg : registers) {
             const auto name = "input-" + QString::number(reg);
             directory.mkdir(name);
@@ -312,6 +327,8 @@ int main(int argc, char **argv) {
                     save(target, "records.json", records.identity);
                     item["input_records"] = records.records.size();
                     observed &= !records.records.empty();
+                    if (tracing)
+                        rasterInputs.emplace(reg, records);
                 }
             } catch (const std::exception &e) {
                 item["status"] = "failed";
@@ -319,6 +336,34 @@ int main(int argc, char **argv) {
                 complete = false;
             }
             report["cases"].push_back(item);
+        }
+        if (tracing && complete && observed && !registers.empty()) {
+            try {
+                const auto traceInputs = pixelTraceInputs(ps, rasterInputs);
+                const auto tracePath = directory.filePath("pixel-trace.jsonl");
+                report["trace"] = exportPixelExecutionTrace(tracePath, *resourceInputs, traceInputs,
+                                                            [&] { return timer.elapsed() > 120000; });
+                QFile file(tracePath);
+                if (!file.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Cannot read completed pixel trace");
+                const auto bytes = file.readAll();
+                const auto hash =
+                    sha256(Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), bytes.size()));
+                file.close();
+                NativeExecutionDebugModel model(tracePath, hash, ps);
+                const auto initial = model.registerValues();
+                model.move(model.size());
+                save(directory, "pixel-terminal-registers.json", model.registerValues());
+                model.move(0);
+                if (initial != model.registerValues())
+                    throw std::runtime_error("Pixel trace rewind differs");
+                report["trace_sha256"] = hash;
+                report["trace_selected_steps"] = model.size();
+                report["trace_rewind_verified"] = true;
+            } catch (const std::exception &e) {
+                complete = false;
+                report["trace_error"] = e.what();
+            }
         }
         report["status"] = registers.empty() ? "inapplicable_no_declared_inputs" : complete ? "ok" : "failed";
         report["elapsed_ms"] = timer.elapsed();

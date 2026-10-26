@@ -133,25 +133,51 @@ Json executionTraceStep(const GroupStep &group) {
 }
 static Json exportExecutionTrace(const QString &path, const InputSnapshot &snapshot,
                                  const GroupTraceOptions &options, bool vertex,
-                                 const VertexInputSelection &selection, const CancelCheck &cancelled) {
+                                 const VertexInputSelection &selection, const CancelCheck &cancelled,
+                                 const PixelTraceOptions *pixel = nullptr) {
     checkCancellation(cancelled);
-    if (snapshot.stage != (vertex ? 0u : 5u) || !snapshot.event || !snapshot.shader || !options.maxSteps ||
-        !options.maxBytes)
+    if (snapshot.stage != (pixel    ? 4u
+                           : vertex ? 0u
+                                    : 5u) ||
+        !snapshot.event || !snapshot.shader || !options.maxSteps || !options.maxBytes)
         throw std::runtime_error("Invalid native execution trace request");
     const Program program(snapshot.bytecode);
-    if (program.stage() != (vertex ? 1u : 5u) || (vertex && !program.sharedDeclarations().empty()))
+    if (program.stage() != (pixel    ? 0u
+                            : vertex ? 1u
+                                     : 5u) ||
+        (vertex && !program.sharedDeclarations().empty()))
         throw std::runtime_error("Execution trace shader stage mismatch");
-    const auto size = vertex ? std::array<uint32_t, 3>{1, 1, 1} : program.threadGroupSize();
+    const auto size = pixel    ? std::array<uint32_t, 3>{4, 1, 1}
+                      : vertex ? std::array<uint32_t, 3>{1, 1, 1}
+                               : program.threadGroupSize();
     for (size_t i = 0; i < 3; ++i)
         if (options.thread[i] >= size[i])
             throw std::runtime_error("Execution trace thread is outside the shader thread group");
     std::unique_ptr<Group> group;
     std::unique_ptr<Lane> vertexLane;
-    if (vertex)
+    std::unique_ptr<PixelQuad> quad;
+    if (pixel) {
+        if (pixel->selectedLane >= 4 || pixel->activeMask > 15 || !pixel->inputProvenance.is_object())
+            throw std::runtime_error("Invalid pixel trace lane/mask/provenance");
+        std::array<Inputs, 4> inputs;
+        for (unsigned i = 0; i < 4; ++i) {
+            inputs[i] = snapshot.inputs;
+            for (const auto &[r, v] : pixel->registers[i]) {
+                if (r.kind != 1 && r.kind != 35)
+                    throw std::runtime_error("Pixel trace input is not an input register");
+                if (!inputs[i].registers.emplace(r, v).second)
+                    throw std::runtime_error("Pixel trace input register is duplicated");
+            }
+        }
+        quad = std::make_unique<PixelQuad>(program, std::move(inputs), pixel->activeMask, options.maxSteps,
+                                           cancelled);
+    } else if (vertex)
         vertexLane = std::make_unique<Lane>(program, snapshot.inputs, options.maxSteps);
     else
         group = std::make_unique<Group>(program, snapshot.inputs, options.group, options.maxSteps, cancelled);
-    const uint32_t selected = options.thread[0] + size[0] * (options.thread[1] + size[1] * options.thread[2]);
+    const uint32_t selected =
+        pixel ? pixel->selectedLane
+              : options.thread[0] + size[0] * (options.thread[1] + size[1] * options.thread[2]);
     const auto shaderHash =
         QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char *>(snapshot.bytecode.data()),
                                                 snapshot.bytecode.size()),
@@ -198,6 +224,15 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
              {"instance", selection.instance},
              {"index_override", selection.actualIndex ? Json(*selection.actualIndex) : Json(nullptr)}});
     }
+    if (pixel) {
+        for (const auto *key : {"group", "thread", "group_size"})
+            header.erase(key);
+        header.update({{"stage", "ps"},
+                       {"scope", "one_pixel_quad"},
+                       {"execution_model", PixelQuad::executionModel},
+                       {"initial_active_mask", pixel->activeMask},
+                       {"quad_input_provenance", pixel->inputProvenance}});
+    }
     journal.write(header);
     const auto source = shaderSourceLines(snapshot.bytecode);
     journal.write({{"record", "source"}, {"data", source}});
@@ -232,7 +267,9 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
             journal.write(
                 {{"record", "constant"}, {"slot", slot}, {"element", i}, {"value", value(values[i])}});
     for (uint32_t lane = 0; lane < size[0] * size[1] * size[2]; ++lane)
-        for (const auto &[r, v] : (vertex ? vertexLane->registers() : group->lane(lane).registers()))
+        for (const auto &[r, v] : (pixel    ? quad->lane(lane).registers()
+                                   : vertex ? vertexLane->registers()
+                                            : group->lane(lane).registers()))
             journal.write(
                 {{"record", "register"}, {"lane", lane}, {"register", reg(r)}, {"value", value(v)}});
     if (snapshot.inputs.memory) {
@@ -329,20 +366,35 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
     }
     uint64_t steps = 0, selectedSteps = 0;
     const auto gpuStart = snapshot.inputs.gpu ? snapshot.inputs.gpu->operations() : 0;
-    while (vertex ? !vertexLane->finished() : !group->finished()) {
+    while (pixel ? !quad->finished() : vertex ? !vertexLane->finished() : !group->finished()) {
         checkCancellation(cancelled);
-        const auto step = vertex ? GroupStep{steps, 0, 0, vertexLane->step(), false} : group->step();
-        journal.write(executionTraceStep(step));
+        Json row;
+        if (pixel) {
+            auto step = quad->step();
+            row = executionTraceStep(GroupStep{step.sequence, 0, step.lane, std::move(step.step), false});
+            row["helper_before"] = step.helper;
+            row["active_mask_after"] = step.activeMask;
+        } else {
+            const auto step = vertex ? GroupStep{steps, 0, 0, vertexLane->step(), false} : group->step();
+            row = executionTraceStep(step);
+        }
+        journal.write(row);
         ++steps;
-        selectedSteps += step.lane == selected;
+        selectedSteps += row.at("lane") == selected;
     }
     Json summary{{"record", "complete"},
                  {"steps", steps},
                  {"selected_steps", selectedSteps},
-                 {"sampling_batches", group ? group->samplingBatches() : 0},
+                 {"sampling_batches", pixel   ? quad->samplingBatches()
+                                      : group ? group->samplingBatches()
+                                              : 0},
                  {"completed", true},
                  {"gpu_operations", snapshot.inputs.gpu ? snapshot.inputs.gpu->operations() - gpuStart : 0},
                  {"gpu", snapshot.inputs.gpu ? snapshot.inputs.gpu->identity() : Json(nullptr)}};
+    if (pixel) {
+        summary["derivative_batches"] = quad->derivativeBatches();
+        summary["final_active_mask"] = quad->activeMask();
+    }
     journal.write(summary);
     journal.commit();
     summary["bytes"] = journal.bytes;
@@ -359,5 +411,12 @@ Json exportVertexExecutionTrace(const QString &path, const InputSnapshot &snapsh
     common.maxSteps = options.maxSteps;
     common.maxBytes = options.maxBytes;
     return exportExecutionTrace(path, snapshot, common, true, options.selection, cancelled);
+}
+Json exportPixelExecutionTrace(const QString &path, const InputSnapshot &snapshot,
+                               const PixelTraceOptions &options, const CancelCheck &cancelled) {
+    GroupTraceOptions common;
+    common.maxSteps = options.maxSteps;
+    common.maxBytes = options.maxBytes;
+    return exportExecutionTrace(path, snapshot, common, false, {}, cancelled, &options);
 }
 } // namespace flora::dxbc_exec

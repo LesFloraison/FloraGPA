@@ -345,7 +345,9 @@ Program::Program(Bytes dxbc) {
                 args.push_back(operand(words, pos));
             if (!precisionArithmetic(op) &&
                 std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
-                fail("Minimum precision on this DXBC operation is not implemented");
+                throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
+                                         " at word " + std::to_string(data->instructions.back().wordOffset) +
+                                         " is not implemented");
             if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
         } else if (op == 90) {

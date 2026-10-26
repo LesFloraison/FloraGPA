@@ -32,6 +32,12 @@ std::string registerName(const dxbc_exec::Register &r) {
             return "vThreadIDInGroup";
         if (r.kind == 36)
             return "vThreadIDInGroupFlattened";
+        if (r.kind == 35)
+            return "vCoverage";
+        if (r.kind == 12)
+            return "oDepth";
+        if (r.kind == 15)
+            return "oMask";
     }
     std::string result = "operand" + std::to_string(r.kind);
     for (auto index : i)
@@ -57,8 +63,10 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
             "Native debug shader does not match the execution trace");
     const dxbc_exec::Program program(shader);
     const bool vertex = header.at("stage") == "vs";
-    require((vertex ? program.stage() == 1
-                    : program.stage() == 5 && header.at("group_size") == Json(program.threadGroupSize())) &&
+    const bool pixel = header.at("stage") == "ps";
+    require((pixel    ? program.stage() == 0
+             : vertex ? program.stage() == 1
+                      : program.stage() == 5 && header.at("group_size") == Json(program.threadGroupSize())) &&
                 program.instructions().size() == trace_.instructionCount(),
             "Native debug program identity mismatch");
     lane_ = header.at("selected_lane");
@@ -93,7 +101,10 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
                               {"components", instruction.words[3]}});
         }
     }
-    registerMetadata_ = {{"shader_stage", vertex ? "vs" : "cs"}, {"indexable_temporaries", arrays}};
+    registerMetadata_ = {{"shader_stage", pixel    ? "ps"
+                                          : vertex ? "vs"
+                                                   : "cs"},
+                         {"indexable_temporaries", arrays}};
     for (uint64_t i = 0; i < trace_.selectedSize(); ++i) {
         checkCancellation(cancelled);
         const auto global = trace_.selectedBoundary(i);
@@ -110,11 +121,17 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
                          {"call_depth", beforeStack.size()},
                          {"return_instruction_stack_before", beforeStack},
                          {"state_boundary", "before_instruction"}});
+        if (pixel) {
+            rows_.back()["helper_before"] = step.at("helper_before");
+            rows_.back()["active_mask_after"] = step.at("active_mask_after");
+        }
     }
     require(!rows_.empty(), "Native debug invocation has no execution steps");
     result_ = {{"format", "flora.native-execution-debug-model"},
                {"version", 1},
-               {"action", vertex ? "debug-vertex" : "debug-thread"},
+               {"action", pixel    ? "debug-pixel"
+                          : vertex ? "debug-vertex"
+                                   : "debug-thread"},
                {"shader_sha256", shaderHash},
                {"trace_sha256", digest},
                {"trace", true},
@@ -124,8 +141,9 @@ NativeExecutionDebugModel::NativeExecutionDebugModel(const QString &path, const 
                {"source_variables", symbols},
                {"source_stack", stack},
                {"disassembly", systemDisassembly(shader)},
-               {"state_boundary", vertex ? "before_selected_instruction_or_terminal_vertex"
-                                         : "before_selected_instruction_or_terminal_group"}};
+               {"state_boundary", pixel    ? "before_selected_instruction_or_terminal_quad"
+                                  : vertex ? "before_selected_instruction_or_terminal_vertex"
+                                           : "before_selected_instruction_or_terminal_group"}};
     if (symbols.value("format", "") == "SDBG assignments" && symbols.value("status", "") == "available") {
         sdbg_ = std::make_unique<SdbgTraceValues>(result_, rows_, [this, &cancelled](size_t i) {
             checkCancellation(cancelled);
@@ -210,10 +228,11 @@ Json NativeExecutionDebugModel::stack() {
 }
 Json NativeExecutionDebugModel::instructionState() const {
     if (position_ == size())
-        return {
-            {"state_boundary", result_.at("action") == "debug-vertex" ? "terminal_vertex" : "terminal_group"},
-            {"global_step", trace_.size()},
-            {"instruction", nullptr}};
+        return {{"state_boundary", result_.at("action") == "debug-pixel"    ? "terminal_quad"
+                                   : result_.at("action") == "debug-vertex" ? "terminal_vertex"
+                                                                            : "terminal_group"},
+                {"global_step", trace_.size()},
+                {"instruction", nullptr}};
     auto result = rows_.at(position_);
     result["execution"] = trace_.step(result.at("global_step").get<uint64_t>());
     return result;

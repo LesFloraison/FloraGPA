@@ -201,6 +201,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
         originalProgram.header[0] != 0x50)
         throw std::runtime_error("Pixel input capture requires an SM4/SM5 pixel shader");
     PixelInputShader result;
+    result.originalShaderSha256 = sha256(original);
     result.reg = inputRegister;
     result.records = records;
     std::vector<Row> selectedDeclarations;

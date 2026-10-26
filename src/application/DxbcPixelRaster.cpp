@@ -517,6 +517,7 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
                        {"private_scissor_guard", {guard.left, guard.top, guard.right, guard.bottom}},
                        {"sample_frequency", pixel.sampleFrequency},
                        {"input_register", pixel.reg},
+                       {"shader_sha256", pixel.originalShaderSha256},
                        {"valid_mask", pixel.mask},
                        {"scope", "isolated_primitive_pre_depth_inputs"},
                        {"original_fragment_eligibility", false},

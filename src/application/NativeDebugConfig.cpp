@@ -13,6 +13,7 @@ constexpr size_t maxBytes = 1024 * 1024;
 const std::map<std::string, std::string> formats{
     {"gs-checkpoint", "FloraGPA native GS debug config 1"},
     {"debug-vertex", "FloraGPA native VS execution debug config 1"},
+    {"debug-pixel", "FloraGPA native PS execution debug config 1"},
     {"ds-checkpoint", "FloraGPA native DS debug config 1"},
     {"hs-checkpoint", "FloraGPA native HS debug config 1"},
     {"debug-thread", "FloraGPA native CS execution debug config 1"}};

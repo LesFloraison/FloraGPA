@@ -12,6 +12,7 @@ struct PixelInputRecordSelection {
 };
 struct PixelInputShader {
     std::vector<uint8_t> bytecode;
+    std::string originalShaderSha256;
     uint32_t reg = 0, mask = 0;
     bool sampleFrequency = false;
     // When present, a private u1 raw buffer replaces all MRT writes. Its first

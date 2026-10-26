@@ -106,7 +106,7 @@ struct ExecutionTraceReader::State {
     qint64 sourceOffset = -1;
     struct InstructionIndex {
         qint64 offset;
-        uint32_t wordOffset;
+        uint32_t wordOffset, opcode;
         bool declaration;
     };
     std::vector<InstructionIndex> instructions;
@@ -247,6 +247,7 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
     QCryptographicHash hash(QCryptographicHash::Sha256);
     uint64_t records = 0, storageBytes = 0, wordOffset = 2, epoch = 0;
     bool begun = false, completed = false;
+    uint8_t pixelActive = 0;
     std::map<TraceStorageKey, uint64_t> filled;
     std::vector<uint64_t> laneSteps;
     std::vector<std::optional<uint32_t>> nextInstructions;
@@ -278,7 +279,8 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
             require(kind == "header" && row.at("format") == "flora.dxbc-execution-trace" &&
                         number(row.at("version")) == 1 &&
                         ((row.at("stage") == "cs" && row.at("scope") == "one_cooperative_group") ||
-                         (row.at("stage") == "vs" && row.at("scope") == "one_vertex")) &&
+                         (row.at("stage") == "vs" && row.at("scope") == "one_vertex") ||
+                         (row.at("stage") == "ps" && row.at("scope") == "one_pixel_quad")) &&
                         !boolean(row.at("captured_gpu_schedule")),
                     "Unsupported execution trace header");
             require(number(row.at("max_steps")) > 0 && number(row.at("max_bytes")) >= uint64_t(s.file.size()),
@@ -295,6 +297,14 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                     number(row.at("index_override"), UINT32_MAX);
                 s.lanes = 1;
                 s.selectedLane = 0;
+            } else if (row.at("stage") == "ps") {
+                require(row.at("execution_model") == PixelQuad::executionModel &&
+                            !row.contains("group_size") && !row.contains("group") &&
+                            !row.contains("thread") && row.at("quad_input_provenance").is_object(),
+                        "Invalid pixel trace identity");
+                s.lanes = 4;
+                s.selectedLane = uint32_t(number(row.at("selected_lane"), 3));
+                pixelActive = uint8_t(number(row.at("initial_active_mask"), 15));
             } else {
                 const auto &size = array(row.at("group_size")), &thread = array(row.at("thread"));
                 require(size.size() == 3 && thread.size() == 3 && array(row.at("group")).size() == 3,
@@ -337,6 +347,12 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                         "Trace completion counts disagree");
                 for (size_t i = 0; i < laneSteps.size(); ++i)
                     require(laneSteps[i] && !nextInstructions[i], "Trace completion has an unfinished lane");
+                if (s.header.at("stage") == "ps") {
+                    require(number(row.at("final_active_mask"), 15) == pixelActive,
+                            "Pixel trace terminal active mask differs");
+                    number(row.at("derivative_batches"), s.steps.size());
+                    number(row.at("sampling_batches"), s.steps.size());
+                }
                 s.completion = row;
                 completed = true;
                 continue;
@@ -386,6 +402,25 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                             number(row.at("barrier_epoch")) == 0 && number(row.at("sync_flags")) == 0 &&
                             array(row.at("shared_changes")).empty(),
                         "Vertex trace contains pixel or group execution state");
+            if (s.header.at("stage") == "ps") {
+                const bool helper = !(pixelActive & (1u << lane));
+                require(boolean(row.at("helper_before")) == helper && !boolean(row.at("released_barrier")) &&
+                            number(row.at("barrier_epoch")) == 0 && number(row.at("sync_flags")) == 0 &&
+                            array(row.at("shared_changes")).empty(),
+                        "Pixel trace helper or group state differs");
+                if (boolean(row.at("discarded"))) {
+                    require(s.instructions[instruction].opcode == 13,
+                            "Pixel trace discard is not a discard instruction");
+                    pixelActive &= uint8_t(~(1u << lane));
+                }
+                require(number(row.at("active_mask_after"), 15) == pixelActive,
+                        "Pixel trace active mask transition differs");
+                if (helper)
+                    require(array(row.at("buffer_changes")).empty() &&
+                                array(row.at("texture_changes")).empty() &&
+                                array(row.at("counter_changes")).empty(),
+                            "Pixel helper trace contains side effects");
+            }
             s.apply(row, true, sequence);
             s.steps.push_back(offset);
             ++s.position;
@@ -409,7 +444,8 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                 number(word, UINT32_MAX);
             require((number(words[0]) & 0x7ff) == number(row.at("dxbc_opcode"), 0x7ff),
                     "Trace opcode disagrees with instruction word");
-            s.instructions.push_back({offset, uint32_t(wordOffset), boolean(row.at("declaration"))});
+            s.instructions.push_back({offset, uint32_t(wordOffset), uint32_t(number(row.at("dxbc_opcode"))),
+                                      boolean(row.at("declaration"))});
             wordOffset += words.size();
             row.at("source");
         } else if (kind == "register") {
@@ -434,7 +470,7 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
         } else if (kind == "storage") {
             const auto size = number(row.at("bytes"), limits.maxStorageBytes - storageBytes);
             const TraceStorageKey key{space(row.at("space")), number(row.at("resource"))};
-            require(s.header.at("stage") != "vs" || key.first != TraceSpace::Shared,
+            require(s.header.at("stage") == "cs" || key.first != TraceSpace::Shared,
                     "Vertex trace contains group shared storage");
             require(s.storage.size() < limits.maxRegisters && !s.storage.contains(key),
                     "Duplicate or excessive trace storage");
