@@ -957,3 +957,16 @@ the helper allocation reduction is not a complete process-memory or latency
 acceptance result. See `DX11_SELECTED_VERTEX_INPUTS.md` and
 `research/dx11-selected-vertex-input-evidence.json`. Full buffer snapshots,
 arbitrary index override and the remaining P5–P8 gates remain open.
+
+## Native vertex index override checkpoint
+
+Effective attribute index override now reaches private IA acquisition through
+CLI and the native VS view. Version 2 invocation/journal provenance separates
+the original address from the requested override; version 1 sessions still
+load. The UINT32_MAX boundary uses a private R32 index plus base vertex after
+the first non-indexed implementation failed D3D11 validation. The final ten
+suites pass 446 checks without failures or skips. Nine real identity overrides
+match native outputs and reload sessions; three existing version 1 real sessions
+load, rewind and export. See `DX11_VERTEX_INDEX_OVERRIDE.md` and its evidence
+ledger. This does not establish cut/missing-index override parity, complete
+debugger semantics, fragment history or standalone removal acceptance.

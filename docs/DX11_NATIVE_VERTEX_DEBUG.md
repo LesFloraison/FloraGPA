@@ -17,10 +17,12 @@ draws use the existing native vertex input observation path. Experiments apply
 inside that observation scope. Cut references, disabled/skipped draws and
 out-of-range selections fail explicitly.
 
-`--index`, when present, checks the effective vertex index. Arbitrary override
-of the observed index is not implemented by this native entry point yet. This
-is a remaining compatibility gate; the implementation does not silently ignore
-the supplied value. Use `--warp` for an explicit software adapter. Input, step
+`--index`, when present, overrides the per-vertex attribute index after all draw
+offsets. System IDs and per-instance attributes retain the original selection.
+Version 2 results distinguish the observed index from the override, while old
+version 1 sessions retain their index-assertion contract. See
+`DX11_VERTEX_INDEX_OVERRIDE.md` for validation and remaining cut/missing-index
+limits. Use `--warp` for an explicit software adapter. Input, step
 and journal budgets are controlled by `--max-bytes`, `--max-steps` and
 `--max-trace-bytes`. Worker cancellation and timeouts retain the existing job
 isolation and completion-publication protocol.
@@ -105,7 +107,9 @@ artifact hashes and intermediate failures are in
 
 The input helper now submits only the selected point and retains whole-draw
 acquisition for comparison; complete bound buffer snapshots remain budgeted.
-See `DX11_SELECTED_VERTEX_INPUTS.md`. Arbitrary index override,
+See `DX11_SELECTED_VERTEX_INPUTS.md`. Index overrides are available for valid
+selected references as described in `DX11_VERTEX_INDEX_OVERRIDE.md`; complete
+cut/missing-index compatibility,
 remaining DXBC semantics and precision combinations, complete legacy debugger
 configuration migration and broad source/behavior parity are not established by
 this checkpoint. Full PS input/quad discovery, fragment history, P7 dependency

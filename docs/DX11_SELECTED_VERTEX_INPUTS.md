@@ -111,7 +111,9 @@ instance byte offset or a non-indexed start is explicitly rejected; complete
 overflow/wrap semantics are not claimed. Selected out-of-bounds index reads are
 still rejected; unselected index contents are irrelevant to this observation.
 
-Arbitrary actual-vertex index override remains unsupported. Remaining DXBC and
+Actual-vertex attribute index override is now available for valid selected
+references; see `DX11_VERTEX_INDEX_OVERRIDE.md` for semantics and remaining
+cut/missing-index compatibility. Remaining DXBC and
 source/configuration parity, PS quad input discovery, fragment history, GPA
 debugger-engine recovery and standalone P7/P8 acceptance remain open. Single
 validation timings are not baseline performance or memory-growth acceptance.

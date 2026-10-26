@@ -124,7 +124,8 @@ of local logs/reports and summarizes the observed outcomes:
   explicit coverage. Existing resource-snapshot restrictions continue to apply.
 - Native VS trace journaling, source/debug sessions and CLI/GUI dispatch are now
   available through the continuation in `DX11_NATIVE_VERTEX_DEBUG.md`. Arbitrary
-  index override and full VS parity remain open, together with PS input/quad
+  index override is now implemented for valid selected references, as described
+  in `DX11_VERTEX_INDEX_OVERRIDE.md`. Full VS parity remains open with PS input/quad
   discovery, fragment history, remaining executor semantics and P7/P8 standalone
   release acceptance.
 

@@ -687,3 +687,14 @@ skips, and nine real capture/adapter jobs retain exact input/final register and
 native output comparisons, module audits and session reloads. See
 `DX11_SELECTED_VERTEX_INPUTS.md`. Complete bound buffer snapshots, arbitrary
 index override, broader semantic/source parity and P7/P8 acceptance remain open.
+
+## Native vertex index override continuation
+
+VS Worker/CLI jobs and the native view now accept an effective per-vertex
+attribute index override. System IDs and instance inputs retain original draw
+selection, and version 2 results distinguish original and overridden addresses.
+Old version 1 sessions retain their prior semantics. Ten suites pass 446 checks;
+nine identity-override real jobs retain exact native output comparisons and
+session/module checks, and three old real sessions load and rewind. See
+`DX11_VERTEX_INDEX_OVERRIDE.md`. Selected cut/missing/out-of-range index behavior,
+complete semantic/source parity, fragment history and P7/P8 remain open.

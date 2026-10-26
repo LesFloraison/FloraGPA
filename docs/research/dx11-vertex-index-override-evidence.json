@@ -1,0 +1,811 @@
+{
+  "schema": 1,
+  "checkpoint": "native-vertex-attribute-index-overrides",
+  "base_commit": "e521123e772927306df257f7f8af2e2047eac0d6",
+  "implementation_commit": "89da6ccd66d71bbf24d3f2a4bb2df6cf270bbca5",
+  "created_utc": "2026-10-26T19:17:40.572391+00:00",
+  "complete_release_acceptance": false,
+  "passed": 446,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "dxbc-vertex-inputs",
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-dxbc-vertex-inputs-tests.txt",
+        "bytes": 3073,
+        "sha256": "0ae0f5184c27e516d5eb15b6e5f4bc3809e97a0f72d052c6c701b688936e5f41"
+      }
+    },
+    {
+      "name": "dxbc-input-snapshot",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-dxbc-input-snapshot-tests.txt",
+        "bytes": 45944,
+        "sha256": "766cfefa303ffe7e1111dc8dc63dde7d9794659073cb89168b4ea0cf2b601a61"
+      }
+    },
+    {
+      "name": "native-vertex-inputs",
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-vertex-inputs-tests.txt",
+        "bytes": 3971,
+        "sha256": "2491234846fbd25fc5899829ad08f10a66dffa6e464f4d28d7e781245a497c0c"
+      }
+    },
+    {
+      "name": "native-analysis",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-analysis-tests.txt",
+        "bytes": 2569,
+        "sha256": "20557841c1820862e423cc19784630f68ef809f067dac1deda5a665ab52b54bc"
+      }
+    },
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-compute-debug-tests.txt",
+        "bytes": 4046,
+        "sha256": "834f1290b7c48c6742f64c21c0b8b8eb14304d2af6f3e92268d2e53636673c06"
+      }
+    },
+    {
+      "name": "native-debug-session",
+      "passed": 50,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-debug-session-tests.txt",
+        "bytes": 3496,
+        "sha256": "a8933ec6476a99d99eaa12b61d67daafe071bc8c3dcb16da2097e918c5e8b3bf"
+      }
+    },
+    {
+      "name": "native-execution-debug-ui",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-execution-debug-ui-tests.txt",
+        "bytes": 1429,
+        "sha256": "f5772f6a1201858ea2ac641176c6bacd97d673bc68352e86c61633455aa14f1d"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-dxbc-execution-trace-tests.txt",
+        "bytes": 2781,
+        "sha256": "c9c1ea8a96c0f48f47f9c8d4f532978f0ea1e9f14b35c7d4ba0941309c024520"
+      }
+    },
+    {
+      "name": "dxbc-execution-trace-reader",
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-dxbc-execution-trace-reader-tests.txt",
+        "bytes": 4509,
+        "sha256": "4aed9ccbb96d0db769cd0e4e06e3fa4d9152f5b96d41e88daadaf91c4bedf234"
+      }
+    },
+    {
+      "name": "native-execution-debug-model",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-native-execution-debug-model-tests.txt",
+        "bytes": 1046,
+        "sha256": "5aba93d7af8f301b8055d47418fd213a882ad14dfcf41d07e9623f9daad05550"
+      }
+    }
+  ],
+  "build": {
+    "path": "artifacts/dx11-native/vertex-index-final-build.txt",
+    "bytes": 20020,
+    "sha256": "75e185366bbc337017961d695b264e54c8a8873bd270dce29809623a8b51eb8b"
+  },
+  "ctest": {
+    "path": "artifacts/dx11-native/vertex-index-final-tests.txt",
+    "bytes": 1337,
+    "sha256": "18723a0017b47c618b42f63685f77acf31e2bb68238b08aeaace9c6dda3d9fd5"
+  },
+  "reproducers": [
+    {
+      "path": "tools/validate_selected_vertex_inputs.py",
+      "bytes": 5097,
+      "sha256": "ce6607dc9ed36cf097c16091344877eab372e0cc44fde4726c1aab14881b055b"
+    },
+    {
+      "path": "tools/validate_native_vertex_debug.py",
+      "bytes": 7398,
+      "sha256": "c3acb6464ab4987db7d95790596032601a875d5172f590bdf2ce625ea4cdb3e7"
+    }
+  ],
+  "real_run_summary": {
+    "path": "artifacts/dx11-native/vertex-index-real/summary.json",
+    "bytes": 30749,
+    "sha256": "6a0c282ad189b334c39aaf38b8640e20f7d1fe3b5eefe7f2c04c48bdffe250a9"
+  },
+  "binaries": [
+    {
+      "path": "build\\vs2022\\Release\\FloraDxbcVertexInputProbe.exe",
+      "bytes": 2200576,
+      "sha256": "1712f0f4c582a87b6c657a541416fda393a200906481127b5b23815881d88385"
+    },
+    {
+      "path": "build\\vs2022\\Release\\FloraGPA.Cli.exe",
+      "bytes": 5530112,
+      "sha256": "eed630b11ada1a629f8dd4a496bd80c0ab05d9c237fa45e7ce52c79d91e963dc"
+    },
+    {
+      "path": "build\\vs2022\\Release\\FloraGPA.Worker.exe",
+      "bytes": 5530112,
+      "sha256": "eed630b11ada1a629f8dd4a496bd80c0ab05d9c237fa45e7ce52c79d91e963dc"
+    },
+    {
+      "path": "build\\vs2022\\Release\\FloraNativeDebugSessionProbe.exe",
+      "bytes": 1132544,
+      "sha256": "b235118cd589e3f9b60a0a877b6cece93295cb032a7503ce809f86c68969c91a"
+    }
+  ],
+  "identity_override_runs": [
+    {
+      "case": "0-4318",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "execution_steps": 12,
+      "native_output_components": 14,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318-job/job.json",
+        "bytes": 639,
+        "sha256": "0af640e1c6408af9c5243e6aae8bd1e1619cba4cafcb7f044157c0b4c018761a"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318-job/result.json",
+        "bytes": 7854,
+        "sha256": "ab3f3c1c993f877fd56163ee24ff7df601733533e9513ad24944b2acd40fa530"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318.json",
+        "bytes": 8159,
+        "sha256": "e06f5946901f69dede08588b65a39e37d4f24514bc8cf99c674ce93fe5771568"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318-validation.json",
+        "bytes": 1862,
+        "sha256": "a1d774be242e3d9b8df6f48c5429031b09b0957b6befb6deac7821bcab0b0eac"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318-validation.session.json",
+        "bytes": 408,
+        "sha256": "dcb88c83fd1d88931bc62eeb129a23a85ae122faa57383a11eee5648a709f40a"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-4318-validation.zip",
+        "bytes": 610824,
+        "sha256": "3a95be481f728ec2413b9d8758734b93f51530b4a5253e339fbe6fab9eb076c9"
+      },
+      "cli_seconds": 1.452999999979511,
+      "worker_ms": 408,
+      "peak_working_set_bytes": 253353984
+    },
+    {
+      "case": "0-32902",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "execution_steps": 12,
+      "native_output_components": 14,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902-job/job.json",
+        "bytes": 641,
+        "sha256": "91ca8568f63cf4dfe9da848fa6d73b2eb5b3dad41becc29caa39fdfb5bdab09d"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902-job/result.json",
+        "bytes": 7515,
+        "sha256": "f0f38fe878cbbfde49deab80de4b51f0a531cd88c782c55d630e3db2069b4d99"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902.json",
+        "bytes": 8162,
+        "sha256": "7fa0f896f15a2e5dcba8d7ea2ff9a3433634a803d9e634ba7bcd51e4a95823f4"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902-validation.json",
+        "bytes": 1862,
+        "sha256": "2ac98a70899ea74a3d057a5bb8f08c24fade72de24f74a9affa0166c07910002"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902-validation.session.json",
+        "bytes": 408,
+        "sha256": "9dc7b3f0eb3762bf28769331410a5581e8fd86f3693822c2e70f0d8055539b64"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-32902-validation.zip",
+        "bytes": 610492,
+        "sha256": "4740ba88c7423c4a5e2a848d33099abb548b9f955ff937a3a57cc1f90f836c83"
+      },
+      "cli_seconds": 1.327999999979511,
+      "worker_ms": 311,
+      "peak_working_set_bytes": 309899264
+    },
+    {
+      "case": "0-0",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "execution_steps": 12,
+      "native_output_components": 14,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0-job/job.json",
+        "bytes": 630,
+        "sha256": "5575dc9e3f972104ff45f764980fb9fa45892f4daf5ff688bc37e47d50437334"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0-job/result.json",
+        "bytes": 7092,
+        "sha256": "6f5a1262bbc5139aa41dc643a73557a144066f2db7d8d430120e43e013078ec7"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0.json",
+        "bytes": 8150,
+        "sha256": "cb19ebeae315da1b3601d23b81adeeca6bdb4581883c64a78dfd6af1b9393d18"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0-validation.json",
+        "bytes": 1862,
+        "sha256": "73d96a960e47f4e09ff4a331ffc38936446e9f6f337f5bf734c1b8c87a18c7ad"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0-validation.session.json",
+        "bytes": 408,
+        "sha256": "8e61077988bad4270b32644f891b886049aa0437ee19bb9444e81b7ca9bb6cfd"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/0-0-validation.zip",
+        "bytes": 610040,
+        "sha256": "3fc227bf654ebddf80117bd1d6c881b41ef4b7b5b23a1901f7f251cd2c6a938c"
+      },
+      "cli_seconds": 1.0940000000409782,
+      "worker_ms": 126,
+      "peak_working_set_bytes": 195543040
+    },
+    {
+      "case": "1-4318",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "execution_steps": 58,
+      "native_output_components": 4,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318-job/job.json",
+        "bytes": 631,
+        "sha256": "90895d81ac94ca71040cf9764500773890cdcc5eea71fce0d8e8b0ce979d59b0"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318-job/result.json",
+        "bytes": 7930,
+        "sha256": "2fbd24c9cfcb35e969942ba5536d52541068c5b251f2f4d228b9e471d5867604"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318.json",
+        "bytes": 7274,
+        "sha256": "28864c2c81cd49f3451d821d48bcaaa987843415790295acfcbbde11e088d6d4"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318-validation.json",
+        "bytes": 1865,
+        "sha256": "e5f306e5828b173803bc297586a24cf243af92a6a4f76d1ce7634a9b7b408ef2"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318-validation.session.json",
+        "bytes": 410,
+        "sha256": "30e4629db5e9e6ee3eccdb58f29b4ca156e5f8348d23c1dc5d6e81d505487935"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-4318-validation.zip",
+        "bytes": 5738093,
+        "sha256": "37c06bc2d1bb3cf6a0dd637ac008356d24380fc8122048e2d04cde4dc9a61145"
+      },
+      "cli_seconds": 11.98499999998603,
+      "worker_ms": 1389,
+      "peak_working_set_bytes": 1768886272
+    },
+    {
+      "case": "1-32902",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "execution_steps": 58,
+      "native_output_components": 4,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902-job/job.json",
+        "bytes": 633,
+        "sha256": "c0c6d1204f5cd2a0680917599da8ee8a7c45d7c6eafae187380a3ff9371230b3"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902-job/result.json",
+        "bytes": 7591,
+        "sha256": "f2a76f3ac8041841ada1f1e63cd83b774a40441257ee907e1ed50e6189683cff"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902.json",
+        "bytes": 7276,
+        "sha256": "f76e1ef13fd515c92469278c435d757ef5cd2674a5b18b5a92d5127715682b1d"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902-validation.json",
+        "bytes": 1865,
+        "sha256": "b419fc4ed504d6f1a3abde2f3fc9b2e104bad62fc0635b3f4163d9664f51e073"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902-validation.session.json",
+        "bytes": 410,
+        "sha256": "00c9a1f132bdecf3289ab1220f223e419bc3148ef749af87086b283815fdc26b"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-32902-validation.zip",
+        "bytes": 5737761,
+        "sha256": "9f69c73a6eef490cf216cd6b5a8a895395e7748d21a48f9cbcd4806294f9c835"
+      },
+      "cli_seconds": 11.858999999938533,
+      "worker_ms": 1153,
+      "peak_working_set_bytes": 1858179072
+    },
+    {
+      "case": "1-0",
+      "request_index": 0,
+      "observed_vertex_index": 0,
+      "vertex_id": 0,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "execution_steps": 58,
+      "native_output_components": 4,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0-job/job.json",
+        "bytes": 622,
+        "sha256": "b059f3e854ee9a22c93243839ac18c0e15a97eda3834f91113e96c04a16db4f6"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0-job/result.json",
+        "bytes": 7167,
+        "sha256": "8b51e84472b172752a15afe9dc8085d091ec4162cd5835583c16a99397067591"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0.json",
+        "bytes": 7265,
+        "sha256": "e7d921b39b6bb88ade2f017804c150108b6664aacc61e77114e4fcf7461118b8"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0-validation.json",
+        "bytes": 1865,
+        "sha256": "935ea511489c7664e49992757b28a335a37a466fef615d5d8f70d95088135615"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0-validation.session.json",
+        "bytes": 410,
+        "sha256": "df6b24a1bb4b0c6a31ecaa48ed10868929b92d5a65b42276f66de417797ada2e"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/1-0-validation.zip",
+        "bytes": 5737308,
+        "sha256": "84ea4f76603aa416f124deb4e014ad01427db51dd2e0948ef370d8679c7f5b1c"
+      },
+      "cli_seconds": 11.53200000000652,
+      "worker_ms": 909,
+      "peak_working_set_bytes": 1720320000
+    },
+    {
+      "case": "2-4318",
+      "request_index": 39562,
+      "observed_vertex_index": 39562,
+      "vertex_id": 38,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "execution_steps": 42,
+      "native_output_components": 13,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318-job/job.json",
+        "bytes": 643,
+        "sha256": "fdfdf23af9c96877a0d2cd39a86e3eecdebb7c72b1e0e529ea6cef6226c61d47"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318-job/result.json",
+        "bytes": 8077,
+        "sha256": "91652095e02a2d15cbb462e53a3a6a00b181325af5b555009496883326f66101"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318.json",
+        "bytes": 9326,
+        "sha256": "75868ca14b1be673878dc8690269ac172b7ffc52ec7fa1defc0aa2a16beaef6d"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318-validation.json",
+        "bytes": 1870,
+        "sha256": "0168c06278b89b0ba61b05b18aa0e5f93b76403e61aa2ca17f7049c74def7797"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318-validation.session.json",
+        "bytes": 412,
+        "sha256": "0ce7735c559a393de18f8270f91d6122ea63e48674f39ad95f4edd29005d40e5"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-4318-validation.zip",
+        "bytes": 38909088,
+        "sha256": "638a56f52936b0d7c8cedb8ecfc3c16c4817b6e8f6c63b94c789f6f46483b7fa"
+      },
+      "cli_seconds": 11.40700000000652,
+      "worker_ms": 1504,
+      "peak_working_set_bytes": 1772892160
+    },
+    {
+      "case": "2-32902",
+      "request_index": 39562,
+      "observed_vertex_index": 39562,
+      "vertex_id": 38,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "execution_steps": 42,
+      "native_output_components": 13,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902-job/job.json",
+        "bytes": 645,
+        "sha256": "2e16ea024ed9152f048a0ab1356705d1276229fa69bbca4c2ee17723b8dee3da"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902-job/result.json",
+        "bytes": 7738,
+        "sha256": "36ebfe92b6631dacd9569c4ffbf5b70f53637fca2f046671a812bcb2430d574b"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902.json",
+        "bytes": 9328,
+        "sha256": "3cae7283187085960b11f4abb0508ab4d7fe85a4d9045e508a48be7fd413daf7"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902-validation.json",
+        "bytes": 1870,
+        "sha256": "31015f13035e8e82d3452d8a82de43e7482984e123d9270ba090b93ed3d495bc"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902-validation.session.json",
+        "bytes": 412,
+        "sha256": "bd9a6e0d4155db274f05bade16181816ebe833b0ab79f24fffff9caeef70a331"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-32902-validation.zip",
+        "bytes": 38908756,
+        "sha256": "9d610475c1d8f7c9f681a0de3d18feb18b5444e8173a9db10034343df2ccb8c5"
+      },
+      "cli_seconds": 11.311999999918044,
+      "worker_ms": 1360,
+      "peak_working_set_bytes": 1858895872
+    },
+    {
+      "case": "2-0",
+      "request_index": 39562,
+      "observed_vertex_index": 39562,
+      "vertex_id": 38,
+      "input_reference": 0,
+      "instance": 0,
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "gpu": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "execution_steps": 42,
+      "native_output_components": 13,
+      "native_output_exact": true,
+      "job": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0-job/job.json",
+        "bytes": 634,
+        "sha256": "29b97816bfc0b220404fea2459deb6a3dae0b1966c1e427f56af098f23af7b23"
+      },
+      "result": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0-job/result.json",
+        "bytes": 7315,
+        "sha256": "6c680ac7f73a62dbd86dce91263e8b43ef5d6791baf7ac966abe473b41a39c96"
+      },
+      "input_reference_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0.json",
+        "bytes": 9317,
+        "sha256": "ada08747d57ef439cd731c5254e02569abbf3117fdee55a611549f1b4507e6a1"
+      },
+      "validation": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0-validation.json",
+        "bytes": 1870,
+        "sha256": "844e52a2f1ac32377f4be7276e391a7b900bbb52c5cfa46b75f77bff92bcbc0c"
+      },
+      "session_report": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0-validation.session.json",
+        "bytes": 412,
+        "sha256": "72ca92a99f60a0c7c3b8abc8a25a7a4afdd39b14c177dad4d13992005b0db7ee"
+      },
+      "session_archive": {
+        "path": "artifacts/dx11-native/vertex-index-real/2-0-validation.zip",
+        "bytes": 38908304,
+        "sha256": "5408a12ff855bdda8decd89e47f987ff8a30b6ea21fa18cb9416006f3f1456f0"
+      },
+      "cli_seconds": 11.062000000034459,
+      "worker_ms": 1168,
+      "peak_working_set_bytes": 1717817344
+    }
+  ],
+  "version_1_session_runs": [
+    {
+      "case": "0-4318",
+      "command": [
+        "build/vs2022/Release/FloraNativeDebugSessionProbe.exe",
+        "artifacts\\dx11-native\\vertex-debug-real\\0-4318",
+        "artifacts\\dx11-native\\vertex-index-legacy\\0-4318.json",
+        "artifacts\\dx11-native\\vertex-index-legacy\\0-4318.zip"
+      ],
+      "source_result_sha256": "58fdc3cb028919eb02df109cd0e2fd75c7395ac676d56d6abe3f034740e12d3d",
+      "report": "artifacts\\dx11-native\\vertex-index-legacy\\0-4318.json",
+      "report_identity": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/0-4318.json",
+        "bytes": 408,
+        "sha256": "f7f786d4a61334dad2ba92547c2153f9dcb398a9cca19c75d537b1ed55e016d6"
+      },
+      "archive": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/0-4318.zip",
+        "bytes": 609870,
+        "sha256": "28c0f5abd222eec8a539ef997ee1006284f9f5babf23065103af4adcd38999b5"
+      },
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/0-4318.log",
+        "bytes": 344,
+        "sha256": "0d701a26ee60eb798b8e37141a9aeb373dac94eaf1a4c241c6bcfeae377eb03a"
+      }
+    },
+    {
+      "case": "1-4318",
+      "command": [
+        "build/vs2022/Release/FloraNativeDebugSessionProbe.exe",
+        "artifacts\\dx11-native\\vertex-debug-real\\1-4318",
+        "artifacts\\dx11-native\\vertex-index-legacy\\1-4318.json",
+        "artifacts\\dx11-native\\vertex-index-legacy\\1-4318.zip"
+      ],
+      "source_result_sha256": "479f78f9b8d8aa071245d0461fa7534d2ccc9aa089dffe351f8d0e76114bc1b0",
+      "report": "artifacts\\dx11-native\\vertex-index-legacy\\1-4318.json",
+      "report_identity": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/1-4318.json",
+        "bytes": 410,
+        "sha256": "6b6c27c70d32ed4fb12b026d3708140964ffafc38b9bd9db5280bb3059470cb0"
+      },
+      "archive": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/1-4318.zip",
+        "bytes": 5737159,
+        "sha256": "5f661a422ac99a65865cbc80bbb871ab9340a3c125a686f8fa5ec2bed7344470"
+      },
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/1-4318.log",
+        "bytes": 346,
+        "sha256": "d697451650d6f1938ff473f05aa21c4f406e565f7fb600c3863d44a289024f22"
+      }
+    },
+    {
+      "case": "2-4318",
+      "command": [
+        "build/vs2022/Release/FloraNativeDebugSessionProbe.exe",
+        "artifacts\\dx11-native\\vertex-debug-real\\2-4318",
+        "artifacts\\dx11-native\\vertex-index-legacy\\2-4318.json",
+        "artifacts\\dx11-native\\vertex-index-legacy\\2-4318.zip"
+      ],
+      "source_result_sha256": "6e4f5c921f647ada08e726f0b0ad4ca4cee36fc53d8094a1c1233dc79fc9c1f4",
+      "report": "artifacts\\dx11-native\\vertex-index-legacy\\2-4318.json",
+      "report_identity": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/2-4318.json",
+        "bytes": 412,
+        "sha256": "bc0dae05b4802988158cff9855ca17e79c99f96191fbd9fd8be47636457f5d47"
+      },
+      "archive": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/2-4318.zip",
+        "bytes": 38908108,
+        "sha256": "bb5117a44a7d0efd9ef9aa7336bedcc8656484820658a30cffe7df9555fe83c4"
+      },
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-legacy/2-4318.log",
+        "bytes": 348,
+        "sha256": "8c7187f33c27b58d4a00c77a3478f8008fd85dbad03ee99ba6e1fa82243341de"
+      }
+    }
+  ],
+  "version_1_summary": {
+    "path": "artifacts/dx11-native/vertex-index-legacy/summary.json",
+    "bytes": 1466,
+    "sha256": "0ff6ab5e1c10f34c649d05ce664d24acd553a4122eeac7b3d5faee8cfaac9dea"
+  },
+  "intermediate_failures": [
+    {
+      "cause": "A test macro contained an unparenthesized template comma. Moving the expected array outside QCOMPARE corrected compilation.",
+      "log": {
+        "path": "artifacts/dx11-native/vertex-index-build.txt",
+        "bytes": 9197,
+        "sha256": "f64e5e2b073bb913f1dba6e0e5aaecbeaa7c21ba465e9c39d9c54e34d476ea9b"
+      }
+    },
+    {
+      "cause": "Non-indexed DrawInstanced with StartVertexLocation UINT32_MAX triggered D3D11 start/count overflow validation on all three adapters. A private R32 index UINT32_MAX-1 plus base vertex one preserves the requested attribute index without a cut or start/count overflow. Assertions and debug-device validation were retained.",
+      "ctest": {
+        "path": "artifacts/dx11-native/vertex-index-first-tests.txt",
+        "bytes": 2826,
+        "sha256": "4fe6aa3b326f69dda3a323efac1fdd2492d0e040c4d3ee10786c968f5e14178c"
+      },
+      "input_tests": {
+        "path": "artifacts/dx11-native/vertex-index-first-input-tests.txt",
+        "bytes": 3748,
+        "sha256": "e910163fe0de707100fd074401048a8060b23d7021022cd42a2215626a552c18"
+      },
+      "repaired_input_tests": {
+        "path": "artifacts/dx11-native/vertex-index-boundary-tests.txt",
+        "bytes": 3073,
+        "sha256": "59643e00464aa2d464e5c9be302b18663852dee6c1db052207d153bd837dd780"
+      }
+    }
+  ],
+  "validation_scope": "Changed indices 0/4/7 and UINT32_MAX are checked in synthetic input and Worker/CLI fixtures. Real capture runs intentionally use identity overrides to retain the prior native output oracle. They establish transport, provenance, module audit and session roundtrip, not arbitrary changed-index real-capture equivalence or full legacy parity.",
+  "assertion_change": "The former unsupported-index rejection becomes a conflicting duplicate override rejection. Positive changed-index executions replace the unsupported behavior. Original cut, bounds, budget, cancellation, golden and skip rules are retained.",
+  "remaining_gates": [
+    "Legacy override behavior at selected cut indices, missing index buffers and out-of-range index references",
+    "Full source-buffer range snapshots and overflow semantics",
+    "Complete VS/CS and source/configuration parity",
+    "Native PS quad input discovery and full fragment history",
+    "Remaining original GPA debugger engine recovery",
+    "P7 complete dependency removal",
+    "P8 clean builds, standalone package and performance/recovery acceptance"
+  ]
+}
