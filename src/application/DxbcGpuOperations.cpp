@@ -539,10 +539,9 @@ struct GpuOperations::State {
             throw;
         }
     }
-    const std::pair<Words, std::vector<uint8_t>> &pixelSamplingCode(uint32_t opcode, uint32_t dimension,
-                                                                    uint32_t returns, uint32_t mask,
-                                                                    uint32_t swizzle,
-                                                                    const std::array<int32_t, 3> &offset) {
+    const std::pair<Words, std::vector<uint8_t>> &
+    pixelSamplingCode(uint32_t opcode, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
+                      const std::array<int32_t, 3> &offset, const std::array<uint32_t, 3> &precision) {
         Words key{opcode,
                   dimension,
                   returns,
@@ -551,6 +550,7 @@ struct GpuOperations::State {
                   uint32_t(offset[0]),
                   uint32_t(offset[1]),
                   uint32_t(offset[2])};
+        key.insert(key.end(), precision.begin(), precision.end());
         if (const auto found = pixelSamplingShaders.find(key); found != pixelSamplingShaders.end())
             return found->second;
         const std::map<uint32_t, std::pair<std::string, std::string>> shapes{
@@ -589,9 +589,68 @@ struct GpuOperations::State {
         for (auto &[kind, bytes] : parts)
             if (kind == 0x58454853 || kind == 0x52444853) {
                 auto program = readDxbcProgram(bytes);
+                const bool reduced =
+                    std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; });
+                uint32_t scratch = 0;
                 for (auto &instruction : program.instructions)
+                    if ((instruction[0] & 2047) == 104) {
+                        scratch = instruction.at(1);
+                        if (reduced)
+                            ++instruction.at(1);
+                    }
+                std::vector<Words> patched;
+                unsigned samples = 0;
+                for (auto &instruction : program.instructions) {
                     if ((instruction[0] & 2047) == 88)
                         instruction.back() = returns;
+                    if ((instruction[0] & 2047) == opcode && reduced) {
+                        ++samples;
+                        const auto operands = checkpoint::instructionOperands(instruction);
+                        Words operation = operands.prefix, originalDestination;
+                        for (size_t i = 0; i < operands.ranges.size(); ++i) {
+                            const auto [begin, end] = operands.ranges[i];
+                            Words arg(instruction.begin() + begin, instruction.begin() + end);
+                            const auto p = i == 0   ? precision[0]
+                                           : i == 1 ? precision[1]
+                                           : i == 4 ? precision[2]
+                                                    : 0u;
+                            if (i == 0) {
+                                originalDestination = arg;
+                                arg = dest(0, scratch, (arg[0] >> 4) & 15);
+                            }
+                            if (p) {
+                                if (arg[0] >> 31)
+                                    throw std::runtime_error(
+                                        "Unexpected implicit sampling template operand extension");
+                                arg[0] |= 0x80000000u;
+                                arg.insert(arg.begin() + 1, 1u | (p << 14));
+                            }
+                            operation.insert(operation.end(), arg.begin(), arg.end());
+                        }
+                        operation[0] = (operation[0] & 0x80ffffff) | (uint32_t(operation.size()) << 24);
+                        patched.push_back(std::move(operation));
+                        // Widen the sampled temporary through an operand with the same precision.
+                        // The remaining compiler-generated routing operates on its original raw bits.
+                        Words sampled{0x100e46, scratch};
+                        if (precision[0]) {
+                            sampled[0] |= 0x80000000u;
+                            sampled.insert(sampled.begin() + 1, 1u | (precision[0] << 14));
+                        }
+                        patched.push_back(row(54, {originalDestination, sampled}));
+                    } else
+                        patched.push_back(instruction);
+                }
+                if (reduced) {
+                    if (samples != 1 || scratch == 0)
+                        throw std::runtime_error("Unexpected implicit sampling template layout");
+                    const auto flags = std::find_if(patched.begin(), patched.end(),
+                                                    [](const auto &r) { return (r[0] & 2047) == 106; });
+                    if (flags == patched.end())
+                        patched.insert(patched.begin(), row(106 | (1u << 16), {}));
+                    else
+                        (*flags)[0] |= 1u << 16;
+                }
+                program.instructions = std::move(patched);
                 programBytes = writeDxbcProgram(program);
                 bytes = programBytes;
                 words.resize(programBytes.size() / 4);
@@ -605,14 +664,16 @@ struct GpuOperations::State {
         return pixelSamplingShaders.emplace(std::move(key), std::make_pair(std::move(words), binary))
             .first->second;
     }
-    std::vector<Value>
-    texture(uint32_t stage, const TextureInput &input, const TextureInputView &view, uint32_t dimension,
-            uint32_t returns, const Value &address, uint32_t swizzle, uint32_t mask,
-            const std::array<int32_t, 3> &offset, const SamplerInput *sampler = nullptr,
-            const Value &lodOrDdx = {}, const std::optional<Value> &ddy = {},
-            const std::array<uint32_t, 3> &groupSize = {},
-            const std::vector<SamplingInvocation> *batch = nullptr, bool comparison = false,
-            const std::array<PixelSamplingInvocation, 4> *pixelBatch = nullptr, uint32_t pixelOpcode = 0) {
+    std::vector<Value> texture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
+                               uint32_t dimension, uint32_t returns, const Value &address, uint32_t swizzle,
+                               uint32_t mask, const std::array<int32_t, 3> &offset,
+                               const SamplerInput *sampler = nullptr, const Value &lodOrDdx = {},
+                               const std::optional<Value> &ddy = {},
+                               const std::array<uint32_t, 3> &groupSize = {},
+                               const std::vector<SamplingInvocation> *batch = nullptr,
+                               bool comparison = false,
+                               const std::array<PixelSamplingInvocation, 4> *pixelBatch = nullptr,
+                               uint32_t pixelOpcode = 0, const std::array<uint32_t, 3> &precision = {}) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -684,7 +745,7 @@ struct GpuOperations::State {
             }
             if (pixelBatch) {
                 const auto &[words, binary] =
-                    pixelSamplingCode(pixelOpcode, dimension, returns, mask, swizzle, offset);
+                    pixelSamplingCode(pixelOpcode, dimension, returns, mask, swizzle, offset, precision);
                 std::vector<std::array<uint32_t, 4>> values;
                 for (const auto &lane : *pixelBatch)
                     values.push_back(lane.address.bits);
@@ -994,7 +1055,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/17"}};
+            {"backend", "dxbc-gpu/18"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1436,12 +1497,14 @@ std::array<Value, 4> GpuOperations::samplePixelQuad(uint32_t opcode, const Textu
                                                     uint32_t dimension, uint32_t returns,
                                                     const std::array<PixelSamplingInvocation, 4> &batch,
                                                     const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                                    const std::array<int32_t, 3> &offset) {
+                                                    const std::array<int32_t, 3> &offset,
+                                                    const std::array<uint32_t, 3> &precision) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
-    const auto values = state_->texture(0, input, view, dimension, returns, {}, selection, mask, offset,
-                                        &sampler, {}, {}, {}, nullptr, opcode == 70, &batch, opcode);
+    const auto values =
+        state_->texture(0, input, view, dimension, returns, {}, selection, mask, offset, &sampler, {}, {}, {},
+                        nullptr, opcode == 70, &batch, opcode, precision);
     return {values.at(0), values.at(1), values.at(2), values.at(3)};
 }
 std::vector<Value> GpuOperations::sampleGradBatch(const TextureInput &input, const TextureInputView &view,

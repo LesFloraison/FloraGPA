@@ -16,7 +16,8 @@ class GpuOperations {
                                          uint32_t dimension, uint32_t returns,
                                          const std::array<struct PixelSamplingInvocation, 4> &,
                                          const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                         const std::array<int32_t, 3> &offset);
+                                         const std::array<int32_t, 3> &offset,
+                                         const std::array<uint32_t, 3> &precision);
     std::optional<uint64_t> textureUavFootprint(const struct TextureInput &, const struct TextureInputView &,
                                                 uint32_t dimension, uint32_t returns, const Value &address);
     std::pair<Value, std::vector<uint8_t>> textureUav(const struct TextureInput &,

@@ -343,7 +343,11 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
-            if (!precisionArithmetic(op) &&
+            const bool precisionSampling =
+                data->stage == 0 && (op == 69 || op == 70 || op == 74) && args[0].kind != 2 &&
+                args[2].precision == 0 && args[3].precision == 0 &&
+                std::all_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision <= 2; });
+            if (!precisionArithmetic(op) && !precisionSampling &&
                 std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
                 throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
                                          " at word " + std::to_string(data->instructions.back().wordOffset) +
@@ -536,6 +540,7 @@ struct SamplingRequest {
     std::array<uint32_t, 4> swizzle;
     uint32_t mask;
     std::array<int32_t, 3> offset;
+    std::array<uint32_t, 3> precision;
 };
 struct Lane::State {
     std::shared_ptr<const ProgramData> program;
@@ -680,7 +685,8 @@ struct Lane::State {
                 op == 73 ? std::optional<Value>(source(args[5], false)) : std::nullopt,
                 resource.select,
                 destination.mask,
-                offsets};
+                offsets,
+                {destination.precision, args[1].precision, op == 69 ? 0u : args[4].precision}};
     }
 };
 bool Lane::samplingBoundary() const {
@@ -1529,7 +1535,7 @@ PixelQuadStep PixelQuad::step() {
                         if (item.binding != request.binding || item.sampler != request.sampler ||
                             item.dimension != request.dimension || item.returns != request.returns ||
                             item.swizzle != request.swizzle || item.mask != request.mask ||
-                            item.offset != request.offset)
+                            item.offset != request.offset || item.precision != request.precision)
                             fail("Pixel sampling cohort bindings disagree");
                         invocations[i] = {item.address, item.lodOrDdx};
                     }
@@ -1539,7 +1545,7 @@ PixelQuadStep PixelQuad::step() {
                             ? first.inputs.textures->samplePixelQuad(
                                   opcode, request.binding, request.sampler, request.dimension,
                                   request.returns, invocations, request.swizzle, request.mask, request.offset,
-                                  first.inputs.gpu.get(), assisted)
+                                  first.inputs.gpu.get(), assisted, request.precision)
                             : std::array<Value, 4>{};
                     for (unsigned i = 0; i < 4; ++i)
                         s.lanes[i]->state_->pendingSampling = std::make_pair(results[i], assisted);

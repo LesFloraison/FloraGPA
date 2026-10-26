@@ -142,16 +142,17 @@ std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register
         return Value{};
     return std::nullopt;
 }
-std::array<Value, 4> TextureInputs::samplePixelQuad(uint32_t opcode, const Register &binding,
-                                                    const Register &samplerBinding, uint32_t dimension,
-                                                    uint32_t returns,
-                                                    const std::array<PixelSamplingInvocation, 4> &invocations,
-                                                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                                    const std::array<int32_t, 3> &offset, GpuOperations *gpu,
-                                                    bool &assisted) const {
+std::array<Value, 4> TextureInputs::samplePixelQuad(
+    uint32_t opcode, const Register &binding, const Register &samplerBinding, uint32_t dimension,
+    uint32_t returns, const std::array<PixelSamplingInvocation, 4> &invocations,
+    const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
+    GpuOperations *gpu, bool &assisted, const std::array<uint32_t, 3> &precision) const {
     assisted = false;
     if (opcode != 69 && opcode != 70 && opcode != 74)
         throw std::runtime_error("Invalid implicit pixel sampling opcode");
+    if (std::any_of(precision.begin(), precision.end(), [](auto p) { return p > 2; }) ||
+        (opcode == 69 && precision[2]))
+        throw std::runtime_error("Invalid implicit sampling floating-point precision");
     const uint32_t addressMask = dimension == 2                     ? 1
                                  : dimension == 3 || dimension == 7 ? 3
                                  : dimension == 10                  ? 15
@@ -184,7 +185,7 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(uint32_t opcode, const Regis
     const auto &view = views.at(binding);
     auto result =
         gpu->samplePixelQuad(opcode, resources.at(*view.resource), view, samplers.at(samplerBinding),
-                             dimension, returns, batch, swizzle, mask, offset);
+                             dimension, returns, batch, swizzle, mask, offset, precision);
     for (unsigned i = 0; i < 4; ++i)
         result[i].valid = opcode == 69 || (invocations[i].parameter.valid & 1) ? uint8_t(mask) : 0;
     assisted = true;

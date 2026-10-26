@@ -1,3 +1,4 @@
+#include "application/DxbcCheckpointModel.h"
 #include "application/DxbcExecution.h"
 #include "application/DxbcGpuOperations.h"
 #include "application/DxbcTextureInputs.h"
@@ -139,6 +140,10 @@ class DxbcPixelSamplingTests final : public QObject {
     }
   private slots:
     void initTestCase() {
+        if (qEnvironmentVariableIsSet("FLORA_KEEP_PIXEL_SAMPLING_EVIDENCE")) {
+            evidence.setAutoRemove(false);
+            qInfo().noquote() << "Independent sampling evidence:" << evidence.path();
+        }
         for (uint32_t vendor : {0u, 4318u, 32902u}) {
             QProcess probe;
             const auto directory = evidence.filePath(QString::number(vendor));
@@ -262,6 +267,106 @@ class DxbcPixelSamplingTests final : public QObject {
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (uint32_t opcode : {69u, 70u, 74u})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(opcode))) << vendor << opcode;
+    }
+    void minimumPrecision_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<unsigned>("scenario");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (unsigned scenario = 1; scenario <= 6; ++scenario)
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(scenario))) << vendor << scenario;
+    }
+    void minimumPrecision() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(unsigned, scenario);
+        const auto directory = evidence.filePath(QString("precision-%1-%2").arg(vendor).arg(scenario));
+        QProcess probe;
+        probe.start(QCoreApplication::applicationDirPath() + "/FloraPixelSamplingProbe.exe",
+                    {directory, QString::number(vendor), QString::number(scenario)});
+        if (!probe.waitForFinished(60000)) {
+            probe.kill();
+            probe.waitForFinished(5000);
+            QFAIL("Independent precision sampling probe timed out");
+        }
+        QVERIFY2(probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0,
+                 probe.readAllStandardError().constData());
+        const auto report = Json::parse(read(directory + "/results.json"));
+        QCOMPARE(report["cases"].size(), size_t(576));
+        QCOMPARE(report["unexpected_validation_errors"].get<unsigned>(), 0u);
+        std::map<std::string, std::unique_ptr<Program>> original;
+        Json observed = report;
+        observed["scope"] = "native_pixel_sampling_execution";
+        observed["helper"] = helpers.at(vendor)->identity();
+        uint64_t components = 0;
+        size_t caseIndex = 0;
+        for (const auto &item : report["cases"]) {
+            const auto name = item["shader"].get<std::string>();
+            if (!original.contains(name)) {
+                original[name] =
+                    std::make_unique<Program>(read(directory + "/" + QString::fromStdString(name)));
+                unsigned samples = 0;
+                for (const auto &instruction : original.at(name)->instructions()) {
+                    if (instruction.opcode != 69 && instruction.opcode != 70 && instruction.opcode != 74)
+                        continue;
+                    ++samples;
+                    const auto operands = checkpoint::instructionOperands(instruction.words);
+                    const auto precisionAt = [&](size_t index) {
+                        const auto first = operands.ranges.at(index).first;
+                        return instruction.words[first] >> 31 ? (instruction.words[first + 1] >> 14) & 7 : 0u;
+                    };
+                    const auto reduced = scenario >= 5 ? 2u : 1u;
+                    QCOMPARE(precisionAt(0), scenario == 1 || scenario >= 4 ? reduced : 0u);
+                    QCOMPARE(precisionAt(1), scenario == 2 || scenario == 4 || scenario == 6 ? reduced : 0u);
+                    if (instruction.opcode != 69)
+                        QCOMPARE(precisionAt(4),
+                                 scenario == 3 || scenario == 4 || scenario == 6 ? reduced : 0u);
+                }
+                QCOMPARE(samples, 1u);
+            }
+            auto storage = textures(item);
+            std::array<Inputs, 4> input;
+            for (unsigned i = 0; i < 4; ++i) {
+                input[i].gpu = helpers.at(vendor);
+                input[i].textures = storage;
+                for (const auto &bits : item["inputs"])
+                    input[i].constantBuffers[0].push_back(Value::known(bits.get<std::array<uint32_t, 4>>()));
+                input[i].constantBuffers[0].push_back(
+                    Value::known({item["discarded"].get<unsigned>(), 0, 0, 0}));
+                input[i].registers[{1, {0}}] =
+                    Value::known({std::bit_cast<uint32_t>(float(i % 2) + .5f),
+                                  std::bit_cast<uint32_t>(float(i / 2) + .5f), 0, 0x3f800000});
+            }
+            PixelQuad quad(*original.at(name), input, item["coverage"].get<uint8_t>());
+            execute(quad);
+            QCOMPARE(quad.activeMask(),
+                     uint8_t(item["coverage"].get<unsigned>() & ~item["discarded"].get<unsigned>()));
+            auto &observation = observed["cases"][caseIndex++];
+            observation["output"] = Json::array();
+            observation["validity"] = Json::array();
+            for (unsigned i = 0; i < 4; ++i) {
+                const auto actual = quad.lane(i).value({2, {0}});
+                observation["output"].push_back(actual.bits);
+                observation["validity"].push_back(actual.valid);
+                if (!(quad.activeMask() & (1u << i)))
+                    continue;
+                const auto expected = item["output"][i].get<std::array<uint32_t, 4>>();
+                QCOMPARE(actual.valid, uint8_t(15));
+                if (actual.bits != expected)
+                    qInfo().noquote() << QString::fromStdString(
+                        Json{{"case", item}, {"lane", i}, {"actual", actual.bits}, {"expected", expected}}
+                            .dump());
+                QCOMPARE(actual.bits, expected);
+                components += 4;
+            }
+        }
+        QFile file(directory + "/native-results.json");
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+        const auto serialized = observed.dump(2);
+        QCOMPARE(file.write(serialized.data(), qint64(serialized.size())), qint64(serialized.size()));
+        qInfo().noquote() << QString::fromStdString(Json{
+            {"precision_scenario", scenario},
+            {"vendor", vendor},
+            {"cases", report["cases"].size()},
+            {"components", components}}.dump());
     }
     void semantics() {
         QFETCH(uint32_t, vendor);

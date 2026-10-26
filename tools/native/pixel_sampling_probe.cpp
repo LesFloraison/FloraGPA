@@ -1,5 +1,6 @@
 // Independent implicit pixel sampling observations using only public D3D11 interfaces.
 #define NOMINMAX
+#include "core/Dxbc.h"
 #include <array>
 #include <bit>
 #include <chrono>
@@ -64,8 +65,8 @@ struct Configuration {
 };
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 3) {
-        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP\n";
+    if (argc != 3 && argc != 4) {
+        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [PRECISION_SCENARIO_1_TO_6]\n";
         return 2;
     }
     try {
@@ -73,6 +74,9 @@ int wmain(int argc, wchar_t **argv) {
         if (!std::filesystem::create_directory(directory))
             throw std::runtime_error("Output directory must be new");
         const uint32_t vendor = std::stoul(argv[2]);
+        const uint32_t precision = argc == 4 ? std::stoul(argv[3]) : 0;
+        if (precision > 6 || (argc == 4 && precision == 0))
+            throw std::runtime_error("Invalid minimum precision scenario");
         ComPtr<IDXGIAdapter1> selected;
         if (vendor) {
             ComPtr<IDXGIFactory1> factory;
@@ -109,6 +113,7 @@ int wmain(int argc, wchar_t **argv) {
         Json report{{"schema", 1},
                     {"scope", "independent_pixel_sampling"},
                     {"vendor", vendor},
+                    {"precision_scenario", precision},
                     {"adapter_vendor", actual.VendorId},
                     {"adapter_device", actual.DeviceId},
                     {"adapter_luid",
@@ -181,7 +186,10 @@ int wmain(int argc, wchar_t **argv) {
             for (unsigned offset = 0; offset < 2; ++offset)
                 for (const std::string flow : {"uniform", "discard", "reconverge", "loop"}) {
                     const bool comparison = operation == "sample_c";
-                    std::string source = "Texture2D<float4> image:register(t0);";
+                    const std::string reduced = precision >= 5 ? "min10float" : "min16float";
+                    const bool destinationPrecision = precision == 1 || precision >= 4;
+                    std::string source =
+                        "Texture2D<" + (destinationPrecision ? reduced : "float") + "4> image:register(t0);";
                     source += comparison ? "SamplerComparisonState state:register(s0);"
                                          : "SamplerState state:register(s0);";
                     source += "cbuffer Inputs:register(b0){uint4 bits[4];uint discarded;}"
@@ -193,13 +201,89 @@ int wmain(int argc, wchar_t **argv) {
                         source += "[branch]if(i&1)v.xy*=1.5;else v.xy-=0.125;";
                     if (flow == "loop")
                         source += "[loop]for(uint k=0;k<i;++k)v.xy+=float2(0.015625,0.03125);";
-                    source += "return asuint(image.";
-                    source += comparison                ? "SampleCmp(state,v.xy,v.z"
-                              : operation == "sample_b" ? "SampleBias(state,v.xy,v.z"
-                                                        : "Sample(state,v.xy";
-                    source += offset ? ",int2(-1,1)).xxxx);}" : ").xxxx);}";
-                    const auto code = compile(source, "ps_5_0");
+                    const bool addressPrecision = precision == 2 || precision == 4 || precision == 6;
+                    const bool parameterPrecision = precision == 3 || precision == 4 || precision == 6;
+                    if (addressPrecision)
+                        source +=
+                            reduced + "2 coordinates=" + reduced + "2(v.xy)*" + reduced + "2(1.0007,0.9991);";
+                    if (parameterPrecision)
+                        source += reduced + " parameter=" + reduced + "(v.z)*" + reduced + "(1.0007);";
+                    source += (destinationPrecision ? reduced : "float") + "4 sampled=image.";
+                    source += comparison                ? "SampleCmp(state,"
+                              : operation == "sample_b" ? "SampleBias(state,"
+                                                        : "Sample(state,";
+                    source += addressPrecision ? "coordinates" : "v.xy";
+                    if (comparison || operation == "sample_b")
+                        source += parameterPrecision ? ",parameter" : ",v.z";
+                    source += offset ? ",int2(-1,1)).xxxx;" : ").xxxx;";
+                    if (destinationPrecision)
+                        source += "sampled *= " + reduced + "(1.0007);";
+                    source += "return asuint(float4(sampled));}";
+                    auto code = compile(source, "ps_5_0");
                     const auto name = operation + "-" + flow + "-" + std::to_string(offset);
+                    const bool patchedDestination = comparison && (precision == 1 || precision == 5);
+                    if (patchedDestination) {
+                        // FXC promotes a comparison sample with full-precision inputs. Exercise
+                        // the legal reduced destination directly, retaining the compiled source
+                        // and using the owned container codec only for binary serialization.
+                        save(directory / (name + ".compiler.dxbc"), code.Get());
+                        auto parts = flora::readDxbcParts(flora::Bytes(
+                            static_cast<const uint8_t *>(code->GetBufferPointer()), code->GetBufferSize()));
+                        std::vector<uint8_t> programBytes;
+                        unsigned patched = 0;
+                        for (auto &[kind, bytes] : parts)
+                            if (kind == 0x58454853 || kind == 0x52444853) {
+                                auto program = flora::readDxbcProgram(bytes);
+                                std::optional<uint32_t> pendingResult;
+                                for (auto &instruction : program.instructions) {
+                                    if (pendingResult) {
+                                        // The compiled multiply still reads the default-precision
+                                        // register. Read the newly reduced sample with its own precision.
+                                        if ((instruction[0] & 2047) != 56)
+                                            throw std::runtime_error(
+                                                "Unexpected comparison fixture result use");
+                                        const size_t source = instruction.at(1) >> 31 ? 4 : 3;
+                                        if ((instruction.at(source) >> 31) ||
+                                            ((instruction[source] >> 12) & 255) != 0 ||
+                                            instruction.at(source + 1) != *pendingResult)
+                                            throw std::runtime_error("Unexpected comparison fixture source");
+                                        instruction[source] |= 0x80000000u;
+                                        instruction.insert(instruction.begin() + source + 1,
+                                                           1u | ((precision == 5 ? 2u : 1u) << 14));
+                                        instruction[0] = (instruction[0] & 0x80ffffff) |
+                                                         (uint32_t(instruction.size()) << 24);
+                                        pendingResult.reset();
+                                        continue;
+                                    }
+                                    if ((instruction[0] & 2047) != 70)
+                                        continue;
+                                    size_t first = 1;
+                                    while (instruction.at(first - 1) >> 31)
+                                        ++first;
+                                    if ((instruction.at(first) >> 31) ||
+                                        ((instruction.at(first) >> 12) & 255) != 0)
+                                        throw std::runtime_error("Unexpected comparison fixture destination");
+                                    pendingResult = instruction.at(first + 1);
+                                    instruction[first] |= 0x80000000u;
+                                    instruction.insert(instruction.begin() + first + 1,
+                                                       1u | ((precision == 5 ? 2u : 1u) << 14));
+                                    instruction[0] =
+                                        (instruction[0] & 0x80ffffff) | (uint32_t(instruction.size()) << 24);
+                                    ++patched;
+                                }
+                                if (pendingResult)
+                                    throw std::runtime_error("Missing comparison fixture result use");
+                                programBytes = flora::writeDxbcProgram(program);
+                                bytes = programBytes;
+                            }
+                        if (patched != 1)
+                            throw std::runtime_error("Missing comparison fixture sample");
+                        const auto binary = flora::makeDxbc(parts);
+                        ComPtr<ID3DBlob> replacement;
+                        check(D3DCreateBlob(binary.size(), &replacement));
+                        std::memcpy(replacement->GetBufferPointer(), binary.data(), binary.size());
+                        code = replacement;
+                    }
                     save(directory / (name + ".dxbc"), code.Get());
                     ComPtr<ID3DBlob> assembly;
                     check(D3DDisassemble(code->GetBufferPointer(), code->GetBufferSize(), 0, nullptr,
@@ -208,8 +292,10 @@ int wmain(int argc, wchar_t **argv) {
                     ComPtr<ID3D11PixelShader> ps;
                     check(device->CreatePixelShader(code->GetBufferPointer(), code->GetBufferSize(), nullptr,
                                                     &ps));
-                    for (unsigned configuration = 0;
-                         configuration < (comparison ? configurations.size() : 14); ++configuration) {
+                    for (unsigned configuration = 0; configuration < (precision    ? 3
+                                                                      : comparison ? configurations.size()
+                                                                                   : 14);
+                         ++configuration) {
                         const auto &config = configurations[configuration];
                         D3D11_TEXTURE2D_DESC descriptor{
                             8,
@@ -258,8 +344,8 @@ int wmain(int argc, wchar_t **argv) {
                                                     : dataset == 1 ? .03125f
                                                     : dataset == 2 ? .5f
                                                                    : .25f;
-                                const float u = .375f + (i % 2) * scale;
-                                const float v = .375f + (i / 2) * scale;
+                                const float u = .375f + (i % 2) * scale + (precision ? .00137f : 0);
+                                const float v = .375f + (i / 2) * scale + (precision ? .00271f : 0);
                                 const std::array<float, 4> parameters{
                                     u, dataset == 3 && i == 3 ? v + 1 : v,
                                     comparison ? std::array<float, 4>{.125f, .5f, 1.f, 2.f}[i]
@@ -330,6 +416,7 @@ int wmain(int argc, wchar_t **argv) {
                                      {"configuration", configuration},
                                      {"name", config.name},
                                      {"shader", name + ".dxbc"},
+                                     {"patched_comparison_destination", patchedDestination},
                                      {"dataset", dataset},
                                      {"coverage", coverage},
                                      {"discarded", discarded},
