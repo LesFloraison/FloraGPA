@@ -10,7 +10,7 @@ from summarize_dxbc_execution import identity
 from summarize_dxbc_texture_uav import read_run
 
 
-def validate(path, backend="dxbc-gpu/15", execution_model="coherent-pixel-sampling/2"):
+def validate(path, backend="dxbc-gpu/16", execution_model="coherent-pixel-sampling/2"):
     text = path.read_text(encoding="utf-8-sig")
     rows = [json.loads(line[line.index(" {") + 1:]) for line in text.splitlines()
             if line.startswith("QINFO") and " {" in line]
@@ -49,7 +49,7 @@ def validate(path, backend="dxbc-gpu/15", execution_model="coherent-pixel-sampli
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--backend", default="dxbc-gpu/15")
+    parser.add_argument("--backend", default="dxbc-gpu/16")
     parser.add_argument("--execution-model", default="coherent-pixel-sampling/2")
     parser.add_argument("--additional-ctest", action="append", default=[])
     for name in ("log", "out"):

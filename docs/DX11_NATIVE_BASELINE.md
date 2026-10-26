@@ -805,3 +805,24 @@ The timings are not controlled performance acceptance. Further helper-dependent
 operations, additional shapes/formats, captured invocation provenance, helper
 memory semantics, source/debugger integration and full P5-P8 acceptance remain
 open. RenderDoc removal is not complete.
+
+## Native GPU completion checkpoint
+
+`dxbc-gpu/16` shares a bounded deadline across private fence notifications,
+nonblocking staging readback and query completion. Unsupported interfaces retain
+native polling on the same adapter. The final 22-suite matrix passes 7,958 tests
+with zero failures/skips, including both explicit polling and automatic event
+paths on WARP, NVIDIA and Intel. GUI, CLI and Worker Release builds pass.
+`DX11_DXBC_GPU_COMPLETION.md` records the original header-macro build failure,
+cold handle-count assumption, short synthetic deadline failure, completed-operation
+controls and the interrupted/resumed test evidence without changing old goldens.
+
+BF1 event 209's selected compute group completes 14,992 steps and 2,000 GPU
+operations. Helldivers event 893's 384-step single dispatch matches its independently
+replayed resource output and preserves observed inputs. These results do not
+establish arbitrary captured shader or debugger UI parity. Ten strict evidence
+gates and ten negative evidence checks pass; the source, binary, test and captured
+execution ledger is `research/dx11-dxbc-gpu-completion-evidence.json`.
+Application performance, actual unsupported-driver/older-OS execution, device
+removal, full fragment history, debugger integration and standalone release gates
+remain open.

@@ -1,5 +1,6 @@
 #pragma once
 #include "DxbcExecution.h"
+#include "DxbcGpuCompletion.h"
 #include <nlohmann/json.hpp>
 struct ID3D11Device;
 
@@ -55,7 +56,8 @@ class GpuOperations {
   public:
     // Creates a separate device on the reference device's exact adapter. WARP
     // must be explicitly requested; no fallback or reference-context use occurs.
-    GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled = {}, uint32_t timeoutMs = 5000);
+    GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled = {}, uint32_t timeoutMs = 5000,
+                  GpuCompletionMode = GpuCompletionMode::Automatic);
     ~GpuOperations();
     nlohmann::json identity() const;
     uint64_t operations() const;

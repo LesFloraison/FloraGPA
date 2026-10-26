@@ -558,3 +558,14 @@ comparison-sampler rejections, and 19 semantic/recovery checks. The implementati
 preserves per-pixel operands, unknown validity, trace changes and private snapshots.
 See `DX11_DXBC_PIXEL_SAMPLING.md`. Additional shapes/formats, captured invocations,
 helper memory behavior and full debugger/source integration remain required.
+
+## Native completion continuation
+
+`dxbc-gpu/16` uses bounded private fence events where supported and retains native
+polling otherwise. All staging and query readbacks share an operation deadline;
+failure poisons the helper. Both paths pass cancellation, handle lifetime,
+multi-subresource and VS/PS/CS checks. The 22 affected suites pass 7,958 tests;
+captured BF1 group execution and Helldivers single-dispatch resource comparison
+also pass. See `DX11_DXBC_GPU_COMPLETION.md`. This checkpoint does not enable the
+currently reserved native debug actions or close any full debugger/history or
+standalone release gate.

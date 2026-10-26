@@ -1,0 +1,793 @@
+{
+  "final": {
+    "path": "artifacts/dx11-native/gpu-completion-final.txt",
+    "sha256": "de44cb96f004aa7760260c8f46e85a9c0bfc308e86e326d71bd7c66cfbe29e2c",
+    "completed": true,
+    "totals_present": true,
+    "unhandled_exception": false,
+    "passed": 39,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 34781,
+    "failures": [],
+    "unit_cases": []
+  },
+  "readback_cases": 6,
+  "stage_cases": 18,
+  "cancelled_submissions": 384,
+  "fresh_retries": 384,
+  "lifetime_controls": 192,
+  "unit_cases": [
+    "deadlines(0-event)",
+    "deadlines(0-poll)",
+    "deadlines(32902-event)",
+    "deadlines(32902-poll)",
+    "deadlines(4318-event)",
+    "deadlines(4318-poll)",
+    "invalid()"
+  ],
+  "schema": 1,
+  "scope": "native_gpu_completion",
+  "validation_passed": true,
+  "complete_release_acceptance": false,
+  "process_recovery_acceptance": false,
+  "device_removal_simulated": false,
+  "unsupported_driver_tested": false,
+  "regressions": [
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-pixel-sampling.txt",
+      "sha256": "2687dbc545f381b6834b3d4ddffeae6b58507cc86dfc32db13e0a2a120ab9d2c",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 168,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 99978,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-pixel-quad.txt",
+      "sha256": "4d22432f88566facc4a39c63f31a1eb0150dfd16cdc41514781fad5ffbfd9a67",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 1022,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 11455,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-sample-comparison.txt",
+      "sha256": "c6fdc3dcef607346b0c574eb489b8cf93e2b1c05ff8c4a2e2e80b1087697d757",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 190,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 116468,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-sampling-group.txt",
+      "sha256": "6d3d446c0f147ecc453a01f7fe3b46b8b506d534c39bc67364cf238f9e5a7c4e",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 34078,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-sample-grad.txt",
+      "sha256": "df86184bc0435358cd0eb035a7643b8e2f90b897a78fa335875a3a085e750c4e",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 262,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 64292,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-sample-level.txt",
+      "sha256": "d2bc2f8b399286a67c06d0973a63cd25799c030dce68e1192ddb96eb29d35b32",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 156,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 59747,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-sample-query.txt",
+      "sha256": "a119d59826c298afdcc11baea38f3a9c27b23f0b974f7ef66f172a58b3fe2273",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 64004,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-multisample.txt",
+      "sha256": "eb0c447565a3e903c160714a90c04fb9fa63fca01b45b7045e9fb9d3a5f3ec98",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 105,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 20253,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-texture-uav.txt",
+      "sha256": "e92ae64133a60185aa6db11165a5fa4b0b51c70dbc71f685aa9c0caed9ba5653",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 765,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 95842,
+      "failures": [],
+      "unit_cases": [
+        "validityAndTransactions(packed-shared-bytes)",
+        "validityAndTransactions(missing-default-components)",
+        "validityAndTransactions(independent-rg-channels)",
+        "cancellationAndRecovery()",
+        "cooperativeAndRollback(0)",
+        "cooperativeAndRollback(4318)",
+        "cooperativeAndRollback(32902)"
+      ]
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-resource-info.txt",
+      "sha256": "9c556d274431e5dfbd87fdc3613475cd6f803080e1a8d226a81ab6fd35cf1328",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 629,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 78236,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-texture-load.txt",
+      "sha256": "d64f1e0d26e78d306425ac0f65ef0b5f6e97b9cc77fccffe09b923b6127b8401",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 1445,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 196122,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-texture-input.txt",
+      "sha256": "69a72e8b3aa2ece855b31f32d2eb826e42587ddde9957f813f8968f085bac8f8",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 9485,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-typed-pixel.txt",
+      "sha256": "f26061484da185a3c0a7a4a9a678bb25be8f4f2daf4f26cb3e3df66c0c1e0e05",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 58680,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-typed-vertex.txt",
+      "sha256": "9a717e147856366cf244d2c22e4d00ebb68d426f5a8ba1f3321c3bb0775d97c6",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 55696,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-typed-buffer.txt",
+      "sha256": "251634e29cd47a02b9a44c7e208221cf58fa0301103eebb48bf98f2cce50e401",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 473,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 59695,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-input-snapshot.txt",
+      "sha256": "3f0ad63203de197cf4dc0fb8f035a982d89734df8dfbbb7a7d27c3e7642a8573",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 7783,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-counter.txt",
+      "sha256": "24c43f39b45a886021b0edfb6b79356f5941458b36af8acfbefa3b9898c9ab42",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 3227,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-group.txt",
+      "sha256": "1ef90fb67c0063dfcc144681fe3a9486fc886b01d5924a7d1f089c9f24fafcc1",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 2517,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-memory.txt",
+      "sha256": "d34d881353ca568d82c82d3e7ac7b1f3ec5cec45862cd137c9670fb81554a944",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 246,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 22308,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-execution.txt",
+      "sha256": "8f2ae796b656aecf40753bbcdd09a45d8c3ea8cb581b96a0e88022017a02a6a8",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 375,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 31486,
+      "failures": [],
+      "unit_cases": []
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-regression-format.txt",
+      "sha256": "d008aa2e7ad329fc5412b7022a3aeac91e58f272a81a5b0c3c54ddc3ecccd426",
+      "completed": true,
+      "totals_present": true,
+      "unhandled_exception": false,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_ms": 21,
+      "failures": [],
+      "unit_cases": []
+    }
+  ],
+  "captured_executions": [
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-captured-bf1.json",
+        "sha256": "f371cb0c319d0b8f7f4cce88d92e934a9e4c33d5dae933765b57ab33f45e35b1"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 209,
+      "shader": 190,
+      "execution": {
+        "attempted": true,
+        "buffers_after": [
+          {
+            "resource": 35,
+            "sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+            "validity_sha256": "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02"
+          }
+        ],
+        "completed": true,
+        "dispatch_arguments": [
+          2,
+          2,
+          1
+        ],
+        "elapsed_ms": 2380,
+        "gpu_operations": 2000,
+        "group": [
+          0,
+          0,
+          0
+        ],
+        "helper": {
+          "backend": "dxbc-gpu/16",
+          "completion_wait": "fence-event/1",
+          "device_id": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "vendor_id": 4318,
+          "warp": false
+        },
+        "last_completed_step": {
+          "instruction": 67,
+          "lane": 255,
+          "word_offset": 435
+        },
+        "model": "bounded-sampling-rendezvous/3",
+        "native_output_parity_verified": false,
+        "step_limit": 100000,
+        "steps": 14992,
+        "texture_write_bytes": 11904,
+        "texture_writes": 1488,
+        "textures_after": [
+          {
+            "bytes": 8192,
+            "known_bytes": 8192,
+            "resource": 193,
+            "sha256": "2a8a273b46101ecb32209a0c6149f9e47af4e313bdedb6660773d276d523cf16",
+            "validity_sha256": "6ba042a6672c64272ce75901468fd210026cd674fe9f1e11b46c9302e47e2136"
+          },
+          {
+            "bytes": 8192,
+            "known_bytes": 8192,
+            "resource": 197,
+            "sha256": "286d68139e77fd4398929311cf802510b6cc956db67dcf9875774d607a50d552",
+            "validity_sha256": "6ba042a6672c64272ce75901468fd210026cd674fe9f1e11b46c9302e47e2136"
+          },
+          {
+            "bytes": 8192,
+            "known_bytes": 8192,
+            "resource": 201,
+            "sha256": "ebe20ab3e1ac68d61b11bf547c8f862ec987f4f04e82d114b1b91120ff2ad903",
+            "validity_sha256": "6ba042a6672c64272ce75901468fd210026cd674fe9f1e11b46c9302e47e2136"
+          },
+          {
+            "bytes": 8192,
+            "known_bytes": 8192,
+            "resource": 243,
+            "sha256": "a08f7a8e82392bab2ab3245253e3d941544fa419a0b70afff0f7ea246ccee658",
+            "validity_sha256": "6ba042a6672c64272ce75901468fd210026cd674fe9f1e11b46c9302e47e2136"
+          }
+        ],
+        "thread_group_size": [
+          16,
+          16,
+          1
+        ],
+        "timeout_ms": 30000
+      }
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/gpu-completion-captured-hd.json",
+        "sha256": "f29b3551b7437c4c2e306deec99a43da14b0a49d0a3fc074acc0bbbf89ec8367"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 893,
+      "shader": 891,
+      "execution": {
+        "attempted": true,
+        "buffers_after": [],
+        "completed": true,
+        "dispatch_arguments": [
+          1,
+          1,
+          1
+        ],
+        "elapsed_ms": 13,
+        "gpu_operations": 64,
+        "group": [
+          0,
+          0,
+          0
+        ],
+        "helper": {
+          "backend": "dxbc-gpu/16",
+          "completion_wait": "fence-event/1",
+          "device_id": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 49408,
+          "luid_high": 0,
+          "luid_low": 68403,
+          "vendor_id": 4318,
+          "warp": false
+        },
+        "last_completed_step": {
+          "instruction": 12,
+          "lane": 63,
+          "word_offset": 51
+        },
+        "model": "bounded-sampling-rendezvous/3",
+        "native_comparison": {
+          "attempted": true,
+          "elapsed_ms": 102,
+          "matching_native_inputs": true,
+          "multisample_inputs_checked": 0,
+          "original_observed_resources_unchanged": true,
+          "passed": true,
+          "resources": [
+            {
+              "bytes": 256,
+              "equal": true,
+              "expected_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+              "native_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+              "resource": 886
+            }
+          ],
+          "sample_queries_checked": 0,
+          "samplers_checked": 16,
+          "scope": "single_direct_dispatch_observed_resources"
+        },
+        "native_output_parity_verified": true,
+        "step_limit": 100000,
+        "steps": 384,
+        "texture_write_bytes": 256,
+        "texture_writes": 64,
+        "textures_after": [
+          {
+            "bytes": 256,
+            "known_bytes": 256,
+            "resource": 886,
+            "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+            "validity_sha256": "2661920f2409dd6c8adeb0c44972959f232b6429afa913845d0fd95e7e768234"
+          }
+        ],
+        "thread_group_size": [
+          8,
+          8,
+          1
+        ],
+        "timeout_ms": 30000
+      }
+    }
+  ],
+  "total_passed": 7958,
+  "performance": {
+    "current": [
+      {
+        "path": "artifacts/dx11-native/gpu-completion-interrupted-ctest.txt",
+        "sha256": "e4796804ad8d27b08e3fbca5adea0423298e64a9a0b50565015971a7aa40bb34"
+      },
+      {
+        "path": "artifacts/dx11-native/gpu-completion-resumed-ctest.txt",
+        "sha256": "de6bc31e5fab1d242b33fd6fd59505bdba755af29be5a70653178325a0fcb204"
+      }
+    ],
+    "baseline": {
+      "path": "artifacts/dx11-native/pixel-sampling-final-ctest.txt",
+      "sha256": "70912f368fbe5424283166e27ec9944b494fc0ff3471aaa549c9b3e8729a2bcb"
+    },
+    "current_seconds": {
+      "dxbc_gpu_completion": 34.85,
+      "dxbc_pixel_sampling": 100.1,
+      "dxbc_pixel_quad": 11.56,
+      "dxbc_sample_comparison": 116.61,
+      "dxbc_sampling_group": 34.32,
+      "dxbc_sample_grad": 64.55,
+      "dxbc_sample_level": 59.9,
+      "dxbc_sample_query": 64.12,
+      "dxbc_multisample": 20.4,
+      "dxbc_texture_uav": 96.55,
+      "dxbc_resource_info": 78.69,
+      "dxbc_texture_load": 197.41,
+      "dxbc_texture_input": 9.61,
+      "dxbc_typed_pixel": 58.97,
+      "dxbc_typed_vertex": 56.04,
+      "dxbc_typed_buffer": 60.26,
+      "dxbc_input_snapshot": 7.86,
+      "dxbc_counter": 3.29,
+      "dxbc_group": 2.56,
+      "dxbc_memory": 22.62,
+      "dxbc_execution": 31.69,
+      "dxbc_format": 0.06
+    },
+    "baseline_seconds": {
+      "dxbc_pixel_sampling": 283.78,
+      "dxbc_pixel_quad": 25.92,
+      "dxbc_sample_comparison": 607.33,
+      "dxbc_sampling_group": 35.81,
+      "dxbc_sample_grad": 168.74,
+      "dxbc_sample_level": 127.86,
+      "dxbc_typed_pixel": 58.76,
+      "dxbc_group": 2.53,
+      "dxbc_execution": 32.27
+    },
+    "ratios": {
+      "dxbc_pixel_sampling": 0.35273803650715346,
+      "dxbc_pixel_quad": 0.44598765432098764,
+      "dxbc_sample_comparison": 0.1920043468954275,
+      "dxbc_sampling_group": 0.9583915107511868,
+      "dxbc_sample_grad": 0.38254118762593337,
+      "dxbc_sample_level": 0.4684811512591897,
+      "dxbc_typed_pixel": 1.00357385976855,
+      "dxbc_group": 1.0118577075098816,
+      "dxbc_execution": 0.9820266501394483
+    },
+    "controlled_comparison": false,
+    "performance_acceptance": false
+  },
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "e3ac6846ba1a673778bc2a60c70bcf26ce3b5a1df0d7bb8209719d34044e113d"
+    },
+    {
+      "path": "src/application/DxbcGpuCompletion.cpp",
+      "sha256": "a910314cfe0abe020c1248931e0ca881fbc94e81319ef090c1baf55fcfc6384e"
+    },
+    {
+      "path": "src/application/DxbcGpuCompletion.h",
+      "sha256": "8a93406267e871895d799fd60d715c8140baa09f39d61ca5ca5deda295b7af37"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "sha256": "02fa3d05deedee0d34822fcf35ffe1a42333e832320c2268b8aac4ecac13afa0"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "sha256": "db360aaa1a44a5d81df41b0f40643c28d977503213cfdd314ea50ae13b30e07e"
+    },
+    {
+      "path": "tests/DxbcCounterTests.cpp",
+      "sha256": "1c64d497a26ccba6d782448aa936fd7844c99d3df0e7c6969b30891e50d48ace"
+    },
+    {
+      "path": "tests/DxbcExecutionTests.cpp",
+      "sha256": "69b508e3fffd1194cb75aac21c06329c39ef0488985af79fab0e545ef2103a1d"
+    },
+    {
+      "path": "tests/DxbcFormatTests.cpp",
+      "sha256": "a1a14791ae7262bf1e12968ab9ef0306f71048f72471eb24a4c5e1f17d83819d"
+    },
+    {
+      "path": "tests/DxbcGpuCompletionTests.cpp",
+      "sha256": "be6f4aa7787d40ff5d5d9f119cf4e252fbe4bbfc36c6edaf5e5237fb29863f82"
+    },
+    {
+      "path": "tests/DxbcGroupTests.cpp",
+      "sha256": "3ef7f32ab8fa14769f903db2553eb2bb35055d8019606d87d8ea07e3a6a4f285"
+    },
+    {
+      "path": "tests/DxbcInputSnapshotTests.cpp",
+      "sha256": "1aa4dbea500966d721a5ecf196c3495b955c1b37100271e2cc292b57a52e5d5c"
+    },
+    {
+      "path": "tests/DxbcMemoryTests.cpp",
+      "sha256": "917ef3c399096080d6e882cd6b663dfc8c6ac149011176be13a55603441b89ad"
+    },
+    {
+      "path": "tests/DxbcMultisampleTests.cpp",
+      "sha256": "675c1ef524ef048e569a3c2a9b0d2c8db50b2c9c08a42ea6f4f35e700791a6bf"
+    },
+    {
+      "path": "tests/DxbcPixelQuadTests.cpp",
+      "sha256": "198559585092cedb395aec48dd501842685ee02971d10578d525a42a1827da44"
+    },
+    {
+      "path": "tests/DxbcPixelSamplingTests.cpp",
+      "sha256": "fcbd0714768e0cd56f940b20ca9491e9c7b517f8bc672bc29292c8af29f52261"
+    },
+    {
+      "path": "tests/DxbcResourceInfoTests.cpp",
+      "sha256": "28e3a23b6365d425eb9ddc31c90e1410fa84e986be182fee9a9c41903c48bc15"
+    },
+    {
+      "path": "tests/DxbcSampleComparisonTests.cpp",
+      "sha256": "afb34a59ca33189fe0b2c61c622a9e79a7b1919db74f988965b337fb5c1c882e"
+    },
+    {
+      "path": "tests/DxbcSampleLevelTests.cpp",
+      "sha256": "c25514183bd2b24121a0d42c682fa770f4dc7cf856fdfb6b6e8452f60eeb4e6d"
+    },
+    {
+      "path": "tests/DxbcSampleQueryTests.cpp",
+      "sha256": "aa521f6233691c0a5deebd979c227856b518438a31aeaa42fc22cc40acbbc743"
+    },
+    {
+      "path": "tests/DxbcSamplingGroupTests.cpp",
+      "sha256": "5e9aed4f69b219eb384eb304110a8048bd29db94286912a2f04303abb984e27c"
+    },
+    {
+      "path": "tests/DxbcTextureInputTests.cpp",
+      "sha256": "4179112baf8d06fbe6fd933ed7f993883f1dd778b706e66802bf969299418889"
+    },
+    {
+      "path": "tests/DxbcTextureLoadTests.cpp",
+      "sha256": "c49b7b64c10cf0269c342f3ab57a568962fbef7ccede91081008d57436b8ab12"
+    },
+    {
+      "path": "tests/DxbcTextureUavTests.cpp",
+      "sha256": "4b3a8a643bef743f7aa6d45621c35dcf628fd2e672036e1600136c72ea0a1b8b"
+    },
+    {
+      "path": "tests/DxbcTypedBufferTests.cpp",
+      "sha256": "90e5bb30c5f37f1ec51faee20a4f954e4cc82142b06076d9320f8edd6737f17f"
+    },
+    {
+      "path": "tests/DxbcTypedPixelTests.cpp",
+      "sha256": "175c7fe959b6335bdfb40f600175f52aa74174b0e2ff3e8481b7ec095b1c6501"
+    },
+    {
+      "path": "tests/DxbcTypedVertexTests.cpp",
+      "sha256": "67e97feba996653658278dc12a90bea4fd223024b90424ac5b681654bca127eb"
+    },
+    {
+      "path": "tools/summarize_dxbc_gpu_completion.py",
+      "sha256": "0d66dd64388359f5e34e540c8bd3803c49b9e605bc7634cb96f2170fb08ea267"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_quad.py",
+      "sha256": "33785af822fca88a07ef79bb57b2d106ba61a94d3e02e53a0df3f82e1aaf8965"
+    },
+    {
+      "path": "tools/summarize_dxbc_pixel_sampling.py",
+      "sha256": "8562993bc552d3b9f1b09bd34594dfcb28f56ffe38caf11302c31dd5e973be04"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_comparison.py",
+      "sha256": "2af6b9d6848d801a26d9e00481b3421a6a006be982d7ed9a5e4b1362b50e9ab1"
+    },
+    {
+      "path": "tools/summarize_dxbc_sample_level.py",
+      "sha256": "67756a9ea31055155a8d0c5e131ea5e1d205b34f683009de7af366ad51bf5139"
+    },
+    {
+      "path": "tools/summarize_dxbc_sampling_groups.py",
+      "sha256": "9c2c47a321958d9164c31714d73b71dc96bcd483898d65bbbdf639fb0602f202"
+    },
+    {
+      "path": "tools/probe_dxbc_inputs.cpp",
+      "sha256": "056478f62032986cf4b414f1561fddadf25e3a9505f49aab8e1089580eb21ddd"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "sha256": "47b6b9a1472a71ff9c2bec0c63a746c41df9c9a8bc3f5d7b8f39baa68f1f4b17"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "sha256": "4f1240dc95fc78bc76f045d426113c27d29ec9334e3ec4192e33b31fdeaac2d2"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "sha256": "dd895fd22df9502a9a3bffd6b5a827ae184cb414babc4aeacabfd2f2512ba61b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcGpuCompletionTests.exe",
+      "sha256": "afe476d0b744f1c166cd2eb98fdd483a1391f17b08bf1b6275496d9c4b3dc09e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
+      "sha256": "2d0fbad8043868d4b02401a136afaa10af7f0b609c0f28e36497fccd305caf86"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/gpu-completion-sample_grad-gate.json",
+      "sha256": "89afa9a624845a6e2f3f03f8bda6c680a3f85337f3a7d13f593b1d5e1515a01b"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-sample_level-gate.json",
+      "sha256": "d4a98c88429d2979d14d0e000b673bf50f722e6f234803af9fbc5e6ac71edce7"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-texture_uav-gate.json",
+      "sha256": "aa25e900fa8c1c08d860011a9d6c805f5fd8ff5617b94a3ff81c06c449c8745c"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-resource_info-gate.json",
+      "sha256": "b7e3aa0197ce80253c64d31f7f436dfe251c5150ded5eba2c2507a8e28c2371c"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-texture_load-gate.json",
+      "sha256": "be822ffe8d98906a8a808b86bba9a64d9c367561634f48bd3bdbc77b0e9d9033"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-sample_comparison-gate.json",
+      "sha256": "98759e1c4daea71513c1bfd9cc2e306ba42c83e894f5b2e40cfe366747c184b9"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-sampling_group-gate.json",
+      "sha256": "76749f04ead6a8ef3af807fa326dfefbcc0a9abb03b37e2c63f91f8852a0ad02"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-pixel_quad-gate.json",
+      "sha256": "04471dda91d2ba5586ca3d2e4cedd1ccfb3a97c8e0fc0c2825e69b778e6df0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-pixel_sampling-gate.json",
+      "sha256": "dbee55981f3a9d304ec116a03529c0a4c501e5f2be2268ce604764ede18f573a"
+    },
+    {
+      "path": "docs/research/dx11-gpu-completion-observations.json",
+      "sha256": "8c524ae2764ff6977dc4ac24fe38bb3ca04016264d552dfb676b993ed5ca6a3a"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-release-build.txt",
+      "sha256": "64c6346a7c5548473627da4610f2c7f0ca6f71a972b28f42c45b0a85a6c28e5b"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-integration-build.txt",
+      "sha256": "2bc27e6e3e854e7d626a2219842de05b680e1234419b0a937ac2694582df99da"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-first.txt",
+      "sha256": "7d0a26dd823c24ede2c34d2ace669c27cd9544dd694b76984ff3eb0264477d35"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-diagnostic.txt",
+      "sha256": "13c4cf93caf0ef81bfd7b6e09fd0bbb620e7f98adc2618c8d8a9da11ae94bb84"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-lifetime.txt",
+      "sha256": "07fed4d08bd205d92d56615eacc6398ef644abccd18c244cd8c425907d70d079"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-control.txt",
+      "sha256": "ace19c9710fce27bb6f0afc42e15386464210194417d88e47646a598d4648b9e"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-execution-negative.json",
+      "sha256": "f0355f2cf1193f594422e4b3e4bde79b4c57a8c16dc4a74a2751d64bfdc23102"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-prior-counts.json",
+      "sha256": "338bccbee20bcdd00e488b49761a16c4453e196ff0b545e3097888eac70c5108"
+    },
+    {
+      "path": "artifacts/dx11-native/gpu-completion-interrupted-sample-grad.txt",
+      "sha256": "fadc48b8cdd019962699335aa545b8806eb60679546099a3a6564f9f330b42a6"
+    }
+  ]
+}

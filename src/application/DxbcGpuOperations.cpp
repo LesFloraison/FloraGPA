@@ -1,4 +1,5 @@
 #include "DxbcGpuOperations.h"
+#include "DxbcGpuCompletion.h"
 #include "DxbcCheckpointModel.h"
 #include "DxbcTextureInputs.h"
 #include "DxbcTypedBuffer.h"
@@ -8,10 +9,8 @@
 #include "replay/Replay.h"
 #include <algorithm>
 #include <bit>
-#include <chrono>
 #include <d3d11sdklayers.h>
 #include <dxgi.h>
-#include <thread>
 
 namespace flora::dxbc_exec {
 namespace {
@@ -207,7 +206,7 @@ struct GpuOperations::State {
     DXGI_ADAPTER_DESC description{};
     LARGE_INTEGER driver{};
     CancelCheck cancelled;
-    uint32_t timeoutMs;
+    std::unique_ptr<GpuCompletion> completion;
     uint64_t count = 0;
     bool failed = false, warp = false, debug = false;
     Value vertex(const Words &words, const std::vector<Value> &constants,
@@ -267,21 +266,8 @@ struct GpuOperations::State {
             context->Draw(1, 0);
             context->ClearState();
             context->CopyResource(staging.Get(), output.Get());
-            context->Flush();
-            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            for (;;) {
-                checkCancellation(cancelled);
-                const auto hr =
-                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (hr == S_OK)
-                    break;
-                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                    check(hr, "Read native instruction result");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native instruction operation timed out");
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+            completion->submit();
+            const auto mapped = completion->map(staging.Get());
             Value result;
             std::memcpy(result.bits.data(), mapped.pData, 16);
             context->Unmap(staging.Get(), 0);
@@ -395,21 +381,8 @@ struct GpuOperations::State {
             context->End(coverage.Get());
             context->ClearState();
             context->CopyResource(staging.Get(), output.Get());
-            context->Flush();
-            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            for (;;) {
-                checkCancellation(cancelled);
-                const auto hr =
-                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (hr == S_OK)
-                    break;
-                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                    check(hr, "Read native pixel result");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native pixel operation timed out");
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+            completion->submit();
+            const auto mapped = completion->map(staging.Get());
             std::array<Value, 4> result;
             for (UINT y = 0; y < dimension; ++y)
                 for (UINT x = 0; x < dimension; ++x)
@@ -418,17 +391,7 @@ struct GpuOperations::State {
                                 16);
             context->Unmap(staging.Get(), 0);
             UINT64 samples = 0;
-            for (;;) {
-                checkCancellation(cancelled);
-                const auto hr = context->GetData(coverage.Get(), &samples, sizeof samples,
-                                                 D3D11_ASYNC_GETDATA_DONOTFLUSH);
-                if (hr == S_OK)
-                    break;
-                check(hr, "Read native pixel coverage");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native pixel coverage timed out");
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+            completion->query(coverage.Get(), &samples, sizeof samples);
             if (samples != dimension * dimension)
                 throw std::runtime_error("Native pixel assist did not cover the requested samples");
             if (debug) {
@@ -740,21 +703,8 @@ struct GpuOperations::State {
             context->Dispatch(1, 1, 1);
             context->ClearState();
             context->CopyResource(staging.Get(), output.Get());
-            context->Flush();
-            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            for (;;) {
-                checkCancellation(cancelled);
-                const auto hr =
-                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (hr == S_OK)
-                    break;
-                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                    check(hr, "Read native texture load result");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native texture load timed out");
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+            completion->submit();
+            const auto mapped = completion->map(staging.Get());
             std::vector<Value> result(resultCount);
             for (UINT i = 0; i < resultCount; ++i)
                 std::memcpy(result[i].bits.data(), static_cast<const uint8_t *>(mapped.pData) + i * 16, 16);
@@ -897,22 +847,9 @@ struct GpuOperations::State {
             context->Dispatch(1, 1, 1);
             context->ClearState();
             context->CopyResource(staging.Get(), store ? resource.Get() : output.Get());
-            context->Flush();
-            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+            completion->submit();
             std::vector<uint8_t> result(bytes);
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            for (;;) {
-                checkCancellation(cancelled);
-                const auto hr =
-                    context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (hr == S_OK)
-                    break;
-                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                    check(hr, "Read native buffer operation result");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native buffer operation timed out");
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+            const auto mapped = completion->map(staging.Get());
             std::memcpy(result.data(), mapped.pData, bytes);
             context->Unmap(staging.Get(), 0);
             if (debug) {
@@ -938,14 +875,14 @@ struct GpuOperations::State {
         }
     }
 };
-GpuOperations::GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled, uint32_t timeoutMs)
+GpuOperations::GpuOperations(ID3D11Device *reference, bool warp, CancelCheck cancelled, uint32_t timeoutMs,
+                             GpuCompletionMode mode)
     : state_(std::make_unique<State>()) {
     if (!reference || !timeoutMs || timeoutMs > 60000)
         throw std::invalid_argument("Invalid native memory assist configuration");
     auto &s = *state_;
     s.warp = warp;
     s.cancelled = std::move(cancelled);
-    s.timeoutMs = timeoutMs;
     checkCancellation(s.cancelled);
     Com<IDXGIAdapter> original;
     const auto expected = adapter(reference, original);
@@ -965,6 +902,7 @@ GpuOperations::GpuOperations(ID3D11Device *reference, bool warp, CancelCheck can
         throw std::runtime_error("Native memory assist adapter differs from the reference adapter");
     check(actual->CheckInterfaceSupport(__uuidof(IDXGIDevice), &s.driver),
           "Read native memory assist driver identity");
+    s.completion = std::make_unique<GpuCompletion>(s.device.Get(), s.context.Get(), s.cancelled, timeoutMs, mode);
 }
 GpuOperations::~GpuOperations() = default;
 nlohmann::json GpuOperations::identity() const {
@@ -976,7 +914,8 @@ nlohmann::json GpuOperations::identity() const {
             {"driver_version", s.driver.QuadPart},
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
-            {"backend", "dxbc-gpu/15"}};
+            {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
+            {"backend", "dxbc-gpu/16"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1215,28 +1154,8 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         s.context->ClearState();
         ID3D11Resource *staging = store ? textureStaging.Get() : s.textureUavStaging.Get();
         s.context->CopyResource(staging, store ? texture.Get() : s.textureUavOutput.Get());
-        s.context->Flush();
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(s.timeoutMs);
-        const auto yieldUntil = std::chrono::steady_clock::now() + std::chrono::microseconds(500);
-        auto map = [&](uint32_t subresource) {
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            for (;;) {
-                checkCancellation(s.cancelled);
-                const auto hr =
-                    s.context->Map(staging, subresource, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (hr == S_OK)
-                    return mapped;
-                if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                    check(hr, "Read native texture UAV result");
-                if (std::chrono::steady_clock::now() >= deadline)
-                    throw std::runtime_error("Native texture UAV operation timed out");
-                // Avoid a coarse scheduler tick for short copies; keep busy polling bounded.
-                if (std::chrono::steady_clock::now() < yieldUntil)
-                    std::this_thread::yield();
-                else
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
-        };
+        s.completion->submit();
+        auto map = [&](uint32_t subresource) { return s.completion->map(staging, subresource, true); };
         std::pair<Value, std::vector<uint8_t>> result;
         if (store) {
             result.second.resize(input.storage.bytes.size());
@@ -1380,21 +1299,8 @@ Value GpuOperations::textureDimensions(const TextureMetadata &input, const Textu
         s.context->Dispatch(1, 1, 1);
         s.context->ClearState();
         s.context->CopyResource(staging.Get(), output.Get());
-        s.context->Flush();
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(s.timeoutMs);
-        D3D11_MAPPED_SUBRESOURCE mapped{};
-        for (;;) {
-            checkCancellation(s.cancelled);
-            const auto hr =
-                s.context->Map(staging.Get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-            if (hr == S_OK)
-                break;
-            if (hr != DXGI_ERROR_WAS_STILL_DRAWING)
-                check(hr, "Read native resource query result");
-            if (std::chrono::steady_clock::now() >= deadline)
-                throw std::runtime_error("Native resource query timed out");
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
+        s.completion->submit();
+        const auto mapped = s.completion->map(staging.Get());
         Value result = Value::known({});
         std::memcpy(result.bits.data(), mapped.pData, 16);
         s.context->Unmap(staging.Get(), 0);
