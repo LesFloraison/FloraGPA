@@ -754,3 +754,14 @@ on NVIDIA, Intel and WARP. See `research/DX11_PIXEL_OUTPUT_PRECISION.md` for
 evidence and limits, including the large Helldivers journal and unavailable
 source symbols. Original fragment qualification, remaining semantics, public PS
 sessions, source/UI parity and complete history remain required before P7/P8.
+
+## Original debugger GPU-selection research continuation
+
+Ghidra and an independent predicate probe establish the original GPU-ID layout;
+research probes now compare the requested enumeration record with the actual
+replay device. Ten explicit NVIDIA/Intel lifecycles complete with null debugger
+objects. Two Helldivers/Intel lifecycles hit the unchanged watch deadline and
+remain failed evidence, with their distinct replay/teardown phases preserved.
+See `research/DX11_DEBUGGER_EXPLICIT_GPU.md`. Explicit Intel selection does not
+recover the debugger engine or close P1, and this research adds no GPA product
+dependency.

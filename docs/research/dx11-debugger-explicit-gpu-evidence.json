@@ -1,0 +1,515 @@
+{
+  "schema": 1,
+  "scope": "Explicit GPU selection and bounded original debugger lifecycles",
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "complete_release_acceptance": false,
+  "installed_player_unchanged": true,
+  "manifests": [
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/runs.json",
+      "bytes": 14421,
+      "sha256": "80da2830241f35354c5eda1d19208e41ea080dfcf4d2a8a943e319766b9fc243"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/supplemental/runs.json",
+      "bytes": 3303,
+      "sha256": "c5a28ee28123b7b6f07cc8aeea3f009c3484e9299368496f959ac8b6f8f5a768"
+    }
+  ],
+  "calibrations": [
+    {
+      "name": "calibration-0",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/calibration-0.json",
+        "bytes": 15906,
+        "sha256": "5058724a933c54f1c9c4eeb2f8543a52ea45b615af7e9c5f8f70b87cdb030fc1"
+      },
+      "elapsed_ms": 16,
+      "field_writes": 36,
+      "live_nonzero": 17
+    },
+    {
+      "name": "calibration-1",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/calibration-1.json",
+        "bytes": 16076,
+        "sha256": "da30aee7d6a9c77526e783d9f030686bcba7a87cdd43d558b477379c01f7773c"
+      },
+      "elapsed_ms": 15,
+      "field_writes": 36,
+      "live_nonzero": 18
+    },
+    {
+      "name": "calibration-2",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/calibration-2.json",
+        "bytes": 15919,
+        "sha256": "2bd7b226cffe57ba31ec66f91962565a44cc01343a57aca6784ed08f63a3e4e9"
+      },
+      "elapsed_ms": 16,
+      "field_writes": 36,
+      "live_nonzero": 17
+    }
+  ],
+  "runs": [
+    {
+      "name": "gf2-controlled-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-controlled-4318/watch.json",
+        "bytes": 19493,
+        "sha256": "71024e65115b28525fb2d65dc737713e5310a82e0c1af245bd43b6815e47d6ca"
+      },
+      "elapsed_ms": 3671,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-controlled-4318/dispatch.json",
+        "bytes": 36866,
+        "sha256": "7c4deb2ce82d5a6595619b21c8e3027427f8812d58b0419aa48918d4fd472b11"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "gf2-controlled-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-controlled-32902/watch.json",
+        "bytes": 22374,
+        "sha256": "3a6fd59034023036d6c5a4ea87fd94256f861a8705670c3bb4e761cc9815a2f8"
+      },
+      "elapsed_ms": 4609,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-controlled-32902/dispatch.json",
+        "bytes": 43676,
+        "sha256": "00950c6887c68058e773d09e35cbbecd2ab66e53be60f6d7adf152cf95e18347"
+      },
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "gf2-default-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-default-4318/watch.json",
+        "bytes": 19508,
+        "sha256": "c5708e1faeffd1a52b26bdd64320baee8400b2c520cdd417142d002584d54236"
+      },
+      "elapsed_ms": 3703,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-default-4318/dispatch.json",
+        "bytes": 36797,
+        "sha256": "2899de03f3d14fb533dc9a11f3552eb6ebdaef2343999330f09206ec6c0e1bd5"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "gf2-default-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-default-32902/watch.json",
+        "bytes": 22375,
+        "sha256": "d7fa776de0170cc097414f1ee2700f29060f3814e94839114247da48f997809b"
+      },
+      "elapsed_ms": 4859,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/gf2-default-32902/dispatch.json",
+        "bytes": 43607,
+        "sha256": "8df51d5b7ad68ab9ddb3cb4805825b546faa278a6c2ccadb76aa5ba77eff2f14"
+      },
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "bf1-controlled-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-controlled-4318/watch.json",
+        "bytes": 19077,
+        "sha256": "ba13bf634fa0a064f320f4e92540d6d9c248b619bb9898b09d26ccdb6e7088a0"
+      },
+      "elapsed_ms": 26063,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-controlled-4318/dispatch.json",
+        "bytes": 36192,
+        "sha256": "3210a8681f8e4bce09f5395b8b63899202476ff45334453b8bb29490be7351c1"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "bf1-controlled-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-controlled-32902/watch.json",
+        "bytes": 19704,
+        "sha256": "25c9d65b7f0dd734a93cae8de88b0aa890cb92302bdaa94d6c6a67e983c4d04d"
+      },
+      "elapsed_ms": 53235,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-controlled-32902/dispatch.json",
+        "bytes": 37338,
+        "sha256": "89a5396f727e76f6f46b76a3116a4e1e5c910ffbb216d21910220a52b61ea7ff"
+      },
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "bf1-default-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-default-4318/watch.json",
+        "bytes": 19075,
+        "sha256": "352b739305d5d67f613be254f0c409974f67fbd4e5b4c2260dd2178645153930"
+      },
+      "elapsed_ms": 23094,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-default-4318/dispatch.json",
+        "bytes": 36123,
+        "sha256": "572732045ce7d8bc071bbcc00c7a7c580638f701cb4ff589271f120369c59507"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "bf1-default-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-default-32902/watch.json",
+        "bytes": 19705,
+        "sha256": "f0f8ca312bbd24219acbf654ca65c248065884392d631ce2e6764251983094d2"
+      },
+      "elapsed_ms": 25218,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/bf1-default-32902/dispatch.json",
+        "bytes": 37269,
+        "sha256": "4f67f542b1c41330769337458374ac15e3eaae51673503de4620650196fbdb9e"
+      },
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 876,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "helldivers-controlled-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/helldivers-controlled-4318/watch.json",
+        "bytes": 19222,
+        "sha256": "14c5657a5e0ed60d772e1dbd80d570a8f92f848cf18079b986d3fac91261d418"
+      },
+      "elapsed_ms": 19875,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/helldivers-controlled-4318/dispatch.json",
+        "bytes": 36200,
+        "sha256": "5e75f44d4cddab07446f24bff6a6a5f51c02267bff74ec83b6a70eef410bd0ac"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true",
+        "no-gtquerymanager": "true",
+        "no-first-playbacks": "true"
+      },
+      "result_callbacks": 0
+    },
+    {
+      "name": "helldivers-default-4318",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/supplemental/helldivers-default-4318/watch.json",
+        "bytes": 18928,
+        "sha256": "cc9be72f67aed1bf785a8fea6a90941eba21442b97965df5767f3e375ca5f051"
+      },
+      "elapsed_ms": 18907,
+      "field_writes": 2,
+      "live_nonzero": 0,
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/supplemental/helldivers-default-4318/dispatch.json",
+        "bytes": 36131,
+        "sha256": "0c7871ff449a179e87bd974dab7fd581ebc27a59a02a7e6a6b40c04d2d64b3b9"
+      },
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "capture_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "settings": {
+        "single-threaded": "true"
+      },
+      "result_callbacks": 0
+    }
+  ],
+  "failed_runs": [
+    {
+      "name": "helldivers-controlled-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/helldivers-controlled-32902/watch.json",
+        "bytes": 17540,
+        "sha256": "7a1f6538aa072c339dc37c878942b9669e0e77d34fa4fb32f1e3e837a46fdf5a"
+      },
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/watched/helldivers-controlled-32902/dispatch.json",
+        "bytes": 9830,
+        "sha256": "792c101c81250a61c7ba28b2ddd7660b0e9d62219f32c7779a8156160d24ff7d"
+      },
+      "elapsed_ms": 120422,
+      "reason": "Hardware watch timed out",
+      "selected_gpu": {
+        "vendor": 32902,
+        "device": 32103,
+        "gpu_id": [
+          1,
+          73907,
+          0
+        ]
+      },
+      "actual_adapter": null,
+      "actual_adapter_verified": false,
+      "last_watch_phase": "published",
+      "observed_null_requests": 0,
+      "no_complete_lifecycle_inference": true,
+      "capture_unchanged": true
+    },
+    {
+      "name": "helldivers-default-32902",
+      "watch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/supplemental/helldivers-default-32902/watch.json",
+        "bytes": 18762,
+        "sha256": "de95b79dd925dfd065667624ced98b307e62b41f83cf0579e50b78b5cb4c95fd"
+      },
+      "dispatch": {
+        "path": "artifacts/dx11-native/debugger-explicit-gpu/supplemental/helldivers-default-32902/dispatch.json",
+        "bytes": 31857,
+        "sha256": "2bdf9bd7e62204bb0f08f35ae2a168125690a52dcec312153ee76321dd7af5a0"
+      },
+      "elapsed_ms": 120344,
+      "reason": "Hardware watch timed out",
+      "selected_gpu": {
+        "vendor": 32902,
+        "device": 32103,
+        "gpu_id": [
+          1,
+          73907,
+          0
+        ]
+      },
+      "actual_adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 6
+      },
+      "actual_adapter_verified": true,
+      "last_watch_phase": "destroying",
+      "observed_null_requests": 2,
+      "no_complete_lifecycle_inference": true,
+      "capture_unchanged": true
+    }
+  ],
+  "all_lifecycles_completed": false,
+  "static_exports": [
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/static-verified/binary.json",
+      "bytes": 191,
+      "sha256": "e67068273991ced5b4cd3516913008d1d516bc410343dffcb5e27dae206bdad1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/static-verified/enumerator-symbols.txt",
+      "bytes": 1883,
+      "sha256": "b18323ac1dfa00e0402cbb27a028370cf68c8c7ecb0d137d2124f3031542d617"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/static-verified/gpu-selection.log",
+      "bytes": 4483,
+      "sha256": "5c06c94e5e92cd8cea18d73b2037bb86f29571747c0cf0385faeec341efe99dc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/static-verified/gpu-selection.txt",
+      "bytes": 100815,
+      "sha256": "22a49f4af974a5c0f652af1545ae33df87f00c0348e4faabd072b148fc63ae0f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-explicit-gpu/static-verified/selector-table.txt",
+      "bytes": 2100,
+      "sha256": "3a045c243f90226fcdded57257208e9f1ae2336a5ac702f29772725f37d20566"
+    }
+  ],
+  "selector_probe": {
+    "path": "artifacts/dx11-native/debugger-explicit-gpu/selector-probe/selector.json",
+    "bytes": 4618,
+    "sha256": "c56ac7961fc7055d5617f2de44257931dac96047df815d259d4e622fdb18dc99"
+  },
+  "summarizer": {
+    "path": "tools/summarize_debugger_gpu.py",
+    "bytes": 10722,
+    "sha256": "8563abc1ce23344ccf5cc6c9d68253a57eb83043bfa58da24ac52db3b5079442"
+  },
+  "evidence_corruptions_rejected": {
+    "(113, 4318, True)vendor": "Actual replay adapter differs",
+    "(113, 4318, True)device": "Actual replay adapter differs",
+    "(113, 4318, True)luid": "Actual replay adapter differs",
+    "(113, 4318, True)after": "Replay adapter changed",
+    "(113, 4318, True)callbacks": "Request outcome changed",
+    "(113, 32902, True)vendor": "Actual replay adapter differs",
+    "(113, 32902, True)device": "Actual replay adapter differs",
+    "(113, 32902, True)luid": "Actual replay adapter differs",
+    "(113, 32902, True)after": "Replay adapter changed",
+    "(113, 32902, True)callbacks": "Request outcome changed",
+    "(113, 4318, False)vendor": "Actual replay adapter differs",
+    "(113, 4318, False)device": "Actual replay adapter differs",
+    "(113, 4318, False)luid": "Actual replay adapter differs",
+    "(113, 4318, False)after": "Replay adapter changed",
+    "(113, 4318, False)callbacks": "Request outcome changed",
+    "(113, 32902, False)vendor": "Actual replay adapter differs",
+    "(113, 32902, False)device": "Actual replay adapter differs",
+    "(113, 32902, False)luid": "Actual replay adapter differs",
+    "(113, 32902, False)after": "Replay adapter changed",
+    "(113, 32902, False)callbacks": "Request outcome changed",
+    "(876, 4318, True)vendor": "Actual replay adapter differs",
+    "(876, 4318, True)device": "Actual replay adapter differs",
+    "(876, 4318, True)luid": "Actual replay adapter differs",
+    "(876, 4318, True)after": "Replay adapter changed",
+    "(876, 4318, True)callbacks": "Request outcome changed",
+    "(876, 32902, True)vendor": "Actual replay adapter differs",
+    "(876, 32902, True)device": "Actual replay adapter differs",
+    "(876, 32902, True)luid": "Actual replay adapter differs",
+    "(876, 32902, True)after": "Replay adapter changed",
+    "(876, 32902, True)callbacks": "Request outcome changed",
+    "(876, 4318, False)vendor": "Actual replay adapter differs",
+    "(876, 4318, False)device": "Actual replay adapter differs",
+    "(876, 4318, False)luid": "Actual replay adapter differs",
+    "(876, 4318, False)after": "Replay adapter changed",
+    "(876, 4318, False)callbacks": "Request outcome changed",
+    "(876, 32902, False)vendor": "Actual replay adapter differs",
+    "(876, 32902, False)device": "Actual replay adapter differs",
+    "(876, 32902, False)luid": "Actual replay adapter differs",
+    "(876, 32902, False)after": "Replay adapter changed",
+    "(876, 32902, False)callbacks": "Request outcome changed",
+    "(200, 4318, True)vendor": "Actual replay adapter differs",
+    "(200, 4318, True)device": "Actual replay adapter differs",
+    "(200, 4318, True)luid": "Actual replay adapter differs",
+    "(200, 4318, True)after": "Replay adapter changed",
+    "(200, 4318, True)callbacks": "Request outcome changed",
+    "(200, 4318, False)vendor": "Actual replay adapter differs",
+    "(200, 4318, False)device": "Actual replay adapter differs",
+    "(200, 4318, False)luid": "Actual replay adapter differs",
+    "(200, 4318, False)after": "Replay adapter changed",
+    "(200, 4318, False)callbacks": "Request outcome changed"
+  }
+}
