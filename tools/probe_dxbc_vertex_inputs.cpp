@@ -1,3 +1,4 @@
+#include "application/DxbcGpuOperations.h"
 #include "application/DxbcInputSnapshot.h"
 #include "application/PostTransform.h"
 #include "replay/Replay.h"
@@ -85,6 +86,10 @@ int main(int argc, char **argv) {
             report["execution_steps"] = steps;
             report["final_registers"] = registers(lane.registers());
             report["execution_complete"] = true;
+            if (resources.inputs.gpu) {
+                report["execution_gpu_identity"] = resources.inputs.gpu->identity();
+                report["execution_gpu_operations"] = resources.inputs.gpu->operations();
+            }
             if (args[7] == "--compare-native") {
                 PostTransformOptions inspection;
                 inspection.stage = "vs-inputs";

@@ -1,6 +1,6 @@
 #include "DxbcGpuOperations.h"
-#include "DxbcGpuCompletion.h"
 #include "DxbcCheckpointModel.h"
+#include "DxbcGpuCompletion.h"
 #include "DxbcTextureInputs.h"
 #include "DxbcTypedBuffer.h"
 #include "HlslCompilation.h"
@@ -209,8 +209,82 @@ struct GpuOperations::State {
     std::unique_ptr<GpuCompletion> completion;
     uint64_t count = 0;
     bool failed = false, warp = false, debug = false;
+    Value computeInstruction(const Words &words, const std::vector<Value> &values) {
+        checkCancellation(cancelled);
+        if (failed)
+            throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+        try {
+            auto found = shaders.find(words);
+            if (found == shaders.end()) {
+                if (shaders.size() >= 256)
+                    shaders.clear();
+                std::vector<uint8_t> code(words.size() * 4);
+                std::memcpy(code.data(), words.data(), code.size());
+                const auto binary = makeDxbc({{0x58454853, code}});
+                Com<ID3D11ComputeShader> shader;
+                check(device->CreateComputeShader(binary.data(), binary.size(), nullptr, &shader),
+                      "Create private arithmetic compute shader");
+                found = shaders.emplace(words, std::move(shader)).first;
+            }
+            std::vector<std::array<uint32_t, 4>> bits;
+            for (const auto &value : values)
+                bits.push_back(value.bits);
+            D3D11_BUFFER_DESC desc{
+                UINT(bits.size() * 16), D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            const D3D11_SUBRESOURCE_DATA data{bits.data(), 0, 0};
+            Com<ID3D11Buffer> cb, output, staging;
+            check(device->CreateBuffer(&desc, &data, &cb), "Create private arithmetic constants");
+            desc = {16,
+                    D3D11_USAGE_DEFAULT,
+                    D3D11_BIND_UNORDERED_ACCESS,
+                    0,
+                    D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+                    16};
+            check(device->CreateBuffer(&desc, nullptr, &output), "Create private arithmetic output");
+            D3D11_UNORDERED_ACCESS_VIEW_DESC view{};
+            view.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+            view.Buffer.NumElements = 1;
+            Com<ID3D11UnorderedAccessView> uav;
+            check(device->CreateUnorderedAccessView(output.Get(), &view, &uav),
+                  "Create private arithmetic output view");
+            desc = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+            check(device->CreateBuffer(&desc, nullptr, &staging), "Create private arithmetic readback");
+            context->CSSetShader(found->second.Get(), nullptr, 0);
+            context->CSSetConstantBuffers(0, 1, cb.GetAddressOf());
+            context->CSSetUnorderedAccessViews(0, 1, uav.GetAddressOf(), nullptr);
+            context->Dispatch(1, 1, 1);
+            context->ClearState();
+            context->CopyResource(staging.Get(), output.Get());
+            completion->submit();
+            const auto mapped = completion->map(staging.Get());
+            Value result;
+            std::memcpy(result.bits.data(), mapped.pData, 16);
+            context->Unmap(staging.Get(), 0);
+            if (debug) {
+                Com<ID3D11InfoQueue> queue;
+                check(device.As(&queue), "Read arithmetic validation queue");
+                for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                    SIZE_T size = 0;
+                    check(queue->GetMessage(i, nullptr, &size), "Read arithmetic validation size");
+                    std::vector<uint8_t> storage(size);
+                    auto *message = reinterpret_cast<D3D11_MESSAGE *>(storage.data());
+                    check(queue->GetMessage(i, message, &size), "Read arithmetic validation message");
+                    if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+                        throw std::runtime_error(message->pDescription);
+                }
+                queue->ClearStoredMessages();
+            }
+            ++count;
+            return result;
+        } catch (...) {
+            context->ClearState();
+            failed = true;
+            throw;
+        }
+    }
     Value vertex(const Words &words, const std::vector<Value> &constants,
-                 ID3D11ShaderResourceView *resource = nullptr, ID3D11SamplerState *sampler = nullptr) {
+                 ID3D11ShaderResourceView *resource = nullptr, ID3D11SamplerState *sampler = nullptr,
+                 uint32_t outputPrecision = 0) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -219,7 +293,11 @@ struct GpuOperations::State {
             if (found == vertexShaders.end()) {
                 if (vertexShaders.size() >= 256)
                     vertexShaders.clear();
-                const auto signature = compileHlsl("uint4 main():TEXCOORD0{return 0;}", "vs_5_0").bytecode;
+                const std::map<uint32_t, std::string> types{
+                    {0, "uint"}, {1, "min16float"}, {2, "min10float"}, {4, "min16int"}, {5, "min16uint"}};
+                const auto signature =
+                    compileHlsl(types.at(outputPrecision) + "4 main():TEXCOORD0{return 0;}", "vs_5_0")
+                        .bytecode;
                 auto parts = readDxbcParts(signature);
                 std::erase_if(parts, [](const auto &part) {
                     return part.first == 0x58454853 || part.first == 0x52444853 || part.first == 0x54415453;
@@ -902,7 +980,8 @@ GpuOperations::GpuOperations(ID3D11Device *reference, bool warp, CancelCheck can
         throw std::runtime_error("Native memory assist adapter differs from the reference adapter");
     check(actual->CheckInterfaceSupport(__uuidof(IDXGIDevice), &s.driver),
           "Read native memory assist driver identity");
-    s.completion = std::make_unique<GpuCompletion>(s.device.Get(), s.context.Get(), s.cancelled, timeoutMs, mode);
+    s.completion =
+        std::make_unique<GpuCompletion>(s.device.Get(), s.context.Get(), s.cancelled, timeoutMs, mode);
 }
 GpuOperations::~GpuOperations() = default;
 nlohmann::json GpuOperations::identity() const {
@@ -915,7 +994,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/16"}};
+            {"backend", "dxbc-gpu/17"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1402,19 +1481,44 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
                                               const std::vector<uint32_t> &masks,
                                               const std::vector<Value> &sources,
                                               const std::vector<Value> &before) {
-    if (stage != 1)
-        throw std::runtime_error("Native instruction assistance currently requires a vertex shader");
+    if (stage != 0 && stage != 1 && stage != 5)
+        throw std::runtime_error("Native instruction assistance requires a VS, PS or CS");
     const auto operands = checkpoint::instructionOperands(instruction.words);
     if (targets.empty() || targets.size() > 2 || masks.size() != targets.size() ||
         before.size() != targets.size() || operands.ranges.size() != targets.size() + sources.size())
         throw std::runtime_error("Invalid native instruction assist operands");
+    auto precision = [&](size_t index) {
+        const auto first = operands.ranges.at(index).first;
+        return (instruction.words.at(first) & 0x80000000u) ? (instruction.words.at(first + 1) & 0x1c000u)
+                                                           : 0u;
+    };
+    bool minimumPrecision = false;
+    for (size_t i = 0; i < operands.ranges.size(); ++i)
+        minimumPrecision |= precision(i) != 0;
+    const bool remapTemps = minimumPrecision || stage == 5;
+    // Preserve VS output precision instead of introducing a narrowing temporary.
+    const bool preserveOutput = stage == 1 && targets.size() == 1 && targets[0].kind == 2;
+    for (size_t i = 0; i < targets.size(); ++i)
+        if (targets[i].kind == 2 && precision(i) && !preserveOutput)
+            throw std::runtime_error("Minimum-precision output requires a single VS destination");
+    auto annotate = [](Words value, uint32_t bits) {
+        if (bits) {
+            value[0] |= 0x80000000u;
+            value.insert(value.begin() + 1, 1u | bits);
+        }
+        return value;
+    };
     std::map<Register, uint32_t> indices;
     uint32_t temps = 0, outputs = 0;
     for (const auto &target : targets) {
-        if ((target.kind != 0 && target.kind != 2) || target.indices.size() != 1)
+        if ((target.kind != 0 && target.kind != 2 && target.kind != 3 && target.kind != 13) ||
+            (target.kind != 13 && target.indices.size() != (target.kind == 3 ? 2u : 1u)))
             throw std::runtime_error("Unsupported native instruction assist destination");
         if (!indices.contains(target))
-            indices[target] = target.kind == 0 ? temps++ : outputs++;
+            indices[target] =
+                target.kind == 0 || target.kind == 3 || target.kind == 13 || (remapTemps && !preserveOutput)
+                    ? temps++
+                    : outputs++;
     }
     if (outputs > 1)
         throw std::runtime_error("Native instruction assistance requires at most one output register");
@@ -1424,28 +1528,47 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
     for (size_t i = 0; i < operands.ranges.size(); ++i) {
         Words arg;
         if (i < targets.size())
-            arg = dest(targets[i].kind, indices.at(targets[i]), masks[i]);
+            arg =
+                targets[i].kind == 13
+                    ? Words{0xd000}
+                    : annotate(
+                          dest((remapTemps && !preserveOutput) || targets[i].kind == 3 ? 0u : targets[i].kind,
+                               indices.at(targets[i]), masks[i]),
+                          precision(i));
         else {
             const auto [begin, end] = operands.ranges[i];
             if (((instruction.words[begin] >> 12) & 255) == 4)
                 arg.assign(instruction.words.begin() + begin, instruction.words.begin() + end);
             else
-                arg = {0x208e46, 0, uint32_t(i - targets.size())};
+                arg = annotate({0x208e46, 0, uint32_t(i - targets.size())}, precision(i));
         }
         operation.insert(operation.end(), arg.begin(), arg.end());
     }
     operation[0] = (operation[0] & 0x80ffffff) | (uint32_t(operation.size()) << 24);
     std::vector<Value> result;
     for (size_t selected = 0; selected < targets.size(); ++selected) {
+        if (targets[selected].kind == 13) {
+            result.push_back({});
+            continue;
+        }
         if (selected && targets[selected] == targets[0]) {
             result.push_back(result.front());
             continue;
         }
         std::vector<Words> rows{row(89, {{0x208e46, 0, uint32_t(constants.size())}}),
-                                row(104, {{std::max(temps, 1u)}}), row(101, {dest(2, 0)})};
+                                row(104, {{std::max(temps, 1u) + (stage == 5 ? 1u : 0u)}})};
+        if (stage == 5) {
+            rows.push_back(row(155, {{1, 1, 1}}));
+            rows.push_back(row(158, {dest(30, 0), {16}}));
+        } else
+            rows.push_back(row(101, {annotate(dest(2, 0), preserveOutput ? precision(selected) : 0)}));
+        if (minimumPrecision)
+            rows.insert(rows.begin(), row(106 | (1u << 16), {}));
         // Initialize only components the operation does not write. Literal
         // operands remain literal to preserve the driver's instruction lowering.
         for (size_t i = 0; i < targets.size(); ++i) {
+            if (targets[i].kind == 13)
+                continue;
             if (i && targets[i] == targets[0])
                 continue;
             uint32_t written = masks[i];
@@ -1453,17 +1576,34 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
                 if (targets[i] == targets[j])
                     written |= masks[j];
             if (written != 15)
-                rows.push_back(row(54, {dest(targets[i].kind, indices.at(targets[i]), 15 ^ written),
-                                        {0x208e46, 0, uint32_t(sources.size() + i)}}));
+                rows.push_back(row(
+                    54, {dest((remapTemps && !preserveOutput) || targets[i].kind == 3 ? 0u : targets[i].kind,
+                              indices.at(targets[i]), 15 ^ written),
+                         {0x208e46, 0, uint32_t(sources.size() + i)}}));
         }
         rows.push_back(operation);
-        if (targets[selected].kind == 0)
-            rows.push_back(row(54, {dest(2, 0), source(0, indices.at(targets[selected]))}));
+        if (stage == 5) {
+            rows.push_back(row(54, {dest(0, temps), annotate(source(0, indices.at(targets[selected])),
+                                                             precision(selected))}));
+            rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, temps)}));
+        } else if (targets[selected].kind == 0 || targets[selected].kind == 3 ||
+                   (remapTemps && !preserveOutput))
+            rows.push_back(row(
+                54, {dest(2, 0), annotate(source(0, indices.at(targets[selected])), precision(selected))}));
         rows.push_back(row(62, {}));
-        const auto bytes = writeDxbcProgram({{0x10050, 0}, rows});
+        const auto bytes = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
         Words words(bytes.size() / 4);
         std::memcpy(words.data(), bytes.data(), bytes.size());
-        result.push_back(state_->vertex(words, constants));
+        if (stage == 5)
+            result.push_back(state_->computeInstruction(words, constants));
+        else if (stage == 0) {
+            std::vector<std::array<uint32_t, 4>> bits;
+            for (const auto &value : constants)
+                bits.push_back(value.bits);
+            result.push_back(state_->pixel(words, bits, nullptr));
+        } else
+            result.push_back(state_->vertex(words, constants, nullptr, nullptr,
+                                            preserveOutput ? precision(selected) >> 14 : 0));
     }
     return result;
 }

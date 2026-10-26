@@ -21,7 +21,7 @@ struct Index {
     std::shared_ptr<Operand> relative;
 };
 struct Operand {
-    uint32_t kind = 0, components = 0, mode = 0, mask = 0, modifier = 0;
+    uint32_t kind = 0, components = 0, mode = 0, mask = 0, modifier = 0, precision = 0;
     std::array<uint32_t, 4> select{0, 1, 2, 3}, literal{};
     std::vector<Index> indices;
 };
@@ -47,10 +47,13 @@ Operand operand(const Words &words, size_t &pos, unsigned depth = 0) {
     for (auto extension = token >> 31; extension;) {
         const auto next = words.at(pos++);
         extension = next >> 31;
-        if ((next & 63) != 1 || modifier || (next & 0x7fffc000u))
+        if ((next & 63) != 1 || modifier || (next & 0x7ffe0000u))
             fail("Unsupported DXBC execution operand extension");
         modifier = true;
         result.modifier = (next >> 6) & 255;
+        result.precision = (next >> 14) & 7;
+        if (result.precision == 3 || result.precision > 5)
+            fail("Invalid DXBC minimum precision");
         if (result.modifier > 3)
             fail("Invalid DXBC execution source modifier");
     }
@@ -65,6 +68,8 @@ Operand operand(const Words &words, size_t &pos, unsigned depth = 0) {
             index.base |= uint64_t(words.at(pos++)) << 32;
         if (representation >= 2)
             index.relative = std::make_shared<Operand>(operand(words, pos, depth + 1));
+        if (index.relative && index.relative->precision)
+            fail("Minimum-precision relative addressing requires native index conversion");
         result.indices.push_back(std::move(index));
     }
     if (result.kind == 4 || result.kind == 5) {
@@ -88,6 +93,11 @@ bool declaration(uint32_t opcode) {
 bool integerSources(uint32_t op) {
     return op == 1 || op == 30 || (op >= 32 && op <= 43) || op == 59 || op == 60 || (op >= 78 && op <= 87) ||
            (op >= 132 && op <= 141);
+}
+bool precisionArithmetic(uint32_t op) {
+    return op <= 1 || (op >= 14 && op <= 17) || (op >= 24 && op <= 30) || (op >= 32 && op <= 43) ||
+           op == 47 || (op >= 49 && op <= 57) || op == 59 || op == 60 || (op >= 64 && op <= 68) || op == 75 ||
+           (op >= 77 && op <= 87) || (op >= 129 && op <= 142);
 }
 uint32_t floatBits(float value) {
     const auto bits = std::bit_cast<uint32_t>(value);
@@ -333,6 +343,9 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
+            if (!precisionArithmetic(op) &&
+                std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
+                fail("Minimum precision on this DXBC operation is not implemented");
             if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
         } else if (op == 90) {
@@ -1342,7 +1355,13 @@ Step Lane::step() {
         const bool aliased = dual && targets[0] == targets[1] && targets[0].kind != 13;
         const bool literalConversion = (op == 27 || op == 28 || op == 131) && args[destinations].kind == 4;
         const bool literalBorrow = op == 133 && args[2].kind == 4 && args[3].kind == 4;
-        if (s.inputs.gpu && (aliased || literalConversion || literalBorrow)) {
+        const bool minimumPrecision =
+            std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; });
+        if (minimumPrecision && !s.inputs.gpu)
+            fail("Minimum-precision arithmetic requires the selected adapter GPU assist");
+        const bool nativeFloat = p.stage == 1 && (op == 50 || (op >= 15 && op <= 17));
+        if (s.inputs.gpu &&
+            (aliased || literalConversion || literalBorrow || minimumPrecision || nativeFloat)) {
             std::vector<uint32_t> masks;
             std::vector<Value> before;
             for (size_t i = 0; i < destinations; ++i) {
@@ -1355,7 +1374,11 @@ Step Lane::step() {
                 std::all_of(values.begin(), values.end(), [](const Value &v) { return v.valid == 15; });
             for (size_t i = 0; i < destinations; ++i) {
                 outputs[i].bits = native.at(i).bits;
-                if (!known)
+                // A narrowed condition can select a different branch. Do not use
+                // the CPU's unrounded selection to validate an unknown result.
+                if ((op == 55 || op == 142) && args[destinations].precision)
+                    outputs[i].valid = values[0].valid & values[1].valid & values[2].valid;
+                if (!known && !minimumPrecision && !nativeFloat)
                     outputs[i].valid = 0;
             }
             result.instructionGpuAssisted = true;

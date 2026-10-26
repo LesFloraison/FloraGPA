@@ -602,6 +602,165 @@ class DxbcExecutionTests final : public QObject {
         QCOMPARE(inputs.gpu->operations(), count);
         QVERIFY(invalid.registers().empty());
     }
+    void minimumPrecision_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("scenario");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto name :
+                 {"float-cast", "signed-cast", "unsigned-cast", "float-mad", "float-dot", "native-mad",
+                  "native-dot", "modifiers", "float-output", "signed-output", "unsigned-output"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(name).arg(vendor))) << vendor << QString(name);
+    }
+    void minimumPrecision() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, scenario);
+        try {
+            const std::map<QString, std::string> bodies{
+                {"float-cast",
+                 "min16float4 x=min16float4(asfloat(a))+min16float4(asfloat(b));return asuint(float4(x));"},
+                {"signed-cast",
+                 "min16int4 x=min16int4(asint(a))+min16int4(asint(b));return asuint(int4(x));"},
+                {"unsigned-cast", "min16uint4 x=min16uint4(a)+min16uint4(b);return uint4(x);"},
+                {"float-mad", "min16float4 "
+                              "x=mad(min16float4(asfloat(a)),min16float4(asfloat(b)),min16float4(asfloat(c)))"
+                              ";return asuint(float4(x));"},
+                {"float-dot", "min16float x=dot(min16float4(asfloat(a)),min16float4(asfloat(b)));return "
+                              "asuint(float4(x,x,x,x));"},
+                {"native-mad", "precise float4 x=mad(asfloat(a),asfloat(b),asfloat(c));return asuint(x);"},
+                {"native-dot", "precise float x=dot(asfloat(a),asfloat(b));return asuint(x.xxxx);"},
+                {"modifiers", "min16float4 x=min16float4(asfloat(a));min16float4 "
+                              "y=saturate(-abs(x)+min16float4(asfloat(b)));return asuint(float4(y));"},
+                {"float-output", "return min16float4(asfloat(a))*min16float4(asfloat(b));"},
+                {"signed-output", "return min16int4(asint(a))+min16int4(asint(b));"},
+                {"unsigned-output", "return min16uint4(a)+min16uint4(b);"}};
+            const std::string output = scenario == "float-output"      ? "min16float4"
+                                       : scenario == "signed-output"   ? "min16int4"
+                                       : scenario == "unsigned-output" ? "min16uint4"
+                                                                       : "uint4";
+            const auto code = compileHlsl("cbuffer Data:register(b0){uint4 a,b,c;}" + output +
+                                              " main():TEXCOORD0{" + bodies.at(scenario) + "}",
+                                          "vs_5_0")
+                                  .bytecode;
+            const std::array<std::array<uint32_t, 4>, 3> values{
+                {{0x3eaaaaab, 0xbfaaaaab, 0x3f801001, 0x80000000},
+                 {0x3faaaaab, 0x3f801001, 0x40000000, 0x3eaaaaab},
+                 {0xbeaaaaab, 0x3f800001, 0xbf800001, 0x3eaaaaab}}};
+            Device device(vendor);
+            Inputs inputs;
+            for (const auto &v : values)
+                inputs.constantBuffers[0].push_back(Value::known(v));
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+            Program program(code);
+            Lane lane(program, inputs);
+            const auto steps = execute(lane);
+            QVERIFY(std::any_of(steps.begin(), steps.end(),
+                                [](const Step &s) { return s.instructionGpuAssisted; }));
+            const auto expected = device.run(code, {values.front().data(), 12});
+            const auto actual = lane.value({2, {0}});
+            qInfo().noquote() << QString::fromStdString(nlohmann::json({{"scenario", scenario.toStdString()},
+                                                                        {"expected", expected},
+                                                                        {"actual", actual.bits},
+                                                                        {"identity", inputs.gpu->identity()}})
+                                                            .dump());
+            QCOMPARE(actual.valid, uint8_t(15));
+            QCOMPARE(actual.bits, expected);
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void precisionGuards() {
+        auto precise = [](Words arg, uint32_t precision) {
+            arg[0] |= 0x80000000u;
+            arg.insert(arg.begin() + 1, 1u | (precision << 14));
+            return arg;
+        };
+        for (uint32_t precision : {3u, 6u, 7u})
+            QVERIFY_THROWS_EXCEPTION(
+                std::runtime_error,
+                Program(binary({op(54, {precise(dst(2, 0), precision), literal(0)}), op(62)})));
+        const Program program(binary({op(54, {precise(dst(2, 0), 1), literal(0x3f800000)}), op(62)}));
+        Lane missing(program, {});
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, missing.step());
+        QVERIFY(missing.registers().empty());
+        QVERIFY_THROWS_EXCEPTION(
+            std::runtime_error, Program(binary({op(31 | 0x40000, {precise(src(0, 0), 4)}), op(21), op(62)})));
+        Device device(0);
+        Inputs inputs;
+        inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), true);
+        for (uint32_t stage : {0u, 1u}) {
+            const auto operation =
+                stage == 0 ? op(54, {precise(dst(2, 0), 1), literal(0x3f800000)})
+                           : op(77, {precise(dst(2, 0), 1), precise(dst(0, 0), 1), literal(0x3f800000)});
+            const auto bytes = writeDxbcProgram(
+                {{(stage << 16) | 0x50, 0}, {op(104, {{1}}), op(101, {dst(2, 0)}), operation, op(62)}});
+            const Program unsupported(makeDxbc({{0x58454853, bytes}}));
+            Lane lane(unsupported, inputs);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+            QVERIFY(lane.registers().empty());
+            QCOMPARE(inputs.gpu->operations(), uint64_t(0));
+        }
+    }
+    void precisionStages_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("stage");
+        QTest::addColumn<uint32_t>("precision");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t stage : {0u, 1u, 5u})
+                for (uint32_t precision : {1u, 2u, 4u, 5u})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(stage).arg(precision)))
+                        << vendor << stage << precision;
+    }
+    void precisionStages() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, stage);
+        QFETCH(uint32_t, precision);
+        try {
+            auto annotate = [&](Words value) {
+                value[0] |= 0x80000000u;
+                value.insert(value.begin() + 1, 1u | (precision << 14));
+                return value;
+            };
+            std::vector<Words> rows{op(106 | (1u << 16)), op(89, {{0x208e46, 0, 2}}), op(104, {{1}})};
+            if (stage == 5)
+                rows.push_back(op(155, {{1, 1, 1}}));
+            rows.push_back(op(precision < 4 ? 0u : 30u, {annotate(dst(0, 0, 5)), annotate({0x208e46, 0, 0}),
+                                                         annotate({0x208e46, 0, 1})}));
+            rows.push_back(op(62));
+            const auto executable = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
+            const auto shader = makeDxbc({{0x58454853, executable}});
+            Device device(vendor);
+            Inputs inputs;
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+            const auto bits = precision < 4 ? 0x3fc00000u : 12u;
+            inputs.constantBuffers[0] = {{{bits, 0, bits, 0}, 5}, {{bits, 0, bits, 0}, 5}};
+            Program program(shader);
+            Lane lane(program, inputs);
+            const auto step = lane.step();
+            QVERIFY(step.instructionGpuAssisted);
+            const auto actual = lane.value({0, {0}});
+            QCOMPARE(actual.valid, uint8_t(5));
+            QCOMPARE(actual.bits[0], precision < 4 ? 0x40400000u : 24u);
+            QCOMPARE(actual.bits[2], actual.bits[0]);
+            QVERIFY(inputs.gpu->operations() > 0);
+            if (precision >= 4) {
+                // Precision conversion can turn 65536 into zero on some adapters.
+                // Either possible selection must remain unknown when one branch is unknown.
+                const auto conditional = writeDxbcProgram(
+                    {{(stage << 16) | 0x50, 0},
+                     {op(106 | (1u << 16)), op(89, {{0x208e46, 0, 3}}), op(104, {{1}}),
+                      op(55, {dst(0, 0), annotate({0x208e46, 0, 0}), {0x208e46, 0, 1}, {0x208e46, 0, 2}}),
+                      op(62)}});
+                Program branch(makeDxbc({{0x58454853, conditional}}));
+                inputs.constantBuffers[0] = {Value::known({65536, 65536, 65536, 65536}),
+                                             Value::known({7, 7, 7, 7}), Value{}};
+                Lane selection(branch, inputs);
+                QVERIFY(selection.step().instructionGpuAssisted);
+                QCOMPARE(selection.value({0, {0}}).valid, uint8_t(0));
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
 };
 QTEST_GUILESS_MAIN(DxbcExecutionTests)
 #include "DxbcExecutionTests.moc"
