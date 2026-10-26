@@ -105,13 +105,14 @@ of local logs/reports and summarizes the observed outcomes:
 - GF2 event 113, reference 0, instance 0 completes 12 executor steps and matches
   all 14 native output components exactly on NVIDIA, Intel and WARP.
 - BF1 event 876 at the same selection completes 58 steps, with all four output
-  components valid. Three floating components differ from native execution on
-  NVIDIA and Intel; the initial NVIDIA maximum absolute difference is about
-  `1.19e-7`. WARP matches all four components exactly. The hardware differences
-  are unresolved evidence, not accepted parity or a changed golden.
-- Helldivers event 200 successfully observes VS inputs, but execution rejects an
-  unsupported DXBC operand extension on all three adapters. No partial execution
-  is presented as a successful debug trace.
+  components valid. The initial three floating-component differences on NVIDIA
+  and Intel are resolved by the arithmetic precision continuation; all four
+  components now match exactly on all three adapters without changing a golden.
+- Helldivers event 200 initially rejected a minimum-precision operand extension.
+  The precision continuation now completes 42 steps and exactly matches all 13
+  output components on NVIDIA, Intel and WARP. See `DX11_DXBC_PRECISION.md` and
+  `research/dx11-native-precision-evidence.json` for encoding, independent probes,
+  raw comparison evidence and remaining precision limitations.
 - The current helper captures all input references for the draw before selecting
   one row. Its byte budget bounds private buffers and decoded rows; large draws
   can exceed that budget. A bounded selected-input acquisition path is still

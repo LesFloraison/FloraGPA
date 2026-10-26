@@ -650,3 +650,15 @@ is exact; BF1 floating differences remain unresolved. See
 `DX11_NATIVE_VERTEX_INPUTS.md` and its evidence ledger. Whole-draw acquisition
 budgets, remaining semantics, VS session/UI integration and full removal gates
 remain open.
+
+## Native arithmetic precision continuation
+
+Minimum-precision arithmetic now uses the selected adapter through private
+VS/PS/CS helpers, and VS output destinations retain their precision-bearing
+signature. Native VS dot/multiply-add assistance closes the selected BF1 float
+differences. Helldivers' minimum-precision operand extension now executes, with
+all 13 output components matching exactly on NVIDIA, Intel and WARP. All nine
+GF2/BF1/Helldivers comparisons match, and ten suites record 2,762 passes without
+failures or skips. See `DX11_DXBC_PRECISION.md` for the bounded scope, rejected
+precision combinations, validation order and evidence ledger. VS journals and
+UI dispatch, remaining shader/fragment semantics and P7/P8 remain open.

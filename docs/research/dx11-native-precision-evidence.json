@@ -1,0 +1,542 @@
+{
+  "schema": 1,
+  "checkpoint": "native-dxbc-arithmetic-precision",
+  "base_commit": "476c8b2ad2a1b026e239b9119d2208e05a380603",
+  "implementation_commit": "fcdd0e3317906fd18b9c62ca03dc84cb7f374d62",
+  "created_utc": "2026-10-26T18:16:54.797036+00:00",
+  "complete_release_acceptance": false,
+  "passed": 2762,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "dxbc-vertex-inputs",
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 4186,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-vertex-inputs-tests.txt",
+        "bytes": 2363,
+        "sha256": "9f327f9e557f42ea5318a799608500619aa0c45fe5b47f93ac389a255d328040"
+      }
+    },
+    {
+      "name": "dxbc-gpu-completion",
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 34500,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-gpu-completion-tests.txt",
+        "bytes": 13749,
+        "sha256": "0367f1125887198ffee84a2f2f487af2565cf01d8b3d405e16839af4ce5a5e2e"
+      }
+    },
+    {
+      "name": "dxbc-pixel-sampling",
+      "passed": 168,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 88346,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-pixel-sampling-tests.txt",
+        "bytes": 79899,
+        "sha256": "57e961291049430edaeba647b891300200ce83faf1b02a9bc22b0b27eafd4da1"
+      }
+    },
+    {
+      "name": "dxbc-sampling-group",
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 29671,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-sampling-group-tests.txt",
+        "bytes": 187688,
+        "sha256": "2d184f702bf696ab1d18f50f5bd7dd5e61081f351e6eb2158ac0d5941d6d89da"
+      }
+    },
+    {
+      "name": "dxbc-typed-pixel",
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 50936,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-typed-pixel-tests.txt",
+        "bytes": 368429,
+        "sha256": "d8e45205a99033377fb74620cb7687f74d27054985af2eea061521ba2526094d"
+      }
+    },
+    {
+      "name": "dxbc-typed-vertex",
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 52298,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-typed-vertex-tests.txt",
+        "bytes": 370163,
+        "sha256": "929d87a1491108e60cd5d0b1586daad95673f8be010454c37f5547075254cf7f"
+      }
+    },
+    {
+      "name": "dxbc-typed-buffer",
+      "passed": 473,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 60736,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-typed-buffer-tests.txt",
+        "bytes": 314530,
+        "sha256": "845a52c87c9c8333c0f9dfd98f62c0f44f481223c328c0bba2480508096f9478"
+      }
+    },
+    {
+      "name": "dxbc-input-snapshot",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 7588,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-dxbc-input-snapshot-tests.txt",
+        "bytes": 45944,
+        "sha256": "5c968bcd1afc41b010d53519f566960d470fd2480193ceae80bfe6ebc1f7b538"
+      }
+    },
+    {
+      "name": "native-compute-debug",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 9780,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-native-compute-debug-tests.txt",
+        "bytes": 4046,
+        "sha256": "b3372a121ab6bffb36450eca13f08971725e9d920e9f82db8e139075abeb3d22"
+      }
+    },
+    {
+      "name": "execution",
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "duration_ms": 38650,
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-final-execution-tests.txt",
+        "bytes": 389008,
+        "sha256": "0df75eff8a14744f54f6ca8c46db9f4da39698770e30ae02e91c8d28f949bade"
+      }
+    }
+  ],
+  "build_logs": [
+    {
+      "path": "artifacts/dx11-native/vertex-precision-final-build.txt",
+      "bytes": 15298,
+      "sha256": "1d7b98857fb187c197182cc150f4cb58c56c5d15b7f6e3f732bdaf41385a80df"
+    },
+    {
+      "path": "artifacts/dx11-native/vertex-precision-guards-build.txt",
+      "bytes": 6817,
+      "sha256": "d91787df2646fbaa89b56a233480bea5e86acefdf1880d62fdcdfbe72e21ac2b"
+    }
+  ],
+  "comparison": {
+    "path": "artifacts/dx11-native/vertex-precision-validation/comparison.json",
+    "bytes": 9395,
+    "sha256": "48509d8d0ec09055662c1c27989ec7f89bdf5bf76fee0d62f97db55dfb0c3481"
+  },
+  "probe_sha256": "0a80b8d50b630b0a95bdb94f23b20fde54eed780b5ccfaa321e57239dcc2f67a",
+  "selected_invocations": [
+    {
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "event": 113,
+      "vendor": 4318,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/0-4318.json",
+        "bytes": 7748,
+        "sha256": "1365b3eb585b45cf204b45ea153609d952515426975fdc8b58bb9b29601f4a08"
+      },
+      "wall_seconds": 0.43799999996554106,
+      "report_sha256": "1365b3eb585b45cf204b45ea153609d952515426975fdc8b58bb9b29601f4a08",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "steps": 12,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "gpu_operations": 6,
+      "components": 14,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 371.9811,
+      "input_observation_ms": 287.7338,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "event": 113,
+      "vendor": 32902,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/0-32902.json",
+        "bytes": 7751,
+        "sha256": "93ee0ed7438c134153df7d5e6b03e99632a78c46b3fd021c597af8bcff9e54f0"
+      },
+      "wall_seconds": 0.35900000005494803,
+      "report_sha256": "93ee0ed7438c134153df7d5e6b03e99632a78c46b3fd021c597af8bcff9e54f0",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "steps": 12,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "gpu_operations": 6,
+      "components": 14,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 319.7537,
+      "input_observation_ms": 269.7523,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "event": 113,
+      "vendor": 0,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/0-0.json",
+        "bytes": 7738,
+        "sha256": "35b2ee861add78436991cc58fc41f593abca7a9fb52bb2faaf22140b71946cfb"
+      },
+      "wall_seconds": 0.14000000001396984,
+      "report_sha256": "35b2ee861add78436991cc58fc41f593abca7a9fb52bb2faaf22140b71946cfb",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "shader_sha256": "4439a0d6ef0b24668fdd71d2693b4448ec2459a93fc2ccebb1ec8c537bf485ff",
+      "steps": 12,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "gpu_operations": 6,
+      "components": 14,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 115.583,
+      "input_observation_ms": 84.7357,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "event": 876,
+      "vendor": 4318,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/1-4318.json",
+        "bytes": 6874,
+        "sha256": "3f168a01e93d418ac117d16a97a3ae35ce234c8b5e7f05084185595f3867dd05"
+      },
+      "wall_seconds": 1.625,
+      "report_sha256": "3f168a01e93d418ac117d16a97a3ae35ce234c8b5e7f05084185595f3867dd05",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "steps": 58,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "gpu_operations": 45,
+      "components": 4,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1585.5882,
+      "input_observation_ms": 1000.0297,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "event": 876,
+      "vendor": 32902,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/1-32902.json",
+        "bytes": 6876,
+        "sha256": "e2a09d26eb952fbbb8feb1e4b6b2b85f9d6269c98920a6aaf8a4138b009e1c5f"
+      },
+      "wall_seconds": 1.3440000000409782,
+      "report_sha256": "e2a09d26eb952fbbb8feb1e4b6b2b85f9d6269c98920a6aaf8a4138b009e1c5f",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "steps": 58,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "gpu_operations": 45,
+      "components": 4,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1294.6422,
+      "input_observation_ms": 990.8351,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "event": 876,
+      "vendor": 0,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/1-0.json",
+        "bytes": 6865,
+        "sha256": "d9799106d16f5d1d5a52ade340aa3cf5388332abb0da44debf1bcac550ed13ad"
+      },
+      "wall_seconds": 1.077999999979511,
+      "report_sha256": "d9799106d16f5d1d5a52ade340aa3cf5388332abb0da44debf1bcac550ed13ad",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "shader_sha256": "e7c5e9783524e14a7a882103447495d5b1d40f6645e240c676f2f2b0f2ab5785",
+      "steps": 58,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "gpu_operations": 45,
+      "components": 4,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1037.2602,
+      "input_observation_ms": 803.9402,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "event": 200,
+      "vendor": 4318,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/2-4318.json",
+        "bytes": 8917,
+        "sha256": "d8d83090b51d94ea99c8ee2c8adebafb57e6b8d8d17efc6cbd4ea56aa4056320"
+      },
+      "wall_seconds": 1.390999999945052,
+      "report_sha256": "d8d83090b51d94ea99c8ee2c8adebafb57e6b8d8d17efc6cbd4ea56aa4056320",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "steps": 42,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "gpu_operations": 24,
+      "components": 13,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1356.3025,
+      "input_observation_ms": 996.0679,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "event": 200,
+      "vendor": 32902,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/2-32902.json",
+        "bytes": 8920,
+        "sha256": "72b26b5334057df8271a76975a0a1d8e5d217c617aee9c8255015ef6a420c8b9"
+      },
+      "wall_seconds": 1.827999999979511,
+      "report_sha256": "72b26b5334057df8271a76975a0a1d8e5d217c617aee9c8255015ef6a420c8b9",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "steps": 42,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "gpu_operations": 24,
+      "components": 13,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1767.4299,
+      "input_observation_ms": 981.6625,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    },
+    {
+      "capture": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "event": 200,
+      "vendor": 0,
+      "reference": 0,
+      "instance": 0,
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-validation/2-0.json",
+        "bytes": 8909,
+        "sha256": "a2d064fad5cce0491d971c7fa70a51acaacbc54ddd7c1f7ccfc61fd7a3e2deb7"
+      },
+      "wall_seconds": 1.2810000000754371,
+      "report_sha256": "a2d064fad5cce0491d971c7fa70a51acaacbc54ddd7c1f7ccfc61fd7a3e2deb7",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "shader_sha256": "fe1c084ebbf32238a1d48dd66bddc6cff5d7cd35669c801b36aad369321dec16",
+      "steps": 42,
+      "gpu_identity": {
+        "backend": "dxbc-gpu/17",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 49408,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "gpu_operations": 24,
+      "components": 13,
+      "different_components": 0,
+      "unknown_components": 0,
+      "ok": true,
+      "probe_elapsed_ms": 1248.1413,
+      "input_observation_ms": 854.5864,
+      "comparison_reference": "original-shader-native-point-output",
+      "original_schedule_recovered": false
+    }
+  ],
+  "validation_order": "The nine resource, sampling, completion and compute regression suites ran before the final restricted-output and conditional-validity guards. The complete execution suite and all nine real capture probes ran after those guards. GUI, CLI and Worker were rebuilt after the final changes.",
+  "references": [
+    {
+      "url": "https://github.com/microsoft/DirectXShaderCompiler/blob/main/include/dxc/Support/d3d12TokenizedProgramFormat.hpp",
+      "local_snapshot": {
+        "path": "artifacts/dx11-native/microsoft-tokenized-program-format.hpp",
+        "bytes": 130712,
+        "sha256": "cf808b363406fce9387d7ec8daec19940175af966589c0d3e084a4c41c3f5060"
+      }
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/using-hlsl-minimum-precision"
+    }
+  ],
+  "supersedes_selected_failures": [
+    "BF1 event 876 hardware output rounding differences on NVIDIA and Intel",
+    "Helldivers event 200 minimum-precision operand extension rejection on all three adapters"
+  ],
+  "remaining_gates": [
+    "Minimum-precision resource/control/derivative operands and relative index conversion",
+    "Minimum-precision PS output and multi-target VS output instructions",
+    "Whole-program optimization and intermediate-state parity beyond selected invocation outputs",
+    "Bounded selected-only VS input acquisition",
+    "VS journals, source sessions and CLI/GUI dispatch",
+    "Captured PS quad inputs, complete fragment history and remaining execution semantics",
+    "GPA debugger engine recovery and independent behavior probes",
+    "P7 dependency removal and P8 standalone release acceptance"
+  ],
+  "diagnostic_attempts": [
+    {
+      "log": {
+        "path": "artifacts/dx11-native/vertex-precision-first-tests.txt",
+        "bytes": 12645,
+        "sha256": "12e52f89b362856e7a48e71d1c736f7a91bdd8cb47e5ab6b9aa14cf5059c299a"
+      },
+      "outcome": "Initial fixtures included optimized-away conversions and invalid precise minimum-precision HLSL. Replaced with actual arithmetic and valid shader declarations."
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/vertex-precision-readback-hd.json",
+        "bytes": 8651,
+        "sha256": "e82cafa79cc1ac11a3771f6f2ce06eb273441fd405413e673f0bd9cb72c84402"
+      },
+      "outcome": "Three NVIDIA output components differed when a minimum-precision output was remapped through a temporary. Preserving the output register and signature resolved this selected case."
+    }
+  ]
+}

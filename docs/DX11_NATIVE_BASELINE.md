@@ -917,3 +917,16 @@ exact; BF1 float differences and a Helldivers execution operand extension remain
 open. See `DX11_NATIVE_VERTEX_INPUTS.md` and
 `research/dx11-native-vertex-input-evidence.json`. This checkpoint does not alter
 historical failures or certify full VS/debug/RenderDoc-removal parity.
+
+## Native arithmetic precision checkpoint
+
+The selected BF1 and Helldivers VS execution failures above are now resolved.
+The executor decodes minimum-precision arithmetic and preserves selected-adapter
+dot/multiply-add behavior and VS output precision. GF2, BF1 and Helldivers outputs
+match exactly on NVIDIA, Intel and WARP in nine selected invocation comparisons.
+Ten affected suites record 2,762 passes, no failures and no skips; the final
+execution suite includes unsupported-output and unknown-selection guards.
+GUI, CLI and Worker Release builds pass. See `DX11_DXBC_PRECISION.md` and
+`research/dx11-native-precision-evidence.json`. This does not close arbitrary
+shader/intermediate-state parity, VS session integration, complete Pixel History
+or standalone dependency removal. Earlier baseline observations remain recorded.
