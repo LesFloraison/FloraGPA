@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "checkpoint": "original-pixel-input-declaration-transport",
+  "base_commit": "0c52401bb025474b3089eb2859a947afc60ffb4b",
+  "implementation_commit": "eacc6892212eff236d90f7a937715df9bbe021a8",
+  "created_utc": "2026-10-26T20:09:09.678370+00:00",
+  "complete_release_acceptance": false,
+  "tests": {
+    "dxbc_pixel_inputs": 113,
+    "dxbc_pixel_quad": 1022,
+    "dxbc_pixel_sampling": 168,
+    "total": 1303,
+    "failed": 0,
+    "skipped": 0
+  },
+  "gpu_cases": 102,
+  "direct_components": 129600,
+  "neighbor_components": 518400,
+  "negative_controls": {
+    "reference.bin": "Direct input bits differ",
+    "oracle-0.bin": "Independent quad input bits differ",
+    "target-0.bin": "Direct input bits differ",
+    "target-4.bin": "Invalid pixel/role",
+    "target-5.bin": "Sample identity differs",
+    "target-7.bin": "Invalid orientation derivatives"
+  },
+  "runs": [
+    {
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "driver_version": 2814751477605871,
+      "cases": 34,
+      "direct_components": 43200,
+      "neighbor_components": 172800
+    },
+    {
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "driver_version": 9007199261368954,
+      "cases": 34,
+      "direct_components": 43200,
+      "neighbor_components": 172800
+    },
+    {
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "driver_version": 9007199255791310,
+      "cases": 34,
+      "direct_components": 43200,
+      "neighbor_components": 172800
+    }
+  ],
+  "raw_artifact_count": 2652,
+  "raw_artifact_manifest": {
+    "path": "artifacts/dx11-native/pixel-input-final-audited-validation.json",
+    "bytes": 618063,
+    "sha256": "bc0731026a66ef78dd8251f6376cc4726b2e38a67274a82f3dd74af221b14a52"
+  },
+  "implementation_sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 118881,
+      "sha256": "eb0f2e797df878228868eefabbb5b48e5bc3dcf774c326b7c99de38877900e3e"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.h",
+      "bytes": 1425,
+      "sha256": "6c5f77c8c2c74cdee831a8a99e46d6382a5e8a6306d15f2b926395e001e2309a"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.cpp",
+      "bytes": 16008,
+      "sha256": "02ac1bc6e2b19ecb08153ebaedda56fc9e106f4b9a91670ca5e50f6a9690d2c6"
+    },
+    {
+      "path": "tests/DxbcPixelInputsTests.cpp",
+      "bytes": 28023,
+      "sha256": "f46951440394fd7c6ad927b2ddf1d5ff8b5e61d5b32df180e1c29be6cdc48169"
+    },
+    {
+      "path": "tools/validate_pixel_input_capture.py",
+      "bytes": 5897,
+      "sha256": "7e04e6b9079a814f6863bb18c96fe1681ffb4574e028aaa59e7bf2efef890b2c"
+    }
+  ],
+  "test_executable": {
+    "path": "build/vs2022/Release/FloraDxbcPixelInputsTests.exe",
+    "bytes": 210432,
+    "sha256": "cf68e31229b9f8f52c3d003add69f0751d509718a1930dcc1a98f1ca7b62ba96"
+  },
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/pixel-input-centroid-build.txt",
+      "bytes": 2180,
+      "sha256": "fc40291ca4b8d4fde048723a7b300432047b96eb87866a42b92c4a719fff0346"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-centroid-test.txt",
+      "bytes": 1409,
+      "sha256": "b03bf2f3b25aced1a580317cef6117e55a49d18ab426faf0378460a6159c382e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-diagnostic-build.txt",
+      "bytes": 2180,
+      "sha256": "56d2d315bac62427cc517e331d93f6c40ce938862a80e5dd37a3e4914787d13f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-diagnostic-test.txt",
+      "bytes": 784,
+      "sha256": "ab51f27fff4cd73906e718e55cec844bd52ac8d192c0e77b8c9f122312e39797"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-evidence-build.txt",
+      "bytes": 2180,
+      "sha256": "faea135242b4197bdd8d9b2532575a9ef81bfa3f6b52bc72bd5a18c4ceb493a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-evidence-tests.txt",
+      "bytes": 6459,
+      "sha256": "010e9e368f44f43103915c6afd44c1e5f521cad5fd8f2df36b5befd44bbd01ec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-exception-build.txt",
+      "bytes": 2180,
+      "sha256": "5d77d673b41dbdcbeaeadeab49633c4eb65da01e40dfc6a1d2b0eb8c2631acc1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-exception-test.txt",
+      "bytes": 763,
+      "sha256": "b0563d47516e2814e4ba67761e5889f109f3902f0df3f9d9770282abb9c6d238"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-final-build.txt",
+      "bytes": 5312,
+      "sha256": "dfeee64162e08d281981ed09050dea3897a39627d173576002ace76ef7825eaf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-final-tests.txt",
+      "bytes": 520,
+      "sha256": "4199f2b96fff3284b2afeaac17bf2ea4656fc742af8ff0fc16e77b699bb636fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-final-unit.txt",
+      "bytes": 6759,
+      "sha256": "9a1681c67761ae182aa9a2e6991da2b2ea619116ed5e8a4149ad96c48539caf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-first-build.txt",
+      "bytes": 1812,
+      "sha256": "e132df84547ca0ec83806211d68c2ea5e3e9eb624b845a6cc1661101b624907f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-first-test.txt",
+      "bytes": 681,
+      "sha256": "d32af074ec690a9b0cbe407eeec0872001503012bfce876171710fe12a4f9147"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-linkage-build.txt",
+      "bytes": 2203,
+      "sha256": "681c8e647af460d3a5f15d18d42164cf6f11bec6c07165275a14d034652a17a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-linkage-tests.txt",
+      "bytes": 10297,
+      "sha256": "23bbef05dabbf5e831ac287f3ea5fa19692d3b6361a5e87f780d7cbdb46518fb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-oracle-build.txt",
+      "bytes": 2180,
+      "sha256": "91c089f072008da7d56c064fcf1d27ea74913115ecaa6321e51f39f5ab7247a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-oracle-fixed-build.txt",
+      "bytes": 2180,
+      "sha256": "91c089f072008da7d56c064fcf1d27ea74913115ecaa6321e51f39f5ab7247a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-oracle-fixed-tests.txt",
+      "bytes": 6784,
+      "sha256": "88ef3d66e6d96ce4d692e2218c9e3b485357b006fd960c00504f1f2e38c29f1a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-oracle-tests.txt",
+      "bytes": 24603,
+      "sha256": "9f97a1fc6fcd61477a37de8bc622df05c05d14091c7517eed34c6792f88ae9dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-quad-regression.txt",
+      "bytes": 420876,
+      "sha256": "38afb93dc907ad53674e46cd2fae8b0ba005056c164b189b7da4a742b3a6cf22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-sampling-regression.txt",
+      "bytes": 79899,
+      "sha256": "630b7afeadbd96e6664f74066b378b1dc0f88d58b7476988f9aba3496e443ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-second-build.txt",
+      "bytes": 2323,
+      "sha256": "26e8a65d6cc035de51d1a0a1f815fdc3a0b939707cab4bd6eb9fcc48fb79c4ec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-test-imports.txt",
+      "bytes": 17681,
+      "sha256": "64b244b34ee747b3b5f10606277d75be6d476a42cc485306bc76cbf4187eea2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-varying-build.txt",
+      "bytes": 995,
+      "sha256": "29d9d7b036c6bf4b0363616283e69588efd672aef4992111d09c21843c1ce2fb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-varying-tests.txt",
+      "bytes": 510,
+      "sha256": "004cfd219d7a249d92cbcee8b7a97fb08cd3f4f8a324a9250c873e8c844cc0f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-final-audited-validation.json",
+      "bytes": 618063,
+      "sha256": "bc0731026a66ef78dd8251f6376cc4726b2e38a67274a82f3dd74af221b14a52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-final-validation.json",
+      "bytes": 618063,
+      "sha256": "bc0731026a66ef78dd8251f6376cc4726b2e38a67274a82f3dd74af221b14a52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-input-validation.json",
+      "bytes": 602151,
+      "sha256": "30a569c564afa09fe9a6161172cc4c9a6128de2453c19a046f8a7a90bccedba7"
+    }
+  ],
+  "limits": [
+    "Private compact producer is required; actual GPA final-geometry integration is pending.",
+    "Original fragment eligibility, depth, discard, side effects and helper validity are not established.",
+    "Full 32-register and packed signatures are creation-tested, not arbitrary application execution-tested.",
+    "Positive-coordinate synthetic GPU fixtures; real captured PS input selection and boundary semantics remain open.",
+    "Legacy RenderDoc consumers and original GPA debugger engine recovery remain unresolved."
+  ]
+}

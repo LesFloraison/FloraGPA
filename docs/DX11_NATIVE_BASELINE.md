@@ -984,3 +984,18 @@ input words unchanged and exact. See
 `research/DX11_PIXEL_QUAD_TRANSPORT_RESEARCH.md` and its evidence ledger. Actual
 GPA PS input/fragment selection, helper validity, debugger integration and the
 remaining full-history/removal/release gates remain open.
+
+## Original PS input declaration transport checkpoint
+
+`DxbcPixelInputs` now emits a private four-lane input observation shader with
+original interpolation, component validity and minimum-precision declarations.
+Sample-frequency triggers outside the selected register are retained. A compact
+producer signature is an explicit integration requirement; an unmodified original
+producer cannot be bound against it. NVIDIA, Intel and WARP pass 102 GPU fixtures
+with 129,600 direct and 518,400 independent quad components compared exactly.
+The complete input suite passes 113 checks, including every register from ordinary
+and packed 32-register signatures, and six offline corruption controls are rejected.
+Existing PS quad/sampling suites add 1,190 passing regression checks. GUI, CLI and
+Worker Release targets build. See `research/DX11_PIXEL_INPUT_CAPTURE.md` and its
+evidence ledger. Private geometry bridge integration, actual GPA fragment input
+selection, helper validity, full debugging/history and removal acceptance remain open.
