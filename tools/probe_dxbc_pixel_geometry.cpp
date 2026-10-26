@@ -1,5 +1,6 @@
 #include "application/DxbcGpuCompletion.h"
 #include "application/DxbcPixelGeometry.h"
+#include "application/DxbcPixelRaster.h"
 #include "core/Dxbc.h"
 #include "core/StreamOutput.h"
 #include "replay/Replay.h"
@@ -8,6 +9,7 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <bit>
+#include <cmath>
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
 #include <iostream>
@@ -137,9 +139,9 @@ std::vector<uint8_t> roundtrip(ID3D11Device *device, const PixelGeometryBridge &
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     const auto args = app.arguments();
-    if (args.size() != 6) {
+    if (args.size() != 6 && args.size() != 10 && !(args.size() == 7 && args[6] == "centroid")) {
         std::cerr << "Usage: FloraDxbcPixelGeometryProbe <frame> <event> <primitive-ordinal> "
-                     "<vendor-or-0-for-WARP> <new-directory>\n";
+                     "<vendor-or-0-for-WARP> <new-directory> [centroid | x y sample layer]\n";
         return 2;
     }
     try {
@@ -163,6 +165,9 @@ int main(int argc, char **argv) {
             if (timer.elapsed() > 120000)
                 throw std::runtime_error("Geometry probe replay deadline");
         });
+        PixelRasterState rasterState;
+        replay.inspectNativeState(
+            [&](auto *context, const auto &) { rasterState = pixelRasterState(context); });
         const auto state = frame.state(frame.event(event).state);
         const auto ps = frame.shader(frame.resource(state.stages[4].shader).data);
         PostTransformOptions geometryOptions;
@@ -172,6 +177,65 @@ int main(int argc, char **argv) {
         if (geometryOptions.stream == UINT32_MAX)
             throw std::runtime_error("Selected draw has no rasterized GS stream");
         const auto geometry = inspectPostTransform(replay, event, geometryOptions);
+        std::optional<PixelInputRecordSelection> selection;
+        if (args.size() > 6) {
+            selection.emplace();
+            selection->layerInput =
+                std::any_of(geometry.report.at("attributes").begin(), geometry.report.at("attributes").end(),
+                            [](const auto &a) { return a.at("system_value") == 4; });
+            if (args.size() == 10) {
+                uint32_t *fields[]{&selection->x, &selection->y, &selection->sample, &selection->layer};
+                for (int i = 0; i < 4; ++i) {
+                    const auto value = number(args[6 + i]);
+                    if (value > UINT32_MAX)
+                        throw std::runtime_error("Raster selection exceeds uint32");
+                    *fields[i] = uint32_t(value);
+                }
+            } else {
+                const auto factor = geometry.report.at("vertices_per_primitive").get<uint32_t>();
+                const auto stride = geometry.report.at("stride").get<uint32_t>();
+                if (ordinal >= geometry.report.at("primitives").get<uint64_t>())
+                    throw std::runtime_error("Centroid primitive selection exceeds geometry");
+                uint32_t viewport = 0;
+                const Json *position = nullptr;
+                for (const auto &a : geometry.report.at("attributes")) {
+                    const auto system = a.at("system_value").get<uint32_t>();
+                    if (system == 1)
+                        position = &a;
+                    if (system == 4 || system == 5) {
+                        const auto value =
+                            Reader(Bytes(geometry.bytes)
+                                       .subspan(ordinal * factor * stride + a.at("offset").get<uint32_t>()))
+                                .read<uint32_t>();
+                        (system == 4 ? selection->layer : viewport) = value;
+                    }
+                }
+                if (!position || position->at("component_count") != 4 ||
+                    viewport >= rasterState.viewports.size())
+                    throw std::runtime_error("Centroid probe requires known position and viewport");
+                double x = 0, y = 0;
+                for (uint32_t i = 0; i < factor; ++i) {
+                    Reader r(Bytes(geometry.bytes)
+                                 .subspan((ordinal * factor + i) * stride +
+                                          position->at("offset").get<uint32_t>()));
+                    const auto px = r.read<float>(), py = r.read<float>();
+                    r.skip(4);
+                    const auto w = r.read<float>();
+                    if (!std::isfinite(w) || w <= 0)
+                        throw std::runtime_error("Centroid probe requires positive clip w");
+                    x += px / double(w);
+                    y += py / double(w);
+                }
+                const auto &v = rasterState.viewports[viewport];
+                x = std::floor(v.TopLeftX + (x / factor + 1) * v.Width / 2);
+                y = std::floor(v.TopLeftY + (1 - y / factor) * v.Height / 2);
+                if (!std::isfinite(x) || !std::isfinite(y) || x < 0 || y < 0 || x > INT32_MAX ||
+                    y > INT32_MAX)
+                    throw std::runtime_error("Centroid probe candidate is outside supported coordinates");
+                selection->x = uint32_t(x);
+                selection->y = uint32_t(y);
+            }
+        }
         save(directory, "source-geometry.json", geometry.report);
         save(directory, "source-geometry.bin", Bytes(geometry.bytes));
         shader(directory, "original-ps", ps);
@@ -180,10 +244,11 @@ int main(int argc, char **argv) {
         check(replay.nativeDevice()->QueryInterface(IID_PPV_ARGS(&dxgi)), "Query reference adapter");
         check(dxgi->GetAdapter(&adapter), "Get reference adapter");
         Com<ID3D11Device> device;
+        const auto featureLevel = replay.nativeDevice()->GetFeatureLevel();
         check(D3D11CreateDevice(vendor ? adapter.Get() : nullptr,
                                 vendor ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_WARP, nullptr,
-                                D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr,
-                                nullptr),
+                                D3D11_CREATE_DEVICE_DEBUG, &featureLevel, 1, D3D11_SDK_VERSION, &device,
+                                nullptr, nullptr),
               "Create private bridge probe device");
         Com<IDXGIDevice> privateDxgi;
         Com<IDXGIAdapter> privateAdapter;
@@ -210,7 +275,14 @@ int main(int argc, char **argv) {
                      (uint64_t(uint32_t(actual.AdapterLuid.HighPart)) << 32) | actual.AdapterLuid.LowPart},
                     {"cases", Json::array()},
                     {"original_fragment_eligibility", false}};
+        report["raster_state"] = pixelRasterIdentity(rasterState);
+        if (selection) {
+            report["selection"] = {selection->x, selection->y, selection->sample, selection->layer};
+            report["selection_source"] =
+                args.size() == 7 ? "projected_primitive_centroid_candidate" : "explicit";
+        }
         bool complete = true;
+        bool observed = true;
         for (auto reg : registers) {
             const auto name = "input-" + QString::number(reg);
             directory.mkdir(name);
@@ -227,6 +299,20 @@ int main(int argc, char **argv) {
                 const auto raw = roundtrip(device.Get(), bridge);
                 save(target, "roundtrip.bin", Bytes(raw));
                 item["roundtrip_components"] = raw.size() / 4;
+                if (selection) {
+                    const auto recordShader = pixelInputShader(ps, reg, selection);
+                    const auto recordBridge = pixelGeometryBridge(geometry, recordShader, ordinal);
+                    const auto records = capturePixelRasterInputs(device.Get(), !vendor, rasterState,
+                                                                  recordBridge, recordShader);
+                    shader(target, "record-ps", recordShader.bytecode);
+                    shader(target, "record-vs", recordBridge.vertexShader);
+                    shader(target, "record-gs", recordBridge.geometryShader);
+                    save(target, "record-vertices.bin", Bytes(recordBridge.vertices));
+                    save(target, "records.bin", Bytes(records.storage));
+                    save(target, "records.json", records.identity);
+                    item["input_records"] = records.records.size();
+                    observed &= !records.records.empty();
+                }
             } catch (const std::exception &e) {
                 item["status"] = "failed";
                 item["error"] = e.what();
@@ -236,9 +322,11 @@ int main(int argc, char **argv) {
         }
         report["status"] = registers.empty() ? "inapplicable_no_declared_inputs" : complete ? "ok" : "failed";
         report["elapsed_ms"] = timer.elapsed();
+        if (selection)
+            report["raster_status"] = !complete ? "failed" : observed ? "observed" : "empty";
         save(directory, "report.json", report);
         std::cout << report.dump(2) << '\n';
-        return registers.empty() ? 3 : complete ? 0 : 1;
+        return registers.empty() ? 3 : !complete ? 1 : selection && !observed ? 4 : 0;
     } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
         return 1;

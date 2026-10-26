@@ -1,6 +1,7 @@
 #include "application/DxbcGpuCompletion.h"
 #include "application/DxbcPixelGeometry.h"
 #include "application/DxbcPixelInputs.h"
+#include "application/DxbcPixelRaster.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
@@ -361,6 +362,21 @@ class DxbcPixelInputsTests : public QObject {
             std::array<std::vector<Words>, 8> observed;
             for (unsigned i = 0; i < 8; ++i)
                 observed[i] = read(d, targets[i], samples);
+            d.context->OMSetRenderTargets(1, targets[0].rtv.GetAddressOf(), nullptr);
+            const auto rasterState = pixelRasterState(d.context.Get(), 0);
+            const PixelInputRecordSelection recordSelection{3, 2, samples - 1, 0, 32, false};
+            const auto recordShader = pixelInputShader(ps, selected, recordSelection);
+            const auto recordBridge = pixelGeometryBridge(geometry, recordShader, 0);
+            const auto recordCapture = capturePixelRasterInputs(d.device.Get(), vendor == 0, rasterState,
+                                                                recordBridge, recordShader);
+            QCOMPARE(recordCapture.records.size(), size_t(1));
+            const auto address = (2 * 16 + 3) * samples + samples - 1;
+            for (unsigned i = 0; i < 8; ++i)
+                QCOMPARE(recordCapture.records[0].words[i], observed[i][address]);
+            Com<ID3D11RenderTargetView> stillBound;
+            d.context->OMGetRenderTargets(1, &stillBound, nullptr);
+            QCOMPARE(stillBound.Get(), targets[0].rtv.Get());
+            d.context->OMSetRenderTargets(0, nullptr, nullptr);
             const auto evidence = qEnvironmentVariable("FLORA_PIXEL_INPUT_EVIDENCE");
             if (!evidence.isEmpty()) {
                 const auto name = QString("%1-%2-%3").arg(vendor).arg(mode).arg(samples).replace(' ', '-');
@@ -383,6 +399,10 @@ class DxbcPixelInputsTests : public QObject {
                 shader("original-vs", vs);
                 shader("compact-vs", compactVs);
                 shader("bridge-gs", bridge.geometryShader);
+                shader("record-ps", recordShader.bytecode);
+                save("records.bin", recordCapture.storage.data(), recordCapture.storage.size());
+                const auto recordIdentity = recordCapture.identity.dump(2);
+                save("records.json", recordIdentity.data(), recordIdentity.size());
                 save("source-geometry.bin", geometry.bytes.data(), geometry.bytes.size());
                 save("bridge-geometry.bin", bridge.vertices.data(), bridge.vertices.size());
                 const auto sourceGeometry = geometry.report.dump(2), bridgeIdentity = bridge.identity.dump(2);
@@ -510,6 +530,11 @@ class DxbcPixelInputsTests : public QObject {
                 check(d.device->CreatePixelShader(helper.bytecode.data(), helper.bytecode.size(), nullptr,
                                                   &shader),
                       "Create full-signature selected input PS");
+                const auto recorded =
+                    pixelInputShader(original, reg, PixelInputRecordSelection{1, 1, 0, 0, 1, false});
+                check(d.device->CreatePixelShader(recorded.bytecode.data(), recorded.bytecode.size(), nullptr,
+                                                  &shader),
+                      "Create full-signature private record PS");
             }
             d.validate();
         } catch (const std::exception &e) {
@@ -611,6 +636,145 @@ class DxbcPixelInputsTests : public QObject {
             malformed.report["geometry_stage"] = "selected_shader_output";
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(malformed, pixel, 0));
             device.validate();
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void rasterContract_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void rasterContract() {
+        QFETCH(uint32_t, vendor);
+        try {
+            Device d(vendor);
+            const auto vs = compile("struct O{float4 p:SV_Position;float4 a:DATA;};"
+                                    "O main(uint id:SV_VertexID){O o;o.p=float4(id==1?3:-1,id==2?-3:1,0.5,1);"
+                                    "o.a=float4(1,2,3,4);return o;}",
+                                    "vs_5_0");
+            Com<ID3D11VertexShader> vertex;
+            check(d.device->CreateVertexShader(vs.data(), vs.size(), nullptr, &vertex),
+                  "Create raster fixture VS");
+            d.context->VSSetShader(vertex.Get(), nullptr, 0);
+            auto geometry = captureGeometry(d, vs);
+            // The SO fixture has no layer output. Add an explicit constant layer
+            // to the synthetic final geometry so the private GS must forward it.
+            const auto stride = geometry.report.at("stride").get<uint32_t>();
+            std::vector<uint8_t> layered(3 * (stride + 4));
+            for (unsigned i = 0; i < 3; ++i) {
+                std::memcpy(layered.data() + i * (stride + 4), geometry.bytes.data() + i * stride, stride);
+                const uint32_t layer = 1;
+                std::memcpy(layered.data() + i * (stride + 4) + stride, &layer, 4);
+            }
+            geometry.bytes = std::move(layered);
+            geometry.report["stride"] = stride + 4;
+            geometry.report["attributes"].push_back({{"semantic", "SV_RenderTargetArrayIndex"},
+                                                     {"index", 0},
+                                                     {"system_value", 4},
+                                                     {"component_type", 1},
+                                                     {"register", 2},
+                                                     {"mask", 1},
+                                                     {"used_mask", 1},
+                                                     {"components", {0}},
+                                                     {"register_components", {0}},
+                                                     {"offset", stride},
+                                                     {"component_count", 1}});
+            D3D11_TEXTURE2D_DESC td{32,
+                                    32,
+                                    2,
+                                    4,
+                                    DXGI_FORMAT_R8G8B8A8_UNORM,
+                                    {1, 0},
+                                    D3D11_USAGE_DEFAULT,
+                                    D3D11_BIND_RENDER_TARGET,
+                                    0,
+                                    0};
+            Com<ID3D11Texture2D> texture;
+            check(d.device->CreateTexture2D(&td, nullptr, &texture), "Create raster array target");
+            D3D11_RENDER_TARGET_VIEW_DESC vd{};
+            vd.Format = td.Format;
+            vd.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+            vd.Texture2DArray = {1, 1, UINT32_MAX};
+            Com<ID3D11RenderTargetView> view;
+            check(d.device->CreateRenderTargetView(texture.Get(), &vd, &view), "Create raster subset view");
+            d.context->OMSetRenderTargets(1, view.GetAddressOf(), nullptr);
+            const D3D11_VIEWPORT viewport{0, 0, 16, 16, 0, 1};
+            d.context->RSSetViewports(1, &viewport);
+            auto state = pixelRasterState(d.context.Get(), 0);
+            QCOMPARE(state.target.width, 16u);
+            QCOMPARE(state.target.height, 16u);
+            QCOMPARE(state.target.layers, 3u);
+            state.rasterizer.CullMode = D3D11_CULL_NONE;
+            const auto ps = compile("float4 main(float4 a:DATA):SV_Target{return a;}");
+            const auto reg = inputRegister(ps, "DATA");
+            const PixelInputRecordSelection selection{3, 2, 0, 1, 1, true};
+            const auto input = pixelInputShader(ps, reg, selection);
+            const auto bridge = pixelGeometryBridge(geometry, input, 0);
+            const auto observed = capturePixelRasterInputs(d.device.Get(), vendor == 0, state, bridge, input);
+            QCOMPARE(observed.records.size(), size_t(1));
+            const auto &record = observed.records[0].words;
+            const auto lane = record[4][2] + 2 * record[4][3];
+            const Words expected{0x3f800000, 0x40000000, 0x40400000, 0x40800000};
+            QCOMPARE(record[lane], expected);
+            QCOMPARE(record[8][0], 1u);
+            auto empty = state;
+            empty.sampleMask = 0;
+            QVERIFY(
+                capturePixelRasterInputs(d.device.Get(), vendor == 0, empty, bridge, input).records.empty());
+            empty = state;
+            empty.rasterizer.ScissorEnable = true;
+            empty.scissors = {{8, 8, 16, 16}};
+            QVERIFY(
+                capturePixelRasterInputs(d.device.Get(), vendor == 0, empty, bridge, input).records.empty());
+            empty.scissors.clear();
+            QVERIFY(
+                capturePixelRasterInputs(d.device.Get(), vendor == 0, empty, bridge, input).records.empty());
+            auto wrongLayer = selection;
+            wrongLayer.layer = 0;
+            const auto other = pixelInputShader(ps, reg, wrongLayer);
+            QVERIFY(
+                capturePixelRasterInputs(d.device.Get(), vendor == 0, state, bridge, other).records.empty());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, capturePixelRasterInputs(d.device.Get(), vendor == 0,
+                                                                                  state, bridge, input, 1));
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     capturePixelRasterInputs(d.device.Get(), vendor == 0, state, bridge,
+                                                              input, 1024 * 1024, [] { return true; }));
+            unsigned cancellationChecks = 0;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     capturePixelRasterInputs(d.device.Get(), vendor == 0, state, bridge,
+                                                              input, 1024 * 1024,
+                                                              [&] { return ++cancellationChecks >= 4; }));
+            QVERIFY(cancellationChecks >= 4);
+            auto missingLayer = selection;
+            missingLayer.layerInput = false;
+            const auto missing = pixelInputShader(ps, reg, missingLayer);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, capturePixelRasterInputs(d.device.Get(), vendor == 0,
+                                                                                  state, bridge, missing));
+            auto invalid = state;
+            invalid.target.width = 3;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, capturePixelRasterInputs(d.device.Get(), vendor == 0,
+                                                                                  invalid, bridge, input));
+            const auto retried = capturePixelRasterInputs(d.device.Get(), vendor == 0, state, bridge, input);
+            QVERIFY(retried.storage == observed.storage);
+            Com<ID3D11RenderTargetView> stillBound;
+            d.context->OMGetRenderTargets(1, &stillBound, nullptr);
+            QCOMPARE(stillBound.Get(), view.Get());
+            d.context->OMSetRenderTargets(0, nullptr, nullptr);
+            // A 3D view's all-remaining-slices sentinel is relative to its mip.
+            const D3D11_TEXTURE3D_DESC volumeDesc{
+                32, 16, 8, 2, td.Format, D3D11_USAGE_DEFAULT, D3D11_BIND_RENDER_TARGET, 0, 0};
+            Com<ID3D11Texture3D> volume;
+            check(d.device->CreateTexture3D(&volumeDesc, nullptr, &volume), "Create raster volume");
+            vd.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
+            vd.Texture3D = {1, 1, UINT32_MAX};
+            check(d.device->CreateRenderTargetView(volume.Get(), &vd, &view), "Create raster volume subset");
+            d.context->OMSetRenderTargets(1, view.GetAddressOf(), nullptr);
+            const auto volumeState = pixelRasterState(d.context.Get(), 0);
+            QCOMPARE(volumeState.target.width, 16u);
+            QCOMPARE(volumeState.target.height, 8u);
+            QCOMPARE(volumeState.target.layers, 3u);
+            d.validate();
         } catch (const std::exception &e) {
             QFAIL(e.what());
         }

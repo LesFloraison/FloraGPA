@@ -73,7 +73,7 @@ std::vector<uint8_t> signature(const std::vector<Field> &fields) {
         result.push_back(0);
     return result;
 }
-bool declaration(uint32_t op) { return op >= 88 && op <= 106; }
+bool declaration(uint32_t op) { return (op >= 88 && op <= 106) || (op >= 143 && op <= 162); }
 // Only the independently compiled template is rewritten. Walk framed operands
 // so immediate data equal to a register token cannot be accidentally changed.
 size_t rewrite(Row &row, size_t pos, const std::map<uint32_t, uint32_t> &temps, unsigned depth = 0) {
@@ -112,6 +112,12 @@ size_t rewrite(Row &row, size_t pos, const std::map<uint32_t, uint32_t> &temps, 
     return pos;
 }
 const char *body = R"(
+#if RECORD_MODE
+RWByteAddressBuffer records:register(u1);
+#define RETURN_TYPE void
+#else
+#define RETURN_TYPE Output
+#endif
 uint4 transport(uint4 value, float2 role, uint target) {
     float2 delta = float2(target & 1u, target >> 1u) - role;
     uint4 result = 0;
@@ -127,8 +133,14 @@ struct Output {
     uint4 location:SV_Target4; uint4 samples:SV_Target5;
     uint4 coverage:SV_Target6; uint4 orientation:SV_Target7;
 };
-Output main(float4 source:FLORA_VALUE, float4 position:SV_Position,
-            uint coverage:SV_Coverage SAMPLE_ARGUMENT) {
+RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
+            uint coverage:SV_Coverage SAMPLE_ARGUMENT LAYER_ARGUMENT) {
+#if RECORD_MODE
+    uint record=MAX_RECORDS;
+    [branch] if(all(asuint(int2(floor(position.xy)))==uint2(SELECT_X,SELECT_Y)) &&
+                LAYER_VALUE==SELECT_LAYER && (coverage&(1u<<SELECT_SAMPLE))!=0 && SAMPLE_MATCH)
+        records.InterlockedAdd(0,1,record);
+#endif
     float2 parity = float2(int2(floor(position.xy)) & 1);
     float2 direction = float2(ddx_fine(parity.x), ddy_fine(parity.y)) * (1-2*parity);
     float2 role = float2(direction.x < 0, direction.y < 0);
@@ -143,12 +155,27 @@ Output main(float4 source:FLORA_VALUE, float4 position:SV_Position,
     o.coverage=uint4(transport(coverage.xxxx,role,0).x,transport(coverage.xxxx,role,1).x,
                      transport(coverage.xxxx,role,2).x,transport(coverage.xxxx,role,3).x);
     o.orientation=asuint(float4(direction,ddx_fine(parity.y),ddy_fine(parity.x)));
+#if RECORD_MODE
+    // Raw UAV stores outside the view are discarded. Keeping the stores
+    // unconditional prevents the compiler sinking derivatives into a pixel
+    // selection branch. The allocation counter still runs only for selection.
+            uint address=16+144*min(record,MAX_RECORDS);
+            records.Store4(address,o.a);records.Store4(address+16,o.b);
+            records.Store4(address+32,o.c);records.Store4(address+48,o.d);
+            records.Store4(address+64,o.location);records.Store4(address+80,o.samples);
+            records.Store4(address+96,o.coverage);records.Store4(address+112,o.orientation);
+            records.Store4(address+128,uint4(LAYER_VALUE,SELECT_SAMPLE,0,0));
+#else
     return o;
+#endif
 })";
 } // namespace
-PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
+PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
+                                  std::optional<PixelInputRecordSelection> records) {
     if (inputRegister >= 32)
         throw std::runtime_error("Pixel input register is outside v0..v31");
+    if (records && (!records->maxRecords || records->maxRecords > 4096 || records->sample >= 32))
+        throw std::runtime_error("Invalid pixel input record limits/sample");
     Bytes input, code;
     uint32_t inputTag = 0;
     std::set<uint32_t> tags;
@@ -175,6 +202,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
         throw std::runtime_error("Pixel input capture requires an SM4/SM5 pixel shader");
     PixelInputShader result;
     result.reg = inputRegister;
+    result.records = records;
     std::vector<Row> selectedDeclarations;
     bool minimumPrecision = false;
     for (const auto &row : originalProgram.instructions) {
@@ -215,7 +243,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
         throw std::runtime_error("Pixel input register is not declared");
     std::vector<Field> fields;
     uint32_t signatureMask = 0;
-    std::optional<Field> position, sample;
+    std::optional<Field> position, sample, layer;
     for (auto f : signature(input, inputTag)) {
         if (f.reg != inputRegister)
             continue;
@@ -226,6 +254,8 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
             position = f;
         if (f.system == 10)
             sample = f;
+        if (f.system == 4)
+            layer = f;
         fields.push_back(std::move(f));
     }
     if (result.mask & ~signatureMask)
@@ -234,6 +264,8 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
         throw std::runtime_error("Pixel position signature lacks float xy");
     if (sample && (sample->type != 1 || !std::has_single_bit(sample->mask)))
         throw std::runtime_error("Invalid pixel sample-index signature");
+    if (layer && (layer->type != 1 || !std::has_single_bit(layer->mask)))
+        throw std::runtime_error("Invalid pixel render-target array-index signature");
     // A selected position register may only read z/w in the original shader.
     // Add xy for orientation without making those components valid observations.
     if (position) {
@@ -250,7 +282,26 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
             if (f.system == 1)
                 f.used |= 3;
     }
+    std::string defines;
+    if (records) {
+        for (const auto &[name, value] :
+             std::initializer_list<std::pair<const char *, uint32_t>>{{"SELECT_X", records->x},
+                                                                      {"SELECT_Y", records->y},
+                                                                      {"SELECT_SAMPLE", records->sample},
+                                                                      {"SELECT_LAYER", records->layer},
+                                                                      {"MAX_RECORDS", records->maxRecords}})
+            defines += "#define " + std::string(name) + " " + std::to_string(value) + "u\n";
+        defines += "#define RECORD_MODE 1\n";
+        defines += result.sampleFrequency ? "#define SAMPLE_MATCH (sample==SELECT_SAMPLE)\n"
+                                          : "#define SAMPLE_MATCH true\n";
+    } else
+        defines += "#define RECORD_MODE 0\n";
+    defines +=
+        records && records->layerInput
+            ? "#define LAYER_ARGUMENT , uint layer:SV_RenderTargetArrayIndex\n#define LAYER_VALUE layer\n"
+            : "#define LAYER_ARGUMENT\n#define LAYER_VALUE (0u)\n";
     const std::string source =
+        defines +
         std::string(result.sampleFrequency ? "#define SAMPLE_ARGUMENT , uint sample:SV_SampleIndex\n"
                                              "#define SAMPLE_VALUE sample\n"
                                            : "#define SAMPLE_ARGUMENT\n#define SAMPLE_VALUE (0u)\n") +
@@ -271,9 +322,9 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
     for (auto &row : program.instructions)
         if ((row[0] & 2047) == 104) {
             temporary = row.at(1);
-            row.at(1) += 3;
+            row.at(1) += 4;
         }
-    if (!temporary || temporary > 4093 || output.empty())
+    if (!temporary || temporary > 4092 || output.empty())
         throw std::runtime_error("Unexpected pixel input transport template");
     std::map<uint32_t, uint32_t> remap;
     std::map<uint32_t, uint32_t> helperRegisters;
@@ -291,11 +342,11 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
             continue;
         }
         const bool isPosition = f.system == 1;
-        if (!isPosition && f.system != 10)
+        if (!isPosition && f.system != 10 && f.system != 4)
             throw std::runtime_error("Unexpected pixel transport input semantic");
-        const auto temp = temporary + (isPosition ? 1 : 2);
+        const auto temp = temporary + (isPosition ? 1 : f.system == 10 ? 2 : 3);
         remap[sourceRegister] = temp;
-        const auto existing = isPosition ? position : sample;
+        const auto existing = isPosition ? position : f.system == 10 ? sample : layer;
         uint32_t reg = 0, swizzle = 0xe4;
         if (existing) {
             if (!isPosition)
@@ -308,6 +359,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
         initialize.push_back({0x05000036, 0x100002 | (f.used << 4), temp, 0x101006 | (swizzle << 4), reg});
     }
     std::vector<Row> declarations = selectedDeclarations, executable;
+    unsigned conditional = 0;
     for (auto row : program.instructions) {
         const auto op = row[0] & 2047;
         if (op >= 98 && op <= 100 && ((row.at(1) >> 12) & 255) == 1) {
@@ -321,6 +373,15 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister) {
                 row[0] |= 1u << 16;
             declarations.push_back(std::move(row));
         } else {
+            if (op == 31)
+                ++conditional;
+            if (op == 21) {
+                if (!conditional)
+                    throw std::runtime_error("Unbalanced pixel input template branch");
+                --conditional;
+            }
+            if (records && conditional && (op == 11 || op == 12 || (op >= 122 && op <= 125)))
+                throw std::runtime_error("Pixel input record derivative became conditional");
             const auto arity = dxbc_detail::operandArities.find(op);
             if (arity == dxbc_detail::operandArities.end() || (row[0] & 0x80000000u))
                 throw std::runtime_error("Unexpected pixel transport instruction");
