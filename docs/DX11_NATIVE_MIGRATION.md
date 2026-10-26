@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals and minimum-precision implicit sampling are tested; GF2/BF1 traces complete on three adapters, while Helldivers still rejects minimum-precision typed-buffer loads; fragment qualification, helper memory behavior and semantic/source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision implicit sampling and typed-buffer loads are tested; GF2/BF1 traces complete on three adapters, while Helldivers reaches the minimum-precision PS output restriction; fragment qualification, helper memory behavior and semantic/source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -732,3 +732,14 @@ See `research/DX11_PIXEL_EXECUTION_TRACES.md` for tests and independent projecti
 evidence. This does not switch the public pixel-debug job or retire its existing
 backend. Fragment qualification, complete semantics, source/UI parity, history
 and standalone removal acceptance still require implementation and validation.
+
+## Typed-buffer precision continuation
+
+`dxbc-gpu/19` preserves destination/address precision and refactoring permission
+for native typed-buffer reads. The 5,760-case GPU comparison covers VS, PS and
+CS SRVs plus CS typed UAVs on three adapters, with 23,040 exact output components.
+Existing typed-buffer/VS/execution checks pass. GF2/BF1 traces still complete;
+Helldivers advances to the remaining minimum-precision PS output restriction.
+See `research/DX11_TYPED_LOAD_PRECISION.md` for scope, retained failed attempts,
+raw evidence and reproduction. This does not close P6 or remove the existing
+RenderDoc backend; full history/debugger parity and P7/P8 remain required.

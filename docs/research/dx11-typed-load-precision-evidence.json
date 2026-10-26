@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "checkpoint": "native-typed-buffer-minimum-precision",
+  "base_commit": "87325938689139ac7314161ffa1d84d0d825dd60",
+  "implementation_commit": "0427642ef3fe4307e80601fbe2eade991e2a1e3f",
+  "created_utc": "2026-10-26T22:47:26.056821+00:00",
+  "complete_release_acceptance": false,
+  "helper_backend": "dxbc-gpu/19",
+  "suites": {
+    "full": {
+      "passed": 1732,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 246851,
+      "log": {
+        "path": "artifacts/dx11-native/typed-load-precision-full-tests.txt",
+        "bytes": 2595668,
+        "sha256": "f367875d23407fec7d0309e4f9e6c8f34707008ed2514b938a8965e5fee2f22e"
+      }
+    },
+    "validity": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 22,
+      "log": {
+        "path": "artifacts/dx11-native/typed-load-precision-validity-tests.txt",
+        "bytes": 481,
+        "sha256": "5575f03b911da363972361de41b71532651a056f3f9bc451468cd82271901c1d"
+      }
+    },
+    "buffer": {
+      "passed": 473,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 59386,
+      "log": {
+        "path": "artifacts/dx11-native/typed-load-precision-buffer-tests.txt",
+        "bytes": 314530,
+        "sha256": "b756372cf4ff84c35b9a6f0b6a3f4998c793d72460d3da9eb5f10c92dea46bdd"
+      }
+    },
+    "vertex": {
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 53456,
+      "log": {
+        "path": "artifacts/dx11-native/typed-load-precision-vertex-tests.txt",
+        "bytes": 370163,
+        "sha256": "7814a3918efd4911cd8703e99f41e8aa60537915825bc5bd2653d8237503837d"
+      }
+    },
+    "execution": {
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 37502,
+      "log": {
+        "path": "artifacts/dx11-native/typed-load-precision-execution-tests.txt",
+        "bytes": 389008,
+        "sha256": "4afc1cdaff6d51635e59b56c7ddb568a04985f0e6bb10149aeec10cc60c3d97a"
+      }
+    }
+  },
+  "suite_note": "The full suite predates the added validity case, which was run separately; all production code is identical.",
+  "minimum_precision": {
+    "rows": 1152,
+    "cases": 5760,
+    "exact_components": 23040,
+    "negative_controls": 72,
+    "report": {
+      "path": "artifacts/dx11-native/typed-load-precision-final-validation.json",
+      "bytes": 5144108,
+      "sha256": "7c025438c0eddfa9986602ca031409d103643d1e8e1c2f13f01425a777aee5e6"
+    },
+    "large_index_scope": "Out-of-range minimum-precision constants are adapter observations, not portable overflow guarantees."
+  },
+  "real_probes": {
+    "completed": 6,
+    "failed": 3,
+    "selected_steps": 381,
+    "global_steps": 1524,
+    "negative_controls": 120,
+    "original_fragment_eligibility": false,
+    "independent_complete_ps_output_comparison": false,
+    "report": {
+      "path": "artifacts/dx11-native/typed-load-precision-real-validation.json",
+      "bytes": 185151,
+      "sha256": "f98dbfc0559fcff8c8b9c1c1457abef838a6c9ab02018d3cdbb568798e76311b"
+    },
+    "runs": [
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-bf1-0/report.json",
+          "bytes": 3291,
+          "sha256": "eb391b4636fbcd70cf4e9457817b412a3c4a3a18f87cf0e0340c98944f4594ce"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-bf1-32902/report.json",
+          "bytes": 3298,
+          "sha256": "04ab83ec9192bca4f03cab2e8e2cf2d4184117928166cd8ba08be6ce24530d13"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-bf1-4318/report.json",
+          "bytes": 3296,
+          "sha256": "0beee0106da1518506a724d583c911a1d37f59c5e75bf643848f96ffcad8fb73"
+        },
+        "status": "ok",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-gf2-0/report.json",
+          "bytes": 2280,
+          "sha256": "492dd9d214fca8095253f89c2346f55a504297eb2d1425af1ba410cfb13ac94e"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-gf2-32902/report.json",
+          "bytes": 2287,
+          "sha256": "d485dd65270696f5b7f3a13e07dd006dfcf3007e5e1e469794e5f6c17c52d1c0"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-gf2-4318/report.json",
+          "bytes": 2285,
+          "sha256": "1999bd8de5a5ee3f8bf32ae331a0014e46590b4b6df3f745fa17462b1ea39caf"
+        },
+        "status": "ok",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "trace_error": null
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-hd-0/report.json",
+          "bytes": 1775,
+          "sha256": "fff863b7c3c594beeae9fc1fe63e4cbce7bcdee7a1b99efca9080fee46e337b8"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 5140,
+        "adapter_luid": 73789,
+        "trace_error": "Minimum-precision output requires a single VS destination"
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-hd-32902/report.json",
+          "bytes": 1778,
+          "sha256": "b29cfaac1c70fac8380f903d230debd051a2250614c1fe4f61aad7e25e52ba56"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 32902,
+        "adapter_luid": 73907,
+        "trace_error": "Minimum-precision output requires a single VS destination"
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/typed-load-precision-real-hd-4318/report.json",
+          "bytes": 1777,
+          "sha256": "c3dc908c7e6b50649cd43a4a56e835f14c983b0b99fa4c783a061fb9b0790a8a"
+        },
+        "status": "failed",
+        "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "event": 200,
+        "adapter_vendor": 4318,
+        "adapter_luid": 68403,
+        "trace_error": "Minimum-precision output requires a single VS destination"
+      }
+    ]
+  },
+  "builds": [
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-build8.txt",
+      "bytes": 12199,
+      "sha256": "24a73e60ad5a07445805338ae17bc6b72da4feefeec7277ecdafa3b24f8f88b3"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-build9.txt",
+      "bytes": 996,
+      "sha256": "4c863a21624f49cfd42f75a38a16f3592a245b14c4c44db869b7468021bddda8"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4966400,
+      "sha256": "44febbf8dd0457413e8780b0d0e56057d9faed918715c7503dc51deb4691fa29"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5554688,
+      "sha256": "c67fb2d0b33062474288f73cc8f7e49ec99c89f86df271fa1e8099f078d62be4"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5554688,
+      "sha256": "399c758997f6afa1227fb3ee68c90c7790fbd166544ea9820e28518ba0f05930"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTypedPixelTests.exe",
+      "bytes": 513024,
+      "sha256": "221a94d0eccfa79c4e8ff7b756071470e6d542c51806440ea2b6b0caee25090f"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTypedBufferTests.exe",
+      "bytes": 1590784,
+      "sha256": "aa1689fdf393559272b6733be563c2ed1a66cb5efcd02fd372449d3a7c16dbed"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTypedVertexTests.exe",
+      "bytes": 463872,
+      "sha256": "97d1c8da9a052563fd103bca80a9bbacae0ed13932bf5ebbf719b75320db8832"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 541184,
+      "sha256": "1f52088d768f8b0088c2f992334cbbcc34aa5a2628175906997330b703fd0217"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 2867200,
+      "sha256": "429e6286aa77c89c4602c7ac7dc3315e3147847932b97f19a1d7d33fe5913379"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 927744,
+      "sha256": "0717d41fd8fa65976e5cd4c3c4e06b513a152b66be6767d06ff7b90ace681b01"
+    }
+  ],
+  "retained_attempts": [
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-first-tests.txt",
+      "bytes": 807189,
+      "sha256": "fb518ea394ebd2155af4cd4eb705dc2d39f8fda39ccdc9159957afccf23baea1"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-trace-tests.txt",
+      "bytes": 2000,
+      "sha256": "44c36e6c0cc0c8e3cbfd4d27ae4db1c2379508ddb25605b5a626a772b73fb94e"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-trace2-tests.txt",
+      "bytes": 2000,
+      "sha256": "5bf9652233fdbb70d93ff166bc96243e096b367e0b713c6c40f749004a0e052a"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-trace3-tests.txt",
+      "bytes": 2000,
+      "sha256": "41371d6bca7817ce334cce3c17d15572867e740bddd996ff64ca4b149d73bd6a"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-trace4-tests.txt",
+      "bytes": 5712,
+      "sha256": "a775ff8371cef30c0c92476ca4436d3f4576fe6d960a87a3ebbd1f59631c2f6d"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-load-precision-second-tests.txt",
+      "bytes": 2117391,
+      "sha256": "445565467c540ba79efdb2b0a85f33b6d07d8584ac8c0cc25c8d0419759c49ed"
+    }
+  ],
+  "verified_artifact_files": 23697,
+  "remaining_gates": [
+    "Minimum-precision PS outputs and remaining memory/texture semantics",
+    "Original fragment qualification and complete Pixel History",
+    "Public PS jobs, source/debugger parity",
+    "RenderDoc consumer/build/package removal",
+    "Independent clean-profile release acceptance"
+  ]
+}
