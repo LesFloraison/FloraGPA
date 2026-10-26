@@ -999,3 +999,19 @@ Existing PS quad/sampling suites add 1,190 passing regression checks. GUI, CLI a
 Worker Release targets build. See `research/DX11_PIXEL_INPUT_CAPTURE.md` and its
 evidence ledger. Private geometry bridge integration, actual GPA fragment input
 selection, helper validity, full debugging/history and removal acceptance remain open.
+
+## Final-geometry pixel input bridge checkpoint
+
+`DxbcPixelGeometry` selects a captured final primitive and generates private VS/GS
+shaders matching the pixel input transport signature. Packed semantic components,
+rasterizer outputs and minimum precision are retained; an uncaptured PrimitiveID
+requires an explicit known value. The 102-case input matrix now uses actual native
+VS output snapshots through this bridge, with unchanged direct/quad exact assertions.
+The suite passes 122 checks. GF2 event 113, BF1 event 2010 and Helldivers event 200
+pass on NVIDIA, Intel and WARP: 33 input-register bridges and 675 GPU roundtrip
+components are exact. BF1 event 876's input-free PS is explicitly inapplicable and
+excluded from accepted coverage. Offline validation checks 2,907 geometry mapping
+components and rejects six further corruptions. GUI, CLI and Worker build. See
+`research/DX11_PIXEL_GEOMETRY_BRIDGE.md` and its evidence ledger. Actual fragment
+selection, complete rasterization scope, helper provenance, native pixel debugging,
+full history and standalone dependency removal remain open.

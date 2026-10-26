@@ -1,0 +1,482 @@
+{
+  "schema": 1,
+  "checkpoint": "private-final-geometry-pixel-input-bridge",
+  "base_commit": "673d73fe2689fee69e019831481c1ee06dc6311f",
+  "implementation_commit": "39c0fdb34f6e76752d72a2d2488d973205f86453",
+  "created_utc": "2026-10-26T20:31:18.249919+00:00",
+  "complete_release_acceptance": false,
+  "tests": {
+    "dxbc_pixel_inputs": 122,
+    "failed": 0,
+    "skipped": 0
+  },
+  "synthetic_gpu_cases": 102,
+  "direct_components": 129600,
+  "quad_components": 518400,
+  "geometry_mapping_components": 2907,
+  "real_gpu_roundtrip_components": 675,
+  "input_negative_controls": {
+    "reference.bin": "Direct input bits differ",
+    "oracle-0.bin": "Independent quad input bits differ",
+    "target-0.bin": "Direct input bits differ",
+    "target-4.bin": "Invalid pixel/role",
+    "target-5.bin": "Sample identity differs",
+    "target-7.bin": "Invalid orientation derivatives"
+  },
+  "geometry_negative_controls": {
+    "source": "Bridge changed source bits",
+    "payload": "Bridge changed source bits",
+    "gpu": "GPU roundtrip changed source bits",
+    "offset": "Incorrect source byte offset",
+    "component": "Invalid component remapping",
+    "ordinal": "Invalid source geometry size/selection"
+  },
+  "real_runs": [
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-0/report.json",
+        "bytes": 677,
+        "sha256": "008b17813f181f1ea88b8d6b2394961381287dfbd161a6195c0f0f62b2cffd88"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "input_registers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "gpu_roundtrip_components": 84,
+      "elapsed_ms": 1461
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-32902/report.json",
+        "bytes": 680,
+        "sha256": "60ad4f4a74f4fde122a32eeca69c1b1ece949b3a5ffee1d5126e6b5474b669e5"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "input_registers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "gpu_roundtrip_components": 84,
+      "elapsed_ms": 1285
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-4318/report.json",
+        "bytes": 679,
+        "sha256": "e52c0513a2b2b2f99138646174a91c7fae8cfc635173d0a545354db406ac30ef"
+      },
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "input_registers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "gpu_roundtrip_components": 84,
+      "elapsed_ms": 1312
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-0/report.json",
+        "bytes": 586,
+        "sha256": "a0e8283a8793f8f92b85765b8c7cd062bd0137200fb7ec41f22569996a32dfe7"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "input_registers": [
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 66,
+      "elapsed_ms": 361
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-32902/report.json",
+        "bytes": 589,
+        "sha256": "469820fdb23e941deb3b2b2afaa7692bbc02f21dd6eebd905afabd04ee29071c"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "input_registers": [
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 66,
+      "elapsed_ms": 431
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-4318/report.json",
+        "bytes": 588,
+        "sha256": "c556e0cc55aa15256936546212781e983261faea2f97e6a60a2f3b2eba6dc17d"
+      },
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "input_registers": [
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 66,
+      "elapsed_ms": 471
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-0/report.json",
+        "bytes": 676,
+        "sha256": "5b48db365a4d4923abca4d6d1f3da687841dce7d90de6f569e0de2bb0e7a135a"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 5140,
+      "adapter_device": 140,
+      "adapter_luid": 73789,
+      "input_registers": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 75,
+      "elapsed_ms": 1217
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-32902/report.json",
+        "bytes": 679,
+        "sha256": "949d125fc2152c657baecce7e60a553411fae9b1a095185272722c822d8084d4"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 32902,
+      "adapter_device": 32103,
+      "adapter_luid": 73907,
+      "input_registers": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 75,
+      "elapsed_ms": 1701
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-4318/report.json",
+        "bytes": 678,
+        "sha256": "bd4b99f053a0f7aec406bb641dae00d3233a99f7839a19e9178e855b9018dff8"
+      },
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "primitive_ordinal": 0,
+      "adapter_vendor": 4318,
+      "adapter_device": 11352,
+      "adapter_luid": 68403,
+      "input_registers": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "gpu_roundtrip_components": 75,
+      "elapsed_ms": 1253
+    }
+  ],
+  "geometry_artifact_count": 3606,
+  "geometry_manifest": {
+    "path": "artifacts/dx11-native/pixel-geometry-accepted-validation.json",
+    "bytes": 849014,
+    "sha256": "4495467db1474e05cb57cb5e709c9b7cfc3c110540aa8635ac1cfd132f4c6a13"
+  },
+  "input_manifest": {
+    "path": "artifacts/dx11-native/pixel-geometry-input-validation.json",
+    "bytes": 766251,
+    "sha256": "5077a50b31935ed1d1603f28e33e6776bc8c1d82d97cc0b7fc88b36c3fb4ddf8"
+  },
+  "implementation_sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 119121,
+      "sha256": "83841de9484d1e9a6efc46b365503843805cc676fc6e0c005affb9b41df1c26d"
+    },
+    {
+      "path": "src/application/DxbcPixelGeometry.h",
+      "bytes": 881,
+      "sha256": "f1d8afa1bde2fd8929cf330eafa02629c5e42702d21a8d52c00c45d485ead221"
+    },
+    {
+      "path": "src/application/DxbcPixelGeometry.cpp",
+      "bytes": 12975,
+      "sha256": "f210693f61663c621659ce877822bde7475b5666248aa3b3ec7452949ef1fb14"
+    },
+    {
+      "path": "tests/DxbcPixelInputsTests.cpp",
+      "bytes": 38309,
+      "sha256": "73a518b97ace211e1a640265fe5017ca32a7817464fbf230339f86ff57c44cf7"
+    },
+    {
+      "path": "tools/probe_dxbc_pixel_geometry.cpp",
+      "bytes": 12571,
+      "sha256": "b1751a092fccaad8e99a89ae2a9c76196d77ae2c278d5c8e18caddcfa62fb4ac"
+    },
+    {
+      "path": "tools/validate_pixel_geometry.py",
+      "bytes": 7862,
+      "sha256": "3939840f5081a8be2a216ed01f7654463a762154a730a064e12d104aaf57a59d"
+    }
+  ],
+  "executables": [
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 1880064,
+      "sha256": "aed177dc6ad561f420c519273ac7f7d707aa35b619cb3146d82fface25478e80"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelInputsTests.exe",
+      "bytes": 432128,
+      "sha256": "5ca33ac96e956c76dfd4025e30af90c62e6d8d176343e587ece7029faa407134"
+    }
+  ],
+  "reports": [
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-contract-build.txt",
+      "bytes": 13181,
+      "sha256": "1e3948d79f01025f234ce0e6b7c542e7ebe0dcf5903a42c86ea59a21794424a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-contract-fixed-build.txt",
+      "bytes": 1978,
+      "sha256": "4d2d65ac788ea9535a00693de65ee960aff8d24806ec1853c8d84cd0d080a7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-contract-tests.txt",
+      "bytes": 922,
+      "sha256": "f5256400acc5c244a3068d48b907cd5b3208eb0a581f9dd4fe7381c9b79cfc36"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-final-build.txt",
+      "bytes": 5300,
+      "sha256": "bf8d4512a99834af8e399850c5ea96ce4f53b43c42cbb0c453a6a7e7d2d2d74b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-final-tests.txt",
+      "bytes": 7266,
+      "sha256": "bc81300fbb94fc2b31246bde679ab478fd195a6352f987ca6b1fd043bd440402"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-first-build.txt",
+      "bytes": 21928,
+      "sha256": "a7efae0370abb685d97de5c46e3556c4c32998889a3dbb902cfbc88917a64969"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-first-test.txt",
+      "bytes": 465,
+      "sha256": "3ae47727ed4f0f289d365769e1376061071d8b5c709f4dbbacbe62a4a1b5ccd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-matrix.txt",
+      "bytes": 8553,
+      "sha256": "9936034e0e6eb7738bbd94647cf2459efb78d6ca8d73e27b9b902fef02d14214"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-precision-build.txt",
+      "bytes": 997,
+      "sha256": "5bed718ac868efac7986fd65791a38904dc15987c29dea57bd548e4df5c9e159"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-precision-tests.txt",
+      "bytes": 573,
+      "sha256": "f8eacd89b3a64b75f66bd7a6c69df409d6f35bafc015c54b072d7e6c6a97f2b5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-probe-build.txt",
+      "bytes": 2719,
+      "sha256": "07dfd0e3b9e21e81a9c9134714df4f837a7822231fc2a542378ec3a2a2f17665"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-second-build.txt",
+      "bytes": 1025,
+      "sha256": "a05c0c496c2254f618dfd0c973fdda1c90130b3ccc66fb4c4df225cb64522758"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-second-test.txt",
+      "bytes": 465,
+      "sha256": "805aa882e3bf060aaa4c6c86737063cccc58c66e14ae1fc86324cb90598a30e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-0.log",
+      "bytes": 712,
+      "sha256": "8e36a21f668e702f6f50417dc671983de13293084068df7525de20ff6b1b3dbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-32902.log",
+      "bytes": 715,
+      "sha256": "0c9df994bda6cfc78ce24cf08aa548a8d31e6fd454087e6c24925afac744859e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-bf1-4318.log",
+      "bytes": 714,
+      "sha256": "b4ca3ae7f48d21213c372ce1d6653c4cd5e054a9311e14f05dfd731a52d80726"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-0.log",
+      "bytes": 616,
+      "sha256": "a8d5a3ee1393ebe86833c936714db70518bf3b1d3abc44bb4a21c4f0f2854e9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-32902.log",
+      "bytes": 619,
+      "sha256": "89d2f90179a6ac511a1d83f832517fa6dbf4cf54145a10654cb3d47473de9a6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-gf2-4318.log",
+      "bytes": 618,
+      "sha256": "accc997dd15958bcbaf1446bca2178c9b61d04a613705accaa4936147f6fa75c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-0.log",
+      "bytes": 711,
+      "sha256": "165e09e440300ed969688b21e79ba820e3025b9aa8472588e1477d0529e04f8f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-32902.log",
+      "bytes": 714,
+      "sha256": "bd0f5c4a5b18a3a677fa291795cc73ac7274b206c9711f82f0fc672550be813c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-accepted-hd-4318.log",
+      "bytes": 713,
+      "sha256": "9a388286b1e1cd93936a1abca5a6f3d8bdf4d6fab3d77cb0b5be9080203d8984"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-bf1-active-first.log",
+      "bytes": 714,
+      "sha256": "b8ee34df82a34e72936e50bd4cddcc5ab9c7c8ef3d752745bafbfd28a266ef00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-gf2-first.log",
+      "bytes": 618,
+      "sha256": "2d3c71eea48cf2d86931a7a3d94527d01efa3dd0f7c8c5d4ba520d8c88b723f6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-input-free-control.log",
+      "bytes": 362,
+      "sha256": "8d0f2cdc15f5f067ce83d05f721eeecdc5d8c0e343e9bc45a3833949cc3897cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-0.log",
+      "bytes": 331,
+      "sha256": "6c86000d9869def2367ec314057f5a3306c90cb0ed411f46c9943f0c02a3c240"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-32902.log",
+      "bytes": 334,
+      "sha256": "b25a8094864ff49988a50ce3c737d8c4c84f38efe2e268ecf039c1b98c33753e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-4318.log",
+      "bytes": 333,
+      "sha256": "62be4a9273d66d0f33714d22110b289346250f1524506e7e5e66c43f46e51b02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-gf2-0.log",
+      "bytes": 616,
+      "sha256": "e3b3d450683da18369877fdcfbf5ce95e51883459821e3fe1cde6d68dd1bc965"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-gf2-32902.log",
+      "bytes": 619,
+      "sha256": "6d821f84c3d26c5f530a8dfb49d2ad0dd93d8c1e15fe1c61bbbcc9577c5ce66f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-gf2-4318.log",
+      "bytes": 618,
+      "sha256": "c6fcc1a6075f54313fa40307ee3d3376b5064cabfbc6d7c9153456aa419d5e79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-hd-0.log",
+      "bytes": 711,
+      "sha256": "028ea35dec52648251ffefad87036e955d834f9b74f71398a426c77ad151a05d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-hd-32902.log",
+      "bytes": 714,
+      "sha256": "36f76d2a79d2bfdd2c824b4ea8e0b7ce636b7d0ea29909b16eee0a42df6ca89c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-hd-4318.log",
+      "bytes": 713,
+      "sha256": "fa87fa6d9fb357cfca1e9dde151aca6df37fac3da415d8afdf73924b3c597ffc"
+    }
+  ],
+  "excluded_input_free_runs": [
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-0/report.json",
+      "bytes": 317,
+      "sha256": "ddcff2afb43189bc0ef0360675bc938b77a9fa73b0b8e6dcf80111edc53a78c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-32902/report.json",
+      "bytes": 320,
+      "sha256": "6b6aaaa1269c6e24d1308653a34e4b76493246405dbae348f65ef3c7edd5e19e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-real-bf1-4318/report.json",
+      "bytes": 319,
+      "sha256": "7110969a9397530965c351842ba551202f685f5ac6ac7af9ebc83e8a27975650"
+    }
+  ],
+  "verified_input_free_control": {
+    "path": "artifacts/dx11-native/pixel-geometry-input-free-control/report.json",
+    "bytes": 348,
+    "sha256": "0c1f0857ce54330e09fc67a964ee53d0c88c9836bc7cc46abc58fb3a02530ae3"
+  },
+  "excluded_old_executable_result": {
+    "path": "artifacts/dx11-native/pixel-geometry-first-test.txt",
+    "bytes": 465,
+    "sha256": "3ae47727ed4f0f289d365769e1376061071d8b5c709f4dbbacbe62a4a1b5ccd7"
+  },
+  "limits": [
+    "Real probes validate pre-raster geometry roundtrips, not original fragment eligibility or final pixel input equivalence.",
+    "Actual pixel selection, rasterizer/target private scope, helper validity and native pixel-debugger integration remain pending.",
+    "Point/line/rasterizer-output contracts are creation/mapping tested; the synthetic rasterization matrix uses triangles.",
+    "Full history, RenderDoc dependency removal, standalone package acceptance and original GPA debugger engine recovery remain open."
+  ]
+}
