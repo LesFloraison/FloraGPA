@@ -1,0 +1,3708 @@
+{
+  "schema": 1,
+  "stage": [
+    "P5",
+    "P6"
+  ],
+  "scope": "private_raster_input_checkpoint_shader_output_join",
+  "implementation_commit": "d2fb8a8e7646ac9dbfc8a04666e4d83a6e75c51f",
+  "research_report": "DX11_NATIVE_PIXEL_HISTORY_SHADER.md",
+  "status": "validated_increment",
+  "complete_pixel_history": false,
+  "public_ps_debugging": false,
+  "full_renderdoc_removal": false,
+  "owned_validation": {
+    "schema": 1,
+    "status": "ok",
+    "owned_cases": 72,
+    "real_cases": 9,
+    "corruption_controls": 474,
+    "complete_pixel_history": false,
+    "public_pixel_debugging": false
+  },
+  "regression": {
+    "schema": 1,
+    "status": "ok",
+    "suites": [
+      {
+        "suite": "dxbc-pixel-trace",
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 434
+      },
+      {
+        "suite": "dxbc-pixel-inputs",
+        "passed": 125,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 68752
+      },
+      {
+        "suite": "native-pixel-checkpoint-inputs",
+        "passed": 311,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 58337
+      },
+      {
+        "suite": "native-pixel-geometry-replay",
+        "passed": 203,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 61032
+      }
+    ],
+    "qt_passed": 663,
+    "ctest_wall_seconds": 189.29
+  },
+  "real_probes": [
+    {
+      "case": "pixel-history-shader-real-bf1-0",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "adapter": {
+        "device": 140,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor": 5140,
+        "warp": true
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 954,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 24,
+          "height": 1009,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 1920
+        },
+        "view": 827,
+        "x": 751,
+        "y": 433
+      },
+      "shader_evaluation": {
+        "global_steps": 4080,
+        "invocations": 10,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 224654
+      },
+      "elapsed_ms": 4963,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-bf1-32902",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "adapter": {
+        "device": 32103,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor": 32902,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 954,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 24,
+          "height": 1009,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 1920
+        },
+        "view": 827,
+        "x": 751,
+        "y": 433
+      },
+      "shader_evaluation": {
+        "global_steps": 4080,
+        "invocations": 10,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 224855
+      },
+      "elapsed_ms": 6971,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-bf1-4318",
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010,
+      "adapter": {
+        "device": 11352,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor": 4318,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 954,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 24,
+          "height": 1009,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 1920
+        },
+        "view": 827,
+        "x": 751,
+        "y": 433
+      },
+      "shader_evaluation": {
+        "global_steps": 4080,
+        "invocations": 10,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 224807
+      },
+      "elapsed_ms": 8163,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-gf2-0",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "adapter": {
+        "device": 140,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor": 5140,
+        "warp": true
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 80,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 29,
+          "height": 1440,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 2560
+        },
+        "view": 75,
+        "x": 799,
+        "y": 480
+      },
+      "shader_evaluation": {
+        "global_steps": 100,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 15823
+      },
+      "elapsed_ms": 447,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-gf2-32902",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "adapter": {
+        "device": 32103,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor": 32902,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 80,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 29,
+          "height": 1440,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 2560
+        },
+        "view": 75,
+        "x": 799,
+        "y": 480
+      },
+      "shader_evaluation": {
+        "global_steps": 100,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 15838
+      },
+      "elapsed_ms": 901,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-gf2-4318",
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113,
+      "adapter": {
+        "device": 11352,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor": 4318,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 80,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 29,
+          "height": 1440,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 2560
+        },
+        "view": 75,
+        "x": 799,
+        "y": 480
+      },
+      "shader_evaluation": {
+        "global_steps": 100,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 15834
+      },
+      "elapsed_ms": 755,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-hd-0",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "adapter": {
+        "device": 140,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "vendor": 5140,
+        "warp": true
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 99,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 28,
+          "height": 256,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 256
+        },
+        "view": 101,
+        "x": 168,
+        "y": 183
+      },
+      "shader_evaluation": {
+        "global_steps": 1316,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 47226
+      },
+      "elapsed_ms": 2496,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-hd-32902",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "adapter": {
+        "device": 32103,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "vendor": 32902,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 99,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 28,
+          "height": 256,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 256
+        },
+        "view": 101,
+        "x": 168,
+        "y": 183
+      },
+      "shader_evaluation": {
+        "global_steps": 1316,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 47245
+      },
+      "elapsed_ms": 3707,
+      "status": "ok"
+    },
+    {
+      "case": "pixel-history-shader-real-hd-4318",
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200,
+      "adapter": {
+        "device": 11352,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "vendor": 4318,
+        "warp": false
+      },
+      "selection": {
+        "layer": 0,
+        "mip": 0,
+        "resource": 99,
+        "sample": 0,
+        "slice": 0,
+        "subresource": {
+          "array_layer": 0,
+          "dimension": 4,
+          "dsv_flags": 0,
+          "first_layer": 0,
+          "format": 28,
+          "height": 256,
+          "layer": 0,
+          "layer_count": 1,
+          "layer_kind": "array_layer",
+          "mip": 0,
+          "relative_layer": 0,
+          "resource_dimension": 3,
+          "slice": 0,
+          "slot": 0,
+          "source_view": "rtv",
+          "width": 256
+        },
+        "view": 101,
+        "x": 168,
+        "y": 183
+      },
+      "shader_evaluation": {
+        "global_steps": 1316,
+        "invocations": 1,
+        "original_fragment_eligibility": null,
+        "requested": true,
+        "resource_boundary": "before_private_primitive",
+        "retained_payload_bytes": 47240
+      },
+      "elapsed_ms": 7826,
+      "status": "ok"
+    }
+  ],
+  "remaining_gates": [
+    "Original fragment qualification and complete failure attribution.",
+    "Original inter-quad and upstream resource side effects and invocation order.",
+    "Public PS debugging, active typed loads/stores and source/UI parity.",
+    "GPA debugger host +0x3c0 concrete implementation.",
+    "RenderDoc runtime/build/test deletion and P8 standalone acceptance."
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 126054,
+      "sha256": "5c36969d7c2bda4751d5be49e24ad01c52bcbfc297ac0d27569cd1e94c052687"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.cpp",
+      "bytes": 21075,
+      "sha256": "aec64d4ef196baa164186b3af77484b2f18609331aa27b2e9f825112a246d487"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.h",
+      "bytes": 2523,
+      "sha256": "783741fb0c084a7528cbb55f227c0b888ab4d5badd461ea493ea075f6b4ed989"
+    },
+    {
+      "path": "src/application/DxbcPixelTraceInputs.cpp",
+      "bytes": 5450,
+      "sha256": "df365a2f6a28a57b605f09b8f5244310a991f1e632a13b2b76f0fc14e9de3a12"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 24626,
+      "sha256": "496b1ae06833bce7e446d832474e25eb6742f2b1a39e0004c4c14aac7033470a"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.h",
+      "bytes": 993,
+      "sha256": "2112c70a5482994e94fe42f167cd2ac5b6f0a89e44e3f456108f8b5789aff5bb"
+    },
+    {
+      "path": "src/application/NativePixelInvocation.cpp",
+      "bytes": 4676,
+      "sha256": "b60872ce2df8c4b6f6fddab2e7aa6226894c234f3712f93b832fe6e11feb5b0e"
+    },
+    {
+      "path": "src/application/NativePixelInvocation.h",
+      "bytes": 864,
+      "sha256": "d9b4b34b77eda74e7bcd9b2f678627915a43dcc61c25c40129e042f615dd56dc"
+    },
+    {
+      "path": "tests/NativePixelCheckpointInputsTests.cpp",
+      "bytes": 43222,
+      "sha256": "5c39f00dc8b5a486dd8fe9287d505a6c9e6751122b8a0f87c7e4a9f55fce1215"
+    },
+    {
+      "path": "tests/NativePixelGeometryReplayTests.cpp",
+      "bytes": 49000,
+      "sha256": "b6f9575e87f9b3f3b38023f71a3c87816768c7f788430a1b3d3a1c90894b9c3a"
+    },
+    {
+      "path": "tools/probe_native_pixel_draw_history.cpp",
+      "bytes": 4726,
+      "sha256": "939cee25fe1c651a1b42f5caf4eaec3f1a5d480c83b3f4c4b72257807272995a"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_shader.py",
+      "bytes": 10102,
+      "sha256": "aba51e80e188767e9b5fc36774cca2558f5cfa85f9b2a133b5cb730b589ed773"
+    },
+    {
+      "path": "docs/research/DX11_NATIVE_PIXEL_HISTORY_SHADER.md",
+      "bytes": 9069,
+      "sha256": "879cfd452a83f1f481e71a28194ecd6730a373c7d5bb19abc96d7cb0d312122d"
+    },
+    {
+      "path": "docs/DX11_NATIVE_MIGRATION.md",
+      "bytes": 63434,
+      "sha256": "e91e3bc9c41964041c84a6cb8d8525adfc335e787e00d48b124171d24ce8a49d"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "01ec3072c2f8e6347bac1a83fbfbbfc5a5bd6a1d9e0de5b89feb3bcf22c0456d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5568512,
+      "sha256": "6730e2b45f3bb07ebb2fa2bcd3edc782cc90144fe977c9c3fd24976692516360"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5568512,
+      "sha256": "2d1e0bcb4d660dbe3c63ddb28de8619a8b8aa96ebe0614d78e884b95895ba9cc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelDrawHistoryProbe.exe",
+      "bytes": 2061824,
+      "sha256": "7ca79c2630983c3eeb9f728c846a93e1910f230d9453f280cb2daa23def240b7"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelGeometryReplayTests.exe",
+      "bytes": 2242560,
+      "sha256": "0c2bd8d556fec13b3983887d8317b190ba2bafe3277aa338198dd55279c12cca"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2226176,
+      "sha256": "96f3373df1f581abacd370e75a1176a64fdcec8b55b06a5280f42d4d6a2d09fc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelInputsTests.exe",
+      "bytes": 514560,
+      "sha256": "02b91603dde422dab0a6c39c013998233d14adc039ef27afeaddc5dfda74fd62"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelTraceTests.exe",
+      "bytes": 1333248,
+      "sha256": "0e7ea3898482bbf04e87962e52bf8308d294149db83f52698e8fffc447c8c2d2"
+    },
+    {
+      "path": "build/vs2022/Release/FloraExperiment.lib",
+      "bytes": 127443206,
+      "sha256": "97b9dbc3c64689cc34dfbb0d84d2dbf9b73b4321a3931b233ecc0a76a2842182"
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-coverage.dxbc",
+      "bytes": 476,
+      "sha256": "09e93ecdb45c56b1dfedfddc5a1ef96cb675c66033bb01dc8fe3f4cb3e52f4e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-coverage.txt",
+      "bytes": 703,
+      "sha256": "3c39911b929fa22cf3ea07268cf6f2ded3a5b66e67b39d1f19ee721f22690763"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-0-texture.json",
+      "bytes": 5852,
+      "sha256": "4e66461d6383fa54d4e4c2020bd411dfbebee4833e7cc44dd896d4bd6e381835"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-0-typed.json",
+      "bytes": 5934,
+      "sha256": "38a9d9afecd0369a2a602d71fa6391d06ddc34cd31e29aa18d00d92db5f84e17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-32902-texture.json",
+      "bytes": 5856,
+      "sha256": "9ab61ba6eaf1e7cd2f6a8aeadcd2437172cc9fe682b2b1d2eff072e069fae944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-32902-typed.json",
+      "bytes": 5938,
+      "sha256": "e01fcc25f4a4db185ffd9b947b202b345262dcbdd0ad413753e652b3a1403bf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-4318-texture.json",
+      "bytes": 5855,
+      "sha256": "0daeb9b665235e84153f5ae368d04a935e6bd4b014696e52eb12834d0c163532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/computeGroup-4318-typed.json",
+      "bytes": 5937,
+      "sha256": "32274448ee1422b0465024eb41c34437eab59a844ab76717ab597ffca5da2370"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-0-append.json",
+      "bytes": 30545,
+      "sha256": "4abd8197e6ac0196ab1f6089de982318f36b5e9f64102eaaa2e4a0c5a6ce9c7c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-0-counter.json",
+      "bytes": 30562,
+      "sha256": "0427c1ac0375e40a7a2c5050faa11f71e835f73e7a16d6cb2def9687d436b1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-0-raw.json",
+      "bytes": 30554,
+      "sha256": "c8a716446914b4a6810ae6296f05e057c0b2bc444011b3a8d37673069f8ac0ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-0-texture.json",
+      "bytes": 29498,
+      "sha256": "5739570a0abb6ccc83cc26320dce480adf4c086bc4bd6cb415192824c565cac5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-0-typed.json",
+      "bytes": 30556,
+      "sha256": "6df53c4c697737fbf16ae1b8ea204d0c9af19e605894c0eb0018380cbadd1053"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-32902-append.json",
+      "bytes": 30561,
+      "sha256": "fdf11d8f6bf12a891f971f2fccc6de01f4aa68bb6556efbc36a2c9fdf3f0d827"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-32902-counter.json",
+      "bytes": 30578,
+      "sha256": "3af5b7443889dfe67fdebbfaa71e6cfabe786302d996e333c355afad558d5881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-32902-raw.json",
+      "bytes": 30570,
+      "sha256": "773d6614f19cf4471ea5e48628e635547fbc13307521ab312bf28db3c48b5eec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-32902-texture.json",
+      "bytes": 29514,
+      "sha256": "ec51ba76a77ce7e66a80b89c007219f0a833d3fff0a00241a7c9c0279b9b9571"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-32902-typed.json",
+      "bytes": 30572,
+      "sha256": "5c86ffdde4bd46b3e6caf0e1e07628d39262bbd796bca241bc5cadaf949fc0a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-4318-append.json",
+      "bytes": 30556,
+      "sha256": "026c398f7d8717adaece5960b524af37cb0aab237eebac94678801366e74e249"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-4318-counter.json",
+      "bytes": 30573,
+      "sha256": "44c86b55f18a31fa52a0bdf1a353b013935426916110ce76e55f1121b9216914"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-4318-raw.json",
+      "bytes": 30565,
+      "sha256": "e54d19ef7f20d1099001c2b4c07d13985dc76014e60c8e613e7def56d6218f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-4318-texture.json",
+      "bytes": 29509,
+      "sha256": "2cd42e8fd79ff8f02fcd366f793939b1086114f229063729b1360dd6a3422401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/prefixes-4318-typed.json",
+      "bytes": 30567,
+      "sha256": "fff602dc98acc16d1f41e0852491da0729374cc4fe24abe8db1e0e720d780880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-0-append.json",
+      "bytes": 74551,
+      "sha256": "e81e0e29d3c990b1288a25c34926130d111e54b6d40bd19e580cf47a214eabf7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-0-counter.json",
+      "bytes": 74548,
+      "sha256": "cfdd0e109d5d5161d38361bad3a6cc3cb85097648833a9845694f9830f4d20be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-0-raw.json",
+      "bytes": 74544,
+      "sha256": "e4e0a5bcee4b8a4def2fee6ee11eaa7880d5d419539ba0d1e52db8207fbd7855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-0-texture.json",
+      "bytes": 74545,
+      "sha256": "77ffdfe949b076fc8d3e56e4410d21baa1a0b4ffd6f230d93a061bd107910945"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-0-typed.json",
+      "bytes": 74546,
+      "sha256": "671777a5fa0c0a8f425f3aaf26c9a4dfa5ea0a0ca9bd8b268373c7883296870b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-32902-append.json",
+      "bytes": 74584,
+      "sha256": "070a19f09a9bfb52d111e116a31c0c95b174e0feb75d31ae48c4fb6a96602529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-32902-counter.json",
+      "bytes": 74581,
+      "sha256": "56d65f6d97f81e8ab7e45f0d27a9bbb6587f7db4a7630f69436e5f651b952582"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-32902-raw.json",
+      "bytes": 74577,
+      "sha256": "fbf73aa64452485bcd7d749b58550e48d65be2fde178a8ce01d9e4c403313c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-32902-texture.json",
+      "bytes": 74578,
+      "sha256": "44f84a42a7211df6dca16be4fd0347e8d720d1d2d87ad10b71e8993566f12bee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-32902-typed.json",
+      "bytes": 74579,
+      "sha256": "962aa4843a47c0e62b697860931fa3d780b2ea45339144b859bae8e24101e8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-4318-append.json",
+      "bytes": 74575,
+      "sha256": "0ff72bb718a8d914a80447e6a330561b4411de8b89568527ff872e5f458f682d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-4318-counter.json",
+      "bytes": 74572,
+      "sha256": "7ef67c46ddb46f75917948481d47bd6e67ededc8ce2fe629b0a18d249e39c4a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-4318-raw.json",
+      "bytes": 74568,
+      "sha256": "4b1796cfa665c99695febce75b31fb3b4c617d155f966be3ced1ba03086b68b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-4318-texture.json",
+      "bytes": 74569,
+      "sha256": "d6fc23d1d4c593cbf513ffcea326b6fb7662316fad59a8e5ab0b41929298d0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/shaderHistory-4318-typed.json",
+      "bytes": 74570,
+      "sha256": "9fd8d4dba4433c3bfb5b704fbf2e75e79695cd9b1cc8b326213f7c4925e2b07b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-42-0.json",
+      "bytes": 721,
+      "sha256": "73b0b6e58071573f7a7ce1ecddfa3ccd862d88b05155d27c6a1f7adc63cd79a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-42-1.json",
+      "bytes": 720,
+      "sha256": "17f42e3afff79ac6e19e57edce52424f1922fb0367ba1e659983d789af71748a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-42-2.json",
+      "bytes": 711,
+      "sha256": "2c855f58820a2e1bb95aa08a9eb2fabda621fc4266f1a9d5ef5de404eba3c964"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-42-3.json",
+      "bytes": 711,
+      "sha256": "8d2d54b85dbe298a09135ffd32e5346012d37362f9f6ab9998f42c86ef0c84f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-43-0.json",
+      "bytes": 721,
+      "sha256": "a1a04edae07e959cbfa0e9391fc9b89f94e44a1d3403b997d26fe480aecee149"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-43-1.json",
+      "bytes": 720,
+      "sha256": "908c204aceb7e7b6cdd6935648f235f1e06ebacc0ffec00c74e8109cc3b71a22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-43-2.json",
+      "bytes": 711,
+      "sha256": "606eeed7750d9dbf63bb8e4e2e32f2d13d0a8df5244e087f2e935fd5d1c6fb1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-2-43-3.json",
+      "bytes": 711,
+      "sha256": "e9b52c67f23ad83b406463cac875b03619aaed9f4b9943f1a2e9a8acbdea8973"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-42-0.json",
+      "bytes": 722,
+      "sha256": "51395c77ae0df7a893e9edb0cc3a52e1e1519b55e100afa416f89fd7f0e07b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-42-1.json",
+      "bytes": 720,
+      "sha256": "d457b957f3b3db69b08a7b939a6fa62195fad0f818f0dffa7b87421d0e5bc972"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-42-2.json",
+      "bytes": 711,
+      "sha256": "ea75347ad93ac8566c7eecca3f423d234f237ce0fb43c7247744a3aca87ef764"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-42-3.json",
+      "bytes": 711,
+      "sha256": "c83bb5875cd8f0418688de6deeef5a99e53e26e33b1cc2f3fe87b73b2dc811b1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-43-0.json",
+      "bytes": 722,
+      "sha256": "0072f1b8cea4f2f6b0b4284483d56a95cb32dfb2037294cfeba78d0f17839372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-43-1.json",
+      "bytes": 720,
+      "sha256": "44409e018287a76c94309955cfb2d6936a76f552b69382872ae7841e1e212c2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-43-2.json",
+      "bytes": 711,
+      "sha256": "ae761d2631ccb80ff52b4d6d7335222cbf622e1a113f738339facea45625b2ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-3-43-3.json",
+      "bytes": 711,
+      "sha256": "c1b0abae5959f45bbf04c33fb306054624c273c6460a0226c3d8b3588980616b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-42-0.json",
+      "bytes": 723,
+      "sha256": "613d8d97b208113b470b45d9a7b947d1b04db3809e07959af126224015469a80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-42-1.json",
+      "bytes": 719,
+      "sha256": "48674e2f5d2d3417f7b11abf2e910ce0b756aed7d3d7297a83c3463a05131c46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-42-2.json",
+      "bytes": 722,
+      "sha256": "3e6727cf84a0d6465d8c45095b6e9dcf0df6cbb2559272ee0641af06fe590609"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-42-3.json",
+      "bytes": 722,
+      "sha256": "9210b03cf0ef159d8d3b288bf0a498811a7f95b7ffcdb240f1208764b552bcf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-43-0.json",
+      "bytes": 723,
+      "sha256": "be93e0cc333f8de0d0612f6c1ebb03e85e2d223d63707c212fab48dbc7a6aaae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-43-1.json",
+      "bytes": 719,
+      "sha256": "b6d4bd054d352d9dc25c1e0c54ea6103a2f9c561ed5cca0f141c0cd3814ecee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-43-2.json",
+      "bytes": 722,
+      "sha256": "54f1f64ac1e319c3d4a0c1b20c2660d1782804adc66f875b9e57f3aba66466e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-5-43-3.json",
+      "bytes": 722,
+      "sha256": "ec49742472d3d5d595f40429465df557c2f1fb112a771a6806797fc63649812c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-42-0.json",
+      "bytes": 722,
+      "sha256": "37f10d6140c1cbe534763578c31fc71e776da636fac875ca25bd1f0cc9abe01e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-42-1.json",
+      "bytes": 720,
+      "sha256": "65bce02fac1a8372d3af2a70137576d9327c8a38097e160253aeb73b6f09cb7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-42-2.json",
+      "bytes": 711,
+      "sha256": "4323799f29399b55506cf43a52e61c44a520985ebf4eaf8374fb905b5a191e20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-42-3.json",
+      "bytes": 711,
+      "sha256": "dfef00fbb4c9b8ab5ffe1b418c1cf2c3561ba89dbb64f2c4400d9e67b8ba9b93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-43-0.json",
+      "bytes": 722,
+      "sha256": "e82203aaff839822806984ad1dab29d193a775e13ced20180c0be06138aab944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-43-1.json",
+      "bytes": 720,
+      "sha256": "773185e78e9950e23247c1b9e434cee961df5bca12656dc835ee1c5b50ed3250"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-43-2.json",
+      "bytes": 711,
+      "sha256": "503aa584f25005a448f8627672692f6f5352325d9b79fe46eae231e4d01b50af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-7-43-3.json",
+      "bytes": 711,
+      "sha256": "50d695ddd56955991ea7be78af345632f978a823e0ba99727d7a31c78652090f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-42-0.json",
+      "bytes": 722,
+      "sha256": "b8d8383cceddd9153a23db48cc5d7d6b70dea9a509db6adc296bcc8ca9ddbd2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-42-1.json",
+      "bytes": 720,
+      "sha256": "0023b4c061b9bdaae34c0fa7beaad9eb9523fdb3527414e315d18902c49d9287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-42-2.json",
+      "bytes": 711,
+      "sha256": "800d6be500001b01fe35442fb9f884250622aecc37937bf7e39c82cc3740e3a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-42-3.json",
+      "bytes": 711,
+      "sha256": "fd6ec96b9c3c11f491cd2c4a6aca63d9722e12b2da8ab8b9934fe61a2d69faef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-43-0.json",
+      "bytes": 722,
+      "sha256": "ca0c91ab3290c70abd88e33f4de45b39d1cd2deda622fd647b62a61db616ae02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-43-1.json",
+      "bytes": 720,
+      "sha256": "355f128c153c59dbde9b132b593e6c487a60fe75c6f647970e7bf646201c7865"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-43-2.json",
+      "bytes": 711,
+      "sha256": "37f16fa1ed74e04538774005a3689fbf3cb919a42b9ac5677f63e036cb0376e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-0-8-43-3.json",
+      "bytes": 711,
+      "sha256": "a755162ccb1e39b7fce36635f9df6f31dc217bab15b6111d5d282cf95b68cf6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-42-0.json",
+      "bytes": 725,
+      "sha256": "a741f9f67e31fa28bb5b3b0ad31de75d49c0fe32b0c951a44ef984d6c967f34c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-42-1.json",
+      "bytes": 724,
+      "sha256": "b9de379125674a87ff390b33f8cd3694fbfe1e2ef89463af1cf1a5c8dc6804ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-42-2.json",
+      "bytes": 715,
+      "sha256": "6fb507d4837092fb1e682755b66cdb50b25feaff675fa9df4ab0103e36664edf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-42-3.json",
+      "bytes": 715,
+      "sha256": "0cc7b1c655b812038879a086f6e05a5607d78c4a9d72a0addfa9fa9f5cf68021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-43-0.json",
+      "bytes": 725,
+      "sha256": "437a5a5175dab96a778cf6f3694c3ffb4efdd30e0429046e7f4686b6a3f61604"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-43-1.json",
+      "bytes": 724,
+      "sha256": "b5bb6c6ed7915a354f8bde8350ce977f9a3f06ef812c6316e2c6b267a50df94a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-43-2.json",
+      "bytes": 715,
+      "sha256": "eb5137d3b463bba99046b6bdf0aa3e1ee6378b78ce2a56d76f95189d1deeffb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-2-43-3.json",
+      "bytes": 715,
+      "sha256": "7c228f2b44bf11bb6ea88c2c3c34fd6f26b46f46630783138e4b0e8553cbba34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-42-0.json",
+      "bytes": 726,
+      "sha256": "45202042de949a0a3be6de6a509d116251d8c9738f8257b0825a11fdbd322258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-42-1.json",
+      "bytes": 724,
+      "sha256": "df3573ee8675fafdc0f0a803eddd0511cdb1a159c6db9196a017a415d39c5fd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-42-2.json",
+      "bytes": 715,
+      "sha256": "11f021dd3c4ac1b49173c15aa0ccd585d881777fe2bd92686543ad5eb21a4afa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-42-3.json",
+      "bytes": 715,
+      "sha256": "93362633d12e1fcfe46471b826d2005371c6ada07a1e2ca421bad3f97c3d8947"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-43-0.json",
+      "bytes": 726,
+      "sha256": "882c58ad6a4c2d1915a82a7b75b7dbd1956c2d339a469d5febba48d3ad4c8d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-43-1.json",
+      "bytes": 724,
+      "sha256": "988b3f950022b19782d18b8fbf29764b39b59fe28b47be542d7f3a4b17b26341"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-43-2.json",
+      "bytes": 715,
+      "sha256": "090a592df5704b4934a5369317e8e945bfd0f50ca07cbb035c900363cb1538d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-3-43-3.json",
+      "bytes": 715,
+      "sha256": "858f7f9a28c3a34c299db361518d39f1db10a45b06b0bb58f905e51c4614b903"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-42-0.json",
+      "bytes": 727,
+      "sha256": "b09aa217c51c62c8751bec7853d6b9604656ab3de5e860e3eda639c194da0770"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-42-1.json",
+      "bytes": 723,
+      "sha256": "67aecc2ee000ac79d33be337449ef65954e6d491e6489b80a87cda87e344eed5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-42-2.json",
+      "bytes": 714,
+      "sha256": "78ebb0c318b63fb0be927209c8d1114919575411e272d8b029d31096ecebe8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-42-3.json",
+      "bytes": 714,
+      "sha256": "363c8d26cebbc61d356f00df71dd5b6d4ce463e07c48a857a4a5615e852f3524"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-43-0.json",
+      "bytes": 727,
+      "sha256": "e851d79f286f6337e5df090fbb2b340ef9ba49babdc439e8acd45881a2d4a668"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-43-1.json",
+      "bytes": 723,
+      "sha256": "1e523fb70d70511a0134631b93a391acff82bf66d7daf184f850f8b5abc9caeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-43-2.json",
+      "bytes": 714,
+      "sha256": "c79765e5d7d8a90951439cb939a384882449a30048c4ebf593c4796798af7538"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-5-43-3.json",
+      "bytes": 714,
+      "sha256": "02b8b47d587824d62f73e8d7ec5d7efce32d6e1606e302228e17b42fb91f18d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-42-0.json",
+      "bytes": 726,
+      "sha256": "28c12c5edaae8dff38f1ccd844ca0edc8461cadea68f782363e554db36d92da3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-42-1.json",
+      "bytes": 724,
+      "sha256": "209bc2c1bb82acb2ace71fb8ae278aaaa6c9e2a635d8ab7427a7768cd3cc4b58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-42-2.json",
+      "bytes": 715,
+      "sha256": "9223543d6dee112d8fb8b846178f753a857c39343444e4bc642536ec98cd4f17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-42-3.json",
+      "bytes": 715,
+      "sha256": "3c26107fbc883ebf29623b39e366b3e3951b6372abc84178aa093fc825394474"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-43-0.json",
+      "bytes": 726,
+      "sha256": "53a0b028ec4551dcb36c1de75992216cfba58db61716830c74ed37badac0c842"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-43-1.json",
+      "bytes": 724,
+      "sha256": "3957cc1ee4a3746157983cc97bf7eeed3204355bc5937bcf8a704176bcd4c839"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-43-2.json",
+      "bytes": 715,
+      "sha256": "86780bbb9d304a0f5e660d989122dbf7b76b3fa6c4c774bdf18d502fe61c0a2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-7-43-3.json",
+      "bytes": 715,
+      "sha256": "13ddf7c216e74849392134f9232e94795c50a7c658cd1c45aa7ed70ffaaf6675"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-42-0.json",
+      "bytes": 726,
+      "sha256": "c3c7cdaf7f472dcf6c8dd338016b1bae91e3006893eb38eba819ff835dc66fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-42-1.json",
+      "bytes": 724,
+      "sha256": "8a490106379ba6a483c9e901a951145ed8b8d67c4dd2f77b4426386b1898cdd0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-42-2.json",
+      "bytes": 715,
+      "sha256": "2dae21c5d1b69006bcb86e2547a7442a457eef595c8ca02fec0309e43f1a8494"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-42-3.json",
+      "bytes": 715,
+      "sha256": "cbc1871ea485a8d6045e6f4d5bb202433372fb860aa18e144d02133f0650a747"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-43-0.json",
+      "bytes": 726,
+      "sha256": "fb04bd712bd31d80afebf7f80c20f8cd622f720f7eba5f3020e883d323dd2c19"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-43-1.json",
+      "bytes": 724,
+      "sha256": "83dc5dcb3a9b5161f9c31ac902a2d009920e59e1f86ada70dc86bb37237d6788"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-43-2.json",
+      "bytes": 715,
+      "sha256": "bbf6f1e0e0f5b6d6f8d72546e7e84ae6c5990f35a7be6d924568abac52f2c0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-32902-8-43-3.json",
+      "bytes": 715,
+      "sha256": "f4289ec4ba92bb86f97d1e07cd5f26067f86bea0432222393d54c6d75d895d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-42-0.json",
+      "bytes": 724,
+      "sha256": "652922bfdefe362b68b48db60c15327c3cf26e8143c5992925070fefe7d159ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-42-1.json",
+      "bytes": 723,
+      "sha256": "d5c3a8a393c54851f717dcf1e54560344deb84290500356d78b21c2004c5103e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-42-2.json",
+      "bytes": 714,
+      "sha256": "44a9fd078e997cf6e46fc1bd00909a2b26e918c1556869ad6e8f8ef63804512c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-42-3.json",
+      "bytes": 714,
+      "sha256": "8d3037bf14064d0a839237e761de7b2e552e0644730e8e5163fa1a7abe51bd33"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-43-0.json",
+      "bytes": 724,
+      "sha256": "cc30f400dad19376a420337f622fabf5f6f81f5048bbd33f9878d8931dcd40c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-43-1.json",
+      "bytes": 723,
+      "sha256": "369818db4bd0108f1839067f1deafc9f0eb10751ab46f17ad5093904d0c550f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-43-2.json",
+      "bytes": 714,
+      "sha256": "2b154a8ae6b6458f239c78450d167c71d44f43021904795f5c6bee41baaf9928"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-2-43-3.json",
+      "bytes": 714,
+      "sha256": "255c5651b2c70ee2e1043b6b1e43879cfa4c4f9e6fc0ebd7bb9d3b5225fc7a99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-42-0.json",
+      "bytes": 725,
+      "sha256": "418ea61a5d19d1a43ed5de01ac1eff9a2a865448aff4fafacae07e1afd44b7bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-42-1.json",
+      "bytes": 723,
+      "sha256": "6cdfcd8bea802790baeee583826e53ea39467b1ee8fbafe4d6a5de3d83c4fda8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-42-2.json",
+      "bytes": 714,
+      "sha256": "1558b3d948e4305ae948c1434869ae9c32e5631dde8d846a5a52307406518d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-42-3.json",
+      "bytes": 714,
+      "sha256": "9b054c5026396fecd6d33d13d04298c811b90bce3c7f6a3f55e08163385b58ed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-43-0.json",
+      "bytes": 725,
+      "sha256": "d21e3b9828886e699f902e9f1a2fd48c1b3980c1dec148a93b011cb24ebfb9ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-43-1.json",
+      "bytes": 723,
+      "sha256": "ba35c253d0141b61505625cffc12039b7c814ee9676551b761b4f8daef04ebbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-43-2.json",
+      "bytes": 714,
+      "sha256": "4c96bf89c766d4ad814f99431b88f967686dfbab35b651c7134e3ac0245578cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-3-43-3.json",
+      "bytes": 714,
+      "sha256": "244cc32c18e7ce7de4f6d25c730b627ea12a197166793d2bb25a48046ea1589b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-42-0.json",
+      "bytes": 726,
+      "sha256": "363360f34f3b0fcece9f1241898520cafa368673d23cee412dc6e434b6567b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-42-1.json",
+      "bytes": 722,
+      "sha256": "808c86af6827998fd22f6ff1a80a82afe0f070780d36a3943a0aff130bfb4a69"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-42-2.json",
+      "bytes": 713,
+      "sha256": "2396046e740843078aafbbeaac763757fe59a6cf46061712a0b346c05d57b4e1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-42-3.json",
+      "bytes": 713,
+      "sha256": "23ef03705beed90c7389c69e973d173dba81208dff05669fbbb154708f32b276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-43-0.json",
+      "bytes": 726,
+      "sha256": "cd4a82cdfbf066ec799c902d8fd2d2b142e00eb28ae94511577a5317a38ac3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-43-1.json",
+      "bytes": 722,
+      "sha256": "bff2045205ea5a4f033e78ea8fe311c13b4eaea5ed6eb42c7afbb9f94a1182c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-43-2.json",
+      "bytes": 713,
+      "sha256": "f4957cc239a4ce21fd26bd3ebdb10d3a524bac0764949f9d7f1c630bc649e387"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-5-43-3.json",
+      "bytes": 713,
+      "sha256": "824850b76dd29745628b9964816dc28e69de5c32060e857c49c29721aed97c89"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-42-0.json",
+      "bytes": 725,
+      "sha256": "b941453180f15d7a130beb6bbf2be9436e96a91d5235cf3547720cc13d022da0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-42-1.json",
+      "bytes": 723,
+      "sha256": "fdd94ff8e6f59a31e2b1ac37756e491f4023c0f09fd4764201fac3dc7ead7536"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-42-2.json",
+      "bytes": 714,
+      "sha256": "7bb0465204b5deb052fde74c4479bc86bef720bffabb925f2f5fe46fac76d951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-42-3.json",
+      "bytes": 714,
+      "sha256": "c795f7109d87581d75a87f94c798605ac9da540733f89ef2274fafec6f6a0986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-43-0.json",
+      "bytes": 725,
+      "sha256": "75477670558e1cbab6fdda828f023f74777de75a9534257604e092db9843e625"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-43-1.json",
+      "bytes": 723,
+      "sha256": "e65b53dd8ac13d65150c77beca067a460e40fa1b909546c153f63499e521e1a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-43-2.json",
+      "bytes": 714,
+      "sha256": "b8cabe11f0ee49ca29eefd8382a26cba1075ff83c7141e04f38e661decb255d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-7-43-3.json",
+      "bytes": 714,
+      "sha256": "9c3175ea640c947e5f59590ad87494c16ed26c226a2300105d9f464269254f82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-42-0.json",
+      "bytes": 725,
+      "sha256": "0f33c1812e81e6ead81cbabcc415260b513bfbf4a3a7a23d5055c009a820058b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-42-1.json",
+      "bytes": 723,
+      "sha256": "70146a79bf1f6d4958f49800cc72b9a5cd63a5549f237e0f81b67a1f2f6a617b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-42-2.json",
+      "bytes": 714,
+      "sha256": "b85e2a3ec613a8bc58ccb1a80687ee34fd29b503be11bff4add50cd42d321162"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-42-3.json",
+      "bytes": 714,
+      "sha256": "ee505908b8a370fd6dd633f06b14fb846575757868e59d9fba9da3ef9712db90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-43-0.json",
+      "bytes": 725,
+      "sha256": "3190708874ead1213b6dbf336f58a0df55ab1ac4a950f0c146c995b97924b35f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-43-1.json",
+      "bytes": 723,
+      "sha256": "149e399c1013ba41ac4157076dfcb29b2831759f284757d9d63953d294f07d23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-43-2.json",
+      "bytes": 714,
+      "sha256": "cc584908d120b2afac805c92432d2be093fca94fdc991bfc47939e7594b6fa17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/textureRegions-4318-8-43-3.json",
+      "bytes": 714,
+      "sha256": "18aab3c72a4a0cd055b61cb13cdedfc4cf4f5237f4798d534f723861f02b187a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-0-texture.json",
+      "bytes": 1114,
+      "sha256": "8b03ac4754566cc169113553982f00b39e5bf4e5b05277f5e8346a4b15e3aee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-0-typed.json",
+      "bytes": 1639,
+      "sha256": "74d486c4f70a1fe3dfcfd523aac6fff48851c2401b91d5ffa58b12059813aaeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-32902-texture.json",
+      "bytes": 1118,
+      "sha256": "85c491b60bd47a233b25ba939d1bf9f7050a24f3a80b42366e74c9d890a83a1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-32902-typed.json",
+      "bytes": 1643,
+      "sha256": "442248c9462087f881d0eb8c6cb743dbf849a36535b9c2d91c00a47e1d7a65cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-4318-texture.json",
+      "bytes": 1117,
+      "sha256": "f2d8133211f41a88d82cf4dced6ec40bc5acd9dcbaab21cb4e4b062db7cf3cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedBounds-4318-typed.json",
+      "bytes": 1642,
+      "sha256": "f795d580fa6e351ef05f9e1b87d11a6dec993542160ace792dbdb2ae721a4168"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-add.json",
+      "bytes": 5176,
+      "sha256": "6500d647cd3dd2fb8b9317e2330e244d214a151aeefcba61884ee17c2be45815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-add_no_result.json",
+      "bytes": 3167,
+      "sha256": "23c6514d50ef7241440b02a2f85382b296f8ffe6dc51efd8b0e5247197a4cd04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-and.json",
+      "bytes": 5164,
+      "sha256": "f9a766a466e4acc582212b0e6fdd222a5eab6a5f54100ce88ff7fe5b569de7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-compare_different.json",
+      "bytes": 4960,
+      "sha256": "875986e9adc88a92a56e8a14acc710316da0a502fad032775c0fdf1ea46bae8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-compare_equal.json",
+      "bytes": 5174,
+      "sha256": "9d7829e60bb7b1e6b9eb170dbd86e9ec64c5b15c5ca3568b606e08aab238f53e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-exchange.json",
+      "bytes": 5169,
+      "sha256": "d9811d85d6c6fef0d83e16c068755951e8d895d5b7aa94b86e3e93434628acf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-max.json",
+      "bytes": 5190,
+      "sha256": "074436e3e667f0bca8ecbc59ff080ef8cca5e2cb5431796e328e002e0674a737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-min.json",
+      "bytes": 5184,
+      "sha256": "47810c56111096da4e28066e8fb73f182ae0f6bdb30c9d8fbdadd2b845ea95d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-or.json",
+      "bytes": 5174,
+      "sha256": "fa31d85055c11a5973f71cda7b1ef9651ac7b7983652dad02dd0f626c80c74b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-store_different.json",
+      "bytes": 2939,
+      "sha256": "4266868d0178fce22b1cf0c1ecc24f5792a1bfe55953d2c6fcd30b4bd17e1e75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-store_equal.json",
+      "bytes": 3153,
+      "sha256": "4c99df42b5b33b9fbf60cf9b44be26032c517424f3b840a2143828d2a1cd7613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-0-xor.json",
+      "bytes": 5175,
+      "sha256": "242c756a428cf7f4cf072a077dda491cf944dca6fa715289a60da8a3e46826d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-add.json",
+      "bytes": 5186,
+      "sha256": "f783880073a3ecf0ec42dae5f7c168c37cb45e67275dcf4052022314a6cb35a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "d970ac907ce3882b3f276824271cbd7c1be447fb5909b60aa86a15fde9acbf3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-and.json",
+      "bytes": 5169,
+      "sha256": "7ec0ce96f289d7af3a0e8e765b5176acc5f23c5b6d200209c8a7e80ff0f3c3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-compare_different.json",
+      "bytes": 4971,
+      "sha256": "df0d7163dc2a9be5e046fa7fd5b17a7d2947f9c16705c3a887356ae09b03c9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-compare_equal.json",
+      "bytes": 5179,
+      "sha256": "8bb307e2e9fc265304c25549851f5d2da1e7835bb26951aec3c75a4f8a6df8fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-exchange.json",
+      "bytes": 5174,
+      "sha256": "9a15f0b7edb1f8770f742d63d5c1b13644d34a76f9c10b35f2ef4625baf1bb40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-max.json",
+      "bytes": 5195,
+      "sha256": "5010ef356ecdb76598eee2cacffc4e49f0462b7c4a922afec951dc3ce8253622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-min.json",
+      "bytes": 5195,
+      "sha256": "739c448728790e908a738e62b655ad3a3f408e221a8ef70e787fe7cb4277aa57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-or.json",
+      "bytes": 5185,
+      "sha256": "e8cd21ecf6770116a68c01d09680ee4afda05e9871adc87a6cca8605b06c1eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-store_different.json",
+      "bytes": 2944,
+      "sha256": "9f0ea78decff46620a882fa22c58e4e1fb4656a3c80b00702bfed70d075bb2eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-store_equal.json",
+      "bytes": 3152,
+      "sha256": "f77abbdb7fa6bea922797821166ce75b91c4879d2a282d72543be37a38f44ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-texture-1-xor.json",
+      "bytes": 5186,
+      "sha256": "f89162b73de07cacbd1a9ef9ae0ba1f8b7841d6bcfce765bf0f524dd6ef7127d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-add.json",
+      "bytes": 5258,
+      "sha256": "14e5bc649cadb901e63044e4a7da55e3b61423893c01870019e5efcd9a186a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-add_no_result.json",
+      "bytes": 3249,
+      "sha256": "ecce6596e16f264bfd8df2766a0736862d0c127caf1ec9081b1b1b8d262902e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-and.json",
+      "bytes": 5246,
+      "sha256": "7f0434a8871e977ea56f725ee21b6f211a003e4a9bcedbcad483baee4ceeff79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-compare_different.json",
+      "bytes": 5042,
+      "sha256": "0f2d81c3bb38c9dee24dc1abf8fde3978d70eb64fa1a59e8efc7aa8a362353bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-compare_equal.json",
+      "bytes": 5256,
+      "sha256": "7232ce50ade31c3fe54a308e18dd8044714dc0b31bbd65e7629fe6e78f45e1a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-exchange.json",
+      "bytes": 5251,
+      "sha256": "8e89deebbfc7bd0e5a8d261ed58b5ff4d9ae8307bd245b55446d668f81bbc4b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-max.json",
+      "bytes": 5272,
+      "sha256": "c653d92d40bdbc0b4648cfa415694abb6ad44090c8645c194d3dde3097822aa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-min.json",
+      "bytes": 5266,
+      "sha256": "ef0b3a4f4a7382c2e5775b83f298568955405d6e0747af3c1869bcd6aa860c91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-or.json",
+      "bytes": 5256,
+      "sha256": "dc1d9f8bb6b06166af5e42fcccb0b1be7b573659c3cb7a17cc4872ae161e0585"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-store_different.json",
+      "bytes": 3021,
+      "sha256": "938433dab7928b1ea365634943c5f707c151ab34e7caec4974208e74fe7b535b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-store_equal.json",
+      "bytes": 3235,
+      "sha256": "a1ce0dd46da6285678535a3ec95bf05cbf97317376745dec6d75b90ff3235bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-0-xor.json",
+      "bytes": 5257,
+      "sha256": "f51694f26a5baee892bf6fc6063ae7e972ffcef4d84d8e253774280ec11ab5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-add.json",
+      "bytes": 5268,
+      "sha256": "0bcc30efd767b82a7d8e4c1e5c87d68f5d78dbb5f31f4d4023bb08f6fc905eea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "defca3044616d803a55a6f69a17ff7772eca5e67abde1008e261d09d7a8b8b78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-and.json",
+      "bytes": 5251,
+      "sha256": "5db24db8b50aedf4834defe74ac0c2df1b65688f8e869cf47d3d1c202a724bad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-compare_different.json",
+      "bytes": 5053,
+      "sha256": "dc82b39ec2f0ee3490229ac64cc8bb9a82cc8450266c8b944fb793a466da6b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-compare_equal.json",
+      "bytes": 5261,
+      "sha256": "4f0398ccedfef449d528beef1253cdbc8a80c520b5a794839b24499bdfaa98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-exchange.json",
+      "bytes": 5256,
+      "sha256": "92ce7faf1400e8c04138b5c042ee0c918644031a298b39f113f6a32aa9311d98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-max.json",
+      "bytes": 5277,
+      "sha256": "ada8391f219a9e466586ff9ca0eb61104ee30cd80ff1e043ba8a97aad0164d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-min.json",
+      "bytes": 5277,
+      "sha256": "bfff11c36ad202f0ac17caf80133a6cb9ddc93e4d5e28f1326dc2aec5c1e1880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-or.json",
+      "bytes": 5267,
+      "sha256": "10440dd1569af2665eab4560a5475ab33a1ccc796e813eb85e3e0d36d1d1d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-store_different.json",
+      "bytes": 3026,
+      "sha256": "e6909b147abb1f57a37cb659ac22772840df544000614973814e7edefc9b249c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-store_equal.json",
+      "bytes": 3234,
+      "sha256": "cfe7ab4966bf9fed9445db71e5eecf1e9c8a71a8da8fb9127ea8b2fe315202b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-0-typed-1-xor.json",
+      "bytes": 5268,
+      "sha256": "18a4d5a82431503c7f9884a5a29b07b9b9275b1c8c306d68e875a3b5c92416f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-add.json",
+      "bytes": 5180,
+      "sha256": "6ac823e878c54a43a05975e3785d7a98f181b720e48e81971b6a8f61f48b1d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "9ac306557ac4abaeaa739d23c696cdafff626e56ad2401e598f301e1a64e2197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-and.json",
+      "bytes": 5168,
+      "sha256": "646c0c2c295b0bc3a7c28d3426159b28c4c95cb140bd9be4030c8170e3c7a372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-compare_different.json",
+      "bytes": 4964,
+      "sha256": "524db941c9e789be5132850d7c8b439880563635a67e8a1e1bfc3419d53163ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-compare_equal.json",
+      "bytes": 5178,
+      "sha256": "981d2366124b476220ae2aa36df12bc2d84d76962859960595dc6f50dfd2da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-exchange.json",
+      "bytes": 5173,
+      "sha256": "615d77dcc2bb4cafa051ad9d8a3948afcb00e2ca64f480bdbca8638e7bf69b08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-max.json",
+      "bytes": 5194,
+      "sha256": "1dab95b3e45ed40e857fb4b4c13c151ce3cf055f8fcb7285a5ab467c1956827f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-min.json",
+      "bytes": 5188,
+      "sha256": "c63179bb196b0c64532d255b83ec4485c0d498703ebb0c4021c2d52e4cf1fc3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-or.json",
+      "bytes": 5178,
+      "sha256": "176f52d314bd6db49a083396fda4c750d14be5fe6bfffd80aeb4c57662810996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-store_different.json",
+      "bytes": 2943,
+      "sha256": "2fe214aeeded009c4a83445ab080a5def632e3b0fb21424e74f8093642b697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-store_equal.json",
+      "bytes": 3157,
+      "sha256": "c19758bdfe56757a3f3b3334721474a668605c018af261da2edb9acf8c6efca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-0-xor.json",
+      "bytes": 5179,
+      "sha256": "f9adf8452f9affdd71ed459a0a89490b3076d574432079851783b166b69f3d0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-add.json",
+      "bytes": 5190,
+      "sha256": "a014ec06feb684f0cd92eaaa5678cea1c36afe3112eda44f5018a5ed8e49100e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-add_no_result.json",
+      "bytes": 3175,
+      "sha256": "8fad2700e0a292ae54cf4efb94735c8e8afc0d32ffb69835176c0d160998d432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-and.json",
+      "bytes": 5173,
+      "sha256": "7879a49e1da84bc2c38ada857f9996e39aabfc6509273f74ff2852236a2d9163"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-compare_different.json",
+      "bytes": 4975,
+      "sha256": "44f6a3130d5ced6f4fc4c6332b11153c2aad7d23706e490e3a862e63f5c56383"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-compare_equal.json",
+      "bytes": 5183,
+      "sha256": "0f9db85be82732f804f1de0e1570fb6d714c5a4089982cf81934d9f8212f1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-exchange.json",
+      "bytes": 5178,
+      "sha256": "86ad9965db844f761bda7621517bcc49c2a2eae3560c515392f7dedcbaaf706e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-max.json",
+      "bytes": 5199,
+      "sha256": "356216d8b558540134ceae030ef28e34c48f6eee99c25bd516b3b3c4a2e83529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-min.json",
+      "bytes": 5199,
+      "sha256": "78761a957d02063e2cc9f0d62b0485ad6e7db3b68f1524fb33773ccf07f79644"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-or.json",
+      "bytes": 5189,
+      "sha256": "221df31fcb3a69a32315d8503b967c9d28d7ed2fbf5ef5bacec105b0ff307ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-store_different.json",
+      "bytes": 2948,
+      "sha256": "c7c3e88539d138c1e3decd5475e537a565b4aaea9d11759e07cbf1da06626bde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-store_equal.json",
+      "bytes": 3156,
+      "sha256": "4a1f46fae9183f59f882bbd4146e1269855d3604fd061fdf55036fe1843acade"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-texture-1-xor.json",
+      "bytes": 5190,
+      "sha256": "9f4433a744ef68c3d1b497e85ef71f2630dfbf414f3fa3490ae5482ed775c267"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-add.json",
+      "bytes": 5262,
+      "sha256": "ff653e61655bb87c5e451d7bc2fb407642c2cefa59de8c6792cb2f907fa0cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "b2a9b9a1b351d3949dea2e0514e9805d40a78b3369b1afe2034b6ba811236db3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-and.json",
+      "bytes": 5250,
+      "sha256": "147335fe4066efc2cccc128e9d655700a257933754082a7abb6369ea05de8b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-compare_different.json",
+      "bytes": 5046,
+      "sha256": "35dc31de3edbf10c0616316ed2321425b61db8861e47ae215b67498a21fc54da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-compare_equal.json",
+      "bytes": 5260,
+      "sha256": "8d2cb36b3fbdce79f799d08ba15f2d77f3c90e1635f80c69d82d6e31a7ad39e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-exchange.json",
+      "bytes": 5255,
+      "sha256": "74a6966f1c0b4b97a36b190804d05fde1121fe5066846f886290fed3205b491d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-max.json",
+      "bytes": 5276,
+      "sha256": "6ad07358caa3d1827523126ee6c3adced9838efd2436132098119cdb7ebf141a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-min.json",
+      "bytes": 5270,
+      "sha256": "518ccc02c14df693628f521a05f55e8493ad1dddd5f8f96fb4fc7ce7626ab2ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-or.json",
+      "bytes": 5260,
+      "sha256": "bab608cb588d1830e3f0bc5d57a6784d1975c38e67a5c42bbfd9bc550dec053f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-store_different.json",
+      "bytes": 3025,
+      "sha256": "ef93a86834500d32a6bf4b6439acc1327ecc666838697a1d460f72305e474663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-store_equal.json",
+      "bytes": 3239,
+      "sha256": "ef677d01e69f41da3655db99498bb8203ad9a4e43f1b4d771ad146ef57b724a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-0-xor.json",
+      "bytes": 5261,
+      "sha256": "76be66196f474dfe4bf1c37c68ad0906e8ca6931b851f6fdb0a1acbbc41e13c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-add.json",
+      "bytes": 5272,
+      "sha256": "a259631e6c6e59f5f8447172efe6f030b25a35cdbe0a6daf1d88580e3e2d67a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-add_no_result.json",
+      "bytes": 3257,
+      "sha256": "d3be8f761ea065e2f3bdf06ef7ffbbcf264cf31eb4c9ab9e5a991045d39e7309"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-and.json",
+      "bytes": 5255,
+      "sha256": "4fe733086249aec25c8f5cba50482c2d0df6378327bb7d78f71ef52afb5d789b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-compare_different.json",
+      "bytes": 5057,
+      "sha256": "9a9ef4aee92ca4e89c82e5718817e51f27243f01993479f764b335704b3be54f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-compare_equal.json",
+      "bytes": 5265,
+      "sha256": "7fc1c6a63c23d5a3b7534ea125f6c0680d473837a4fde37bb81c199307c367f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-exchange.json",
+      "bytes": 5260,
+      "sha256": "9e777cb275bae9f82c814d9b7340a2fd77b7c9f1a68dd8f6dc87ae346abbcb27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-max.json",
+      "bytes": 5281,
+      "sha256": "ecf2a059ce72c5c6a6dcdbfce120e5e630944b315e812893bf055ec546d61abc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-min.json",
+      "bytes": 5281,
+      "sha256": "2656ea38c39c87244b0ea11e6b44854d09d24ca945a483505b9d40c068fda75a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-or.json",
+      "bytes": 5271,
+      "sha256": "9e20b758634aecec3ee2edf53b2c1cb727298bdf531def15ced1128ce0f79292"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-store_different.json",
+      "bytes": 3030,
+      "sha256": "7810f57aad2821264e1e8d2f1e8938ab17546a937b43472db53d6a8d500e7ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-store_equal.json",
+      "bytes": 3238,
+      "sha256": "830d85ee8a5ad1ace3b0ea45c548cb35b5d7636c323d2010fa31930e54426ef0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-32902-typed-1-xor.json",
+      "bytes": 5272,
+      "sha256": "3cf6ec6faa212caecb69f1b69e8035f272990dff4cb641ab930e268c15ed1e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-add.json",
+      "bytes": 5179,
+      "sha256": "da7b38865ec4fe32cf1db0b39950ff7e0c9c2949d626277ca722be2399bbfc2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-add_no_result.json",
+      "bytes": 3170,
+      "sha256": "e0b957eea74aa3b982a3e877b205555cc7d9a123a9d4d3111fe402c711afcfc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-and.json",
+      "bytes": 5167,
+      "sha256": "eb847fc40ee1116d129497695e29e2e075e82b2946757cc10614fb564e368367"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-compare_different.json",
+      "bytes": 4963,
+      "sha256": "80087cd7e2dc317f5f8a6f7a9dbb1e7d27cea3ac8165fb2522fbd9fafda1935d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-compare_equal.json",
+      "bytes": 5177,
+      "sha256": "f32b126e0bf44763ce2cf7a6e95dc1a290e6ee8ea6bcaa25f5362bd2dc402264"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-exchange.json",
+      "bytes": 5172,
+      "sha256": "f563a9428cbc4784e3f6c9427205ea43f9cc2c9c018fa3b967a2d4cdc5bb5258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-max.json",
+      "bytes": 5193,
+      "sha256": "a3621e895884690378d952a9a8c95d021f7ee26820c7ac4cd8adcd82fadd971a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-min.json",
+      "bytes": 5187,
+      "sha256": "3a3b44d9fbb9664096b2abf74fa0fa33e043139d6b8793fec6adb1146dbbce81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-or.json",
+      "bytes": 5177,
+      "sha256": "8d44fabfb6751f67bc5bb2f118ab252514c5d610156256a13c194122a0269b7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-store_different.json",
+      "bytes": 2942,
+      "sha256": "5085f2936d630fe21c0686fe364eea63cf755f31ff444fa42fb7aa93964322c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-store_equal.json",
+      "bytes": 3156,
+      "sha256": "336ab82f85e5c3d277794e8da0597f3c4a524315cfb44a6fe233d7f5eb0c08e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-0-xor.json",
+      "bytes": 5178,
+      "sha256": "1eee976489a802957c873d31255bf11359e82f9b65967ebfef8d80db1b6f64ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-add.json",
+      "bytes": 5189,
+      "sha256": "a9bdcc1c32e7e8171e7b8fc58ebf0faf18ba9688d9aeae6e1724fff7865b73dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-add_no_result.json",
+      "bytes": 3174,
+      "sha256": "718d1ef9ac11fb8970f6f9933fb51fc375377d64f9f85cb800f56dc1030b951d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-and.json",
+      "bytes": 5172,
+      "sha256": "4cc4aa7f1c9d78588669597890ce0d7199afe1de1131f9a8312ddb89c416a8be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-compare_different.json",
+      "bytes": 4974,
+      "sha256": "a44ba63370b060380a9b09674505f5b6558373b258986ab44a428f780bfae1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-compare_equal.json",
+      "bytes": 5182,
+      "sha256": "c3952a8ee6d959c38eec6538d01933da871ecc91249d4e53228350c0528d288e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-exchange.json",
+      "bytes": 5177,
+      "sha256": "25431883e4022c785676d77be7ed300292d5446696bf2e4a66d9edca2cb59b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-max.json",
+      "bytes": 5198,
+      "sha256": "d0a53b229d51f8e30ef9cca253d0bfa7427fcc4a33b91ed07db28c9db9819260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-min.json",
+      "bytes": 5198,
+      "sha256": "30ab38146421a597f410e805b5b10dacb15f799e72c2acaadc4d21a682b3384e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-or.json",
+      "bytes": 5188,
+      "sha256": "29f02fd1f3b2f5a2a289279fd985b9080b67511d7aeb4bef5cfd25069b0df448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-store_different.json",
+      "bytes": 2947,
+      "sha256": "ae0f253d80ae47d0d23f042a98796be225b507b0081833c7ba71004a72a0929a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-store_equal.json",
+      "bytes": 3155,
+      "sha256": "667b4260c3472b1b83c416ea20183eda1475dda304674d018912b1c9ce6a4768"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-texture-1-xor.json",
+      "bytes": 5189,
+      "sha256": "d713b105156ef3110564737231b896d612cfb46398a02ef09597a12884f29a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-add.json",
+      "bytes": 5261,
+      "sha256": "34dea1959dd3aa1ae4f23d080abc8e0bdf32797ebda4b7b0840489eb83e2d3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-add_no_result.json",
+      "bytes": 3252,
+      "sha256": "0ec88624c43e931c1df2b48b3b9d00d287e683b5938bb1410aa1213f1cd60139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-and.json",
+      "bytes": 5249,
+      "sha256": "88d4aff3cd7a4ed46c7ed143654fddcc35a0c8e6728aaca2d1d41c7d01d6fee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-compare_different.json",
+      "bytes": 5045,
+      "sha256": "507790dfd0456d74be5f202f75c2ed2055b2fe4405bf6679079aedbc9e553c67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-compare_equal.json",
+      "bytes": 5259,
+      "sha256": "5008361454f6eeef914a80c10826b8ae2b665774daec4d43a1edd5934f994be3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-exchange.json",
+      "bytes": 5254,
+      "sha256": "b9fe7644d080007d15e946b07e3176eb362a46c34b6dc6d687cde52fce4c85cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-max.json",
+      "bytes": 5275,
+      "sha256": "84487043c4f7536c9ad4a53ceaab965d0d089355f998756ed74c96fe4f821bfa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-min.json",
+      "bytes": 5269,
+      "sha256": "91b743e0ecbc290316ad4968f55bf3f16753882cd9508e72182896c612ddedfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-or.json",
+      "bytes": 5259,
+      "sha256": "1f3ee5f65bcda873731db77f5c66439ca66273d888caa09298a59c1f6fa1412b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-store_different.json",
+      "bytes": 3024,
+      "sha256": "f111534a96c9a82f7839d78905eb17988cb8f71f7d872e385fbdd6a6df1153fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-store_equal.json",
+      "bytes": 3238,
+      "sha256": "4d595fe96880954f8c5bf400e0e653c60df580fb5f97c16eabad23cd760e0084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-0-xor.json",
+      "bytes": 5260,
+      "sha256": "9fedba4ac745fc5a842e5396bf41f347618e0031259d40ceebbdc280f069bf73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-add.json",
+      "bytes": 5271,
+      "sha256": "ca3e26d72135ffcecd410e243fd2072c50c8bb01957fb317b1f8a64f4e14f12c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-add_no_result.json",
+      "bytes": 3256,
+      "sha256": "0c45ab7ce62008ef2e56f4d574151b89b32284c008827d299b77c59d978ba061"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-and.json",
+      "bytes": 5254,
+      "sha256": "68d6544d48e2a82304348ece4116890462523cb22aad26ceede512e427f77314"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-compare_different.json",
+      "bytes": 5056,
+      "sha256": "00239962174c5dac22e6cda4e538b3fe5825662958e1892548d648e39175f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-compare_equal.json",
+      "bytes": 5264,
+      "sha256": "3c6ca39cd51f8dc9a48ceea9cfcd09db608f270f6de5d0fb89fde286ed682b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-exchange.json",
+      "bytes": 5259,
+      "sha256": "33990bd7c1c41ce145326e080fbb3cfe2907cefad685c8f2304f07b341039932"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-max.json",
+      "bytes": 5280,
+      "sha256": "1bcfb095ab6aae075ac9497078da17d020c4872861f8479d8845cda23977ad94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-min.json",
+      "bytes": 5280,
+      "sha256": "bc62c90006e97e87e033adf44257c8d7f90d583c2527f398c1b977da7af24237"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-or.json",
+      "bytes": 5270,
+      "sha256": "9ddd9f145b62d326fc91a946fec67ae461e4ec25da243376b358ec2758a1e33d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-store_different.json",
+      "bytes": 3029,
+      "sha256": "eaa32156e3b2b2de388f4d15c5c109acb90a192176fc97ab46266b73357fcfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-store_equal.json",
+      "bytes": 3237,
+      "sha256": "42bfb43cf0e89518d8ec3afc0f4b90f78ff1b6b3fcc3151b8b200f42419503ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-checkpoint/typedInstructions-4318-typed-1-xor.json",
+      "bytes": 5271,
+      "sha256": "b3bde9e522f8b7622507cf2ed65ccaa4b02abd78dcd4255e71423ebbcbde3f42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "93d6f52ef098e428667d856a3d13b63eef079fe3cff7d9c8b6113c0756a1dac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "b6b2922f5e693afd925159b5cba6292b22d46404ffe916d8b96afa841a008477"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "60f8e640b19991b0100becda9b2788c175ab905dcb2c24b2fa6f8121738f42b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-blend.json",
+      "bytes": 31370,
+      "sha256": "84ca378920a547483d0e0607d098a06bb26dffe9ba9fafa690d9970c7d2b0122"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-clip.json",
+      "bytes": 25327,
+      "sha256": "456827212c013c5977d038d94cb2e2e3bcb7b72be1765060c6ffc704b300c4cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-cull.json",
+      "bytes": 25511,
+      "sha256": "b3a8d488faebe8dcf708a62af2b72a29bbf65b7783a354bd0c7ff2bfe61b0c61"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-depth.json",
+      "bytes": 31164,
+      "sha256": "510c96211f57253dc80ccfec5eddabb3583e7989f995a34c9df66c3c5f003e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-depth_resource.json",
+      "bytes": 29214,
+      "sha256": "980159f7f14448fba61e04a6b7dce893cad904bdc8e7406aa0bfd63736530b25"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-discard.json",
+      "bytes": 31716,
+      "sha256": "2223a58b6fc300ab30cdf6aa6983dfffac439ef7d15e81d78c8a90143f455cd1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-early_discard.json",
+      "bytes": 31716,
+      "sha256": "d960f7f14fda1105f82a783a0a772ad2cfafa81cfc665c70d412047d17261772"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-mask.json",
+      "bytes": 31155,
+      "sha256": "c305e2eb9fde87025c2f788bb0f53fb9c2821b91f5d79561eb6771b6973cc62d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-ordinary.json",
+      "bytes": 31174,
+      "sha256": "09243caa133bd641e1496fe26c619059de2ccb289d79cf5ff66aebc5a1915bca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-scissor.json",
+      "bytes": 25511,
+      "sha256": "7f6484f03d6c098445c0901e85cf869da86c16f60de6d71b1969e9fb37fd3b10"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-stencil.json",
+      "bytes": 31164,
+      "sha256": "510c96211f57253dc80ccfec5eddabb3583e7989f995a34c9df66c3c5f003e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-0-unchanged.json",
+      "bytes": 31182,
+      "sha256": "d4a814de2286ef5fa3705f55bea42ad754afd6b923e0113962f795d8da04249b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-blend.json",
+      "bytes": 31382,
+      "sha256": "8a82e4923688bf57f6adefc5f9ebdb803726d9bbf0bf52321a25aa9274fbd351"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-clip.json",
+      "bytes": 25339,
+      "sha256": "650e86e94241d6cc00dd7b191427b6edbd3362ca27042a74ae4bc8e257e0eeb1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-cull.json",
+      "bytes": 25523,
+      "sha256": "2c747fb183f186984f3113e4b3e6de6e40b11ba632df9b7bd70ab14220a1a0a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-depth.json",
+      "bytes": 31176,
+      "sha256": "151c1dfa909966221a1cc1f8e4ac0914097168631640a1c03d53c7f2cfdc8446"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-depth_resource.json",
+      "bytes": 29226,
+      "sha256": "b7227f3c55bacc26577ded0a2d0e5fe611387ccb819c4507d79332542ad4847b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-discard.json",
+      "bytes": 31728,
+      "sha256": "f063c7b53bbaeb4715c5d6712f30c9e2ecc43cdc1019a446d3a3a86f60617ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-early_discard.json",
+      "bytes": 31728,
+      "sha256": "0523d8980268ea25f3d3a6768ae3cc1b81163e75b1d3f60c89efd38dde130981"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-mask.json",
+      "bytes": 31167,
+      "sha256": "77f1e0915e21f7313e655be0180fb0a90824191386aae6f7753a15080046e25b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-ordinary.json",
+      "bytes": 31186,
+      "sha256": "3fdf321c0aefcf545d797b9f3404bb6dea8a1ac8484a743b0570e0329655918b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-scissor.json",
+      "bytes": 25523,
+      "sha256": "af064c48773fb883a39adb0b3a793416c1e839dbd10633456bd37fa22ca681dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-stencil.json",
+      "bytes": 31176,
+      "sha256": "151c1dfa909966221a1cc1f8e4ac0914097168631640a1c03d53c7f2cfdc8446"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-32902-unchanged.json",
+      "bytes": 31194,
+      "sha256": "ba5ac42c3895b3d231fc73e89878364523f426974f7d80fecac3ad71733ef4a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-blend.json",
+      "bytes": 31379,
+      "sha256": "1f79e9e8aa22bf0dfd7dbae35560b8c4bb4c48b65b047f7aff63170ec058856f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-clip.json",
+      "bytes": 25336,
+      "sha256": "5b42a7cab9065a68fcc19cb23ec2dea23086501700e05cedc1b4cce1be2296aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-cull.json",
+      "bytes": 25520,
+      "sha256": "c83265f2f1f0456f6324bb6be64a3fb46a5e19184329a42918f79706fb9ae258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-depth.json",
+      "bytes": 31173,
+      "sha256": "19e67811d01558332c95bc696a87e9c8e2a72b50e1f257fd9ae2ac21f38fc7a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-depth_resource.json",
+      "bytes": 29223,
+      "sha256": "42920a98478fa33fdd7a2a3834b96130ee8e27e2368896742c85b51e69363c8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-discard.json",
+      "bytes": 31725,
+      "sha256": "8015420f9445c99bca8b36d3ec8f346373fd6d45aceee51832b1b72e228c7d3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-early_discard.json",
+      "bytes": 31725,
+      "sha256": "dc981f41ed1fdd91fc0663bfb6c32088d61697c7545424a2782ffaf4324c458d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-mask.json",
+      "bytes": 31164,
+      "sha256": "4ad20e21586d7c9d72aa71ad5217ff0043fb4d089369d1a7e99f4b5e610ce62c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-ordinary.json",
+      "bytes": 31183,
+      "sha256": "e6a4a568f2bd53d3cef25eb0597d31232c677c084fcacb4ea5cda39f34fa9edd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-scissor.json",
+      "bytes": 25520,
+      "sha256": "692f52b14e66721176cf5799446bfdfcf05b652bedcb65bfcf789519de684d75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-stencil.json",
+      "bytes": 31173,
+      "sha256": "19e67811d01558332c95bc696a87e9c8e2a72b50e1f257fd9ae2ac21f38fc7a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistory-4318-unchanged.json",
+      "bytes": 31191,
+      "sha256": "b3dd64f77a46f74c8381476236592b8302987a6a34a4f9e84712ae2c252c52ec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryForced-0.json",
+      "bytes": 61618,
+      "sha256": "6c8dc083cb444cd17c9e31aeb38cf98d9a7946764a0ab1f4ed0e14924e58cd46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryForced-32902.json",
+      "bytes": 61644,
+      "sha256": "d873f5ec45782512815a3ab65238000219d84479261ccad3dac62b02297f9f02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryForced-4318.json",
+      "bytes": 61638,
+      "sha256": "53a7e3ecd0a22be43ada3da387b4daea6f507f1e42b2b20c536673663cf3a9f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-0-0-0.json",
+      "bytes": 23660,
+      "sha256": "d70d1290502fc2df4d44ded20820ad40c1068bfa9e8b524955eb4c1bb290b5d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-0-0-1.json",
+      "bytes": 23660,
+      "sha256": "53250f9c21e229dc0699a58329b75e2caf67ce329bbdb45cafe531c86eef1fd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-0-1-0.json",
+      "bytes": 23657,
+      "sha256": "eb1ed72beec9bc31b1962f024e970152d2e6333277350db3be9c861bae3ce530"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-0-1-1.json",
+      "bytes": 23657,
+      "sha256": "10547234eb3ab565aa4347b46c8b985966165c73e8d3020d90761cbb0dbf9298"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23672,
+      "sha256": "e65b76764fd7bbaeec5e148dcccbab33d1120e88a20541fd3abfa6283773424c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23672,
+      "sha256": "875ae8769a0df5b26073261e2259fd882bce19e730c8f0a8ce8ceb4e10831071"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23669,
+      "sha256": "9ecd6549a8ebc2ba8dcf41bec1c3a872758218c2e5bcfdb9e6767e7f429b5a53"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23669,
+      "sha256": "8fcb221c8ee009540479d6b99e9d37125a96d3b9a8ce90d3e8860a51c87c5643"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23669,
+      "sha256": "1462c6a984c3c2830035930642f85ca8c0bd1636b6ba6b882412039b49f48b7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23669,
+      "sha256": "26946073b3db49db424393d0957e5fbe3a95168bf9f53452882b6ba7d2473a7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23666,
+      "sha256": "5022f9f1b98caa5a408508980f6d4393271bbf6fac7597fc0e89e1c8af7923cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23666,
+      "sha256": "68fdbda021ba102479bd659fcb44c5c0cecdaa22f5c2f1d49378a57ced775a3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-0-0.json",
+      "bytes": 29498,
+      "sha256": "0ba98345b4b0011ce2465dc934e4f4d28928b18c67315ba1609e7aaa5c8c6a6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-0-1.json",
+      "bytes": 29519,
+      "sha256": "49cc8015046c11fac5ee3a0c735e66dc3577e70438d394e318b35723b62d7a5e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-0-2.json",
+      "bytes": 29500,
+      "sha256": "24b1dc9b118beb907100dc70f4489238c17c8e90ea49d92063407625a24dd3a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-0-3.json",
+      "bytes": 29519,
+      "sha256": "35f646f6d39831730773e7758845199ed6f5aa0faf8340cd15c38e3f445b7708"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-32902-0.json",
+      "bytes": 29511,
+      "sha256": "ed12e86d51b51c4650080dd3dabfdc576d98a4b7f23177955db826f8dbe20a22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-32902-1.json",
+      "bytes": 29531,
+      "sha256": "cc346d0038883c2e22dd5c4d6e0b81deaf24e4146925e6265f190e1d21bee15b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-32902-2.json",
+      "bytes": 29513,
+      "sha256": "15ecd87c58638903433d5fb5fd209281effcf7fa2033a8d91a719839d053818a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-32902-3.json",
+      "bytes": 29531,
+      "sha256": "2e13e89d87af2d6c4fdd89a5d0710e4397bc44587c765f4b8c2057f9a5b0ac6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-4318-0.json",
+      "bytes": 29508,
+      "sha256": "17414a9bd8393a3b9f4c46faed23f4d3b6101c79f6e81a7c2302d15ceac71f07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-4318-1.json",
+      "bytes": 29528,
+      "sha256": "9bf5ec037e170bdd46999529a432a147289e4d7cb268ad6552d12a45c7121d80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-4318-2.json",
+      "bytes": 29510,
+      "sha256": "f6d55d94649b98d5c269e18f769779a63a7739f3be47147e47ced282f98ef834"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryMsaa-4318-3.json",
+      "bytes": 29528,
+      "sha256": "fc12d29a1a3233ede2c36041bd6c06f5cd2e1241e123805721855757cd6c9d1d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryRecovery-0.json",
+      "bytes": 30909,
+      "sha256": "d00290d4bf3b1fb00649a1de0e6ddac868a513c86604f54ca82623f71624725b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryRecovery-32902.json",
+      "bytes": 30921,
+      "sha256": "82579a34a7defc387be6a833fb4125fa680ec8e2baf4eebe5ecf2f0d69964d64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/drawHistoryRecovery-4318.json",
+      "bytes": 30918,
+      "sha256": "cb683238db044514da6f17e6334660d467ca50b81a3aa9b301fc37315b121968"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-constant-0.json",
+      "bytes": 42442,
+      "sha256": "c8efd1c4e112f9d5ed6d3eb2b13195b26276e6b7049fc5539a4b3a7395c127fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-constant-3.json",
+      "bytes": 42443,
+      "sha256": "49a1900a095e99217f8cfabe3c9b562e760f65a0f45c2872bbe2aae180b70b49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-coverage-0.json",
+      "bytes": 42415,
+      "sha256": "4d21399062eb848d0c4ed77f3b30fc59c90cdff0ed92b2d607a92f59dc5a1b9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-coverage-3.json",
+      "bytes": 42416,
+      "sha256": "ae24d9c70566440b4222447c96931927fb84137fa5ff0037bea7000137e030ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-derivative-0.json",
+      "bytes": 42419,
+      "sha256": "02772f05ad24c9aa568d0676eb0bbfb07cac328cb1121837c7b9fbeee2819a92"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-derivative-3.json",
+      "bytes": 42420,
+      "sha256": "7828b9385799cb92bd97d741bac30e73c4c496beb908186fcd8be70c7c66ca46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-discard-0.json",
+      "bytes": 42425,
+      "sha256": "eafba52248398f5e198650a1d12f284def6c5a52924d95c6133118472209cc77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-discard-3.json",
+      "bytes": 42426,
+      "sha256": "1514327a62d7b8a258296823224cd4723722a6c808cc3c2c7e3566f05ac8b877"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-masked-0.json",
+      "bytes": 42416,
+      "sha256": "c9a557c8e8860965f7421eddd4d6f92feae133d05c7ab247aa08cfb4a6a85042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-masked-3.json",
+      "bytes": 42417,
+      "sha256": "15f37a2e65996daa301d94e6b2cdda40c3379ebeaf73a24032b8b120242b3283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-sample-0.json",
+      "bytes": 42370,
+      "sha256": "dfeb61c1bd63f3e2a801855a1abe2a5e09c350224909fa5d266bcf35a3ba3760"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-sample-3.json",
+      "bytes": 42422,
+      "sha256": "546994de1e594363a0a6a2e3384bdaed6218baaa8348372c1b45bd8c2120ac14"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-varying-0.json",
+      "bytes": 42416,
+      "sha256": "517fef32c778259db0f4bd3356509ad6fef2097a497a8dc087aa8489e03a3f07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-0-varying-3.json",
+      "bytes": 42417,
+      "sha256": "4035b70492a8b771966adfee3bef350d75ac10481dbb936bfd78120bb1269b1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-constant-0.json",
+      "bytes": 42461,
+      "sha256": "bc3459134e3ae272d3a7f48bbb7ca27ca9ade8d447ecd6ddca6b943b34d42b02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-constant-3.json",
+      "bytes": 42462,
+      "sha256": "ef149d506461053455f0f7ce96ba6be679bc7ca75212dc6f042124b1015c71d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-coverage-0.json",
+      "bytes": 42434,
+      "sha256": "72e36c5301cd287dffcc8804fbb094395997bc4391c37dc454d2f4b00d745668"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-coverage-3.json",
+      "bytes": 42437,
+      "sha256": "3ce518b21cc4e63a90c37413581dd7e20d6fc2e832c2a46c8ee9a70e14ed1cf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-derivative-0.json",
+      "bytes": 42438,
+      "sha256": "ce47d61ade0de328028a4cd8943028df6cc83077b052546fa8e51e7d264360e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-derivative-3.json",
+      "bytes": 42439,
+      "sha256": "d8e4f675a1d23b87b94043d395c2878530f9465074f7c136193f3684b32f0b4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-discard-0.json",
+      "bytes": 42444,
+      "sha256": "3771c8a4d5296943f6dfb02871afedd01c8a6a4111d52acc98e0e19e08267e67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-discard-3.json",
+      "bytes": 42445,
+      "sha256": "44a08695422c5ba707fd242b47fd739c9f33d062c609a6cffaf557fdc3e2ba06"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-masked-0.json",
+      "bytes": 42435,
+      "sha256": "b9b15107e345d2823c4337d8623bec8c6487bf0c41f0fbac96f00bb901c12e0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-masked-3.json",
+      "bytes": 42436,
+      "sha256": "086ab5e82a7032ac67e002dff8a3db605250a24ef4a373c1a0342b7690c64aef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-sample-0.json",
+      "bytes": 42389,
+      "sha256": "c6d7cb16b810f98c409a403ac8cebd2c8106f6e914a9e6440bfb46ed7fb4034e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-sample-3.json",
+      "bytes": 42441,
+      "sha256": "85e8b4003cfad98d70a49b29c83d01aa27aca9b2c3bcc6875066f2c81c46097a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-varying-0.json",
+      "bytes": 42435,
+      "sha256": "a545763ab6d6f157a38adcd4a681db4fb299164abfd29844d5d9aa8e8d3ddbe1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-32902-varying-3.json",
+      "bytes": 42436,
+      "sha256": "c9fa17f11e159a2956f56035179dcc3a392f7a78ff07e0d0515d638a0db7463e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-constant-0.json",
+      "bytes": 42456,
+      "sha256": "04bf191cffb6c1122c3e7c3dac8130400cf4aa536fc24d4c6f1b122516dfc581"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-constant-3.json",
+      "bytes": 42457,
+      "sha256": "9342d268cdb98c161c7eb16c42eb173e6f418f56cef2cef9bd281da9c928b5bb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-coverage-0.json",
+      "bytes": 42429,
+      "sha256": "93fe3948329bf1bc46fb32d0dfcfe48f4f7b433b8463e42e2f5676c4c4ebea49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-coverage-3.json",
+      "bytes": 42432,
+      "sha256": "91c1eea66b6ed75fcdc5a104819ae88a5cd0777312ea920eccc3f6055cfabe5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-derivative-0.json",
+      "bytes": 42433,
+      "sha256": "c2fdafab381460fa6c26fd372552c76ff67d64a40b525ee39d6a32d3f6b63dea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-derivative-3.json",
+      "bytes": 42434,
+      "sha256": "aeb43e289546a6e390ecbf0f94cbc1b9c99147e66ac027e3438ac0cfcaf2fb5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-discard-0.json",
+      "bytes": 42439,
+      "sha256": "c1e993132ba3958bbe3b3266a5cf8df4f62ac9ad8970080b6dee0ba2daed7649"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-discard-3.json",
+      "bytes": 42440,
+      "sha256": "fc2156990fbda06b6ebd1d5bccb551a0d88d814cab8b3c269649520fd58f9141"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-masked-0.json",
+      "bytes": 42430,
+      "sha256": "08f287a5866d343ee6a80cdfe93f3908d0cf8cd4b25239a3dcad2a8114317e0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-masked-3.json",
+      "bytes": 42431,
+      "sha256": "09b6c72236aeaa9dc2a5fe8823b1474d0bf2af2729b15b1d8c4c778d15267427"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-sample-0.json",
+      "bytes": 42384,
+      "sha256": "f0e9e19c271f1b7f1a950ec26f5dc534a1c70b82317be2e1b3ca716dded81471"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-sample-3.json",
+      "bytes": 42436,
+      "sha256": "37fb5dd4bd8197da9bb7163943180f7fcb488c5992e7b0364532c8406dcbbac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-varying-0.json",
+      "bytes": 42430,
+      "sha256": "0287f3f776dd1bda91841344dd361ad26afabd03cbedce140fcebdae1d6e7ca8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistory-4318-varying-3.json",
+      "bytes": 42431,
+      "sha256": "7af488ffffcfa8cbc0d0bc59443c4440a7f42dbfbaaf6883487276f8d5bbab47"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-0-depth_reject.json",
+      "bytes": 40856,
+      "sha256": "8889b4d8bec25af48dd9fe0012d36888019ce476bd814bf1967d510f913bb0a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-0-forced.json",
+      "bytes": 102681,
+      "sha256": "83f6f20210e8fedbce011d2baba2de5fb4e8365c0d412e54e545e346e0a3e68d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-0-null_ps.json",
+      "bytes": 26659,
+      "sha256": "e6f80a4bade5d5891550fbff3a71131f5115d231797e6d9e0c8c113facd439cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-0-stencil_reject.json",
+      "bytes": 40858,
+      "sha256": "e5675837340c215dba91fb63f681328e4d2f9bab2789154bc84a1a39730742d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-32902-depth_reject.json",
+      "bytes": 40875,
+      "sha256": "1558ee2e881224f904ec3868c75acfd4430152354181ef547c667bc2f942007f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-32902-forced.json",
+      "bytes": 102726,
+      "sha256": "15849b5f89e792eb375f677c9e5a6d5f1d4f8090a4e39aaadc22f19c5408ac72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-32902-null_ps.json",
+      "bytes": 26671,
+      "sha256": "d92d22f3a0da3b7d41b721d8d886adf52244a10fc7ee38911783d0567d604445"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-32902-stencil_reject.json",
+      "bytes": 40877,
+      "sha256": "d514b3bc24cdf4ec24b15c732cf44a0381ca2d4fe42972a5bd0a1f334fe9fa50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-4318-depth_reject.json",
+      "bytes": 40870,
+      "sha256": "a91391b1c1ee2b56ff730e9fa5296044dc401a9a5ad5314bb1571bbe972a7800"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-4318-forced.json",
+      "bytes": 102715,
+      "sha256": "647ff7288909faaec788774b0e38a505576024a74e4c7e8ddd9f2c7acce472e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-4318-null_ps.json",
+      "bytes": 26668,
+      "sha256": "94cf5f23952ffbda9ba638fca404bfe83b7f23ea99bd5389f6771793c6b05d96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryBoundaries-4318-stencil_reject.json",
+      "bytes": 40872,
+      "sha256": "b875f8f434ecb882618135d1fa3c45febd3479928628993465080b4b41b82d96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryRecovery-0.json",
+      "bytes": 58725,
+      "sha256": "a810f4a4a80958b66d22273709f94676bd56a3bb6d33b5aa6a4c3ca41f282719"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryRecovery-32902.json",
+      "bytes": 58751,
+      "sha256": "4413ee3e310c691976881388764c18be0ba2140152633c38bf6cf878b7d43890"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/shaderHistoryRecovery-4318.json",
+      "bytes": 58744,
+      "sha256": "1ad9cf5c43ccb3cb31d9d34627bdc47e17f63847622e1559a2dae4744b97de09"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-geometry/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-final-validation.json",
+      "bytes": 185,
+      "sha256": "24087e809f3acc48970c7dea4d343ef28f1ee5c51dbf8937ca4977e6d8bd372a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-0-append.json",
+      "bytes": 74551,
+      "sha256": "e81e0e29d3c990b1288a25c34926130d111e54b6d40bd19e580cf47a214eabf7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-0-counter.json",
+      "bytes": 74548,
+      "sha256": "cfdd0e109d5d5161d38361bad3a6cc3cb85097648833a9845694f9830f4d20be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-0-raw.json",
+      "bytes": 74544,
+      "sha256": "e4e0a5bcee4b8a4def2fee6ee11eaa7880d5d419539ba0d1e52db8207fbd7855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-0-texture.json",
+      "bytes": 74545,
+      "sha256": "77ffdfe949b076fc8d3e56e4410d21baa1a0b4ffd6f230d93a061bd107910945"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-0-typed.json",
+      "bytes": 74546,
+      "sha256": "671777a5fa0c0a8f425f3aaf26c9a4dfa5ea0a0ca9bd8b268373c7883296870b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-32902-append.json",
+      "bytes": 74584,
+      "sha256": "070a19f09a9bfb52d111e116a31c0c95b174e0feb75d31ae48c4fb6a96602529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-32902-counter.json",
+      "bytes": 74581,
+      "sha256": "56d65f6d97f81e8ab7e45f0d27a9bbb6587f7db4a7630f69436e5f651b952582"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-32902-raw.json",
+      "bytes": 74577,
+      "sha256": "fbf73aa64452485bcd7d749b58550e48d65be2fde178a8ce01d9e4c403313c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-32902-texture.json",
+      "bytes": 74578,
+      "sha256": "44f84a42a7211df6dca16be4fd0347e8d720d1d2d87ad10b71e8993566f12bee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-32902-typed.json",
+      "bytes": 74579,
+      "sha256": "962aa4843a47c0e62b697860931fa3d780b2ea45339144b859bae8e24101e8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-4318-append.json",
+      "bytes": 74575,
+      "sha256": "0ff72bb718a8d914a80447e6a330561b4411de8b89568527ff872e5f458f682d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-4318-counter.json",
+      "bytes": 74572,
+      "sha256": "7ef67c46ddb46f75917948481d47bd6e67ededc8ce2fe629b0a18d249e39c4a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-4318-raw.json",
+      "bytes": 74568,
+      "sha256": "4b1796cfa665c99695febce75b31fb3b4c617d155f966be3ced1ba03086b68b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-4318-texture.json",
+      "bytes": 74569,
+      "sha256": "d6fc23d1d4c593cbf513ffcea326b6fb7662316fad59a8e5ab0b41929298d0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint/shaderHistory-4318-typed.json",
+      "bytes": 74570,
+      "sha256": "9fd8d4dba4433c3bfb5b704fbf2e75e79695cd9b1cc8b326213f7c4925e2b07b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-checkpoint.txt",
+      "bytes": 1512,
+      "sha256": "c059055983bf1d0956273449a9a3807ba0f915285e44ccc5aa7a7231550402ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-constant-0.json",
+      "bytes": 42442,
+      "sha256": "c8efd1c4e112f9d5ed6d3eb2b13195b26276e6b7049fc5539a4b3a7395c127fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-constant-3.json",
+      "bytes": 42443,
+      "sha256": "49a1900a095e99217f8cfabe3c9b562e760f65a0f45c2872bbe2aae180b70b49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-derivative-0.json",
+      "bytes": 42419,
+      "sha256": "02772f05ad24c9aa568d0676eb0bbfb07cac328cb1121837c7b9fbeee2819a92"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-derivative-3.json",
+      "bytes": 42420,
+      "sha256": "7828b9385799cb92bd97d741bac30e73c4c496beb908186fcd8be70c7c66ca46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-discard-0.json",
+      "bytes": 42425,
+      "sha256": "eafba52248398f5e198650a1d12f284def6c5a52924d95c6133118472209cc77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-discard-3.json",
+      "bytes": 42426,
+      "sha256": "1514327a62d7b8a258296823224cd4723722a6c808cc3c2c7e3566f05ac8b877"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-masked-0.json",
+      "bytes": 42416,
+      "sha256": "c9a557c8e8860965f7421eddd4d6f92feae133d05c7ab247aa08cfb4a6a85042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-masked-3.json",
+      "bytes": 42417,
+      "sha256": "15f37a2e65996daa301d94e6b2cdda40c3379ebeaf73a24032b8b120242b3283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-sample-0.json",
+      "bytes": 42370,
+      "sha256": "dfeb61c1bd63f3e2a801855a1abe2a5e09c350224909fa5d266bcf35a3ba3760"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-sample-3.json",
+      "bytes": 42422,
+      "sha256": "546994de1e594363a0a6a2e3384bdaed6218baaa8348372c1b45bd8c2120ac14"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-varying-0.json",
+      "bytes": 42416,
+      "sha256": "517fef32c778259db0f4bd3356509ad6fef2097a497a8dc087aa8489e03a3f07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-0-varying-3.json",
+      "bytes": 42417,
+      "sha256": "4035b70492a8b771966adfee3bef350d75ac10481dbb936bfd78120bb1269b1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-constant-0.json",
+      "bytes": 42461,
+      "sha256": "bc3459134e3ae272d3a7f48bbb7ca27ca9ade8d447ecd6ddca6b943b34d42b02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-constant-3.json",
+      "bytes": 42462,
+      "sha256": "ef149d506461053455f0f7ce96ba6be679bc7ca75212dc6f042124b1015c71d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-derivative-0.json",
+      "bytes": 42438,
+      "sha256": "ce47d61ade0de328028a4cd8943028df6cc83077b052546fa8e51e7d264360e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-derivative-3.json",
+      "bytes": 42439,
+      "sha256": "d8e4f675a1d23b87b94043d395c2878530f9465074f7c136193f3684b32f0b4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-discard-0.json",
+      "bytes": 42444,
+      "sha256": "3771c8a4d5296943f6dfb02871afedd01c8a6a4111d52acc98e0e19e08267e67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-discard-3.json",
+      "bytes": 42445,
+      "sha256": "44a08695422c5ba707fd242b47fd739c9f33d062c609a6cffaf557fdc3e2ba06"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-masked-0.json",
+      "bytes": 42435,
+      "sha256": "b9b15107e345d2823c4337d8623bec8c6487bf0c41f0fbac96f00bb901c12e0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-masked-3.json",
+      "bytes": 42436,
+      "sha256": "086ab5e82a7032ac67e002dff8a3db605250a24ef4a373c1a0342b7690c64aef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-sample-0.json",
+      "bytes": 42389,
+      "sha256": "c6d7cb16b810f98c409a403ac8cebd2c8106f6e914a9e6440bfb46ed7fb4034e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-sample-3.json",
+      "bytes": 42441,
+      "sha256": "85e8b4003cfad98d70a49b29c83d01aa27aca9b2c3bcc6875066f2c81c46097a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-varying-0.json",
+      "bytes": 42435,
+      "sha256": "a545763ab6d6f157a38adcd4a681db4fb299164abfd29844d5d9aa8e8d3ddbe1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-32902-varying-3.json",
+      "bytes": 42436,
+      "sha256": "c9fa17f11e159a2956f56035179dcc3a392f7a78ff07e0d0515d638a0db7463e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-constant-0.json",
+      "bytes": 42456,
+      "sha256": "04bf191cffb6c1122c3e7c3dac8130400cf4aa536fc24d4c6f1b122516dfc581"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-constant-3.json",
+      "bytes": 42457,
+      "sha256": "9342d268cdb98c161c7eb16c42eb173e6f418f56cef2cef9bd281da9c928b5bb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-derivative-0.json",
+      "bytes": 42433,
+      "sha256": "c2fdafab381460fa6c26fd372552c76ff67d64a40b525ee39d6a32d3f6b63dea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-derivative-3.json",
+      "bytes": 42434,
+      "sha256": "aeb43e289546a6e390ecbf0f94cbc1b9c99147e66ac027e3438ac0cfcaf2fb5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-discard-0.json",
+      "bytes": 42439,
+      "sha256": "c1e993132ba3958bbe3b3266a5cf8df4f62ac9ad8970080b6dee0ba2daed7649"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-discard-3.json",
+      "bytes": 42440,
+      "sha256": "fc2156990fbda06b6ebd1d5bccb551a0d88d814cab8b3c269649520fd58f9141"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-masked-0.json",
+      "bytes": 42430,
+      "sha256": "08f287a5866d343ee6a80cdfe93f3908d0cf8cd4b25239a3dcad2a8114317e0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-masked-3.json",
+      "bytes": 42431,
+      "sha256": "09b6c72236aeaa9dc2a5fe8823b1474d0bf2af2729b15b1d8c4c778d15267427"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-sample-0.json",
+      "bytes": 42384,
+      "sha256": "f0e9e19c271f1b7f1a950ec26f5dc534a1c70b82317be2e1b3ca716dded81471"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-sample-3.json",
+      "bytes": 42436,
+      "sha256": "37fb5dd4bd8197da9bb7163943180f7fcb488c5992e7b0364532c8406dcbbac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-varying-0.json",
+      "bytes": 42430,
+      "sha256": "0287f3f776dd1bda91841344dd361ad26afabd03cbedce140fcebdae1d6e7ca8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistory-4318-varying-3.json",
+      "bytes": 42431,
+      "sha256": "7af488ffffcfa8cbc0d0bc59443c4440a7f42dbfbaaf6883487276f8d5bbab47"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistoryRecovery-0.json",
+      "bytes": 58725,
+      "sha256": "a810f4a4a80958b66d22273709f94676bd56a3bb6d33b5aa6a4c3ca41f282719"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistoryRecovery-32902.json",
+      "bytes": 58751,
+      "sha256": "4413ee3e310c691976881388764c18be0ba2140152633c38bf6cf878b7d43890"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry/shaderHistoryRecovery-4318.json",
+      "bytes": 58744,
+      "sha256": "1ad9cf5c43ccb3cb31d9d34627bdc47e17f63847622e1559a2dae4744b97de09"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-initial-geometry.txt",
+      "bytes": 4788,
+      "sha256": "2e6cf98e829e46fee5b4b62454edbf5910a59c0c883af62970e836c0ff557c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-platform.json",
+      "bytes": 539,
+      "sha256": "70459b0969a457fdff41ff3cd4afd9d7814b75fa74fb522037949f3dae7d609e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-0/private.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-0/report.json",
+      "bytes": 633579,
+      "sha256": "1e86c593f9ffbb8001a7e3160ad68222ac7979bc9a568f1ebedf0478599eaa41"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-0.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-32902/private.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-32902/report.json",
+      "bytes": 633771,
+      "sha256": "1a615389772f9d8c6f13a1c56d98fbe065bf6c554e9f0769d8828e1d594bbeb2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-32902.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-4318/private.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-4318/report.json",
+      "bytes": 633783,
+      "sha256": "69dda792f9fbd35df3de1e07fed73f2251a90fd22f5ea0c7ce7c9a1b7f3d150f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-bf1-4318.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-0/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-0/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-0/report.json",
+      "bytes": 66575,
+      "sha256": "82cc1bf17dd0bc99ea7ae5649c60021453fc6e5589795a8bb0417800c669d8ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-0.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-32902/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-32902/report.json",
+      "bytes": 66602,
+      "sha256": "502a8c39f1b1b54b1c998f4117767012c1a938c2dd49af58168bd58609758438"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-32902.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-4318/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-4318/report.json",
+      "bytes": 66595,
+      "sha256": "1005e5fd1ea7a85d7943dea92898b9cbcc9070ead17e03c91523e715bb2f52a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-gf2-4318.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-0/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-0/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-0/report.json",
+      "bytes": 82437,
+      "sha256": "1500e8e1e8c0a1c190ccad17465eb8e1c1e75466b50e87797deecae02c072487"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-0.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-32902/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-32902/report.json",
+      "bytes": 82469,
+      "sha256": "8087c4eef33b9193c15dbee6a89ec20929f96fcfba18d0b72c404bf9d82d831e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-32902.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-4318/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-4318/report.json",
+      "bytes": 82460,
+      "sha256": "22db3e6ce3774efb0ebaadebde426f114b8fa819104c9206dc1049614283642b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-hd-4318.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-real-runs.json",
+      "bytes": 1004,
+      "sha256": "12fd5c785f13259ebc41814a95825573400ba6db993971a3e9163aa8264801eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-regression-dxbc-pixel-inputs.txt",
+      "bytes": 7423,
+      "sha256": "96f6b5d4df2b48d8f2235fafe42a3a4e7ca6cdf3b017e7fd52b936167833a1f6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-regression-dxbc-pixel-trace.txt",
+      "bytes": 1527,
+      "sha256": "508a8f82e826b29e410175e3afeae0c27ef01375c5af2314524713b843bfad02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-regression-native-pixel-checkpoint-inputs.txt",
+      "bytes": 24313,
+      "sha256": "c75495deb06037d66c774f303ddde65000951cd2503e0900c5118b6dc1600e1a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-regression-native-pixel-geometry-replay.txt",
+      "bytes": 14321,
+      "sha256": "631552cf531f6c17980493c7f592df5a6e057a95250d4f785f7f620d3170781f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-regression-summary.json",
+      "bytes": 808,
+      "sha256": "9d9f6d297d93f63874a8eb5a922f1a5ba1aaef3d1e11c01a1b77d2358d26bdc0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-shader-validation.json",
+      "bytes": 185,
+      "sha256": "24087e809f3acc48970c7dea4d343ef28f1ee5c51dbf8937ca4977e6d8bd372a"
+    }
+  ]
+}

@@ -18,7 +18,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
-| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private geometry checkpoints are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
+| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active PS typed loads/stores and remaining precision semantics, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
@@ -894,3 +894,16 @@ serialized original draws for exact checkpoint comparisons. See
 `research/DX11_NATIVE_PIXEL_CHECKPOINT_INPUTS.md` for 294 new data cases, 2,337
 combined passing checks and the remaining raster-input/output integration gates.
 Full fragment history, public PS debugging and P7/P8 acceptance remain open.
+
+
+## Private history shader-output continuation
+
+Actual raster quad inputs now join current private primitive checkpoints and the
+independent DXBC executor. Constant and coverage-only shaders are supported;
+forced raster samples preserve separate acquisition provenance when equivalent
+pixel-frequency invocations are merged. Shader results remain explicitly private
+and do not qualify original fragments. See
+`research/DX11_NATIVE_PIXEL_HISTORY_SHADER.md` for 72 new data cases, 663 passing
+regression checks, nine real-capture probes, 474 corruption controls and measured
+cost. Complete fragment history, public PS debugging and P7/P8 acceptance remain
+open, and the GPA debugger host +0x3c0 path still needs independent closure.
