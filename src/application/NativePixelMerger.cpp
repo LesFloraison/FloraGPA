@@ -49,11 +49,12 @@ std::vector<uint32_t> words(const D3D11_DEPTH_STENCIL_DESC &value) {
 bool dual(D3D11_BLEND factor) {
     return factor >= D3D11_BLEND_SRC1_COLOR && factor <= D3D11_BLEND_INV_SRC1_ALPHA;
 }
-Resource cellResource(uint32_t format, DXGI_SAMPLE_DESC samples, bool depth) {
+Resource cellResource(uint32_t format, DXGI_SAMPLE_DESC samples, bool depth, uint32_t width,
+                      uint32_t height) {
     Resource result;
     result.type = 0x85;
-    result.desc = {1,
-                   1,
+    result.desc = {width,
+                   height,
                    1,
                    1,
                    format,
@@ -67,22 +68,24 @@ Resource cellResource(uint32_t format, DXGI_SAMPLE_DESC samples, bool depth) {
 }
 Com<ID3D11Resource> createCell(ID3D11Device *device, const Resource &resource, std::optional<Bytes> bytes) {
     const auto info = textureInfo(resource);
-    if (resource.type != 0x85 || info.width != 1 || info.height != 1 || info.layers != 1 || info.mips != 1)
-        throw std::invalid_argument("Private merger transfer requires one storage cell");
+    if (resource.type != 0x85 || !info.width || !info.height || info.layers != 1 || info.mips != 1)
+        throw std::invalid_argument("Private merger transfer requires a 2D target");
     D3D11_TEXTURE2D_DESC desc{};
     if (resource.desc.size() * 4 != sizeof(desc))
         throw std::invalid_argument("Private merger transfer descriptor size");
     std::memcpy(&desc, resource.desc.data(), sizeof(desc));
-    const auto size = pitches(1, 1, info.format).first;
+    const auto [pitch, rows] = pitches(info.width, info.height, info.format);
+    const uint64_t size = uint64_t(pitch) * rows;
     if (bytes && (info.samples != 1 || bytes->size() != size))
         throw std::invalid_argument("Private merger transfer initial storage size");
-    const D3D11_SUBRESOURCE_DATA data{bytes ? bytes->data() : nullptr, size, size};
+    const D3D11_SUBRESOURCE_DATA data{bytes ? bytes->data() : nullptr, pitch, UINT(size)};
     Com<ID3D11Texture2D> result;
     check(device->CreateTexture2D(&desc, bytes ? &data : nullptr, &result), "Create merger transfer cell");
     return result;
 }
 std::vector<uint8_t> readCell(ID3D11Device *device, ID3D11DeviceContext *context, ID3D11Resource *source,
-                              const Resource &resource, const CancelCheck &cancelled, uint32_t timeout) {
+                              const Resource &resource, uint32_t x, uint32_t y, const CancelCheck &cancelled,
+                              uint32_t timeout) {
     checkCancellation(cancelled);
     auto stagingResource = resource;
     const auto info = textureInfo(resource);
@@ -96,7 +99,8 @@ std::vector<uint8_t> readCell(ID3D11Device *device, ID3D11DeviceContext *context
     dxbc_exec::GpuCompletion completion(device, context, cancelled, timeout);
     completion.submit();
     const auto mapped = completion.map(staging.Get());
-    const auto *data = static_cast<const uint8_t *>(mapped.pData);
+    const auto *data = static_cast<const uint8_t *>(mapped.pData) + uint64_t(y) * mapped.RowPitch +
+                       uint64_t(x) * pitches(1, 1, info.format).first;
     std::vector<uint8_t> bytes(data, data + pitches(1, 1, info.format).first);
     context->Unmap(staging.Get(), 0);
     // X24 is not storage data. Keep its explicit invalid-byte marker in results.
@@ -105,15 +109,16 @@ std::vector<uint8_t> readCell(ID3D11Device *device, ID3D11DeviceContext *context
     return bytes;
 }
 std::vector<uint8_t> readSamples(ID3D11Device *device, ID3D11DeviceContext *context, ID3D11Resource *source,
-                                 const Resource &resource, const CancelCheck &cancelled, uint32_t timeout) {
+                                 const Resource &resource, uint32_t x, uint32_t y,
+                                 const CancelCheck &cancelled, uint32_t timeout) {
     std::vector<uint8_t> result;
     for (uint32_t sample = 0; sample < textureInfo(resource).samples; ++sample) {
         checkCancellation(cancelled);
-        const auto read =
-            readNativeMsaaStorage(device, context, source, resource, sample, resource.desc[4],
-                                  [&](ID3D11Resource *target, const Resource &layout) {
-                                      return readCell(device, context, target, layout, cancelled, timeout);
-                                  });
+        const auto read = readNativeMsaaStorage(device, context, source, resource, sample, resource.desc[4],
+                                                [&](ID3D11Resource *target, const Resource &layout) {
+                                                    return readCell(device, context, target, layout, x, y,
+                                                                    cancelled, timeout);
+                                                });
         if (read.mode != "selected_sample")
             throw std::runtime_error("Private merger sample transfer attempted a resolve");
         result.insert(result.end(), read.bytes.begin(), read.bytes.end());
@@ -132,11 +137,23 @@ NativePixelMergerState::NativePixelMergerState() : blend(defaultBlend()) {
 Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixelMergerState &s,
                             const Json &outputs, uint32_t laneIndex, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    if (!reference || s.colorSlot >= 8 || laneIndex >= 4 || !s.timeoutMs || s.timeoutMs > 60000 ||
-        !s.samples.Count || s.samples.Count > 32 || (s.samples.Count & (s.samples.Count - 1)) ||
-        (s.samples.Count == 1 && s.samples.Quality != 0) ||
+    if (!reference || s.colorSlot >= 8 || laneIndex >= 4 || !s.timeoutMs || s.timeoutMs > 60000 || !s.width ||
+        !s.height || s.width > 16384 || s.height > 16384 || s.x >= s.width || s.y >= s.height ||
+        !s.maxBytes || !s.samples.Count || s.samples.Count > 32 ||
+        (s.samples.Count & (s.samples.Count - 1)) || (s.samples.Count == 1 && s.samples.Quality != 0) ||
         (s.depthViewFlags & ~(D3D11_DSV_READ_ONLY_DEPTH | D3D11_DSV_READ_ONLY_STENCIL)))
         throw std::invalid_argument("Invalid private pixel merger request");
+    uint64_t payload = 0;
+    for (const auto format : {s.colorFormat, s.depthFormat})
+        if (format) {
+            const auto texel = pitches(1, 1, format).first;
+            // Account for both bound targets, a same-size transfer target,
+            // source/readback storage and CPU initialization payloads.
+            const uint64_t bytes = uint64_t(s.width) * s.height * texel * (2 * s.samples.Count + 4);
+            if (bytes > s.maxBytes - payload)
+                throw std::runtime_error("Private pixel merger target payload budget exceeded");
+            payload += bytes;
+        }
     if (outputs.at("schema") != 1 || outputs.at("kind") != "native_pixel_shader_outputs" ||
         outputs.at("backend") != "native-pixel-outputs/1" ||
         outputs.at("scope") != "one_private_pixel_quad_shader_outputs" || outputs.at("lanes").size() != 4)
@@ -252,7 +269,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
         if (!(support & (i ? D3D11_FORMAT_SUPPORT_DEPTH_STENCIL : D3D11_FORMAT_SUPPORT_RENDER_TARGET)) ||
             bytes.empty() || bytes.size() != uint64_t(pitches(1, 1, format).first) * s.samples.Count)
             throw std::invalid_argument("Pixel merger storage format or length mismatch");
-        layouts[i] = cellResource(format, s.samples, i != 0);
+        layouts[i] = cellResource(format, s.samples, i != 0, s.width, s.height);
         if (s.samples.Count > 1) {
             const auto encoding = msaaEditEncoding(layouts[i], format);
             auto storage = layouts[i];
@@ -265,19 +282,21 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
                 TexturePatch patch;
                 patch.sample = sample;
                 patch.typedFormat = format;
-                patch.bytes.assign(bytes.begin() + size * sample, bytes.begin() + size * (sample + 1));
+                patch.bytes.resize(uint64_t(s.width) * s.height * size);
+                std::copy_n(bytes.begin() + size * sample, size,
+                            patch.bytes.begin() + (uint64_t(s.y) * s.width + s.x) * size);
                 writeNativeMsaaSample(device.Get(), context.Get(), textures[i].Get(), layouts[i], patch,
                                       [&](const Resource &r, std::optional<Bytes> data) {
                                           return createCell(device.Get(), r, data);
                                       });
             }
-            if (readSamples(device.Get(), context.Get(), textures[i].Get(), layouts[i], cancelled,
+            if (readSamples(device.Get(), context.Get(), textures[i].Get(), layouts[i], s.x, s.y, cancelled,
                             s.timeoutMs) != bytes)
                 throw std::runtime_error("Private merger sample initialization did not preserve storage");
             continue;
         }
-        D3D11_TEXTURE2D_DESC desc{1,
-                                  1,
+        D3D11_TEXTURE2D_DESC desc{s.width,
+                                  s.height,
                                   1,
                                   1,
                                   DXGI_FORMAT(format),
@@ -286,7 +305,10 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
                                   UINT(i ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET),
                                   0,
                                   0};
-        const D3D11_SUBRESOURCE_DATA data{bytes.data(), UINT(bytes.size()), UINT(bytes.size())};
+        const auto pitch = uint64_t(s.width) * bytes.size();
+        std::vector<uint8_t> initial(pitch * s.height);
+        std::copy(bytes.begin(), bytes.end(), initial.begin() + uint64_t(s.y) * pitch + s.x * bytes.size());
+        const D3D11_SUBRESOURCE_DATA data{initial.data(), UINT(pitch), UINT(initial.size())};
         check(device->CreateTexture2D(&desc, &data, &textures[i]), "Create private merger storage");
         desc.Usage = D3D11_USAGE_STAGING;
         desc.BindFlags = 0;
@@ -338,7 +360,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     context->OMSetBlendState(blendState.Get(), s.blendFactor.data(), s.sampleMask & s.coverageMask);
     context->OMSetDepthStencilState(depthState.Get(), s.stencilRef);
     context->RSSetState(rasterState.Get());
-    const D3D11_VIEWPORT viewport{0, 0, 1, 1, 0, 1};
+    const D3D11_VIEWPORT viewport{float(s.x), float(s.y), 1, 1, 0, 1};
     context->RSSetViewports(1, &viewport);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->VSSetShader(vertex.Get(), nullptr, 0);
@@ -364,14 +386,17 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     for (unsigned i = 0; i < 2; ++i)
         if (textures[i]) {
             if (s.samples.Count > 1) {
-                after[i] = readSamples(device.Get(), context.Get(), textures[i].Get(), layouts[i], cancelled,
-                                       s.timeoutMs);
+                after[i] = readSamples(device.Get(), context.Get(), textures[i].Get(), layouts[i], s.x, s.y,
+                                       cancelled, s.timeoutMs);
                 continue;
             }
             const auto mapped = completion.map(staging[i].Get());
-            const auto *bytes = static_cast<const uint8_t *>(mapped.pData);
+            const auto *bytes = static_cast<const uint8_t *>(mapped.pData) + uint64_t(s.y) * mapped.RowPitch +
+                                uint64_t(s.x) * (i ? s.depth.size() : s.color.size());
             after[i].assign(bytes, bytes + (i ? s.depth.size() : s.color.size()));
             context->Unmap(staging[i].Get(), 0);
+            if (i && s.depthFormat == 20)
+                std::fill(after[i].begin() + 5, after[i].end(), 0);
         }
     if (debug) {
         Com<ID3D11InfoQueue> queue;
@@ -389,7 +414,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     const auto source = outputs.dump();
     return {{"schema", 1},
             {"kind", "native_pixel_merger"},
-            {"backend", "native-pixel-merger/2"},
+            {"backend", "native-pixel-merger/3"},
             {"scope", s.samples.Count > 1 ? "private_multisample_output_merger"
                                           : "private_single_sample_output_merger"},
             {"sample_count", s.samples.Count},
@@ -398,11 +423,13 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
             {"color_invalid_byte_offsets", s.samples.Count > 1 && (s.colorFormat == 88 || s.colorFormat == 93)
                                                ? Json::array({3})
                                                : Json::array()},
-            {"depth_invalid_byte_offsets",
-             s.samples.Count > 1 && s.depthFormat == 20 ? Json::array({5, 6, 7}) : Json::array()},
+            {"depth_invalid_byte_offsets", s.depthFormat == 20 ? Json::array({5, 6, 7}) : Json::array()},
             {"coverage_mask", s.coverageMask},
             {"effective_sample_mask", s.sampleMask & s.coverageMask},
-            {"private_pixel_location", Json::array({0, 0})},
+            {"private_pixel_location", Json::array({s.x, s.y})},
+            {"private_target_extent", Json::array({s.width, s.height})},
+            {"logical_payload_bound", payload},
+            {"payload_limit", s.maxBytes},
             {"original_fragment_eligibility", nullptr},
             {"original_early_depth_reconstructed", false},
             {"lane", laneIndex},

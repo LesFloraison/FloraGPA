@@ -16,10 +16,26 @@ def compare(op, a, b):
     return (False, False, a < b, a == b, a <= b, a > b, a != b, a >= b, True)[op]
 
 
+def validate_location(r, position=(0, 0), extent=(1, 1)):
+    require(r['backend'] in ('native-pixel-merger/2', 'native-pixel-merger/3'), 'Wrong merger backend')
+    require(r['private_pixel_location'] == list(position), 'Wrong private pixel location')
+    if r['backend'] == 'native-pixel-merger/3':
+        require(r['private_target_extent'] == list(extent), 'Wrong private target extent')
+        texels = {0: 0, 2: 16, 3: 16, 10: 8, 11: 8, 20: 8, 24: 4, 28: 4, 29: 4,
+                  40: 4, 41: 4, 45: 4, 49: 2, 54: 2, 55: 2, 61: 1, 87: 4, 91: 4}
+        expected = (extent[0] * extent[1] * (texels[r['color_format']] + texels[r['depth_format']]) *
+                    (2 * r['sample_count'] + 4))
+        require(r['logical_payload_bound'] == expected and 0 < expected <= r['payload_limit'],
+                'Wrong private target payload bound')
+    else:
+        require(tuple(position) == (0, 0) and tuple(extent) == (1, 1), 'Legacy backend cannot preserve location')
+
+
 def validate(document, vendor, family, mode, value, front=True):
     r, q = document['result'], document['quad_outputs']
-    require((r['schema'], r['kind'], r['backend'], r['scope']) ==
-            (1, 'native_pixel_merger', 'native-pixel-merger/2', 'private_single_sample_output_merger'),
+    validate_location(r)
+    require((r['schema'], r['kind'], r['scope']) ==
+            (1, 'native_pixel_merger', 'private_single_sample_output_merger'),
             'Wrong merger scope or format')
     require(r['sample_count'] == 1 and r['sample_quality'] == 0 and
             r['storage_layout'] == 'sample_major_native_texels', 'Wrong single-sample storage layout')
@@ -117,8 +133,9 @@ def msaa_cases():
 
 def validate_msaa(document, vendor, samples, mode, selected):
     r, q = document['result'], document['quad_outputs']
-    require((r['schema'], r['kind'], r['backend'], r['scope']) ==
-            (1, 'native_pixel_merger', 'native-pixel-merger/2', 'private_multisample_output_merger'),
+    validate_location(r)
+    require((r['schema'], r['kind'], r['scope']) ==
+            (1, 'native_pixel_merger', 'private_multisample_output_merger'),
             'Wrong multisample result identity')
     require(r['sample_count'] == samples and r['sample_quality'] == 0 and
             r['storage_layout'] == 'sample_major_native_texels' and r['private_pixel_location'] == [0, 0],
@@ -197,14 +214,124 @@ def validate_msaa(document, vendor, samples, mode, selected):
                 require(after == encoded, 'Independent float multisample merger differs')
 
 
+def coordinate_cases():
+    for vendor in (0, 4318, 32902):
+        for samples in (1, 2, 4):
+            for position in range(4):
+                for alpha in (1, 3, 5, 7):
+                    yield f'{vendor}-{samples}-{position}-{alpha}', (vendor, samples, position, alpha)
+
+
+def validate_coordinates(document, vendor, samples, position, alpha):
+    r, q = document['result'], document['quad_outputs']
+    validate_location(r, ((0, 0), (1, 1), (4, 2), (6, 4))[position], (7, 5))
+    require((r['schema'], r['kind'], r['backend'], r['scope']) ==
+            (1, 'native_pixel_merger', 'native-pixel-merger/3',
+             'private_single_sample_output_merger' if samples == 1 else 'private_multisample_output_merger'),
+            'Wrong coordinate merger identity')
+    require(r['sample_count'] == samples and r['sample_quality'] == 0 and
+            r['storage_layout'] == 'sample_major_native_texels', 'Wrong coordinate sample layout')
+    require(r['original_fragment_eligibility'] is None and r['original_early_depth_reconstructed'] is False,
+            'Invented original fragment execution')
+    require(r['reference_storage_unchanged'] and r['debug_validation'] == 'no_errors', 'Failed state isolation')
+    require(r['adapter'] == q['adapter'] and r['adapter']['vendor'] == (vendor or 5140) and
+            r['adapter']['luid'] != 0, 'Wrong coordinate adapter')
+    source = json.dumps(q, sort_keys=True, ensure_ascii=False, separators=(',', ':')).encode()
+    require(r['source_sha256'] == hashlib.sha256(source).hexdigest(), 'Wrong source digest')
+    require(q['event'] == 100 and r['lane'] == 0, 'Wrong coordinate source event/lane')
+    require(r['color_format'] == 2 and r['depth_format'] == 0 and r['color_slot'] == 0 and
+            r['blend_descriptor'][0] == 1, 'Wrong coordinate storage/blend state')
+    require(r['sample_mask'] == r['coverage_mask'] == r['effective_sample_mask'] == 0xffffffff,
+            'Wrong coordinate sample mask')
+    require(r['count_semantics'] == 'd3d11_occlusion_query' and 0 <= r['passing_samples'] <= samples,
+            'Wrong coordinate query meaning or count')
+    before = list(struct.pack('<4f', .125, .5, .25, .25))
+    after = list(struct.pack('<4f', .5, .25, .75, alpha / 8))
+    require(r['color_before'] == before * samples and r['depth_before'] == r['depth_after'] == [],
+            'Wrong coordinate initial storage')
+    require(r['color_after'] == r['reference_color'] and r['depth_after'] == r['reference_depth'] and
+            len(r['color_after']) == samples * 16, 'Original coordinate GPU comparison differs')
+    written = 0
+    for sample in range(samples):
+        value = r['color_after'][sample * 16:(sample + 1) * 16]
+        require(value in (before, after), 'Invented coordinate sample value')
+        written += value == after
+    require(r['passing_samples'] == written, 'Query differs from constant shader sample writes')
+
+
+def depth_coordinate_cases():
+    for vendor in (0, 4318, 32902):
+        for samples in (1, 2, 4):
+            for fmt in (20, 40, 45, 55):
+                for position in range(2):
+                    yield f'{vendor}-{samples}-{fmt}-{position}', (vendor, samples, fmt, position)
+
+
+def validate_depth_coordinates(document, vendor, samples, fmt, position):
+    r, q = document['result'], document['quad_outputs']
+    validate_location(r, (6, 4) if position else (1, 1), (7, 5))
+    require((r['schema'], r['kind'], r['backend'], r['scope']) ==
+            (1, 'native_pixel_merger', 'native-pixel-merger/3',
+             'private_single_sample_output_merger' if samples == 1 else 'private_multisample_output_merger'),
+            'Wrong depth coordinate identity')
+    require(r['sample_count'] == samples and r['sample_quality'] == 0 and
+            r['storage_layout'] == 'sample_major_native_texels', 'Wrong depth coordinate sample layout')
+    require(r['original_fragment_eligibility'] is None and r['original_early_depth_reconstructed'] is False,
+            'Invented original fragment execution')
+    require(r['reference_storage_unchanged'] and r['debug_validation'] == 'no_errors', 'Failed state isolation')
+    require(r['adapter'] == q['adapter'] and r['adapter']['vendor'] == (vendor or 5140) and
+            r['adapter']['luid'] != 0, 'Wrong depth coordinate adapter')
+    source = json.dumps(q, sort_keys=True, ensure_ascii=False, separators=(',', ':')).encode()
+    require(r['source_sha256'] == hashlib.sha256(source).hexdigest(), 'Wrong source digest')
+    require(q['event'] == 1000 and r['lane'] == 0, 'Wrong depth coordinate event/lane')
+    require(r['color_format'] == 28 and r['depth_format'] == fmt and r['color_slot'] == 0 and
+            r['raster_depth_bits'] == 0 and r['stencil_ref'] == 0xa5, 'Wrong depth coordinate inputs')
+    require(r['color_invalid_byte_offsets'] == [] and
+            r['depth_invalid_byte_offsets'] == ([5, 6, 7] if fmt == 20 else []),
+            'Unknown depth padding treated as data')
+    require(r['sample_mask'] == r['effective_sample_mask'] == 0x55555555 and r['coverage_mask'] == 0xffffffff,
+            'Wrong depth coordinate sample mask')
+    require(r['count_semantics'] == 'd3d11_occlusion_query' and
+            r['passing_samples'] == (0x55555555 & ((1 << samples) - 1)).bit_count(),
+            'Wrong depth coordinate query')
+    require(r['color_after'] == r['reference_color'] and r['depth_after'] == r['reference_depth'],
+            'Original depth coordinate GPU comparison differs')
+    size = {20: 8, 40: 4, 45: 4, 55: 2}[fmt]
+    require(len(r['depth_before']) == len(r['depth_after']) == size * samples and
+            r['color_before'] == [0, 0, 0, 255] * samples and len(r['color_after']) == samples * 4,
+            'Wrong depth coordinate storage length/initial color')
+    for sample in range(samples):
+        before = r['depth_before'][sample * size:(sample + 1) * size]
+        after = r['depth_after'][sample * size:(sample + 1) * size]
+        depth = (int.from_bytes(bytes(before[:3]), 'little') / 0xffffff if fmt == 45 else
+                 int.from_bytes(bytes(before), 'little') / 0xffff if fmt == 55 else
+                 struct.unpack('<f', bytes(before[:4]))[0])
+        require(abs(depth - .5) <= (1 / 0xffff if fmt == 55 else 1 / 0xffffff), 'Wrong initial depth')
+        if fmt in (20, 45):
+            require(before[4 if fmt == 20 else 3] == 0x53, 'Wrong initial stencil')
+        expected = before.copy()
+        enabled = bool(0x55555555 & (1 << sample))
+        if enabled:
+            expected[:{20: 4, 40: 4, 45: 3, 55: 2}[fmt]] = [0] * {20: 4, 40: 4, 45: 3, 55: 2}[fmt]
+            if fmt in (20, 45):
+                expected[4 if fmt == 20 else 3] = 0xa5
+        require(after == expected and r['color_after'][sample * 4:(sample + 1) * 4] ==
+                ([255, 0, 0, 255] if enabled else [0, 0, 0, 255]), 'Independent depth coordinate result differs')
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('directory', type=Path)
     p.add_argument('--out', required=True, type=Path)
-    p.add_argument('--msaa', action='store_true')
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument('--msaa', action='store_true')
+    mode.add_argument('--coordinates', action='store_true')
+    mode.add_argument('--depth-coordinates', action='store_true')
     args = p.parse_args()
-    matrix = list(msaa_cases() if args.msaa else cases())
-    validator = validate_msaa if args.msaa else validate
+    matrix = list(depth_coordinate_cases() if args.depth_coordinates else coordinate_cases() if args.coordinates
+                  else msaa_cases() if args.msaa else cases())
+    validator = (validate_depth_coordinates if args.depth_coordinates else validate_coordinates if args.coordinates
+                 else validate_msaa if args.msaa else validate)
     require({path.stem for path in args.directory.glob('*.json')} == {name for name, _ in matrix},
             'Incomplete or extra merger evidence')
     report = dict(schema=1, scope='owned_private_pixel_merger_validation', completed=False,
@@ -222,6 +349,11 @@ def main():
         if args.msaa:
             corruptions += [('sample_count', 1), ('sample_quality', 1), ('private_pixel_location', [1, 1]),
                             ('effective_sample_mask', -1), ('depth_invalid_byte_offsets', [0])]
+        if document['result']['backend'] == 'native-pixel-merger/3':
+            corruptions += [('private_target_extent', [0, 0]), ('logical_payload_bound', 0), ('payload_limit', 1)]
+        if args.coordinates or args.depth_coordinates:
+            corruptions += [('private_pixel_location', [-1, -1]), ('sample_count', 0), ('sample_quality', 1),
+                            ('effective_sample_mask', -1)]
         for key, value in corruptions:
             bad = copy.deepcopy(document)
             bad['result'][key] = value

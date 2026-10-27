@@ -16,8 +16,9 @@ void save(const Json &result, const Json &outputs) {
     auto root = qEnvironmentVariable("FLORA_PIXEL_MERGER_EVIDENCE");
     if (root.isEmpty())
         return;
-    if (QString::fromLatin1(QTest::currentTestFunction()) == "msaa")
-        root += "/msaa";
+    const auto function = QString::fromLatin1(QTest::currentTestFunction());
+    if (function == "msaa" || function == "coordinates" || function == "depthCoordinates")
+        root += "/" + function;
     QDir dir(root);
     if (!dir.exists() && !QDir().mkpath(root))
         throw std::runtime_error("Cannot create merger evidence directory");
@@ -30,7 +31,7 @@ void save(const Json &result, const Json &outputs) {
 std::vector<uint8_t> storage(Replay &replay, Id resource, uint32_t format, uint32_t samples,
                              const char *phase = "before") {
     if (samples == 1)
-        return replay.observeTextureStorage(resource, 1024).bytes;
+        return replay.observeTextureStorage(resource, 1024 * 1024).bytes;
     std::vector<uint8_t> result;
     for (uint32_t sample = 0; sample < samples; ++sample) {
         std::vector<uint8_t> bytes;
@@ -41,8 +42,24 @@ std::vector<uint8_t> storage(Replay &replay, Id resource, uint32_t format, uint3
                                      " resource " + std::to_string(resource) + " read: " + e.what());
         }
         if (format == 20)
-            std::fill(bytes.begin() + 5, bytes.end(), 0);
+            for (size_t offset = 0; offset < bytes.size(); offset += 8)
+                std::fill(bytes.begin() + offset + 5, bytes.begin() + offset + 8, 0);
         result.insert(result.end(), bytes.begin(), bytes.end());
+    }
+    return result;
+}
+std::vector<uint8_t> selected(const std::vector<uint8_t> &storage, uint32_t format,
+                              const NativePixelMergerState &state) {
+    if (!format)
+        return {};
+    const auto texel = pitches(1, 1, format).first;
+    const size_t plane = size_t(state.width) * state.height * texel;
+    if (storage.size() != plane * state.samples.Count)
+        throw std::runtime_error("Reference texture storage has unexpected dimensions");
+    std::vector<uint8_t> result;
+    for (uint32_t sample = 0; sample < state.samples.Count; ++sample) {
+        const auto offset = sample * plane + (size_t(state.y) * state.width + state.x) * texel;
+        result.insert(result.end(), storage.begin() + offset, storage.begin() + offset + texel);
     }
     return result;
 }
@@ -62,20 +79,25 @@ Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id dept
     Replay before(frame, options);
     const auto snapshot = snapshotResourceInputs(before, 4);
     const auto outputs = evaluateNativePixelOutputs(snapshot, {});
-    state.color = storage(before, color, state.colorFormat, state.samples.Count);
-    if (depth)
-        state.depth = storage(before, depth, state.depthFormat, state.samples.Count);
+    const auto originalColor = storage(before, color, state.colorFormat, state.samples.Count);
+    const auto originalDepth =
+        depth ? storage(before, depth, state.depthFormat, state.samples.Count) : std::vector<uint8_t>();
+    state.color = selected(originalColor, state.colorFormat, state);
+    state.depth = selected(originalDepth, state.depthFormat, state);
     auto result = mergeNativePixelOutput(before.nativeDevice(), options.warp, state, outputs, 0);
-    if (storage(before, color, state.colorFormat, state.samples.Count, "after diagnostic") != state.color ||
+    if (storage(before, color, state.colorFormat, state.samples.Count, "after diagnostic") != originalColor ||
         (depth &&
-         storage(before, depth, state.depthFormat, state.samples.Count, "after diagnostic") != state.depth))
+         storage(before, depth, state.depthFormat, state.samples.Count, "after diagnostic") != originalDepth))
         throw std::runtime_error("Private merger changed reference storage");
     options.before = false;
     Replay after(frame, options);
     after.run();
-    const auto expectedColor = storage(after, color, state.colorFormat, state.samples.Count, "after");
-    const auto expectedDepth = depth ? storage(after, depth, state.depthFormat, state.samples.Count, "after")
-                                     : std::vector<uint8_t>();
+    const auto expectedColor = selected(
+        storage(after, color, state.colorFormat, state.samples.Count, "after"), state.colorFormat, state);
+    const auto expectedDepth =
+        depth ? selected(storage(after, depth, state.depthFormat, state.samples.Count, "after"),
+                         state.depthFormat, state)
+              : std::vector<uint8_t>();
     result["reference_color"] = expectedColor;
     result["reference_depth"] = expectedDepth;
     result["reference_storage_unchanged"] = true;
@@ -419,6 +441,125 @@ class NativePixelMergerTests final : public QObject {
             QFAIL(e.what());
         }
     }
+    void coordinates_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<uint32_t>("position");
+        QTest::addColumn<uint32_t>("alpha");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 2u, 4u})
+                for (uint32_t position = 0; position < 4; ++position)
+                    for (uint32_t alpha : {1u, 3u, 5u, 7u})
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(samples).arg(position).arg(alpha)))
+                            << vendor << samples << position << alpha;
+    }
+    void coordinates() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(uint32_t, position);
+            QFETCH(uint32_t, alpha);
+            auto capture = testing::blendCapture(1, false, false, samples);
+            NativePixelMergerState state;
+            state.width = 7;
+            state.height = 5;
+            state.x = std::array{0u, 1u, 4u, 6u}[position];
+            state.y = std::array{0u, 1u, 2u, 4u}[position];
+            state.colorFormat = 2;
+            state.samples.Count = samples;
+            state.blend.AlphaToCoverageEnable = TRUE;
+            for (const auto &entry : capture.entries) {
+                if (entry.id == 1000) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, state.width);
+                    testing::put(capture.bytes, size_t(entry.offset) + 20, state.height);
+                }
+                if (entry.id == 50) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 12, float(state.width));
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, float(state.height));
+                }
+            }
+            if (samples == 1) {
+                std::erase_if(capture.entries, [](const auto &entry) { return entry.id == 1001; });
+                auto data = testing::word(state.width * state.height * 16);
+                for (uint32_t pixel = 0; pixel < state.width * state.height; ++pixel)
+                    for (float value : {.125f, .5f, .25f, .25f})
+                        testing::append(data, value);
+                capture.add(1001, 9, 1, data);
+            }
+            ReplayOptions options;
+            options.shaders[12] = compileHlsl("float4 main():SV_Target{return float4(.5,.25,.75," +
+                                                  std::to_string(float(alpha) / 8) + ");}",
+                                              "ps_5_0")
+                                      .bytecode;
+            const auto result = run(capture, vendor, 100, 1000, 0, state, options);
+            QCOMPARE(result.at("private_pixel_location"), Json({state.x, state.y}));
+            QCOMPARE(result.at("private_target_extent"), Json({7, 5}));
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void depthCoordinates_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<uint32_t>("position");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 2u, 4u})
+                for (uint32_t format : {20u, 40u, 45u, 55u})
+                    for (uint32_t position = 0; position < 2; ++position)
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(samples).arg(format).arg(position)))
+                            << vendor << samples << format << position;
+    }
+    void depthCoordinates() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(uint32_t, format);
+            QFETCH(uint32_t, position);
+            auto capture = testing::depthStencilCapture();
+            NativePixelMergerState state;
+            state.width = 7;
+            state.height = 5;
+            state.x = position ? 6 : 1;
+            state.y = position ? 4 : 1;
+            state.colorFormat = 28;
+            state.depthFormat = format;
+            state.samples.Count = samples;
+            state.sampleMask = 0x55555555;
+            state.rasterDepthBits = 0;
+            state.stencilRef = 0xa5;
+            state.depthStencil.StencilEnable = format == 20 || format == 45;
+            state.depthStencil.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+            for (const auto &entry : capture.entries) {
+                if (entry.id == 20 || entry.id == 720) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, state.width);
+                    testing::put(capture.bytes, size_t(entry.offset) + 20, state.height);
+                    testing::put(capture.bytes, size_t(entry.offset) + 36, samples);
+                }
+                if (entry.id == 22) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 12, float(state.width));
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, float(state.height));
+                }
+                if (entry.id == 720)
+                    testing::put(capture.bytes, size_t(entry.offset) + 32, format);
+                if (entry.id == 21)
+                    testing::put(capture.bytes, size_t(entry.offset) + 28, samples > 1 ? 6u : 4u);
+                if (entry.id == 722) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 24, format);
+                    testing::put(capture.bytes, size_t(entry.offset) + 28, samples > 1 ? 5u : 3u);
+                }
+                if (entry.id == 724)
+                    testing::put(capture.bytes, size_t(entry.offset) + 48, samples > 1 ? 1u : 0u);
+                if (entry.id == 810 && !state.depthStencil.StencilEnable)
+                    testing::put(capture.bytes, size_t(entry.offset) + 24, 1u);
+            }
+            run(capture, vendor, 1000, 20, 720, state);
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
     void boundaries() {
         auto capture = testing::blendCapture();
         QTemporaryDir dir;
@@ -463,6 +604,25 @@ class NativePixelMergerTests final : public QObject {
         invalid = s;
         invalid.timeoutMs = 60001;
         QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        for (uint32_t extent : {0u, 16385u}) {
+            invalid = s;
+            invalid.width = extent;
+            QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+            invalid = s;
+            invalid.height = extent;
+            QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        }
+        invalid = s;
+        invalid.x = 1;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        invalid = s;
+        invalid.y = 1;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        invalid = s;
+        invalid.maxBytes = 0;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        invalid.maxBytes = 95;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::runtime_error);
         for (UINT count : {0u, 3u, 64u}) {
             invalid = s;
             invalid.samples.Count = count;
