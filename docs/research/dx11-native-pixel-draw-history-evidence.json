@@ -1,0 +1,3722 @@
+{
+  "schema": 1,
+  "stage": "P5",
+  "scope": "private_primitive_storage",
+  "implementation_commit": "785d35ba901c91673d8eb34a3dd1ca86b0672945",
+  "research_report": "DX11_NATIVE_PIXEL_DRAW_HISTORY.md",
+  "status": "validated_increment",
+  "complete_pixel_history": false,
+  "public_ps_debugging": false,
+  "full_renderdoc_removal": false,
+  "owned_validation": {
+    "new_data_cases": 66,
+    "retained_geometry_data_cases": 78,
+    "qt_passed": 146,
+    "failed": 0,
+    "skipped": 0,
+    "milliseconds": 32012,
+    "corruption_controls": 501,
+    "accepted_directory": "artifacts/dx11-native/pixel-draw-history-release-evidence",
+    "accepted_log": "artifacts/dx11-native/pixel-draw-history-release-tests.txt"
+  },
+  "regression": {
+    "event_history_qt_passed": 91,
+    "failed": 0,
+    "skipped": 0,
+    "milliseconds": 9441,
+    "total_qt_passed": 237,
+    "event_history_log": "artifacts/dx11-native/pixel-draw-history-event-final-tests.txt"
+  },
+  "real_validation": [
+    {
+      "case": "pixel-draw-history-real-gf2-0",
+      "records": 1,
+      "changed_records": 0,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 250
+    },
+    {
+      "case": "pixel-draw-history-real-gf2-4318",
+      "records": 1,
+      "changed_records": 0,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 469
+    },
+    {
+      "case": "pixel-draw-history-real-gf2-32902",
+      "records": 1,
+      "changed_records": 0,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 563
+    },
+    {
+      "case": "pixel-draw-history-real-bf1-0",
+      "records": 10,
+      "changed_records": 2,
+      "readback_count": 23,
+      "readback_bytes": 92,
+      "elapsed_ms": 1769
+    },
+    {
+      "case": "pixel-draw-history-real-bf1-4318",
+      "records": 10,
+      "changed_records": 2,
+      "readback_count": 23,
+      "readback_bytes": 92,
+      "elapsed_ms": 1270
+    },
+    {
+      "case": "pixel-draw-history-real-bf1-32902",
+      "records": 10,
+      "changed_records": 2,
+      "readback_count": 23,
+      "readback_bytes": 92,
+      "elapsed_ms": 1529
+    },
+    {
+      "case": "pixel-draw-history-real-hd-0",
+      "records": 1,
+      "changed_records": 1,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 1688
+    },
+    {
+      "case": "pixel-draw-history-real-hd-4318",
+      "records": 1,
+      "changed_records": 1,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 1251
+    },
+    {
+      "case": "pixel-draw-history-real-hd-32902",
+      "records": 1,
+      "changed_records": 1,
+      "readback_count": 5,
+      "readback_bytes": 20,
+      "elapsed_ms": 1485
+    }
+  ],
+  "adapters": [
+    "WARP",
+    "NVIDIA",
+    "Intel"
+  ],
+  "product_build_targets": [
+    "FloraGPA",
+    "FloraGPA.Cli",
+    "FloraGPA.Worker"
+  ],
+  "observations": [
+    "An initial forced-sample fixture omitted explicit depth disablement and failed replay validation; the corrected fixture preserves the same assertions.",
+    "NVIDIA interpolated position produced byte 127 where an initial CPU oracle assumed 128; both original and private draws match exactly. Original prefix bytes are exported; no tolerance or golden was weakened.",
+    "Earlier failed and partial runs are retained below; only the accepted directory and log above establish the final owned results."
+  ],
+  "remaining_gates": [
+    "Original fragment qualification, failure reasons and shader-output joins remain unknown.",
+    "Pre-raster and shared-UAV side effects, complete formats and experiments require closure.",
+    "Public Pixel History and PS debugging have not switched to this diagnostic.",
+    "GPA debugger host +0x3c0 implementation remains unresolved.",
+    "Static probe imports do not establish dynamic product module or standalone package acceptance."
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 125466,
+      "sha256": "0e31b89b3a26483aed3f02a95d33068d9f7454b8af898e03262cb64372737a7e"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 16972,
+      "sha256": "ac1f9a6276d9f2c52a3af193a3e4e6c703ae3706ac7a756812e51d46dafb36a8"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.h",
+      "bytes": 706,
+      "sha256": "d3505e17751c8622a19913bebff64573e3a0826a8b8a99989c2da65ba0d6524f"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.cpp",
+      "bytes": 14234,
+      "sha256": "ebaa017084c8c3ba94ff2abdc7810fd1317226a1a69417fc42ef364b4ab39428"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.h",
+      "bytes": 2166,
+      "sha256": "69327c7d94e70c70f03b2fa6f6b9ca02373dfd27aa22dc107b8832a7474ae0bb"
+    },
+    {
+      "path": "tests/NativePixelGeometryReplayTests.cpp",
+      "bytes": 36779,
+      "sha256": "ee28beafd81bf174c0c6bbcd647a9468a21aa7436dd50c6175864ea2203170e4"
+    },
+    {
+      "path": "tools/probe_native_pixel_draw_history.cpp",
+      "bytes": 4518,
+      "sha256": "c992965db21bf7bbf9dc68e825bdbbb23693887479ad46220109b2d7f3c006bc"
+    },
+    {
+      "path": "tools/validate_native_pixel_draw_history.py",
+      "bytes": 11496,
+      "sha256": "0b20fcffd715a8d3b163d6ed50396b2871163374f0203fc0a577071d3847c343"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "bb56e8db32bcc962ab5c00b7009242735a3fa6470c36f5c849150193266f3bbf"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5565440,
+      "sha256": "66de20156d8aab3558fe299d77a01b91289c4b673802c3fe2d787ae611afe86a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5565440,
+      "sha256": "4058bc181d09a2157618268b39e3776d07002e6f332234e0948df0de1d4fb1c8"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelGeometryReplayTests.exe",
+      "bytes": 1624064,
+      "sha256": "51d1ac32c00e90717e2a36dcf177c1b4dad15fc2ee09cdad1e3d8fc7d65f966b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelDrawHistoryProbe.exe",
+      "bytes": 1476096,
+      "sha256": "6a39137be44fed13762d9687b46af4c249a2141aae00893eb992bf032f078f2f"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeHistoryTests.exe",
+      "bytes": 1874432,
+      "sha256": "54ed1f521428d6de5275cbe936ec5cc5f29ffaea859e0edbca235321f48437bc"
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-build.txt",
+      "bytes": 7858,
+      "sha256": "6d6745950a45c70b1415cb03fc4049424e7095b3722e5ecb31c888ceaa5bda21"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-ctest.txt",
+      "bytes": 430,
+      "sha256": "138c9434b1ca2adb6ed0d405fa30227c74066b925554ee89b92485d4a3d5a5fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "b3943699e7b6e4d86e384b68f6a5902e53e102c7882a9780ae0e447ada850a56"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "764c4be2d7e43fd033cf9ea3e630ed6c5ff00afc25273ac72b02ab286f035587"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "8211f0a3ac6bed12290e255ce06f6098942059ade99bdc00eabe72a33eee3260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-blend.json",
+      "bytes": 30874,
+      "sha256": "a291335fa57672da8df610d14e0edb7390f33b7aea62508deb2ea7caec404c34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-clip.json",
+      "bytes": 25073,
+      "sha256": "3949b5691a487a5f95798037bd89b378b1583a57244cdf9b421cfddc40a09b3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-cull.json",
+      "bytes": 25257,
+      "sha256": "dcc9164a2fbb1292be054e9413b6b71b8c784cd8b960d5286af9e5fb447d253e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-depth.json",
+      "bytes": 30676,
+      "sha256": "a3e016334cf7d3314dd6879a8871096cabaf7c16a303a921fcc319acfde2536b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-depth_resource.json",
+      "bytes": 28726,
+      "sha256": "8c452e2a7526a6678e7a32e89e7f5514b12d90d88f5da5ba0476f6725ebc8af6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-discard.json",
+      "bytes": 31223,
+      "sha256": "ddcc3d0e83ce8b3d80e95979b4b38a31a58eaced51eb21099c2f061c73a80042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-early_discard.json",
+      "bytes": 31223,
+      "sha256": "ee78e2dfb0736b4cfde4e911d21e59c67b747bd1046117c78df5fb0aab882bca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-mask.json",
+      "bytes": 30667,
+      "sha256": "b082dc542fdc2d0c3baa5bacb9a5a47d6846da26cff889eaa21ae84fede36de9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-ordinary.json",
+      "bytes": 30682,
+      "sha256": "48e9f7d45a3c4c0c0522ca991887a5c9eaa3b5f628d71d001eb81ee32f63a140"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-scissor.json",
+      "bytes": 25257,
+      "sha256": "0c0f0361e44d9b64c6048e981c1dc4195c7564cd09f67bb08f6aa1c0b8295471"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-stencil.json",
+      "bytes": 30676,
+      "sha256": "a3e016334cf7d3314dd6879a8871096cabaf7c16a303a921fcc319acfde2536b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-0-unchanged.json",
+      "bytes": 30690,
+      "sha256": "60dae4ef3d7e4628702d0897828381542312241abafe658d6b561b654ea294d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-blend.json",
+      "bytes": 30886,
+      "sha256": "11a5514ea4846fead93345d77bc346a5140328b2ac5867ac18598c64a688594d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-clip.json",
+      "bytes": 25085,
+      "sha256": "1f75ff37efcb81993dd68a740b65a3c6122875604a3e6612cb77a55e901bdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-cull.json",
+      "bytes": 25269,
+      "sha256": "fe909e33bd0c95f38c0b181ce4230c576cc2a9554563a28f3b9781f7f8654663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-depth.json",
+      "bytes": 30688,
+      "sha256": "978493f44a74be1de008e250a328ef343b8ebfe8d435bd6a367ee6846222dd97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-depth_resource.json",
+      "bytes": 28738,
+      "sha256": "c20dd283b75e388ef06180b065415efe7a87c412c3724412592f502a804358df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-discard.json",
+      "bytes": 31235,
+      "sha256": "b549a0a101d9d42d1bf3d134a939ebca66fc07821eebbce35afe74a5f9002fe9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-early_discard.json",
+      "bytes": 31235,
+      "sha256": "32155fb0b1052a6244a3b52aefbc7a2b5efa8fd03b3f8eea03e802fe136c1d40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-mask.json",
+      "bytes": 30679,
+      "sha256": "7ec60cd81499b8da473a8b7175d70c5a1cf9c1d1d82f35af5689eb81e46f98f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-ordinary.json",
+      "bytes": 30694,
+      "sha256": "edc4fc7bec01d04d89a2af090570dc8d4f80b5b136f49aeee569ab68da5e2a3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-scissor.json",
+      "bytes": 25269,
+      "sha256": "7df83fd5e06187aeea9296d2a794f6cc73878f246147f4bcf049b7e2c5337e08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-stencil.json",
+      "bytes": 30688,
+      "sha256": "978493f44a74be1de008e250a328ef343b8ebfe8d435bd6a367ee6846222dd97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-32902-unchanged.json",
+      "bytes": 30702,
+      "sha256": "06be879e6ac5dd555309deb512ff650b3859f0537512ee39eb75ac716593e40b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-blend.json",
+      "bytes": 30883,
+      "sha256": "236fe031f5fd5ab452c1e9f803919f05a22c7609e703dc9ce388d55fca0d30c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-clip.json",
+      "bytes": 25082,
+      "sha256": "2baeb9d94e0fd79dac0430c599ba69bd701baa386a20b6c30169d5e76d5e4e74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-cull.json",
+      "bytes": 25266,
+      "sha256": "c1a2baee4dfa8e7d412d1203c56e0203f13245c90ee95ebf93f8fc780d39e4bc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-depth.json",
+      "bytes": 30685,
+      "sha256": "1feb71f0467560983c22842ab972ccff1434ef1051c28d29c8963ac1d1686484"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-depth_resource.json",
+      "bytes": 28735,
+      "sha256": "7d990162018fd403010d74c1ca0393824722e298a000cb99b1c779607520c85d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-discard.json",
+      "bytes": 31232,
+      "sha256": "e9de63d82512af70fa331eed1104a46b078e44827b0de1e4711c481aa2f25119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-early_discard.json",
+      "bytes": 31232,
+      "sha256": "e2879c124803ea6f1ca1628b5ed6de7a7f27864f53f44aaaa0c29370c087d950"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-mask.json",
+      "bytes": 30676,
+      "sha256": "072db290f11b684b69acab2be243e95a2b726c0fd4c317dacfa902bf13b09bb2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-ordinary.json",
+      "bytes": 30691,
+      "sha256": "f98d5d48f5854d42c9e4a1d08aeeb3860fbb3a8ef3dcf994dfe0d9f29add8beb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-scissor.json",
+      "bytes": 25266,
+      "sha256": "a98d33f7fd31aa4ebc0ab589c75f63cb4bb218eec694e6bad7783a18869d4530"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-stencil.json",
+      "bytes": 30685,
+      "sha256": "1feb71f0467560983c22842ab972ccff1434ef1051c28d29c8963ac1d1686484"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistory-4318-unchanged.json",
+      "bytes": 30699,
+      "sha256": "2a8f54a4d3b0f6300419439750368f5e6455c6c39fbe646b24fb1233c7e7853a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryForced-0.json",
+      "bytes": 61391,
+      "sha256": "c6f96beb63e1d26d1d7ae6bd3a5d54ff4699c380b2e3d598f483a52c0d8463b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryForced-32902.json",
+      "bytes": 61417,
+      "sha256": "9833a3a640fab9c2a7964d1f3aad301d17f83eeec3d7df9312d5c24adcd9ecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryForced-4318.json",
+      "bytes": 61411,
+      "sha256": "ad7a94e124f2270df14fa8ff85b8dddf2eee0c1cb8f0bd561cc23a1fbc685bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-0-0-0.json",
+      "bytes": 23433,
+      "sha256": "48931c9267bc903ee825e67d76f6fe85bde0b4fc35751bcf1748e9ce139f6497"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-0-0-1.json",
+      "bytes": 23433,
+      "sha256": "1c458bf20d04f6b2ae050e513ce41e7013f88dda4cba673bbbdd3db516c20fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-0-1-0.json",
+      "bytes": 23430,
+      "sha256": "e8ba9d82021754fc91476f66130e09d262a28939fa93d77f0fa0aab2bd330685"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-0-1-1.json",
+      "bytes": 23430,
+      "sha256": "68fb7583d51f563f2021d7167f819b35c43c6721a5a507551eea4a12ab6cd355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23445,
+      "sha256": "75c9fa920b100c60ec39d82661814b1a93dbe786e5ea6fbda338937349048591"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23445,
+      "sha256": "1770f44217a7f34f7405d78cd77213c66639d0f12cf766e012781689ca199697"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23442,
+      "sha256": "316af8ff72d151065e1d4f239fc7bb7641fc081996340935c6229ce09fea1fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23442,
+      "sha256": "2ba5ccf206e4bc93e949a64081bb7378a577f064996676bdc85f0d35bd7193f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23442,
+      "sha256": "232c85308428939e58aeab4386b2d44ffd8c374c98e3a3d20671dd1f8b04f3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23442,
+      "sha256": "b5ccb29a77871e46f07a07e0134db2469310e9e4f43b6a16b7be10e973bf5287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23439,
+      "sha256": "63ce97f269c7ef9f2ba564bd7aa8698abba35c64556e21c48f5e366d7029a335"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23439,
+      "sha256": "f9b0edc6800c4fda3a91ae41ea7e8f3556742d79845d1c1785fce26a043784de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-0-0.json",
+      "bytes": 29271,
+      "sha256": "b6c1bd6b19450ada94c3827b1e3eff0b9b6e5ebebd606ca88cc5164068b84b84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-0-1.json",
+      "bytes": 29292,
+      "sha256": "5c7d382f8dcfab7b9d8718487bd3acdfd1ad89cc4170b79e0ae83e4c78c946c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-0-2.json",
+      "bytes": 29273,
+      "sha256": "bfed95573031fec07cf050b6e5f222f4c7aaf4d5b02b881f47c4dbc8469cbf48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-0-3.json",
+      "bytes": 29292,
+      "sha256": "cef2c66a6367ff4e58af7c647d550780107d5a1b5af82c83fe086e9ab3aa9206"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-32902-0.json",
+      "bytes": 29284,
+      "sha256": "7849ab947bf31f8410ce78d76d1c8db5777580f8a0a3f418e1dd8a45c272e204"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-32902-1.json",
+      "bytes": 29304,
+      "sha256": "5ac92a660c7bcdc675e55717ba03cc267dda3f69b9f3a436c388794c234e0664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-32902-2.json",
+      "bytes": 29286,
+      "sha256": "af8995249aa48d1310706832744a3f5568bdaa096416bdf55a54c01eacc81784"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-32902-3.json",
+      "bytes": 29304,
+      "sha256": "b1256674d8fbf2690292283968964e4a84475df5f402def1d5889dfcd2385495"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-4318-0.json",
+      "bytes": 29281,
+      "sha256": "c78f95d211696a9a53ade8f7d7ce4b347914327ada4d0bd23453634a714cf4e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-4318-1.json",
+      "bytes": 29301,
+      "sha256": "d2799d90a8c5a0a7d384eda3a65411836d9e786fb007079fab125c9182390def"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-4318-2.json",
+      "bytes": 29283,
+      "sha256": "5d33ec1401ef05ccd4d2023c98ee201ee2e9f81523fcf0ef6b1314f8019ed323"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryMsaa-4318-3.json",
+      "bytes": 29301,
+      "sha256": "214b129920cb2e55b2bc478011b46fa6e647a90087f0ad68541dd12406246f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryRecovery-0.json",
+      "bytes": 30682,
+      "sha256": "b5b329c85acd8e20dfe6d450a459157fdc9c7a99feff39210912a7dfaa63822c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryRecovery-32902.json",
+      "bytes": 30694,
+      "sha256": "3e225758f8d0b88314a09ac4aaae6c69497ee7793c8419fe598dedecdf4b3f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/drawHistoryRecovery-4318.json",
+      "bytes": 30691,
+      "sha256": "b382137f336a42177e789e666ec32cb07926f20fc59722f0faedcb0536103aa8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-accepted-tests.txt",
+      "bytes": 10114,
+      "sha256": "c86a2301ea4da45ef87adde881c3a5872d24bb0c5b2e952f8ae8c4dde11cb7a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-complete-build.txt",
+      "bytes": 2783,
+      "sha256": "afdd7f0b844214bcdf56bc3cc9e5223c441812939f956c515a52ae4ed0e6b94d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-complete-validation.json",
+      "bytes": 2009,
+      "sha256": "feb076c640e1150fced15be35602fd8edd30f5e5e98dae49c3e9ca36dd3c711b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-event-build.txt",
+      "bytes": 1518,
+      "sha256": "8f86756ac1c751be4b090a671808c5bdda5a99e43c39ee330557f0c9d39339ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-event-ctest.txt",
+      "bytes": 315,
+      "sha256": "7b7f2ec898d679032f2261a6b50f47b7f48c15b94518f3a95a39c16aa852f905"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-event-final-tests.txt",
+      "bytes": 5715,
+      "sha256": "948516d9c58b574bad7d6c46765ea0405361c282f8f36e8b2e5424cddc0da91e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-event-regression.txt",
+      "bytes": 5715,
+      "sha256": "2fb5f9805bb612bdbb417395f07e05a6fa90388c2c7d327e72bbb9298a4013e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-console.txt",
+      "bytes": 125070,
+      "sha256": "02c69a3af9eb546f54b64cc7ff849309a0691f2b787ddb6750444c8b78a6141d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "90817e81ee4836d19de0b0ce59c1c517d827f804070b744f5d81caf8b7fc147c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "0653a8aeebb28acf7f273b94b8d2abc55668641e14fd1a8853d9f451fe4fb2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "1733d2a847f1aef252f937bc795e336c8b0fe4d7f9e4e13d8f621f111abbd50d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-blend.json",
+      "bytes": 30874,
+      "sha256": "a291335fa57672da8df610d14e0edb7390f33b7aea62508deb2ea7caec404c34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-clip.json",
+      "bytes": 25073,
+      "sha256": "3949b5691a487a5f95798037bd89b378b1583a57244cdf9b421cfddc40a09b3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-cull.json",
+      "bytes": 25257,
+      "sha256": "dcc9164a2fbb1292be054e9413b6b71b8c784cd8b960d5286af9e5fb447d253e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-depth.json",
+      "bytes": 30676,
+      "sha256": "a3e016334cf7d3314dd6879a8871096cabaf7c16a303a921fcc319acfde2536b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-depth_resource.json",
+      "bytes": 28726,
+      "sha256": "8c452e2a7526a6678e7a32e89e7f5514b12d90d88f5da5ba0476f6725ebc8af6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-discard.json",
+      "bytes": 31223,
+      "sha256": "ddcc3d0e83ce8b3d80e95979b4b38a31a58eaced51eb21099c2f061c73a80042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-early_discard.json",
+      "bytes": 31223,
+      "sha256": "ee78e2dfb0736b4cfde4e911d21e59c67b747bd1046117c78df5fb0aab882bca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-mask.json",
+      "bytes": 30667,
+      "sha256": "b082dc542fdc2d0c3baa5bacb9a5a47d6846da26cff889eaa21ae84fede36de9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-ordinary.json",
+      "bytes": 30682,
+      "sha256": "48e9f7d45a3c4c0c0522ca991887a5c9eaa3b5f628d71d001eb81ee32f63a140"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-scissor.json",
+      "bytes": 25257,
+      "sha256": "0c0f0361e44d9b64c6048e981c1dc4195c7564cd09f67bb08f6aa1c0b8295471"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-stencil.json",
+      "bytes": 30676,
+      "sha256": "a3e016334cf7d3314dd6879a8871096cabaf7c16a303a921fcc319acfde2536b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-0-unchanged.json",
+      "bytes": 30690,
+      "sha256": "60dae4ef3d7e4628702d0897828381542312241abafe658d6b561b654ea294d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-blend.json",
+      "bytes": 30886,
+      "sha256": "11a5514ea4846fead93345d77bc346a5140328b2ac5867ac18598c64a688594d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-clip.json",
+      "bytes": 25085,
+      "sha256": "1f75ff37efcb81993dd68a740b65a3c6122875604a3e6612cb77a55e901bdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-cull.json",
+      "bytes": 25269,
+      "sha256": "fe909e33bd0c95f38c0b181ce4230c576cc2a9554563a28f3b9781f7f8654663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-depth.json",
+      "bytes": 30688,
+      "sha256": "978493f44a74be1de008e250a328ef343b8ebfe8d435bd6a367ee6846222dd97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-depth_resource.json",
+      "bytes": 28738,
+      "sha256": "c20dd283b75e388ef06180b065415efe7a87c412c3724412592f502a804358df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-discard.json",
+      "bytes": 31235,
+      "sha256": "b549a0a101d9d42d1bf3d134a939ebca66fc07821eebbce35afe74a5f9002fe9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-early_discard.json",
+      "bytes": 31235,
+      "sha256": "32155fb0b1052a6244a3b52aefbc7a2b5efa8fd03b3f8eea03e802fe136c1d40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-mask.json",
+      "bytes": 30679,
+      "sha256": "7ec60cd81499b8da473a8b7175d70c5a1cf9c1d1d82f35af5689eb81e46f98f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-ordinary.json",
+      "bytes": 30694,
+      "sha256": "edc4fc7bec01d04d89a2af090570dc8d4f80b5b136f49aeee569ab68da5e2a3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-scissor.json",
+      "bytes": 25269,
+      "sha256": "7df83fd5e06187aeea9296d2a794f6cc73878f246147f4bcf049b7e2c5337e08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-stencil.json",
+      "bytes": 30688,
+      "sha256": "978493f44a74be1de008e250a328ef343b8ebfe8d435bd6a367ee6846222dd97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-32902-unchanged.json",
+      "bytes": 30702,
+      "sha256": "06be879e6ac5dd555309deb512ff650b3859f0537512ee39eb75ac716593e40b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-blend.json",
+      "bytes": 30883,
+      "sha256": "236fe031f5fd5ab452c1e9f803919f05a22c7609e703dc9ce388d55fca0d30c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-clip.json",
+      "bytes": 25082,
+      "sha256": "2baeb9d94e0fd79dac0430c599ba69bd701baa386a20b6c30169d5e76d5e4e74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-cull.json",
+      "bytes": 25266,
+      "sha256": "c1a2baee4dfa8e7d412d1203c56e0203f13245c90ee95ebf93f8fc780d39e4bc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-depth.json",
+      "bytes": 30685,
+      "sha256": "1feb71f0467560983c22842ab972ccff1434ef1051c28d29c8963ac1d1686484"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-depth_resource.json",
+      "bytes": 28735,
+      "sha256": "7d990162018fd403010d74c1ca0393824722e298a000cb99b1c779607520c85d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-discard.json",
+      "bytes": 31232,
+      "sha256": "e9de63d82512af70fa331eed1104a46b078e44827b0de1e4711c481aa2f25119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-early_discard.json",
+      "bytes": 31232,
+      "sha256": "e2879c124803ea6f1ca1628b5ed6de7a7f27864f53f44aaaa0c29370c087d950"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-mask.json",
+      "bytes": 30676,
+      "sha256": "072db290f11b684b69acab2be243e95a2b726c0fd4c317dacfa902bf13b09bb2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-ordinary.json",
+      "bytes": 30691,
+      "sha256": "f98d5d48f5854d42c9e4a1d08aeeb3860fbb3a8ef3dcf994dfe0d9f29add8beb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-scissor.json",
+      "bytes": 25266,
+      "sha256": "a98d33f7fd31aa4ebc0ab589c75f63cb4bb218eec694e6bad7783a18869d4530"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-stencil.json",
+      "bytes": 30685,
+      "sha256": "1feb71f0467560983c22842ab972ccff1434ef1051c28d29c8963ac1d1686484"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistory-4318-unchanged.json",
+      "bytes": 30699,
+      "sha256": "2a8f54a4d3b0f6300419439750368f5e6455c6c39fbe646b24fb1233c7e7853a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryForced-0.json",
+      "bytes": 61391,
+      "sha256": "c6f96beb63e1d26d1d7ae6bd3a5d54ff4699c380b2e3d598f483a52c0d8463b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryForced-32902.json",
+      "bytes": 61417,
+      "sha256": "9833a3a640fab9c2a7964d1f3aad301d17f83eeec3d7df9312d5c24adcd9ecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryForced-4318.json",
+      "bytes": 61411,
+      "sha256": "ad7a94e124f2270df14fa8ff85b8dddf2eee0c1cb8f0bd561cc23a1fbc685bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-0-0-0.json",
+      "bytes": 23433,
+      "sha256": "48931c9267bc903ee825e67d76f6fe85bde0b4fc35751bcf1748e9ce139f6497"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-0-0-1.json",
+      "bytes": 23433,
+      "sha256": "1c458bf20d04f6b2ae050e513ce41e7013f88dda4cba673bbbdd3db516c20fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-0-1-0.json",
+      "bytes": 23430,
+      "sha256": "e8ba9d82021754fc91476f66130e09d262a28939fa93d77f0fa0aab2bd330685"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-0-1-1.json",
+      "bytes": 23430,
+      "sha256": "68fb7583d51f563f2021d7167f819b35c43c6721a5a507551eea4a12ab6cd355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23445,
+      "sha256": "75c9fa920b100c60ec39d82661814b1a93dbe786e5ea6fbda338937349048591"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23445,
+      "sha256": "1770f44217a7f34f7405d78cd77213c66639d0f12cf766e012781689ca199697"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23442,
+      "sha256": "316af8ff72d151065e1d4f239fc7bb7641fc081996340935c6229ce09fea1fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23442,
+      "sha256": "2ba5ccf206e4bc93e949a64081bb7378a577f064996676bdc85f0d35bd7193f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23442,
+      "sha256": "232c85308428939e58aeab4386b2d44ffd8c374c98e3a3d20671dd1f8b04f3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23442,
+      "sha256": "b5ccb29a77871e46f07a07e0134db2469310e9e4f43b6a16b7be10e973bf5287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23439,
+      "sha256": "63ce97f269c7ef9f2ba564bd7aa8698abba35c64556e21c48f5e366d7029a335"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23439,
+      "sha256": "f9b0edc6800c4fda3a91ae41ea7e8f3556742d79845d1c1785fce26a043784de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-0-0.json",
+      "bytes": 29271,
+      "sha256": "b6c1bd6b19450ada94c3827b1e3eff0b9b6e5ebebd606ca88cc5164068b84b84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-0-1.json",
+      "bytes": 29292,
+      "sha256": "5c7d382f8dcfab7b9d8718487bd3acdfd1ad89cc4170b79e0ae83e4c78c946c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-0-2.json",
+      "bytes": 29273,
+      "sha256": "bfed95573031fec07cf050b6e5f222f4c7aaf4d5b02b881f47c4dbc8469cbf48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-0-3.json",
+      "bytes": 29292,
+      "sha256": "cef2c66a6367ff4e58af7c647d550780107d5a1b5af82c83fe086e9ab3aa9206"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-32902-0.json",
+      "bytes": 29284,
+      "sha256": "7849ab947bf31f8410ce78d76d1c8db5777580f8a0a3f418e1dd8a45c272e204"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-32902-1.json",
+      "bytes": 29304,
+      "sha256": "5ac92a660c7bcdc675e55717ba03cc267dda3f69b9f3a436c388794c234e0664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-32902-2.json",
+      "bytes": 29286,
+      "sha256": "af8995249aa48d1310706832744a3f5568bdaa096416bdf55a54c01eacc81784"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-32902-3.json",
+      "bytes": 29304,
+      "sha256": "b1256674d8fbf2690292283968964e4a84475df5f402def1d5889dfcd2385495"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-4318-0.json",
+      "bytes": 29281,
+      "sha256": "c78f95d211696a9a53ade8f7d7ce4b347914327ada4d0bd23453634a714cf4e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-4318-1.json",
+      "bytes": 29301,
+      "sha256": "d2799d90a8c5a0a7d384eda3a65411836d9e786fb007079fab125c9182390def"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-4318-2.json",
+      "bytes": 29283,
+      "sha256": "5d33ec1401ef05ccd4d2023c98ee201ee2e9f81523fcf0ef6b1314f8019ed323"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryMsaa-4318-3.json",
+      "bytes": 29301,
+      "sha256": "214b129920cb2e55b2bc478011b46fa6e647a90087f0ad68541dd12406246f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryRecovery-0.json",
+      "bytes": 30682,
+      "sha256": "b5b329c85acd8e20dfe6d450a459157fdc9c7a99feff39210912a7dfaa63822c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryRecovery-32902.json",
+      "bytes": 30694,
+      "sha256": "3e225758f8d0b88314a09ac4aaae6c69497ee7793c8419fe598dedecdf4b3f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/drawHistoryRecovery-4318.json",
+      "bytes": 30691,
+      "sha256": "b382137f336a42177e789e666ec32cb07926f20fc59722f0faedcb0536103aa8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-final-tests.txt",
+      "bytes": 10114,
+      "sha256": "09e50433e5a80a3dd852e00ee27bf878afb8205483c5e236b624d6da2fb6b468"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-forced-build.txt",
+      "bytes": 1040,
+      "sha256": "e68a88f0b46b6f80681b5a9b246179a951ad8ba859fd8d4ae63a7361990aab52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-forced-console.txt",
+      "bytes": 207,
+      "sha256": "8edeef9fc9ea38fe3c5b0b85fa22dc63c481b883893f2a985ac987e540c41b40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-forced-tests.txt",
+      "bytes": 1129,
+      "sha256": "dfda8c3bc8322d90bbb886309df40bf373f85374ec9d6dc63fed5e455de6f2e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-build.txt",
+      "bytes": 1719,
+      "sha256": "a4e2ba2c5109c8964376b058a31744a8ab91574eceec62cb91deff460b6b6596"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-console.txt",
+      "bytes": 38088,
+      "sha256": "1c403b6bd12d97a4bf5679d35b2f29a180a54447e69c827b1dca83750267ac89"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-blend.json",
+      "bytes": 30232,
+      "sha256": "bef1b0329d716d555f8e46926407e1c27781a1f7448953b0302f29c6fbc0ae4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-clip.json",
+      "bytes": 24823,
+      "sha256": "4887f6143239578648479df71592269eb1b0f5f4cf7b37657608ba9d710bd9a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-cull.json",
+      "bytes": 25007,
+      "sha256": "788ced7f817758aa2a7a3045b4537ee662a13da260604ab1daade1665293d1d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-depth.json",
+      "bytes": 30032,
+      "sha256": "b091b98e6d302c065cd25e0aaa8b21716d30722d23c49595908bc192321e364a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-depth_resource.json",
+      "bytes": 28084,
+      "sha256": "8b742442df6af297c2cd9ffa0ca00ae8d7c05b2ab6e184ce83d486f3b6791286"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-discard.json",
+      "bytes": 30580,
+      "sha256": "756c71df67d53a771399dfa8d171a0fe01caefc223902b5867ddfbf4103f2022"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-early_discard.json",
+      "bytes": 30580,
+      "sha256": "6396e56e68fd088ba2cce0a8d3af3181d96e49a47391a12cc871fa55d4fd6ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-mask.json",
+      "bytes": 30023,
+      "sha256": "9d2b185f592e64c8eb115efeaa78040432dd68b8b5f656953764ee2b40a1620a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-ordinary.json",
+      "bytes": 30039,
+      "sha256": "be6ff92525f8756fffb7e2f7a5266c19e777878c040df851f302784ef133c4f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-scissor.json",
+      "bytes": 25007,
+      "sha256": "e1849c8db19e364017f0a236f6f4cdcdfa830599b283dd3be27d668447aaed4c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-stencil.json",
+      "bytes": 30032,
+      "sha256": "b091b98e6d302c065cd25e0aaa8b21716d30722d23c49595908bc192321e364a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-0-unchanged.json",
+      "bytes": 30046,
+      "sha256": "1215843e7bbd4b3f0ed8be84a03db33e8e03e13a1ec0e86eabe4cec22ed07aaf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-blend.json",
+      "bytes": 30244,
+      "sha256": "69a421cfcbb8a778a0009f719493ab71269432183d40ee880597cc4f54e53496"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-clip.json",
+      "bytes": 24835,
+      "sha256": "7c4f77559fa5412c4cd15e9d19b5fb061b68beb0fdd7bf2beb070c8796d2a92d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-cull.json",
+      "bytes": 25019,
+      "sha256": "d8df4e7df84c2625f184560b14efdcc2df1da1cbe9799944a59b4771da0d8113"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-depth.json",
+      "bytes": 30044,
+      "sha256": "dbb06e93b1d9d87b4cb9af76e6bb4723f1d81e2757cb48fd2dafc23992514ae4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-depth_resource.json",
+      "bytes": 28096,
+      "sha256": "481a4fcdfc74ad4bf07a3fb17e47741cf638f5709206a0ce086f5120c529745e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-discard.json",
+      "bytes": 30592,
+      "sha256": "63ed0d4cb13e22f96a414f432d69d569630ad9add929c79b89aaf335829fe201"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-early_discard.json",
+      "bytes": 30592,
+      "sha256": "acc4fe6ed7fcd97bd07af02ebdba69967e26afdcf620e8c42d031e1386519e07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-mask.json",
+      "bytes": 30035,
+      "sha256": "34c446a206c35fef7f2f2301569c77755361b219df77ee5ceeefe4b8b49e70e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-ordinary.json",
+      "bytes": 30051,
+      "sha256": "2a0a5602e57afffa88ae8be569b46a3836038cb0ec6f43576f50b6e33438fe95"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-scissor.json",
+      "bytes": 25019,
+      "sha256": "67b03b5668e4eafff8a657e7724e6603306178d7e3a119798c58a300b6c09bf9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-stencil.json",
+      "bytes": 30044,
+      "sha256": "dbb06e93b1d9d87b4cb9af76e6bb4723f1d81e2757cb48fd2dafc23992514ae4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-32902-unchanged.json",
+      "bytes": 30058,
+      "sha256": "b9c3ea6b75034292e6882a99d29f2ac2f99d35f660ece2e7344e6258ef164ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-blend.json",
+      "bytes": 30241,
+      "sha256": "88c6df4c44c331920ad8a51ea213329c6ef5865d55462c65353319e3f88ca7ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-clip.json",
+      "bytes": 24832,
+      "sha256": "d864b782957f2ec211f54347f2d42932fe8e6b82c59e1e5d00e5875364bd6ea0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-cull.json",
+      "bytes": 25016,
+      "sha256": "f6395ec9ac475ac8ccec8db39467a73123589e22f080d162271f323eb0ba694f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-depth.json",
+      "bytes": 30041,
+      "sha256": "2767763fdf667e02849c7c139fa02633994badae0be8eb2094ef5cc6447204aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-depth_resource.json",
+      "bytes": 28093,
+      "sha256": "b2e7d14eae61847616d92f3d6bffb274186cde5cb6a35e86d196157561da9cf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-discard.json",
+      "bytes": 30589,
+      "sha256": "f5351fe44d1f605fcb00099865dae9c1fb9a16d00e6769bf2eb9a54326524f9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-early_discard.json",
+      "bytes": 30589,
+      "sha256": "abaa628c89bd50919b77279b5f47d901d887903f52fd2313cd8c86f5b144b5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-mask.json",
+      "bytes": 30032,
+      "sha256": "a0f5904749d9cb5073e5189c36b611b20dc3f971eade1485748dc4c96f6d86df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-ordinary.json",
+      "bytes": 30048,
+      "sha256": "b85433b8aa8cd38deaffefcf04478754771d23f49ddec91406ba23f1bbc59201"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-scissor.json",
+      "bytes": 25016,
+      "sha256": "7a4eb3bbe7ff1700c8786a016a642438e063b6aefa24b1238741eed74996f01d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-stencil.json",
+      "bytes": 30041,
+      "sha256": "2767763fdf667e02849c7c139fa02633994badae0be8eb2094ef5cc6447204aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistory-4318-unchanged.json",
+      "bytes": 30055,
+      "sha256": "7ba5baf1bb87f3817901ccd5ddfdf1e24b1b30b424e996b88da945a99cab5989"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-0-0.json",
+      "bytes": 28845,
+      "sha256": "9432a50ba7b397000616f2acc665de2db2f52cc9dd38452cf4b30ce8061f1230"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-0-1.json",
+      "bytes": 28865,
+      "sha256": "34b90d16dd319ec73bbe948e5f10485592ca3bbcc86083a7502007b4187e74dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-0-2.json",
+      "bytes": 28847,
+      "sha256": "a9e69b6221702919869dc928c8adcd6072084afb7741ec33204355279eda3305"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-0-3.json",
+      "bytes": 28865,
+      "sha256": "ae5af9781a3a3d6f45fbc2c963904466dd1df8dc360746efc978242208f20ccc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-32902-0.json",
+      "bytes": 28858,
+      "sha256": "36628fa2d649e3a2cdf1c6d28436416d885952f8557478ff00b225e701ba722d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-32902-1.json",
+      "bytes": 28877,
+      "sha256": "0b9504a63eb30ca6f5443e92ddbb76c2ea750d634f803a732203a0d28ab06353"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-32902-2.json",
+      "bytes": 28860,
+      "sha256": "f754546cb30afb7c7650eb6962e8fa6c41abb5b78cfe8d4d2dea3fee147ec9fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-32902-3.json",
+      "bytes": 28877,
+      "sha256": "7972ee645e8efe1abe963fbb287385a3c1f2cc077cbf033e26512dd278a16b07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-4318-0.json",
+      "bytes": 28855,
+      "sha256": "2ade0ed57e104ad5a0066b4d6a95306dfd8b2b45185cad91efdd6bc567af2518"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-4318-1.json",
+      "bytes": 28874,
+      "sha256": "672252bf3574f85e978c359a33eebf9d7a1ed27db4aa6012846830ab07e15892"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-4318-2.json",
+      "bytes": 28857,
+      "sha256": "d0de7717addeed8ffc891f77b4f2c8a66bd4942709d578057e1f248452c80535"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryMsaa-4318-3.json",
+      "bytes": 28874,
+      "sha256": "eafcd64cadc67031e0bd7a419fadc8c2954889a1ab882efad57e334488f31c96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryRecovery-0.json",
+      "bytes": 30039,
+      "sha256": "8bd6d4763d86acbbb193eb2b5b2a8bf247548fb3ff39a490ee3d0bf0b7ed69c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryRecovery-32902.json",
+      "bytes": 30051,
+      "sha256": "421d1d934e19641617809193ccf67af8220de461fe427e14d78d3d299fdecf33"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-evidence/drawHistoryRecovery-4318.json",
+      "bytes": 30048,
+      "sha256": "b83e75b1425c4ae3551fbebf048e400d00638af109c5621fb7a2369ec52a5fad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-initial-tests.txt",
+      "bytes": 3875,
+      "sha256": "f0c01429172f784818de968ddc220128a0adf0eb15512f6ae1c827bdb441192a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-build.txt",
+      "bytes": 1070,
+      "sha256": "49ba67516777803c832188fb94fbbc65831c7a6fa196ce6a9734305f6fb4cad5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-console.txt",
+      "bytes": 6856,
+      "sha256": "e2ddf4f4c47fbfc4ae77f7885eb94c68ee18b2b23724dbadd7e29c441518ff5d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-0-0-0.json",
+      "bytes": 23433,
+      "sha256": "48931c9267bc903ee825e67d76f6fe85bde0b4fc35751bcf1748e9ce139f6497"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-0-0-1.json",
+      "bytes": 23433,
+      "sha256": "1c458bf20d04f6b2ae050e513ce41e7013f88dda4cba673bbbdd3db516c20fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-0-1-0.json",
+      "bytes": 23430,
+      "sha256": "e8ba9d82021754fc91476f66130e09d262a28939fa93d77f0fa0aab2bd330685"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-0-1-1.json",
+      "bytes": 23430,
+      "sha256": "68fb7583d51f563f2021d7167f819b35c43c6721a5a507551eea4a12ab6cd355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23445,
+      "sha256": "75c9fa920b100c60ec39d82661814b1a93dbe786e5ea6fbda338937349048591"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23445,
+      "sha256": "1770f44217a7f34f7405d78cd77213c66639d0f12cf766e012781689ca199697"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23442,
+      "sha256": "316af8ff72d151065e1d4f239fc7bb7641fc081996340935c6229ce09fea1fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23442,
+      "sha256": "2ba5ccf206e4bc93e949a64081bb7378a577f064996676bdc85f0d35bd7193f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23442,
+      "sha256": "232c85308428939e58aeab4386b2d44ffd8c374c98e3a3d20671dd1f8b04f3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23442,
+      "sha256": "b5ccb29a77871e46f07a07e0134db2469310e9e4f43b6a16b7be10e973bf5287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23439,
+      "sha256": "63ce97f269c7ef9f2ba564bd7aa8698abba35c64556e21c48f5e366d7029a335"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-evidence/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23439,
+      "sha256": "f9b0edc6800c4fda3a91ae41ea7e8f3556742d79845d1c1785fce26a043784de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-layers-tests.txt",
+      "bytes": 1395,
+      "sha256": "0236d21aa6cc92a9482e774e9f1338fb4fd1ef6b5b8027b4e6ac0e407663a62a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-platform.json",
+      "bytes": 450,
+      "sha256": "0e2b77bf2fe71ef2dfba813925ef0a4837e07f11b629fcb0382ff8ae0d1428f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-probe-imports.txt",
+      "bytes": 833,
+      "sha256": "7519bdd093f7d8561851ce3c79784a2ba10f1d39d438ad725ebae293f0ddfd18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-0/private.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-0/report.json",
+      "bytes": 65934,
+      "sha256": "ab249cbb993b74ff57f6de0561ca130bf52f2fa488f108f37379e7adf83abc3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-0.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-32902/private.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-32902/report.json",
+      "bytes": 65925,
+      "sha256": "f1a332f44d0e4528417371b11049af4d2b8f81024ee3d4c769a0def325d92852"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-32902.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-4318/private.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-4318/report.json",
+      "bytes": 65985,
+      "sha256": "15595638914a2065bdd65c099fa121920929839a29d94d689d8b8a5b2026ab1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-bf1-4318.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-0/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-0/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-0/report.json",
+      "bytes": 33587,
+      "sha256": "df077c35afbed09bd675d2b521354b3b0a849e84d9854027d7d8630e9b90717b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-0.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-32902/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-32902/report.json",
+      "bytes": 33599,
+      "sha256": "d3772200e11a6430596294d33030a9fe3f50caf2916ca895842c11848f5effd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-32902.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-4318/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-4318/report.json",
+      "bytes": 33596,
+      "sha256": "af12d37abaa57fd5103ce45d22393394b8bd4ea0915df53dba6c5587a0de216b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-gf2-4318.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-0/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-0/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-0/report.json",
+      "bytes": 34780,
+      "sha256": "15687d7fb37c954463f9205635be5d5ab96ce49b479c65ec3585eeae5d5832ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-0.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-32902/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-32902/report.json",
+      "bytes": 34793,
+      "sha256": "1c8266b71ab2664b8b369c41675c2b8825141c3f80572747d10e3208d59ca40d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-32902.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-4318/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-4318/report.json",
+      "bytes": 34789,
+      "sha256": "cc6440eb63b0f2619241ace8f493963f4428e656ff05a81d7077428a4856b578"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-hd-4318.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-real-runs.json",
+      "bytes": 4692,
+      "sha256": "00ed5958de6770e27b8f7a63f2033410caf69719c0b9456e579efa44096039d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-build.txt",
+      "bytes": 1040,
+      "sha256": "e68a88f0b46b6f80681b5a9b246179a951ad8ba859fd8d4ae63a7361990aab52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-console.txt",
+      "bytes": 125070,
+      "sha256": "02c69a3af9eb546f54b64cc7ff849309a0691f2b787ddb6750444c8b78a6141d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "f81eda391416682255b3f24fcf91729ca6d3beceebbf4234557f2f5e05782694"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "6ab95c1660fa4c47e203465f422050ba66b59c88563a65c6e2f564084125dabb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "27f6295e08b92e7d83190359042860cb394464b674178ee03271adaca4f90c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-blend.json",
+      "bytes": 31143,
+      "sha256": "fd245e1e4e31eaf704bf2def8793fe483b330a4976c4c65b90e5571bbbcf13ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-clip.json",
+      "bytes": 25100,
+      "sha256": "096b77963d6990e43375fb989b820e1fa641facdc48d93b1d216916b8870675d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-cull.json",
+      "bytes": 25284,
+      "sha256": "a7f99d6f5057f03a629cc5039aea9135eef5f9dfcf5fe5485383bbb73c5f05cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-depth.json",
+      "bytes": 30937,
+      "sha256": "266ee9f14b4388f53b0491bff9e8efd035af928ac37acaedd5d5dbc5c77dae78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-depth_resource.json",
+      "bytes": 28987,
+      "sha256": "a9b7aff96d4c7d27252016225b51f44de9d2f7c5889952fa3b641a8e3efbfea2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-discard.json",
+      "bytes": 31489,
+      "sha256": "909a16cf7ada172b6da49a0a0a964e87fc4a1068b63729dd98dded3920448545"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-early_discard.json",
+      "bytes": 31489,
+      "sha256": "ff7ece194cd7997938737a45c781744a571d242e3aa247e63f279ab3a002d19a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-mask.json",
+      "bytes": 30928,
+      "sha256": "fc0a94a2afa55048e27e468c8a27a72057999907a2906640b06d559c43b9d40b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-ordinary.json",
+      "bytes": 30947,
+      "sha256": "aa4cb1e03998534ee406a6c29945628423e666892884966d58848a1541b0e151"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-scissor.json",
+      "bytes": 25284,
+      "sha256": "50954289f071bbaf7675edb9c9ee677f42b9b8482adee91cc9cba56c44cb7ab7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-stencil.json",
+      "bytes": 30937,
+      "sha256": "266ee9f14b4388f53b0491bff9e8efd035af928ac37acaedd5d5dbc5c77dae78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-0-unchanged.json",
+      "bytes": 30955,
+      "sha256": "b35d04286278225908de6fdb1b5fa45cc38486590e294728db7592526e8b8ba3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-blend.json",
+      "bytes": 31155,
+      "sha256": "763aabafe5553bb77f19624797df9de185154b6462fe89b30344982f1d9c95b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-clip.json",
+      "bytes": 25112,
+      "sha256": "e144d0d8ab840323cbe2cc018c7aea1ed4e56099a684a32ed7474c00a5b08717"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-cull.json",
+      "bytes": 25296,
+      "sha256": "b8fecd97d5fdb3f3366bf36ad6abd1a897e8f0884d310708fcdd903766192b00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-depth.json",
+      "bytes": 30949,
+      "sha256": "be990e0b77f69304df610e0cd50490a0d3fcea723efccc4ced4f5216c72a7e11"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-depth_resource.json",
+      "bytes": 28999,
+      "sha256": "9397f1acb7c2e6276d0daad67d787e150e16c9ea172f498d28c17a6f6415f9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-discard.json",
+      "bytes": 31501,
+      "sha256": "d5e4db9fc7ae496693229cf8dc58dd352839afabc28d15b2c90b09c2ead781ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-early_discard.json",
+      "bytes": 31501,
+      "sha256": "9322e310299e3764e3f7f070540e83ff306055049d7a4a0da83c126443cb488c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-mask.json",
+      "bytes": 30940,
+      "sha256": "602e65bd75247ba46d7c86a35e1facb68c7e60825816de3c0773488d90c2a2a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-ordinary.json",
+      "bytes": 30959,
+      "sha256": "9ce6a2063f7701bc6178d4dd8ea4fcb2b4b28df6b52e3a1016988b9c243a70a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-scissor.json",
+      "bytes": 25296,
+      "sha256": "c99e4afb205ee1d93ea9944cc77ce325102392e4f4479345b850c7da6db4f006"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-stencil.json",
+      "bytes": 30949,
+      "sha256": "be990e0b77f69304df610e0cd50490a0d3fcea723efccc4ced4f5216c72a7e11"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-32902-unchanged.json",
+      "bytes": 30967,
+      "sha256": "9b025cb2f0119cc8b905a3f52ae5ba172bd1cd4271d24a6885039d8c18c3355e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-blend.json",
+      "bytes": 31152,
+      "sha256": "71648f3db79ec8a510542d3f13ca25f55848ec61943a8a421525fab5fcc816be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-clip.json",
+      "bytes": 25109,
+      "sha256": "90d9aa8ae1e634d9ea8c14bf617a37d1803af52553411a58daf27738a732e50d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-cull.json",
+      "bytes": 25293,
+      "sha256": "7affa94b807d51c119ba101f702f02ca34ad84587b3483863f7728cc0125b36a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-depth.json",
+      "bytes": 30946,
+      "sha256": "f17e81705f8253ffc47d1df2901ab57b9753293068746b0432d7ea5f885d7444"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-depth_resource.json",
+      "bytes": 28996,
+      "sha256": "8f71f238ac9a2a16071764a887cf34808a63281eba15714986d10a9f9a9a3ab6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-discard.json",
+      "bytes": 31498,
+      "sha256": "0a486b4a8e85ba31963bd870ad5990e3ebef5ff1eb7bf5b422ca1b44edeb3551"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-early_discard.json",
+      "bytes": 31498,
+      "sha256": "452851599e98fabb4a61803d8e220c379f87f53cb7410aed03a59831828b31eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-mask.json",
+      "bytes": 30937,
+      "sha256": "a720fa731ce0c717d8d566569d64784d134dcaf496f01d62ec19f83498814696"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-ordinary.json",
+      "bytes": 30956,
+      "sha256": "6395988399835f380246e45f77e36dbf58a310f3e79c6fad93eb648b9742c470"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-scissor.json",
+      "bytes": 25293,
+      "sha256": "fe2af73be46ba84694f374a59d4e667dc7eb78b4590344a257ba5019deeb2afb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-stencil.json",
+      "bytes": 30946,
+      "sha256": "f17e81705f8253ffc47d1df2901ab57b9753293068746b0432d7ea5f885d7444"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistory-4318-unchanged.json",
+      "bytes": 30964,
+      "sha256": "e0242dfa498d20c2d21f5c04b0f5730f1b42ed1f40885eac304a6c9e54d9f3d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryForced-0.json",
+      "bytes": 61391,
+      "sha256": "c6f96beb63e1d26d1d7ae6bd3a5d54ff4699c380b2e3d598f483a52c0d8463b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryForced-32902.json",
+      "bytes": 61417,
+      "sha256": "9833a3a640fab9c2a7964d1f3aad301d17f83eeec3d7df9312d5c24adcd9ecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryForced-4318.json",
+      "bytes": 61411,
+      "sha256": "ad7a94e124f2270df14fa8ff85b8dddf2eee0c1cb8f0bd561cc23a1fbc685bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-0-0-0.json",
+      "bytes": 23433,
+      "sha256": "48931c9267bc903ee825e67d76f6fe85bde0b4fc35751bcf1748e9ce139f6497"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-0-0-1.json",
+      "bytes": 23433,
+      "sha256": "1c458bf20d04f6b2ae050e513ce41e7013f88dda4cba673bbbdd3db516c20fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-0-1-0.json",
+      "bytes": 23430,
+      "sha256": "e8ba9d82021754fc91476f66130e09d262a28939fa93d77f0fa0aab2bd330685"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-0-1-1.json",
+      "bytes": 23430,
+      "sha256": "68fb7583d51f563f2021d7167f819b35c43c6721a5a507551eea4a12ab6cd355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23445,
+      "sha256": "75c9fa920b100c60ec39d82661814b1a93dbe786e5ea6fbda338937349048591"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23445,
+      "sha256": "1770f44217a7f34f7405d78cd77213c66639d0f12cf766e012781689ca199697"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23442,
+      "sha256": "316af8ff72d151065e1d4f239fc7bb7641fc081996340935c6229ce09fea1fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23442,
+      "sha256": "2ba5ccf206e4bc93e949a64081bb7378a577f064996676bdc85f0d35bd7193f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23442,
+      "sha256": "232c85308428939e58aeab4386b2d44ffd8c374c98e3a3d20671dd1f8b04f3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23442,
+      "sha256": "b5ccb29a77871e46f07a07e0134db2469310e9e4f43b6a16b7be10e973bf5287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23439,
+      "sha256": "63ce97f269c7ef9f2ba564bd7aa8698abba35c64556e21c48f5e366d7029a335"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23439,
+      "sha256": "f9b0edc6800c4fda3a91ae41ea7e8f3556742d79845d1c1785fce26a043784de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-0-0.json",
+      "bytes": 29271,
+      "sha256": "b6c1bd6b19450ada94c3827b1e3eff0b9b6e5ebebd606ca88cc5164068b84b84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-0-1.json",
+      "bytes": 29292,
+      "sha256": "5c7d382f8dcfab7b9d8718487bd3acdfd1ad89cc4170b79e0ae83e4c78c946c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-0-2.json",
+      "bytes": 29273,
+      "sha256": "bfed95573031fec07cf050b6e5f222f4c7aaf4d5b02b881f47c4dbc8469cbf48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-0-3.json",
+      "bytes": 29292,
+      "sha256": "cef2c66a6367ff4e58af7c647d550780107d5a1b5af82c83fe086e9ab3aa9206"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-32902-0.json",
+      "bytes": 29284,
+      "sha256": "7849ab947bf31f8410ce78d76d1c8db5777580f8a0a3f418e1dd8a45c272e204"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-32902-1.json",
+      "bytes": 29304,
+      "sha256": "5ac92a660c7bcdc675e55717ba03cc267dda3f69b9f3a436c388794c234e0664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-32902-2.json",
+      "bytes": 29286,
+      "sha256": "af8995249aa48d1310706832744a3f5568bdaa096416bdf55a54c01eacc81784"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-32902-3.json",
+      "bytes": 29304,
+      "sha256": "b1256674d8fbf2690292283968964e4a84475df5f402def1d5889dfcd2385495"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-4318-0.json",
+      "bytes": 29281,
+      "sha256": "c78f95d211696a9a53ade8f7d7ce4b347914327ada4d0bd23453634a714cf4e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-4318-1.json",
+      "bytes": 29301,
+      "sha256": "d2799d90a8c5a0a7d384eda3a65411836d9e786fb007079fab125c9182390def"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-4318-2.json",
+      "bytes": 29283,
+      "sha256": "5d33ec1401ef05ccd4d2023c98ee201ee2e9f81523fcf0ef6b1314f8019ed323"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryMsaa-4318-3.json",
+      "bytes": 29301,
+      "sha256": "214b129920cb2e55b2bc478011b46fa6e647a90087f0ad68541dd12406246f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryRecovery-0.json",
+      "bytes": 30682,
+      "sha256": "b5b329c85acd8e20dfe6d450a459157fdc9c7a99feff39210912a7dfaa63822c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryRecovery-32902.json",
+      "bytes": 30694,
+      "sha256": "3e225758f8d0b88314a09ac4aaae6c69497ee7793c8419fe598dedecdf4b3f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/drawHistoryRecovery-4318.json",
+      "bytes": 30691,
+      "sha256": "b382137f336a42177e789e666ec32cb07926f20fc59722f0faedcb0536103aa8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-reference-tests.txt",
+      "bytes": 10114,
+      "sha256": "1f8191dcc54364790b2fadb1810281fac8fcb70f284338dfc8bf6c229cf93c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-build.txt",
+      "bytes": 6352,
+      "sha256": "f1e39ce4481cd44b356fa21f3d840619aacc4886a50680497a9860a6f46632e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-console.txt",
+      "bytes": 126243,
+      "sha256": "8287bb4d250f5904cf286483d97548153a98e7109cb5acd53331e6c5f007cb52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "5ac534423a06fb0b6ef5db487480ead2282f08c1475a647d8aee2907d3a95941"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "53567fe6767200b3d9da505bfa70a45c15f260b356037a0b14b055666236f451"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "831bcf627390cfd2543bdfdc9b6f5f295ebed2618f9041b3ccbfd4c396b4e6e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-blend.json",
+      "bytes": 31143,
+      "sha256": "fd245e1e4e31eaf704bf2def8793fe483b330a4976c4c65b90e5571bbbcf13ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-clip.json",
+      "bytes": 25100,
+      "sha256": "096b77963d6990e43375fb989b820e1fa641facdc48d93b1d216916b8870675d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-cull.json",
+      "bytes": 25284,
+      "sha256": "a7f99d6f5057f03a629cc5039aea9135eef5f9dfcf5fe5485383bbb73c5f05cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-depth.json",
+      "bytes": 30937,
+      "sha256": "266ee9f14b4388f53b0491bff9e8efd035af928ac37acaedd5d5dbc5c77dae78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-depth_resource.json",
+      "bytes": 28987,
+      "sha256": "a9b7aff96d4c7d27252016225b51f44de9d2f7c5889952fa3b641a8e3efbfea2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-discard.json",
+      "bytes": 31489,
+      "sha256": "909a16cf7ada172b6da49a0a0a964e87fc4a1068b63729dd98dded3920448545"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-early_discard.json",
+      "bytes": 31489,
+      "sha256": "ff7ece194cd7997938737a45c781744a571d242e3aa247e63f279ab3a002d19a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-mask.json",
+      "bytes": 30928,
+      "sha256": "fc0a94a2afa55048e27e468c8a27a72057999907a2906640b06d559c43b9d40b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-ordinary.json",
+      "bytes": 30947,
+      "sha256": "aa4cb1e03998534ee406a6c29945628423e666892884966d58848a1541b0e151"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-scissor.json",
+      "bytes": 25284,
+      "sha256": "50954289f071bbaf7675edb9c9ee677f42b9b8482adee91cc9cba56c44cb7ab7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-stencil.json",
+      "bytes": 30937,
+      "sha256": "266ee9f14b4388f53b0491bff9e8efd035af928ac37acaedd5d5dbc5c77dae78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-0-unchanged.json",
+      "bytes": 30955,
+      "sha256": "b35d04286278225908de6fdb1b5fa45cc38486590e294728db7592526e8b8ba3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-blend.json",
+      "bytes": 31155,
+      "sha256": "763aabafe5553bb77f19624797df9de185154b6462fe89b30344982f1d9c95b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-clip.json",
+      "bytes": 25112,
+      "sha256": "e144d0d8ab840323cbe2cc018c7aea1ed4e56099a684a32ed7474c00a5b08717"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-cull.json",
+      "bytes": 25296,
+      "sha256": "b8fecd97d5fdb3f3366bf36ad6abd1a897e8f0884d310708fcdd903766192b00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-depth.json",
+      "bytes": 30949,
+      "sha256": "be990e0b77f69304df610e0cd50490a0d3fcea723efccc4ced4f5216c72a7e11"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-depth_resource.json",
+      "bytes": 28999,
+      "sha256": "9397f1acb7c2e6276d0daad67d787e150e16c9ea172f498d28c17a6f6415f9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-discard.json",
+      "bytes": 31501,
+      "sha256": "d5e4db9fc7ae496693229cf8dc58dd352839afabc28d15b2c90b09c2ead781ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-early_discard.json",
+      "bytes": 31501,
+      "sha256": "9322e310299e3764e3f7f070540e83ff306055049d7a4a0da83c126443cb488c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-mask.json",
+      "bytes": 30940,
+      "sha256": "602e65bd75247ba46d7c86a35e1facb68c7e60825816de3c0773488d90c2a2a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-ordinary.json",
+      "bytes": 30959,
+      "sha256": "9ce6a2063f7701bc6178d4dd8ea4fcb2b4b28df6b52e3a1016988b9c243a70a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-scissor.json",
+      "bytes": 25296,
+      "sha256": "c99e4afb205ee1d93ea9944cc77ce325102392e4f4479345b850c7da6db4f006"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-stencil.json",
+      "bytes": 30949,
+      "sha256": "be990e0b77f69304df610e0cd50490a0d3fcea723efccc4ced4f5216c72a7e11"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-32902-unchanged.json",
+      "bytes": 30967,
+      "sha256": "9b025cb2f0119cc8b905a3f52ae5ba172bd1cd4271d24a6885039d8c18c3355e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-blend.json",
+      "bytes": 31152,
+      "sha256": "71648f3db79ec8a510542d3f13ca25f55848ec61943a8a421525fab5fcc816be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-clip.json",
+      "bytes": 25109,
+      "sha256": "90d9aa8ae1e634d9ea8c14bf617a37d1803af52553411a58daf27738a732e50d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-cull.json",
+      "bytes": 25293,
+      "sha256": "7affa94b807d51c119ba101f702f02ca34ad84587b3483863f7728cc0125b36a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-depth.json",
+      "bytes": 30946,
+      "sha256": "f17e81705f8253ffc47d1df2901ab57b9753293068746b0432d7ea5f885d7444"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-depth_resource.json",
+      "bytes": 28996,
+      "sha256": "8f71f238ac9a2a16071764a887cf34808a63281eba15714986d10a9f9a9a3ab6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-discard.json",
+      "bytes": 31498,
+      "sha256": "0a486b4a8e85ba31963bd870ad5990e3ebef5ff1eb7bf5b422ca1b44edeb3551"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-early_discard.json",
+      "bytes": 31498,
+      "sha256": "452851599e98fabb4a61803d8e220c379f87f53cb7410aed03a59831828b31eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-mask.json",
+      "bytes": 30937,
+      "sha256": "a720fa731ce0c717d8d566569d64784d134dcaf496f01d62ec19f83498814696"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-ordinary.json",
+      "bytes": 30956,
+      "sha256": "6395988399835f380246e45f77e36dbf58a310f3e79c6fad93eb648b9742c470"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-scissor.json",
+      "bytes": 25293,
+      "sha256": "fe2af73be46ba84694f374a59d4e667dc7eb78b4590344a257ba5019deeb2afb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-stencil.json",
+      "bytes": 30946,
+      "sha256": "f17e81705f8253ffc47d1df2901ab57b9753293068746b0432d7ea5f885d7444"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistory-4318-unchanged.json",
+      "bytes": 30964,
+      "sha256": "e0242dfa498d20c2d21f5c04b0f5730f1b42ed1f40885eac304a6c9e54d9f3d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryForced-0.json",
+      "bytes": 61391,
+      "sha256": "c6f96beb63e1d26d1d7ae6bd3a5d54ff4699c380b2e3d598f483a52c0d8463b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryForced-32902.json",
+      "bytes": 61417,
+      "sha256": "9833a3a640fab9c2a7964d1f3aad301d17f83eeec3d7df9312d5c24adcd9ecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryForced-4318.json",
+      "bytes": 61411,
+      "sha256": "ad7a94e124f2270df14fa8ff85b8dddf2eee0c1cb8f0bd561cc23a1fbc685bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-0-0-0.json",
+      "bytes": 23433,
+      "sha256": "48931c9267bc903ee825e67d76f6fe85bde0b4fc35751bcf1748e9ce139f6497"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-0-0-1.json",
+      "bytes": 23433,
+      "sha256": "1c458bf20d04f6b2ae050e513ce41e7013f88dda4cba673bbbdd3db516c20fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-0-1-0.json",
+      "bytes": 23430,
+      "sha256": "e8ba9d82021754fc91476f66130e09d262a28939fa93d77f0fa0aab2bd330685"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-0-1-1.json",
+      "bytes": 23430,
+      "sha256": "68fb7583d51f563f2021d7167f819b35c43c6721a5a507551eea4a12ab6cd355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-32902-0-0.json",
+      "bytes": 23445,
+      "sha256": "75c9fa920b100c60ec39d82661814b1a93dbe786e5ea6fbda338937349048591"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-32902-0-1.json",
+      "bytes": 23445,
+      "sha256": "1770f44217a7f34f7405d78cd77213c66639d0f12cf766e012781689ca199697"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-32902-1-0.json",
+      "bytes": 23442,
+      "sha256": "316af8ff72d151065e1d4f239fc7bb7641fc081996340935c6229ce09fea1fa2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-32902-1-1.json",
+      "bytes": 23442,
+      "sha256": "2ba5ccf206e4bc93e949a64081bb7378a577f064996676bdc85f0d35bd7193f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-4318-0-0.json",
+      "bytes": 23442,
+      "sha256": "232c85308428939e58aeab4386b2d44ffd8c374c98e3a3d20671dd1f8b04f3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-4318-0-1.json",
+      "bytes": 23442,
+      "sha256": "b5ccb29a77871e46f07a07e0134db2469310e9e4f43b6a16b7be10e973bf5287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-4318-1-0.json",
+      "bytes": 23439,
+      "sha256": "63ce97f269c7ef9f2ba564bd7aa8698abba35c64556e21c48f5e366d7029a335"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryLayers-4318-1-1.json",
+      "bytes": 23439,
+      "sha256": "f9b0edc6800c4fda3a91ae41ea7e8f3556742d79845d1c1785fce26a043784de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-0-0.json",
+      "bytes": 29271,
+      "sha256": "b6c1bd6b19450ada94c3827b1e3eff0b9b6e5ebebd606ca88cc5164068b84b84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-0-1.json",
+      "bytes": 29292,
+      "sha256": "5c7d382f8dcfab7b9d8718487bd3acdfd1ad89cc4170b79e0ae83e4c78c946c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-0-2.json",
+      "bytes": 29273,
+      "sha256": "bfed95573031fec07cf050b6e5f222f4c7aaf4d5b02b881f47c4dbc8469cbf48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-0-3.json",
+      "bytes": 29292,
+      "sha256": "cef2c66a6367ff4e58af7c647d550780107d5a1b5af82c83fe086e9ab3aa9206"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-32902-0.json",
+      "bytes": 29284,
+      "sha256": "7849ab947bf31f8410ce78d76d1c8db5777580f8a0a3f418e1dd8a45c272e204"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-32902-1.json",
+      "bytes": 29304,
+      "sha256": "5ac92a660c7bcdc675e55717ba03cc267dda3f69b9f3a436c388794c234e0664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-32902-2.json",
+      "bytes": 29286,
+      "sha256": "af8995249aa48d1310706832744a3f5568bdaa096416bdf55a54c01eacc81784"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-32902-3.json",
+      "bytes": 29304,
+      "sha256": "b1256674d8fbf2690292283968964e4a84475df5f402def1d5889dfcd2385495"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-4318-0.json",
+      "bytes": 29281,
+      "sha256": "c78f95d211696a9a53ade8f7d7ce4b347914327ada4d0bd23453634a714cf4e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-4318-1.json",
+      "bytes": 29301,
+      "sha256": "d2799d90a8c5a0a7d384eda3a65411836d9e786fb007079fab125c9182390def"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-4318-2.json",
+      "bytes": 29283,
+      "sha256": "5d33ec1401ef05ccd4d2023c98ee201ee2e9f81523fcf0ef6b1314f8019ed323"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryMsaa-4318-3.json",
+      "bytes": 29301,
+      "sha256": "214b129920cb2e55b2bc478011b46fa6e647a90087f0ad68541dd12406246f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryRecovery-0.json",
+      "bytes": 30682,
+      "sha256": "b5b329c85acd8e20dfe6d450a459157fdc9c7a99feff39210912a7dfaa63822c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryRecovery-32902.json",
+      "bytes": 30694,
+      "sha256": "3e225758f8d0b88314a09ac4aaae6c69497ee7793c8419fe598dedecdf4b3f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/drawHistoryRecovery-4318.json",
+      "bytes": 30691,
+      "sha256": "b382137f336a42177e789e666ec32cb07926f20fc59722f0faedcb0536103aa8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-draw-history-release-tests.txt",
+      "bytes": 10114,
+      "sha256": "35517f1f27fbea63e5b58ec065392341ca6a430865fa899148db8b086e761670"
+    }
+  ]
+}

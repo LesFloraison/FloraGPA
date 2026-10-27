@@ -869,3 +869,14 @@ same adapter. See `research/DX11_NATIVE_PIXEL_GEOMETRY_REPLAY.md` for evidence,
 query differences between local adapters, payload/deadline limits and the
 remaining fragment-qualification boundary. This internal diagnostic does not
 close full history, public PS debugging or P7/P8 acceptance.
+
+## Selected-pixel primitive storage continuation
+
+Candidate observations now join to checkpoints from the same captured geometry,
+with complete private drawing between candidates. Typed selected-texel records
+preserve before/after values, sample and subresource identity, unchanged values
+and explicit unknown qualification/failure fields. The extension covers array
+mips, 3D slices, masked MSAA storage samples and forced raster-sample unions.
+See `research/DX11_NATIVE_PIXEL_DRAW_HISTORY.md` for 66 new data cases, 501
+corruption controls and nine real-capture comparisons. These private primitive
+storage records do not yet replace public fragment history or PS debugging.
