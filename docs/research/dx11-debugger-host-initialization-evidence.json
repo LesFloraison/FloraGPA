@@ -1,0 +1,299 @@
+{
+  "schema": "FloraGPA host initialization research 1",
+  "player": {
+    "path": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+    "version": "25, 1, 26603, 47871",
+    "sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "synthetic_cases": 6,
+  "observations": [
+    {
+      "name": "gf2-nvidia-controlled",
+      "elapsed_ms": 750,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "api_table": "0x17ae40",
+      "query_table": "0x17d668",
+      "graph_boundaries": 5,
+      "engine": "null"
+    },
+    {
+      "name": "gf2-nvidia-default",
+      "elapsed_ms": 750,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 68403,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "api_table": "0x17ae40",
+      "query_table": "0x17d668",
+      "graph_boundaries": 5,
+      "engine": "null"
+    },
+    {
+      "name": "gf2-intel-controlled",
+      "elapsed_ms": 890,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "api_table": "0x17ae40",
+      "query_table": "0x17d668",
+      "graph_boundaries": 5,
+      "engine": "null"
+    },
+    {
+      "name": "gf2-intel-default",
+      "elapsed_ms": 844,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 73907,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "api_table": "0x17ae40",
+      "query_table": "0x17d668",
+      "graph_boundaries": 5,
+      "engine": "null"
+    }
+  ],
+  "corruption_controls": 30,
+  "engine_recovered": false,
+  "p1_closed": false,
+  "preliminary": "Root exports and gf2-nvidia-controlled are exploratory only; the preliminary query owner offset was incorrect.",
+  "sources": [
+    {
+      "path": "tools/probe_original_host_initialization.py",
+      "bytes": 5947,
+      "sha256": "9562f5e905cf3ab48e0531f4230d85f413901ea63197383060da95107b186d57"
+    },
+    {
+      "path": "tools/probe_original_debugger_host.py",
+      "bytes": 18367,
+      "sha256": "abfb9743e58be06efba4cf173319e08f1665f20ac6bfb3c7c6b154c89166f7d3"
+    },
+    {
+      "path": "tools/summarize_host_initialization.py",
+      "bytes": 9514,
+      "sha256": "52601bb964038bbe5e39ff8c039b354317ef8df0db1bd5ca29c4f05a4d12d5b3"
+    },
+    {
+      "path": "tools/summarize_debugger_gpu.py",
+      "bytes": 10722,
+      "sha256": "8563abc1ce23344ccf5cc6c9d68253a57eb83043bfa58da24ac52db3b5079442"
+    },
+    {
+      "path": "tools/ghidra/Invoke-HostInitializationResearch.ps1",
+      "bytes": 2782,
+      "sha256": "9591f13dd7faf70b9a40766f31af3e6263a297f3a47c54f19e61147d2dcf6ad9"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "bytes": 2676,
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportAddressEvidence.java",
+      "bytes": 2682,
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    },
+    {
+      "path": "tools/ghidra/ExportSymbolEvidence.java",
+      "bytes": 2383,
+      "sha256": "f3b81eae0e8e622ea92cbfe5fc7138f5aaa7127a45d63f856d4777054ea95012"
+    }
+  ],
+  "raw": [
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/debug-symbols.txt",
+      "bytes": 4592,
+      "sha256": "becaec275021d5c04078b6ac043657066f40f7a29cb51d02a64a2b934241d4f5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-intel-controlled/dispatch.json",
+      "bytes": 50096,
+      "sha256": "6bb9b721df0ee944ff6e6642dc003f915925678884df9823402d6858482856ec"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-intel-controlled/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-intel-default/dispatch.json",
+      "bytes": 50027,
+      "sha256": "d8161a62eb83cd9d62b5e270ed5951808504df6f21b3bf42134c3d54065c9dc4"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-intel-default/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-nvidia-controlled/dispatch.json",
+      "bytes": 43286,
+      "sha256": "46951a2e98e6d14920d59a93f9838212e6c7cdaf6bb720f26736cf4317aa1fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-nvidia-controlled/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-nvidia-default/dispatch.json",
+      "bytes": 43217,
+      "sha256": "65b256280b62efdcc1f7c24d6f65611f28d1289a24485ea1b5cfba2e03792d56"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/gf2-nvidia-default/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/runs.json",
+      "bytes": 4177,
+      "sha256": "cf074a2378faac9c7763fe50e86e18c21bb92fa51f78071fa2161ebed1c9ff10"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/synthetic/process.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/final/synthetic/synthetic.json",
+      "bytes": 27794,
+      "sha256": "fc9fb305cc94235556b35dbe8eac4ef296e2ef80547cd7810fbcb6b2d6e245b0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/gf2-nvidia-controlled/dispatch.json",
+      "bytes": 43161,
+      "sha256": "33a9578ff52eba9ba7f6489a930fba4c9bafef22251796b4faf16468300d189a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/gf2-nvidia-controlled/process.json",
+      "bytes": 536,
+      "sha256": "67846785f4ab67e731bcc73baaaef12d48ef4293018dc8fc89acc3341672c982"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/gf2-nvidia-controlled/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/ghidra-retry.log",
+      "bytes": 4438,
+      "sha256": "c23a70a6a00e1a30d826ea6715be3d3146a01a4e4a1fadbe3a97bb1942e7eb7f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/ghidra.log",
+      "bytes": 102,
+      "sha256": "03bc629470514c54d87cb90e4572efa6f31486375cfdad858f3e125c1a93e258"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/init.txt",
+      "bytes": 26086,
+      "sha256": "89908f3195e00058d2218d721cc8ebf6a014edfa6bb71647ba11dd6235c47f23"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/manager-init.log",
+      "bytes": 3807,
+      "sha256": "0c572467aa6243a6ccef4cdaf82747b26c214fc3bf3340c91b1dac36b32cd688"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/manager-init.txt",
+      "bytes": 8072,
+      "sha256": "842bc6e4e50899c2eab5515bfe8f4ff0947ce66380962f16568bdaf2e8342b96"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/manager-table.txt",
+      "bytes": 2317,
+      "sha256": "b4113a07344ee1d072f4420ee899433ebcac72bf6fb1cacb5f9392e352399939"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/managers.log",
+      "bytes": 4079,
+      "sha256": "e4408cda6d748e03650a46d27c2c050f47edcecadd63331e782962bcc2e8c4bc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/managers.txt",
+      "bytes": 56832,
+      "sha256": "f79bb4625ddc43647da92232c8fc7659dbb9dc4e96eeb25234976ef17bfc43ee"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/query-symbols.txt",
+      "bytes": 12127,
+      "sha256": "32afee322604fd9b00241780b58013df1a6d7fe3fd683070d57011f91d87cfda"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/binary.json",
+      "bytes": 191,
+      "sha256": "9de4b31df1fa3241c0cce598e58c220cabc36a75aedd619c9de90c7e8240b7de"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/debug-symbols.log",
+      "bytes": 3781,
+      "sha256": "ec1a18746b2bf7b0a5e88abaa464681f86bfe467b7baddbbb60bf5c25f7f1032"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/debug-symbols.txt",
+      "bytes": 4592,
+      "sha256": "becaec275021d5c04078b6ac043657066f40f7a29cb51d02a64a2b934241d4f5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/evidence-sha256.json",
+      "bytes": 1354,
+      "sha256": "5cec8fd8dd2cbf7b74c86b2daa45640e157fd084df27e01bfbe03be4c85299f7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/host.log",
+      "bytes": 3848,
+      "sha256": "8281ab7a058bde5f756315a1eaa91317838448ebae923f8ad6c53e307e748b38"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/host.txt",
+      "bytes": 73477,
+      "sha256": "8def48e9a6a9341e16c9b53d593a33d45241d75ab6c0b72c787e0fef65acb15b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/managers.log",
+      "bytes": 3842,
+      "sha256": "e543382c74145fc971eb9c37df4999a5e5be567924111255ea156d9c9ff3c29f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/managers.txt",
+      "bytes": 77778,
+      "sha256": "7302031894efe4cde3950248fbbf4e513d50935e9577611815b4d8d93e50d0cd"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/query-symbols.log",
+      "bytes": 3788,
+      "sha256": "7bb9ea3143566d5e724f691103ab38a1e3e0a85a38c628d97ba4270f00995774"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/query-symbols.txt",
+      "bytes": 12127,
+      "sha256": "32afee322604fd9b00241780b58013df1a6d7fe3fd683070d57011f91d87cfda"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/tables.log",
+      "bytes": 3801,
+      "sha256": "2c6d7b16917500020da5be1edb437792e927fe2c2fc6485b9f7141f2a101ca67"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-initialization/verified/tables.txt",
+      "bytes": 6037,
+      "sha256": "2de2491e5bd7b327d9179dc9db044701a689546b954604c5253237a015ef4499"
+    }
+  ]
+}

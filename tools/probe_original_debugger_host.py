@@ -91,6 +91,32 @@ def digest(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def host_graph(base, host):
+    """Observe pinned initialization aliases; do not infer a debugger from a manager."""
+    read = lambda address: Q.from_address(address).value
+    result = dict(host=hex(host), engine=hex(read(host + 0x3c0)), aliases={})
+    for name, offset in (("subobject_08_owner", 0x18), ("subobject_48_owner", 0x48),
+                         ("request_manager_owner", 0x190)):
+        result["aliases"][name] = dict(offset=hex(offset), pointer=hex(read(host + offset)),
+                                        matches_host=read(host + offset) == host)
+    for name, offset in (("api", 0x1b8), ("query", 0x1c8)):
+        pointer = read(host + offset)
+        row = dict(offset=hex(offset), pointer=hex(pointer))
+        if pointer:
+            table = read(pointer)
+            row.update(vtable_rva=hex(table - base),
+                       slots=[hex(read(table + slot) - base) for slot in (0, 8, 0x10, 0x20)])
+            if name == "api" and table == base + 0x17ae40:
+                row.update(owner=hex(read(pointer + 0x48)), owner_matches_host=read(pointer + 0x48) == host)
+            if name == "query" and table == base + 0x180538:
+                row.update(owner=hex(read(pointer + 0x38)), owner_matches_host=read(pointer + 0x38) == host)
+            if name == "query" and table == base + 0x17d668:
+                row.update(api=hex(read(pointer + 0x68)),
+                           api_matches_host_manager=read(pointer + 0x68) == read(host + 0x1b8))
+        result[name] = row
+    return result
+
+
 class Wide:
     """Read-only MSVC x64 wstring argument; the callee must not own this storage."""
     def __init__(self, text):
@@ -148,6 +174,8 @@ def child(args):
             host = read(base + 0x208540)
             engine = read(host + 0x3c0) if host else 0
             row = dict(label=label, host=hex(host), engine=hex(engine), modules=modules())
+            if args.host_graph and host and label != "closed":
+                row["host_graph"] = host_graph(base, host)
             if engine:
                 table = read(engine)
                 row.update(vtable=hex(table), entry=hex(read(table)))
@@ -296,6 +324,8 @@ def main():
                         help="Retain original query-manager and initial-playback defaults")
     parser.add_argument("--vendor", type=int, choices=(4318, 32902),
                         help="Select one enumerated NVIDIA or Intel GPU and verify the replay device")
+    parser.add_argument("--host-graph", action="store_true",
+                        help="Record pinned host aliases and manager tables at lifecycle boundaries")
     parser.add_argument("--child", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not 0 < args.event <= 0xffffffff or not 0 < args.timeout <= 600:

@@ -920,3 +920,13 @@ three address modes on three adapters. See
 `research/DX11_NATIVE_PIXEL_TYPED_UAV.md` for validation, corrected normalized
 resource declarations and remaining coverage limits. Public PS debugging,
 fragment qualification, the GPA debugger implementation and P7/P8 remain open.
+
+## Original host initialization continuation
+
+The Ghidra investigation now maps three host-owner aliases, the D3D11 manager
+initializer and concrete fallback query factory. Six original-code synthetic
+cases and four serial GF2 lifecycles verify the alias writes, tables and reverse
+links; the candidate engine remains null at all 20 sampled live boundaries.
+See `research/DX11_DEBUGGER_HOST_INITIALIZATION.md` for addresses, retained probe
+corrections and evidence limits. These manager implementations do not identify
+the debugger engine or close P1. Product behavior is unchanged by this research.
