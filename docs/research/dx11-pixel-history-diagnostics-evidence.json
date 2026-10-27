@@ -1,0 +1,246 @@
+{
+  "schema": 1,
+  "checkpoint": "original-pixel-history-diagnostics",
+  "base_commit": "a589f25a38456e06474c1632d9faaebcd1928844",
+  "implementation_commit": "239bb0d908a72b90cf0899b1947b3f2fc0064b6d",
+  "created_utc": "2026-10-27T00:32:20.441361+00:00",
+  "complete_release_acceptance": false,
+  "binary": {
+    "path": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+    "version": "25, 1, 26603, 47871",
+    "sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "sdk": {
+    "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\d3d11.h",
+    "sha256": "65964c91b641d5fc93d68796183318a9ebe493e41502f61fc26fbbf34e9d3ead",
+    "slots": {
+      "PSSetShader": 72,
+      "Map": 112,
+      "Unmap": 120,
+      "Begin": 216,
+      "End": 224,
+      "GetData": 232,
+      "OMSetRenderTargets": 264,
+      "OMSetBlendState": 280,
+      "OMSetDepthStencilState": 288,
+      "RSSetState": 344,
+      "RSSetScissorRects": 360,
+      "CopySubresourceRegion": 368,
+      "ClearRenderTargetView": 400
+    }
+  },
+  "verified_artifact_files": 426,
+  "validation": {
+    "path": "artifacts/dx11-native/pixel-history-followup/validation.json",
+    "bytes": 105732,
+    "sha256": "761b8ca2677db6f369b4b49f3bc34575b035c351fe50ac29a08db80977a5b637"
+  },
+  "manifest": {
+    "path": "artifacts/dx11-native/pixel-history-followup/final/manifest.json",
+    "bytes": 8207,
+    "sha256": "8a181f174d829eeb17561d0fba99abc411800998dbae6761ed46c48a4b6feeaf"
+  },
+  "measurements": {
+    "reference_draws": 384,
+    "exact_reference_components": 90112,
+    "tolerated_unorm_blend_components": 8192,
+    "original_requests": 8,
+    "original_result_records": 80,
+    "observed_dispatches": 96
+  },
+  "negative_controls": 40,
+  "selected_capture": {
+    "path": "artifacts/dx11-native/pixel-history-followup/final/fixture.gpa_frame",
+    "bytes": 323623,
+    "sha256": "63e5d1180d54fd620f72c82f38e5f2eddf6e512527449c27a64d8cc5f2fd577d"
+  },
+  "static_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/binary.json",
+      "bytes": 191,
+      "sha256": "9de4b31df1fa3241c0cce598e58c220cabc36a75aedd619c9de90c7e8240b7de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/evidence-sha256.json",
+      "bytes": 856,
+      "sha256": "79d1f86bb7f17a5a152818f8dfac825006a1bfc7666b993b153f79835c224a56"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/export.log",
+      "bytes": 5154,
+      "sha256": "9ff652213a4a49fc58495fa8c5c8109553ac7b6aeb06b3b6af3676b1a9a1bc55"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/passes.txt",
+      "bytes": 158260,
+      "sha256": "1fa42b2bad6efe20735cc3e92987e8e9c760b4ba456bd0a6571f083e289d3c1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/request.txt",
+      "bytes": 61028,
+      "sha256": "091d5a7b45ecaeea292e8d66f8952a60a83416cb69020e089d956467674cb45b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/state-wrappers.txt",
+      "bytes": 13475,
+      "sha256": "59c15becf1d5eb8fec1bde10f86817b2bf201aaa2925d8a5ad78f387e270e780"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/symbols.txt",
+      "bytes": 2214,
+      "sha256": "630c195c887847dd8589497564c765e50987a6408e7126866ff26f7a78714b59"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-history-followup/static-final/tables.txt",
+      "bytes": 7762,
+      "sha256": "402fb5f1602b325f7ee2a0b8df8f366e76c4da3ee486b0a0145ae5f85bf36a70"
+    }
+  ],
+  "build": {
+    "path": "artifacts/dx11-native/pixel-history-followup/producer-build2.txt",
+    "bytes": 198,
+    "sha256": "6be555b9bce4bd3f25834edd812a927f82ab8aded966caa9f7dc02b974fa41bd"
+  },
+  "producer_binary": {
+    "path": "build/vs2022/Release/FloraPixelHistoryProbe.exe",
+    "bytes": 125952,
+    "sha256": "a374b81cc0e9f8d059527952168071db4189df6a6beb268c6eec0a58406e5e36"
+  },
+  "original_runs": [
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-history-followup/final/history-4318-4/history.json",
+        "bytes": 18366,
+        "sha256": "ec0a1373f6f06a7c1df4c5121c87693de9269a724db21d4498155254cef4f342"
+      },
+      "vendor": 4318,
+      "pixel": [
+        4,
+        4
+      ],
+      "events_per_request": 10,
+      "eligibility_mismatches": [
+        "scissor_reject",
+        "sample_mask_zero"
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-history-followup/final/history-4318-1/history.json",
+        "bytes": 18366,
+        "sha256": "87df723bd3a1888f8faabe2dd9abdbc4aeafeff2605968f8ed8a40549fc3c98f"
+      },
+      "vendor": 4318,
+      "pixel": [
+        1,
+        1
+      ],
+      "events_per_request": 10,
+      "eligibility_mismatches": [
+        "sample_mask_zero"
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-history-followup/final/history-32902-4/history.json",
+        "bytes": 18540,
+        "sha256": "e4ec7ed44dfd28d919f742f99597c37079089f5d894e82585ad5e8795c85c7f5"
+      },
+      "vendor": 32902,
+      "pixel": [
+        4,
+        4
+      ],
+      "events_per_request": 10,
+      "eligibility_mismatches": [
+        "scissor_reject",
+        "sample_mask_zero"
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/dx11-native/pixel-history-followup/final/history-32902-1/history.json",
+        "bytes": 18540,
+        "sha256": "855773976acf9237dae00c682445725e2f656ec4fc3c7d14ac68c3b2ba3014bd"
+      },
+      "vendor": 32902,
+      "pixel": [
+        1,
+        1
+      ],
+      "events_per_request": 10,
+      "eligibility_mismatches": [
+        "sample_mask_zero"
+      ]
+    }
+  ],
+  "real_gf2": {
+    "report": {
+      "path": "artifacts/dx11-native/pixel-history-followup/gf2-observed/history.json",
+      "bytes": 8569,
+      "sha256": "50bdc5f05b78db37eaf9406a234b754d00da7f51219b0c06726af75fdefd1691"
+    },
+    "process": {
+      "path": "artifacts/dx11-native/pixel-history-followup/gf2-observed/process.json",
+      "bytes": 596,
+      "sha256": "3b73dd002b7474a19b6732580f68cbce4453ccad6035253b8ec17b0aa9f09ea4"
+    },
+    "event": 113,
+    "vendor": 4318,
+    "requests": 2,
+    "control_matches_observer": true,
+    "manager_event_after_pass_zero": 113
+  },
+  "field_correction": {
+    "manager_event_offset": "0x178",
+    "diagnostic_count_offset": "0x174",
+    "status_offset": "0x170",
+    "identity_getter_rva": "0x20700",
+    "identity_getter_erg_offset": "0x10"
+  },
+  "verified_fixture_statuses": {
+    "2": "Depth rejection",
+    "3": "Stencil rejection",
+    "5": "Shader discard"
+  },
+  "unverified_status_values": [
+    1,
+    4,
+    6
+  ],
+  "observed_limits": [
+    "Scissor-rejected selected pixel can return status 0/count 1",
+    "Zero-sample-mask draw can return status 0/count 1",
+    "Two overlapping primitives yield one event row/count 2, not two fragment records"
+  ],
+  "retained_failures": [
+    {
+      "kind": "Incorrect cull orientation in first fixture",
+      "report": {
+        "path": "artifacts/dx11-native/pixel-history-followup/reference-first-warp/observations.json",
+        "bytes": 315,
+        "sha256": "6f907787a4f6dfdd8811d9ac09c6b944b99c7a39ed3f1dc390123cd9cee85386"
+      },
+      "source": {
+        "path": "artifacts/dx11-native/pixel-history-followup/producer-first-source.cpp",
+        "bytes": 13957,
+        "sha256": "50fdeed75de0f76ccd82671ab758e28be3f284f367f91226ac75c108ef47a656"
+      }
+    },
+    {
+      "kind": "Manual batch wrapper interpreted regex pipe",
+      "log": {
+        "path": "artifacts/dx11-native/pixel-history-followup/export.log",
+        "bytes": 105,
+        "sha256": "96afb54b4ef89de46279ed6467461d0691c3774ee9aff14ffde6b36bacc58d34"
+      }
+    }
+  ],
+  "remaining_gates": [
+    "Original per-fragment qualification and extraction",
+    "Original sample, blend, discard and early/late depth interactions",
+    "Complete private resource/state restoration",
+    "Public PS debugging and source/UI parity",
+    "RenderDoc dependency removal and standalone release acceptance"
+  ]
+}

@@ -776,3 +776,14 @@ GF2 journal load and rewind. See `research/DX11_PIXEL_HELPER_MEMORY.md` for scop
 retained fixture compilation failures and reproducible evidence. Original fragment
 qualification, active typed-UAV and remaining precision semantics, public PS jobs,
 source/UI parity, full history and P7/P8 acceptance remain required.
+
+## Original pixel history diagnostic continuation
+
+Owned D3D11 draws and original requests now verify selected Pixel History status
+values, the callback vectors and manager event identity. Four reference runs
+validate 384 draws; eight original requests match same-GPU event pixel outputs.
+The original diagnostic count is not a per-fragment record and does not faithfully
+qualify scissor/sample-mask rejection in these cases. See
+`research/DX11_PIXEL_HISTORY_DIAGNOSTICS.md`. P5 must preserve original coverage
+independently of its diagnostic passes; full fragment extraction, public PS
+integration and P7/P8 remain open.

@@ -26,8 +26,10 @@ calls `0x47ee0`; pass 1 calls `0x48e70` and can call `0x47ba0`. Mode 2 uses
 blend state and an occlusion query. `0x47ee0` constrains scissor to a single pixel,
 modifies raster/depth state, wraps draws in Begin/End/GetData, and repeats with
 different states. `0x43b70` copies/maps temporary pixel data. Status at object
-offset `0x170` and count at `0x178` are observed; their complete enum meanings
-are **not** established. `0x3fa80` emits values conditioned on this state.
+offset `0x170` and a field at `0x178` are observed. The later independent probe
+establishes that `+0x178` is an ERG event identity, correcting its earlier
+description as a count; `+0x174` holds diagnostic readback. `0x3fa80` emits values
+conditioned on this state.
 
 The SDK slots were independently checked against local `d3d11.h`: context Begin
 `0xd8`, End `0xe0`, GetData `0xe8`, OMSetDepthStencilState `0x120`, RSSetState
@@ -37,6 +39,12 @@ The SDK slots were independently checked against local `d3d11.h`: context Begin
 Open gates: status meanings, fragment identity, per-fragment shader output,
 blending/discard/sample semantics, state restoration and independent synthetic
 probes. The static evidence alone does not establish output parity.
+
+The [diagnostic continuation](research/DX11_PIXEL_HISTORY_DIAGNOSTICS.md) now
+verifies request/result layouts, selected depth/stencil/discard status values and
+one/two-primitive diagnostic counts using original requests and independent D3D11
+draws. It also records original scissor/sample-mask eligibility limitations. Full
+fragment identity/output semantics and state restoration remain open.
 
 ## Geometry and queries
 
