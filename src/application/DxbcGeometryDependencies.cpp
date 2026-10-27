@@ -127,6 +127,11 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
             return reject("Unsupported geometry shader profile");
         if (program.instructions.empty())
             return reject("Empty executable code");
+        std::set<uint32_t> srvReads, uavReads;
+        const auto srvs = shaderSrvDeclarations(bytecode);
+        for (uint32_t slot = 0; slot < srvs.size(); ++slot)
+            if (srvs[slot])
+                srvReads.insert(slot);
         uint32_t token = 2;
         uint64_t budget = 1024 * 1024;
         for (size_t instruction = 0; instruction < program.instructions.size(); ++instruction) {
@@ -134,10 +139,18 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
             result["checked_token"] = token;
             const auto opcode = row[0] & 2047;
             token += uint32_t(row.size());
-            if (row[0] & 0x80000000u)
-                return reject("Extended instructions are not covered");
+            // Pinned Microsoft format metadata: these extensions contain only
+            // immediate offsets, resource dimensions/strides and return types.
+            // They cannot introduce additional resource/register operands.
+            std::set<uint32_t> extensions;
+            for (size_t word = 1; row.at(word - 1) >> 31; ++word) {
+                const auto extension = row.at(word), kind = extension & 63;
+                const auto reserved = kind == 1 ? 0x7fe001c0u : kind == 2 ? 0x7f800000u : 0x7fc00000u;
+                if (kind < 1 || kind > 3 || !extensions.insert(kind).second || (extension & reserved))
+                    return reject("Unsupported or malformed instruction extension");
+            }
             if (opcode == 88 || opcode == 161 || opcode == 162)
-                return reject("SRV reads may alias writable storage");
+                continue;
             if (opcode == 4 || opcode == 5 || opcode == 44 || opcode == 53 || opcode == 120 ||
                 (opcode >= 144 && opcode <= 146) || opcode == 159 || opcode == 160 || opcode == 190)
                 return reject("Unsupported declarations or execution semantics");
@@ -161,17 +174,24 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
                 bool unsupported = false;
                 visitOperand(row, begin, [&](uint32_t operand, size_t, bool nested) {
                     const auto type = (operand >> 12) & 255;
-                    unsupported |= type == 6 || type == 7 || type == 29 || type == 31 || type >= 38 ||
-                                   (nested && type == 30);
+                    unsupported |= type == 29 || type == 31 || type >= 38 ||
+                                   (nested && (type == 6 || type == 7 || type == 30));
                 });
                 if (unsupported)
                     return reject("Unsupported resource or operand kind");
+                if (kind == 7) {
+                    if (end != begin + 2 || (row[begin] & 0xfff00000u) != 0x00100000u ||
+                        row[begin + 1] >= 128 || !srvReads.contains(row[begin + 1]))
+                        return reject("Nonliteral or undeclared SRV addressing is not covered");
+                }
                 if (kind != 30)
                     continue;
-                if (!((store && i == 0) || (atomic && i == 1)))
-                    return reject("UAV read may affect geometry");
                 if (end != begin + 2 || (row[begin] & 0xfff00000u) != 0x00100000u || row[begin + 1] >= 64)
                     return reject("Nonliteral UAV addressing is not covered");
+                if (!((store && i == 0) || (atomic && i == 1))) {
+                    uavReads.insert(row[begin + 1]);
+                    continue;
+                }
                 result["write_instructions"].push_back({{"token", result["checked_token"]},
                                                         {"opcode", opcode},
                                                         {"slot", row[begin + 1]},
@@ -180,9 +200,11 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
         }
         result.erase("checked_token");
         result["liveness_instructions_checked"] = 1024 * 1024 - budget;
+        result["read_dependencies"] = {{"srv_slots", srvReads}, {"uav_slots", uavReads}};
+        if (!srvReads.empty() || !uavReads.empty())
+            result["scope"] = "immutable_resource_inputs";
         result["proved"] = true;
-        result["reason"] =
-            "All UAV operations are writes with no observable return value; no SRV declarations";
+        result["reason"] = "Atomic results are unobservable; resource reads require runtime alias exclusion";
         return result;
     } catch (const std::exception &error) {
         result["reason"] = std::string("Unproved bytecode: ") + error.what();

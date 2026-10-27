@@ -213,8 +213,8 @@ class NativeAnalysisTests final : public QObject {
         QTest::addColumn<QString>("scenario");
         QTest::addColumn<unsigned>("vendor");
         for (const auto vendor : {0u, 0x10deu, 0x8086u})
-            for (const auto scenario :
-                 {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav", "ds-uav-independent", "gs", "auto"})
+            for (const auto scenario : {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav",
+                                        "ds-uav-independent", "gs", "gs-read", "auto"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(scenario).arg(vendor)))
                     << QString(scenario) << vendor;
     }
@@ -246,13 +246,16 @@ class NativeAnalysisTests final : public QObject {
                                                                     : testing::depthStencilCapture();
             if (scenario == "ds-uav")
                 fixture = testing::hullUavReadCapture();
-            const auto event = scenario == "instanced" || scenario.startsWith("ds") || scenario == "auto"
+            if (scenario == "gs-read")
+                fixture = testing::geometryResourceReadCapture(false, false);
+            const auto event = scenario == "instanced" || scenario.startsWith("ds") || scenario == "auto" ||
+                                       scenario == "gs-read"
                                    ? 200u
                                : scenario == "gs" ? 150u
                                                   : 1000u;
             const std::string stage = scenario == "vs"            ? "vs"
                                       : scenario.startsWith("ds") ? "ds"
-                                      : scenario == "gs"          ? "gs"
+                                      : scenario.startsWith("gs") ? "gs"
                                                                   : "vs-index";
             if (scenario == "indexed" || scenario == "tail") {
                 fixture.entries.erase(
@@ -325,11 +328,12 @@ class NativeAnalysisTests final : public QObject {
             const auto result = load(runNativeAnalysisJob(job, worker(), 30));
             const auto mesh = readNativeMesh(job, result, output, 64 * 1024 * 1024);
             // Both original GS draws emit three vertices into the same SO cursor before DrawAuto.
-            const auto expected =
-                scenario == "ds-uav" ? 12u
-                : scenario == "instanced" || scenario == "ds" || scenario == "ds-uav-independent" || scenario == "auto" || scenario == "indexed"
-                    ? 6u
-                    : 3u;
+            const auto expected = scenario == "ds-uav" ? 12u
+                                  : scenario == "instanced" || scenario == "ds" ||
+                                          scenario == "ds-uav-independent" || scenario == "auto" ||
+                                          scenario == "indexed"
+                                      ? 6u
+                                      : 3u;
             QCOMPARE(mesh.geometry.report.at("vertices").get<unsigned>(), expected);
             if (vendor)
                 QCOMPARE(result.at("context").at("adapter").at("vendor").get<unsigned>(), vendor);

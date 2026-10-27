@@ -264,16 +264,18 @@ class PostTransformCapture {
             for (const auto &stage : report.at("executed_stages"))
                 hasUav |= declaresUav(code(state.stages[indices.at(stage.get<std::string>())].shader));
             if (hasUav) {
-                const auto fail = [] {
-                    throw std::runtime_error("Instance boundaries through HS/DS/GS with UAV access are not "
-                                             "verified; inspect all instances or select VS");
+                const auto fail = [](const std::string &detail = {}) {
+                    throw std::runtime_error(
+                        std::string("Instance boundaries through HS/DS/GS with UAV access are not ") +
+                        "verified; inspect all instances or select VS" +
+                        (detail.empty() ? "" : ": " + detail));
                 };
                 independence = {{"stages", Json::object()}, {"input_aliases_excluded", false}};
                 for (const auto &stage : report.at("executed_stages")) {
                     const auto name = stage.get<std::string>();
                     const auto proof = geometryUavIndependence(code(state.stages[indices.at(name)].shader));
                     if (proof.at("proved") != true)
-                        fail();
+                        fail(name + ": " + proof.at("reason").get<std::string>());
                     independence["stages"][name] = proof;
                 }
                 // Use actual resource ownership: experiment edits can change a
@@ -284,16 +286,23 @@ class PostTransformCapture {
                 outputs.insert(outputs.end(), state.omExtended.begin(), state.omExtended.end());
                 if (state.rtCount > outputs.size())
                     fail();
-                for (uint32_t i = state.omStart; i < state.rtCount; ++i)
-                    if (outputs[i]) {
+                auto outputView = [&](uint32_t slot) -> Id {
+                    return slot >= state.omStart && slot < state.rtCount ? outputs.at(slot) : 0;
+                };
+                std::set<uint32_t> writeSlots;
+                for (const auto &stage : independence["stages"])
+                    for (const auto &write : stage.at("write_instructions"))
+                        writeSlots.insert(write.at("slot").get<uint32_t>());
+                for (const auto slot : writeSlots)
+                    if (const auto view = outputView(slot)) {
                         Com<ID3D11Resource> owner;
-                        r.get<ID3D11View>(outputs[i])->GetResource(&owner);
+                        r.get<ID3D11View>(view)->GetResource(&owner);
                         writable.insert(owner.Get());
                         owners.push_back(std::move(owner));
                     }
                 auto checkInput = [&](Id id) {
                     if (id && writable.contains(r.get<ID3D11Resource>(id)))
-                        fail();
+                        fail("IA/CB input aliases a written UAV");
                 };
                 checkInput(state.ib);
                 for (auto id : state.vb)
@@ -301,6 +310,31 @@ class PostTransformCapture {
                 for (const auto &stage : report.at("executed_stages"))
                     for (auto id : state.stages[indices.at(stage.get<std::string>())].cb)
                         checkInput(id);
+                Json reads = Json::array();
+                for (const auto &stage : report.at("executed_stages")) {
+                    const auto name = stage.get<std::string>();
+                    const auto &proof = independence["stages"][name];
+                    for (const auto kind : {"srv_slots", "uav_slots"})
+                        for (const auto &item : proof.at("read_dependencies").at(kind)) {
+                            const auto slot = item.get<uint32_t>();
+                            const auto view = std::string_view(kind) == "srv_slots"
+                                                  ? state.stages[indices.at(name)].srv.at(slot)
+                                                  : outputView(slot);
+                            if (view) {
+                                Com<ID3D11Resource> owner;
+                                r.get<ID3D11View>(view)->GetResource(&owner);
+                                if (writable.contains(owner.Get()))
+                                    fail("Read resource aliases a written UAV");
+                            }
+                            reads.push_back({{"stage", name},
+                                             {"kind", kind},
+                                             {"slot", slot},
+                                             {"view", view},
+                                             {"aliases_write", false}});
+                        }
+                }
+                independence["write_slots"] = writeSlots;
+                independence["resource_reads"] = reads;
                 independence["input_aliases_excluded"] = true;
             }
             strategy = "native_prefix_statistics";
