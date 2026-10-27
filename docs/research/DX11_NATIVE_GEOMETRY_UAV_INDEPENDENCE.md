@@ -93,6 +93,11 @@ without suppressing a failure or skipping WARP.
 
 ## Reproduction and evidence
 
+This section records the matrix at the implementation commit above. Current
+sources additionally support immutable resource reads; use the expanded commands
+in `DX11_NATIVE_GEOMETRY_RESOURCE_READS.md` for a current-source rerun. The commands
+below remain applicable to this commit and its retained evidence.
+
 Build `FloraGeometryUavDependencyTests`, `FloraNativeAnalysisTests`,
 `FloraNativeReplayMeshUiTests`, `FloraPostTransformTests` and `FloraGPA` in Release.
 Use fresh evidence/output paths:

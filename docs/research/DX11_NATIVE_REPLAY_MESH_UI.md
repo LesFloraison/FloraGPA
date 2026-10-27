@@ -76,6 +76,10 @@ separately from that failure.
 
 ## Reproduction
 
+These commands describe the initial preview commit. For the current expanded
+matrix, use `DX11_NATIVE_GEOMETRY_RESOURCE_READS.md`; the original validator mode
+remains available for the retained initial evidence.
+
 Use the configured Visual Studio Release build with Qt available. Build
 `FloraGPA`, `FloraNativeReplayMeshUiTests`, `FloraReplayMeshUiTests`,
 `FloraNativeAnalysisTests`, `FloraNativeCounterUiTests` and

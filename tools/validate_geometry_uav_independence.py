@@ -22,20 +22,26 @@ def validate(name, result):
     require(result["schema"] == 1 and result["vendor"] == int(vendor) and result["mode"] == mode, "identity")
     for key in ("storage_restored", "counter_restored", "clean_draw_equal"):
         require(result[key] is True, key)
-    gs = mode == "gs"
+    gs = mode.startswith("gs")
+    unbound = mode == "gs-unbound"
+    rejected = mode == "read" or "alias" in mode
     require(result["before_sha256"] == storage_hash((0, 0, 0, 0)), "original storage")
     require(result["after_sha256"] == storage_hash((3, 0, 0, 0) if gs else (42, 43, 52, 53)),
             "independent draw storage")
     require(result["counter_before"] == 0 and result["counter_after"] == (0 if gs else 4), "counter values")
     full = result["full"]
-    require(full["vertices"] == (18 if gs else 12) and full["primitives"] == (6 if gs else 4), "full geometry")
+    if rejected and gs:
+        require(9 <= full["vertices"] <= 27 and full["vertices"] == full["primitives"] * 3, "aliased geometry bounds")
+    else:
+        require(full["vertices"] == (9 if unbound else 18 if gs else 12) and
+                full["primitives"] == (3 if unbound else 6 if gs else 4), "full geometry")
     selections = result["selections"]
-    if mode in ("read", "ia-alias"):
+    if rejected:
         require(not selections, "unproved selection must be rejected")
         return
     require(len(selections) == (3 if gs else 2), "all instances")
     for i, selection in enumerate(selections):
-        first, count = (i * (i + 1) // 2 * 3, (i + 1) * 3) if gs else (i * 6, 6)
+        first, count = (i * 3, 3) if unbound else (i * (i + 1) // 2 * 3, (i + 1) * 3) if gs else (i * 6, 6)
         require(selection["instance"] == i and selection["instance_count"] == len(selections), "instance")
         require(selection["first_vertex"] == first and selection["vertex_count"] == count, "slice bounds")
         require(selection["full_capture"] == {k: full[k] for k in ("vertices", "primitives", "sha256")},
@@ -48,14 +54,25 @@ def validate(name, result):
         require([q["instance_count"] for q in queries] == expected, "prefix sequence")
         for q in queries:
             n = q["instance_count"]
-            count = n * (n + 1) // 2 if gs else n * 2
+            count = n if unbound else n * (n + 1) // 2 if gs else n * 2
             require(q["primitives"] == count and q["attempts"][-1]["primitives_storage_needed"] == count,
                     "prefix query count")
         proof = selection["uav_independence"]
         require(proof["input_aliases_excluded"] is True, "actual input ownership")
         require(set(proof["stages"]) == ({"vs", "gs"} if gs else {"vs", "hs", "ds"}), "executed stages")
+        reads = mode in ("gs-read-uav", "gs-read-srv", "gs-unbound")
+        if reads:
+            kind, slot = ("srv_slots", 0) if mode == "gs-read-srv" else ("uav_slots", 2)
+            require(proof["write_slots"] == [1] and proof["resource_reads"] ==
+                    [{"stage": "gs", "kind": kind, "slot": slot, "view": 0 if unbound else 9002,
+                      "aliases_write": False}], "runtime read ownership")
         for stage, item in proof["stages"].items():
-            require(item["proved"] is True and item["scope"] == "no_uav_results_or_srv_reads", "stage proof")
+            require(item["proved"] is True and item["scope"] ==
+                    ("immutable_resource_inputs" if reads and stage == "gs" else "no_uav_results_or_srv_reads"), "stage proof")
+            if reads and stage == "gs":
+                require(item["read_dependencies"] == {"srv_slots": [0] if kind == "srv_slots" else [],
+                                                       "uav_slots": [2] if kind == "uav_slots" else []},
+                        "static read dependencies")
             require(re.fullmatch("[0-9a-f]{64}", item["shader_sha256"]) and
                     0 <= item["liveness_instructions_checked"] <= 1048576, "bounded shader proof")
             writes = item["write_instructions"]
@@ -70,11 +87,16 @@ def main():
     parser.add_argument("directory", type=Path)
     parser.add_argument("--log", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--resource-reads", action="store_true", help="Require the expanded immutable-read matrix")
     args = parser.parse_args()
     paths = {p.stem: p for p in args.directory.glob("*.json")}
     expected = {f"{v}-{mode}" for v in (0, 4318, 32902) for mode in ("independent", "gs", "read", "ia-alias")}
+    if args.resource_reads:
+        expected |= {f"{v}-{mode}" for v in (0, 4318, 32902)
+                     for mode in ("gs-read-uav", "gs-read-srv", "gs-unbound", "gs-alias-uav", "gs-alias-srv")}
     require(paths.keys() == expected, "complete evidence matrix")
-    require(re.search(r"Totals: 31 passed, 0 failed, 0 skipped, 0 blacklisted,",
+    passed = 53 if args.resource_reads else 31
+    require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     controls = 0
     for name, path in sorted(paths.items()):

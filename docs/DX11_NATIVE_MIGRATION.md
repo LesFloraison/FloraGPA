@@ -269,9 +269,11 @@ not exemptions:
   real-capture, format and workflow comparisons before default cutover.
 - Per-instance HS/DS/GS boundaries with UAV-dependent geometry remain unverified.
   A sufficient bytecode and input-alias proof now permits independent writes,
-  including dead hidden-counter results. Reads, live results, aliases and
-  unproved liveness retain explicit rejection. Tests retain those rejections and
-  full-draw capture separately from independent-write and pure-shader selection.
+  including dead hidden-counter results. Reads are now permitted when actual
+  resource ownership excludes writes by the executed geometry stages. Read/write
+  feedback, live results, aliases and unproved liveness retain explicit rejection.
+  Tests retain those rejections and full-draw capture separately from
+  independent-write and pure-shader selection.
   They do not establish baseline parity for the rejected cases.
 - The new VS input path removes the free-signature-component requirement and
   supports OSG1. Other instrumented stages retain their separate restrictions.
@@ -954,3 +956,14 @@ counts. See `research/DX11_NATIVE_GEOMETRY_UAV_INDEPENDENCE.md` for 113 passing
 regression checks, 108 rejected evidence corruptions, retained preliminary failures
 and the remaining read/alias/control-flow gates. Default backend cutover remains
 pending full baseline parity.
+
+## Immutable geometry resource-read continuation
+
+Native instance proofs now track SRV/UAV reads and compare their actual owners
+with the union of written UAV owners across all geometry stages. Independent and
+unbound reads are supported; feedback remains rejected. Compiler probes cover
+structured/raw/typed buffer operands and sampling extensions, and the new GS
+paths run through the Worker and native mesh UI. See
+`research/DX11_NATIVE_GEOMETRY_RESOURCE_READS.md` for 141 passing checks, 186
+rejected evidence corruptions, the corrected feedback fixture and remaining gates.
+This expands P3 coverage without declaring default cutover or P7/P8 complete.

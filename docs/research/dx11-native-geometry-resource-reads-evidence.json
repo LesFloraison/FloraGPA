@@ -1,0 +1,1568 @@
+{
+  "schema": 1,
+  "implementation_commit": "1856911f81d0deddc5e25cc0212ac8772df95115",
+  "main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "worker_sha256": "a63584046d890c892706f189a4fc70cb27fb03cc61e25e15779e9435661e5377",
+  "qt_passes": 141,
+  "qt_failures": 0,
+  "qt_skips": 0,
+  "dependency_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 27,
+    "corruption_controls": 111,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "mesh_successes": 15,
+  "mesh_open_gates": [
+    "0-ds-uav",
+    "32902-ds-uav",
+    "4318-ds-uav"
+  ],
+  "mesh_corruption_controls": 75,
+  "default_cutover": false,
+  "full_renderdoc_removal": false,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs-alias-srv.json",
+      "bytes": 2912,
+      "sha256": "9442f5b539519941780e38ec8d3fc444335ed4bc9eb434435b785833f3297d72"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs-alias-uav.json",
+      "bytes": 2912,
+      "sha256": "c995b5e813256cf854fcf073ce09c6b41cf8709f41f09cde4bb4043568fdae75"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs-read-srv.json",
+      "bytes": 10712,
+      "sha256": "7d2e3002f630051df6d0003a078a49218bf58cea36c6d617b4ad26482bb57e04"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs-read-uav.json",
+      "bytes": 10712,
+      "sha256": "f3f8b6237da0ac5fb7cd27e28c698d6c39434f472c53c2936b21f332acce8310"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs-unbound.json",
+      "bytes": 10696,
+      "sha256": "19b3aa3075f8957b6f9a8419c40c287be543a66475b897c2d81d9516aff6d0eb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-gs.json",
+      "bytes": 10079,
+      "sha256": "23b57bcac4cd313d46f6e6c4713a181b038ce7b2969438e3495ab7764c9b6383"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-ia-alias.json",
+      "bytes": 2918,
+      "sha256": "b3bf80202405aa0b171627fc7dc637020787b9877e1b67e3018a811cc9056c16"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-independent.json",
+      "bytes": 8903,
+      "sha256": "249d7b89332b108d8af1f7b0c7e2e7bd7bdfe6261d73ca3c9bc1b1e03858121b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/0-read.json",
+      "bytes": 2914,
+      "sha256": "6b6ab7abd0ff8d6ea1e771445387014d1f54fe7d3266bc3679349c7dc6c77dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs-alias-srv.json",
+      "bytes": 2916,
+      "sha256": "de81278affd60820b21457860924b8de23d38e02c6135c514a6777f9ac02b05b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs-alias-uav.json",
+      "bytes": 2916,
+      "sha256": "b2dccf7dad673098e269add54b9976bf7f5fb93912360be405965fffd3dd9f38"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs-read-srv.json",
+      "bytes": 10716,
+      "sha256": "32a8bb628f885ad60c6ef2c94c16b2031bacbe56cf52c0db3d6999c854674364"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs-read-uav.json",
+      "bytes": 10716,
+      "sha256": "f7d8b3644dbf6e187595a33cf481b455b2ee563db57e058edd91cd6019cde761"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs-unbound.json",
+      "bytes": 10700,
+      "sha256": "e4bdeb2eb125111c3661e4fd699d94100df3f6293dabd9397bce87db79f237bd"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-gs.json",
+      "bytes": 10083,
+      "sha256": "6658e79bdd9bffd5e77e758b77aca6d1a240791f3abacbcc880654931704e30c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-ia-alias.json",
+      "bytes": 2922,
+      "sha256": "8bda5030dc41a2aa30b127ec05b9536768711b0bd6c0cfd72aade9f390a56ff7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-independent.json",
+      "bytes": 8907,
+      "sha256": "abefb59b8e6463a6427f739ddee5c97f7868de09452a3dd0fd567e2f5fa61eea"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/32902-read.json",
+      "bytes": 2918,
+      "sha256": "abe9d7880942148d04f44ba731f29234c74afdd7226d7a03e00915f83049d3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs-alias-srv.json",
+      "bytes": 2915,
+      "sha256": "419db583274fa3f4d1e9d4e52ab306f4dfc5aafb087d653b64e2591a14e70cef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs-alias-uav.json",
+      "bytes": 2915,
+      "sha256": "56b9367f9bb7d3b57a6d252a22cd511b601fdcee4b42d8064e95fb706f69c7b3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs-read-srv.json",
+      "bytes": 10715,
+      "sha256": "1c5466775e3ef9fd81107f93154ba1075e153204649009cbcaa82424b6ecd8d4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs-read-uav.json",
+      "bytes": 10715,
+      "sha256": "ba091e4ed8d5655b15998ca00c5ead3fbcce25933f2965f07be8bdf658be194d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs-unbound.json",
+      "bytes": 10699,
+      "sha256": "4d731e3849fe11104ef669a7c89ab40af37f58efe6951aae2bf75a95f8961be4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-gs.json",
+      "bytes": 10082,
+      "sha256": "195c5904115cf0797eac307233307ffeb104ee5fad135729716b2ec50a230f5a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-ia-alias.json",
+      "bytes": 2921,
+      "sha256": "d0277332783f9c8b7c11c967d3711f71ea70d1048f8978472e90f0e84a4f68d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-independent.json",
+      "bytes": 8906,
+      "sha256": "51b6bd178670703304050b3319a7b995a6bc7e0d15360f7cfa30caa8b34b8a70"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions/4318-read.json",
+      "bytes": 2917,
+      "sha256": "3cde9bb2a2bd3deb33deb9c741a1cb5afefddc01c3ae32534bb7c0454c0e4a56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions-build.log",
+      "bytes": 1102,
+      "sha256": "22a9c0aad850b32c3c539257e5ee30d4fe17be80f527fd80ee7195dcc5e12e57"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-extensions-ctest.log",
+      "bytes": 324,
+      "sha256": "7e8b273304fe6f9c49141f87692fa014caa533d79147cb01d33b49d5b831e27c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs-alias-srv.json",
+      "bytes": 2912,
+      "sha256": "9442f5b539519941780e38ec8d3fc444335ed4bc9eb434435b785833f3297d72"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs-alias-uav.json",
+      "bytes": 2912,
+      "sha256": "c995b5e813256cf854fcf073ce09c6b41cf8709f41f09cde4bb4043568fdae75"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs-read-srv.json",
+      "bytes": 10712,
+      "sha256": "7d2e3002f630051df6d0003a078a49218bf58cea36c6d617b4ad26482bb57e04"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs-read-uav.json",
+      "bytes": 10712,
+      "sha256": "f3f8b6237da0ac5fb7cd27e28c698d6c39434f472c53c2936b21f332acce8310"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs-unbound.json",
+      "bytes": 10696,
+      "sha256": "19b3aa3075f8957b6f9a8419c40c287be543a66475b897c2d81d9516aff6d0eb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-gs.json",
+      "bytes": 10079,
+      "sha256": "23b57bcac4cd313d46f6e6c4713a181b038ce7b2969438e3495ab7764c9b6383"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-ia-alias.json",
+      "bytes": 2918,
+      "sha256": "b3bf80202405aa0b171627fc7dc637020787b9877e1b67e3018a811cc9056c16"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-independent.json",
+      "bytes": 8903,
+      "sha256": "249d7b89332b108d8af1f7b0c7e2e7bd7bdfe6261d73ca3c9bc1b1e03858121b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/0-read.json",
+      "bytes": 2914,
+      "sha256": "6b6ab7abd0ff8d6ea1e771445387014d1f54fe7d3266bc3679349c7dc6c77dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs-alias-srv.json",
+      "bytes": 2916,
+      "sha256": "de81278affd60820b21457860924b8de23d38e02c6135c514a6777f9ac02b05b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs-alias-uav.json",
+      "bytes": 2916,
+      "sha256": "b2dccf7dad673098e269add54b9976bf7f5fb93912360be405965fffd3dd9f38"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs-read-srv.json",
+      "bytes": 10716,
+      "sha256": "32a8bb628f885ad60c6ef2c94c16b2031bacbe56cf52c0db3d6999c854674364"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs-read-uav.json",
+      "bytes": 10716,
+      "sha256": "f7d8b3644dbf6e187595a33cf481b455b2ee563db57e058edd91cd6019cde761"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs-unbound.json",
+      "bytes": 10700,
+      "sha256": "e4bdeb2eb125111c3661e4fd699d94100df3f6293dabd9397bce87db79f237bd"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-gs.json",
+      "bytes": 10083,
+      "sha256": "6658e79bdd9bffd5e77e758b77aca6d1a240791f3abacbcc880654931704e30c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-ia-alias.json",
+      "bytes": 2922,
+      "sha256": "8bda5030dc41a2aa30b127ec05b9536768711b0bd6c0cfd72aade9f390a56ff7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-independent.json",
+      "bytes": 8907,
+      "sha256": "abefb59b8e6463a6427f739ddee5c97f7868de09452a3dd0fd567e2f5fa61eea"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/32902-read.json",
+      "bytes": 2918,
+      "sha256": "abe9d7880942148d04f44ba731f29234c74afdd7226d7a03e00915f83049d3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs-alias-srv.json",
+      "bytes": 2915,
+      "sha256": "419db583274fa3f4d1e9d4e52ab306f4dfc5aafb087d653b64e2591a14e70cef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs-alias-uav.json",
+      "bytes": 2915,
+      "sha256": "56b9367f9bb7d3b57a6d252a22cd511b601fdcee4b42d8064e95fb706f69c7b3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs-read-srv.json",
+      "bytes": 10715,
+      "sha256": "1c5466775e3ef9fd81107f93154ba1075e153204649009cbcaa82424b6ecd8d4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs-read-uav.json",
+      "bytes": 10715,
+      "sha256": "ba091e4ed8d5655b15998ca00c5ead3fbcce25933f2965f07be8bdf658be194d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs-unbound.json",
+      "bytes": 10699,
+      "sha256": "4d731e3849fe11104ef669a7c89ab40af37f58efe6951aae2bf75a95f8961be4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-gs.json",
+      "bytes": 10082,
+      "sha256": "195c5904115cf0797eac307233307ffeb104ee5fad135729716b2ec50a230f5a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-ia-alias.json",
+      "bytes": 2921,
+      "sha256": "d0277332783f9c8b7c11c967d3711f71ea70d1048f8978472e90f0e84a4f68d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-independent.json",
+      "bytes": 8906,
+      "sha256": "51b6bd178670703304050b3319a7b995a6bc7e0d15360f7cfa30caa8b34b8a70"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final/4318-read.json",
+      "bytes": 2917,
+      "sha256": "3cde9bb2a2bd3deb33deb9c741a1cb5afefddc01c3ae32534bb7c0454c0e4a56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final-build.log",
+      "bytes": 7602,
+      "sha256": "885f9115e1c8ca658c52383e7a9a137ec679d46b6645d18bba81202e4c1ac296"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-final-ctest.log",
+      "bytes": 637,
+      "sha256": "12c21c0e42b94bae10375a0c443f626617558817a6c7307d75f04fc096ff80eb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-gs-alias-srv.json",
+      "bytes": 2912,
+      "sha256": "9442f5b539519941780e38ec8d3fc444335ed4bc9eb434435b785833f3297d72"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-gs-alias-uav.json",
+      "bytes": 2912,
+      "sha256": "c995b5e813256cf854fcf073ce09c6b41cf8709f41f09cde4bb4043568fdae75"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-gs.json",
+      "bytes": 10079,
+      "sha256": "23b57bcac4cd313d46f6e6c4713a181b038ce7b2969438e3495ab7764c9b6383"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-ia-alias.json",
+      "bytes": 2918,
+      "sha256": "b3bf80202405aa0b171627fc7dc637020787b9877e1b67e3018a811cc9056c16"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-independent.json",
+      "bytes": 8903,
+      "sha256": "249d7b89332b108d8af1f7b0c7e2e7bd7bdfe6261d73ca3c9bc1b1e03858121b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/0-read.json",
+      "bytes": 2914,
+      "sha256": "6b6ab7abd0ff8d6ea1e771445387014d1f54fe7d3266bc3679349c7dc6c77dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-gs-alias-srv.json",
+      "bytes": 2916,
+      "sha256": "de81278affd60820b21457860924b8de23d38e02c6135c514a6777f9ac02b05b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-gs-alias-uav.json",
+      "bytes": 2916,
+      "sha256": "b2dccf7dad673098e269add54b9976bf7f5fb93912360be405965fffd3dd9f38"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-gs.json",
+      "bytes": 10083,
+      "sha256": "6658e79bdd9bffd5e77e758b77aca6d1a240791f3abacbcc880654931704e30c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-ia-alias.json",
+      "bytes": 2922,
+      "sha256": "8bda5030dc41a2aa30b127ec05b9536768711b0bd6c0cfd72aade9f390a56ff7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-independent.json",
+      "bytes": 8907,
+      "sha256": "abefb59b8e6463a6427f739ddee5c97f7868de09452a3dd0fd567e2f5fa61eea"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/32902-read.json",
+      "bytes": 2918,
+      "sha256": "abe9d7880942148d04f44ba731f29234c74afdd7226d7a03e00915f83049d3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-gs-alias-srv.json",
+      "bytes": 2915,
+      "sha256": "419db583274fa3f4d1e9d4e52ab306f4dfc5aafb087d653b64e2591a14e70cef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-gs-alias-uav.json",
+      "bytes": 2915,
+      "sha256": "56b9367f9bb7d3b57a6d252a22cd511b601fdcee4b42d8064e95fb706f69c7b3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-gs.json",
+      "bytes": 10082,
+      "sha256": "195c5904115cf0797eac307233307ffeb104ee5fad135729716b2ec50a230f5a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-ia-alias.json",
+      "bytes": 2921,
+      "sha256": "d0277332783f9c8b7c11c967d3711f71ea70d1048f8978472e90f0e84a4f68d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-independent.json",
+      "bytes": 8906,
+      "sha256": "51b6bd178670703304050b3319a7b995a6bc7e0d15360f7cfa30caa8b34b8a70"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial/4318-read.json",
+      "bytes": 2917,
+      "sha256": "3cde9bb2a2bd3deb33deb9c741a1cb5afefddc01c3ae32534bb7c0454c0e4a56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial-build.log",
+      "bytes": 1102,
+      "sha256": "5435f11cb151df2bb865e3d0ae780e7569f247f7e14c058735f251df5a1cdce8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial-ctest.log",
+      "bytes": 426,
+      "sha256": "91f6a36dd415436fbb0b1e55666ff2498b5b0bb0e1f807d06d6b15d41772100f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-dependency-initial.txt",
+      "bytes": 5429,
+      "sha256": "e709949972faca697f9d8156cb2ad5ec3f6dbb8a13c869adfcf4b86e50f712fe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-earlier-dependency-validation.json",
+      "bytes": 161,
+      "sha256": "b526503778dd2bd84289ab4b2e31fc928c40e7db7db2b6a0b306c16a65374227"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-earlier-mesh-validation.json",
+      "bytes": 34458,
+      "sha256": "1af01b6cee60a7f5da9ae88d0d31246bc6de0fa38d732ffad7f371864538f88f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-geometry-uav-dependencies-final.txt",
+      "bytes": 3849,
+      "sha256": "f46ec218f8836eb883b4b3cad2abad03460ad1e0f62d4f1c5dfe4c60a9f1fb7e"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-geometry-uav-dependencies-verified.txt",
+      "bytes": 3849,
+      "sha256": "70ddf23115a052a5401b4893f4767ea444608ca90139ac6a1c44daf3ec6456a0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-initial-validator-failure.log",
+      "bytes": 637,
+      "sha256": "37e2fe6037fcc02e4bf94ab4253796c2c3d74105f3753c434423f68d4c40f0c1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-validation.json",
+      "bytes": 42051,
+      "sha256": "5ecca85e5d98c6e4ae29fdff2b329ccfd565155cb218463143691d96bc5d66ac"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/job.json",
+      "bytes": 624,
+      "sha256": "d1503a8786369c7a4877f61dd4e8f258536faa94847c5bbd1de2c524e6a73515"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/result.json",
+      "bytes": 7897,
+      "sha256": "f109d4692b412aee23ab2468826227c0461bf5f52808783d784d5f2fc9dea2a9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav/job.json",
+      "bytes": 624,
+      "sha256": "a50c7c3b1f66ed323f7ba1b7fc141cb4dde31f4b23120d86fb90f87e73a73d65"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "b6e3404baee526d47b36988bab3f6b06e44f451a0c96fc76bf850cf72b679646"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/job.json",
+      "bytes": 624,
+      "sha256": "cb1db729bcbcdca0638cac44b1bf6ecfc722375e0d31ec835ab884529033d4d9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/result.json",
+      "bytes": 9997,
+      "sha256": "024bb48377d3dac8b7843feb68ba1b98b11a676c1e3294b1d50674db0e271dfe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/job.json",
+      "bytes": 624,
+      "sha256": "6f1acba807ceae478eb6fcb918e0ad391e8d3fb83504a8ba3508048f8580e763"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/result.json",
+      "bytes": 7517,
+      "sha256": "fc67bfc8647b3e37f04f39df2c17f7257c4e11718974294a7f2ae7c25b60ea81"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/job.json",
+      "bytes": 624,
+      "sha256": "1624fdd59476ae5357588c0808407f68e5773bc2d01ae5ac440306c51e3561b1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/result.json",
+      "bytes": 9516,
+      "sha256": "de6bd6cd7e4d0bcad045f37b3341c27e03c2b387c95497bc01bbb9876fdf0b38"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/job.json",
+      "bytes": 629,
+      "sha256": "b06756c9bd40f130d43847db0fe234122c49c219c6a6441f5e8e3b6b9345fb46"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/result.json",
+      "bytes": 9086,
+      "sha256": "8fe7492d04ee224f92e42a48a1c11fb22aba3d2b38187eb461d369bfe718e989"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/0-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/job.json",
+      "bytes": 631,
+      "sha256": "973f6afa0955a16559d061b8b60aef804465a15129b3f9e5cb25a7243c91f878"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/result.json",
+      "bytes": 8313,
+      "sha256": "c3c01b7dcf1cc1de12e731e3bb9422ce0a0d26a2c2fb9959586f27d6a5885183"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav/job.json",
+      "bytes": 631,
+      "sha256": "b7a39edbce49a02070e2628062aca68d5d744545893344c5df7ee5436f1625b7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "b6e3404baee526d47b36988bab3f6b06e44f451a0c96fc76bf850cf72b679646"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/job.json",
+      "bytes": 631,
+      "sha256": "6ed283cdb64c2b3ff3c4f7dc3c027caea730f6b730ea3f4a1daf537baf2e2d80"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/result.json",
+      "bytes": 10413,
+      "sha256": "9f06207383fec5fbd43943396c2e9b8fbbde5c84d2da08c02d615a9107962500"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/job.json",
+      "bytes": 631,
+      "sha256": "bfee8953e0f4061fa08a6224efcab322e9aec5f2a8275e8c0bb1551641542359"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/result.json",
+      "bytes": 7932,
+      "sha256": "39a81d069ee89dcc6691222b1710295522ebc31ea0eb3be503527383a6f042d3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/job.json",
+      "bytes": 631,
+      "sha256": "dcf58d015331645b82da9ff6d298bfd4603693d15a2ad1eff300f6830bed3241"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/result.json",
+      "bytes": 9932,
+      "sha256": "a7d44089494f3df5ccb786e467b23f53ab2f170b8bf107c9b027f931af74ccf8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/job.json",
+      "bytes": 636,
+      "sha256": "c8f5b60c03c4943e3d128d9cab8b9480c840a96ff4cb9f6392cb7a8472c70a49"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/result.json",
+      "bytes": 9502,
+      "sha256": "9146a245aec33a54545766e2c51e4cf4c6f24ffa23b8024e42482554b4ac3d16"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/32902-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "70c36c80d3d67f49773d3b69a555dfe6297b956a32344b31c07c1f69a06ae0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "c4ed4d80c4bd1204c2b0a0e819abc69436afdb96906b6b5004dea161a6187e29"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "b308a606cba9ecd0a97aa634b8bed20d7882b90ec3dd25ff7a0a7ea240d1e21c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/job.json",
+      "bytes": 630,
+      "sha256": "75bd5c8f2dd24952009bed3b9396ae165133caa0cd936c55b82e1491fffeefbb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "aea58ac3b3c0a8f392690a0d389bce0cd1f8e7d62e3004deceb9581a8573b313"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "eb162b5e8629798b1ca2adb8caae1dddb500873ca5500bc3b6af65ad05d5d9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/result.json",
+      "bytes": 8699,
+      "sha256": "c49d82af4ff5e36fed9b7ab4289afe7d3ef2bf336d73583eb4e87a6607e79578"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "6328e6e88ce6fe6c0b610f685d8e6af12302b3482319eac15e45e6af66dfc1d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav/job.json",
+      "bytes": 630,
+      "sha256": "344ce883a22e1fad9c1b5ac7c767050dd6250741581353b9bf75483d5e54119f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "f053b9bbe12dc4bc6482013a96d15226b4eebd1e657363e638a19f242ddbad85"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "802e7f87812613f2357a020586a6ca8c10f437fcaaff58dea97704fae9cc9b34"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "a05923bd59d8e714248121d13e3f7d53f8501d05093fb72c7057cc4e70b5fcaa"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/job.json",
+      "bytes": 630,
+      "sha256": "d70e226b2bc54a9a74ca183c29d97fcf8c566aeabd16dfbde31efa4f28950c12"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "7ac1aeb4c99baacea4c74508e6cc2b063bf5254a0cd7fc0436a03b48cb16e019"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "88f3ce972981cd3a55468ddb45357d54c41dbfbc52bd95ba6662a4d760c8a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/result.json",
+      "bytes": 10799,
+      "sha256": "99ff2c922d802518fd2203b436f550089cc99aa6d7d6b0d5a30a556f9502c370"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "df924d15f920dc3133ae8b58461122c4649deb3774484eff3b35987ae8c08ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/job.json",
+      "bytes": 630,
+      "sha256": "cdc9a803322c7966c496500e976ddf131d10256b7024ffea53db3cefa08ed5cc"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/result.json",
+      "bytes": 8319,
+      "sha256": "27bf78133c0ebfa4ca87dc9d53e05fcdcfd098059229e04c10aff5a4483641ba"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/job.json",
+      "bytes": 630,
+      "sha256": "200986949a5b44056a3462f260cc69e7cce03dc6755bd61cec6fc1b0545beefa"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/result.json",
+      "bytes": 10318,
+      "sha256": "0090483cf32baa9d34b676c06779a8a9a430dfa1412cb99fa2580f0adb55948d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/job.json",
+      "bytes": 635,
+      "sha256": "096843de5089f1260dcae24c8f29e41c3eba7c19bdf006628cbc54052498bf8d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/result.json",
+      "bytes": 9888,
+      "sha256": "005cbfff211c48da9b5e7cca8da1de02114c2736d4dbb79b6e74e681f8d130f7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified/4318-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-mesh-verified-validation.json",
+      "bytes": 42534,
+      "sha256": "51c8801b7a02ad22e98833c5c3998bb7b3bf8f234cd246a815dce5bed2294c66"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-native-analysis-final.txt",
+      "bytes": 2952,
+      "sha256": "12f8d669aa6895a0d1ec8ed82a208fef3839d6180ec5b7030f71c532ac5c31d8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-native-analysis-verified.txt",
+      "bytes": 2952,
+      "sha256": "29156a40ddb691bbdd8340681f44a4157d6a9ed8b416e73bb4d285db36f132c9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-native-replay-mesh-ui-final.txt",
+      "bytes": 2371,
+      "sha256": "99a221d004547916eef766d9354df7efb0216bc27e6bb7f789eaada0acb43ba9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-native-replay-mesh-ui-verified.txt",
+      "bytes": 2371,
+      "sha256": "9f9b24df1f11ecc2b90011dbfcd965ee1aa925c20922ccfafb977e6781ab4eea"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-post-transform-final.txt",
+      "bytes": 6187,
+      "sha256": "f4649bf658a0654fc4377eeb56292e84280ed6434e1da93b925c64cffab9a8ef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-post-transform-verified.txt",
+      "bytes": 6187,
+      "sha256": "4238dbe80b4cf6da8e0914f39e9eeeae4d97de727bd3bd59813e90d8689ffeeb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-valid-alias-build.log",
+      "bytes": 4381,
+      "sha256": "6a1176f330bcd8f77143b229896ae0d0215220f60a004f220b89f5934d9d4716"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs-alias-srv.json",
+      "bytes": 2912,
+      "sha256": "9442f5b539519941780e38ec8d3fc444335ed4bc9eb434435b785833f3297d72"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs-alias-uav.json",
+      "bytes": 2915,
+      "sha256": "fd760cfdb60a9d79148abc31fe54ed24ae2f78d261f65b67f4bb108ae9713ef4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs-read-srv.json",
+      "bytes": 10712,
+      "sha256": "7d2e3002f630051df6d0003a078a49218bf58cea36c6d617b4ad26482bb57e04"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs-read-uav.json",
+      "bytes": 10712,
+      "sha256": "f3f8b6237da0ac5fb7cd27e28c698d6c39434f472c53c2936b21f332acce8310"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs-unbound.json",
+      "bytes": 10696,
+      "sha256": "19b3aa3075f8957b6f9a8419c40c287be543a66475b897c2d81d9516aff6d0eb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-gs.json",
+      "bytes": 10079,
+      "sha256": "23b57bcac4cd313d46f6e6c4713a181b038ce7b2969438e3495ab7764c9b6383"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-ia-alias.json",
+      "bytes": 2918,
+      "sha256": "b3bf80202405aa0b171627fc7dc637020787b9877e1b67e3018a811cc9056c16"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-independent.json",
+      "bytes": 8903,
+      "sha256": "249d7b89332b108d8af1f7b0c7e2e7bd7bdfe6261d73ca3c9bc1b1e03858121b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/0-read.json",
+      "bytes": 2914,
+      "sha256": "6b6ab7abd0ff8d6ea1e771445387014d1f54fe7d3266bc3679349c7dc6c77dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs-alias-srv.json",
+      "bytes": 2916,
+      "sha256": "de81278affd60820b21457860924b8de23d38e02c6135c514a6777f9ac02b05b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs-alias-uav.json",
+      "bytes": 2919,
+      "sha256": "4dd66d778fde24e20f42a47ad49b8f3b98154f50342c9e9d3ef66c688ac9ef62"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs-read-srv.json",
+      "bytes": 10716,
+      "sha256": "32a8bb628f885ad60c6ef2c94c16b2031bacbe56cf52c0db3d6999c854674364"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs-read-uav.json",
+      "bytes": 10716,
+      "sha256": "f7d8b3644dbf6e187595a33cf481b455b2ee563db57e058edd91cd6019cde761"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs-unbound.json",
+      "bytes": 10700,
+      "sha256": "e4bdeb2eb125111c3661e4fd699d94100df3f6293dabd9397bce87db79f237bd"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-gs.json",
+      "bytes": 10083,
+      "sha256": "6658e79bdd9bffd5e77e758b77aca6d1a240791f3abacbcc880654931704e30c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-ia-alias.json",
+      "bytes": 2922,
+      "sha256": "8bda5030dc41a2aa30b127ec05b9536768711b0bd6c0cfd72aade9f390a56ff7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-independent.json",
+      "bytes": 8907,
+      "sha256": "abefb59b8e6463a6427f739ddee5c97f7868de09452a3dd0fd567e2f5fa61eea"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/32902-read.json",
+      "bytes": 2918,
+      "sha256": "abe9d7880942148d04f44ba731f29234c74afdd7226d7a03e00915f83049d3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs-alias-srv.json",
+      "bytes": 2915,
+      "sha256": "419db583274fa3f4d1e9d4e52ab306f4dfc5aafb087d653b64e2591a14e70cef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs-alias-uav.json",
+      "bytes": 2915,
+      "sha256": "4dd6cc8f3a7fff629d4f12d021283333ab99ca2428daaecbf32ec4f87eb6e963"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs-read-srv.json",
+      "bytes": 10715,
+      "sha256": "1c5466775e3ef9fd81107f93154ba1075e153204649009cbcaa82424b6ecd8d4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs-read-uav.json",
+      "bytes": 10715,
+      "sha256": "ba091e4ed8d5655b15998ca00c5ead3fbcce25933f2965f07be8bdf658be194d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs-unbound.json",
+      "bytes": 10699,
+      "sha256": "4d731e3849fe11104ef669a7c89ab40af37f58efe6951aae2bf75a95f8961be4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-gs.json",
+      "bytes": 10082,
+      "sha256": "195c5904115cf0797eac307233307ffeb104ee5fad135729716b2ec50a230f5a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-ia-alias.json",
+      "bytes": 2921,
+      "sha256": "d0277332783f9c8b7c11c967d3711f71ea70d1048f8978472e90f0e84a4f68d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-independent.json",
+      "bytes": 8906,
+      "sha256": "51b6bd178670703304050b3319a7b995a6bc7e0d15360f7cfa30caa8b34b8a70"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified/4318-read.json",
+      "bytes": 2917,
+      "sha256": "3cde9bb2a2bd3deb33deb9c741a1cb5afefddc01c3ae32534bb7c0454c0e4a56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified-ctest.log",
+      "bytes": 637,
+      "sha256": "41b8131df9493fb49cc7a478d9e68856929b58fc9eb1bf5b4495e7900a4d104f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-resource-verified-validation.json",
+      "bytes": 162,
+      "sha256": "f12a33c3795b4917086c8a6f07c4ab44ada1149be9f83f1ba5d691b214d4611a"
+    },
+    {
+      "path": "artifacts/dx11-native/microsoft-dxbc-format/D3D12TokenizedProgramFormat.hpp",
+      "bytes": 130378,
+      "sha256": "5862ef7c8b819f0d02ba73563a9df4dc0e89f11fe59d8f598def39122273c626"
+    },
+    {
+      "path": "build/vs2022/Release/D3DCOMPILER_47.dll",
+      "bytes": 4173928,
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGeometryUavDependencyTests.exe",
+      "bytes": 1905664,
+      "sha256": "d9f32c8fc6da09e68d77fa1ba3d9817c3c06ef1e759eaaac21d4babe0e9151ef"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5595648,
+      "sha256": "a63584046d890c892706f189a4fc70cb27fb03cc61e25e15779e9435661e5377"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 5096960,
+      "sha256": "9aa41c4061f811a7bf7deeaaa6e93d934d7756db10756e6ed42d017c9349fbcc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5595648,
+      "sha256": "a63584046d890c892706f189a4fc70cb27fb03cc61e25e15779e9435661e5377"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeAnalysisTests.exe",
+      "bytes": 1511424,
+      "sha256": "448fce7b483694cd31a29ba21a8546a53afe8d9c91de3c1536bff4b380b1b206"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5163008,
+      "sha256": "8da760fbdec4d9c181255255ddba32e5d2cdcd6ed6abf654a20b5241f7174cfd"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPostTransformTests.exe",
+      "bytes": 6120448,
+      "sha256": "32b765134a2fc9d058d17f11f92f055c343953c79a882368994deac200a9cb5a"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 127341,
+      "sha256": "8c790d1e7aa0b3fad65c0dc51d51562f0b1bc814f10909068f3aa1e34443ef88"
+    },
+    {
+      "path": "src/application/DxbcCheckpointModel.cpp",
+      "bytes": 22905,
+      "sha256": "385ab6e20e74fe5fe37a77c7b8fda474b173ccafb902aa17da3c2b179430de21"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.cpp",
+      "bytes": 10729,
+      "sha256": "d08bdec03480eee8ea1f385f62465a68ae2666c2bf9e411df3b60514c3a710c7"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.h",
+      "bytes": 478,
+      "sha256": "ab49457d542eb16727d3bf536785a806440b557be692eccddb62a97681bfd308"
+    },
+    {
+      "path": "src/application/DxbcIdentity.cpp",
+      "bytes": 17520,
+      "sha256": "03724d327c83ad5ba9293e1f28a989bee70c2c88f565b5f878cfe29d2b504009"
+    },
+    {
+      "path": "src/application/DxbcOperandArities.h",
+      "bytes": 5180,
+      "sha256": "f761e5b30f3dbbc39f15067c62997502466c023e4ecf81dbc60f2873514833b1"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 108907,
+      "sha256": "d54d602ff4d9fb488808b136066ca0b23ff5ad6e1b4864d0d750f7b9b2da1500"
+    },
+    {
+      "path": "src/core/Dxbc.cpp",
+      "bytes": 10880,
+      "sha256": "b51459d4fe590f97203adb5be16d2d62925ad657b7fb38c5a589c6d0639c4229"
+    },
+    {
+      "path": "src/replay/PrivateOutputs.cpp",
+      "bytes": 14612,
+      "sha256": "952ea204f6341772b9f54045ca39c64807223194446dc2e19c9258ff641b89a1"
+    },
+    {
+      "path": "tests/GeometryUavDependencyTests.cpp",
+      "bytes": 17036,
+      "sha256": "6dff59888cad345bba4508183e67dfc4d4ebb5bb2f7ca31aa7771aa2bb2bf739"
+    },
+    {
+      "path": "tests/HullCapture.h",
+      "bytes": 2515,
+      "sha256": "e36eb3dea875728450f7cdf187549b9ddf8e8458eb7bd4fc9ebb9588dd87f328"
+    },
+    {
+      "path": "tests/NativeAnalysisTests.cpp",
+      "bytes": 31795,
+      "sha256": "270952b75b6f9cbd87e16534c7db0c7e942d78297d9f35921a76529b91caa168"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 17450,
+      "sha256": "3bbc9cc6336d7af3913b73fb4cc02fd0e02baa7e2b1c3767a6859831dcc4dac9"
+    },
+    {
+      "path": "tests/PostTransformTests.cpp",
+      "bytes": 46432,
+      "sha256": "596e27a45cc26dbfaaae0d398340d046ef0c3218f86fba5dbbc837ebe3cb6acc"
+    },
+    {
+      "path": "tests/SyntheticCapture.h",
+      "bytes": 11154,
+      "sha256": "9d934788b995ba5361cfb92f3eebd2fb62ebf4041b149936cd8b1acaff9b617d"
+    },
+    {
+      "path": "tests/UavGeometryCapture.h",
+      "bytes": 4884,
+      "sha256": "91806507af042ae3f62f819d1ef1825f1b98438aa971d0c560e559a97e6cb098"
+    },
+    {
+      "path": "tools/validate_geometry_uav_independence.py",
+      "bytes": 6922,
+      "sha256": "e33255547c7325da60c7b871bac9edb503a19ab0ddda6a330a927fd859ce494c"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 9791,
+      "sha256": "3078eed71c6295e16057905da9f2ca92de55a85c11e199fe5906bd45eceae189"
+    }
+  ]
+}
