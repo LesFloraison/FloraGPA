@@ -96,6 +96,13 @@ checks a 120-second cooperative deadline; driver calls still require the externa
 watchdog. Raw captures, geometry, records, binaries and logs remain ignored. The
 compact ledger is `dx11-native-pixel-candidates-evidence.json`.
 
+## Primitive identity continuation
+
+The later [native primitive identity increment](DX11_NATIVE_PRIMITIVE_IDENTITY.md)
+adds observed IDs to candidate rows when their geometry has a validated sidecar.
+The initial matrix above still tests absent sidecars and unknown IDs unchanged.
+Instance and original fragment eligibility remain unknown.
+
 ## Remaining gates
 
 Preserving captured geometry alone does not recover stateful original shader

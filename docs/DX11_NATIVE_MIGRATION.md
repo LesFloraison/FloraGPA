@@ -18,7 +18,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
-| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private shader outputs and single-sample private output merging are tested on three adapters; original fragment qualification, identity, ordering and multisample reconstruction remain open |
+| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging and observed primitive IDs are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active typed-UAV and remaining precision semantics, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
@@ -846,3 +846,14 @@ starts typeless while captured typed interpretation remains intact. See
 `research/DX11_NATIVE_PIXEL_MERGER_MSAA.md` for reproductions and explicit limits.
 This completes neither original fragment qualification/order nor public PS
 debugging, and does not close P5/P6/P7/P8 acceptance.
+
+## Primitive identity continuation
+
+Native pixel geometry now carries validated shader primitive IDs from original GS
+output or private system-value SO passes. Tessellation uses a DS patch-ID helper:
+an independent D3D11 probe reproduces a conflicting inserted-GS result on WARP.
+Pixel bridges and candidates consume the sidecar without inferring instance or
+fragment eligibility. Upstream UAV ambiguity, including reflection-stripped
+declarations, remains explicit. See `research/DX11_NATIVE_PRIMITIVE_IDENTITY.md`
+for the 108-case matrix, real captures, independent runtime controls and remaining
+gates. Public pixel debugging, complete history and dependency removal are pending.
