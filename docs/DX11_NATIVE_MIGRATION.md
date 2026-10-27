@@ -834,3 +834,15 @@ Missing depth observations remain unknown, and reference storage stays unchanged
 Early depth, multisample coverage, original fragment qualification/order and
 public history/debug cutover remain required before P5/P6 and dependency removal
 can be accepted.
+
+## Multisample output merger continuation
+
+The private merger now uploads and reads individual native samples, intersects
+supplied raster coverage with the output-merger mask, and applies hardware
+blend/depth/stencil state to 2x/4x fixtures. Its 144-case extension preserves the
+546 single-sample cases. An independent D3D11 probe exposed a repeated typed
+MSAA copy failure on the local Intel driver; replay-owned family storage now
+starts typeless while captured typed interpretation remains intact. See
+`research/DX11_NATIVE_PIXEL_MERGER_MSAA.md` for reproductions and explicit limits.
+This completes neither original fragment qualification/order nor public PS
+debugging, and does not close P5/P6/P7/P8 acceptance.

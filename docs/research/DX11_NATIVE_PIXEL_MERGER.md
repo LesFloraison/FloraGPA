@@ -1,5 +1,9 @@
 # Private native pixel output merger
 
+This records the original single-sample implementation and its frozen evidence.
+The subsequent multisample extension and current version-2 result contract are
+documented in `DX11_NATIVE_PIXEL_MERGER_MSAA.md`.
+
 `mergeNativePixelOutput` consumes the project's compact native pixel-shader
 outputs and applies one lane to a private single-sample color/depth storage cell.
 This advances the P5 path from shader outputs to depth/stencil and blend effects.
