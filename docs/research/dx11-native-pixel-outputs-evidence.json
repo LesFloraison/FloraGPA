@@ -1,0 +1,3701 @@
+{
+  "schema": 1,
+  "scope": "private_native_pixel_shader_output_checkpoint",
+  "implementation_commit": "b28c5ef144ecb957a4fba8b51f6abc0a1455607f",
+  "source_sha256": {
+    "CMakeLists.txt": "4ca3b06ce4bc69a2e0b29164fe996178a4f3abe681b1861f063f00eb68aacbd2",
+    "src/application/NativePixelOutputs.h": "57f15f54e6aa0bb806e1e489db910e49512148fa3e7f014efab8c860d99519f7",
+    "src/application/NativePixelOutputs.cpp": "244cd72639ae52c70487375fefc27b26096e38baf4e3b5026dbfc334213f89b3",
+    "tests/NativePixelOutputsTests.cpp": "2e91554f4d0d47e62ef6400f91ac49c318c4c233081ba07e3a1db601d141beae",
+    "tools/probe_dxbc_pixel_geometry.cpp": "f0f8de612e44243eadfcfb309dc058884b05be114598d5620961772904917101",
+    "tools/validate_native_pixel_outputs.py": "213b5a58674ec38aa69a703ee71d12287230dbf03a0f8341f0ad4bbcaf608da6"
+  },
+  "binaries": {
+    "FloraDxbcPixelGeometryProbe.exe": "2101ca1b32a21f518f30c1ac390b88191127e76fa6af85c0f77932164b9475c3",
+    "FloraNativePixelOutputsTests.exe": "b5d32602ea956bb5ad6b45bd364acb70939fc7bf3f051612fbe2ae04d3049a4b"
+  },
+  "tests": {
+    "outputs": {
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "path": "artifacts/dx11-native/pixel-shader-outputs-verified-outputs.txt"
+    },
+    "pixel-trace": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "path": "artifacts/dx11-native/pixel-shader-outputs-verified-pixel-trace.txt"
+    },
+    "execution-trace": {
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "path": "artifacts/dx11-native/pixel-shader-outputs-verified-execution-trace.txt"
+    },
+    "trace-reader": {
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0,
+      "path": "artifacts/dx11-native/pixel-shader-outputs-verified-trace-reader.txt"
+    }
+  },
+  "ctest_tests_passed": 5,
+  "qt_checks_passed": 204,
+  "synthetic": {
+    "cases": 90,
+    "independent_gpu_draws": 90,
+    "negative_controls": 540,
+    "schema_validation": "pixel-shader-outputs-final-validation.json"
+  },
+  "real": [
+    {
+      "name": "bf1-0",
+      "event": 2010,
+      "adapter": {
+        "device": 140,
+        "luid": 73789,
+        "vendor": 5140
+      },
+      "global_steps": 408,
+      "private_storage_bytes": 3498796,
+      "output_evaluation_ms": 31,
+      "elapsed_ms": 1855,
+      "journal_components_compared": 0,
+      "output_sha256": "e40b3448cf200b85fc65d50ff9e10e736e2f662e03f505228d571cd1104e8d51"
+    },
+    {
+      "name": "bf1-32902",
+      "event": 2010,
+      "adapter": {
+        "device": 32103,
+        "luid": 73907,
+        "vendor": 32902
+      },
+      "global_steps": 408,
+      "private_storage_bytes": 3498796,
+      "output_evaluation_ms": 154,
+      "elapsed_ms": 2458,
+      "journal_components_compared": 0,
+      "output_sha256": "baa5fcb0d71cfdead9d01aa80ccc402912cd3a1a855c9303a353b4ede2fd77da"
+    },
+    {
+      "name": "bf1-4318",
+      "event": 2010,
+      "adapter": {
+        "device": 11352,
+        "luid": 68403,
+        "vendor": 4318
+      },
+      "global_steps": 408,
+      "private_storage_bytes": 3498796,
+      "output_evaluation_ms": 285,
+      "elapsed_ms": 2001,
+      "journal_components_compared": 0,
+      "output_sha256": "f379dd9327ca181702a980bfda7c9228f32b1d1ae4fc18c980d7a8380debe5c2"
+    },
+    {
+      "name": "gf2-0",
+      "event": 113,
+      "adapter": {
+        "device": 140,
+        "luid": 73789,
+        "vendor": 5140
+      },
+      "global_steps": 100,
+      "private_storage_bytes": 36576,
+      "output_evaluation_ms": 5,
+      "elapsed_ms": 517,
+      "journal_components_compared": 0,
+      "output_sha256": "62109dc8a6756c24d97810ac2bebfa943e8fe4fe4536278a57d3c049fe6b8b0f"
+    },
+    {
+      "name": "gf2-32902",
+      "event": 113,
+      "adapter": {
+        "device": 32103,
+        "luid": 73907,
+        "vendor": 32902
+      },
+      "global_steps": 100,
+      "private_storage_bytes": 36576,
+      "output_evaluation_ms": 8,
+      "elapsed_ms": 866,
+      "journal_components_compared": 0,
+      "output_sha256": "2e4440a6665525ff39f81a8b8714bbce28594fe859b8d2ab12405d16d2bee3f3"
+    },
+    {
+      "name": "gf2-4318",
+      "event": 113,
+      "adapter": {
+        "device": 11352,
+        "luid": 68403,
+        "vendor": 4318
+      },
+      "global_steps": 100,
+      "private_storage_bytes": 36576,
+      "output_evaluation_ms": 11,
+      "elapsed_ms": 923,
+      "journal_components_compared": 4,
+      "output_sha256": "741f7543c72f8b48fb6006a70ebb04d8561df5f37bf1965e6cf831e3f0bb024a"
+    },
+    {
+      "name": "helldivers-0",
+      "event": 200,
+      "adapter": {
+        "device": 140,
+        "luid": 73789,
+        "vendor": 5140
+      },
+      "global_steps": 1316,
+      "private_storage_bytes": 128760224,
+      "output_evaluation_ms": 553,
+      "elapsed_ms": 2399,
+      "journal_components_compared": 0,
+      "output_sha256": "c9e6ff942297b57be2f0819bd7a269bc926d8acbd208dee0cbe297c8675608e3"
+    },
+    {
+      "name": "helldivers-32902",
+      "event": 200,
+      "adapter": {
+        "device": 32103,
+        "luid": 73907,
+        "vendor": 32902
+      },
+      "global_steps": 1316,
+      "private_storage_bytes": 128760224,
+      "output_evaluation_ms": 925,
+      "elapsed_ms": 3418,
+      "journal_components_compared": 0,
+      "output_sha256": "bd667eb9438a713dc5ad1039ba01ccc297e4d0d94c0b77beca3ba4fa0c967207"
+    },
+    {
+      "name": "helldivers-4318",
+      "event": 200,
+      "adapter": {
+        "device": 11352,
+        "luid": 68403,
+        "vendor": 4318
+      },
+      "global_steps": 1316,
+      "private_storage_bytes": 128760224,
+      "output_evaluation_ms": 5921,
+      "elapsed_ms": 7701,
+      "journal_components_compared": 0,
+      "output_sha256": "27b2d65bac523ec33ea1e3f4c5e8e187755fd03b560bf53a5462166cb565a63a"
+    }
+  ],
+  "captures": {
+    "bf1": {
+      "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "event": 2010
+    },
+    "gf2": {
+      "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "event": 113
+    },
+    "helldivers": {
+      "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "event": 200
+    }
+  },
+  "limitations": [
+    "Private quad outputs do not qualify original fragments.",
+    "No original depth/stencil, predication, alpha-to-coverage or blending is reconstructed.",
+    "No original fragment ordering or cross-primitive resource effects are established.",
+    "Real-frame probes are smoke observations; the journal comparison shares the executor.",
+    "Copied payload bytes are not process peak memory.",
+    "Static imports are not a dynamic module audit.",
+    "P1 debugger-engine closure and P5-P8 completion remain open."
+  ],
+  "artifacts": {
+    "artifacts/dx11-native/pixel-shader-outputs-build1.txt": {
+      "bytes": 44527,
+      "sha256": "171122319ec06b9764bbd359122628ed35253f187302f69915715ed6da27d0d6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build2.txt": {
+      "bytes": 1915,
+      "sha256": "08c35a5eb8877b6aa0599542d85a3619fde632664fe9969ede70e1eeebe1355d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build3.txt": {
+      "bytes": 1915,
+      "sha256": "a2668279f1439a38bd0ca855af0b56d72e26682531fb39888d56be262a193448"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build4.txt": {
+      "bytes": 1007,
+      "sha256": "2188e748b0111d45a902756954218dca7a44e56c67d42a2f29a6d96a49237d53"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build5.txt": {
+      "bytes": 1007,
+      "sha256": "2188e748b0111d45a902756954218dca7a44e56c67d42a2f29a6d96a49237d53"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build6.txt": {
+      "bytes": 1941,
+      "sha256": "76c3d36f60ca87c46e919d692b41809bd1c9a31dd0c289ed3d7b3f6b8283a415"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build7.txt": {
+      "bytes": 4159,
+      "sha256": "5270cbfdc8af82f5dc915b60fe4342014a892bacb7ce5ecfe579e6f985746d5f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build8.txt": {
+      "bytes": 5883,
+      "sha256": "334800ed87568c65017c9f8efac99cc867d2429d07cf214af3e985d819d21988"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-build9.txt": {
+      "bytes": 8389,
+      "sha256": "7586f196470ca40484cb0949cff708a8c2cc05205c3ae50e29072178ef7c7cf4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic-tests.txt": {
+      "bytes": 605,
+      "sha256": "e6b7b64415677a4d7af024eb950a5501bbe3c6985a94dcb28acb0e92ffcf6b95"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic2-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic2-tests.txt": {
+      "bytes": 652,
+      "sha256": "cb35039801101453e41bd156a3b3174f72f211c193ee1ee80b6a0e46fdd6cb81"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic3-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-diagnostic3-tests.txt": {
+      "bytes": 478,
+      "sha256": "f6d37b5f06060fae1b3d9ebf81315db40c6dcdbcc5d0639d92c16bfd657739c4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-ctest.txt": {
+      "bytes": 428,
+      "sha256": "49d69c4c651dd57dc804e438c942935b646dac49298b9b397b407305b8b1dee7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-coverage.json": {
+      "bytes": 8004,
+      "sha256": "90c7640ccd7a5d3fbf2844a4201c6b082ab19d24bf64cd50792c013df042ffac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-discard.json": {
+      "bytes": 8002,
+      "sha256": "2e20b73fed69862ed39c18b7c3c069cf2f3daf98d6f768fee6fc032bcfb264d9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-greater.json": {
+      "bytes": 8108,
+      "sha256": "ede6ffd0e0500a85f06c0ab8ff83b7fd950237099f27058b52e1bd9eefbaf0a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-less.json": {
+      "bytes": 8084,
+      "sha256": "43935cc3a0b43b0782eac36764394415069e5bf6daa9cb3127b1736cc0f5f030"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-ordinary.json": {
+      "bytes": 8004,
+      "sha256": "53ca826122d8f7c61225c98ebe9ae7428287abadc36b639a4c2a04a27787e014"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-0-signed.json": {
+      "bytes": 8004,
+      "sha256": "9f496987c2566749050828a99d29d9fc131212067754b7c5ec3f54a930eb8554"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-coverage.json": {
+      "bytes": 8002,
+      "sha256": "e185ce5b6395dffa76419829eb3e96c0263bc7cb9e3cf830363965075fc389bd"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-discard.json": {
+      "bytes": 8001,
+      "sha256": "4a707a131f6f203f58151529a70830fc590e2ea94ae3ad8962f3f3448cade112"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-greater.json": {
+      "bytes": 8177,
+      "sha256": "e20ad59ec094ebfa386070721db259d36b4916a6a90f2adf0fef80ae2d121c32"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-less.json": {
+      "bytes": 8153,
+      "sha256": "ec8e6df4ea751a25c4a446c633bdf63e74f42556fcd030e36dd8be36c097f71d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-ordinary.json": {
+      "bytes": 8073,
+      "sha256": "99b337eb83cd12c5405d366623df13616d4c5e5031a7f4a7b713cfa3699fb07a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-1-signed.json": {
+      "bytes": 8074,
+      "sha256": "b68796ee9715733160deb7eae9ff17d7141cf14ef7e0cbcee9a06cea238104a8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-coverage.json": {
+      "bytes": 8140,
+      "sha256": "7c490084a2e93b7c9ac9e746c97e2ec77d0205453c0c1a5f8ca7cb0a6808f257"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-discard.json": {
+      "bytes": 8140,
+      "sha256": "9a0547f632d0dff6ce0af46fa9f38a3d3c8a052822ba710c596c30be542cdd31"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-greater.json": {
+      "bytes": 8386,
+      "sha256": "928f6ee9d46e26ababeb946bf951488b861aee8bd06928d6d20e617661976736"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-less.json": {
+      "bytes": 8362,
+      "sha256": "6286d05027c1d82be4841cbfd029fa6122aeb913298937246b69fee05bb79a18"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-ordinary.json": {
+      "bytes": 8282,
+      "sha256": "22c9d35538fcc819bcdac7a31d057f2591ecb12ed0c1aafe5f0f608c732d1057"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-15-signed.json": {
+      "bytes": 8286,
+      "sha256": "b588cf41ec3428cd91bcb8bef67779389f1c55172f3dde745d677046406c157d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-coverage.json": {
+      "bytes": 8000,
+      "sha256": "5209eb117a8d820592c8ec8dab04b40e25453fadf7b7a57a0b9f6369d7ef7ac7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-discard.json": {
+      "bytes": 8070,
+      "sha256": "bb6374e34528c670fd34ba26d694b1038d109201c1ef8553fa12fd8b77bcc213"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-greater.json": {
+      "bytes": 8246,
+      "sha256": "7ba8af86698e468258a65de915ce66ba98723109ab207523e410d7f36835cce6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-less.json": {
+      "bytes": 8222,
+      "sha256": "a559c9f4fade018e840cadd6eee9ecd58bed2c2f0935e430ea9ac0441c0fb80c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-ordinary.json": {
+      "bytes": 8142,
+      "sha256": "5689bc2f21cfa6a1195c3e27cb3701e6fff674a564d5604f8e67590d445de6a5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-3-signed.json": {
+      "bytes": 8144,
+      "sha256": "e9d392991f4b21c85703865177e427f2328f09948316e876b535fe20fa035a12"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-coverage.json": {
+      "bytes": 8071,
+      "sha256": "5adb6dfcee99e8a0ba9334c9724c007b6a5d3dead4ee806778ff27b0c6951216"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-discard.json": {
+      "bytes": 8000,
+      "sha256": "5d69864f6a52cfae2353f513c4a0709c2dcb1b29e6da849e429f6c63fe463067"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-greater.json": {
+      "bytes": 8246,
+      "sha256": "ac28d3e835118126c70a3d10d84beb5f6a95bb1b298242660083f5184dd943cc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-less.json": {
+      "bytes": 8222,
+      "sha256": "bcbbe0dc0281fb0ff0d2f1fc8cf4e76cd2332aabc1f5e21713623286fd6fa1d2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-ordinary.json": {
+      "bytes": 8142,
+      "sha256": "7068498c2df5abce78a5cae9d95669ae04aa3df693eb6e69d4390ab663bf284b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/0-5-signed.json": {
+      "bytes": 8144,
+      "sha256": "c8bd8617f45bc803930ce0c8335b1282aa09e2f6928b7ac9357b7f71cebf747d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-coverage.json": {
+      "bytes": 8011,
+      "sha256": "a94a1466c73d46ec9b4fa48cf9d9b08ae874b67cc66f726bb7018ef5221afa67"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-discard.json": {
+      "bytes": 8009,
+      "sha256": "84a8e7869239462029396aae08469a57ffafaa84dc2caea019e4780bcd021df6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-greater.json": {
+      "bytes": 8115,
+      "sha256": "9e6489b8576c255c725163b7c993fab58bcdfaae682627139569caf40c327ef6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-less.json": {
+      "bytes": 8091,
+      "sha256": "f611e1972b88a7093bf0dfafaefbfa9c06d7c92cae16d9e548629de02ffbd3f5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-ordinary.json": {
+      "bytes": 8011,
+      "sha256": "abdadd51d04c26d1bf30f0fa63e6cd2225598035e4742df005ea51db94d8832b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-0-signed.json": {
+      "bytes": 8011,
+      "sha256": "ab89682e5ceb87dadec73b0a268fc0441969485a28571ff13353a0c8d06db46b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-coverage.json": {
+      "bytes": 8009,
+      "sha256": "5bef45e3fa39824cf2317aae210c264ddf31971c1bd204be431282c760fc7912"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-discard.json": {
+      "bytes": 8008,
+      "sha256": "2f50906502d835e8d7e410fe2dde16af8942e0a85d6b88455547d4e04d75b5e4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-greater.json": {
+      "bytes": 8184,
+      "sha256": "1b3489e3b15e0f7b4938beef18003b7a90e6842835fa96f2853a2e48e577f3ad"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-less.json": {
+      "bytes": 8160,
+      "sha256": "389f6814c61fb6806e62931b4bb757a3623145159a1df84ddc5d0cb8db3731ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-ordinary.json": {
+      "bytes": 8080,
+      "sha256": "d4c24821fb822318e982ae21fa11edd5c7d78ad80a2764eb8a515e995cf1dea5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-1-signed.json": {
+      "bytes": 8081,
+      "sha256": "bd17c8476ee5c6a7efcb9ab7cc95f332143b32ec44204af5735c6c977071b439"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-coverage.json": {
+      "bytes": 8147,
+      "sha256": "5d7d70a0ecd3dd06d0f72fc40a63b5a4221133bdb658da5b9a70689c476e57a8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-discard.json": {
+      "bytes": 8147,
+      "sha256": "28fdb633d20443cfad2beec0ee6e7d308c0a400cca6d3987ad54371f8cfaf420"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-greater.json": {
+      "bytes": 8393,
+      "sha256": "6761a66dd33a36870337b2987da8f9dcfe4d82c21f5ef29ed0d105c599e3e5d1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-less.json": {
+      "bytes": 8369,
+      "sha256": "77d19b59535456990207688ef299da95dba088d03afd55c577b79ceefccbe26d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-ordinary.json": {
+      "bytes": 8289,
+      "sha256": "3f4da69a169131f53480f1bae798b2e83a07298f91facf7f86b92065cf00aadd"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-15-signed.json": {
+      "bytes": 8293,
+      "sha256": "e2fe59bbb7c158dd89694ab1084af7db99f06576a9d2e5d438b8b669b0f6ef45"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-coverage.json": {
+      "bytes": 8007,
+      "sha256": "9fdb70e74d9b08a72ea309188702d96fec047d08ad20fb8fb68da299a4042830"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-discard.json": {
+      "bytes": 8077,
+      "sha256": "8399cb981d1f4898668b70aea44d560cc63b911c66e8b1652b7a338313ef761f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-greater.json": {
+      "bytes": 8253,
+      "sha256": "9a31729be4a493e789e1491dc0f5875f94a739962a683d0bd73a8978e60f7933"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-less.json": {
+      "bytes": 8229,
+      "sha256": "2345fad63431141adaea560afbed849b8a11871f5babb52eb238f5fefae2d35d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-ordinary.json": {
+      "bytes": 8149,
+      "sha256": "0a46b7e88026d09582235a2ec4bd7773e28563e74031f9fd19d8de5979c463f2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-3-signed.json": {
+      "bytes": 8151,
+      "sha256": "b8295cb1b256a07c03895b116fa20643a609161f17747023a0204825b7f552eb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-coverage.json": {
+      "bytes": 8078,
+      "sha256": "1b36720350bd2e50cdb9be52303c7f0165800e44d36299f413762b7feff39caf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-discard.json": {
+      "bytes": 8007,
+      "sha256": "c890fdeae2e562c9271d257fd88426684d9f05a88ec24441dd8f5519f2568850"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-greater.json": {
+      "bytes": 8253,
+      "sha256": "514d860f06575b30a5990b4dde49bc399589c7d509c6ca071d7c0b6f0db3bd39"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-less.json": {
+      "bytes": 8229,
+      "sha256": "cabe4e12a76fe68db57d32d9eefd97b8a664f5a45cd4050f4ff090f76ebe828d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-ordinary.json": {
+      "bytes": 8149,
+      "sha256": "7334ea3fdb65127993779b0ab12a5e0fd358314cc4f945eed878b4490693525b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/32902-5-signed.json": {
+      "bytes": 8151,
+      "sha256": "e158a6e7ef581975a19fdd232cc9a2a8dbd4ed47b1560638b5eb0dde0a7bd042"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-coverage.json": {
+      "bytes": 8030,
+      "sha256": "8ab62a3a0a9ff3ce93af120cc7334d065759f4bf1d023dd23e5ba7e5d134bd3d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-discard.json": {
+      "bytes": 8028,
+      "sha256": "6be63c2c43dd43258cd892b8bb4f512a55c246739d9e2dc656bfe734ea04d9fa"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-greater.json": {
+      "bytes": 8134,
+      "sha256": "53037c5634576f572b72cf0064e828bd53b171635ce247bb111b1a5b0f3b11fd"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-less.json": {
+      "bytes": 8110,
+      "sha256": "9c8ad21e868891d68d06b3b6b7952cba7347aa2352df44736c87245ca9967c82"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-ordinary.json": {
+      "bytes": 8030,
+      "sha256": "ac854b71451255464eb27227788cfd0595e94ad12d38edc25f7a3f5000a7fdff"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-0-signed.json": {
+      "bytes": 8030,
+      "sha256": "956b1ec16511a9a2bb57a1fefccac6e0a05fef80da283d772f5c923d5ceb20fc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-coverage.json": {
+      "bytes": 8028,
+      "sha256": "b3bb9973943e25831688532906431dc46a72c8eb3a8d1ac703df90218e510fbb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-discard.json": {
+      "bytes": 8027,
+      "sha256": "dedc917fcc285373c7da636042dcdf16b8ea8971505263af2e4e5743c3e8381e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-greater.json": {
+      "bytes": 8203,
+      "sha256": "18705178aec5bb33dd50b4f89f35a5f27252d227bc835a10a88eba7ced632804"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-less.json": {
+      "bytes": 8179,
+      "sha256": "fcbea2a4e886727c4939adebf480577b503b45cfbcf4e9e0dc5096a6f9f735b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-ordinary.json": {
+      "bytes": 8099,
+      "sha256": "9c5c15bc2743b495226a0dfea7c20aef952a3069ca0f629fdb17c828dc6db5cc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-1-signed.json": {
+      "bytes": 8100,
+      "sha256": "4464ec7450a8fc72cee0eb22426ad964db83201d632d903ad56ec934d26b502c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-coverage.json": {
+      "bytes": 8166,
+      "sha256": "e3a4e1caaf8df92a2269d672f3238c14a76a39458762f92bee503131d56331a3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-discard.json": {
+      "bytes": 8166,
+      "sha256": "7dbd8f9bc06a470f42bc33b16a1a20d465e52e724fc3aa1e932416a1e373c831"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-greater.json": {
+      "bytes": 8412,
+      "sha256": "51539233eae26efe65756b21e78538b754773854db034cc42d8d105833e0a9ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-less.json": {
+      "bytes": 8388,
+      "sha256": "a3f318d25c7824891bd941da1a7ca9e6bb5ca6cb82632f59887b5b55ceafe642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-ordinary.json": {
+      "bytes": 8308,
+      "sha256": "de79f227eef1af8f6326ec6eb7e87953c56a46978ebfb208eb92394cd559a6c9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-15-signed.json": {
+      "bytes": 8312,
+      "sha256": "264b796ae21246bbad83be2f1952068a06b23a600cba6ff587912592734f5b07"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-coverage.json": {
+      "bytes": 8026,
+      "sha256": "e8d793c61c17caa59d195858be14d195366ffa28dc0481bd5eb80c502888bc2e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-discard.json": {
+      "bytes": 8096,
+      "sha256": "d21eac651f67beb8d45ccd5961fbed74d699d26aedffc97d39ad30753edf955c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-greater.json": {
+      "bytes": 8272,
+      "sha256": "198f81195b1611ab41c94c83adc6c9caca323e66ad10ea18782b73f1199bf4c9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-less.json": {
+      "bytes": 8248,
+      "sha256": "40d9bc1f8d8220077294e7689ac7951f31dea64ebbd0d31a3c20b44b7c079530"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-ordinary.json": {
+      "bytes": 8168,
+      "sha256": "ce62c14d4937e523e8a15d2dc04446f2b9afaeac9a4c7feb80047e62b1b8bcf8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-3-signed.json": {
+      "bytes": 8170,
+      "sha256": "b993770b124835d05e6f089cb4bcb49aded7c0fa212d3a580a2e5cd4bfdf5a34"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-coverage.dxbc": {
+      "bytes": 816,
+      "sha256": "7f936ed65ddca290dfc9916a855c5ca57ba75255e3014e7b416c0baf29969085"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-coverage.json": {
+      "bytes": 8097,
+      "sha256": "d5f3aeb6fde506d55c3b8c118f5420c81bb052c43994a4888a50ac64f793133f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-discard.dxbc": {
+      "bytes": 812,
+      "sha256": "b1d2bc9cf76d404d5394bf6cc5b8246097ec8a1678bece0a5e66384a1207f642"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-discard.json": {
+      "bytes": 8026,
+      "sha256": "d79be83eb91171735b01ee557e1344ca5d5ab805d0ed09caae6dce3c4135032c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-greater.dxbc": {
+      "bytes": 784,
+      "sha256": "d0e5105c5cfc379c1a4087ea1d8ccab5f9f3ea6534a0b0638a465136d9eb43d8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-greater.json": {
+      "bytes": 8272,
+      "sha256": "fd423254a4f8508f9131eceb31b88305808a25786786ec282844ea63ee79135b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-less.dxbc": {
+      "bytes": 780,
+      "sha256": "4dc58bf2a4e35d37e012a2f5205ffd81c82d20b2c604428af1c63dbc11318f09"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-less.json": {
+      "bytes": 8248,
+      "sha256": "a9d02845ec4c6542c42c7116628e5e890aef864e1744beb23240a353072c5ba3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-ordinary.dxbc": {
+      "bytes": 772,
+      "sha256": "5cbc7a0a330b2f407df10676604a26cb0b9d4fb07659eac6f14f9e8420c8eccf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-ordinary.json": {
+      "bytes": 8168,
+      "sha256": "30bde668acf9019befb9e3e3309010ed1710e791e2488be08391cb5ec0a4e518"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-signed.dxbc": {
+      "bytes": 772,
+      "sha256": "7fd75f5a25cb732587ac53dd0b9b7179084e3bbb4e6bd08c4fab1a1c1f983e79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-evidence/4318-5-signed.json": {
+      "bytes": 8170,
+      "sha256": "675dedd99693f0b963400133b03fb6c33530e0ea859dde0ed64398db625606d1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-final-validation.json": {
+      "bytes": 20863,
+      "sha256": "b4777b3370113ed90b89155bb99aeea9927c5ab0c9164c98c43682679fcc7a21"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-first-console.txt": {
+      "bytes": 982,
+      "sha256": "446a96e169b5522a3247e35776bdcfd1f710a823a03e12f36edb43fc2a4c6683"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-first-tests.txt": {
+      "bytes": 518,
+      "sha256": "c59816d37640766435e6992b461f6ee8b474ef33b4520ce9ce70f3353499efc0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-fourth-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-fourth-tests.txt": {
+      "bytes": 5652,
+      "sha256": "a8178e8c9f77fd1dadc804f145da4bdff1bbc75d5c5b2dc61f21c4f984efd772"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-imports.txt": {
+      "bytes": 828,
+      "sha256": "8becd42be1c3ba2bb5f3e9c7757637ee0cdf0aab9d720bc9f438e18d651908cf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "89558b9cf78f3dd8dcc97d6a7cc97153efea57f3bcaa6e9c43906575bbb5839a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "f0e90d70b1f3045fc73b465f1c9cc93e4794c0f9bc33ed252065991aa3c0e104"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "726a5d8ff647c94f582b5c714267b11257e3e362483b60aba9bb45bdd41bb9be"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "c236aa664a27c248fcfe3124edbfaa6c0e294fb6f24d6cc43aacfbfaee856088"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "460f67acb7d53dfb5e0bf1bde48c32365f2ae67055972b9b53f0709d5c352b30"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/records.json": {
+      "bytes": 4426,
+      "sha256": "b62d74a4ec7711088ba9e26f60d5c5c2daf35cb9e68b9266bd00d09fe1e6d1e7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "c236aa664a27c248fcfe3124edbfaa6c0e294fb6f24d6cc43aacfbfaee856088"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "c236aa664a27c248fcfe3124edbfaa6c0e294fb6f24d6cc43aacfbfaee856088"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2744b63149f221d147d36795f67b99478e79e106581020d0178f34770d1500f2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "cbcbc2063746d7fdd206e205fa5911b8028c91a8f206cb1ae0575f62642bb46d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "87a49c69a4c8a54a128c01e324e815ed0985bb6949a5cd375bc889927602cbca"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "13f8bc41ab0b1874be716a97858234ae45f19acaf46c71d299d1c209d0cde15d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "e11e502d9d6cbdcdcbe9bff893866028d2c8fdb52d09b28a6cd49542670aa160"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "4fb7281b430bc09a99a6e99ec45ef473184d0ddf3cdaa131b0781328c51ea3ad"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "008886eee020b3d9c9ff2b1b40de02944313dca8253e1accdcb70571bbd66846"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/records.json": {
+      "bytes": 4426,
+      "sha256": "f80b2b218ea734be3ce8fc3056accf99be04c47f257ca5ee87d71324ce503503"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "4fb7281b430bc09a99a6e99ec45ef473184d0ddf3cdaa131b0781328c51ea3ad"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "4fb7281b430bc09a99a6e99ec45ef473184d0ddf3cdaa131b0781328c51ea3ad"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2b36a03dfc4c36428e64205ff200764494753d9f329a4ea79a30a70ce65f1946"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "a48e9ef4feae7984e4ce445d9ae8a8086df7c0f902f4a4caaff39c50f4e445f7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "a6f52c43dd134a720ed25ab7a553d536cb5be25f870c41eba43b6799b9e7a555"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "9433a6762df1323cfd391bc1633cc8218c26fab9326ea3e416b9c696a8fce5b3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "ec6f4ff47a38b14fb8bd4dbfbaf01266fac9bf26edfb6625a95986455d3ca64f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "fee4680a51f20cd88b4f3202a76e1ed06fff487b6fd55cac030ee2642ecb0fb1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "5e2db2b3ac1a23f70ce9eb274c3eeb120fd90c6177589b03b0183384a81ca095"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/records.json": {
+      "bytes": 4426,
+      "sha256": "d97570b4cc4fc3f404f979854ba07ca815e9a5918175d2810ef80c5818c72f14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "fee4680a51f20cd88b4f3202a76e1ed06fff487b6fd55cac030ee2642ecb0fb1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "fee4680a51f20cd88b4f3202a76e1ed06fff487b6fd55cac030ee2642ecb0fb1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/bridge.json": {
+      "bytes": 1075,
+      "sha256": "900d574bb2b8fd4170052f34c868467fb8946f12f7e1688392f324e3f87f10b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/pixel.asm.txt": {
+      "bytes": 7756,
+      "sha256": "2e75ba1681009340f3a917923e5b407bb026323c75e0fa4e7075edc1fef9d79d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/pixel.dxbc": {
+      "bytes": 6244,
+      "sha256": "14aa6a495ad54aaa94f6463da002b07777ed39e8a0edc5c05c2aae2d33e82ed3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-ps.asm.txt": {
+      "bytes": 7904,
+      "sha256": "56e94fd44bde44fadb5e1b823c9ae6fb3040f81a845689fc69151f6ec05a72f9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-ps.dxbc": {
+      "bytes": 6684,
+      "sha256": "aa3e234c0a22c254b0f68a74959af7b01886cef8260998a6f4c6d84aef91946f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "2f3d7c10957578cd0ffcf1b907938a76ea6a30e52ddb85ed48c842631165ac12"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/records.bin": {
+      "bytes": 4624,
+      "sha256": "f718b59056edb189f333a190ee08580b10d0127faa1925a044a4d2a2a5db813b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/records.json": {
+      "bytes": 3624,
+      "sha256": "2c72d12c3259859e191044e84894d84720473ecee3217385259ac9a88a0b9c79"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "2f3d7c10957578cd0ffcf1b907938a76ea6a30e52ddb85ed48c842631165ac12"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/input-4/vertices.bin": {
+      "bytes": 48,
+      "sha256": "2f3d7c10957578cd0ffcf1b907938a76ea6a30e52ddb85ed48c842631165ac12"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/original-ps.asm.txt": {
+      "bytes": 10206,
+      "sha256": "3007aa232535288b21e66f0aebd41009625515787000526ba7c5dbb32d6c1527"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/original-ps.dxbc": {
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/pixel-shader-outputs.json": {
+      "bytes": 29941,
+      "sha256": "e40b3448cf200b85fc65d50ff9e10e736e2f662e03f505228d571cd1104e8d51"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/report.json": {
+      "bytes": 2656,
+      "sha256": "f389feb4c0fb0a8038d2cf2a78852463f3a303893b1c3772312f70e4106889a5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/source-geometry.bin": {
+      "bytes": 1021440,
+      "sha256": "1f6e10ba1229cb7770253df51f2a99a5f175aaf1c4028d482095dc2a2e31b444"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0/source-geometry.json": {
+      "bytes": 3576,
+      "sha256": "c7a1d4fd29a7917faf26cd4beb55a25c7dff4d6b99385dbf06caf3495223f349"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-0.log": {
+      "bytes": 2840,
+      "sha256": "0076a92a3131077ed44320c53f5bfe1e645218c3c6733edf9508fb0c492a3679"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "89558b9cf78f3dd8dcc97d6a7cc97153efea57f3bcaa6e9c43906575bbb5839a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "f0e90d70b1f3045fc73b465f1c9cc93e4794c0f9bc33ed252065991aa3c0e104"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "726a5d8ff647c94f582b5c714267b11257e3e362483b60aba9bb45bdd41bb9be"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "6328d150ffe0967269743f0edc4e0d3359bfbe73799cbf6ddc2985ed1d276e46"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "1da8381fa0ebee24055d5182d3b60c16891b7c99852e4cc756f56582c5bfda40"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/records.json": {
+      "bytes": 4430,
+      "sha256": "6346b6a56fe3821b4006a9b1a74997d0d0a1a8492bad051ea077fe10e711b3a9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "6328d150ffe0967269743f0edc4e0d3359bfbe73799cbf6ddc2985ed1d276e46"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "6328d150ffe0967269743f0edc4e0d3359bfbe73799cbf6ddc2985ed1d276e46"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2744b63149f221d147d36795f67b99478e79e106581020d0178f34770d1500f2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "cbcbc2063746d7fdd206e205fa5911b8028c91a8f206cb1ae0575f62642bb46d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "87a49c69a4c8a54a128c01e324e815ed0985bb6949a5cd375bc889927602cbca"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "13f8bc41ab0b1874be716a97858234ae45f19acaf46c71d299d1c209d0cde15d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "e11e502d9d6cbdcdcbe9bff893866028d2c8fdb52d09b28a6cd49542670aa160"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "e630732f8036d2eebd25b4f428dca0dcef51add37232ca7e0f1c5334b84a81a3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "7866d50b528dccdbf7c467e9605bc255d2255e4e01c2175e74736f2f711de840"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/records.json": {
+      "bytes": 4430,
+      "sha256": "6c59141ebe4c2ff79905f2b660d2fbda991367e2df0607191785f99bfd5a25d5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "e630732f8036d2eebd25b4f428dca0dcef51add37232ca7e0f1c5334b84a81a3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "e630732f8036d2eebd25b4f428dca0dcef51add37232ca7e0f1c5334b84a81a3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2b36a03dfc4c36428e64205ff200764494753d9f329a4ea79a30a70ce65f1946"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "a48e9ef4feae7984e4ce445d9ae8a8086df7c0f902f4a4caaff39c50f4e445f7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "a6f52c43dd134a720ed25ab7a553d536cb5be25f870c41eba43b6799b9e7a555"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "9433a6762df1323cfd391bc1633cc8218c26fab9326ea3e416b9c696a8fce5b3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "ec6f4ff47a38b14fb8bd4dbfbaf01266fac9bf26edfb6625a95986455d3ca64f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "cb6dbd0f2885789a93f03fb23f09c6af12bba02262e2810f55afd30de21b06cc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "0f4a133cb49913f428aa41dc2647f9f038f89d53ea8a0995bd24d6dd9a8ef184"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/records.json": {
+      "bytes": 4430,
+      "sha256": "3fd68642f3509185b7d83568820e73152d0d017e10000b9d4430dd0b7a5b9f47"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "cb6dbd0f2885789a93f03fb23f09c6af12bba02262e2810f55afd30de21b06cc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "cb6dbd0f2885789a93f03fb23f09c6af12bba02262e2810f55afd30de21b06cc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/bridge.json": {
+      "bytes": 1075,
+      "sha256": "900d574bb2b8fd4170052f34c868467fb8946f12f7e1688392f324e3f87f10b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/pixel.asm.txt": {
+      "bytes": 7756,
+      "sha256": "2e75ba1681009340f3a917923e5b407bb026323c75e0fa4e7075edc1fef9d79d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/pixel.dxbc": {
+      "bytes": 6244,
+      "sha256": "14aa6a495ad54aaa94f6463da002b07777ed39e8a0edc5c05c2aae2d33e82ed3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-ps.asm.txt": {
+      "bytes": 7904,
+      "sha256": "56e94fd44bde44fadb5e1b823c9ae6fb3040f81a845689fc69151f6ec05a72f9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-ps.dxbc": {
+      "bytes": 6684,
+      "sha256": "aa3e234c0a22c254b0f68a74959af7b01886cef8260998a6f4c6d84aef91946f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/records.bin": {
+      "bytes": 4624,
+      "sha256": "14a1a5f8a955a469a9cb91ad42f84ff9693924eee8fcd061a854e80ad6631735"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/records.json": {
+      "bytes": 3628,
+      "sha256": "e4654ae0389953b8e59fcb28ea66fa22ffd6d48b49683b8a40d62d572dc9e1fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/input-4/vertices.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/original-ps.asm.txt": {
+      "bytes": 10206,
+      "sha256": "3007aa232535288b21e66f0aebd41009625515787000526ba7c5dbb32d6c1527"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/original-ps.dxbc": {
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/pixel-shader-outputs.json": {
+      "bytes": 29960,
+      "sha256": "baa5fcb0d71cfdead9d01aa80ccc402912cd3a1a855c9303a353b4ede2fd77da"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/report.json": {
+      "bytes": 2660,
+      "sha256": "85017d170d71790978b3b4606f9a51a69685d4904a8b832f8f2745abe849cf1a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/source-geometry.bin": {
+      "bytes": 1021440,
+      "sha256": "73383f7047e155e66dfb909fa4f9ca7066d06fe209d4ea319be167f60364cbd3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902/source-geometry.json": {
+      "bytes": 3576,
+      "sha256": "3c49c82d64bf530eb2a583088493261ba5210400c0433861d95eb476ac2bb067"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-32902.log": {
+      "bytes": 2844,
+      "sha256": "02f22d932d87be5e51c48c4593934421a50339a2e8d1fe0147bc1a8db868447f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "89558b9cf78f3dd8dcc97d6a7cc97153efea57f3bcaa6e9c43906575bbb5839a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "f0e90d70b1f3045fc73b465f1c9cc93e4794c0f9bc33ed252065991aa3c0e104"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "726a5d8ff647c94f582b5c714267b11257e3e362483b60aba9bb45bdd41bb9be"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "5b0abf373994f713a613a037658b475fe4f0f7a4424ecdcfcc705a4210c23076"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "f2edf058991e0da3ae3cd82aa3668c0f88eaa6c46d8a0ea0488d3bf0cffe6b49"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/records.json": {
+      "bytes": 4429,
+      "sha256": "788b66480b871537190e14b5e2847ab43c878cca408b3d573b148240d81386dc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "5b0abf373994f713a613a037658b475fe4f0f7a4424ecdcfcc705a4210c23076"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "5b0abf373994f713a613a037658b475fe4f0f7a4424ecdcfcc705a4210c23076"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2744b63149f221d147d36795f67b99478e79e106581020d0178f34770d1500f2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "cbcbc2063746d7fdd206e205fa5911b8028c91a8f206cb1ae0575f62642bb46d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "87a49c69a4c8a54a128c01e324e815ed0985bb6949a5cd375bc889927602cbca"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "13f8bc41ab0b1874be716a97858234ae45f19acaf46c71d299d1c209d0cde15d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "e11e502d9d6cbdcdcbe9bff893866028d2c8fdb52d09b28a6cd49542670aa160"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "a4c2c24f4925e7f922cf2de4ef432aa375a6801bf5992c3a620b7e66cd4261b1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "f4d04c17719f16b71c8d7c7242e497ba31b43c5561ad5438fa420c28bab8e72a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/records.json": {
+      "bytes": 4429,
+      "sha256": "847c84902e23b21d55b7f277011abd615867b59e8ac55c7bc8b1e0fe41f48f5e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "a4c2c24f4925e7f922cf2de4ef432aa375a6801bf5992c3a620b7e66cd4261b1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "a4c2c24f4925e7f922cf2de4ef432aa375a6801bf5992c3a620b7e66cd4261b1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "2b36a03dfc4c36428e64205ff200764494753d9f329a4ea79a30a70ce65f1946"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "a48e9ef4feae7984e4ce445d9ae8a8086df7c0f902f4a4caaff39c50f4e445f7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "a6f52c43dd134a720ed25ab7a553d536cb5be25f870c41eba43b6799b9e7a555"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "5191d4b479fbe941a6da43fe216f570fae789a0dfced90bca7961c09df4e2422"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "bbd0e3785283235b2c21e5d32422bcea2925b84e5eeca1d200640d67cd11bd89"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "9433a6762df1323cfd391bc1633cc8218c26fab9326ea3e416b9c696a8fce5b3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "ec6f4ff47a38b14fb8bd4dbfbaf01266fac9bf26edfb6625a95986455d3ca64f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "5567386824717441d70e19ee6b79a7966aa24899d967f1351c252a7cbefd915b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "012f2f679f239364230b44197e80e26f7a691316f9d2b7e02482b7325c59b22a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/records.json": {
+      "bytes": 4429,
+      "sha256": "8bd4c479218ddb40f417b79f1ae2900aff8e6cb19b7fe95d6b7a1fc6794069fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "5567386824717441d70e19ee6b79a7966aa24899d967f1351c252a7cbefd915b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "5567386824717441d70e19ee6b79a7966aa24899d967f1351c252a7cbefd915b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/bridge.json": {
+      "bytes": 1075,
+      "sha256": "900d574bb2b8fd4170052f34c868467fb8946f12f7e1688392f324e3f87f10b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/pixel.asm.txt": {
+      "bytes": 7756,
+      "sha256": "2e75ba1681009340f3a917923e5b407bb026323c75e0fa4e7075edc1fef9d79d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/pixel.dxbc": {
+      "bytes": 6244,
+      "sha256": "14aa6a495ad54aaa94f6463da002b07777ed39e8a0edc5c05c2aae2d33e82ed3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "476ce1c3233193824e82bcc0ccda07a52e39718304f72d820a6e56bdf8bef4fb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "37b167cda34be3e9efbe132e73a6052669465389b27d1edd350e710a9dd7a925"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-ps.asm.txt": {
+      "bytes": 7904,
+      "sha256": "56e94fd44bde44fadb5e1b823c9ae6fb3040f81a845689fc69151f6ec05a72f9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-ps.dxbc": {
+      "bytes": 6684,
+      "sha256": "aa3e234c0a22c254b0f68a74959af7b01886cef8260998a6f4c6d84aef91946f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/records.bin": {
+      "bytes": 4624,
+      "sha256": "14a1a5f8a955a469a9cb91ad42f84ff9693924eee8fcd061a854e80ad6631735"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/records.json": {
+      "bytes": 3627,
+      "sha256": "3d842bb789c16ffa2d91e4cc83b5d8288f42d68984ff4ae70b66871a89cbe3f1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/input-4/vertices.bin": {
+      "bytes": 48,
+      "sha256": "39ad9c9a1615384818c4a6e278c74ff5f0cf39174477233e476cf2c7f4bdabaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/original-ps.asm.txt": {
+      "bytes": 10206,
+      "sha256": "3007aa232535288b21e66f0aebd41009625515787000526ba7c5dbb32d6c1527"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/original-ps.dxbc": {
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/pixel-shader-outputs.json": {
+      "bytes": 29955,
+      "sha256": "f379dd9327ca181702a980bfda7c9228f32b1d1ae4fc18c980d7a8380debe5c2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/report.json": {
+      "bytes": 2659,
+      "sha256": "e3bf87d4793a79fd6f8f031acd6c3da6b3c2b6fa610db4c642e4130d8a4b6a58"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/source-geometry.bin": {
+      "bytes": 1021440,
+      "sha256": "25bece1260334ca677faea95f29a64909a5568f97e5e9b026f951d0f3e4c07b9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318/source-geometry.json": {
+      "bytes": 3576,
+      "sha256": "5836a9acf3aefb13c69e510bfcea70c4efd72d49e955b00aea72285548870c5e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/bf1-4318.log": {
+      "bytes": 2843,
+      "sha256": "44a81be514471273edf4aa49198b31d95fec005f0a1ebceb6afe50ca21ee3951"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/bridge.json": {
+      "bytes": 1809,
+      "sha256": "f9261fc70dea558141b58d8f812ff42ca4284e4bbd0726490c46356fab2c2dba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/geometry.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "ef733ec3b343595519cccb71bf9956c5c01c3fca38754f6a9769a7f1ebcb645d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/pixel.dxbc": {
+      "bytes": 6232,
+      "sha256": "084fd59dbf855f26db97f8167d6530a7f99a3ba261c42c8ab1512180b0f9ee49"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-gs.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "77f7ccb0766ef91a43e30de0f81eb34ecfc504ab1208ab42a97e56a626755f74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-ps.dxbc": {
+      "bytes": 6672,
+      "sha256": "4eb502f285cbd40abfc66304dbbf8a4e53454b30eb971f5b7da2c5cf9ab1ee6a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "84897d30cf52563ec51330b82eb7a18d1f5513e41c33682e3fafb45750c7dfaf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/records.json": {
+      "bytes": 3535,
+      "sha256": "229a29d58109f86d0e3c567fca4323308d196e093764284fae21b6c82dd62907"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/bridge.json": {
+      "bytes": 1563,
+      "sha256": "ec7208b248ca2ac824187613cdbe462124aeeb4c42badd95c695e81085b375b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "d8c2474c69d8d3b1ac7f901f384c52d51423ac77d9b4b4be0bd6696cc1b01bf4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "eff22aceceda4166af68cccb3f9b6eb39f5ce07d48e8c2ac51561ae847157eba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "abe66e56664621e6278427b6db75367b0571f7d60874c4cd7042b31a70925ff5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "6991fe9d3b4fca5c46d29e6e37c7b561eb2cb50f610fc2fca1fdc413c8ec2117"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "7ca630f75fa381a929a280b4adbcb552d598e597a87861a925030002be0b29b0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/records.json": {
+      "bytes": 3268,
+      "sha256": "5b92437fc9a04728be80d65d605eaa45c18cb0d3c53c4dceddefc2d07911db3c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "7a4316d6a0dc4e633c72e37ed0fdace5cd0b42f9a19dad203d9b812d960d25a7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "d414df4738826a0bc6b83f795248842c595126bcfa28eba7ea33e13d53de6df3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "e7081b743764fa0d80563b8aee2b4128b53bddd364d9032434a817855e453d41"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "596d66d495907beeb0973985b5e3d271e9799c7a05b97c75a45b1f601bb508ec"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "6aa163e6f1a78f0491ef0c21be755758f3e8743f2f6acb8365737b36a9af0abc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "92afa47efd3bacb561093b37f591b6a10384e88de12e874b836d08399cb2717e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "ae6686ebdda6cc81ce09d56fdf657bffc19ea7b9350f1ced944f5a5f6f2d682b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/records.json": {
+      "bytes": 3537,
+      "sha256": "d78d5ceb257e7445c3aed9ab667147b21f5b85cf0801dd15a7596e106b95d595"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/original-ps.asm.txt": {
+      "bytes": 1934,
+      "sha256": "a14b8b967c2d07683572fc482fa485bf59a887f2353235a318662abae051888d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/original-ps.dxbc": {
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/pixel-shader-outputs.json": {
+      "bytes": 16113,
+      "sha256": "62109dc8a6756c24d97810ac2bebfa943e8fe4fe4536278a57d3c049fe6b8b0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/report.json": {
+      "bytes": 1648,
+      "sha256": "dec37fb91a031f73a5bd6b4d7e100efd24d53b2169aa6403b8b678d13fdd9fc9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/source-geometry.bin": {
+      "bytes": 336,
+      "sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0/source-geometry.json": {
+      "bytes": 3259,
+      "sha256": "34de37f0ea94dc6cc61d5edc473e921973dcc3e332d0c7a9afde655f32ede949"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-0.log": {
+      "bytes": 1736,
+      "sha256": "a80c87881d514e42e3e8b9436ec9f30439d2c9703ec4c9058bb9adf35f6a940c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/bridge.json": {
+      "bytes": 1809,
+      "sha256": "f9261fc70dea558141b58d8f812ff42ca4284e4bbd0726490c46356fab2c2dba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/geometry.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "ef733ec3b343595519cccb71bf9956c5c01c3fca38754f6a9769a7f1ebcb645d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/pixel.dxbc": {
+      "bytes": 6232,
+      "sha256": "084fd59dbf855f26db97f8167d6530a7f99a3ba261c42c8ab1512180b0f9ee49"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-gs.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "77f7ccb0766ef91a43e30de0f81eb34ecfc504ab1208ab42a97e56a626755f74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-ps.dxbc": {
+      "bytes": 6672,
+      "sha256": "4eb502f285cbd40abfc66304dbbf8a4e53454b30eb971f5b7da2c5cf9ab1ee6a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "211023149799a3cea373786a88342d4f5983aae628d31e1278d6cbad3ef13b59"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/records.json": {
+      "bytes": 3539,
+      "sha256": "770fa4414e374fde7520bd50021f4a389940de188a066e73784a30db08e62dca"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/bridge.json": {
+      "bytes": 1563,
+      "sha256": "ec7208b248ca2ac824187613cdbe462124aeeb4c42badd95c695e81085b375b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "d8c2474c69d8d3b1ac7f901f384c52d51423ac77d9b4b4be0bd6696cc1b01bf4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "eff22aceceda4166af68cccb3f9b6eb39f5ce07d48e8c2ac51561ae847157eba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "abe66e56664621e6278427b6db75367b0571f7d60874c4cd7042b31a70925ff5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "6991fe9d3b4fca5c46d29e6e37c7b561eb2cb50f610fc2fca1fdc413c8ec2117"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "216f1466c4aa2eed5497d37f73822887617591fde5190b380cd37fcf8f2601e2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/records.json": {
+      "bytes": 3272,
+      "sha256": "1aec7cdfcf32f19f6860c9ff8d5b5fdb2cf6373a6c91028d83a5d4547312059f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "7a4316d6a0dc4e633c72e37ed0fdace5cd0b42f9a19dad203d9b812d960d25a7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "d414df4738826a0bc6b83f795248842c595126bcfa28eba7ea33e13d53de6df3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "e7081b743764fa0d80563b8aee2b4128b53bddd364d9032434a817855e453d41"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "596d66d495907beeb0973985b5e3d271e9799c7a05b97c75a45b1f601bb508ec"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "6aa163e6f1a78f0491ef0c21be755758f3e8743f2f6acb8365737b36a9af0abc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "92afa47efd3bacb561093b37f591b6a10384e88de12e874b836d08399cb2717e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "bd238bae84b23107ee24741a56bffb4af34099990a9696d3d786b6c52556aad2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/records.json": {
+      "bytes": 3541,
+      "sha256": "63f5b87eae024e30c40c964314074964bffecc6be92d0beae84307cfb82d1f30"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/original-ps.asm.txt": {
+      "bytes": 1934,
+      "sha256": "a14b8b967c2d07683572fc482fa485bf59a887f2353235a318662abae051888d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/original-ps.dxbc": {
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/pixel-shader-outputs.json": {
+      "bytes": 16128,
+      "sha256": "2e4440a6665525ff39f81a8b8714bbce28594fe859b8d2ab12405d16d2bee3f3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/report.json": {
+      "bytes": 1651,
+      "sha256": "9bb546dc509b18b147f9708fc5dfc729671ba22dcc9c6bbae5f97595702b079c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/source-geometry.bin": {
+      "bytes": 336,
+      "sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902/source-geometry.json": {
+      "bytes": 3259,
+      "sha256": "34de37f0ea94dc6cc61d5edc473e921973dcc3e332d0c7a9afde655f32ede949"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-32902.log": {
+      "bytes": 1739,
+      "sha256": "4d76a74fe0ae079d987ac0701adf5b773e3d8a0ce5f14a478e2d0a3fab71145e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/bridge.json": {
+      "bytes": 1809,
+      "sha256": "f9261fc70dea558141b58d8f812ff42ca4284e4bbd0726490c46356fab2c2dba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/geometry.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "ef733ec3b343595519cccb71bf9956c5c01c3fca38754f6a9769a7f1ebcb645d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/pixel.dxbc": {
+      "bytes": 6232,
+      "sha256": "084fd59dbf855f26db97f8167d6530a7f99a3ba261c42c8ab1512180b0f9ee49"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "ee7cde609d25528571dd0e1e45de5db83668e1829784f739554a98c9692def17"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-gs.dxbc": {
+      "bytes": 492,
+      "sha256": "51d77342566dcbecc4d4602592c79167cba2cdf3726680b796f7c08856cccabf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "77f7ccb0766ef91a43e30de0f81eb34ecfc504ab1208ab42a97e56a626755f74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-ps.dxbc": {
+      "bytes": 6672,
+      "sha256": "4eb502f285cbd40abfc66304dbbf8a4e53454b30eb971f5b7da2c5cf9ab1ee6a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "4b8520a921cbd5cbe1c559a3bd02e3b7c4789daabf95fd87e33b70bdd4dd4a3f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/records.json": {
+      "bytes": 3538,
+      "sha256": "ee6066244edbc0d2db19a6944f413101249e34bd19384f1b0ed3aaa694a0fc2e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "bf84ff26c08074950c1680a0ba32c93814839e2077c74c36c2c113d0bec28883"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/bridge.json": {
+      "bytes": 1563,
+      "sha256": "ec7208b248ca2ac824187613cdbe462124aeeb4c42badd95c695e81085b375b4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "d8c2474c69d8d3b1ac7f901f384c52d51423ac77d9b4b4be0bd6696cc1b01bf4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "eff22aceceda4166af68cccb3f9b6eb39f5ce07d48e8c2ac51561ae847157eba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "c4259d4d78cc776ac72d3d84904cf0a1a3acb01ae28f85c891999901c0d1a7b2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "55d2519aa3ab340f6b5ae3f788932026a92fd6e4cba3246028a56f5dbba0c5ed"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "abe66e56664621e6278427b6db75367b0571f7d60874c4cd7042b31a70925ff5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "6991fe9d3b4fca5c46d29e6e37c7b561eb2cb50f610fc2fca1fdc413c8ec2117"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "d34e61746866091821980be1d0d384c6ff68a92c63a69542b3adf30dfe49ee2a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/records.json": {
+      "bytes": 3271,
+      "sha256": "1589ab705de5737a442b5a13feb8a8c199335fff56f0d51e713a07dadfa1b86e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "7a4316d6a0dc4e633c72e37ed0fdace5cd0b42f9a19dad203d9b812d960d25a7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "e3f2060849be10c96acbddd1c06990976f5064767d8b5c2614a700eef695be7e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/bridge.json": {
+      "bytes": 1812,
+      "sha256": "d414df4738826a0bc6b83f795248842c595126bcfa28eba7ea33e13d53de6df3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "e7081b743764fa0d80563b8aee2b4128b53bddd364d9032434a817855e453d41"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "596d66d495907beeb0973985b5e3d271e9799c7a05b97c75a45b1f601bb508ec"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "21b1604fed9046668a68420abb6ed7f64e143456a890751739320437eaf52228"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "9e85b5a9a2a766da630725ebb66971f91472436f54e16f7c0ee1025c82f532a2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "6aa163e6f1a78f0491ef0c21be755758f3e8743f2f6acb8365737b36a9af0abc"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "92afa47efd3bacb561093b37f591b6a10384e88de12e874b836d08399cb2717e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "f55255f3fa4c56960dedc334c8577b8c671103f65c5d9d612e45612611972ae0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/records.json": {
+      "bytes": 3540,
+      "sha256": "c1ef2743e0dbc0349c62578aa080ebc3201f2efc8c5d33bfd12def02ea1d0f59"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "7e7cdc47e5b78e7b6c916536d8d672eb5114bea4111acbd617dca4cd8f57b99f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/original-ps.asm.txt": {
+      "bytes": 1934,
+      "sha256": "a14b8b967c2d07683572fc482fa485bf59a887f2353235a318662abae051888d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/original-ps.dxbc": {
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/pixel-shader-outputs.json": {
+      "bytes": 16124,
+      "sha256": "741f7543c72f8b48fb6006a70ebb04d8561df5f37bf1965e6cf831e3f0bb024a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/pixel-terminal-registers.json": {
+      "bytes": 15202,
+      "sha256": "ed4a054b4fcc90fe3757cb33a978aaa110903aea4e0d27e21255dbe9093935f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/pixel-trace.jsonl": {
+      "bytes": 245310,
+      "sha256": "5b767e34357fbadc72336a10e1356d025dc7e792781003f834c9e32aeee3b524"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/report.json": {
+      "bytes": 2345,
+      "sha256": "2a0aec74cd6455d30fb42f894504349793f6c3fb2fe9fe72dc2c50fa9817b9b3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/source-geometry.bin": {
+      "bytes": 336,
+      "sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/gf2-4318/source-geometry.json": {
+      "bytes": 3259,
+      "sha256": "34de37f0ea94dc6cc61d5edc473e921973dcc3e332d0c7a9afde655f32ede949"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/bridge.json": {
+      "bytes": 1075,
+      "sha256": "04674dd50b954726aadcfb016d0266b934854e60e3df5a0eb29ddf68818cad85"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/pixel.asm.txt": {
+      "bytes": 7650,
+      "sha256": "28429fa55dd4fb282f5a08c328e800c3b1d74beed34418b53ca2074040279a14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/pixel.dxbc": {
+      "bytes": 6180,
+      "sha256": "04cff4be8f26a18c9c548a799f7a333d5c8a1447fae132e8e461484c8f643bbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-ps.asm.txt": {
+      "bytes": 7798,
+      "sha256": "359042c72b4ba2f60a05eef54d53f12a50f84bac3743c8c4f067634203b80ba8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-ps.dxbc": {
+      "bytes": 6620,
+      "sha256": "6b482e2f0fe1732a4cd9d7a166f653287f6742c9152100aeb448144b9797e58b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/records.bin": {
+      "bytes": 4624,
+      "sha256": "f51afb9e4efe07272773eaf8778a9995dd62e2d5193a859934551fbc819bd2cd"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/records.json": {
+      "bytes": 2722,
+      "sha256": "b337240ff1a3931961730ac48d18f86903b50d3a1ea4a2b6f928208e8ef9f23f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-0/vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "99e59be0b2eaf1c137e01002312093663662aa7ff600071786b6ed3854d6b376"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "2083bdbe3528e5c0ad1510af79c8ea7b3b1c4a586c74a1baeff88dcce7cf2740"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "dc1d34a00179719614a44d6a9d63f84bc46ff89f26ffbdac1be3eca0635e961d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "01280b57ca1ecc38c7d8e53f00d4a00fd6d7f73d6795e6621fd9481a95ef4285"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/records.json": {
+      "bytes": 3524,
+      "sha256": "cca51d4018344adde8d35597940d89e8833bc438129fa3c66d2dfbf4ac07c2a5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/bridge.json": {
+      "bytes": 1685,
+      "sha256": "a516e897a972bcdd10e35628add75e10b46a44423d2c0fa57f19c6d9683e3432"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/geometry.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/geometry.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/pixel.asm.txt": {
+      "bytes": 7877,
+      "sha256": "3dd2a1dbbed8666b405b68a620542ce30d6eec7641d8e3be058701466347d0b8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "c499301a23fc7501ac462384b75e223c71487674c56142cef22b74919613fa33"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-gs.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-gs.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-ps.asm.txt": {
+      "bytes": 8025,
+      "sha256": "c53c2b318f86381aa5777960dcd4cdcb4b7915a9a0ef22d58bf54c15c219bb28"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "77980a9379b724b7d0c6db49b578ddf96d5d97780e6f65de61e557a4f9538c88"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "6d1227f946e760891d69efb3aec2341ba518577a44c097f00f39dc0d9b8cfdbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "aab9729694d323f54f7ce80842de31d6672b4b17fa5be036728019ad5fcbcda6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/records.json": {
+      "bytes": 3386,
+      "sha256": "85f89e780c43e99650e861e025eda350da757e5f0dc59905ae9a0074165655e5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/roundtrip.bin": {
+      "bytes": 84,
+      "sha256": "f94323ab0690b541d6894e7c741ced1fe3425570402d5bb6b494ce84b103fdf3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "6d1227f946e760891d69efb3aec2341ba518577a44c097f00f39dc0d9b8cfdbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/bridge.json": {
+      "bytes": 1563,
+      "sha256": "f62f11ceaeb6a2e7529afb92136c4bf62969e75b176af9a34547aa3a9f9b5d30"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "1db48ac000dccbdacbb687c10ef5ef2908d89aca55c7af953a193e1e43c8a212"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "67d586d12a39c74cd594479f4684765a3268c60e24681ddbc059c8a2a10e44a6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "5532e5c112c05a68c3cb74918d8d61ac898b1f380b03eecda9e5255546ce2d93"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "c8313ee602102b34a2fbbabf5c882331ec2ea3be63272a20e6222c3dfc0c70b5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "ccacf25da6d998d921f7e2070a0f81ef8fe525d5d0610d5f009e46a659662d21"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/records.json": {
+      "bytes": 3254,
+      "sha256": "be0906ee5cae00e9b44bfd91e618b5b89d9ba3a0d2b98d4ad6177c122ffad4cf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "cf2efd564ed3690d7934842668a87301a818b19aa96b3cf24dda151b3f66dd50"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/original-ps.asm.txt": {
+      "bytes": 38010,
+      "sha256": "4b5027cf91423a6960404be4cad75172165e4c1654519a9c1654f8b4298845ab"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/original-ps.dxbc": {
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/pixel-shader-outputs.json": {
+      "bytes": 23662,
+      "sha256": "c9e6ff942297b57be2f0819bd7a269bc926d8acbd208dee0cbe297c8675608e3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/report.json": {
+      "bytes": 1757,
+      "sha256": "bd95fcb96c66f71bb980880061f168be74b2ac5e66718f122f4374e4458ee3cd"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/source-geometry.bin": {
+      "bytes": 726336,
+      "sha256": "b5fae9970dbd4f1e2e116729c3ccc0cdbe7cbaa83a97bee49e8fb36eecd2c7e1"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0/source-geometry.json": {
+      "bytes": 3650,
+      "sha256": "5596c25e970f738a01b77582c913bd33c2316be1c1565d35acc60e4eed38410f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-0.log": {
+      "bytes": 1851,
+      "sha256": "ed1424391a1d537adcfe8d142efeb93b688d7de204ca5340ff3689d35f5667be"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/bridge.json": {
+      "bytes": 1075,
+      "sha256": "04674dd50b954726aadcfb016d0266b934854e60e3df5a0eb29ddf68818cad85"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/pixel.asm.txt": {
+      "bytes": 7650,
+      "sha256": "28429fa55dd4fb282f5a08c328e800c3b1d74beed34418b53ca2074040279a14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/pixel.dxbc": {
+      "bytes": 6180,
+      "sha256": "04cff4be8f26a18c9c548a799f7a333d5c8a1447fae132e8e461484c8f643bbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-ps.asm.txt": {
+      "bytes": 7798,
+      "sha256": "359042c72b4ba2f60a05eef54d53f12a50f84bac3743c8c4f067634203b80ba8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-ps.dxbc": {
+      "bytes": 6620,
+      "sha256": "6b482e2f0fe1732a4cd9d7a166f653287f6742c9152100aeb448144b9797e58b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/records.bin": {
+      "bytes": 4624,
+      "sha256": "1baf7012cfdc461d667e1a086c1333a0a0af1cd503bec7355d16adefa6c31305"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/records.json": {
+      "bytes": 2726,
+      "sha256": "80853b07c26843eb17b7241ae96bbd5bcfc1a03d0a8e4fcb714c13fe1b53ea74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-0/vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "99e59be0b2eaf1c137e01002312093663662aa7ff600071786b6ed3854d6b376"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "2083bdbe3528e5c0ad1510af79c8ea7b3b1c4a586c74a1baeff88dcce7cf2740"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "dc1d34a00179719614a44d6a9d63f84bc46ff89f26ffbdac1be3eca0635e961d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "172acce4baea0cd7008f5d9b9415c718be1c5083702f7c3f65a72f8e0ab67ace"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/records.json": {
+      "bytes": 3528,
+      "sha256": "266e054a054de3673b6324ade7753b32c20e3ebc5b9a0ff29b81e9b2fa0c8c43"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/bridge.json": {
+      "bytes": 1685,
+      "sha256": "a516e897a972bcdd10e35628add75e10b46a44423d2c0fa57f19c6d9683e3432"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/geometry.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/geometry.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/pixel.asm.txt": {
+      "bytes": 7877,
+      "sha256": "3dd2a1dbbed8666b405b68a620542ce30d6eec7641d8e3be058701466347d0b8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "c499301a23fc7501ac462384b75e223c71487674c56142cef22b74919613fa33"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-gs.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-gs.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-ps.asm.txt": {
+      "bytes": 8025,
+      "sha256": "c53c2b318f86381aa5777960dcd4cdcb4b7915a9a0ef22d58bf54c15c219bb28"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "77980a9379b724b7d0c6db49b578ddf96d5d97780e6f65de61e557a4f9538c88"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "6d1227f946e760891d69efb3aec2341ba518577a44c097f00f39dc0d9b8cfdbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "de5fadf427d8e3d9ec8d10af522398ab143fea11425bd33686ef7c56df9b8fef"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/records.json": {
+      "bytes": 3390,
+      "sha256": "58cf0117e1dbac1571b0c0a073a0132d567e97ffa0c573a2623b88bb2f0ff3af"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/roundtrip.bin": {
+      "bytes": 84,
+      "sha256": "f94323ab0690b541d6894e7c741ced1fe3425570402d5bb6b494ce84b103fdf3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "6d1227f946e760891d69efb3aec2341ba518577a44c097f00f39dc0d9b8cfdbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/bridge.json": {
+      "bytes": 1563,
+      "sha256": "f62f11ceaeb6a2e7529afb92136c4bf62969e75b176af9a34547aa3a9f9b5d30"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "1db48ac000dccbdacbb687c10ef5ef2908d89aca55c7af953a193e1e43c8a212"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "67d586d12a39c74cd594479f4684765a3268c60e24681ddbc059c8a2a10e44a6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "5532e5c112c05a68c3cb74918d8d61ac898b1f380b03eecda9e5255546ce2d93"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "c8313ee602102b34a2fbbabf5c882331ec2ea3be63272a20e6222c3dfc0c70b5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "b1b5666a45285567f91c7acd330d038a16bcb876324b0f726a1951a0038e8e31"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/records.json": {
+      "bytes": 3258,
+      "sha256": "787ab9309dbf887ccb2938d0bb9e8061fb5cae6ed83b126587e60310c2cc41db"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "cf2efd564ed3690d7934842668a87301a818b19aa96b3cf24dda151b3f66dd50"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/original-ps.asm.txt": {
+      "bytes": 38010,
+      "sha256": "4b5027cf91423a6960404be4cad75172165e4c1654519a9c1654f8b4298845ab"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/original-ps.dxbc": {
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/pixel-shader-outputs.json": {
+      "bytes": 23681,
+      "sha256": "bd667eb9438a713dc5ad1039ba01ccc297e4d0d94c0b77beca3ba4fa0c967207"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/report.json": {
+      "bytes": 1760,
+      "sha256": "0e3ae7a24b501859a6a392257d9d849ef2dc43bb7a7734ffa33125d0ae3f7825"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/source-geometry.bin": {
+      "bytes": 726336,
+      "sha256": "74819a04ebda6b61ead9553122f4bb59f06e44266ffda7983f0be0b61bdd24b9"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902/source-geometry.json": {
+      "bytes": 3650,
+      "sha256": "87092a8da2bcbafc3476451279be7f069351b0a9c6b86d60bc57fe585a445b45"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-32902.log": {
+      "bytes": 1854,
+      "sha256": "011239b594261e2ea915036d13a8d094163f0b7d70eefd63d51d96befa4baf5e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/bridge.json": {
+      "bytes": 1075,
+      "sha256": "04674dd50b954726aadcfb016d0266b934854e60e3df5a0eb29ddf68818cad85"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/geometry.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/geometry.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/pixel.asm.txt": {
+      "bytes": 7650,
+      "sha256": "28429fa55dd4fb282f5a08c328e800c3b1d74beed34418b53ca2074040279a14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/pixel.dxbc": {
+      "bytes": 6180,
+      "sha256": "04cff4be8f26a18c9c548a799f7a333d5c8a1447fae132e8e461484c8f643bbf"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-gs.asm.txt": {
+      "bytes": 822,
+      "sha256": "7664ee13e5ac6883086ac9a0bc09af965dcf2ebfe2cd23cf44a9369777621686"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-gs.dxbc": {
+      "bytes": 312,
+      "sha256": "1b2e8118ec5f9faab63f1892483f897adef064131d383b1ae659ba1f96b32ea2"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-ps.asm.txt": {
+      "bytes": 7798,
+      "sha256": "359042c72b4ba2f60a05eef54d53f12a50f84bac3743c8c4f067634203b80ba8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-ps.dxbc": {
+      "bytes": 6620,
+      "sha256": "6b482e2f0fe1732a4cd9d7a166f653287f6742c9152100aeb448144b9797e58b"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-vs.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/record-vs.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/records.bin": {
+      "bytes": 4624,
+      "sha256": "1baf7012cfdc461d667e1a086c1333a0a0af1cd503bec7355d16adefa6c31305"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/records.json": {
+      "bytes": 2725,
+      "sha256": "32d23c485d591e6d9c51e77b5d4b35c29cb20f57df971e253e8c9a1465af600a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/roundtrip.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/vertex.asm.txt": {
+      "bytes": 652,
+      "sha256": "7f664b3ff4ca509a79b8b34833060fa8100ab63208055697684b0200f54281ac"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/vertex.dxbc": {
+      "bytes": 220,
+      "sha256": "4d351a8ff2db0aacfcb29987715493aa4b61076928664a1227c51e34b7cda10e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-0/vertices.bin": {
+      "bytes": 48,
+      "sha256": "92f27762caf8bc358efc6d171cf53e9bd71695cbd940a958d62b7145e3b95d2c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/bridge.json": {
+      "bytes": 1812,
+      "sha256": "99e59be0b2eaf1c137e01002312093663662aa7ff600071786b6ed3854d6b376"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/geometry.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/pixel.asm.txt": {
+      "bytes": 7750,
+      "sha256": "62c2d8a4c59477e078e3c1e0391cc2360f2a46bcd47f48edc4394012a939f417"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "1d112fdeea32f5a89245d19fb1b101c2df0f043331823959accc1a9d6fa1949e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-gs.asm.txt": {
+      "bytes": 1082,
+      "sha256": "f89e591fdf7364672422538982600cb5754a49616fe04da7e4e03139af28d9f0"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "64ff5c230a3c742691f4b4216cd490a57ebd44de9935899ae857cac8e7205e14"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-ps.asm.txt": {
+      "bytes": 7898,
+      "sha256": "2083bdbe3528e5c0ad1510af79c8ea7b3b1c4a586c74a1baeff88dcce7cf2740"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "dc1d34a00179719614a44d6a9d63f84bc46ff89f26ffbdac1be3eca0635e961d"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/records.bin": {
+      "bytes": 4624,
+      "sha256": "3b23e7758bba46b6c1bfb7c983040e6aba12e74b10299f343f54b6a9f324a3f4"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/records.json": {
+      "bytes": 3527,
+      "sha256": "ae5a7a95efbe04083360e35c3b7e0063175224acf9f56dfb8b70fec7e7143287"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/roundtrip.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-1/vertices.bin": {
+      "bytes": 96,
+      "sha256": "d7618f3a11d1b652ec3f0ca8389aeeba95521dfc53723979f054b3cb90130c0f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/bridge.json": {
+      "bytes": 1685,
+      "sha256": "a516e897a972bcdd10e35628add75e10b46a44423d2c0fa57f19c6d9683e3432"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/geometry.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/geometry.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/pixel.asm.txt": {
+      "bytes": 7877,
+      "sha256": "3dd2a1dbbed8666b405b68a620542ce30d6eec7641d8e3be058701466347d0b8"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "c499301a23fc7501ac462384b75e223c71487674c56142cef22b74919613fa33"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-gs.asm.txt": {
+      "bytes": 1302,
+      "sha256": "f5f354159fbe92cb89761aa0b08e49f07e47698cccc638cd6112f8c6e2349774"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-gs.dxbc": {
+      "bytes": 512,
+      "sha256": "a41547832a2593b07f94cbb32d485f8dace6a6a6fc9a39212b21be37662f901a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-ps.asm.txt": {
+      "bytes": 8025,
+      "sha256": "c53c2b318f86381aa5777960dcd4cdcb4b7915a9a0ef22d58bf54c15c219bb28"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "77980a9379b724b7d0c6db49b578ddf96d5d97780e6f65de61e557a4f9538c88"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "b22091d8bdd1d3897ebcf451b19096bb4a1c84c33241489806de7a3a4c0f8e05"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/records.bin": {
+      "bytes": 4624,
+      "sha256": "5224f061b970acc3a976a859b8e7dc67dcc9532b292a8d7d9ae2be8b71e9bd45"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/records.json": {
+      "bytes": 3389,
+      "sha256": "b703f2a4d69eea5440fa95f356a6111ad816b3663c7982781d2cb2110592eddb"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/roundtrip.bin": {
+      "bytes": 84,
+      "sha256": "63a403a2b1c7424e95519722bfa3da9cdd18f7af788dc2c341ac44df84fa80e6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-2/vertices.bin": {
+      "bytes": 96,
+      "sha256": "b22091d8bdd1d3897ebcf451b19096bb4a1c84c33241489806de7a3a4c0f8e05"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/bridge.json": {
+      "bytes": 1563,
+      "sha256": "f62f11ceaeb6a2e7529afb92136c4bf62969e75b176af9a34547aa3a9f9b5d30"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/geometry.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/geometry.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/pixel.asm.txt": {
+      "bytes": 7746,
+      "sha256": "1db48ac000dccbdacbb687c10ef5ef2908d89aca55c7af953a193e1e43c8a212"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/pixel.dxbc": {
+      "bytes": 6236,
+      "sha256": "67d586d12a39c74cd594479f4684765a3268c60e24681ddbc059c8a2a10e44a6"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-gs.asm.txt": {
+      "bytes": 1074,
+      "sha256": "e83485809bc183f5ceea98dcbec23c1ce34ea6a88649e9c0c17bea813ecdb7ba"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-gs.dxbc": {
+      "bytes": 496,
+      "sha256": "e1b4d0555941bb1ea2d995cbc85e8ad605221ef607b81a420d90b4dab7eeee57"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-ps.asm.txt": {
+      "bytes": 7894,
+      "sha256": "5532e5c112c05a68c3cb74918d8d61ac898b1f380b03eecda9e5255546ce2d93"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-ps.dxbc": {
+      "bytes": 6676,
+      "sha256": "c8313ee602102b34a2fbbabf5c882331ec2ea3be63272a20e6222c3dfc0c70b5"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-vs.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/record-vs.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/records.bin": {
+      "bytes": 4624,
+      "sha256": "48be573590c21bc75608609f34a5f9c1f3f62212cbd3036a989563441d396e1a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/records.json": {
+      "bytes": 3257,
+      "sha256": "7cca7c420d85c4c8bc8998a8df56c87c5fbe79ef1784fe8dc40a027ab3a4aaab"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/roundtrip.bin": {
+      "bytes": 72,
+      "sha256": "cf2efd564ed3690d7934842668a87301a818b19aa96b3cf24dda151b3f66dd50"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/vertex.asm.txt": {
+      "bytes": 850,
+      "sha256": "f4c14ead979121be1702be0996f7fefea1a1053f220869d54b621159ce977468"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/vertex.dxbc": {
+      "bytes": 344,
+      "sha256": "6aff766afd07dfeec192d369fe55a0a3b61658918ffaae625c31a442468d7aa7"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/input-3/vertices.bin": {
+      "bytes": 96,
+      "sha256": "b6e09921186fbfba7addeeeb38e1bde8799e156c8df9a1190fc0fc1aee63db13"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/original-ps.asm.txt": {
+      "bytes": 38010,
+      "sha256": "4b5027cf91423a6960404be4cad75172165e4c1654519a9c1654f8b4298845ab"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/original-ps.dxbc": {
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/pixel-shader-outputs.json": {
+      "bytes": 23676,
+      "sha256": "27b2d65bac523ec33ea1e3f4c5e8e187755fd03b560bf53a5462166cb565a63a"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/report.json": {
+      "bytes": 1760,
+      "sha256": "c5837a054f48a793ca98ce90628987b7cf9a667e69d54238ce3aba5a8b784458"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/source-geometry.bin": {
+      "bytes": 726336,
+      "sha256": "48deb432cc01f54757df1844d4cca3f97a9f94d8bbadf8217d54d717f92f223e"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318/source-geometry.json": {
+      "bytes": 3650,
+      "sha256": "08149b24ca16c02d77b86a702227a404cc19555b6405bcdaf14faae93881590c"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/helldivers-4318.log": {
+      "bytes": 1854,
+      "sha256": "8683d2d29f1ab01801ccb5e254e09ae6818fd8e494ac9ca44ec518b9f8868a50"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real/runner.json": {
+      "bytes": 2711,
+      "sha256": "a24c27c1c91d819cda846d9df4ff24aa187fc4fbba142de95b8221dda5ed6341"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real-gf2-4318-console.txt": {
+      "bytes": 2459,
+      "sha256": "76af58e4a3b243fe3787fde6bdb56f4f2a85487e97d4947d74a5fcd87e177908"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-real-validation.json": {
+      "bytes": 4032,
+      "sha256": "4f2ef47b77e4c26a968f03de9b6932ac41d325589091dbfdd4ebe8efce754eab"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-regression-ctest.txt": {
+      "bytes": 536,
+      "sha256": "b85d165bee870100613f0944c20b56aa902d94ec2591991c026d5563c6d6d662"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-second-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-second-tests.txt": {
+      "bytes": 19086,
+      "sha256": "9a74826b385a961b7af3890b9727421f822c8aa4df01a0fd4413865633da6855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-third-console.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-third-tests.txt": {
+      "bytes": 4565,
+      "sha256": "f010c90912372af909aabd8e2e2bf255c744d19e1bf9ccbd156c86522d4f624f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-verified-execution-trace.txt": {
+      "bytes": 2781,
+      "sha256": "5ee7b686aadbab2348c5a2d32a28bba33033e86e0e839dcccfaa367639da1609"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-verified-outputs.txt": {
+      "bytes": 5486,
+      "sha256": "e4d8c5c7f048b6add72adbece81131e2505a557e21ba8d0439cf9ec5d81a796f"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-verified-pixel-trace.txt": {
+      "bytes": 1527,
+      "sha256": "ddb643f4f0a532e0cfa1d14490093de9620af7c199483d7dc8ee41f420e1d4e3"
+    },
+    "artifacts/dx11-native/pixel-shader-outputs-verified-trace-reader.txt": {
+      "bytes": 4509,
+      "sha256": "e59662a5b8bc443706c2987915b0765a442c33e364cb83e98761a8e241ba2ceb"
+    }
+  }
+}
