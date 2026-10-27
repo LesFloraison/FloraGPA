@@ -29,7 +29,10 @@ def same_float(a, b):
 
 
 def validate(name, job, result, files):
-    vendor, stage = name.split("-")
+    vendor, stage = name.split("-", 1)
+    independent_uav = stage == "ds-uav-independent"
+    if independent_uav:
+        stage = "ds"
     vendor = int(vendor)
     expected_event = {"vs": 1000, "gs": 150, "ds": 200}[stage]
     expected_stage = "vs-inputs" if stage == "vs" else "final"
@@ -47,6 +50,14 @@ def validate(name, job, result, files):
     require(data["shader_stage"] == stage, "executed stage")
     require(options["instance"] == data["instance_selection"]["instance"] == (1 if stage == "ds" else 0),
             "instance identity")
+    if independent_uav:
+        proof = data["instance_selection"]["uav_independence"]
+        require(proof["input_aliases_excluded"] is True and set(proof["stages"]) == {"vs", "hs", "ds"},
+                "UAV independence input scope")
+        require(all(p["proved"] is True and p["scope"] == "no_uav_results_or_srv_reads"
+                    for p in proof["stages"].values()), "UAV independence proofs")
+        require([p["opcode"] for p in proof["stages"]["hs"]["write_instructions"]] == [178, 168],
+                "original hull writes")
     adapter = context["adapter"]
     require(adapter["warp"] is (vendor == 0), "adapter class")
     require(adapter["vendor"] == (5140 if vendor == 0 else vendor), "adapter vendor")
@@ -93,10 +104,14 @@ def main():
     parser.add_argument("directory", type=Path)
     parser.add_argument("--log", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--uav-independent", action="store_true", help="Require the expanded 15-row GPU matrix")
     args = parser.parse_args()
     expected = {f"{v}-{s}" for v in (0, 4318, 32902) for s in ("vs", "gs", "ds", "ds-uav")}
+    if args.uav_independent:
+        expected |= {f"{v}-ds-uav-independent" for v in (0, 4318, 32902)}
     require({p.name for p in args.directory.iterdir() if p.is_dir()} == expected, "complete matrix")
-    require(re.search(r"Totals: 23 passed, 0 failed, 0 skipped, 0 blacklisted,",
+    passed = 26 if args.uav_independent else 23
+    require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     records, gates, controls = [], [], 0
     for name in sorted(expected):

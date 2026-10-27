@@ -267,11 +267,12 @@ not exemptions:
   tails. `vs-inputs` now preserves them in the three-adapter matrix, including full
   signatures and indirect draws. Full baseline mesh parity still needs the remaining
   real-capture, format and workflow comparisons before default cutover.
-- Per-instance HS/DS/GS boundaries with UAV access remain unverified. The current
-  native implementation rejects that selection. Tests check both this rejection
-  and successful all-instance DS capture, separately from a pure-shader DS
-  instance-selection fixture. They do not establish equivalence to baseline
-  Replay Mesh for the rejected selection.
+- Per-instance HS/DS/GS boundaries with UAV-dependent geometry remain unverified.
+  A sufficient bytecode and input-alias proof now permits independent writes,
+  including dead hidden-counter results. Reads, live results, aliases and
+  unproved liveness retain explicit rejection. Tests retain those rejections and
+  full-draw capture separately from independent-write and pure-shader selection.
+  They do not establish baseline parity for the rejected cases.
 - The new VS input path removes the free-signature-component requirement and
   supports OSG1. Other instrumented stages retain their separate restrictions.
   Nonzero GS SO streams, deferred contexts and complete real-capture mesh parity
@@ -942,3 +943,14 @@ across three adapters; three UAV instance-selection cases retain the existing
 explicit rejection. See `research/DX11_NATIVE_REPLAY_MESH_UI.md` for the independent
 validator, original failed runs, corrected counter regression and legacy fixture
 skips. Default cutover and full P3/P7/P8 acceptance remain open.
+
+## UAV-independent mesh instance continuation
+
+The original hull counter/store fixture now supports per-instance native capture
+after a bounded DXBC liveness proof and actual input-resource alias checks. A GS
+fixture with different output counts per instance validates nonuniform boundaries.
+All selected bytes come from the full capture; private prefix draws provide only
+counts. See `research/DX11_NATIVE_GEOMETRY_UAV_INDEPENDENCE.md` for 113 passing
+regression checks, 108 rejected evidence corruptions, retained preliminary failures
+and the remaining read/alias/control-flow gates. Default backend cutover remains
+pending full baseline parity.

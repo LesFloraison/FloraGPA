@@ -1,0 +1,958 @@
+{
+  "schema": 1,
+  "implementation_commit": "671dda1e8263843fd46f2b0dd885a5c3e673524d",
+  "main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "qt_passes": 113,
+  "qt_failures": 0,
+  "qt_skips": 0,
+  "independence_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 12,
+    "corruption_controls": 48,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "mesh_successes": 12,
+  "mesh_open_gates": [
+    "0-ds-uav",
+    "32902-ds-uav",
+    "4318-ds-uav"
+  ],
+  "mesh_corruption_controls": 60,
+  "earlier_evidence_successes": 9,
+  "default_cutover": false,
+  "full_renderdoc_removal": false,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependencies-final.txt",
+      "bytes": 2222,
+      "sha256": "aaa897295192b434cf47c25fc963c894a36a1d25d05231d93daf816ce248e7eb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependency-initial-build.log",
+      "bytes": 1767,
+      "sha256": "ff7f7f966905f866b15e5cf87644f3841bda9a64b449bc6a6c4f4288a235f08e"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependency-initial-ctest.log",
+      "bytes": 426,
+      "sha256": "8ac8f2577286159c52d4225dedaa392514d78b7a936b0bff68e4e5d3534b44b0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependency-initial.txt",
+      "bytes": 1575,
+      "sha256": "14c4c60c988b4a844449a9c2b9d4386584278913453be9eb8747e4b96e11d5b2"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependency-liveness-build.log",
+      "bytes": 1056,
+      "sha256": "a6a1f0066274f09e31ced724cdcf89cc425566984e6ddab1bbd4031f06519694"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-dependency-liveness-ctest.log",
+      "bytes": 324,
+      "sha256": "97b318ddd29a35d3035eb60a1393e428aecae2c66acdb581b5231e44c62654ae"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-earlier-mesh-validation.json",
+      "bytes": 26971,
+      "sha256": "e090b2e089553d4ff7abd0e7adbc58b1d41e92dd7552989b2ae12d64570e19cd"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-expanded-build.log",
+      "bytes": 7660,
+      "sha256": "3b82fa8b41b17f3bdfd80dfbed355684397c07110b8abc9d9520bfd52d04f3ce"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-final-ctest.log",
+      "bytes": 637,
+      "sha256": "e70e176f8a2ccc6cf6b4b26719cfd2d45db143ed20a1b7b9ec4efbbb5458de56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-fixture-build.log",
+      "bytes": 4381,
+      "sha256": "a26a59be55c1940a14889500d42584da31e606149c6b070011b234049570053b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/0-gs.json",
+      "bytes": 9197,
+      "sha256": "a4a163879deb9981dca77c543f81af1a771ecb5fe579903c5d894c2af35202a1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/0-ia-alias.json",
+      "bytes": 2904,
+      "sha256": "30ed126078eda3f2053f351f458a2ff1268b8a32e549fbd60e729e73c06bea8c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/0-independent.json",
+      "bytes": 8099,
+      "sha256": "9d91136b2ce1a218eb971256d99e4b7630ad6c855c81c67113babf158d1544bb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/0-read.json",
+      "bytes": 2914,
+      "sha256": "6b6ab7abd0ff8d6ea1e771445387014d1f54fe7d3266bc3679349c7dc6c77dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/32902-gs.json",
+      "bytes": 9201,
+      "sha256": "96288ce84f000025b64bb8e47275ee4812bd0077d19fd80c0bed0e51689ca92d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/32902-ia-alias.json",
+      "bytes": 2908,
+      "sha256": "a9b52d7b5f598461b41536a3d9ec7ea5057d840fdb4313a40759a835211be54d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/32902-independent.json",
+      "bytes": 8103,
+      "sha256": "6534f95eebf290b702dfe08c1108eff5ef433a7ca6d0ef5aa6ef5dee057f6923"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/32902-read.json",
+      "bytes": 2918,
+      "sha256": "abe9d7880942148d04f44ba731f29234c74afdd7226d7a03e00915f83049d3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/4318-gs.json",
+      "bytes": 9200,
+      "sha256": "e15e52f76c3e656df6762345b192c5b5871dc4061f218d2a1db2caa6d0ff6678"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/4318-ia-alias.json",
+      "bytes": 2907,
+      "sha256": "9df62a31b26d2bea17a4ac56aefcfef5802435012191fe33730e58dabfcae359"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/4318-independent.json",
+      "bytes": 8102,
+      "sha256": "b1bbb1fc292c6aab4587e737b5b41691ddaeb2bc61ec391606dcf0ba6ab5aff2"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-independence-final/4318-read.json",
+      "bytes": 2917,
+      "sha256": "3cde9bb2a2bd3deb33deb9c741a1cb5afefddc01c3ae32534bb7c0454c0e4a56"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-integration-build.log",
+      "bytes": 6603,
+      "sha256": "1c0eb237280c2f93db8729839bbb5d9d16ce89ce5cea8ca8b13c62d2b283e40b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-integration-ctest.log",
+      "bytes": 639,
+      "sha256": "640692c24903290ce6dd53813aadaef39b42f90b0f8e56d0335d19d852b5c888"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-integration-initial.txt",
+      "bytes": 2196,
+      "sha256": "7f807b3858d332202e6546d208aa6d3158ab7b9c4667e33c1211d679df4413b1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/job.json",
+      "bytes": 624,
+      "sha256": "bda2fe894340a158d23c8129cc9d08dd771d63ffb83bea6c72bba1470ed84e67"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/result.json",
+      "bytes": 7897,
+      "sha256": "19c8e7e97a19b1cfa4be5b1cc76d24f40b8658c1234029a7f2641c422d1e327d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav/job.json",
+      "bytes": 624,
+      "sha256": "37bb93f1bd07aafe00bc828b0b0e345178c674315968a922d5db46c7c53d96ad"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/geometry.json",
+      "bytes": 4801,
+      "sha256": "e4ee7c882c123cfc240f0c556c3fa3a4249fd9d740aec07114f206551759e827"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/job.json",
+      "bytes": 624,
+      "sha256": "a44a05a76bfcd03a847af2a67b287fe7a5fcafa4abb63dce3ab67996de15e0f1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/result.json",
+      "bytes": 9595,
+      "sha256": "87fd71ad84b51516973c4da0b5361dea81f42de1a2d3c10c277f24b227c67ba9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/job.json",
+      "bytes": 624,
+      "sha256": "a38aeee6f7889548bad506c8a3ba9bdd123bf52b76cb641c19a2e0e127109ff3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/result.json",
+      "bytes": 7517,
+      "sha256": "aed964b6b7340ab43e589c3189c5621eb369bb5fd2c03dc057428cc6857cba89"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/job.json",
+      "bytes": 629,
+      "sha256": "86dd3f9406764a6492bb8c539957626915fbbed31ce80315eb538fd095285a4a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/result.json",
+      "bytes": 9086,
+      "sha256": "21cc8ff4e6870ceca9cdbdbb44c11b7b80f9aa3f340f00556f5a51aa46711aef"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/0-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/job.json",
+      "bytes": 631,
+      "sha256": "32479020d1dd46ebfeb151801795e3336b68ccd155f5a98dfc7ccc73fc12a62d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/result.json",
+      "bytes": 8312,
+      "sha256": "5c9099f3ccc6bd8e941d6ad9837ac9a2a2411855de4640897af5ad8491196494"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav/job.json",
+      "bytes": 631,
+      "sha256": "a92f609acee1abb12caf540c1a9828121b47549ccd8c76e186d88ac1cde49af3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/geometry.json",
+      "bytes": 4801,
+      "sha256": "e4ee7c882c123cfc240f0c556c3fa3a4249fd9d740aec07114f206551759e827"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/job.json",
+      "bytes": 631,
+      "sha256": "6025c5814b0f380d72357a0cdaaf8d5fb21d4cc5b19a52b623ccb41d598a68dd"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/result.json",
+      "bytes": 10011,
+      "sha256": "2e572e1c92ccd6a71ff7b9f008d999db4517d729f58b2db58c2ec9860452bc9c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/job.json",
+      "bytes": 631,
+      "sha256": "05e77897d25ba234f40f7d016f06b6e43ac06189d897a53f0b3f28aa9f9001ca"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/result.json",
+      "bytes": 7932,
+      "sha256": "30acb89e06bd1e83c0e8db80b3247bf66974b10a4561939ba43ebb65d11978d9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/job.json",
+      "bytes": 636,
+      "sha256": "6e29266f63666a930b95cdfcf41112144a5332e429d7c4a34aecdd8f5d2db443"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/result.json",
+      "bytes": 9502,
+      "sha256": "1b6011444c01535d3742fa4ae841bb756ac895b9fcddbe421785a1170e1c8682"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/32902-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "70c36c80d3d67f49773d3b69a555dfe6297b956a32344b31c07c1f69a06ae0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "c4ed4d80c4bd1204c2b0a0e819abc69436afdb96906b6b5004dea161a6187e29"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "b308a606cba9ecd0a97aa634b8bed20d7882b90ec3dd25ff7a0a7ea240d1e21c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/job.json",
+      "bytes": 630,
+      "sha256": "63b81433de0f744d37a748c82ef9c480366f516b25784258c099b56a8cb61abe"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "aea58ac3b3c0a8f392690a0d389bce0cd1f8e7d62e3004deceb9581a8573b313"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "eb162b5e8629798b1ca2adb8caae1dddb500873ca5500bc3b6af65ad05d5d9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/result.json",
+      "bytes": 8699,
+      "sha256": "3d84c3087ac2285709b2a5a49b26d9a0f2a22b5229501d9cf16b740faa30e444"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "6328e6e88ce6fe6c0b610f685d8e6af12302b3482319eac15e45e6af66dfc1d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav/job.json",
+      "bytes": 630,
+      "sha256": "3427f5a6d6a01bc109ab8de8ae45fa1551b7067310397fd390a56afc44a8865d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "f053b9bbe12dc4bc6482013a96d15226b4eebd1e657363e638a19f242ddbad85"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/geometry.json",
+      "bytes": 4801,
+      "sha256": "6b0759acee48e10737d289d596b425b6c243beb37c1bd88225e388b16c8a93c6"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "a05923bd59d8e714248121d13e3f7d53f8501d05093fb72c7057cc4e70b5fcaa"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/job.json",
+      "bytes": 630,
+      "sha256": "2996be4e994aaaf93164e5c765ebfaa2e6d2b3338b11b8f85835264db3d1dfd0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "7ac1aeb4c99baacea4c74508e6cc2b063bf5254a0cd7fc0436a03b48cb16e019"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "88f3ce972981cd3a55468ddb45357d54c41dbfbc52bd95ba6662a4d760c8a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/result.json",
+      "bytes": 10397,
+      "sha256": "17816fcdfca1d73384a9e62acb6c6aa1b445f381da45b8a0b6629aa1af7e2c92"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "df924d15f920dc3133ae8b58461122c4649deb3774484eff3b35987ae8c08ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/job.json",
+      "bytes": 630,
+      "sha256": "f2c5834efa83f4984322eda6718a67ac6f8a25e283089167d9cd4ef5ea12e5df"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/result.json",
+      "bytes": 8319,
+      "sha256": "a9ac97ba5e648d14fe114da9a53ce37963495ee9e29d663cb75a06a11aac52d5"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/job.json",
+      "bytes": 635,
+      "sha256": "922a9fb258e208aa69b60e06e76c9d6aeba62cc615e44cf14f54f3a2357b426e"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/result.json",
+      "bytes": 9888,
+      "sha256": "97a6e30035bb0e48f1ead243df446816771132239f56f9fdd19345a11773ea52"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final/4318-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-ui-final.txt",
+      "bytes": 2199,
+      "sha256": "5da9ab007174067e86d5c75611e832aca8028cf2c3ec1df9f7349ff4dabb29e9"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-mesh-validation.json",
+      "bytes": 34458,
+      "sha256": "1af01b6cee60a7f5da9ae88d0d31246bc6de0fa38d732ffad7f371864538f88f"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-native-analysis-final.txt",
+      "bytes": 2777,
+      "sha256": "b9402564d77be88f55e53b48d10b54f53ae0a9c3842762bcb727aaa6dbe35969"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-post-transform-final.txt",
+      "bytes": 6187,
+      "sha256": "75e4aea691f31bf7cbd373a4ed2fa6dad2a0e6df0a11f62c5f3680c4c8616f88"
+    },
+    {
+      "path": "artifacts/dx11-native/geometry-uav-validation.json",
+      "bytes": 161,
+      "sha256": "b526503778dd2bd84289ab4b2e31fc928c40e7db7db2b6a0b306c16a65374227"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGeometryUavDependencyTests.exe",
+      "bytes": 1884672,
+      "sha256": "66a6ef2e98a3520b682a5be8968c0ba7775150f5c0be8384f7f03a7f8fa2eded"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5592576,
+      "sha256": "fa46008094505a566ed5f90b9272dcc349d08ca1fab35c9334194920dfa3b5a1"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 5096960,
+      "sha256": "185b7e721d8ba67a9ecdcb631b3d667b014dc2f16bacb8514dc0950ae892c125"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5592576,
+      "sha256": "fa46008094505a566ed5f90b9272dcc349d08ca1fab35c9334194920dfa3b5a1"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeAnalysisTests.exe",
+      "bytes": 1503232,
+      "sha256": "63d2c65651caebcdda64c1cd103630e85e1f0ff46ea38dc3169dedf4f5a68185"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5153792,
+      "sha256": "e862f06aa8086bc553d2725f0f9702a47c586b419c88b3413760b473f8719ffc"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPostTransformTests.exe",
+      "bytes": 6117376,
+      "sha256": "45618f03598750157a82b7d926c6f7322a9be8258c3531d05138d5baa42b0564"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 127341,
+      "sha256": "8c790d1e7aa0b3fad65c0dc51d51562f0b1bc814f10909068f3aa1e34443ef88"
+    },
+    {
+      "path": "src/app/ReplayMeshView.cpp",
+      "bytes": 15115,
+      "sha256": "8322831b9e9820bcb0b766cc1495c9a0995f31a2c5be3d05bdd24359ea7f16d6"
+    },
+    {
+      "path": "src/application/DxbcCheckpointModel.cpp",
+      "bytes": 22905,
+      "sha256": "385ab6e20e74fe5fe37a77c7b8fda474b173ccafb902aa17da3c2b179430de21"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.cpp",
+      "bytes": 9378,
+      "sha256": "9e1fcd4862ca4da5c7d9bcc95e84c2ac167cae0ddfbdfcb6ed00e66d0532761c"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.h",
+      "bytes": 395,
+      "sha256": "b6857e1e67b7385f29b2145936c70bd849af7f3dd45c13bb2a3097f7f31cec31"
+    },
+    {
+      "path": "src/application/DxbcOperandArities.h",
+      "bytes": 5180,
+      "sha256": "f761e5b30f3dbbc39f15067c62997502466c023e4ecf81dbc60f2873514833b1"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 106705,
+      "sha256": "bd9d6d959ce8dff410c71fc7878376b3dea4aecc94b4eaa98ac72837a5a6c41b"
+    },
+    {
+      "path": "src/replay/PrivateOutputs.cpp",
+      "bytes": 14612,
+      "sha256": "952ea204f6341772b9f54045ca39c64807223194446dc2e19c9258ff641b89a1"
+    },
+    {
+      "path": "tests/GeometryUavDependencyTests.cpp",
+      "bytes": 11727,
+      "sha256": "c67ae730e056d87a837afab0dc576bf65e5fdab157df54a88c672fef4d2852a1"
+    },
+    {
+      "path": "tests/HullCapture.h",
+      "bytes": 2515,
+      "sha256": "e36eb3dea875728450f7cdf187549b9ddf8e8458eb7bd4fc9ebb9588dd87f328"
+    },
+    {
+      "path": "tests/NativeAnalysisTests.cpp",
+      "bytes": 31454,
+      "sha256": "baa91de1cf4992a65aa2a08e500f5e1f8fc86f43fb0489086575e280359e324c"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 17057,
+      "sha256": "a9e4d8f7e34317f9d372b15632ed0573cc8e7581148169ddb7e3de1b4aec3a6a"
+    },
+    {
+      "path": "tests/PostTransformTests.cpp",
+      "bytes": 46432,
+      "sha256": "596e27a45cc26dbfaaae0d398340d046ef0c3218f86fba5dbbc837ebe3cb6acc"
+    },
+    {
+      "path": "tests/SyntheticCapture.h",
+      "bytes": 11154,
+      "sha256": "9d934788b995ba5361cfb92f3eebd2fb62ebf4041b149936cd8b1acaff9b617d"
+    },
+    {
+      "path": "tests/UavGeometryCapture.h",
+      "bytes": 2319,
+      "sha256": "5e2088fa0410771490626a5ce2a27014a72e88648849f021b9df90da8548d81b"
+    },
+    {
+      "path": "tools/validate_geometry_uav_independence.py",
+      "bytes": 5417,
+      "sha256": "ca00f8eff2638eb8b9efc07847bd2df858cf42e77fbb5700f3d28f3a923f04cb"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 8771,
+      "sha256": "621c6dd9f31d47599f854a65ed5f2d28a221bfd86572878e0dce920d29dcd446"
+    }
+  ]
+}
