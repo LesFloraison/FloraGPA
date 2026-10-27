@@ -1,0 +1,587 @@
+{
+  "schema": 1,
+  "scope": "native_double_debug_workflow_evidence",
+  "implementation_commit": "8185f3abcf08adbe4e2257d95ec4d7c971e86220",
+  "worker_jobs": 2,
+  "cli_jobs": 2,
+  "source_observations": 74,
+  "archive_reloads": 2,
+  "negative_controls": 18,
+  "qt_passed": 244,
+  "qt_failed": 0,
+  "qt_skipped": 0,
+  "complete_debugger_parity": false,
+  "renderdoc_removal_complete": false,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraDxbcInputSnapshotTests.exe",
+      "bytes": 1698816,
+      "sha256": "f34813a37b306d95a229a243bbb24a5e4ed1c45ae8687da5e2a9e0dc9d72bd72"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraGPA.Cli.exe",
+      "bytes": 5599744,
+      "sha256": "161b3b1ef4367d538a2e31d56d797eb33bb1972d2d9d7c362ca44a5363d821cf"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraGPA.exe",
+      "bytes": 5105664,
+      "sha256": "469e1f18ffe3c0ba320e62f5485680815ce721fc56e66f9428106aff12642913"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraGPA.Worker.exe",
+      "bytes": 5599744,
+      "sha256": "161b3b1ef4367d538a2e31d56d797eb33bb1972d2d9d7c362ca44a5363d821cf"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeComputeDebugTests.exe",
+      "bytes": 2927616,
+      "sha256": "7320412ede6c7d56d82308d70ec4db85822cb710c08c147eb5709155047e160c"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeDebugOperationTests.exe",
+      "bytes": 5464064,
+      "sha256": "8a6c77723a4e5bf89035d3ede9a3c3aabb7123bbaacfafe95a27a2748f40aedb"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeDebugSessionProbe.exe",
+      "bytes": 1138688,
+      "sha256": "41eee61113f0e3eae607b8392e32ed5798c0fa1f35d114fb91387a6f887c81d6"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeDebugSessionTests.exe",
+      "bytes": 5495808,
+      "sha256": "7be8482084c7e8ebbc37efeca1fd580ff347bc4abeb87c0f323a4061882f16c4"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeExecutionDebugModelTests.exe",
+      "bytes": 1498624,
+      "sha256": "58d8187094e72d660c2f98da27ac3337c473c483b6b4f23293d76c4ce2b1a61e"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-binaries/FloraNativeExecutionDebugUiTests.exe",
+      "bytes": 5523456,
+      "sha256": "a197fa7ecb1535673e2cbce1959911015e6975c82c53818526b0a604d6fb8c3e"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-build-final.log",
+      "bytes": 5944,
+      "sha256": "fb3a5cefc693547e1a9ebb3e2eb1470eda4e6eac6b4ebaa36b9ec52a9558d8c5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-build-initial.log",
+      "bytes": 1694,
+      "sha256": "8ae279748ddd1531855840a6b4c80a28efb191d734e79f57a4fdc750c186cf53"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-build-second.log",
+      "bytes": 1719,
+      "sha256": "c06c4073505464cea865acc73b2fbdcd8737b24c77cb5a1f481a345a51202c8a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-build-third.log",
+      "bytes": 1694,
+      "sha256": "04f9eb806a06237c46892ad5dd806ff681eb8ee2a32473f2a5154c917ab7db48"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-compute-final.txt",
+      "bytes": 4168,
+      "sha256": "eaa864d815d7ffb45c8512d132a2d37d0213a67ea7a3409b36f69037d454167a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/debug.json",
+      "bytes": 1546,
+      "sha256": "1d9249a08b7e33293e7e7f8aff69e461ce24351ec3442ab934fa861c86189dc0"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/job.json",
+      "bytes": 757,
+      "sha256": "b14130ba7f1fdfa5c26adaf75685bd924743aa667549446fe49e97e201c69e2a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/result.json",
+      "bytes": 27351,
+      "sha256": "f99bbf2e7bced165f4d01d96928ca7a9ff85cda22c8119bf2e62c0d09e834cd5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "b04925319f332aa521c05b6f9a7b04cc76e8b9f5d248425556a4b4977a19c52d"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/trace.jsonl",
+      "bytes": 145418,
+      "sha256": "4779347e1d3d75f01f54252a6e7b21e43e1e2e14b8e379a08e2e6826be13295c"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/experiment.json",
+      "bytes": 21487,
+      "sha256": "85cd5e4aa159525d1d224e3c1a0aaaa6882de567b1f9b29ff95d1bd01f195db3"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/session.zip",
+      "bytes": 263940,
+      "sha256": "7288a70a304ba04fcfd3fa4d5661ad0bc99809f9d312a74b71635556783a1258"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/debug.json",
+      "bytes": 1546,
+      "sha256": "20a7b3e2eca1a26f0a6b8600090c742178df407309366a139446ce4b8f5992bf"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/job.json",
+      "bytes": 815,
+      "sha256": "d5bf88940aecec48319f9c5a444a772d2a204181205ed1e364816140dc226ef8"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/result.json",
+      "bytes": 27410,
+      "sha256": "cdc22a672bccd7a2723a4ac171424621d0d5df0e44e1039b04e0c9496ff8f7af"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "b04925319f332aa521c05b6f9a7b04cc76e8b9f5d248425556a4b4977a19c52d"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/trace.jsonl",
+      "bytes": 145413,
+      "sha256": "7caf657707d2ba94f9e7d1300f0cc797baa9d8aec782b99dcc64cb9c1d11026a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/0/workflow.json",
+      "bytes": 45916,
+      "sha256": "ac651f68379f4b9051d15d4e3d8da2f4c1b0cebf1ebc0b9051d8fb581a132e3d"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/debug.json",
+      "bytes": 1549,
+      "sha256": "9deda2dd912d327576ea50c321a39ca68bc755697944cdd183b528280a6bf4dc"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/job.json",
+      "bytes": 772,
+      "sha256": "5ebd4355a2ae64a97257fb8478231bae0d38327c855db030c27f35518d3f574c"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/result.json",
+      "bytes": 28112,
+      "sha256": "bcb4d436f5e903f2c24f690c6761c127df5c16fbea021fe5c6b508e8a9ebbf8c"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "c8f7a6ee8789caf49484f9c01ffcd67c972947ae343152ec85c6f6b01a3f3221"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/trace.jsonl",
+      "bytes": 145423,
+      "sha256": "340ba201d1209c8ce5682a23d9a9bc412c4af676b6fd4f52c72a02c8ac7708c6"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/experiment.json",
+      "bytes": 21487,
+      "sha256": "a9c12a096cb8c89897ba6dd352383c2d51f8fef9fd8ef91fea50586d7e3cbe83"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/session.zip",
+      "bytes": 264726,
+      "sha256": "d498ebf8b1ad09369edd844a143279253f6c2f87de8264c3e48b1805eb4f2511"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/debug.json",
+      "bytes": 1549,
+      "sha256": "7a221298154076ad188a256ed7d669e61f32479ce634d766eee4fc5d577b9954"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/job.json",
+      "bytes": 830,
+      "sha256": "7cd4c87cc881c382f17ed97f7a779a698c9ff0d32fbba05f1db87cdf8585d343"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/result.json",
+      "bytes": 28171,
+      "sha256": "7982126b6d10a30cbf6d6f362e84926e35864bd1752466ba42ef5d70598bd155"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "c8f7a6ee8789caf49484f9c01ffcd67c972947ae343152ec85c6f6b01a3f3221"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/trace.jsonl",
+      "bytes": 145418,
+      "sha256": "57ba34c03db22f408162b6a275e77fb129566d868f963cd7644c3a646698d91b"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-final/4318/workflow.json",
+      "bytes": 45944,
+      "sha256": "eb1873e1e95ebf0604a934bef23a9f45efcd9e362b606b0e50ea48851e31a12e"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-initial/0/experiment.json",
+      "bytes": 21391,
+      "sha256": "cabd12e00b6e4fe7a5b3c7b09ab7b93d34d88c37719619347c04c95a725e5e8a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-initial/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-initial/0/worker/job.json",
+      "bytes": 821,
+      "sha256": "b19f0a65e2ab1a82204fe542025f0ea0049e40bd35cd975c2488979f284a3b88"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-initial/0/worker/worker.log",
+      "bytes": 87,
+      "sha256": "6ccc26e39376756dd41605697b3dae0498c0a6f43c7d1ffa0fd79223a4170c66"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-initial.txt",
+      "bytes": 536,
+      "sha256": "ca26cc889de844b20a76aaa586d45d5a9ca02c02e3f802d324d873ef48390a1a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-input-final.txt",
+      "bytes": 45944,
+      "sha256": "2338341838953eea8e606f0404a276f93d4de613e0deabdb10b93692a073c192"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-model-final.txt",
+      "bytes": 2236,
+      "sha256": "fe6b85b8b6b310eac8856d7cf3bba99a2e51d8898eab590bbef263cd2eb8e873"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-operations-final.txt",
+      "bytes": 865,
+      "sha256": "44e79f4652e0132ff4afb382873a63f72179832441fd4065e01af70fb79d35a2"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-regression.log",
+      "bytes": 548,
+      "sha256": "b6d70cce59fbfe97cc1398e0f30f34e7f27e61b157288d3ecf529b7c243788d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/experiment.json",
+      "bytes": 21391,
+      "sha256": "7e8f4ce3b05dc5939b7a32016865b672b153c3ce4fce97f0b15de63aed4bf2cf"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/session.zip",
+      "bytes": 259601,
+      "sha256": "a108cdd8d45770200b28edb4edea3880b615605738431c205298f0e5e878071c"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/debug.json",
+      "bytes": 1546,
+      "sha256": "f7c2baf4184a2c0e37eb632ea6f7d9314d32b9ce0d8b9b05acd7249fab8b0c48"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/job.json",
+      "bytes": 818,
+      "sha256": "f94b41db369a3668d29e9f7088176a12e7d1f112504a79f47d148a549e157f62"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/result.json",
+      "bytes": 27314,
+      "sha256": "ca26502c7dce7626eb7242b2555407c37fbd423cda1e60639cdcb21dabe04010"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/shader.dxbc",
+      "bytes": 15300,
+      "sha256": "aa003889d67a464192fd7b823f6f6b07fa9364777cc97f513ccee72ce7a50f84"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/trace.jsonl",
+      "bytes": 142648,
+      "sha256": "dc5dbf3cc0edd008f49febc93a7811cd853594f9ce56b3b234978b9d0e10dad4"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/experiment.json",
+      "bytes": 21391,
+      "sha256": "54ee774e8be8fe1e13713e63377155fba968300bd77afdfd19f30ea5cebb5223"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/session.zip",
+      "bytes": 260387,
+      "sha256": "fa5cfb2db1755b91bca07fa9a709df788a0e128fac7efda64de21e722ef0fcbc"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/debug.json",
+      "bytes": 1549,
+      "sha256": "d93118f1247f042594c80db64831f32632d26bdf174260d5ac4162beb2d17d71"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/job.json",
+      "bytes": 833,
+      "sha256": "96aad5d941a3fb8c6c26b825ed0c2d078fec05f60f8f0888018ff6f910f7c38a"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/result.json",
+      "bytes": 28075,
+      "sha256": "3c328a14beaa77a7acaa018d2840af5447ab3039c09e180d74a4d6420c0921c4"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/shader.dxbc",
+      "bytes": 15300,
+      "sha256": "3f5fcc294c8d53b94d46b29068836059064911dc3d74cc7cf839f531d2520c57"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/trace.jsonl",
+      "bytes": 142653,
+      "sha256": "0568d98c79b9e4615c8a334ae503dcf40c01fea33128e4d01e3b22085954dc00"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second/4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-second.txt",
+      "bytes": 1613,
+      "sha256": "6b6a3d0cbc96b880e67de563fb3a77f1fce5c664cc57304d605df1ad3607fca5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-session-final.txt",
+      "bytes": 3496,
+      "sha256": "5fdb2308effb74e3409b2a52b0c28ba40e5e97eb85995a4f4f8a4e8e415ff6fc"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-support-build.log",
+      "bytes": 4829,
+      "sha256": "c9ca0bb767cab642b683ab2e16df4d3370ce2805a2e2d525613f1cd15264dcb5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-support-regression.log",
+      "bytes": 537,
+      "sha256": "3459e2f70e3ec4fe334262eff95c4e28c406706ee95950ce6dd4154b9d227741"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/experiment.json",
+      "bytes": 21487,
+      "sha256": "2f5b75919ef7af5a4683abc094f092b7e8e7cdac5df7732c7a3b286dcc0de52b"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/session.zip",
+      "bytes": 263756,
+      "sha256": "a03f06defb1cc3ece36d8160ae0d4881e582cb0cddbf4421dc7fed94dce014b2"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/debug.json",
+      "bytes": 1546,
+      "sha256": "ae2d8fe680f75e3b6007baf3bd4e31504d6e5098e115d28fe0fa47a57afb07d6"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/job.json",
+      "bytes": 815,
+      "sha256": "2ff57ef5f0b78f9dec65aabd1c47db017cd7827b93c47cee555cd52595202a72"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/result.json",
+      "bytes": 27410,
+      "sha256": "e55361f363ccd2396d1483be41431bb9e84d00a3119cba29f6053f3491fe5fad"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "4ac14691e52a6c67c81dad7376a6990f2d7a11c5fc5e1e4a78aff6c016119d11"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/trace.jsonl",
+      "bytes": 145372,
+      "sha256": "e5ca320f2d3c097e3414dfa717028df4b9d30bae49931eceb6623eed9891c51e"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/0/workflow.json",
+      "bytes": 45741,
+      "sha256": "12740b92c101cf6b2802719110bb7bc5cce667bc61017b6eb522ed7f2f28b45f"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/experiment.json",
+      "bytes": 21487,
+      "sha256": "87e8eddfc1225ac1c7ba22fdbea3d7cbf029dc6521f07315a7912ecf67e6f462"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/session.zip",
+      "bytes": 264542,
+      "sha256": "d83cb13fdd05cc6bc459380a28b5953aecaebec0501fc10c3d648c0318790a38"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/debug.json",
+      "bytes": 1549,
+      "sha256": "ab0f06673017c8c494c3a524303adda045a76ce3c3e6f1225f8000c375e71e41"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/job.json",
+      "bytes": 830,
+      "sha256": "da1cbb5a703c623a2fcc0503f8a639a0df049d7edc049833439f4443716b331f"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/result.json",
+      "bytes": 28171,
+      "sha256": "c394f04a6479c436bd6adbe2171ffb570867d76f71c9becefe667436fc3cc428"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/shader.dxbc",
+      "bytes": 15340,
+      "sha256": "24cbed2ed2bea29a6bb91770b378c05a86b237494a823fad0f5aa83f1aa51705"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/trace.jsonl",
+      "bytes": 145377,
+      "sha256": "fef207bb2cf425b94a92b1b35af0910f1109a22e2010764f22cb7104854faceb"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third/4318/workflow.json",
+      "bytes": 45769,
+      "sha256": "8e1fe910391757e95ae4c8172077c1c85ac2ce47f084d5f4a16c62cde63ca96f"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-third.txt",
+      "bytes": 547,
+      "sha256": "08a4a0a4f31045b3facb20b8cd80e38947cc8b67c2401eeb935d02395e1e5778"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-ui-final.txt",
+      "bytes": 1429,
+      "sha256": "eb26ce06ccf8151e222107760e53ded08f31b14db77da99e8a5c3f6b74f1c06f"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-source-validation.json",
+      "bytes": 5245,
+      "sha256": "9977e573766c2e74f1f68ee159fcaab9e31e15c4719338f7cfd39825bb891030"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-ui-build-initial.log",
+      "bytes": 2800,
+      "sha256": "4821657d043c45ff3cf6de710307ff2cd39cd04a6ca6a4d3e120d7df69e714ff"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-ui-final.txt",
+      "bytes": 1429,
+      "sha256": "23b7482a5300e627e7c288f7c73179d98c59376a34e574f612ee66711e438fc7"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-ui-model-initial.txt",
+      "bytes": 1644,
+      "sha256": "be5bc73c3d98f0c8fd1473b5e0ec0279ec260ec85f782d52ec5c15785374a706"
+    },
+    {
+      "path": "artifacts/dx11-native/dxbc-double-ui-view-initial.txt",
+      "bytes": 804,
+      "sha256": "2e88c4e489dc2b094bc23f23d822e584c96386c1d8a79f1cfc0d11f9fbc2cc65"
+    },
+    {
+      "path": "src/app/NativeExecutionDebugView.cpp",
+      "bytes": 22061,
+      "sha256": "5b38994d04cbe4d09040aac068d7e122d42fa263f9d11ef60598ed30fe810348"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "bytes": 42065,
+      "sha256": "2ed726b1d308df9269b5c122ebe7ef6a80fce1fc1ffd64d6964693c65cbf3c00"
+    },
+    {
+      "path": "src/application/NativeExecutionDebugModel.cpp",
+      "bytes": 17832,
+      "sha256": "4b7e8fc9c762d86342c9d4ea77034bdf0533afdf36141d2d7b8b75063af655ac"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "bytes": 24362,
+      "sha256": "88b5d1a51cd08dfef5c079d89272d34b60f2eaf7af99a367062a94a4a34d09ff"
+    },
+    {
+      "path": "tests/NativeExecutionDebugModelTests.cpp",
+      "bytes": 15124,
+      "sha256": "9b9cf3cc8c21d10a154ca195fa10a0b39c8652e9809522d6e3327589aede36ff"
+    },
+    {
+      "path": "tests/NativeExecutionDebugUiTests.cpp",
+      "bytes": 15168,
+      "sha256": "db45b710748bbd1bb504bfdc1b552f9c097d7ae3cb9d2d8f67f31ff4463cad0b"
+    },
+    {
+      "path": "tools/probe_native_debug_session.cpp",
+      "bytes": 3637,
+      "sha256": "4d6a986e5d40d93d19fffe00f495f9ef17aa38de72c83a55e1767ce15ab83f5a"
+    },
+    {
+      "path": "tools/validate_native_debug_session.py",
+      "bytes": 5143,
+      "sha256": "cd37fd2c79dbd9b4c5a67573c49fee4539c4e88293a947ef8beac93c695c4f0b"
+    },
+    {
+      "path": "tools/validate_native_double_workflow.py",
+      "bytes": 7899,
+      "sha256": "7060ef31e35cd648d986b206d9390abcbab78e4cb2b8d63317b0d3a3bad06ff6"
+    }
+  ]
+}

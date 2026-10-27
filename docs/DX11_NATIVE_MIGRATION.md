@@ -1022,3 +1022,14 @@ with 5,772 rejected report corruptions. Seven regression entries pass 2,540 chec
 See `research/DX11_NATIVE_DXBC_DOUBLES.md` for raw/compiled shader coverage,
 retained fixture failures, replay instructions and evidence limits. Source/type
 parity, captured pixel qualification, full history and P7/P8 acceptance remain open.
+
+## Double source workflow continuation
+
+A public Worker probe exposed missing GPU assistance for ordinary double compute
+snapshots; snapshots now honor the double capability declaration. The native GUI
+also supports paired double register interpretation with strict pair validity.
+WARP/NVIDIA Worker and CLI jobs retain precise source/watch values, conditional
+breakpoints, independent GPU output and cross-process ZIP restoration. Six suites
+pass 244 checks and the evidence validator rejects 18 corruptions. See
+`research/DX11_NATIVE_DOUBLE_DEBUG_WORKFLOW.md` for the retained integration failure,
+compiler fixture investigation and remaining full debugger/removal gates.
