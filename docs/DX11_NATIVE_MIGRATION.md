@@ -1033,3 +1033,14 @@ breakpoints, independent GPU output and cross-process ZIP restoration. Six suite
 pass 244 checks and the evidence validator rejects 18 corruptions. See
 `research/DX11_NATIVE_DOUBLE_DEBUG_WORKFLOW.md` for the retained integration failure,
 compiler fixture investigation and remaining full debugger/removal gates.
+
+## Depth-only private merger continuation
+
+The private output merger now accepts a DSV without an RTV and requires only
+shader outputs consumed by bound targets or alpha-to-coverage. Independent
+original draws cover 432 depth-only cases across WARP, NVIDIA and Intel,
+including MSAA, stencil, read-only views and same-value depth writes. The full
+suite passes 1,341 checks without failures or skips; five report validators reject
+17,514 corruptions. See `research/DX11_NATIVE_DEPTH_ONLY_MERGER.md` for the
+reproduction commands and evidence limits. Original fragment eligibility,
+complete Pixel History, debugger parity and P7/P8 removal gates remain open.
