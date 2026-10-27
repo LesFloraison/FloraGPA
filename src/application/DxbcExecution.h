@@ -63,7 +63,7 @@ class Memory {
                     const std::array<uint32_t, 4> &, uint32_t mask, bool literal, bool &assisted,
                     const std::array<uint32_t, 2> &precision = {}, bool refactoringAllowed = false) const;
     std::vector<MemoryChange> storeTyped(const Register &, uint32_t index, uint32_t returns, const Value &,
-                                         bool literal, bool &assisted) const;
+                                         bool literal, bool &assisted, uint32_t stage = 5) const;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool literalIndex, bool literalOffset,
                bool &assisted) const;

@@ -1086,8 +1086,8 @@ Step Lane::step() {
         const bool store = op == 164;
         const bool multisample = op == 46;
         const auto &resource = store ? args[0] : args[2];
-        if (p.stage != 5 && !((p.stage == 0 || p.stage == 1) && (op == 45 || multisample)))
-            fail("Native typed buffer assistance requires CS execution or a VS/PS SRV load");
+        if (p.stage != 5 && p.stage != 0 && !(p.stage == 1 && (op == 45 || multisample)))
+            fail("Native typed access requires PS/CS execution or a VS SRV load");
         if (instruction.words[0] & (1u << 13))
             fail("Unexpected saturation on a typed buffer instruction");
         if (resource.modifier || resource.kind != (op == 45 || multisample ? 7u : 30u))
@@ -1109,7 +1109,7 @@ Step Lane::step() {
             if (dimension == 1)
                 result.memoryChanges = s.inputs.memory->storeTyped(
                     binding, address.bits[0], declaration->second.second, s.source(args[2], false),
-                    args[1].kind == 4, result.memoryGpuAssisted);
+                    args[1].kind == 4, result.memoryGpuAssisted, p.stage);
             else {
                 std::set<uint32_t> extensions;
                 for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
@@ -1123,7 +1123,7 @@ Step Lane::step() {
                 }
                 result.textureChanges = s.inputs.textures->storeUav(
                     binding, dimension, declaration->second.second, address, s.source(args[2], false),
-                    s.inputs.gpu.get(), result.memoryGpuAssisted);
+                    s.inputs.gpu.get(), result.memoryGpuAssisted, p.stage);
             }
         } else {
             const auto &destination = args[0];
@@ -1168,18 +1168,20 @@ Step Lane::step() {
                     } else
                         fail("Unsupported DXBC texture load extension");
                 }
-                value = !s.inputs.textures ? Value{}
-                        : multisample      ? s.inputs.textures->loadMultisample(
-                                            binding, dimension, declaration->second.second, address,
-                                            s.source(args[3], true), resource.select, destination.mask,
-                                            offsets, result.memoryGpuAssisted)
-                        : op == 163
-                            ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second,
-                                                         address, resource.select, destination.mask,
-                                                         s.inputs.gpu.get(), result.memoryGpuAssisted)
-                            : s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
-                                                      address, resource.select, destination.mask, offsets,
-                                                      s.inputs.gpu.get(), result.memoryGpuAssisted);
+                value =
+                    !s.inputs.textures ? Value{}
+                    : multisample
+                        ? s.inputs.textures->loadMultisample(binding, dimension, declaration->second.second,
+                                                             address, s.source(args[3], true),
+                                                             resource.select, destination.mask, offsets,
+                                                             result.memoryGpuAssisted)
+                    : op == 163
+                        ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second, address,
+                                                     resource.select, destination.mask, s.inputs.gpu.get(),
+                                                     result.memoryGpuAssisted, p.stage)
+                        : s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
+                                                  address, resource.select, destination.mask, offsets,
+                                                  s.inputs.gpu.get(), result.memoryGpuAssisted);
             }
             if (s.inBounds(target)) {
                 const auto before = s.value(target);

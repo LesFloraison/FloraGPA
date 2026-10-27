@@ -1,4 +1,6 @@
 #include "StateCapture.h"
+#include "application/DxbcExecutionTraceReader.h"
+#include "application/DxbcTypedBuffer.h"
 #include "application/HlslCompilation.h"
 #include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
@@ -185,6 +187,174 @@ Capture textureRegion(uint32_t dimension, uint32_t format) {
 class NativePixelCheckpointInputsTests final : public QObject {
     Q_OBJECT
   private slots:
+    void typedPixelReadWrite_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<uint32_t>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t dimension : {1u, 2u, 3u, 5u, 7u, 8u})
+                for (uint32_t format : {42u, 43u, 41u, 28u, 31u, 10u})
+                    for (uint32_t mode : {0u, 1u, 2u})
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(dimension).arg(format).arg(mode)))
+                            << vendor << dimension << format << mode;
+    }
+    void typedPixelReadWrite() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, dimension);
+        QFETCH(uint32_t, format);
+        QFETCH(uint32_t, mode);
+        try {
+            const QString kind = dimension == 1 ? "typed" : "texture";
+            auto c = dimension == 1 ? fixture("typed") : textureRegion(dimension, format);
+            count(c, 1);
+            const auto layout = typedBufferFormat(format).value();
+            if (dimension == 1) {
+                std::erase_if(c.entries,
+                              [](const auto &e) { return e.id == 10 || e.id == 11 || e.id == 12; });
+                c.add(10, 5, 0x83,
+                      statePack(
+                          Id(0), Id(0),
+                          D3D11_BUFFER_DESC{64, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0, 0, 0},
+                          Id(11)));
+                auto data = word(64);
+                data.resize(68, 0x11);
+                c.add(11, 9, 1, data);
+                D3D11_UNORDERED_ACCESS_VIEW_DESC view{};
+                view.Format = DXGI_FORMAT(format);
+                view.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+                view.Buffer = {1, 2, 0};
+                c.add(12, 5, 0x8f, statePack(Id(0), Id(0), Id(10), view));
+            }
+            std::array<uint32_t, 3> address{dimension == 1 ? 0u : 1u, 1, 1};
+            if (mode == 1)
+                address[0] = UINT32_MAX;
+            if (mode == 2) {
+                if (dimension == 7)
+                    address[1] = 2;
+                else if (dimension == 5 || dimension == 8)
+                    address[2] = 2;
+                else
+                    address[0] = dimension == 1 ? 2 : 4;
+            }
+            const auto components = dimension == 1 || dimension == 2   ? 1u
+                                    : dimension == 3 || dimension == 7 ? 2u
+                                                                       : 3u;
+            std::string coordinate =
+                "uint" + (components == 1 ? std::string() : std::to_string(components)) + "(";
+            for (uint32_t i = 0; i < components; ++i)
+                coordinate += (i ? "," : "") + std::to_string(address[i]) + "u";
+            coordinate += ")";
+            const auto shape = dimension == 1   ? "RWBuffer"
+                               : dimension == 2 ? "RWTexture1D"
+                               : dimension == 3 ? "RWTexture2D"
+                               : dimension == 5 ? "RWTexture3D"
+                               : dimension == 7 ? "RWTexture1DArray"
+                                                : "RWTexture2DArray";
+            const auto type = format == 28             ? "unorm float4"
+                              : format == 31           ? "snorm float4"
+                              : layout.returnType == 4 ? "uint4"
+                              : layout.returnType == 3 ? "int4"
+                                                       : "float4";
+            const auto value = layout.returnType == 4   ? "uint4(11,17,23,29)"
+                               : layout.returnType == 3 ? "int4(-11,17,-23,29)"
+                                                        : "float4(.25,.5,.75,1)";
+            auto o = options(vendor, kind);
+            o.shaders[32] =
+                compileHlsl(std::string(shape) + "<" + type +
+                                "> target:register(u1);uint4 main():SV_Target{target[" + coordinate + "]=" +
+                                value + ";DeviceMemoryBarrier();return asuint(target[" + coordinate + "]);}",
+                            "ps_5_0")
+                    .bytecode;
+            QTemporaryDir dir;
+            const auto path = dir.filePath("typed.gpa_frame");
+            c.save(path);
+            Frame f(path.toStdWString());
+            Replay reference(f, o);
+            reference.run();
+            const auto native = storage(reference, kind), color = reference.readTexture(20);
+            o.before = o.prepareBeforeDraw = true;
+            Replay r(f, o);
+            r.run();
+            const auto initial = storage(r, kind);
+            const auto bound = bindings(r);
+            auto snap = snapshotBoundResourceInputs(r, 4);
+            Program program(snap.bytecode);
+            std::array<Inputs, 4> inputs;
+            inputs.fill(snap.inputs);
+            PixelQuad quad(program, inputs, 1);
+            Json changes = Json::array();
+            uint32_t loads = 0, stores = 0;
+            while (!quad.finished()) {
+                const auto step = quad.step();
+                const auto opcode = program.instructions()[step.step.instruction].opcode;
+                if (opcode == 163 || opcode == 164) {
+                    if (step.helper) {
+                        QVERIFY(!step.step.memoryGpuAssisted);
+                        QVERIFY(step.step.memoryChanges.empty());
+                        QVERIFY(step.step.textureChanges.empty());
+                    } else {
+                        QVERIFY(step.step.memoryGpuAssisted);
+                        loads += opcode == 163;
+                        stores += opcode == 164;
+                    }
+                    changes.push_back(
+                        executionTraceStep(GroupStep{step.sequence, 0, step.lane, step.step, false}));
+                }
+            }
+            QCOMPARE(loads, 1u);
+            QCOMPARE(stores, 1u);
+            const auto actual = quad.lane(0).value({2, {0}});
+            QCOMPARE(actual.valid, uint8_t(15));
+            std::array<uint32_t, 4> expected{};
+            QCOMPARE(color.size(), size_t(16));
+            std::memcpy(expected.data(), color.data(), 16);
+            QCOMPARE(actual.bits, expected);
+            QCOMPARE(snapshotStorage(snap, kind), native);
+            for (unsigned lane = 1; lane < 4; ++lane)
+                QCOMPARE(quad.lane(lane).value({2, {0}}).valid, uint8_t(0));
+            QCOMPARE(storage(r, kind), initial);
+            QCOMPARE(bindings(r), bound);
+            // Export and traverse the same instruction/resource journal in both directions.
+            PixelTraceOptions trace;
+            trace.activeMask = 1;
+            trace.selectedLane = 0;
+            trace.inputProvenance = {{"source", "explicit-one-covered-lane"}};
+            const auto journal = dir.filePath("trace.jsonl");
+            const auto fresh = snapshotBoundResourceInputs(r, 4);
+            exportPixelExecutionTrace(journal, fresh, trace);
+            QFile file(journal);
+            require(file.open(QIODevice::ReadOnly), "Cannot read typed pixel journal");
+            const auto bytes = file.readAll();
+            file.close();
+            ExecutionTraceReader reader(journal, sha256(Bytes(reinterpret_cast<const uint8_t *>(bytes.data()),
+                                                              size_t(bytes.size()))));
+            reader.moveTo(reader.size());
+            QCOMPARE(reader.registerValue(0, {2, {0}}), actual);
+            reader.moveTo(0);
+            reader.moveTo(reader.size());
+            QCOMPARE(reader.registerValue(0, {2, {0}}), actual);
+            save({{"schema", 1},
+                  {"status", "ok"},
+                  {"vendor", vendor},
+                  {"dimension", dimension},
+                  {"format", format},
+                  {"mode", mode},
+                  {"address", address},
+                  {"gpu_storage", native},
+                  {"gpu_color", color},
+                  {"raw_bits", actual.bits},
+                  {"valid_mask", actual.valid},
+                  {"transactions", changes},
+                  {"helper_accesses_suppressed", true},
+                  {"journal_roundtrip", true},
+                  {"original_storage_restored", true}});
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+
     void shaderHistory_data() { prefixes_data(); }
     void shaderHistory() {
         QFETCH(uint32_t, vendor);

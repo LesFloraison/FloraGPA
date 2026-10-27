@@ -20,11 +20,13 @@ class GpuOperations {
                                          const std::array<uint32_t, 3> &precision);
     std::optional<uint64_t> textureUavFootprint(const struct TextureInput &, const struct TextureInputView &,
                                                 uint32_t dimension, uint32_t returns, const Value &address,
-                                                bool atomicMarker = false);
-    std::pair<Value, std::vector<uint8_t>>
-    textureUav(const struct TextureInput &, const struct TextureInputView &, uint32_t dimension,
-               uint32_t returns, const Value &address, const Value &value, bool store,
-               const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker = false);
+                                                bool atomicMarker = false, uint32_t stage = 5);
+    std::pair<Value, std::vector<uint8_t>> textureUav(const struct TextureInput &,
+                                                      const struct TextureInputView &, uint32_t dimension,
+                                                      uint32_t returns, const Value &address,
+                                                      const Value &value, bool store,
+                                                      const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                                                      bool atomicMarker = false, uint32_t stage = 5);
     Value textureDimensions(const struct TextureMetadata &, const struct TextureInputView &, uint32_t kind,
                             uint32_t dimension, uint32_t mip, uint32_t mode);
     Value loadTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
@@ -46,7 +48,7 @@ class GpuOperations {
                     uint32_t returns, const std::array<uint32_t, 4> &, uint32_t mask, bool literal,
                     const std::array<uint32_t, 2> &precision, bool refactoringAllowed);
     std::vector<uint8_t> storeTyped(const Buffer &, const BufferView &, uint32_t index, uint32_t returns,
-                                    const Value &, bool literal);
+                                    const Value &, bool literal, uint32_t stage = 5);
     std::vector<Value> instruction(uint32_t stage, const Instruction &, const std::vector<Register> &,
                                    const std::vector<uint32_t> &, const std::vector<Value> &,
                                    const std::vector<Value> &, bool refactoringAllowed = false);

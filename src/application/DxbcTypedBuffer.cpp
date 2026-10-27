@@ -79,7 +79,8 @@ Value Memory::loadTyped(uint32_t stage, const Register &binding, uint32_t index,
     return result;
 }
 std::vector<MemoryChange> Memory::storeTyped(const Register &binding, uint32_t index, uint32_t returns,
-                                             const Value &value, bool literal, bool &assisted) const {
+                                             const Value &value, bool literal, bool &assisted,
+                                             uint32_t stage) const {
     const auto found = views_.find(binding);
     if (found == views_.end())
         throw std::runtime_error("Unavailable DXBC typed store binding");
@@ -93,7 +94,7 @@ std::vector<MemoryChange> Memory::storeTyped(const Register &binding, uint32_t i
         throw std::runtime_error("DXBC typed store change budget exceeded");
     const auto &buffer = buffers_.at(*view.resource);
     const auto offset = uint64_t(index) * format.bytes;
-    const auto after = gpu_->storeTyped(buffer, view, index, returns, value, literal);
+    const auto after = gpu_->storeTyped(buffer, view, index, returns, value, literal, stage);
     assisted = true;
     const auto absolute = view.offset + offset;
     for (size_t i = 0; i < after.size(); ++i)

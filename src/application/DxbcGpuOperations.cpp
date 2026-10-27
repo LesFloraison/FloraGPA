@@ -117,6 +117,29 @@ Words typedGraphicsKernel(uint32_t stage, uint32_t mask, uint32_t swizzle, uint3
     std::memcpy(result.data(), code.data(), code.size());
     return result;
 }
+Words typedPixelUavKernel(uint32_t dimension, uint32_t returns, bool store, const Words &address,
+                          uint32_t mask, uint32_t swizzle, const std::array<uint32_t, 2> &precision = {},
+                          bool refactoringAllowed = false, bool atomicMarker = false) {
+    std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}),
+                            row(156 | (dimension << 11), {dest(30, 1), {returns}}), row(101, {dest(2, 0)}),
+                            row(54, {dest(2, 0), immediate(0)})};
+    if (atomicMarker)
+        rows.push_back(row(173, {dest(30, 1), address, immediate(1)}));
+    else if (store)
+        rows.push_back(row(164, {dest(30, 1), address, {0x208e46, 0, 1}}));
+    else {
+        rows.push_back(row(163, {withPrecision(dest(0, 0, mask), precision[0]),
+                                 withPrecision(address, precision[1]), source(30, 1, swizzle)}));
+        rows.push_back(row(54, {dest(2, 0, mask), withPrecision(source(0, 0), precision[0])}));
+    }
+    if (precision[0] || precision[1])
+        rows.insert(rows.begin(), row(106 | (1u << 16) | (refactoringAllowed ? 1u << 11 : 0u), {}));
+    rows.push_back(row(62, {}));
+    const auto code = writeDxbcProgram({{0x50, 0}, rows});
+    Words result(code.size() / 4);
+    std::memcpy(result.data(), code.data(), code.size());
+    return result;
+}
 Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
                     const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false,
                     bool comparison = false) {
@@ -397,7 +420,8 @@ struct GpuOperations::State {
     }
     std::array<Value, 4> pixels(const Words &words, const std::vector<std::array<uint32_t, 4>> &values,
                                 ID3D11ShaderResourceView *resource, ID3D11SamplerState *sampler = nullptr,
-                                Bytes native = {}, uint32_t outputPrecision = 0) {
+                                Bytes native = {}, uint32_t outputPrecision = 0,
+                                ID3D11UnorderedAccessView *uav = nullptr) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -484,7 +508,7 @@ struct GpuOperations::State {
             context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             context->RSSetState(pixelRasterizer.Get());
             context->RSSetViewports(1, &viewport);
-            context->OMSetRenderTargets(1, &rtv, nullptr);
+            context->OMSetRenderTargetsAndUnorderedAccessViews(1, &rtv, nullptr, 1, 1, &uav, nullptr);
             context->Begin(coverage.Get());
             context->Draw(3, 0);
             context->End(coverage.Get());
@@ -908,11 +932,13 @@ struct GpuOperations::State {
                                  uint32_t index, uint32_t offset, const Value &value, uint32_t mask,
                                  uint32_t swizzle, bool literalIndex, bool literalOffset,
                                  uint32_t returns = 0, const std::array<uint32_t, 2> &precision = {},
-                                 bool refactoringAllowed = false) {
+                                 bool refactoringAllowed = false, uint32_t stage = 5) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native memory assist after a failed operation");
         const auto typed = typedBufferFormat(view.format);
+        if ((stage != 5 && stage != 0) || (stage == 0 && (!typed || kind != 30)))
+            throw std::runtime_error("Invalid native buffer operation stage");
         if (buffer.bytes.empty() || buffer.bytes.size() > 256ull * 1024 * 1024 ||
             (!typed && buffer.bytes.size() % 4) || !view.resource || !view.size ||
             view.offset > buffer.bytes.size() || view.size > buffer.bytes.size() - view.offset ||
@@ -943,7 +969,7 @@ struct GpuOperations::State {
                                      : kernel(store, view.stride, kind, mask, swizzle, index, offset,
                                               literalIndex, literalOffset);
             auto found = shaders.find(words);
-            if (found == shaders.end()) {
+            if (stage == 5 && found == shaders.end()) {
                 if (shaders.size() >= 256)
                     shaders.clear();
                 std::vector<uint8_t> code(words.size() * 4);
@@ -988,6 +1014,27 @@ struct GpuOperations::State {
                             typed || view.stride ? 0u : D3D11_BUFFER_UAV_FLAG_RAW};
                 check(device->CreateUnorderedAccessView(resource.Get(), &v, &uav),
                       "Create private native buffer UAV");
+            }
+            if (stage == 0) {
+                const auto code = typedPixelUavKernel(1, returns, store,
+                                                      literalIndex ? immediate(index) : Words{0x20800a, 0, 0},
+                                                      mask, swizzle, precision, refactoringAllowed);
+                const auto observed =
+                    pixels(code, {{index, 0, 0, 0}, value.bits}, nullptr, nullptr, {}, 0, uav.Get())[0];
+                if (!store) {
+                    std::vector<uint8_t> result(16);
+                    std::memcpy(result.data(), observed.bits.data(), 16);
+                    return result;
+                }
+                desc = {UINT(buffer.bytes.size()), D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+                check(device->CreateBuffer(&desc, nullptr, &staging), "Create pixel UAV buffer staging");
+                context->CopyResource(staging.Get(), resource.Get());
+                completion->submit();
+                const auto mapped = completion->map(staging.Get());
+                std::vector<uint8_t> result(buffer.bytes.size());
+                std::memcpy(result.data(), mapped.pData, result.size());
+                context->Unmap(staging.Get(), 0);
+                return result;
             }
             if (!store) {
                 desc = {16,
@@ -1148,7 +1195,7 @@ std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std:
 std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
                                                            const TextureInputView &view, uint32_t dimension,
                                                            uint32_t returns, const Value &address,
-                                                           bool atomicMarker) {
+                                                           bool atomicMarker, uint32_t stage) {
     auto &s = *state_;
     checkCancellation(s.cancelled);
     if (s.failed)
@@ -1157,7 +1204,7 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
     key.insert(key.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
     key.insert(key.end(), address.bits.begin(), address.bits.end());
     key.insert(key.end(),
-               {dimension, returns, std::bit_cast<uint32_t>(input.minLod), uint32_t(atomicMarker)});
+               {dimension, returns, std::bit_cast<uint32_t>(input.minLod), uint32_t(atomicMarker), stage});
     if (auto found = s.textureFootprints.find(key); found != s.textureFootprints.end())
         return found->second;
     const auto format = typedBufferFormat(view.format);
@@ -1166,9 +1213,10 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
     auto marker = input;
     std::fill(marker.storage.bytes.begin(), marker.storage.bytes.end(), 0);
     const uint32_t one = format->returnType == 5 ? 0x3f800000u : 1u;
-    const auto after = textureUav(marker, view, dimension, returns, address,
-                                  Value::known({one, one, one, one}), true, {0, 1, 2, 3}, 15, atomicMarker)
-                           .second;
+    const auto after =
+        textureUav(marker, view, dimension, returns, address, Value::known({one, one, one, one}), true,
+                   {0, 1, 2, 3}, 15, atomicMarker, stage)
+            .second;
     std::optional<uint64_t> selected;
     for (size_t i = 0; i < after.size(); ++i)
         if (after[i]) {
@@ -1185,13 +1233,14 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
 std::pair<Value, std::vector<uint8_t>>
 GpuOperations::textureUav(const TextureInput &input, const TextureInputView &view, uint32_t dimension,
                           uint32_t returns, const Value &address, const Value &value, bool store,
-                          const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker) {
+                          const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker,
+                          uint32_t stage) {
     auto &s = *state_;
     checkCancellation(s.cancelled);
     if (s.failed)
         throw std::runtime_error("Recreate the native GPU assist after a failed operation");
-    if (input.storage.bytes.empty() || input.storage.bytes.size() > 256ull * 1024 * 1024 ||
-        view.nativeDescriptor.size() != 5 ||
+    if ((stage != 0 && stage != 5) || input.storage.bytes.empty() ||
+        input.storage.bytes.size() > 256ull * 1024 * 1024 || view.nativeDescriptor.size() != 5 ||
         (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8))
         throw std::runtime_error("Invalid native texture UAV operation");
     if (atomicMarker && (!store || (view.format != 42 && view.format != 43) ||
@@ -1295,7 +1344,7 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         Words key(bytes.size() / 4);
         std::memcpy(key.data(), bytes.data(), bytes.size());
         auto found = s.shaders.find(key);
-        if (found == s.shaders.end()) {
+        if (stage == 5 && found == s.shaders.end()) {
             if (s.shaders.size() >= 256)
                 s.shaders.clear();
             const auto binary = makeDxbc({{0x58454853, bytes}});
@@ -1304,38 +1353,50 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
                   "Create native texture UAV shader");
             found = s.shaders.emplace(std::move(key), std::move(shader)).first;
         }
-        const std::array<uint32_t, 8> parameters{address.bits[0], address.bits[1], address.bits[2],
-                                                 address.bits[3], value.bits[0],   value.bits[1],
-                                                 value.bits[2],   value.bits[3]};
-        D3D11_BUFFER_DESC bd{32, D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
-        if (!s.textureUavConstants)
-            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavConstants),
-                  "Create texture UAV constants");
-        s.context->UpdateSubresource(s.textureUavConstants.Get(), 0, nullptr, parameters.data(), 0, 0);
-        if (!store && !s.textureUavOutput) {
-            bd = {16,
-                  D3D11_USAGE_DEFAULT,
-                  D3D11_BIND_UNORDERED_ACCESS,
-                  0,
-                  D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
-                  16};
-            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavOutput),
-                  "Create texture UAV load output");
-            check(s.device->CreateUnorderedAccessView(s.textureUavOutput.Get(), nullptr,
-                                                      &s.textureUavOutputView),
-                  "Create texture UAV load output view");
-            bd = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
-            check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavStaging),
-                  "Create texture UAV load staging");
+        if (stage == 0) {
+            uint32_t selection = 0;
+            for (unsigned c = 0; c < 4; ++c)
+                selection |= swizzle[c] << (c * 2);
+            const auto code = typedPixelUavKernel(dimension, returns, store, {0x208e46, 0, 0}, mask,
+                                                  selection, {}, false, atomicMarker);
+            const auto valueResult =
+                s.pixels(code, {address.bits, value.bits}, nullptr, nullptr, {}, 0, operation.view.Get())[0];
+            if (!store)
+                return {valueResult, {}};
+        } else {
+            const std::array<uint32_t, 8> parameters{address.bits[0], address.bits[1], address.bits[2],
+                                                     address.bits[3], value.bits[0],   value.bits[1],
+                                                     value.bits[2],   value.bits[3]};
+            D3D11_BUFFER_DESC bd{32, D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+            if (!s.textureUavConstants)
+                check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavConstants),
+                      "Create texture UAV constants");
+            s.context->UpdateSubresource(s.textureUavConstants.Get(), 0, nullptr, parameters.data(), 0, 0);
+            if (!store && !s.textureUavOutput) {
+                bd = {16,
+                      D3D11_USAGE_DEFAULT,
+                      D3D11_BIND_UNORDERED_ACCESS,
+                      0,
+                      D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+                      16};
+                check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavOutput),
+                      "Create texture UAV load output");
+                check(s.device->CreateUnorderedAccessView(s.textureUavOutput.Get(), nullptr,
+                                                          &s.textureUavOutputView),
+                      "Create texture UAV load output view");
+                bd = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+                check(s.device->CreateBuffer(&bd, nullptr, &s.textureUavStaging),
+                      "Create texture UAV load staging");
+            }
+            auto *cb = s.textureUavConstants.Get();
+            ID3D11UnorderedAccessView *targets[]{operation.view.Get(),
+                                                 store ? nullptr : s.textureUavOutputView.Get()};
+            s.context->CSSetShader(found->second.Get(), nullptr, 0);
+            s.context->CSSetConstantBuffers(0, 1, &cb);
+            s.context->CSSetUnorderedAccessViews(0, 2, targets, nullptr);
+            s.context->Dispatch(1, 1, 1);
+            s.context->ClearState();
         }
-        auto *cb = s.textureUavConstants.Get();
-        ID3D11UnorderedAccessView *targets[]{operation.view.Get(),
-                                             store ? nullptr : s.textureUavOutputView.Get()};
-        s.context->CSSetShader(found->second.Get(), nullptr, 0);
-        s.context->CSSetConstantBuffers(0, 1, &cb);
-        s.context->CSSetUnorderedAccessViews(0, 2, targets, nullptr);
-        s.context->Dispatch(1, 1, 1);
-        s.context->ClearState();
         ID3D11Resource *staging = store ? textureStaging.Get() : s.textureUavStaging.Get();
         s.context->CopyResource(staging, store ? texture.Get() : s.textureUavOutput.Get());
         s.completion->submit();
@@ -1380,7 +1441,8 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         }
         if (store)
             operation.shadow = result.second;
-        ++s.count;
+        if (stage == 5)
+            ++s.count;
         return result;
     } catch (...) {
         s.context->ClearState();
@@ -1581,17 +1643,19 @@ Value GpuOperations::loadTyped(uint32_t stage, const Buffer &buffer, const Buffe
     if ((stage == 0 || stage == 1) && kind == 7)
         return state_->typedGraphics(stage, buffer, view, index, returns, selection, mask, literal, precision,
                                      refactoringAllowed);
-    if (stage != 5)
+    if (stage != 5 && !(stage == 0 && kind == 30))
         throw std::runtime_error("Unsupported native typed buffer shader stage");
     const auto bytes = state_->execute(buffer, view, false, kind, index, 0, {}, mask, selection, literal,
-                                       false, returns, precision, refactoringAllowed);
+                                       false, returns, precision, refactoringAllowed, stage);
     Value result;
     std::memcpy(result.bits.data(), bytes.data(), 16);
     return result;
 }
 std::vector<uint8_t> GpuOperations::storeTyped(const Buffer &buffer, const BufferView &view, uint32_t index,
-                                               uint32_t returns, const Value &value, bool literal) {
-    return state_->execute(buffer, view, true, 30, index, 0, value, 15, 0xe4, literal, false, returns);
+                                               uint32_t returns, const Value &value, bool literal,
+                                               uint32_t stage) {
+    return state_->execute(buffer, view, true, 30, index, 0, value, 15, 0xe4, literal, false, returns, {},
+                           false, stage);
 }
 std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction &instruction,
                                               const std::vector<Register> &targets,

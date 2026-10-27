@@ -77,7 +77,7 @@ Selection select(const TextureInput &texture, const TextureInputView &view, uint
 } // namespace
 Value TextureInputs::loadUav(const Register &binding, uint32_t dimension, uint32_t returns,
                              const Value &address, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                             GpuOperations *gpu, bool &assisted) const {
+                             GpuOperations *gpu, bool &assisted, uint32_t stage) const {
     assisted = false;
     addressMask(binding, dimension, address);
     for (auto c : swizzle)
@@ -97,8 +97,10 @@ Value TextureInputs::loadUav(const Register &binding, uint32_t dimension, uint32
     if (!gpu)
         throw std::runtime_error("Typed texture UAV access requires the selected GPU");
     if (dimension == 5 && !selection.offset)
-        selection.offset = gpu->textureUavFootprint(texture, view, dimension, returns, address);
-    auto result = gpu->textureUav(texture, view, dimension, returns, address, {}, false, swizzle, mask).first;
+        selection.offset = gpu->textureUavFootprint(texture, view, dimension, returns, address, false, stage);
+    auto result =
+        gpu->textureUav(texture, view, dimension, returns, address, {}, false, swizzle, mask, false, stage)
+            .first;
     assisted = true;
     result.valid = uint8_t(mask);
     if (!selection.offset)
@@ -120,7 +122,7 @@ Value TextureInputs::loadUav(const Register &binding, uint32_t dimension, uint32
 }
 std::vector<MemoryChange> TextureInputs::storeUav(const Register &binding, uint32_t dimension,
                                                   uint32_t returns, const Value &address, const Value &value,
-                                                  GpuOperations *gpu, bool &assisted) const {
+                                                  GpuOperations *gpu, bool &assisted, uint32_t stage) const {
     assisted = false;
     addressMask(binding, dimension, address);
     const auto selected = views.find(binding);
@@ -137,9 +139,10 @@ std::vector<MemoryChange> TextureInputs::storeUav(const Register &binding, uint3
     if (!gpu)
         throw std::runtime_error("Typed texture UAV access requires the selected GPU");
     if (dimension == 5 && !selection.offset)
-        selection.offset = gpu->textureUavFootprint(texture, view, dimension, returns, address);
-    const auto after =
-        gpu->textureUav(texture, view, dimension, returns, address, value, true, {0, 1, 2, 3}, 15).second;
+        selection.offset = gpu->textureUavFootprint(texture, view, dimension, returns, address, false, stage);
+    const auto after = gpu->textureUav(texture, view, dimension, returns, address, value, true, {0, 1, 2, 3},
+                                       15, false, stage)
+                           .second;
     assisted = true;
     if (after.size() != texture.storage.bytes.size())
         throw std::runtime_error("Typed texture UAV storage size changed");

@@ -82,11 +82,11 @@ struct TextureInputs {
     Value dimensions(const Register &, uint32_t dimension, const Value &mip, uint32_t mode, GpuOperations *,
                      bool &assisted) const;
     Value loadUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address,
-                  const std::array<uint32_t, 4> &swizzle, uint32_t mask, GpuOperations *,
-                  bool &assisted) const;
+                  const std::array<uint32_t, 4> &swizzle, uint32_t mask, GpuOperations *, bool &assisted,
+                  uint32_t stage = 5) const;
     std::vector<MemoryChange> storeUav(const Register &, uint32_t dimension, uint32_t returns,
-                                       const Value &address, const Value &, GpuOperations *,
-                                       bool &assisted) const;
+                                       const Value &address, const Value &, GpuOperations *, bool &assisted,
+                                       uint32_t stage = 5) const;
     std::pair<Value, std::vector<MemoryChange>>
     atomicUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address, uint32_t opcode,
               const Value &, const Value &comparison, GpuOperations *, bool &assisted) const;
