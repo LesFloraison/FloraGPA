@@ -1,0 +1,325 @@
+#include "NativePixelDrawHistory.h"
+#include "FrameOutput.h"
+#include "NativePixel.h"
+#include "NativePixelCandidates.h"
+#include "NativePixelGeometryReplay.h"
+#include <algorithm>
+#include <chrono>
+#include <set>
+namespace flora {
+namespace {
+using Json = nlohmann::json;
+struct Target {
+    Resource resource;
+    Json view;
+    Id viewId = 0;
+    dxbc_exec::PixelRasterState raster;
+};
+Target selectedTarget(Replay &r, const NativeHistorySelection &s, const dxbc_exec::PixelRasterState &raster) {
+    Target result;
+    result.resource = r.observeTextureMetadata(s.resource).resource;
+    const auto info = textureInfo(result.resource);
+    if (!s.maxReadbackBytes || s.mip >= info.mips || s.mip >= 32 || s.layer >= info.layers ||
+        s.slice >= std::max(1u, info.depth >> s.mip) || s.x >= std::max(1u, info.width >> s.mip) ||
+        s.y >= std::max(1u, info.height >> s.mip) || s.sample >= info.samples)
+        throw std::invalid_argument("Private pixel history selection exceeds resource bounds");
+    const auto storage = textureSubresources(result.resource);
+    const auto bytes = storage.back().offset + storage.back().size;
+    if (bytes > s.maxReadbackBytes / info.samples)
+        throw std::runtime_error("Private pixel history readback payload budget exceeded");
+    result.raster = raster;
+    r.inspectNativeState([&](auto *context, const auto &objects) {
+        Com<ID3D11Resource> selected;
+        check(objects.at(s.resource).As(&selected), "Get selected pixel history resource");
+        auto consider = [&](ID3D11View *view, Bytes descriptor, bool depth, uint32_t slot) {
+            if (!view)
+                return;
+            Com<ID3D11Resource> owner;
+            view->GetResource(&owner);
+            if (owner != selected)
+                return;
+            const auto sub = outputSubresource(result.resource, descriptor, {}, depth);
+            const auto layer = info.dimension == 4 ? s.slice : s.layer;
+            if (sub.at("mip") != s.mip || layer < sub.at("first_layer").get<uint32_t>() ||
+                uint64_t(layer) - sub.at("first_layer").get<uint32_t>() >=
+                    sub.at("layer_count").get<uint32_t>())
+                return;
+            if (!result.view.is_null())
+                throw std::runtime_error("Ambiguous private pixel history output binding");
+            result.view = outputSubresource(result.resource, descriptor, layer, depth);
+            result.view["slot"] = depth ? Json(nullptr) : Json(slot);
+            const auto format = result.view.at("format").get<uint32_t>();
+            if (!nativePixelFormatsCompatible(info.format, format) ||
+                (s.typedFormat && *s.typedFormat != format))
+                throw std::runtime_error("Private pixel history interpretation differs from its bound view");
+            for (const auto &[id, object] : objects) {
+                Com<ID3D11View> candidate;
+                if (SUCCEEDED(object.As(&candidate)) && candidate.Get() == view) {
+                    result.viewId = id;
+                    break;
+                }
+            }
+            if (!result.viewId)
+                throw std::runtime_error("Private pixel history output has no GPA view identity");
+            auto &target = result.raster.target;
+            selected->GetType(&target.dimension);
+            target.width = result.view.at("width").get<uint32_t>();
+            target.height = result.view.at("height").get<uint32_t>();
+            target.layers = result.view.at("layer_count").get<uint32_t>();
+            target.format = DXGI_FORMAT(format);
+            target.depth = depth;
+            target.samples = {info.samples, result.resource.type == 0x85 ? result.resource.desc.at(6) : 0};
+        };
+        std::array<ID3D11RenderTargetView *, 8> raw{};
+        std::array<Com<ID3D11RenderTargetView>, 8> views;
+        Com<ID3D11DepthStencilView> depth;
+        context->OMGetRenderTargets(8, raw.data(), &depth);
+        for (size_t i = 0; i < raw.size(); ++i)
+            views[i].Attach(raw[i]);
+        for (uint32_t i = 0; i < views.size(); ++i)
+            if (views[i]) {
+                D3D11_RENDER_TARGET_VIEW_DESC d{};
+                views[i]->GetDesc(&d);
+                consider(views[i].Get(), Bytes(reinterpret_cast<const uint8_t *>(&d), sizeof d), false, i);
+            }
+        if (depth) {
+            D3D11_DEPTH_STENCIL_VIEW_DESC d{};
+            depth->GetDesc(&d);
+            consider(depth.Get(), Bytes(reinterpret_cast<const uint8_t *>(&d), sizeof d), true, 0);
+        }
+    });
+    if (result.view.is_null())
+        throw std::runtime_error("Selected pixel is not in a bound RTV or DSV");
+    return result;
+}
+Json readPixel(Replay &r, NativePixelDecoder &decoder, const Target &target, const NativeHistorySelection &s,
+               const CancelCheck &cancelled, uint64_t &readBytes) {
+    checkCancellation(cancelled);
+    const auto info = textureInfo(target.resource);
+    const auto originalInfo = textureInfo(r.frame().resource(s.resource));
+    const bool sameExtent = info.width == originalInfo.width && info.height == originalInfo.height &&
+                            info.depth == originalInfo.depth && info.layers == originalInfo.layers &&
+                            info.mips == originalInfo.mips && info.samples == originalInfo.samples;
+    const auto format = target.view.at("format").get<uint32_t>();
+    const bool capturedFamily = nativePixelFormatsCompatible(originalInfo.format, format);
+    auto resource = target.resource;
+    std::vector<uint8_t> bytes;
+    bool point = false, canonicalX = false, exactBits = true;
+    std::string transfer = "native_storage_copy";
+    if (info.samples > 1) {
+        if (!sameExtent || !capturedFamily)
+            throw std::runtime_error(
+                "MSAA history storage differs from the captured extent or format family");
+        auto data = r.readMsaa(s.resource, s.sample, format);
+        resource = std::move(data.resource);
+        bytes = std::move(data.bytes);
+        canonicalX = data.canonicalX;
+        exactBits = data.integerBits || data.depthStencil;
+        transfer = data.mode;
+    } else if (auto narrow = sameExtent && capturedFamily
+                                 ? r.readTexturePoint(s.resource, s.x, s.y, s.slice, s.mip, s.layer)
+                                 : std::nullopt) {
+        bytes = std::move(*narrow);
+        point = true;
+    } else {
+        auto data = r.observeTextureStorage(s.resource, s.maxReadbackBytes, cancelled);
+        resource = std::move(data.resource);
+        bytes = std::move(data.bytes);
+    }
+    checkCancellation(cancelled);
+    if (bytes.size() > s.maxReadbackBytes || bytes.size() > UINT64_MAX - readBytes)
+        throw std::runtime_error("Private pixel history readback limit exceeded");
+    readBytes += bytes.size();
+    const auto sub = textureSubresources(resource).at(s.mip + s.layer * info.mips);
+    const auto [size, rows] = pitches(1, 1, format);
+    if (rows != 1 || !size)
+        throw std::runtime_error("Private pixel history requires native texel storage");
+    const auto offset = point ? 0
+                              : sub.offset + uint64_t(s.slice) * sub.slicePitch +
+                                    uint64_t(s.y) * sub.rowPitch + uint64_t(s.x) * size;
+    if (offset > bytes.size() || size > bytes.size() - offset)
+        throw std::runtime_error("Private pixel history texel bounds");
+    std::vector<uint8_t> value(bytes.begin() + ptrdiff_t(offset), bytes.begin() + ptrdiff_t(offset + size));
+    std::vector<bool> valid(size, true);
+    if (format == 20)
+        for (size_t i = 5; i < 8; ++i)
+            valid[i] = false;
+    if (format == 88 || format == 93)
+        valid[3] = false;
+    return {{"bytes", value},
+            {"valid_bytes", valid},
+            {"defined", nullptr},
+            {"typed_format", format},
+            {"canonical_unused_x", canonicalX},
+            {"exact_storage_bits", exactBits},
+            {"transfer", transfer},
+            {"readback_scope", point ? "single_texel" : "complete_storage"},
+            {"decoded", decoder.decode(value, format, s.x, s.y)}};
+}
+bool equal(const Json &a, const Json &b) {
+    if (a.at("typed_format") != b.at("typed_format") || a.at("valid_bytes") != b.at("valid_bytes") ||
+        a.at("bytes").size() != b.at("bytes").size())
+        throw std::runtime_error("Private pixel storage shape changed");
+    for (size_t i = 0; i < a.at("bytes").size(); ++i)
+        if (a.at("valid_bytes")[i] == true && a.at("bytes")[i] != b.at("bytes")[i])
+            return false;
+    return true;
+}
+} // namespace
+nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHistorySelection &s,
+                                             const NativePixelDrawHistoryLimits &limits,
+                                             const CancelCheck &cancelled) {
+    if (!s.maxRecords || !limits.maxCandidates || limits.maxCandidates > 2048 || !limits.timeoutMs ||
+        limits.timeoutMs > 60000 || !limits.maxBytes)
+        throw std::invalid_argument("Invalid private pixel history limits");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
+    const CancelCheck bounded = [&] {
+        checkCancellation(cancelled);
+        if (std::chrono::steady_clock::now() >= deadline)
+            throw std::runtime_error("Private pixel history deadline");
+        return false;
+    };
+    Target target;
+    NativePixelDecoder decoder(r);
+    uint64_t readBytes = 0, reads = 0, completed = 0, total = 0;
+    Json before, previous, after, candidateReports = Json::array(), records = Json::array(),
+                                  unattributed = Json::array();
+    std::map<uint64_t, Json> candidates;
+    auto snapshot = [&](Replay &replay) {
+        ++reads;
+        return readPixel(replay, decoder, target, s, bounded, readBytes);
+    };
+    const NativePixelCheckpointPlanner plan = [&](const PostTransformGeometry &geometry,
+                                                  const dxbc_exec::PixelRasterState &raster) {
+        checkCancellation(bounded);
+        target = selectedTarget(r, s, raster);
+        before = snapshot(r);
+        total = geometry.report.at("primitives").get<uint64_t>();
+        std::set<uint64_t> checkpoints;
+        if (total) {
+            auto discovery = target.raster;
+            // Discover geometry before the application sample mask; rejected
+            // storage samples must not disappear merely because no value changed.
+            discovery.sampleMask = UINT32_MAX;
+            const auto forced = discovery.rasterizer.ForcedSampleCount;
+            const uint32_t passes = forced ? forced : 1;
+            uint32_t observations = 0;
+            for (uint32_t pass = 0; pass < passes; ++pass) {
+                NativePixelCandidateSelection select;
+                select.x = s.x;
+                select.y = s.y;
+                select.layer = target.view.at("relative_layer").get<uint32_t>();
+                select.sample = forced ? pass : s.sample;
+                select.primitiveCount = total;
+                select.maxRecords = std::max(1u, limits.maxCandidates - observations);
+                select.timeoutMs = limits.timeoutMs;
+                const auto sourceBytes =
+                    geometry.bytes.size() + geometry.primitiveIds.size() * sizeof(uint32_t);
+                if (sourceBytes >= limits.maxBytes)
+                    throw std::runtime_error("Private pixel candidate payload budget exceeded");
+                select.maxBytes = limits.maxBytes - sourceBytes;
+                auto found = captureNativePixelCandidates(r.nativeDevice(), r.options().warp, discovery,
+                                                          geometry, select, bounded);
+                observations += uint32_t(found.report.at("observations").size());
+                if (observations > limits.maxCandidates)
+                    throw std::runtime_error("Private pixel history candidate record limit exceeded");
+                for (const auto &row : found.report.at("observations")) {
+                    const auto ordinal = row.at("primitive_ordinal").get<uint64_t>();
+                    auto &entry = candidates[ordinal];
+                    if (entry.is_null())
+                        entry = {{"primitive_ordinal", ordinal},
+                                 {"original_primitive_id", row.at("original_primitive_id")},
+                                 {"observations", Json::array()}};
+                    if (candidates.size() > s.maxRecords)
+                        throw std::runtime_error("Private pixel history primitive record limit exceeded");
+                    entry["observations"].push_back({{"pass", pass},
+                                                     {"observation_index", row.at("observation_index")},
+                                                     {"raster_sample", select.sample},
+                                                     {"selected_lane", row.at("selected_lane")}});
+                    if (ordinal)
+                        checkpoints.insert(ordinal);
+                    checkpoints.insert(ordinal + 1);
+                }
+                candidateReports.push_back(std::move(found.report));
+            }
+        }
+        return std::vector<uint64_t>(checkpoints.begin(), checkpoints.end());
+    };
+    const auto replay = replayNativePixelGeometryCheckpoints(
+        r, event, plan,
+        [&](Replay &privateReplay, uint64_t count) {
+            auto current = snapshot(privateReplay);
+            if (!count) {
+                if (!equal(before, current))
+                    throw std::runtime_error("Private pixel initial storage differs");
+            } else {
+                const auto found = candidates.find(completed);
+                if (count == completed + 1 && found != candidates.end()) {
+                    auto row = found->second;
+                    row["event"] = event;
+                    row["record_kind"] = "private_primitive_storage";
+                    row["before"] = previous;
+                    row["after"] = current;
+                    row["observed_value_changed"] = !equal(previous, current);
+                    row["storage_changed"] =
+                        previous.at("exact_storage_bits") == true && current.at("exact_storage_bits") == true
+                            ? row["observed_value_changed"]
+                            : Json(nullptr);
+                    row["instance"] = nullptr;
+                    row["original_fragment_eligibility"] = nullptr;
+                    row["write_executed"] = nullptr;
+                    row["shader_output"] = nullptr;
+                    row["failure_reasons"] = nullptr;
+                    records.push_back(std::move(row));
+                } else if (!equal(previous, current))
+                    unattributed.push_back({{"first_primitive", completed},
+                                            {"primitive_count", count - completed},
+                                            {"before", previous},
+                                            {"after", current}});
+            }
+            completed = count;
+            previous = std::move(current);
+            after = previous;
+        },
+        limits.maxBytes, limits.timeoutMs, bounded);
+    if (completed != total || records.size() != candidates.size())
+        throw std::runtime_error("Incomplete private pixel checkpoint join");
+    const auto restored = snapshot(r);
+    if (!equal(before, restored))
+        throw std::runtime_error("Private pixel history changed original storage");
+    return {
+        {"schema", 1},
+        {"kind", "private_pixel_draw_history"},
+        {"backend", "native-pixel-draw-history/1"},
+        {"event", event},
+        {"frame_sha256", replay.at("frame_sha256")},
+        {"adapter", replay.at("adapter")},
+        {"selection",
+         {{"resource", s.resource},
+          {"view", target.viewId},
+          {"x", s.x},
+          {"y", s.y},
+          {"mip", s.mip},
+          {"layer", s.layer},
+          {"slice", s.slice},
+          {"sample", s.sample},
+          {"subresource", target.view}}},
+        {"before", before},
+        {"after", after},
+        {"restored", restored},
+        {"records", records},
+        {"unattributed_changes", unattributed},
+        {"candidate_passes", candidateReports},
+        {"geometry_replay", replay},
+        {"readback_count", reads},
+        {"readback_bytes", readBytes},
+        {"order", "captured_geometry_storage"},
+        {"sample_selection_domain", "target_storage"},
+        {"observed_storage_restored", true},
+        {"original_storage_restored", before.at("exact_storage_bits") == true ? Json(true) : Json(nullptr)},
+        {"original_fragment_eligibility", nullptr},
+        {"fragment_history_available", false},
+        {"original_gpu_schedule", false},
+        {"pre_raster_side_effects_replayed", false}};
+}
+} // namespace flora

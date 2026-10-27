@@ -1,6 +1,7 @@
 #include "BlendCapture.h"
 #include "DepthStencilCapture.h"
 #include "StreamCapture.h"
+#include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
 #include <QDir>
 #include <QTemporaryDir>
@@ -55,10 +56,321 @@ D3D11_DEPTH_STENCIL_DESC depthState() {
                                 D3D11_COMPARISON_ALWAYS};
     return d;
 }
+Capture layeredHistoryCapture(bool volume) {
+    auto c = blendCapture();
+    c.entries.erase(std::remove_if(c.entries.begin(), c.entries.end(),
+                                   [](const auto &e) {
+                                       return e.id == 1000 || e.id == 1001 || e.id == 1002 || e.id == 50 ||
+                                              e.category == 3 || e.category == 7;
+                                   }),
+                    c.entries.end());
+    const auto size = volume ? 1152u : 960u;
+    c.add(1000, 5, volume ? 0x86 : 0x85,
+          volume ? statePack(Id(0), Id(0), 4u, 4u, 4u, 2u, 2u, 0u, 32u, 0u, 0u, Id(1001))
+                 : statePack(Id(0), Id(0), 4u, 4u, 2u, 3u, 2u, 1u, 0u, 0u, 32u, 0u, 0u, Id(1001)));
+    auto data = word(size);
+    data.resize(size + 4);
+    c.add(1001, 9, 1, data);
+    c.add(1002, 5, 0x8d, statePack(Id(0), Id(0), Id(1000), 2u, volume ? 8u : 5u, 1u, volume ? 0u : 1u, 2u));
+    c.add(50, 9, 0x87, statePack(1u, 0.f, 0.f, 2.f, 2.f, 0.f, 1.f));
+    const auto code = compileClassProgram(
+        "struct V{float4 p:SV_Position;};struct O{float4 p:SV_Position;uint "
+        "layer:SV_RenderTargetArrayIndex;};"
+        "[maxvertexcount(3)]void main(triangle V v[3],uint id:SV_PrimitiveID,inout TriangleStream<O> output){"
+        "[unroll]for(uint i=0;i<3;i++){O o;o.p=v[i].p;o.layer=id;output.Append(o);}}",
+        "gs_5_0");
+    c.add(60, 5, 0x91, statePack(Id(0), Id(0), Id(0), Id(0), Id(0), Id(0), Id(61)));
+    auto raw = statePack(uint64_t(code.size()));
+    raw.insert(raw.end(), code.begin(), code.end());
+    append(raw, Id(0));
+    c.add(61, 9, 0x81, raw);
+    State s{};
+    s.topology = 4;
+    s.sampleMask = UINT32_MAX;
+    s.omStart = 8;
+    s.rtCount = 1;
+    s.rtv[0] = 1002;
+    s.rasterizer = 52;
+    s.viewports = 50;
+    s.stages[0].shader = 10;
+    s.stages[3].shader = 60;
+    s.stages[4].shader = 12;
+    c.add(90, 3, 3, snapshot(s));
+    c.add(100, 7, 0x37, statePack(Id(90), Id(0), Id(1), 6u, 0u));
+    return c;
+}
 } // namespace
 class NativePixelGeometryReplayTests final : public QObject {
     Q_OBJECT
   private slots:
+    void drawHistory_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *mode : {"ordinary", "blend", "depth", "stencil", "discard", "early_discard",
+                                     "mask", "scissor", "cull", "clip", "unchanged", "depth_resource"})
+                QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
+    }
+    void drawHistory() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        auto c = depthStencilCapture();
+        const Id event = mode == "unchanged" ? 2000 : 1000;
+        drawCount(c, event, 6);
+        auto o = options(vendor, event);
+        o.shaders[30] = compileClassProgram(
+            "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return float4(i==2?3:-1,i==1?3:-1," +
+                std::string(mode == "clip" ? "-1" : ".25-v/3*.125") + ",1);}",
+            "vs_5_0");
+        auto depth = depthState();
+        if (mode == "depth" || mode == "depth_resource") {
+            depth.DepthEnable = TRUE;
+            depth.DepthFunc = mode == "depth" ? D3D11_COMPARISON_NEVER : D3D11_COMPARISON_LESS;
+        }
+        if (mode == "stencil") {
+            depth.StencilEnable = TRUE;
+            depth.FrontFace.StencilFunc = depth.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
+        }
+        o.depthStencilEdits[1000].descriptor = o.depthStencilEdits[2000].descriptor = depth;
+        if (mode == "mask")
+            o.blendEdits[event].sampleMask = 0;
+        if (mode == "blend") {
+            D3D11_BLEND_DESC1 d{};
+            auto &t = d.RenderTarget[0];
+            t.BlendEnable = TRUE;
+            t.SrcBlend = t.SrcBlendAlpha = t.DestBlend = t.DestBlendAlpha = D3D11_BLEND_ONE;
+            t.BlendOp = t.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            t.RenderTargetWriteMask = 15;
+            o.blendEdits[event].descriptor = d;
+            o.shaders[32] =
+                compileClassProgram("float4 main():SV_Target{return float4(.25,.125,.375,.25);}", "ps_5_0");
+        }
+        if (mode == "discard" || mode == "early_discard")
+            o.shaders[32] = compileClassProgram(
+                std::string(mode == "early_discard" ? "[earlydepthstencil]" : "") +
+                    "float4 main(float4 p:SV_Position,uint "
+                    "id:SV_PrimitiveID):SV_Target{if(id==0)discard;return float4(p.xy,.25,1);}",
+                "ps_5_0");
+        if (mode == "scissor" || mode == "cull") {
+            D3D11_RASTERIZER_DESC2 d{};
+            d.FillMode = D3D11_FILL_SOLID;
+            d.CullMode = mode == "cull" ? D3D11_CULL_FRONT : D3D11_CULL_NONE;
+            d.DepthClipEnable = TRUE;
+            d.ScissorEnable = mode == "scissor";
+            o.rasterizerEdits[event].descriptor = d;
+            o.rasterizerEdits[event].scissors = std::vector<D3D11_RECT>{{1, 1, 2, 2}};
+        }
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        NativeHistorySelection selection;
+        selection.resource = mode == "depth_resource" ? 720 : 20;
+        auto before = o;
+        before.before = before.prepareBeforeDraw = true;
+        Replay r(f, before);
+        r.run();
+        const auto initial = r.readTexture(selection.resource);
+        const auto report = collectNativePixelDrawHistory(r, event, selection);
+        QCOMPARE(r.readTexture(selection.resource), initial);
+        QVERIFY(report.at("original_storage_restored").get<bool>());
+        const bool noCandidates = mode == "scissor" || mode == "cull" || mode == "clip";
+        QCOMPARE(report.at("records").size(), noCandidates ? size_t(0) : size_t(2));
+        QCOMPARE(report.at("unattributed_changes").size(), size_t(0));
+        Replay reference(f, o);
+        reference.run();
+        Json originalPrefixes = Json::array();
+        QCOMPARE(report.at("after").at("bytes").get<std::vector<uint8_t>>(),
+                 reference.readTexture(selection.resource));
+        if (!noCandidates)
+            for (uint32_t index = 0; index < 2; ++index) {
+                const auto &row = report.at("records")[index];
+                QCOMPARE(row.at("primitive_ordinal"), Json(index));
+                QCOMPARE(row.at("original_primitive_id"), Json(index));
+                QCOMPARE(row.at("record_kind"), Json("private_primitive_storage"));
+                QVERIFY(row.at("write_executed").is_null());
+                QVERIFY(row.at("original_fragment_eligibility").is_null());
+                QVERIFY(row.at("failure_reasons").is_null());
+                auto prefix = c;
+                drawCount(prefix, event, (index + 1) * 3);
+                const auto p = dir.filePath(QString("prefix%1.gpa_frame").arg(index));
+                prefix.save(p);
+                Frame pf(p.toStdWString());
+                Replay originalPrefix(pf, o);
+                originalPrefix.run();
+                const auto prefixBytes = originalPrefix.readTexture(selection.resource);
+                QCOMPARE(row.at("after").at("bytes").get<std::vector<uint8_t>>(), prefixBytes);
+                originalPrefixes.push_back({{"completed_primitives", index + 1}, {"bytes", prefixBytes}});
+                if (index)
+                    QCOMPARE(row.at("before"), report.at("records")[index - 1].at("after"));
+            }
+        if (mode == "ordinary" || mode == "unchanged")
+            QVERIFY(!report.at("records")[1].at("storage_changed").get<bool>());
+        auto saved = report;
+        saved["original_prefixes"] = originalPrefixes;
+        saved["status"] = "ok";
+        evidence(saved);
+    }
+    void drawHistoryMsaa_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("sample");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t sample = 0; sample < 4; ++sample)
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(sample))) << vendor << sample;
+    }
+    void drawHistoryMsaa() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, sample);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        blendCapture(1, false, false, 4).save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 100);
+        o.blendEdits[100].sampleMask = 5;
+        o.shaders[12] = compileClassProgram("float4 main(float4 p:SV_Position,uint "
+                                            "s:SV_SampleIndex):SV_Target{return float4(s*.25,p.xy,.5);}",
+                                            "ps_5_0");
+        Replay reference(f, o);
+        reference.run();
+        const auto expected = reference.readMsaa(1000, sample, 2).bytes;
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readMsaa(1000, sample, 2).bytes;
+        NativeHistorySelection selection;
+        selection.resource = 1000;
+        selection.sample = sample;
+        auto report = collectNativePixelDrawHistory(r, 100, selection);
+        QCOMPARE(report.at("records").size(), size_t(1));
+        QCOMPARE(report.at("after").at("bytes").get<std::vector<uint8_t>>(), expected);
+        QCOMPARE(r.readMsaa(1000, sample, 2).bytes, initial);
+        if (sample == 1 || sample == 3)
+            QVERIFY(!report.at("records")[0].at("storage_changed").get<bool>());
+        report["status"] = "ok";
+        evidence(report);
+    }
+    void drawHistoryLayers_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<bool>("volume");
+        QTest::addColumn<uint32_t>("layer");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (bool volume : {false, true})
+                for (uint32_t layer : {0u, 1u})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(volume).arg(layer)))
+                        << vendor << volume << layer;
+    }
+    void drawHistoryLayers() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(bool, volume);
+        QFETCH(uint32_t, layer);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        layeredHistoryCapture(volume).save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 100);
+        o.shaders[10] = compileClassProgram(
+            "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return float4(i==2?3:-1,i==1?3:-1,0,1);}",
+            "vs_5_0");
+        o.shaders[12] = compileClassProgram(
+            "float4 main(float4 p:SV_Position):SV_Target{return float4(p.xy,.25,1);}", "ps_5_0");
+        NativeHistorySelection selection;
+        selection.resource = 1000;
+        selection.mip = 1;
+        selection.x = selection.y = 1;
+        if (volume)
+            selection.slice = layer;
+        else
+            selection.layer = layer + 1;
+        Replay reference(f, o);
+        reference.run();
+        const auto expected = reference.readTexturePoint(1000, 1, 1, selection.slice, 1, selection.layer);
+        QVERIFY(expected);
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readTexture(1000);
+        auto report = collectNativePixelDrawHistory(r, 100, selection);
+        QCOMPARE(report.at("records").size(), size_t(1));
+        QCOMPARE(report.at("records")[0].at("primitive_ordinal"), Json(layer));
+        QVERIFY(report.at("records")[0].at("original_primitive_id").is_null());
+        QCOMPARE(report.at("after").at("bytes").get<std::vector<uint8_t>>(), *expected);
+        QCOMPARE(report.at("unattributed_changes").size(), size_t(0));
+        QCOMPARE(r.readTexture(1000), initial);
+        report["status"] = "ok";
+        evidence(report);
+    }
+    void drawHistoryForced_data() { devices(); }
+    void drawHistoryForced() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QTemporaryDir dir;
+            const auto path = dir.filePath("frame.gpa_frame");
+            blendCapture().save(path);
+            Frame f(path.toStdWString());
+            auto o = options(vendor, 100);
+            D3D11_RASTERIZER_DESC2 d{};
+            d.FillMode = D3D11_FILL_SOLID;
+            d.CullMode = D3D11_CULL_NONE;
+            d.DepthClipEnable = TRUE;
+            d.ForcedSampleCount = 4;
+            o.rasterizerEdits[100].descriptor = d;
+            o.depthStencilEdits[100].descriptor = depthState();
+            Replay reference(f, o);
+            reference.run();
+            const auto expected = reference.readTexture(1000);
+            o.before = o.prepareBeforeDraw = true;
+            Replay r(f, o);
+            r.run();
+            NativeHistorySelection selection;
+            selection.resource = 1000;
+            auto report = collectNativePixelDrawHistory(r, 100, selection);
+            QCOMPARE(report.at("candidate_passes").size(), size_t(4));
+            QCOMPARE(report.at("records").size(), size_t(1));
+            QCOMPARE(report.at("records")[0].at("observations").size(), size_t(4));
+            QCOMPARE(report.at("after").at("bytes").get<std::vector<uint8_t>>(), expected);
+            report["status"] = "ok";
+            evidence(report);
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void drawHistoryRecovery_data() { devices(); }
+    void drawHistoryRecovery() {
+        QFETCH(uint32_t, vendor);
+        auto c = depthStencilCapture();
+        drawCount(c, 1000, 6);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 1000);
+        o.before = o.prepareBeforeDraw = true;
+        o.shaders[30] = compileClassProgram(
+            "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return float4(i==2?3:-1,i==1?3:-1,0,1);}",
+            "vs_5_0");
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readTexture(20);
+        NativeHistorySelection selection;
+        selection.resource = 20;
+        auto bad = selection;
+        bad.mip = 1;
+        QVERIFY_THROWS_EXCEPTION(std::exception, collectNativePixelDrawHistory(r, 1000, bad));
+        bad = selection;
+        bad.maxRecords = 1;
+        QVERIFY_THROWS_EXCEPTION(std::exception, collectNativePixelDrawHistory(r, 1000, bad));
+        NativePixelDrawHistoryLimits limit;
+        limit.maxCandidates = 1;
+        QVERIFY_THROWS_EXCEPTION(std::exception, collectNativePixelDrawHistory(r, 1000, selection, limit));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                 collectNativePixelDrawHistory(r, 1000, selection, {}, [] { return true; }));
+        QCOMPARE(r.readTexture(20), initial);
+        auto report = collectNativePixelDrawHistory(r, 1000, selection);
+        QCOMPARE(report.at("records").size(), size_t(2));
+        QCOMPARE(r.readTexture(20), initial);
+        report["status"] = "ok";
+        evidence(report);
+    }
     void checkpoints_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");

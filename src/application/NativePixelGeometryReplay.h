@@ -1,6 +1,9 @@
 #pragma once
 #include "PostTransform.h"
 namespace flora {
+namespace dxbc_exec {
+struct PixelRasterState;
+}
 struct NativePixelGeometryRange {
     uint64_t firstPrimitive = 0, primitiveCount = 0;
     // Relative completed-primitive counts. Each boundary ends a separate Draw.
@@ -21,4 +24,13 @@ nlohmann::json
 replayNativePixelGeometry(Replay &, Id event, const NativePixelGeometryRange &,
                           const std::function<void(Replay &, uint64_t completedPrimitives)> &observe = {},
                           const CancelCheck &cancelled = {});
+using NativePixelCheckpointPlanner =
+    std::function<std::vector<uint64_t>(const PostTransformGeometry &, const dxbc_exec::PixelRasterState &)>;
+// Plans checkpoints from the exact geometry used for the subsequent full draw.
+// The planner is read-only and owns limits for its temporary diagnostic work.
+nlohmann::json replayNativePixelGeometryCheckpoints(Replay &, Id event, const NativePixelCheckpointPlanner &,
+                                                    const std::function<void(Replay &, uint64_t)> &observe,
+                                                    uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                    uint32_t timeoutMs = 30000,
+                                                    const CancelCheck &cancelled = {});
 } // namespace flora

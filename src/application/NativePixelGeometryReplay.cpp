@@ -11,7 +11,8 @@ using Json = nlohmann::json;
 class NativePixelGeometryReplay {
     Replay &r;
     Id id;
-    const NativePixelGeometryRange &request;
+    NativePixelGeometryRange request;
+    const NativePixelCheckpointPlanner *planner;
     const std::function<void(Replay &, uint64_t)> &observer;
     CancelCheck cancelled;
     std::chrono::steady_clock::time_point deadline;
@@ -44,8 +45,8 @@ class NativePixelGeometryReplay {
   public:
     NativePixelGeometryReplay(Replay &replay, Id event, const NativePixelGeometryRange &selection,
                               const std::function<void(Replay &, uint64_t)> &observe,
-                              const CancelCheck &cancel)
-        : r(replay), id(event), request(selection), observer(observe), cancelled(cancel),
+                              const CancelCheck &cancel, const NativePixelCheckpointPlanner *plan = nullptr)
+        : r(replay), id(event), request(selection), planner(plan), observer(observe), cancelled(cancel),
           deadline(std::chrono::steady_clock::now() + std::chrono::milliseconds(selection.timeoutMs)) {}
     Json run() {
         checkDeadline();
@@ -74,6 +75,15 @@ class NativePixelGeometryReplay {
                 captureBoundPixelGeometry(r, event, state, stream, request.maxBytes - cloneBytes);
             checkDeadline();
             const auto count = geometry.report.at("primitives").get<uint64_t>();
+            const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
+            if (planner) {
+                request.firstPrimitive = 0;
+                request.primitiveCount = count;
+                request.checkpoints = (*planner)(geometry, raster);
+                checkDeadline();
+                if (request.checkpoints.size() > 4096)
+                    throw std::invalid_argument("Native pixel checkpoint plan exceeds its limit");
+            }
             if (request.firstPrimitive > count || request.primitiveCount > count - request.firstPrimitive ||
                 (!request.primitiveCount && count))
                 throw std::invalid_argument("Native pixel geometry range is outside captured primitives");
@@ -122,7 +132,6 @@ class NativePixelGeometryReplay {
                 check(r.device_->CreateBuffer(&desc, &initial, &vertices),
                       "Create original-PS bridge vertices");
             }
-            const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
             report = {{"schema", 1},
                       {"kind", "native_pixel_geometry_replay"},
                       {"backend", "native-pixel-geometry-replay/1"},
@@ -220,5 +229,14 @@ Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRan
                                const std::function<void(Replay &, uint64_t)> &observe,
                                const CancelCheck &cancelled) {
     return NativePixelGeometryReplay(r, event, range, observe, cancelled).run();
+}
+Json replayNativePixelGeometryCheckpoints(Replay &r, Id event, const NativePixelCheckpointPlanner &planner,
+                                          const std::function<void(Replay &, uint64_t)> &observe,
+                                          uint64_t maxBytes, uint32_t timeoutMs,
+                                          const CancelCheck &cancelled) {
+    if (!planner)
+        throw std::invalid_argument("Native pixel checkpoint planner is missing");
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, observe, cancelled, &planner)
+        .run();
 }
 } // namespace flora
