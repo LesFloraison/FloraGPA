@@ -3,6 +3,7 @@
 #include "application/DxbcPixelRaster.h"
 #include "application/DxbcPixelTraceInputs.h"
 #include "application/NativeExecutionDebugModel.h"
+#include "application/NativePixelOutputs.h"
 #include "core/Dxbc.h"
 #include "core/StreamOutput.h"
 #include "replay/Replay.h"
@@ -142,11 +143,13 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     auto args = app.arguments();
     const bool tracing = args.size() > 6 && args.back() == "trace";
-    if (tracing)
+    const bool evaluating = tracing || (args.size() > 6 && args.back() == "outputs");
+    if (evaluating)
         args.removeLast();
     if (args.size() != 6 && args.size() != 10 && !(args.size() == 7 && args[6] == "centroid")) {
-        std::cerr << "Usage: FloraDxbcPixelGeometryProbe <frame> <event> <primitive-ordinal> "
-                     "<vendor-or-0-for-WARP> <new-directory> [centroid | x y sample layer] [trace]\n";
+        std::cerr
+            << "Usage: FloraDxbcPixelGeometryProbe <frame> <event> <primitive-ordinal> "
+               "<vendor-or-0-for-WARP> <new-directory> [centroid | x y sample layer] [trace | outputs]\n";
         return 2;
     }
     try {
@@ -167,7 +170,7 @@ int main(int argc, char **argv) {
             options.vendor = uint32_t(vendor);
         Replay replay(frame, options);
         std::optional<InputSnapshot> resourceInputs;
-        if (tracing) {
+        if (evaluating) {
             if (args.size() == 6)
                 throw std::runtime_error("Pixel trace requires a raster selection");
             resourceInputs = snapshotResourceInputs(replay, 4, 256ull * 1024 * 1024,
@@ -327,7 +330,7 @@ int main(int argc, char **argv) {
                     save(target, "records.json", records.identity);
                     item["input_records"] = records.records.size();
                     observed &= !records.records.empty();
-                    if (tracing)
+                    if (evaluating)
                         rasterInputs.emplace(reg, records);
                 }
             } catch (const std::exception &e) {
@@ -337,29 +340,38 @@ int main(int argc, char **argv) {
             }
             report["cases"].push_back(item);
         }
-        if (tracing && complete && observed && !registers.empty()) {
+        if (evaluating && complete && observed && !registers.empty()) {
             try {
                 const auto traceInputs = pixelTraceInputs(ps, rasterInputs);
-                const auto tracePath = directory.filePath("pixel-trace.jsonl");
-                report["trace"] = exportPixelExecutionTrace(tracePath, *resourceInputs, traceInputs,
-                                                            [&] { return timer.elapsed() > 120000; });
-                QFile file(tracePath);
-                if (!file.open(QIODevice::ReadOnly))
-                    throw std::runtime_error("Cannot read completed pixel trace");
-                const auto bytes = file.readAll();
-                const auto hash =
-                    sha256(Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), bytes.size()));
-                file.close();
-                NativeExecutionDebugModel model(tracePath, hash, ps);
-                const auto initial = model.registerValues();
-                model.move(model.size());
-                save(directory, "pixel-terminal-registers.json", model.registerValues());
-                model.move(0);
-                if (initial != model.registerValues())
-                    throw std::runtime_error("Pixel trace rewind differs");
-                report["trace_sha256"] = hash;
-                report["trace_selected_steps"] = model.size();
-                report["trace_rewind_verified"] = true;
+                QElapsedTimer outputTimer;
+                outputTimer.start();
+                const auto outputs = evaluateNativePixelOutputs(*resourceInputs, traceInputs,
+                                                                [&] { return timer.elapsed() > 120000; });
+                save(directory, "pixel-shader-outputs.json", outputs);
+                report["output_evaluation_ms"] = outputTimer.elapsed();
+                report["output_global_steps"] = outputs.at("global_steps");
+                if (tracing) {
+                    const auto tracePath = directory.filePath("pixel-trace.jsonl");
+                    report["trace"] = exportPixelExecutionTrace(tracePath, *resourceInputs, traceInputs,
+                                                                [&] { return timer.elapsed() > 120000; });
+                    QFile file(tracePath);
+                    if (!file.open(QIODevice::ReadOnly))
+                        throw std::runtime_error("Cannot read completed pixel trace");
+                    const auto bytes = file.readAll();
+                    const auto hash =
+                        sha256(Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), bytes.size()));
+                    file.close();
+                    NativeExecutionDebugModel model(tracePath, hash, ps);
+                    const auto initial = model.registerValues();
+                    model.move(model.size());
+                    save(directory, "pixel-terminal-registers.json", model.registerValues());
+                    model.move(0);
+                    if (initial != model.registerValues())
+                        throw std::runtime_error("Pixel trace rewind differs");
+                    report["trace_sha256"] = hash;
+                    report["trace_selected_steps"] = model.size();
+                    report["trace_rewind_verified"] = true;
+                }
             } catch (const std::exception &e) {
                 complete = false;
                 report["trace_error"] = e.what();
