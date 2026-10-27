@@ -16,7 +16,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
-| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
+| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; VS identities, selected real-capture meshes and native UI exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, full typed-format/precision coverage, public PS sessions and source parity remain open |
@@ -967,3 +967,14 @@ paths run through the Worker and native mesh UI. See
 `research/DX11_NATIVE_GEOMETRY_RESOURCE_READS.md` for 141 passing checks, 186
 rejected evidence corruptions, the corrected feedback fixture and remaining gates.
 This expands P3 coverage without declaring default cutover or P7/P8 complete.
+
+## Real-capture mesh validation continuation
+
+Twenty-one GF2/BF1/Helldivers selection/adapter combinations now pass through
+42 native Worker jobs and 21 actual VS mesh views. An independent triangle-list
+assembly check compares all output attribute bytes with final SO storage on the
+same adapter, including first/last instance selection and BF1 zero-W output.
+See `research/DX11_NATIVE_MESH_REAL_CAPTURES.md` for 84 rejected corruptions,
+module snapshots, elapsed time and memory measurements, and retained initial
+validator failures. This is selected native-path consistency evidence; baseline
+RenderDoc export parity, remaining P3 cases and default cutover remain open.

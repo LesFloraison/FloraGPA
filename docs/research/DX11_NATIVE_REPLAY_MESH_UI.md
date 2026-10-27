@@ -74,6 +74,10 @@ VS debug session and its modules, then checks the same strict error and Worker-l
 assertions using the still-reserved PS action. The successful rerun is recorded
 separately from that failure.
 
+Selected GF2, BF1 and Helldivers VS results now also exercise the actual native
+view and exports. See `DX11_NATIVE_MESH_REAL_CAPTURES.md` for the separate
+same-adapter assembly comparison, zero-W finding and remaining parity gates.
+
 ## Reproduction
 
 These commands describe the initial preview commit. For the current expanded
