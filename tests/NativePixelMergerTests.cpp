@@ -17,7 +17,8 @@ void save(const Json &result, const Json &outputs) {
     if (root.isEmpty())
         return;
     const auto function = QString::fromLatin1(QTest::currentTestFunction());
-    if (function == "msaa" || function == "coordinates" || function == "depthCoordinates")
+    if (function == "msaa" || function == "coordinates" || function == "depthCoordinates" ||
+        function == "depthOnly")
         root += "/" + function;
     QDir dir(root);
     if (!dir.exists() && !QDir().mkpath(root))
@@ -79,21 +80,32 @@ Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id dept
     Replay before(frame, options);
     const auto snapshot = snapshotResourceInputs(before, 4);
     const auto outputs = evaluateNativePixelOutputs(snapshot, {});
-    const auto originalColor = storage(before, color, state.colorFormat, state.samples.Count);
+    const auto originalColor =
+        color ? storage(before, color, state.colorFormat, state.samples.Count) : std::vector<uint8_t>();
     const auto originalDepth =
         depth ? storage(before, depth, state.depthFormat, state.samples.Count) : std::vector<uint8_t>();
     state.color = selected(originalColor, state.colorFormat, state);
     state.depth = selected(originalDepth, state.depthFormat, state);
     auto result = mergeNativePixelOutput(before.nativeDevice(), options.warp, state, outputs, 0);
-    if (storage(before, color, state.colorFormat, state.samples.Count, "after diagnostic") != originalColor ||
+    if ((color && storage(before, color, state.colorFormat, state.samples.Count, "after diagnostic") !=
+                      originalColor) ||
         (depth &&
          storage(before, depth, state.depthFormat, state.samples.Count, "after diagnostic") != originalDepth))
         throw std::runtime_error("Private merger changed reference storage");
     options.before = false;
+    if (!color)
+        options.measurement = ReplayOptions::Measurement{event, event, true};
     Replay after(frame, options);
     after.run();
-    const auto expectedColor = selected(
-        storage(after, color, state.colorFormat, state.samples.Count, "after"), state.colorFormat, state);
+    if (!color) {
+        if (!after.measurementResult())
+            throw std::runtime_error("Missing original depth-only draw measurement");
+        result["reference_entire_draw_passing_samples"] = after.measurementResult()->occlusion;
+    }
+    const auto expectedColor =
+        color ? selected(storage(after, color, state.colorFormat, state.samples.Count, "after"),
+                         state.colorFormat, state)
+              : std::vector<uint8_t>();
     const auto expectedDepth =
         depth ? selected(storage(after, depth, state.depthFormat, state.samples.Count, "after"),
                          state.depthFormat, state)
@@ -112,6 +124,137 @@ Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id dept
 class NativePixelMergerTests final : public QObject {
     Q_OBJECT
   private slots:
+    void depthOnly_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 2u, 4u})
+                for (uint32_t format : {20u, 40u, 45u, 55u})
+                    for (const auto *mode :
+                         {"raster", "shader-depth", "discard", "sample-mask", "coverage", "alpha",
+                          "no-depth-write", "read-only-depth", "depth-fail", "stencil-pass", "stencil-fail",
+                          "stencil-back", "read-only-stencil", "unchanged"}) {
+                        if (QString(mode).contains("stencil") && format != 20 && format != 45)
+                            continue;
+                        QTest::newRow(
+                            qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(samples).arg(format).arg(mode)))
+                            << vendor << samples << format << QString(mode);
+                    }
+    }
+    void depthOnly() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(uint32_t, format);
+            QFETCH(QString, mode);
+            NativePixelMergerState state;
+            state.width = 7;
+            state.height = 5;
+            state.x = 6;
+            state.y = 4;
+            state.samples.Count = samples;
+            state.depthFormat = format;
+            state.rasterDepthBits = 0;
+            state.frontFace = mode != "stencil-back";
+            state.stencilRef = 0xa5;
+            state.depthStencil.StencilEnable = format == 20 || format == 45;
+            if (mode == "unchanged") {
+                state.rasterDepthBits = std::bit_cast<uint32_t>(.5f);
+                state.depthStencil.DepthFunc = D3D11_COMPARISON_ALWAYS;
+                state.depthStencil.StencilEnable = FALSE;
+            }
+            auto &face = state.frontFace ? state.depthStencil.FrontFace : state.depthStencil.BackFace;
+            face.StencilPassOp = mode == "stencil-back" ? D3D11_STENCIL_OP_INVERT : D3D11_STENCIL_OP_REPLACE;
+            if (mode == "stencil-fail") {
+                face.StencilFunc = D3D11_COMPARISON_NEVER;
+                face.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+            }
+            if (mode == "depth-fail") {
+                state.depthStencil.DepthFunc = D3D11_COMPARISON_NEVER;
+                face.StencilDepthFailOp = D3D11_STENCIL_OP_INVERT;
+            }
+            if (mode == "no-depth-write")
+                state.depthStencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+            state.depthViewFlags = mode == "read-only-depth"     ? D3D11_DSV_READ_ONLY_DEPTH
+                                   : mode == "read-only-stencil" ? D3D11_DSV_READ_ONLY_STENCIL
+                                                                 : 0;
+            if (mode == "sample-mask")
+                state.sampleMask = 0x55555555;
+            state.blend.AlphaToCoverageEnable = mode == "alpha";
+            auto capture = testing::depthStencilCapture(!state.frontFace);
+            for (const auto &entry : capture.entries) {
+                if (entry.id == 720) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, state.width);
+                    testing::put(capture.bytes, size_t(entry.offset) + 20, state.height);
+                    testing::put(capture.bytes, size_t(entry.offset) + 32, format);
+                    testing::put(capture.bytes, size_t(entry.offset) + 36, samples);
+                }
+                if (entry.id == 22) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 12, float(state.width));
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, float(state.height));
+                }
+                if (entry.id == 722) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 24, format);
+                    testing::put(capture.bytes, size_t(entry.offset) + 28, samples > 1 ? 5u : 3u);
+                    testing::put(capture.bytes, size_t(entry.offset) + 32, state.depthViewFlags);
+                }
+                if (entry.id == 724)
+                    testing::put(capture.bytes, size_t(entry.offset) + 48, samples > 1 ? 1u : 0u);
+                if (entry.id == 810) {
+                    testing::put(capture.bytes, size_t(entry.offset) + 16, Id(723));
+                    if (format != 20 && format != 45)
+                        testing::put(capture.bytes, size_t(entry.offset) + 24, 1u);
+                }
+            }
+            capture.add(
+                723, 5, 0x8e,
+                testing::statePack(Id(0), Id(0), Id(720), format, samples > 1 ? 5u : 3u, 0u, 0u, 0u, 0u));
+            std::erase_if(capture.entries,
+                          [](const auto &entry) { return entry.id == 990 || entry.id == 1990; });
+            State bound{};
+            bound.topology = 4;
+            bound.sampleMask = UINT32_MAX;
+            bound.omStart = 8;
+            bound.dsv = 722;
+            bound.rasterizer = 724;
+            bound.viewports = 22;
+            bound.stages[0].shader = 30;
+            bound.stages[4].shader = 32;
+            capture.add(990, 3, 3, testing::snapshot(bound));
+            capture.add(1990, 3, 3, testing::snapshot(bound));
+            ReplayOptions options;
+            const char *source = mode == "shader-depth" ? "float main():SV_Depth{return .25;}"
+                                 : mode == "discard"    ? "void main(){discard;}"
+                                 : mode == "coverage"   ? "uint main():SV_Coverage{return 5;}"
+                                 : mode == "alpha" ? "float4 main():SV_Target{return float4(0,0,0,.375);}"
+                                                   : "void main(){}";
+            options.shaders[32] = compileHlsl(source, "ps_5_0").bytecode;
+            if (mode == "unchanged")
+                options.shaders[30] =
+                    compileHlsl(
+                        "float4 main(uint id:SV_VertexID):SV_Position{"
+                        "float2 p=float2((id<<1)&2,id&2);return float4(p*float2(2,-2)+float2(-1,1),.5,1);}",
+                        "vs_5_0")
+                        .bytecode;
+            const auto result = run(capture, vendor, 1000, 0, 720, state, options);
+            QCOMPARE(result.at("color_format"), Json(0));
+            QCOMPARE(result.at("color_before"), Json::array());
+            QCOMPARE(result.at("color_after"), Json::array());
+            QVERIFY(result.at("original_fragment_eligibility").is_null());
+            if (mode == "discard" || mode == "stencil-fail" || mode == "depth-fail")
+                QCOMPARE(result.at("passing_samples"), Json(0));
+            if (mode == "unchanged") {
+                QCOMPARE(result.at("depth_before"), result.at("depth_after"));
+                QCOMPARE(result.at("passing_samples"), Json(samples));
+                QCOMPARE(result.at("reference_entire_draw_passing_samples"),
+                         Json(state.width * state.height * samples));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void blend_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
@@ -592,6 +735,38 @@ class NativePixelMergerTests final : public QObject {
         QVERIFY_EXCEPTION_THROWN(attempt(s, changed), std::invalid_argument);
         QVERIFY_EXCEPTION_THROWN(attempt(s, outputs, 4), std::invalid_argument);
         auto invalid = s;
+        invalid.colorFormat = 0;
+        invalid.color.clear();
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        auto depthOnly = invalid;
+        depthOnly.depthFormat = 40;
+        depthOnly.depth = {0, 0, 0, 0x3f};
+        depthOnly.rasterDepthBits = 0;
+        changed = outputs;
+        changed["lanes"][0]["outputs"] = Json::array();
+        const auto withoutColor = attempt(depthOnly, changed);
+        QCOMPARE(withoutColor.at("color_after"), Json::array());
+        QCOMPARE(withoutColor.at("depth_after"), Json::array({0, 0, 0, 0}));
+        invalid = depthOnly;
+        invalid.color = {0};
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, changed), std::invalid_argument);
+        invalid = depthOnly;
+        invalid.depth.clear();
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, changed), std::invalid_argument);
+        invalid = depthOnly;
+        invalid.rasterDepthBits.reset();
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, changed), std::invalid_argument);
+        invalid = depthOnly;
+        invalid.blend.AlphaToCoverageEnable = TRUE;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, changed), std::runtime_error);
+        invalid = depthOnly;
+        invalid.blend.RenderTarget[0].BlendEnable = TRUE;
+        invalid.blend.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC1_COLOR;
+        QCOMPARE(attempt(invalid, changed).at("depth_after"), withoutColor.at("depth_after"));
+        changed = outputs;
+        changed["lanes"][0]["outputs"][0]["valid_mask"] = 0;
+        QCOMPARE(attempt(depthOnly, changed).at("depth_after"), withoutColor.at("depth_after"));
+        invalid = s;
         invalid.color.pop_back();
         QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
         invalid = s;

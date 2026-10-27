@@ -26,6 +26,8 @@ struct NativePixelMergerState {
     NativePixelMergerState();
 };
 // Applies one private shader lane to one color/depth cell, preserving samples.
+// Either target may be absent; at least one must be bound. Depth-only draws do
+// not require color outputs unless alpha-to-coverage consumes target-zero alpha.
 // Uses a new device on the exact reference adapter. The shader is already
 // evaluated; this does not reconstruct early depth, original fragment identity,
 // original raster coverage or inter-primitive side effects. Private rasterization

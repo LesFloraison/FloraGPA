@@ -137,9 +137,9 @@ NativePixelMergerState::NativePixelMergerState() : blend(defaultBlend()) {
 Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixelMergerState &s,
                             const Json &outputs, uint32_t laneIndex, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    if (!reference || s.colorSlot >= 8 || laneIndex >= 4 || !s.timeoutMs || s.timeoutMs > 60000 || !s.width ||
-        !s.height || s.width > 16384 || s.height > 16384 || s.x >= s.width || s.y >= s.height ||
-        !s.maxBytes || !s.samples.Count || s.samples.Count > 32 ||
+    if (!reference || (!s.colorFormat && !s.depthFormat) || s.colorSlot >= 8 || laneIndex >= 4 ||
+        !s.timeoutMs || s.timeoutMs > 60000 || !s.width || !s.height || s.width > 16384 || s.height > 16384 ||
+        s.x >= s.width || s.y >= s.height || !s.maxBytes || !s.samples.Count || s.samples.Count > 32 ||
         (s.samples.Count & (s.samples.Count - 1)) || (s.samples.Count == 1 && s.samples.Quality != 0) ||
         (s.depthViewFlags & ~(D3D11_DSV_READ_ONLY_DEPTH | D3D11_DSV_READ_ONLY_STENCIL)))
         throw std::invalid_argument("Invalid private pixel merger request");
@@ -195,12 +195,15 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     }
     if (s.depthFormat && !hasDepth && !s.rasterDepthBits)
         throw std::invalid_argument("Private pixel merger requires observed raster or shader depth");
-    std::set<uint32_t> needed{s.colorSlot};
+    std::set<uint32_t> needed;
+    if (s.colorFormat)
+        needed.insert(s.colorSlot);
     const auto &blend = s.blend.RenderTarget[s.blend.IndependentBlendEnable ? s.colorSlot : 0];
     if (s.blend.AlphaToCoverageEnable)
         needed.insert(0);
-    if (blend.BlendEnable && (dual(blend.SrcBlend) || dual(blend.DestBlend) || dual(blend.SrcBlendAlpha) ||
-                              dual(blend.DestBlendAlpha))) {
+    if (s.colorFormat && blend.BlendEnable &&
+        (dual(blend.SrcBlend) || dual(blend.DestBlend) || dual(blend.SrcBlendAlpha) ||
+         dual(blend.DestBlendAlpha))) {
         if (s.colorSlot != 0)
             throw std::invalid_argument("Dual-source blending requires target zero");
         needed.insert(1);
@@ -259,9 +262,9 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     for (unsigned i = 0; i < 2; ++i) {
         const auto format = i ? s.depthFormat : s.colorFormat;
         const auto &bytes = i ? s.depth : s.color;
-        if (i && !format) {
-            if (!bytes.empty() || s.depthViewFlags)
-                throw std::invalid_argument("Unbound merger depth contains storage or flags");
+        if (!format) {
+            if (!bytes.empty() || (i && s.depthViewFlags))
+                throw std::invalid_argument("Unbound merger target contains storage or flags");
             continue;
         }
         UINT support = 0;
@@ -321,8 +324,9 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     targetDesc.Format = DXGI_FORMAT(s.colorFormat);
     targetDesc.ViewDimension =
         s.samples.Count > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D;
-    check(device->CreateRenderTargetView(textures[0].Get(), &targetDesc, &target),
-          "Create private merger RTV");
+    if (textures[0])
+        check(device->CreateRenderTargetView(textures[0].Get(), &targetDesc, &target),
+              "Create private merger RTV");
     if (textures[1]) {
         D3D11_DEPTH_STENCIL_VIEW_DESC desc{};
         desc.Format = DXGI_FORMAT(s.depthFormat);
@@ -356,7 +360,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     check(device->CreateBuffer(&buffer, &data, &cb), "Create private merger inputs");
     std::array<ID3D11RenderTargetView *, 8> targets{};
     targets[s.colorSlot] = target.Get();
-    context->OMSetRenderTargets(s.colorSlot + 1, targets.data(), depth.Get());
+    context->OMSetRenderTargets(target ? s.colorSlot + 1 : 0, targets.data(), depth.Get());
     context->OMSetBlendState(blendState.Get(), s.blendFactor.data(), s.sampleMask & s.coverageMask);
     context->OMSetDepthStencilState(depthState.Get(), s.stencilRef);
     context->RSSetState(rasterState.Get());
@@ -414,7 +418,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     const auto source = outputs.dump();
     return {{"schema", 1},
             {"kind", "native_pixel_merger"},
-            {"backend", "native-pixel-merger/3"},
+            {"backend", "native-pixel-merger/4"},
             {"scope", s.samples.Count > 1 ? "private_multisample_output_merger"
                                           : "private_single_sample_output_merger"},
             {"sample_count", s.samples.Count},

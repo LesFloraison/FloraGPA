@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import struct
 
+EXPECTED_BACKEND = None
+
 
 def require(value, message):
     if not value:
@@ -17,9 +19,10 @@ def compare(op, a, b):
 
 
 def validate_location(r, position=(0, 0), extent=(1, 1)):
-    require(r['backend'] in ('native-pixel-merger/2', 'native-pixel-merger/3'), 'Wrong merger backend')
+    require(r['backend'] in ((EXPECTED_BACKEND,) if EXPECTED_BACKEND else
+                            ('native-pixel-merger/2', 'native-pixel-merger/3')), 'Wrong merger backend')
     require(r['private_pixel_location'] == list(position), 'Wrong private pixel location')
-    if r['backend'] == 'native-pixel-merger/3':
+    if r['backend'] in ('native-pixel-merger/3', 'native-pixel-merger/4'):
         require(r['private_target_extent'] == list(extent), 'Wrong private target extent')
         texels = {0: 0, 2: 16, 3: 16, 10: 8, 11: 8, 20: 8, 24: 4, 28: 4, 29: 4,
                   40: 4, 41: 4, 45: 4, 49: 2, 54: 2, 55: 2, 61: 1, 87: 4, 91: 4}
@@ -226,7 +229,7 @@ def validate_coordinates(document, vendor, samples, position, alpha):
     r, q = document['result'], document['quad_outputs']
     validate_location(r, ((0, 0), (1, 1), (4, 2), (6, 4))[position], (7, 5))
     require((r['schema'], r['kind'], r['backend'], r['scope']) ==
-            (1, 'native_pixel_merger', 'native-pixel-merger/3',
+            (1, 'native_pixel_merger', EXPECTED_BACKEND or 'native-pixel-merger/3',
              'private_single_sample_output_merger' if samples == 1 else 'private_multisample_output_merger'),
             'Wrong coordinate merger identity')
     require(r['sample_count'] == samples and r['sample_quality'] == 0 and
@@ -271,7 +274,7 @@ def validate_depth_coordinates(document, vendor, samples, fmt, position):
     r, q = document['result'], document['quad_outputs']
     validate_location(r, (6, 4) if position else (1, 1), (7, 5))
     require((r['schema'], r['kind'], r['backend'], r['scope']) ==
-            (1, 'native_pixel_merger', 'native-pixel-merger/3',
+            (1, 'native_pixel_merger', EXPECTED_BACKEND or 'native-pixel-merger/3',
              'private_single_sample_output_merger' if samples == 1 else 'private_multisample_output_merger'),
             'Wrong depth coordinate identity')
     require(r['sample_count'] == samples and r['sample_quality'] == 0 and
@@ -320,14 +323,17 @@ def validate_depth_coordinates(document, vendor, samples, fmt, position):
 
 
 def main():
+    global EXPECTED_BACKEND
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('directory', type=Path)
     p.add_argument('--out', required=True, type=Path)
+    p.add_argument('--backend', choices=('native-pixel-merger/3', 'native-pixel-merger/4'))
     mode = p.add_mutually_exclusive_group()
     mode.add_argument('--msaa', action='store_true')
     mode.add_argument('--coordinates', action='store_true')
     mode.add_argument('--depth-coordinates', action='store_true')
     args = p.parse_args()
+    EXPECTED_BACKEND = args.backend
     matrix = list(depth_coordinate_cases() if args.depth_coordinates else coordinate_cases() if args.coordinates
                   else msaa_cases() if args.msaa else cases())
     validator = (validate_depth_coordinates if args.depth_coordinates else validate_coordinates if args.coordinates
@@ -349,7 +355,7 @@ def main():
         if args.msaa:
             corruptions += [('sample_count', 1), ('sample_quality', 1), ('private_pixel_location', [1, 1]),
                             ('effective_sample_mask', -1), ('depth_invalid_byte_offsets', [0])]
-        if document['result']['backend'] == 'native-pixel-merger/3':
+        if document['result']['backend'] in ('native-pixel-merger/3', 'native-pixel-merger/4'):
             corruptions += [('private_target_extent', [0, 0]), ('logical_payload_bound', 0), ('payload_limit', 1)]
         if args.coordinates or args.depth_coordinates:
             corruptions += [('private_pixel_location', [-1, -1]), ('sample_count', 0), ('sample_quality', 1),
