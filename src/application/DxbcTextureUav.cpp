@@ -1,3 +1,4 @@
+#include "DxbcAtomic.h"
 #include "DxbcGpuOperations.h"
 #include "DxbcTextureInputs.h"
 #include "DxbcTypedBuffer.h"
@@ -163,6 +164,35 @@ std::vector<MemoryChange> TextureInputs::storeUav(const Register &binding, uint3
         bit += selection.format.bits[c];
     }
     return {std::move(change)};
+}
+std::pair<Value, std::vector<MemoryChange>>
+TextureInputs::atomicUav(const Register &binding, uint32_t dimension, uint32_t returns, const Value &address,
+                         uint32_t opcode, const Value &value, const Value &comparison, GpuOperations *gpu,
+                         bool &assisted) const {
+    assisted = false;
+    addressMask(binding, dimension, address);
+    const auto found = views.find(binding);
+    if (found == views.end())
+        throw std::runtime_error("Unavailable typed atomic texture binding");
+    const auto &view = found->second;
+    if (!view.resource)
+        return {};
+    if ((view.format != 42 && view.format != 43) || returns != (view.format == 42 ? 0x4444u : 0x3333u))
+        throw std::runtime_error("Typed atomic requires a matching R32 integer texture view");
+    const auto storage = resources.find(*view.resource);
+    if (storage == resources.end())
+        throw std::runtime_error("Unavailable typed atomic texture storage");
+    auto selected = select(storage->second, view, dimension, returns, address);
+    if (dimension == 5 && !selected.offset) {
+        if (!gpu)
+            throw std::runtime_error("3D atomic footprint requires the selected GPU");
+        selected.offset = gpu->textureUavFootprint(storage->second, view, dimension, returns, address, true);
+        assisted = true;
+    }
+    if (!selected.offset)
+        return {};
+    return atomicStorageWord(*view.resource, storage->second.storage, size_t(*selected.offset), opcode, value,
+                             comparison);
 }
 void TextureInputs::apply(const std::vector<MemoryChange> &changes, bool forward) {
     uint64_t total = 0;

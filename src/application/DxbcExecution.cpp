@@ -856,9 +856,8 @@ Step Lane::step() {
         const auto binding = s.address(*suppressedResource);
         const bool typed = p.typedResources.contains(binding);
         const bool buffered = p.bufferStrides.contains(binding);
-        const bool declared = op == 163 || op == 164
-                                  ? typed
-                                  : buffered || (typed && op >= 169 && op != 178 && op != 179);
+        const bool declared =
+            op == 163 || op == 164 ? typed : buffered || (typed && op >= 169 && op != 178 && op != 179);
         if (suppressedResource->modifier || !declared)
             fail("Invalid suppressed pixel UAV declaration");
         const bool returned = op == 163 || op == 165 || op == 167 || op >= 178;
@@ -1295,29 +1294,53 @@ Step Lane::step() {
         if (resource.modifier || (resource.kind != 30 && resource.kind != 31))
             fail("Invalid DXBC atomic resource");
         const auto binding = s.address(resource);
-        const auto declaration = p.bufferStrides.find(binding);
-        if (declaration == p.bufferStrides.end())
-            fail("Missing DXBC atomic buffer declaration");
-        const auto memory = resource.kind == 31 ? s.inputs.sharedMemory : s.inputs.memory;
-        if (!memory)
-            fail("Unavailable DXBC atomic memory");
-        const auto view = memory->views_.find(binding);
-        if (view != memory->views_.end() && view->second.resource &&
-            view->second.stride != declaration->second)
-            fail("DXBC atomic declaration disagrees with captured stride");
-        if (binding.kind == 31 && view != memory->views_.end() && view->second.resource &&
-            view->second.size != p.shared.at(binding.indices[0]).bytes)
-            fail("DXBC atomic shared memory size disagrees with its declaration");
         const auto address = s.source(args[first + 1], true);
-        const bool structured = declaration->second != 0;
-        if ((address.valid & (structured ? 3 : 1)) != (structured ? 3 : 1))
-            fail("Unknown DXBC atomic address");
-        authorizeAppend(binding, structured ? address.bits[0] : 0);
         const auto value = s.source(args.back(), true);
         const auto comparison = compare ? s.source(args[first + 2], true) : Value{};
-        const auto [old, changes] = memory->atomic(binding, op, structured ? address.bits[0] : 0,
-                                                   address.bits[structured ? 1 : 0], value, comparison);
-        (resource.kind == 31 ? result.sharedMemoryChanges : result.memoryChanges) = changes;
+        Value old;
+        if (const auto typed = p.typedResources.find(binding); typed != p.typedResources.end()) {
+            if (resource.kind != 30)
+                fail("Invalid DXBC typed atomic resource");
+            const auto [dimension, returns] = typed->second;
+            std::pair<Value, std::vector<MemoryChange>> transaction;
+            if (dimension == 1) {
+                if (!s.inputs.memory || !(address.valid & 1))
+                    fail("Unavailable typed atomic buffer or address");
+                transaction =
+                    s.inputs.memory->atomicTyped(binding, op, address.bits[0], returns, value, comparison);
+                result.memoryChanges = std::move(transaction.second);
+            } else {
+                if (!s.inputs.textures)
+                    fail("Unavailable typed atomic texture inputs");
+                transaction =
+                    s.inputs.textures->atomicUav(binding, dimension, returns, address, op, value, comparison,
+                                                 s.inputs.gpu.get(), result.memoryGpuAssisted);
+                result.textureChanges = std::move(transaction.second);
+            }
+            old = transaction.first;
+        } else {
+            const auto declaration = p.bufferStrides.find(binding);
+            if (declaration == p.bufferStrides.end())
+                fail("Missing DXBC atomic buffer declaration");
+            const auto memory = resource.kind == 31 ? s.inputs.sharedMemory : s.inputs.memory;
+            if (!memory)
+                fail("Unavailable DXBC atomic memory");
+            const auto view = memory->views_.find(binding);
+            if (view != memory->views_.end() && view->second.resource &&
+                view->second.stride != declaration->second)
+                fail("DXBC atomic declaration disagrees with captured stride");
+            if (binding.kind == 31 && view != memory->views_.end() && view->second.resource &&
+                view->second.size != p.shared.at(binding.indices[0]).bytes)
+                fail("DXBC atomic shared memory size disagrees with its declaration");
+            const bool structured = declaration->second != 0;
+            if ((address.valid & (structured ? 3 : 1)) != (structured ? 3 : 1))
+                fail("Unknown DXBC atomic address");
+            authorizeAppend(binding, structured ? address.bits[0] : 0);
+            const auto transaction = memory->atomic(binding, op, structured ? address.bits[0] : 0,
+                                                    address.bits[structured ? 1 : 0], value, comparison);
+            old = transaction.first;
+            (resource.kind == 31 ? result.sharedMemoryChanges : result.memoryChanges) = transaction.second;
+        }
         if (returned && args[0].kind != 13) {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||

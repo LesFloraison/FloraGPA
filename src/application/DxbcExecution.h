@@ -70,6 +70,9 @@ class Memory {
     std::vector<MemoryChange> store(const Register &binding, bool structured, uint32_t index, uint32_t offset,
                                     const Value &value, uint32_t mask, bool literalIndex, bool literalOffset,
                                     bool &assisted) const;
+    std::pair<Value, std::vector<MemoryChange>> atomicTyped(const Register &, uint32_t opcode, uint32_t index,
+                                                            uint32_t returns, const Value &,
+                                                            const Value &comparison) const;
     void commit(const std::vector<MemoryChange> &changes);
     void commitCounters(const std::vector<CounterChange> &changes);
     std::pair<Value, std::optional<CounterChange>> counter(const Register &, bool consume) const;

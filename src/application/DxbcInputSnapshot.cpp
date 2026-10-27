@@ -691,11 +691,17 @@ class Snapshot {
     }
 };
 } // namespace
-static InputSnapshot snapshotInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
-                                    const CancelCheck &cancelled, const std::function<void()> &beforeSnapshot,
-                                    const VertexInputSelection *vertex = nullptr,
-                                    nlohmann::json *invocation = nullptr) {
+static void identifySnapshot(InputSnapshot &result, Replay &replay, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
+    result.frameSha256 = replay.frame().sha256(cancelled);
+    result.replayGeneration = replay.generation();
+    const auto adapter = replay.adapterDescription();
+    result.adapterLuid =
+        (uint64_t(uint32_t(adapter.AdapterLuid.HighPart)) << 32) | adapter.AdapterLuid.LowPart;
+    result.adapterVendor = adapter.VendorId;
+    result.adapterDevice = adapter.DeviceId;
+}
+static void validateSnapshotBoundary(Replay &replay, unsigned stage, uint64_t maxBytes) {
     const auto id = replay.options().until;
     if (stage >= 6 || !maxBytes || !id || !replay.options().before || !replay.options().prepareBeforeDraw ||
         !isDraw(replay.frame().entry(id).type))
@@ -703,6 +709,26 @@ static InputSnapshot snapshotInputs(Replay &replay, unsigned stage, uint64_t max
     const bool compute = replay.frame().entry(id).type == 0x35 || replay.frame().entry(id).type == 0x36;
     if (compute != (stage == 5))
         throw std::runtime_error("DXBC input stage disagrees with the selected work event");
+}
+InputSnapshot snapshotBoundResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                          const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    validateSnapshotBoundary(replay, stage, maxBytes);
+    std::optional<InputSnapshot> result;
+    replay.inspectNativeState([&](auto *context, const auto &objects) {
+        result = Snapshot(replay, objects, stage, maxBytes, cancelled).read(context);
+    });
+    identifySnapshot(*result, replay, cancelled);
+    result->resourceObservation = "current_native_bindings";
+    return std::move(*result);
+}
+static InputSnapshot snapshotInputs(Replay &replay, unsigned stage, uint64_t maxBytes,
+                                    const CancelCheck &cancelled, const std::function<void()> &beforeSnapshot,
+                                    const VertexInputSelection *vertex = nullptr,
+                                    nlohmann::json *invocation = nullptr) {
+    checkCancellation(cancelled);
+    const auto id = replay.options().until;
+    validateSnapshotBoundary(replay, stage, maxBytes);
     std::optional<InputSnapshot> result;
     replay.run(
         [&](Id, size_t, size_t) { checkCancellation(cancelled); },
@@ -718,13 +744,8 @@ static InputSnapshot snapshotInputs(Replay &replay, unsigned stage, uint64_t max
     checkCancellation(cancelled);
     if (!result)
         throw std::runtime_error("Selected DXBC input boundary was not observed");
-    result->frameSha256 = replay.frame().sha256(cancelled);
-    result->replayGeneration = replay.generation();
-    const auto adapter = replay.adapterDescription();
-    result->adapterLuid =
-        (uint64_t(uint32_t(adapter.AdapterLuid.HighPart)) << 32) | adapter.AdapterLuid.LowPart;
-    result->adapterVendor = adapter.VendorId;
-    result->adapterDevice = adapter.DeviceId;
+    identifySnapshot(*result, replay, cancelled);
+    result->resourceObservation = "before_event_replay";
     return std::move(*result);
 }
 InputSnapshot snapshotResourceInputs(Replay &replay, unsigned stage, uint64_t maxBytes,

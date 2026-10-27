@@ -1147,7 +1147,8 @@ std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std:
 }
 std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &input,
                                                            const TextureInputView &view, uint32_t dimension,
-                                                           uint32_t returns, const Value &address) {
+                                                           uint32_t returns, const Value &address,
+                                                           bool atomicMarker) {
     auto &s = *state_;
     checkCancellation(s.cancelled);
     if (s.failed)
@@ -1155,7 +1156,8 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
     Words key = input.resource.desc;
     key.insert(key.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
     key.insert(key.end(), address.bits.begin(), address.bits.end());
-    key.insert(key.end(), {dimension, returns, std::bit_cast<uint32_t>(input.minLod)});
+    key.insert(key.end(),
+               {dimension, returns, std::bit_cast<uint32_t>(input.minLod), uint32_t(atomicMarker)});
     if (auto found = s.textureFootprints.find(key); found != s.textureFootprints.end())
         return found->second;
     const auto format = typedBufferFormat(view.format);
@@ -1165,7 +1167,7 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
     std::fill(marker.storage.bytes.begin(), marker.storage.bytes.end(), 0);
     const uint32_t one = format->returnType == 5 ? 0x3f800000u : 1u;
     const auto after = textureUav(marker, view, dimension, returns, address,
-                                  Value::known({one, one, one, one}), true, {0, 1, 2, 3}, 15)
+                                  Value::known({one, one, one, one}), true, {0, 1, 2, 3}, 15, atomicMarker)
                            .second;
     std::optional<uint64_t> selected;
     for (size_t i = 0; i < after.size(); ++i)
@@ -1183,7 +1185,7 @@ std::optional<uint64_t> GpuOperations::textureUavFootprint(const TextureInput &i
 std::pair<Value, std::vector<uint8_t>>
 GpuOperations::textureUav(const TextureInput &input, const TextureInputView &view, uint32_t dimension,
                           uint32_t returns, const Value &address, const Value &value, bool store,
-                          const std::array<uint32_t, 4> &swizzle, uint32_t mask) {
+                          const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker) {
     auto &s = *state_;
     checkCancellation(s.cancelled);
     if (s.failed)
@@ -1192,12 +1194,16 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         view.nativeDescriptor.size() != 5 ||
         (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8))
         throw std::runtime_error("Invalid native texture UAV operation");
+    if (atomicMarker && (!store || (view.format != 42 && view.format != 43) ||
+                         returns != (view.format == 42 ? 0x4444u : 0x3333u)))
+        throw std::runtime_error("Invalid native atomic texture footprint");
     try {
         D3D11_FEATURE_DATA_FORMAT_SUPPORT2 support{DXGI_FORMAT(view.format), 0};
         check(s.device->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2, &support, sizeof support),
               "Query native texture UAV support");
-        const auto required =
-            store ? D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE : D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD;
+        const auto required = atomicMarker ? D3D11_FORMAT_SUPPORT2_UAV_ATOMIC_ADD
+                              : store      ? D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE
+                                           : D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD;
         if (!(support.OutFormatSupport2 & required))
             throw std::runtime_error("Selected adapter does not support this typed texture UAV operation");
         const auto layout = textureInitialSubresources(input.resource, input.storage.bytes);
@@ -1271,7 +1277,9 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         }
         std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
                                 row(156 | (dimension << 11), {dest(30, 0), {returns}})};
-        if (store)
+        if (atomicMarker)
+            rows.push_back(row(173, {dest(30, 0), {0x208e46, 0, 0}, immediate(1)}));
+        else if (store)
             rows.push_back(row(164, {dest(30, 0), {0x208e46, 0, 0}, {0x208e46, 0, 1}}));
         else {
             uint32_t selection = 0;

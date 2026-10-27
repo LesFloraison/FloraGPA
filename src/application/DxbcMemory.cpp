@@ -1,3 +1,4 @@
+#include "DxbcAtomic.h"
 #include "DxbcExecution.h"
 #include "DxbcGpuOperations.h"
 #include "DxbcTypedBuffer.h"
@@ -317,6 +318,35 @@ std::pair<Value, std::vector<MemoryChange>> Memory::atomic(const Register &bindi
     if (!inRange(base, 4, view.size))
         return {};
     const auto absolute = size_t(view.offset + base);
+    return atomicStorageWord(*view.resource, buffer, absolute, opcode, value, comparison);
+}
+std::pair<Value, std::vector<MemoryChange>> Memory::atomicTyped(const Register &binding, uint32_t opcode,
+                                                                uint32_t index, uint32_t returns,
+                                                                const Value &value,
+                                                                const Value &comparison) const {
+    validateBinding(binding);
+    if (binding.kind != 30)
+        fail("Invalid typed atomic binding");
+    const auto found = views_.find(binding);
+    if (found == views_.end())
+        fail("Unavailable typed atomic binding");
+    const auto &view = found->second;
+    if (!view.resource)
+        return {};
+    if (view.stride || (view.format != 42 && view.format != 43) ||
+        returns != (view.format == 42 ? 0x4444u : 0x3333u) || view.offset % 4 || view.size % 4)
+        fail("Typed atomic requires a matching R32 integer buffer view");
+    if (uint64_t(index) >= view.size / 4)
+        return {};
+    return atomicStorageWord(*view.resource, buffers_.at(*view.resource),
+                             size_t(view.offset + uint64_t(index) * 4), opcode, value, comparison);
+}
+std::pair<Value, std::vector<MemoryChange>> atomicStorageWord(uint64_t resource, const Buffer &buffer,
+                                                              size_t absolute, uint32_t opcode,
+                                                              const Value &value, const Value &comparison) {
+    if (buffer.valid.size() != buffer.bytes.size() || absolute > buffer.bytes.size() ||
+        buffer.bytes.size() - absolute < 4)
+        fail("Invalid DXBC atomic storage word");
     Value old;
     std::memcpy(&old.bits[0], buffer.bytes.data() + absolute, 4);
     old.valid = std::all_of(buffer.valid.begin() + absolute, buffer.valid.begin() + absolute + 4,
@@ -376,7 +406,7 @@ std::pair<Value, std::vector<MemoryChange>> Memory::atomic(const Register &bindi
     default:
         fail("Unsupported DXBC atomic operation");
     }
-    MemoryChange change{*view.resource,
+    MemoryChange change{resource,
                         absolute,
                         {buffer.bytes.begin() + absolute, buffer.bytes.begin() + absolute + 4},
                         std::vector<uint8_t>(4),

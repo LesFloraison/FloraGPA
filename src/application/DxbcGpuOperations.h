@@ -19,12 +19,12 @@ class GpuOperations {
                                          const std::array<int32_t, 3> &offset,
                                          const std::array<uint32_t, 3> &precision);
     std::optional<uint64_t> textureUavFootprint(const struct TextureInput &, const struct TextureInputView &,
-                                                uint32_t dimension, uint32_t returns, const Value &address);
-    std::pair<Value, std::vector<uint8_t>> textureUav(const struct TextureInput &,
-                                                      const struct TextureInputView &, uint32_t dimension,
-                                                      uint32_t returns, const Value &address,
-                                                      const Value &value, bool store,
-                                                      const std::array<uint32_t, 4> &swizzle, uint32_t mask);
+                                                uint32_t dimension, uint32_t returns, const Value &address,
+                                                bool atomicMarker = false);
+    std::pair<Value, std::vector<uint8_t>>
+    textureUav(const struct TextureInput &, const struct TextureInputView &, uint32_t dimension,
+               uint32_t returns, const Value &address, const Value &value, bool store,
+               const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker = false);
     Value textureDimensions(const struct TextureMetadata &, const struct TextureInputView &, uint32_t kind,
                             uint32_t dimension, uint32_t mip, uint32_t mode);
     Value loadTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,

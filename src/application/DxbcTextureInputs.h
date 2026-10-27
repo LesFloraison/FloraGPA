@@ -87,6 +87,9 @@ struct TextureInputs {
     std::vector<MemoryChange> storeUav(const Register &, uint32_t dimension, uint32_t returns,
                                        const Value &address, const Value &, GpuOperations *,
                                        bool &assisted) const;
+    std::pair<Value, std::vector<MemoryChange>>
+    atomicUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address, uint32_t opcode,
+              const Value &, const Value &comparison, GpuOperations *, bool &assisted) const;
     // Validate the complete transaction before applying a forward or reverse trace step.
     void apply(const std::vector<MemoryChange> &, bool forward = true);
     Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,

@@ -16,6 +16,9 @@ struct InputSnapshot {
     uint64_t event = 0, shader = 0, replayGeneration = 0;
     unsigned stage = 0; // Native pipeline order: VS, HS, DS, GS, PS, CS.
     std::string frameSha256;
+    // Acquisition scope is separate from replay generation: private checkpoints
+    // can observe different resource values without starting another replay.
+    std::string resourceObservation = "provided_snapshot";
     uint64_t adapterLuid = 0;
     uint32_t adapterVendor = 0, adapterDevice = 0;
     std::vector<uint8_t> bytecode;
@@ -36,6 +39,12 @@ InputSnapshot snapshotBufferInputs(Replay &, unsigned stage, uint64_t maxBytes =
 InputSnapshot snapshotResourceInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
                                      const CancelCheck &cancelled = {},
                                      const std::function<void()> &beforeSnapshot = {});
+// Copies the currently bound resources of a completed prepared before-event
+// replay, including private checkpoint storage. Does not run/rebind the event or
+// apply experiments again. The caller owns the current checkpoint and raster
+// input identity; replay generation alone is not a resource-value cache key.
+InputSnapshot snapshotBoundResourceInputs(Replay &, unsigned stage, uint64_t maxBytes = 256 * 1024 * 1024,
+                                          const CancelCheck &cancelled = {});
 struct VertexInputSelection {
     // Zero-based draw input reference, before removing cut indices. Instance
     // is relative to the draw, independently of StartInstanceLocation.
