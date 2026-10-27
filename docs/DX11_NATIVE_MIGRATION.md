@@ -1011,3 +1011,14 @@ differences remain because the baseline instance-zero export also contains later
 instances; additional native all-instance jobs reproduce those entire buffers.
 See `research/DX11_NATIVE_MESH_INDEXED_PRESENTATION.md` for the 35 passing UI
 checks, 21 real adapter/selection combinations and the still-failed strict gate.
+
+## Native double instruction continuation
+
+The owned DXBC executor now supports 19 double instructions with paired register
+validity, reversible changes and arithmetic on the explicitly selected adapter.
+`dxbc-gpu/21` checks both basic and extended hardware capabilities. Local evidence
+contains 528 independent GPU comparisons and 264 Intel capability rejections,
+with 5,772 rejected report corruptions. Seven regression entries pass 2,540 checks.
+See `research/DX11_NATIVE_DXBC_DOUBLES.md` for raw/compiled shader coverage,
+retained fixture failures, replay instructions and evidence limits. Source/type
+parity, captured pixel qualification, full history and P7/P8 acceptance remain open.
