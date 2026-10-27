@@ -1,0 +1,965 @@
+{
+  "schema": 1,
+  "implementation_commit": "90c9318b0c9ed0ce7f2ab68cbf942961bf9166c4",
+  "main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "successful_cases": [
+    {
+      "case": "0-ds",
+      "vertices": 6,
+      "faces": 2,
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "elapsed_ms": 34,
+      "peak_working_set_bytes": 22294528
+    },
+    {
+      "case": "0-gs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "elapsed_ms": 36,
+      "peak_working_set_bytes": 22335488
+    },
+    {
+      "case": "0-vs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "Microsoft Basic Render Driver",
+        "device": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73789,
+        "revision": 0,
+        "subsystem": 0,
+        "vendor": 5140,
+        "warp": true
+      },
+      "elapsed_ms": 40,
+      "peak_working_set_bytes": 21860352
+    },
+    {
+      "case": "32902-ds",
+      "vertices": 6,
+      "faces": 2,
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "elapsed_ms": 100,
+      "peak_working_set_bytes": 53010432
+    },
+    {
+      "case": "32902-gs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "elapsed_ms": 101,
+      "peak_working_set_bytes": 52781056
+    },
+    {
+      "case": "32902-vs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 73907,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "elapsed_ms": 145,
+      "peak_working_set_bytes": 51302400
+    },
+    {
+      "case": "4318-ds",
+      "vertices": 6,
+      "faces": 2,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "elapsed_ms": 236,
+      "peak_working_set_bytes": 101965824
+    },
+    {
+      "case": "4318-gs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "elapsed_ms": 243,
+      "peak_working_set_bytes": 101453824
+    },
+    {
+      "case": "4318-vs",
+      "vertices": 3,
+      "faces": 1,
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 68403,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "elapsed_ms": 221,
+      "peak_working_set_bytes": 102416384
+    }
+  ],
+  "open_gate_cases": [
+    "0-ds-uav",
+    "32902-ds-uav",
+    "4318-ds-uav"
+  ],
+  "corruption_controls": 45,
+  "default_cutover": false,
+  "full_renderdoc_removal": false,
+  "files": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 126753,
+      "sha256": "ee1bb75e46149772a48a0b8e6d7d858bd06b2bfd873fe6befdbfebf324081741"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-build-fixed.log",
+      "bytes": 8451,
+      "sha256": "cc2211e22d1a334e7622a02b71402a3bd5bd8c23f09de0ce50d80c5ec2689851"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-build.log",
+      "bytes": 61385,
+      "sha256": "fbd3aa526742a38e84dc21e86efbd2d7e9bf7cd668410bcb59b3c0eb8365bb3f"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-counter-build.log",
+      "bytes": 1667,
+      "sha256": "b44bcb385de11bc71a83faaadde4a9a771a26f99339ab9cbdc3347cbd46ab541"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-counter-recovery-ctest.log",
+      "bytes": 318,
+      "sha256": "52560352d27398e9d0b9029cac998736ec5dcf0617556c664aee1de8c3286827"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-counter-stale-assertion.txt",
+      "bytes": 1078,
+      "sha256": "d276ac38f5252e1a2e88dccd79c37c49958e83b529c4615d1d9b133dbe2c97b2"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-final-ctest.log",
+      "bytes": 940,
+      "sha256": "517d746c96fb363f9a73aead3be2a275a2336c3bb9c48d95c614989f1288337a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-final-polish-build.log",
+      "bytes": 4931,
+      "sha256": "d0746f60634ac6bdcac304600dd42ed91526652381b74ccacd094e7610238c32"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-final-polish-ctest.log",
+      "bytes": 423,
+      "sha256": "36fcfc4335e0d93ddeb0ca36c325ee16d91414f7fb4e79e56d24b623dbd4b4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-gated-build.log",
+      "bytes": 10190,
+      "sha256": "b125d01931828fc1cc612cb6a1f5989767c9bb6be8fe0361735b9147504f261e"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-native-analysis-final.txt",
+      "bytes": 2569,
+      "sha256": "6c6464224ebe9a37f90ac527bc65c8c56b56aa87749a8bb7d2efaec91d9cbf57"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-native-counter-ui-final.txt",
+      "bytes": 935,
+      "sha256": "121abc29c7d38d6d6c7ad62ad146587aaaaddf35f83cb27b8b63e09a9ed52e0a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-native-execution-debug-ui-final.txt",
+      "bytes": 1429,
+      "sha256": "542e0184640ca738965be1b46f80770b2ea07260b83b3bb383431048d228c5a9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-replay-mesh-ui-final.txt",
+      "bytes": 1296,
+      "sha256": "20ff727fffa5a66634e2878d30f0e521ac7841b1d6abba50854004afed8f406d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-test-diagnostics-build.log",
+      "bytes": 1981,
+      "sha256": "4fa1e86bfac5c0e388079806b0a7a72b5c06d0db58581eeebf3b9f87a68efe46"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-diagnostics-ctest.log",
+      "bytes": 420,
+      "sha256": "b13e35b18ef2b15b3a4639a7a16c98939fe17852d8c33b372aca5789fbf0a090"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-diagnostics.txt",
+      "bytes": 2392,
+      "sha256": "917b8af56d4d585d0a16f9c972709bb72263a089362924bbc98d7a10175084f2"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final.txt",
+      "bytes": 1994,
+      "sha256": "e3e90fec379e9e9d79d1af5922cf9b92b9b280179d70786137932e85aa44e219"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-initial-ctest.log",
+      "bytes": 1404,
+      "sha256": "bb110d6f777be0209ef932c157cd1e207e26a6d593d48952384c9eb05e2ba172"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-initial.txt",
+      "bytes": 1498,
+      "sha256": "60ef7d972608504364fb7e9df96444457ba1476869d56911eaadbeab74ba4ac5"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-validation-v2.json",
+      "bytes": 26971,
+      "sha256": "e090b2e089553d4ff7abd0e7adbc58b1d41e92dd7552989b2ae12d64570e19cd"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-validation.json",
+      "bytes": 26740,
+      "sha256": "5fc63afec91aa192baa9704304aab8d71a44483dfaa544f38ab9a4e441ca8671"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5576192,
+      "sha256": "47ff1649efab75fda7992e69e5b4a605070bc2422d16afe9df215976a2f08c17"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 5096960,
+      "sha256": "5e16d11db2b65d027f04c7d8559545f3661088e00c7754569f91d1405df7730c"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeAnalysisTests.exe",
+      "bytes": 1501184,
+      "sha256": "66e30513259be3f253f1cfe4a483176cc8206e5e5cffd18c88ae040a34049d51"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeCounterUiTests.exe",
+      "bytes": 5147136,
+      "sha256": "25ef651de871218aa9f1c51a1e61aa6348328f6d00a2fab9894437a48f82e677"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeExecutionDebugUiTests.exe",
+      "bytes": 5507584,
+      "sha256": "256ced5ebfef05df051cd545db2d22708e5a290d790b93d1bd32574dcd3cf36e"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5153280,
+      "sha256": "d537586242b41ce77140cf968976e2af12d6339ea5895bdd9f1ba5f5ee4d433b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraReplayMeshUiTests.exe",
+      "bytes": 5122048,
+      "sha256": "78412f45f9c9ed2d8ba6527b07eaecfe6caab838cfa10069fa46d9acdbf15787"
+    },
+    {
+      "path": "src/app/MainWindow.cpp",
+      "bytes": 218920,
+      "sha256": "931b9ff3cd4e1c3f1f291092bfeb8ca792ad7f4a552aa29e1ec3a836aa6fd188"
+    },
+    {
+      "path": "src/app/MainWindow.h",
+      "bytes": 12911,
+      "sha256": "11d4203ab655061b3b943d7c921fc2affa31a1d0275f0b7d725be54082345de9"
+    },
+    {
+      "path": "src/app/NativeAnalysisController.cpp",
+      "bytes": 7167,
+      "sha256": "564cb162e844e54703fe6279c3e308835c333755a64e0f9eee8ddcc58d5ed323"
+    },
+    {
+      "path": "src/app/NativeAnalysisController.h",
+      "bytes": 1582,
+      "sha256": "db3b43b4bf3b5194462032a78747c756fba7a7bcfe30895b6d6ba97a1a95499b"
+    },
+    {
+      "path": "src/app/ReplayMeshView.cpp",
+      "bytes": 15108,
+      "sha256": "488680ae4cf2ee9c59d152eb715b14bfc13c526de7206615853c1832b3ab1e18"
+    },
+    {
+      "path": "src/app/ReplayMeshView.h",
+      "bytes": 1749,
+      "sha256": "89773be64f092642ee9b6859440f1cb620853168fd58c319599121f8ddfb3703"
+    },
+    {
+      "path": "src/application/Geometry.cpp",
+      "bytes": 21125,
+      "sha256": "2d830dbf9c1bcdea58dd42dd30267436182ce0f7e5e75c2057b0226e0070e725"
+    },
+    {
+      "path": "src/application/NativeMesh.cpp",
+      "bytes": 5044,
+      "sha256": "00668af289dc3c4df860a8e0f649d06c6782c3a299b8e2b016a4e4ee3078509b"
+    },
+    {
+      "path": "src/application/NativeMesh.h",
+      "bytes": 774,
+      "sha256": "1f41e00d34f25e7f9b3c1146f90a776b3aed99d65ffc378a8a1b4061a5bfd114"
+    },
+    {
+      "path": "src/application/NativeReplayMesh.cpp",
+      "bytes": 4815,
+      "sha256": "db6eaa9031e8f2ba1d104e6d3a6849d043083f7aa9d1a6e6c5581d2e3e4e60c4"
+    },
+    {
+      "path": "src/application/NativeReplayMesh.h",
+      "bytes": 599,
+      "sha256": "39ea0a5b2e4fc30b0635ca56be44f2cc523221d2cf62cb8624873b3054997f48"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 104469,
+      "sha256": "c2e76bde1195caf63d8b5f754a4dc7b0e124d047aeb6e3df662b2ee4f4bfb79f"
+    },
+    {
+      "path": "src/application/ReplayMesh.cpp",
+      "bytes": 5752,
+      "sha256": "73934d2a63c463083f8ad2df16b2bb6a6b2011541d03c48ba95c46c38639de16"
+    },
+    {
+      "path": "tests/DepthStencilCapture.h",
+      "bytes": 1339,
+      "sha256": "71ded34b7e97e1e11428a804cd032c45ae37c9e15f464eb53715ffef4ce846ef"
+    },
+    {
+      "path": "tests/HullCapture.h",
+      "bytes": 2515,
+      "sha256": "e36eb3dea875728450f7cdf187549b9ddf8e8458eb7bd4fc9ebb9588dd87f328"
+    },
+    {
+      "path": "tests/NativeCounterUiTests.cpp",
+      "bytes": 14505,
+      "sha256": "5a8f63f841cfcf159bdd468bb2eb28bb85788d00388762e3de34dc735f163052"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 16703,
+      "sha256": "520b3935bd204b1224ca8fe77dc4beed66df713cfdf2b58356ac533385b2265c"
+    },
+    {
+      "path": "tests/ReplayMeshUiTests.cpp",
+      "bytes": 14644,
+      "sha256": "a7635d288600423a09fc6deb3933f6f41723d18752fe23d4d39743111f84a360"
+    },
+    {
+      "path": "tests/StreamCapture.h",
+      "bytes": 3712,
+      "sha256": "9ef4543b1885159f7dbff4e129a96061580a5f4c7c11532dca5ac4a505fc5b5c"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 7852,
+      "sha256": "45da9eb0497be2da005fd72ba19f3dbca510f1333e12f800ee3548e09f2097fc"
+    }
+  ],
+  "retained_evidence": [
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/geometry.json",
+      "bytes": 3165,
+      "sha256": "d6713e253be56bbbac2a29e52cc2f8f52ac74d349cc169b79d2c0224700554f9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/job.json",
+      "bytes": 624,
+      "sha256": "41e13d22dd267790fb3f8a9f3dcc56076b9fbb31479d6077d282c215b0ee0c2e"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/result.json",
+      "bytes": 7865,
+      "sha256": "44af635dbdb11a73b7febf1b22a2416594ad58b11acd6dd66430ee25e828d2b3"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds-uav/job.json",
+      "bytes": 624,
+      "sha256": "4127dd7bdf010f9b4f2f66390aa5ba35a0c8f3e9a223f86c2dab6b381416c7a0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/geometry.json",
+      "bytes": 2814,
+      "sha256": "9029c0365f4cb6fa85d66710c3919f4b8874c153de5cf7f024f396cc403a7a6b"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/job.json",
+      "bytes": 624,
+      "sha256": "37aeab45b7688d1b7f843b98d8150382edbf2e577b1bce17c31ceb3d0e242352"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/result.json",
+      "bytes": 7485,
+      "sha256": "37d0a5b76732ce063ff21dc21fce8248cdc2311a53c92e9a2268520bf8bb13b4"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/job.json",
+      "bytes": 629,
+      "sha256": "78e9f67b2895e1713ededbb0f05e5f954b3182bbd00579fa90663be9f0287241"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/result.json",
+      "bytes": 9086,
+      "sha256": "287efed35b23352170c723c36d344b16cb596e801df038ccea2e60b7ddd77bc6"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/0-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/geometry.json",
+      "bytes": 3165,
+      "sha256": "d6713e253be56bbbac2a29e52cc2f8f52ac74d349cc169b79d2c0224700554f9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/job.json",
+      "bytes": 631,
+      "sha256": "3d5d74426c1d10d3e45a78ec21a8ff470d14f25efa907ba30ca83c3b1a67d93e"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/result.json",
+      "bytes": 8281,
+      "sha256": "190b8efdbf0b0c7cfa22e6f3c84b5e7b1887756b6dc8650d28519dbd1f08b4e7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds-uav/job.json",
+      "bytes": 631,
+      "sha256": "855f58c85ae65e08426cf45976c84d248a0cc5cd64e56b47fa7589e20548cea4"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/geometry.json",
+      "bytes": 2814,
+      "sha256": "9029c0365f4cb6fa85d66710c3919f4b8874c153de5cf7f024f396cc403a7a6b"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/job.json",
+      "bytes": 631,
+      "sha256": "b95f1b5dcab3250c0edb5f87508141cfc0ef4752cdac4ed95996797d481fb3cd"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/result.json",
+      "bytes": 7901,
+      "sha256": "b829fd9ecc90d46cdc5e47b9f1feb3bfe40101094007fccd35c50dd7ffa01fe5"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/job.json",
+      "bytes": 636,
+      "sha256": "e244522855a57a742aa05fca9bf0b08862c534315ac87b2bc1b57c2da0046e7d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/result.json",
+      "bytes": 9502,
+      "sha256": "752b91e5f91451e32d26f855cca9afd433a4bec6fb522766c0278baaac4b86c5"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/32902-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "70c36c80d3d67f49773d3b69a555dfe6297b956a32344b31c07c1f69a06ae0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/geometry.json",
+      "bytes": 3165,
+      "sha256": "048f51da36dc25718ee7ab08041e72b590bbc1340c1dc560d88010481539302c"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "b308a606cba9ecd0a97aa634b8bed20d7882b90ec3dd25ff7a0a7ea240d1e21c"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/job.json",
+      "bytes": 630,
+      "sha256": "ccea0328af3217c641eed16536556969a02ea3c2183722e574ad2a0bb7a3d468"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "aea58ac3b3c0a8f392690a0d389bce0cd1f8e7d62e3004deceb9581a8573b313"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "eb162b5e8629798b1ca2adb8caae1dddb500873ca5500bc3b6af65ad05d5d9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/result.json",
+      "bytes": 8667,
+      "sha256": "92aa786e5e2348f06b6ba779996763612808133671ac56e1c7f4d529e36bcd91"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "6328e6e88ce6fe6c0b610f685d8e6af12302b3482319eac15e45e6af66dfc1d0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds-uav/job.json",
+      "bytes": 630,
+      "sha256": "ffb9823709a49b458e69be1c2bae96ccd3615de403cb75e8a3a286c02c11a387"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-ds-uav/worker.log",
+      "bytes": 130,
+      "sha256": "d42ba90d0c0a9f478f509641c12313ebf6d6a759ea322344a0e980a49d58bdc1"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/geometry.json",
+      "bytes": 2814,
+      "sha256": "9029c0365f4cb6fa85d66710c3919f4b8874c153de5cf7f024f396cc403a7a6b"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/job.json",
+      "bytes": 630,
+      "sha256": "ca87c8c920ad747826bf85f3847fd3abd616f57b7fa0286781ba1395667d74a5"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/result.json",
+      "bytes": 8287,
+      "sha256": "d45be40569f5e468d57020f73ad4c8c0b801ab7f003a6c4338385ec8b07cdf0d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/job.json",
+      "bytes": 635,
+      "sha256": "da2625cdf894ec31f28af51dbbf6c6d088e7eca8571326fe46b5b83642e02f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/result.json",
+      "bytes": 9888,
+      "sha256": "1ab0cfac0fe44798f5d6232d6516e5b3c0c5b0d3bc9b93a438cbfd2558c30f09"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final/4318-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/native-replay-mesh-ui-final.txt",
+      "bytes": 1994,
+      "sha256": "e3e90fec379e9e9d79d1af5922cf9b92b9b280179d70786137932e85aa44e219"
+    }
+  ]
+}

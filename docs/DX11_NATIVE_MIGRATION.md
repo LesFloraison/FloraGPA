@@ -258,8 +258,10 @@ Signature metadata is independently checked using the documented
 
 ### Mesh cutover gaps
 
-The Replay Mesh GUI remains on its existing path until its successful baseline
-coverage is preserved. The following are explicit P3 blockers, not exemptions:
+The Replay Mesh GUI defaults to its existing path until its successful baseline
+coverage is preserved. An explicit Native preview mode now exercises the unified
+Worker route without automatic fallback. The following are explicit P3 blockers,
+not exemptions:
 
 - The older assembled `vs-index` mode still omits adjacency helpers and incomplete
   tails. `vs-inputs` now preserves them in the three-adapter matrix, including full
@@ -930,3 +932,13 @@ links; the candidate engine remains null at all 20 sampled live boundaries.
 See `research/DX11_DEBUGGER_HOST_INITIALIZATION.md` for addresses, retained probe
 corrections and evidence limits. These manager implementations do not identify
 the debugger engine or close P1. Product behavior is unchanged by this research.
+
+## Native Replay Mesh preview continuation
+
+Replay Mesh now offers explicit native GPA analysis through the shared Worker
+controller, with retained position/identity artifacts, CSV/OBJ/JSON exports,
+stale-context rejection and cancellation/retry. Nine VS/GS/pure-DS GPU cases pass
+across three adapters; three UAV instance-selection cases retain the existing
+explicit rejection. See `research/DX11_NATIVE_REPLAY_MESH_UI.md` for the independent
+validator, original failed runs, corrected counter regression and legacy fixture
+skips. Default cutover and full P3/P7/P8 acceptance remain open.
