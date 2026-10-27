@@ -852,6 +852,18 @@ starts typeless while captured typed interpretation remains intact. See
 This completes neither original fragment qualification/order nor public PS
 debugging, and does not close P5/P6/P7/P8 acceptance.
 
+## Pixel merger coordinates continuation
+
+The private output merger now preserves caller-supplied target extent and pixel
+location. WARP fixtures demonstrate a spatial alpha-to-coverage difference that
+the former 1x1 origin target could not reproduce. The extension adds 216 color
+and depth/stencil coordinate cases on three adapters; the final combined suite
+passes 909 checks with no failures or skips. Results expose a logical payload
+budget and retain unknown original fragment eligibility. Single-sample D32S8
+padding is explicitly invalid. See
+`research/DX11_NATIVE_PIXEL_MERGER_COORDINATES.md` for evidence and reproduction.
+Public history/debug integration, full parity and P7/P8 removal remain open.
+
 ## Primitive identity continuation
 
 Native pixel geometry now carries validated shader primitive IDs from original GS
