@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active PS typed loads/stores and remaining precision semantics, public PS sessions and source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, full typed-format/precision coverage, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -907,3 +907,16 @@ and do not qualify original fragments. See
 regression checks, nine real-capture probes, 474 corruption controls and measured
 cost. Complete fragment history, public PS debugging and P7/P8 acceptance remain
 open, and the GPA debugger host +0x3c0 path still needs independent closure.
+
+
+## Active PS typed UAV continuation
+
+The independent executor now supports active PS typed buffer and texture UAV
+loads/stores through isolated, same-adapter PS assistance. Helper lanes retain
+suppressed accesses and unknown results; stage-specific 3D footprint identities
+and reversible memory records are preserved. The new 324-case matrix compares
+native PS output and complete storage across six dimensions, six formats and
+three address modes on three adapters. See
+`research/DX11_NATIVE_PIXEL_TYPED_UAV.md` for validation, corrected normalized
+resource declarations and remaining coverage limits. Public PS debugging,
+fragment qualification, the GPA debugger implementation and P7/P8 remain open.

@@ -1,0 +1,4463 @@
+{
+  "schema": 1,
+  "stage": [
+    "P6"
+  ],
+  "scope": "active_pixel_typed_uav_load_store",
+  "implementation_commit": "560a61fad9c35e798e86ed602500390265713e4b",
+  "research_report": "DX11_NATIVE_PIXEL_TYPED_UAV.md",
+  "status": "validated_increment",
+  "full_renderdoc_removal": false,
+  "public_pixel_debugging": false,
+  "owned_validation": {
+    "schema": 1,
+    "status": "ok",
+    "data_cases": 324,
+    "corruption_controls": 1296,
+    "scope": "active_pixel_typed_uav_load_store",
+    "public_pixel_debugging": false,
+    "full_renderdoc_removal": false
+  },
+  "regression": {
+    "schema": 1,
+    "status": "ok",
+    "suites": [
+      {
+        "suite": "dxbc-pixel-memory",
+        "passed": 650,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 10275
+      },
+      {
+        "suite": "dxbc-texture-uav",
+        "passed": 765,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 86763
+      },
+      {
+        "suite": "dxbc-typed-pixel",
+        "passed": 1733,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 255314
+      },
+      {
+        "suite": "native-pixel-checkpoint-inputs",
+        "passed": 635,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 125591
+      }
+    ],
+    "qt_passed": 3783,
+    "ctest_wall_seconds": 481.86
+  },
+  "initial_findings": [
+    "54 new UNORM fixtures failed native debug validation due to FLOAT declarations; normalized resource declarations were corrected and SNORM cases added.",
+    "An initial compile caught a misplaced stage guard; the guard belongs to the typed buffer dispatcher."
+  ],
+  "remaining_gates": [
+    "Full typed-format, partial/unknown-value and minimum-precision PS coverage.",
+    "Original cross-quad resource schedule and complete fragment qualification.",
+    "Public PS debugging and source/UI parity.",
+    "GPA debugger host +0x3c0 implementation closure.",
+    "P7 dependency deletion and P8 standalone release audit."
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 88235,
+      "sha256": "354e93e2811394fa67a4d9370b96914c341a77b7541343ff8575c9e99e6365ab"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "bytes": 8614,
+      "sha256": "2b402555e0945ee644696218039fa851e7766df94908d3bc56c38d2a9abac348"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 105696,
+      "sha256": "7446bea5578b7cf791216f72beefad78c8aa6d20690e5eedad00eb45acbf9a0c"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "bytes": 5321,
+      "sha256": "51a12056ba0c10ca3f133a1ceb89ae8c0c9d342f6d2c6b47a9752fbd81879773"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "bytes": 6267,
+      "sha256": "3439236351d037c98e8b9a72d4f6676afd34228327dbbce79cce7c113cd23d99"
+    },
+    {
+      "path": "src/application/DxbcTextureUav.cpp",
+      "bytes": 13092,
+      "sha256": "081328bbb75febe271c453c0b2edfc9b1a168ac42386601dae83ba10eee2d83e"
+    },
+    {
+      "path": "src/application/DxbcTypedBuffer.cpp",
+      "bytes": 6965,
+      "sha256": "1e880856e888d23597d8d2596c069513b652933b0adb24866019cd9876e69b42"
+    },
+    {
+      "path": "tests/NativePixelCheckpointInputsTests.cpp",
+      "bytes": 51996,
+      "sha256": "14867b5b91dd2353376aaa4d2e3c5393e340e6ed9fed4ec34c7f49eb7589ed62"
+    },
+    {
+      "path": "tools/validate_pixel_typed_uav.py",
+      "bytes": 4603,
+      "sha256": "a2882418e3ed4bc8a2aad51b1da94faa03275d8f2de6e579391fb6c376c72296"
+    },
+    {
+      "path": "docs/DX11_NATIVE_MIGRATION.md",
+      "bytes": 64126,
+      "sha256": "755ded79452c4e2d90f498880bbcd7a14d2fa269ab91f48a30f343cda0498d54"
+    },
+    {
+      "path": "docs/research/DX11_NATIVE_PIXEL_TYPED_UAV.md",
+      "bytes": 6303,
+      "sha256": "6bf17dd6082191beb474cde6319ea23df533275d22649dc3f87c52e8fd9cb680"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "65190239c3b53148d3864d1dac8a1f7dca327d1dc440bfccc7896387dbb43718"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5576192,
+      "sha256": "3fd02b6cb51faae4b9ca1020f53ec5ad59a6e2b9c0a8c3ce524fa0a3ee86cb61"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5576192,
+      "sha256": "eb9ff3f542653670cdfde0d0a290c969748af334941089f8d01d93e9c40fa87c"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2475008,
+      "sha256": "1b79d6459f18d7b11d8cd01cd14264014d0ff471ad70643cda0ebff53f90b588"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelMemoryTests.exe",
+      "bytes": 513536,
+      "sha256": "b98a522a8fefead4a873307cc6f9ef0349871bc69af087dc995f28220b43af53"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTextureUavTests.exe",
+      "bytes": 1580544,
+      "sha256": "4ca2c0c9391d75573f92da65f825b58188e5ef0bbec535f358ee1a4a72ea586f"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTypedPixelTests.exe",
+      "bytes": 524800,
+      "sha256": "f21236f4c87bf4bbd7f34c9bb106cf0067a235003eece177f42a07b76255de47"
+    },
+    {
+      "path": "build/vs2022/Release/FloraExperiment.lib",
+      "bytes": 127472780,
+      "sha256": "c845db945d753a3bd23018b8c01f7cfccd51a0b59e7437d2f0aaed8d946e3670"
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-0-texture.json",
+      "bytes": 5852,
+      "sha256": "4e66461d6383fa54d4e4c2020bd411dfbebee4833e7cc44dd896d4bd6e381835"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-0-typed.json",
+      "bytes": 5934,
+      "sha256": "38a9d9afecd0369a2a602d71fa6391d06ddc34cd31e29aa18d00d92db5f84e17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-32902-texture.json",
+      "bytes": 5856,
+      "sha256": "9ab61ba6eaf1e7cd2f6a8aeadcd2437172cc9fe682b2b1d2eff072e069fae944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-32902-typed.json",
+      "bytes": 5938,
+      "sha256": "e01fcc25f4a4db185ffd9b947b202b345262dcbdd0ad413753e652b3a1403bf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-4318-texture.json",
+      "bytes": 5855,
+      "sha256": "0daeb9b665235e84153f5ae368d04a935e6bd4b014696e52eb12834d0c163532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/computeGroup-4318-typed.json",
+      "bytes": 5937,
+      "sha256": "32274448ee1422b0465024eb41c34437eab59a844ab76717ab597ffca5da2370"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-0-append.json",
+      "bytes": 30545,
+      "sha256": "4abd8197e6ac0196ab1f6089de982318f36b5e9f64102eaaa2e4a0c5a6ce9c7c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-0-counter.json",
+      "bytes": 30562,
+      "sha256": "0427c1ac0375e40a7a2c5050faa11f71e835f73e7a16d6cb2def9687d436b1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-0-raw.json",
+      "bytes": 30554,
+      "sha256": "c8a716446914b4a6810ae6296f05e057c0b2bc444011b3a8d37673069f8ac0ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-0-texture.json",
+      "bytes": 29498,
+      "sha256": "5739570a0abb6ccc83cc26320dce480adf4c086bc4bd6cb415192824c565cac5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-0-typed.json",
+      "bytes": 30556,
+      "sha256": "6df53c4c697737fbf16ae1b8ea204d0c9af19e605894c0eb0018380cbadd1053"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-32902-append.json",
+      "bytes": 30561,
+      "sha256": "fdf11d8f6bf12a891f971f2fccc6de01f4aa68bb6556efbc36a2c9fdf3f0d827"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-32902-counter.json",
+      "bytes": 30578,
+      "sha256": "3af5b7443889dfe67fdebbfaa71e6cfabe786302d996e333c355afad558d5881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-32902-raw.json",
+      "bytes": 30570,
+      "sha256": "773d6614f19cf4471ea5e48628e635547fbc13307521ab312bf28db3c48b5eec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-32902-texture.json",
+      "bytes": 29514,
+      "sha256": "ec51ba76a77ce7e66a80b89c007219f0a833d3fff0a00241a7c9c0279b9b9571"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-32902-typed.json",
+      "bytes": 30572,
+      "sha256": "5c86ffdde4bd46b3e6caf0e1e07628d39262bbd796bca241bc5cadaf949fc0a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-4318-append.json",
+      "bytes": 30556,
+      "sha256": "026c398f7d8717adaece5960b524af37cb0aab237eebac94678801366e74e249"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-4318-counter.json",
+      "bytes": 30573,
+      "sha256": "44c86b55f18a31fa52a0bdf1a353b013935426916110ce76e55f1121b9216914"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-4318-raw.json",
+      "bytes": 30565,
+      "sha256": "e54d19ef7f20d1099001c2b4c07d13985dc76014e60c8e613e7def56d6218f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-4318-texture.json",
+      "bytes": 29509,
+      "sha256": "2cd42e8fd79ff8f02fcd366f793939b1086114f229063729b1360dd6a3422401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/prefixes-4318-typed.json",
+      "bytes": 30567,
+      "sha256": "fff602dc98acc16d1f41e0852491da0729374cc4fe24abe8db1e0e720d780880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-0-append.json",
+      "bytes": 74551,
+      "sha256": "e81e0e29d3c990b1288a25c34926130d111e54b6d40bd19e580cf47a214eabf7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-0-counter.json",
+      "bytes": 74548,
+      "sha256": "cfdd0e109d5d5161d38361bad3a6cc3cb85097648833a9845694f9830f4d20be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-0-raw.json",
+      "bytes": 74544,
+      "sha256": "e4e0a5bcee4b8a4def2fee6ee11eaa7880d5d419539ba0d1e52db8207fbd7855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-0-texture.json",
+      "bytes": 74545,
+      "sha256": "77ffdfe949b076fc8d3e56e4410d21baa1a0b4ffd6f230d93a061bd107910945"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-0-typed.json",
+      "bytes": 74546,
+      "sha256": "671777a5fa0c0a8f425f3aaf26c9a4dfa5ea0a0ca9bd8b268373c7883296870b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-32902-append.json",
+      "bytes": 74584,
+      "sha256": "070a19f09a9bfb52d111e116a31c0c95b174e0feb75d31ae48c4fb6a96602529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-32902-counter.json",
+      "bytes": 74581,
+      "sha256": "56d65f6d97f81e8ab7e45f0d27a9bbb6587f7db4a7630f69436e5f651b952582"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-32902-raw.json",
+      "bytes": 74577,
+      "sha256": "fbf73aa64452485bcd7d749b58550e48d65be2fde178a8ce01d9e4c403313c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-32902-texture.json",
+      "bytes": 74578,
+      "sha256": "44f84a42a7211df6dca16be4fd0347e8d720d1d2d87ad10b71e8993566f12bee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-32902-typed.json",
+      "bytes": 74579,
+      "sha256": "962aa4843a47c0e62b697860931fa3d780b2ea45339144b859bae8e24101e8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-4318-append.json",
+      "bytes": 74575,
+      "sha256": "0ff72bb718a8d914a80447e6a330561b4411de8b89568527ff872e5f458f682d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-4318-counter.json",
+      "bytes": 74572,
+      "sha256": "7ef67c46ddb46f75917948481d47bd6e67ededc8ce2fe629b0a18d249e39c4a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-4318-raw.json",
+      "bytes": 74568,
+      "sha256": "4b1796cfa665c99695febce75b31fb3b4c617d155f966be3ced1ba03086b68b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-4318-texture.json",
+      "bytes": 74569,
+      "sha256": "d6fc23d1d4c593cbf513ffcea326b6fb7662316fad59a8e5ab0b41929298d0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/shaderHistory-4318-typed.json",
+      "bytes": 74570,
+      "sha256": "9fd8d4dba4433c3bfb5b704fbf2e75e79695cd9b1cc8b326213f7c4925e2b07b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-42-0.json",
+      "bytes": 721,
+      "sha256": "73b0b6e58071573f7a7ce1ecddfa3ccd862d88b05155d27c6a1f7adc63cd79a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-42-1.json",
+      "bytes": 720,
+      "sha256": "17f42e3afff79ac6e19e57edce52424f1922fb0367ba1e659983d789af71748a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-42-2.json",
+      "bytes": 711,
+      "sha256": "2c855f58820a2e1bb95aa08a9eb2fabda621fc4266f1a9d5ef5de404eba3c964"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-42-3.json",
+      "bytes": 711,
+      "sha256": "8d2d54b85dbe298a09135ffd32e5346012d37362f9f6ab9998f42c86ef0c84f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-43-0.json",
+      "bytes": 721,
+      "sha256": "a1a04edae07e959cbfa0e9391fc9b89f94e44a1d3403b997d26fe480aecee149"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-43-1.json",
+      "bytes": 720,
+      "sha256": "908c204aceb7e7b6cdd6935648f235f1e06ebacc0ffec00c74e8109cc3b71a22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-43-2.json",
+      "bytes": 711,
+      "sha256": "606eeed7750d9dbf63bb8e4e2e32f2d13d0a8df5244e087f2e935fd5d1c6fb1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-2-43-3.json",
+      "bytes": 711,
+      "sha256": "e9b52c67f23ad83b406463cac875b03619aaed9f4b9943f1a2e9a8acbdea8973"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-42-0.json",
+      "bytes": 722,
+      "sha256": "51395c77ae0df7a893e9edb0cc3a52e1e1519b55e100afa416f89fd7f0e07b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-42-1.json",
+      "bytes": 720,
+      "sha256": "d457b957f3b3db69b08a7b939a6fa62195fad0f818f0dffa7b87421d0e5bc972"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-42-2.json",
+      "bytes": 711,
+      "sha256": "ea75347ad93ac8566c7eecca3f423d234f237ce0fb43c7247744a3aca87ef764"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-42-3.json",
+      "bytes": 711,
+      "sha256": "c83bb5875cd8f0418688de6deeef5a99e53e26e33b1cc2f3fe87b73b2dc811b1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-43-0.json",
+      "bytes": 722,
+      "sha256": "0072f1b8cea4f2f6b0b4284483d56a95cb32dfb2037294cfeba78d0f17839372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-43-1.json",
+      "bytes": 720,
+      "sha256": "44409e018287a76c94309955cfb2d6936a76f552b69382872ae7841e1e212c2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-43-2.json",
+      "bytes": 711,
+      "sha256": "ae761d2631ccb80ff52b4d6d7335222cbf622e1a113f738339facea45625b2ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-3-43-3.json",
+      "bytes": 711,
+      "sha256": "c1b0abae5959f45bbf04c33fb306054624c273c6460a0226c3d8b3588980616b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-42-0.json",
+      "bytes": 723,
+      "sha256": "613d8d97b208113b470b45d9a7b947d1b04db3809e07959af126224015469a80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-42-1.json",
+      "bytes": 719,
+      "sha256": "48674e2f5d2d3417f7b11abf2e910ce0b756aed7d3d7297a83c3463a05131c46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-42-2.json",
+      "bytes": 722,
+      "sha256": "3e6727cf84a0d6465d8c45095b6e9dcf0df6cbb2559272ee0641af06fe590609"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-42-3.json",
+      "bytes": 722,
+      "sha256": "9210b03cf0ef159d8d3b288bf0a498811a7f95b7ffcdb240f1208764b552bcf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-43-0.json",
+      "bytes": 723,
+      "sha256": "be93e0cc333f8de0d0612f6c1ebb03e85e2d223d63707c212fab48dbc7a6aaae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-43-1.json",
+      "bytes": 719,
+      "sha256": "b6d4bd054d352d9dc25c1e0c54ea6103a2f9c561ed5cca0f141c0cd3814ecee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-43-2.json",
+      "bytes": 722,
+      "sha256": "54f1f64ac1e319c3d4a0c1b20c2660d1782804adc66f875b9e57f3aba66466e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-5-43-3.json",
+      "bytes": 722,
+      "sha256": "ec49742472d3d5d595f40429465df557c2f1fb112a771a6806797fc63649812c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-42-0.json",
+      "bytes": 722,
+      "sha256": "37f10d6140c1cbe534763578c31fc71e776da636fac875ca25bd1f0cc9abe01e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-42-1.json",
+      "bytes": 720,
+      "sha256": "65bce02fac1a8372d3af2a70137576d9327c8a38097e160253aeb73b6f09cb7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-42-2.json",
+      "bytes": 711,
+      "sha256": "4323799f29399b55506cf43a52e61c44a520985ebf4eaf8374fb905b5a191e20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-42-3.json",
+      "bytes": 711,
+      "sha256": "dfef00fbb4c9b8ab5ffe1b418c1cf2c3561ba89dbb64f2c4400d9e67b8ba9b93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-43-0.json",
+      "bytes": 722,
+      "sha256": "e82203aaff839822806984ad1dab29d193a775e13ced20180c0be06138aab944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-43-1.json",
+      "bytes": 720,
+      "sha256": "773185e78e9950e23247c1b9e434cee961df5bca12656dc835ee1c5b50ed3250"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-43-2.json",
+      "bytes": 711,
+      "sha256": "503aa584f25005a448f8627672692f6f5352325d9b79fe46eae231e4d01b50af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-7-43-3.json",
+      "bytes": 711,
+      "sha256": "50d695ddd56955991ea7be78af345632f978a823e0ba99727d7a31c78652090f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-42-0.json",
+      "bytes": 722,
+      "sha256": "b8d8383cceddd9153a23db48cc5d7d6b70dea9a509db6adc296bcc8ca9ddbd2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-42-1.json",
+      "bytes": 720,
+      "sha256": "0023b4c061b9bdaae34c0fa7beaad9eb9523fdb3527414e315d18902c49d9287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-42-2.json",
+      "bytes": 711,
+      "sha256": "800d6be500001b01fe35442fb9f884250622aecc37937bf7e39c82cc3740e3a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-42-3.json",
+      "bytes": 711,
+      "sha256": "fd6ec96b9c3c11f491cd2c4a6aca63d9722e12b2da8ab8b9934fe61a2d69faef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-43-0.json",
+      "bytes": 722,
+      "sha256": "ca0c91ab3290c70abd88e33f4de45b39d1cd2deda622fd647b62a61db616ae02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-43-1.json",
+      "bytes": 720,
+      "sha256": "355f128c153c59dbde9b132b593e6c487a60fe75c6f647970e7bf646201c7865"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-43-2.json",
+      "bytes": 711,
+      "sha256": "37f16fa1ed74e04538774005a3689fbf3cb919a42b9ac5677f63e036cb0376e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-0-8-43-3.json",
+      "bytes": 711,
+      "sha256": "a755162ccb1e39b7fce36635f9df6f31dc217bab15b6111d5d282cf95b68cf6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-42-0.json",
+      "bytes": 725,
+      "sha256": "a741f9f67e31fa28bb5b3b0ad31de75d49c0fe32b0c951a44ef984d6c967f34c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-42-1.json",
+      "bytes": 724,
+      "sha256": "b9de379125674a87ff390b33f8cd3694fbfe1e2ef89463af1cf1a5c8dc6804ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-42-2.json",
+      "bytes": 715,
+      "sha256": "6fb507d4837092fb1e682755b66cdb50b25feaff675fa9df4ab0103e36664edf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-42-3.json",
+      "bytes": 715,
+      "sha256": "0cc7b1c655b812038879a086f6e05a5607d78c4a9d72a0addfa9fa9f5cf68021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-43-0.json",
+      "bytes": 725,
+      "sha256": "437a5a5175dab96a778cf6f3694c3ffb4efdd30e0429046e7f4686b6a3f61604"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-43-1.json",
+      "bytes": 724,
+      "sha256": "b5bb6c6ed7915a354f8bde8350ce977f9a3f06ef812c6316e2c6b267a50df94a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-43-2.json",
+      "bytes": 715,
+      "sha256": "eb5137d3b463bba99046b6bdf0aa3e1ee6378b78ce2a56d76f95189d1deeffb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-2-43-3.json",
+      "bytes": 715,
+      "sha256": "7c228f2b44bf11bb6ea88c2c3c34fd6f26b46f46630783138e4b0e8553cbba34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-42-0.json",
+      "bytes": 726,
+      "sha256": "45202042de949a0a3be6de6a509d116251d8c9738f8257b0825a11fdbd322258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-42-1.json",
+      "bytes": 724,
+      "sha256": "df3573ee8675fafdc0f0a803eddd0511cdb1a159c6db9196a017a415d39c5fd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-42-2.json",
+      "bytes": 715,
+      "sha256": "11f021dd3c4ac1b49173c15aa0ccd585d881777fe2bd92686543ad5eb21a4afa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-42-3.json",
+      "bytes": 715,
+      "sha256": "93362633d12e1fcfe46471b826d2005371c6ada07a1e2ca421bad3f97c3d8947"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-43-0.json",
+      "bytes": 726,
+      "sha256": "882c58ad6a4c2d1915a82a7b75b7dbd1956c2d339a469d5febba48d3ad4c8d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-43-1.json",
+      "bytes": 724,
+      "sha256": "988b3f950022b19782d18b8fbf29764b39b59fe28b47be542d7f3a4b17b26341"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-43-2.json",
+      "bytes": 715,
+      "sha256": "090a592df5704b4934a5369317e8e945bfd0f50ca07cbb035c900363cb1538d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-3-43-3.json",
+      "bytes": 715,
+      "sha256": "858f7f9a28c3a34c299db361518d39f1db10a45b06b0bb58f905e51c4614b903"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-42-0.json",
+      "bytes": 727,
+      "sha256": "b09aa217c51c62c8751bec7853d6b9604656ab3de5e860e3eda639c194da0770"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-42-1.json",
+      "bytes": 723,
+      "sha256": "67aecc2ee000ac79d33be337449ef65954e6d491e6489b80a87cda87e344eed5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-42-2.json",
+      "bytes": 714,
+      "sha256": "78ebb0c318b63fb0be927209c8d1114919575411e272d8b029d31096ecebe8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-42-3.json",
+      "bytes": 714,
+      "sha256": "363c8d26cebbc61d356f00df71dd5b6d4ce463e07c48a857a4a5615e852f3524"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-43-0.json",
+      "bytes": 727,
+      "sha256": "e851d79f286f6337e5df090fbb2b340ef9ba49babdc439e8acd45881a2d4a668"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-43-1.json",
+      "bytes": 723,
+      "sha256": "1e523fb70d70511a0134631b93a391acff82bf66d7daf184f850f8b5abc9caeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-43-2.json",
+      "bytes": 714,
+      "sha256": "c79765e5d7d8a90951439cb939a384882449a30048c4ebf593c4796798af7538"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-5-43-3.json",
+      "bytes": 714,
+      "sha256": "02b8b47d587824d62f73e8d7ec5d7efce32d6e1606e302228e17b42fb91f18d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-42-0.json",
+      "bytes": 726,
+      "sha256": "28c12c5edaae8dff38f1ccd844ca0edc8461cadea68f782363e554db36d92da3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-42-1.json",
+      "bytes": 724,
+      "sha256": "209bc2c1bb82acb2ace71fb8ae278aaaa6c9e2a635d8ab7427a7768cd3cc4b58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-42-2.json",
+      "bytes": 715,
+      "sha256": "9223543d6dee112d8fb8b846178f753a857c39343444e4bc642536ec98cd4f17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-42-3.json",
+      "bytes": 715,
+      "sha256": "3c26107fbc883ebf29623b39e366b3e3951b6372abc84178aa093fc825394474"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-43-0.json",
+      "bytes": 726,
+      "sha256": "53a0b028ec4551dcb36c1de75992216cfba58db61716830c74ed37badac0c842"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-43-1.json",
+      "bytes": 724,
+      "sha256": "3957cc1ee4a3746157983cc97bf7eeed3204355bc5937bcf8a704176bcd4c839"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-43-2.json",
+      "bytes": 715,
+      "sha256": "86780bbb9d304a0f5e660d989122dbf7b76b3fa6c4c774bdf18d502fe61c0a2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-7-43-3.json",
+      "bytes": 715,
+      "sha256": "13ddf7c216e74849392134f9232e94795c50a7c658cd1c45aa7ed70ffaaf6675"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-42-0.json",
+      "bytes": 726,
+      "sha256": "c3c7cdaf7f472dcf6c8dd338016b1bae91e3006893eb38eba819ff835dc66fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-42-1.json",
+      "bytes": 724,
+      "sha256": "8a490106379ba6a483c9e901a951145ed8b8d67c4dd2f77b4426386b1898cdd0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-42-2.json",
+      "bytes": 715,
+      "sha256": "2dae21c5d1b69006bcb86e2547a7442a457eef595c8ca02fec0309e43f1a8494"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-42-3.json",
+      "bytes": 715,
+      "sha256": "cbc1871ea485a8d6045e6f4d5bb202433372fb860aa18e144d02133f0650a747"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-43-0.json",
+      "bytes": 726,
+      "sha256": "fb04bd712bd31d80afebf7f80c20f8cd622f720f7eba5f3020e883d323dd2c19"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-43-1.json",
+      "bytes": 724,
+      "sha256": "83dc5dcb3a9b5161f9c31ac902a2d009920e59e1f86ada70dc86bb37237d6788"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-43-2.json",
+      "bytes": 715,
+      "sha256": "bbf6f1e0e0f5b6d6f8d72546e7e84ae6c5990f35a7be6d924568abac52f2c0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-32902-8-43-3.json",
+      "bytes": 715,
+      "sha256": "f4289ec4ba92bb86f97d1e07cd5f26067f86bea0432222393d54c6d75d895d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-42-0.json",
+      "bytes": 724,
+      "sha256": "652922bfdefe362b68b48db60c15327c3cf26e8143c5992925070fefe7d159ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-42-1.json",
+      "bytes": 723,
+      "sha256": "d5c3a8a393c54851f717dcf1e54560344deb84290500356d78b21c2004c5103e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-42-2.json",
+      "bytes": 714,
+      "sha256": "44a9fd078e997cf6e46fc1bd00909a2b26e918c1556869ad6e8f8ef63804512c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-42-3.json",
+      "bytes": 714,
+      "sha256": "8d3037bf14064d0a839237e761de7b2e552e0644730e8e5163fa1a7abe51bd33"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-43-0.json",
+      "bytes": 724,
+      "sha256": "cc30f400dad19376a420337f622fabf5f6f81f5048bbd33f9878d8931dcd40c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-43-1.json",
+      "bytes": 723,
+      "sha256": "369818db4bd0108f1839067f1deafc9f0eb10751ab46f17ad5093904d0c550f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-43-2.json",
+      "bytes": 714,
+      "sha256": "2b154a8ae6b6458f239c78450d167c71d44f43021904795f5c6bee41baaf9928"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-2-43-3.json",
+      "bytes": 714,
+      "sha256": "255c5651b2c70ee2e1043b6b1e43879cfa4c4f9e6fc0ebd7bb9d3b5225fc7a99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-42-0.json",
+      "bytes": 725,
+      "sha256": "418ea61a5d19d1a43ed5de01ac1eff9a2a865448aff4fafacae07e1afd44b7bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-42-1.json",
+      "bytes": 723,
+      "sha256": "6cdfcd8bea802790baeee583826e53ea39467b1ee8fbafe4d6a5de3d83c4fda8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-42-2.json",
+      "bytes": 714,
+      "sha256": "1558b3d948e4305ae948c1434869ae9c32e5631dde8d846a5a52307406518d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-42-3.json",
+      "bytes": 714,
+      "sha256": "9b054c5026396fecd6d33d13d04298c811b90bce3c7f6a3f55e08163385b58ed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-43-0.json",
+      "bytes": 725,
+      "sha256": "d21e3b9828886e699f902e9f1a2fd48c1b3980c1dec148a93b011cb24ebfb9ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-43-1.json",
+      "bytes": 723,
+      "sha256": "ba35c253d0141b61505625cffc12039b7c814ee9676551b761b4f8daef04ebbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-43-2.json",
+      "bytes": 714,
+      "sha256": "4c96bf89c766d4ad814f99431b88f967686dfbab35b651c7134e3ac0245578cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-3-43-3.json",
+      "bytes": 714,
+      "sha256": "244cc32c18e7ce7de4f6d25c730b627ea12a197166793d2bb25a48046ea1589b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-42-0.json",
+      "bytes": 726,
+      "sha256": "363360f34f3b0fcece9f1241898520cafa368673d23cee412dc6e434b6567b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-42-1.json",
+      "bytes": 722,
+      "sha256": "808c86af6827998fd22f6ff1a80a82afe0f070780d36a3943a0aff130bfb4a69"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-42-2.json",
+      "bytes": 713,
+      "sha256": "2396046e740843078aafbbeaac763757fe59a6cf46061712a0b346c05d57b4e1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-42-3.json",
+      "bytes": 713,
+      "sha256": "23ef03705beed90c7389c69e973d173dba81208dff05669fbbb154708f32b276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-43-0.json",
+      "bytes": 726,
+      "sha256": "cd4a82cdfbf066ec799c902d8fd2d2b142e00eb28ae94511577a5317a38ac3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-43-1.json",
+      "bytes": 722,
+      "sha256": "bff2045205ea5a4f033e78ea8fe311c13b4eaea5ed6eb42c7afbb9f94a1182c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-43-2.json",
+      "bytes": 713,
+      "sha256": "f4957cc239a4ce21fd26bd3ebdb10d3a524bac0764949f9d7f1c630bc649e387"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-5-43-3.json",
+      "bytes": 713,
+      "sha256": "824850b76dd29745628b9964816dc28e69de5c32060e857c49c29721aed97c89"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-42-0.json",
+      "bytes": 725,
+      "sha256": "b941453180f15d7a130beb6bbf2be9436e96a91d5235cf3547720cc13d022da0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-42-1.json",
+      "bytes": 723,
+      "sha256": "fdd94ff8e6f59a31e2b1ac37756e491f4023c0f09fd4764201fac3dc7ead7536"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-42-2.json",
+      "bytes": 714,
+      "sha256": "7bb0465204b5deb052fde74c4479bc86bef720bffabb925f2f5fe46fac76d951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-42-3.json",
+      "bytes": 714,
+      "sha256": "c795f7109d87581d75a87f94c798605ac9da540733f89ef2274fafec6f6a0986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-43-0.json",
+      "bytes": 725,
+      "sha256": "75477670558e1cbab6fdda828f023f74777de75a9534257604e092db9843e625"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-43-1.json",
+      "bytes": 723,
+      "sha256": "e65b53dd8ac13d65150c77beca067a460e40fa1b909546c153f63499e521e1a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-43-2.json",
+      "bytes": 714,
+      "sha256": "b8cabe11f0ee49ca29eefd8382a26cba1075ff83c7141e04f38e661decb255d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-7-43-3.json",
+      "bytes": 714,
+      "sha256": "9c3175ea640c947e5f59590ad87494c16ed26c226a2300105d9f464269254f82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-42-0.json",
+      "bytes": 725,
+      "sha256": "0f33c1812e81e6ead81cbabcc415260b513bfbf4a3a7a23d5055c009a820058b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-42-1.json",
+      "bytes": 723,
+      "sha256": "70146a79bf1f6d4958f49800cc72b9a5cd63a5549f237e0f81b67a1f2f6a617b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-42-2.json",
+      "bytes": 714,
+      "sha256": "b85e2a3ec613a8bc58ccb1a80687ee34fd29b503be11bff4add50cd42d321162"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-42-3.json",
+      "bytes": 714,
+      "sha256": "ee505908b8a370fd6dd633f06b14fb846575757868e59d9fba9da3ef9712db90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-43-0.json",
+      "bytes": 725,
+      "sha256": "3190708874ead1213b6dbf336f58a0df55ab1ac4a950f0c146c995b97924b35f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-43-1.json",
+      "bytes": 723,
+      "sha256": "149e399c1013ba41ac4157076dfcb29b2831759f284757d9d63953d294f07d23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-43-2.json",
+      "bytes": 714,
+      "sha256": "cc584908d120b2afac805c92432d2be093fca94fdc991bfc47939e7594b6fa17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/textureRegions-4318-8-43-3.json",
+      "bytes": 714,
+      "sha256": "18aab3c72a4a0cd055b61cb13cdedfc4cf4f5237f4798d534f723861f02b187a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-0-texture.json",
+      "bytes": 1114,
+      "sha256": "8b03ac4754566cc169113553982f00b39e5bf4e5b05277f5e8346a4b15e3aee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-0-typed.json",
+      "bytes": 1639,
+      "sha256": "74d486c4f70a1fe3dfcfd523aac6fff48851c2401b91d5ffa58b12059813aaeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-32902-texture.json",
+      "bytes": 1118,
+      "sha256": "85c491b60bd47a233b25ba939d1bf9f7050a24f3a80b42366e74c9d890a83a1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-32902-typed.json",
+      "bytes": 1643,
+      "sha256": "442248c9462087f881d0eb8c6cb743dbf849a36535b9c2d91c00a47e1d7a65cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-4318-texture.json",
+      "bytes": 1117,
+      "sha256": "f2d8133211f41a88d82cf4dced6ec40bc5acd9dcbaab21cb4e4b062db7cf3cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedBounds-4318-typed.json",
+      "bytes": 1642,
+      "sha256": "f795d580fa6e351ef05f9e1b87d11a6dec993542160ace792dbdb2ae721a4168"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-add.json",
+      "bytes": 5176,
+      "sha256": "6500d647cd3dd2fb8b9317e2330e244d214a151aeefcba61884ee17c2be45815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-add_no_result.json",
+      "bytes": 3167,
+      "sha256": "23c6514d50ef7241440b02a2f85382b296f8ffe6dc51efd8b0e5247197a4cd04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-and.json",
+      "bytes": 5164,
+      "sha256": "f9a766a466e4acc582212b0e6fdd222a5eab6a5f54100ce88ff7fe5b569de7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-compare_different.json",
+      "bytes": 4960,
+      "sha256": "875986e9adc88a92a56e8a14acc710316da0a502fad032775c0fdf1ea46bae8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-compare_equal.json",
+      "bytes": 5174,
+      "sha256": "9d7829e60bb7b1e6b9eb170dbd86e9ec64c5b15c5ca3568b606e08aab238f53e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-exchange.json",
+      "bytes": 5169,
+      "sha256": "d9811d85d6c6fef0d83e16c068755951e8d895d5b7aa94b86e3e93434628acf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-max.json",
+      "bytes": 5190,
+      "sha256": "074436e3e667f0bca8ecbc59ff080ef8cca5e2cb5431796e328e002e0674a737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-min.json",
+      "bytes": 5184,
+      "sha256": "47810c56111096da4e28066e8fb73f182ae0f6bdb30c9d8fbdadd2b845ea95d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-or.json",
+      "bytes": 5174,
+      "sha256": "fa31d85055c11a5973f71cda7b1ef9651ac7b7983652dad02dd0f626c80c74b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-store_different.json",
+      "bytes": 2939,
+      "sha256": "4266868d0178fce22b1cf0c1ecc24f5792a1bfe55953d2c6fcd30b4bd17e1e75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-store_equal.json",
+      "bytes": 3153,
+      "sha256": "4c99df42b5b33b9fbf60cf9b44be26032c517424f3b840a2143828d2a1cd7613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-0-xor.json",
+      "bytes": 5175,
+      "sha256": "242c756a428cf7f4cf072a077dda491cf944dca6fa715289a60da8a3e46826d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-add.json",
+      "bytes": 5186,
+      "sha256": "f783880073a3ecf0ec42dae5f7c168c37cb45e67275dcf4052022314a6cb35a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "d970ac907ce3882b3f276824271cbd7c1be447fb5909b60aa86a15fde9acbf3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-and.json",
+      "bytes": 5169,
+      "sha256": "7ec0ce96f289d7af3a0e8e765b5176acc5f23c5b6d200209c8a7e80ff0f3c3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-compare_different.json",
+      "bytes": 4971,
+      "sha256": "df0d7163dc2a9be5e046fa7fd5b17a7d2947f9c16705c3a887356ae09b03c9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-compare_equal.json",
+      "bytes": 5179,
+      "sha256": "8bb307e2e9fc265304c25549851f5d2da1e7835bb26951aec3c75a4f8a6df8fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-exchange.json",
+      "bytes": 5174,
+      "sha256": "9a15f0b7edb1f8770f742d63d5c1b13644d34a76f9c10b35f2ef4625baf1bb40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-max.json",
+      "bytes": 5195,
+      "sha256": "5010ef356ecdb76598eee2cacffc4e49f0462b7c4a922afec951dc3ce8253622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-min.json",
+      "bytes": 5195,
+      "sha256": "739c448728790e908a738e62b655ad3a3f408e221a8ef70e787fe7cb4277aa57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-or.json",
+      "bytes": 5185,
+      "sha256": "e8cd21ecf6770116a68c01d09680ee4afda05e9871adc87a6cca8605b06c1eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-store_different.json",
+      "bytes": 2944,
+      "sha256": "9f0ea78decff46620a882fa22c58e4e1fb4656a3c80b00702bfed70d075bb2eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-store_equal.json",
+      "bytes": 3152,
+      "sha256": "f77abbdb7fa6bea922797821166ce75b91c4879d2a282d72543be37a38f44ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-texture-1-xor.json",
+      "bytes": 5186,
+      "sha256": "f89162b73de07cacbd1a9ef9ae0ba1f8b7841d6bcfce765bf0f524dd6ef7127d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-add.json",
+      "bytes": 5258,
+      "sha256": "14e5bc649cadb901e63044e4a7da55e3b61423893c01870019e5efcd9a186a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-add_no_result.json",
+      "bytes": 3249,
+      "sha256": "ecce6596e16f264bfd8df2766a0736862d0c127caf1ec9081b1b1b8d262902e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-and.json",
+      "bytes": 5246,
+      "sha256": "7f0434a8871e977ea56f725ee21b6f211a003e4a9bcedbcad483baee4ceeff79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-compare_different.json",
+      "bytes": 5042,
+      "sha256": "0f2d81c3bb38c9dee24dc1abf8fde3978d70eb64fa1a59e8efc7aa8a362353bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-compare_equal.json",
+      "bytes": 5256,
+      "sha256": "7232ce50ade31c3fe54a308e18dd8044714dc0b31bbd65e7629fe6e78f45e1a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-exchange.json",
+      "bytes": 5251,
+      "sha256": "8e89deebbfc7bd0e5a8d261ed58b5ff4d9ae8307bd245b55446d668f81bbc4b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-max.json",
+      "bytes": 5272,
+      "sha256": "c653d92d40bdbc0b4648cfa415694abb6ad44090c8645c194d3dde3097822aa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-min.json",
+      "bytes": 5266,
+      "sha256": "ef0b3a4f4a7382c2e5775b83f298568955405d6e0747af3c1869bcd6aa860c91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-or.json",
+      "bytes": 5256,
+      "sha256": "dc1d9f8bb6b06166af5e42fcccb0b1be7b573659c3cb7a17cc4872ae161e0585"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-store_different.json",
+      "bytes": 3021,
+      "sha256": "938433dab7928b1ea365634943c5f707c151ab34e7caec4974208e74fe7b535b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-store_equal.json",
+      "bytes": 3235,
+      "sha256": "a1ce0dd46da6285678535a3ec95bf05cbf97317376745dec6d75b90ff3235bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-0-xor.json",
+      "bytes": 5257,
+      "sha256": "f51694f26a5baee892bf6fc6063ae7e972ffcef4d84d8e253774280ec11ab5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-add.json",
+      "bytes": 5268,
+      "sha256": "0bcc30efd767b82a7d8e4c1e5c87d68f5d78dbb5f31f4d4023bb08f6fc905eea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "defca3044616d803a55a6f69a17ff7772eca5e67abde1008e261d09d7a8b8b78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-and.json",
+      "bytes": 5251,
+      "sha256": "5db24db8b50aedf4834defe74ac0c2df1b65688f8e869cf47d3d1c202a724bad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-compare_different.json",
+      "bytes": 5053,
+      "sha256": "dc82b39ec2f0ee3490229ac64cc8bb9a82cc8450266c8b944fb793a466da6b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-compare_equal.json",
+      "bytes": 5261,
+      "sha256": "4f0398ccedfef449d528beef1253cdbc8a80c520b5a794839b24499bdfaa98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-exchange.json",
+      "bytes": 5256,
+      "sha256": "92ce7faf1400e8c04138b5c042ee0c918644031a298b39f113f6a32aa9311d98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-max.json",
+      "bytes": 5277,
+      "sha256": "ada8391f219a9e466586ff9ca0eb61104ee30cd80ff1e043ba8a97aad0164d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-min.json",
+      "bytes": 5277,
+      "sha256": "bfff11c36ad202f0ac17caf80133a6cb9ddc93e4d5e28f1326dc2aec5c1e1880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-or.json",
+      "bytes": 5267,
+      "sha256": "10440dd1569af2665eab4560a5475ab33a1ccc796e813eb85e3e0d36d1d1d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-store_different.json",
+      "bytes": 3026,
+      "sha256": "e6909b147abb1f57a37cb659ac22772840df544000614973814e7edefc9b249c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-store_equal.json",
+      "bytes": 3234,
+      "sha256": "cfe7ab4966bf9fed9445db71e5eecf1e9c8a71a8da8fb9127ea8b2fe315202b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-0-typed-1-xor.json",
+      "bytes": 5268,
+      "sha256": "18a4d5a82431503c7f9884a5a29b07b9b9275b1c8c306d68e875a3b5c92416f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-add.json",
+      "bytes": 5180,
+      "sha256": "6ac823e878c54a43a05975e3785d7a98f181b720e48e81971b6a8f61f48b1d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "9ac306557ac4abaeaa739d23c696cdafff626e56ad2401e598f301e1a64e2197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-and.json",
+      "bytes": 5168,
+      "sha256": "646c0c2c295b0bc3a7c28d3426159b28c4c95cb140bd9be4030c8170e3c7a372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-compare_different.json",
+      "bytes": 4964,
+      "sha256": "524db941c9e789be5132850d7c8b439880563635a67e8a1e1bfc3419d53163ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-compare_equal.json",
+      "bytes": 5178,
+      "sha256": "981d2366124b476220ae2aa36df12bc2d84d76962859960595dc6f50dfd2da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-exchange.json",
+      "bytes": 5173,
+      "sha256": "615d77dcc2bb4cafa051ad9d8a3948afcb00e2ca64f480bdbca8638e7bf69b08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-max.json",
+      "bytes": 5194,
+      "sha256": "1dab95b3e45ed40e857fb4b4c13c151ce3cf055f8fcb7285a5ab467c1956827f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-min.json",
+      "bytes": 5188,
+      "sha256": "c63179bb196b0c64532d255b83ec4485c0d498703ebb0c4021c2d52e4cf1fc3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-or.json",
+      "bytes": 5178,
+      "sha256": "176f52d314bd6db49a083396fda4c750d14be5fe6bfffd80aeb4c57662810996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-store_different.json",
+      "bytes": 2943,
+      "sha256": "2fe214aeeded009c4a83445ab080a5def632e3b0fb21424e74f8093642b697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-store_equal.json",
+      "bytes": 3157,
+      "sha256": "c19758bdfe56757a3f3b3334721474a668605c018af261da2edb9acf8c6efca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-0-xor.json",
+      "bytes": 5179,
+      "sha256": "f9adf8452f9affdd71ed459a0a89490b3076d574432079851783b166b69f3d0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-add.json",
+      "bytes": 5190,
+      "sha256": "a014ec06feb684f0cd92eaaa5678cea1c36afe3112eda44f5018a5ed8e49100e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-add_no_result.json",
+      "bytes": 3175,
+      "sha256": "8fad2700e0a292ae54cf4efb94735c8e8afc0d32ffb69835176c0d160998d432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-and.json",
+      "bytes": 5173,
+      "sha256": "7879a49e1da84bc2c38ada857f9996e39aabfc6509273f74ff2852236a2d9163"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-compare_different.json",
+      "bytes": 4975,
+      "sha256": "44f6a3130d5ced6f4fc4c6332b11153c2aad7d23706e490e3a862e63f5c56383"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-compare_equal.json",
+      "bytes": 5183,
+      "sha256": "0f9db85be82732f804f1de0e1570fb6d714c5a4089982cf81934d9f8212f1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-exchange.json",
+      "bytes": 5178,
+      "sha256": "86ad9965db844f761bda7621517bcc49c2a2eae3560c515392f7dedcbaaf706e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-max.json",
+      "bytes": 5199,
+      "sha256": "356216d8b558540134ceae030ef28e34c48f6eee99c25bd516b3b3c4a2e83529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-min.json",
+      "bytes": 5199,
+      "sha256": "78761a957d02063e2cc9f0d62b0485ad6e7db3b68f1524fb33773ccf07f79644"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-or.json",
+      "bytes": 5189,
+      "sha256": "221df31fcb3a69a32315d8503b967c9d28d7ed2fbf5ef5bacec105b0ff307ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-store_different.json",
+      "bytes": 2948,
+      "sha256": "c7c3e88539d138c1e3decd5475e537a565b4aaea9d11759e07cbf1da06626bde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-store_equal.json",
+      "bytes": 3156,
+      "sha256": "4a1f46fae9183f59f882bbd4146e1269855d3604fd061fdf55036fe1843acade"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-texture-1-xor.json",
+      "bytes": 5190,
+      "sha256": "9f4433a744ef68c3d1b497e85ef71f2630dfbf414f3fa3490ae5482ed775c267"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-add.json",
+      "bytes": 5262,
+      "sha256": "ff653e61655bb87c5e451d7bc2fb407642c2cefa59de8c6792cb2f907fa0cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "b2a9b9a1b351d3949dea2e0514e9805d40a78b3369b1afe2034b6ba811236db3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-and.json",
+      "bytes": 5250,
+      "sha256": "147335fe4066efc2cccc128e9d655700a257933754082a7abb6369ea05de8b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-compare_different.json",
+      "bytes": 5046,
+      "sha256": "35dc31de3edbf10c0616316ed2321425b61db8861e47ae215b67498a21fc54da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-compare_equal.json",
+      "bytes": 5260,
+      "sha256": "8d2cb36b3fbdce79f799d08ba15f2d77f3c90e1635f80c69d82d6e31a7ad39e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-exchange.json",
+      "bytes": 5255,
+      "sha256": "74a6966f1c0b4b97a36b190804d05fde1121fe5066846f886290fed3205b491d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-max.json",
+      "bytes": 5276,
+      "sha256": "6ad07358caa3d1827523126ee6c3adced9838efd2436132098119cdb7ebf141a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-min.json",
+      "bytes": 5270,
+      "sha256": "518ccc02c14df693628f521a05f55e8493ad1dddd5f8f96fb4fc7ce7626ab2ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-or.json",
+      "bytes": 5260,
+      "sha256": "bab608cb588d1830e3f0bc5d57a6784d1975c38e67a5c42bbfd9bc550dec053f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-store_different.json",
+      "bytes": 3025,
+      "sha256": "ef93a86834500d32a6bf4b6439acc1327ecc666838697a1d460f72305e474663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-store_equal.json",
+      "bytes": 3239,
+      "sha256": "ef677d01e69f41da3655db99498bb8203ad9a4e43f1b4d771ad146ef57b724a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-0-xor.json",
+      "bytes": 5261,
+      "sha256": "76be66196f474dfe4bf1c37c68ad0906e8ca6931b851f6fdb0a1acbbc41e13c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-add.json",
+      "bytes": 5272,
+      "sha256": "a259631e6c6e59f5f8447172efe6f030b25a35cdbe0a6daf1d88580e3e2d67a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-add_no_result.json",
+      "bytes": 3257,
+      "sha256": "d3be8f761ea065e2f3bdf06ef7ffbbcf264cf31eb4c9ab9e5a991045d39e7309"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-and.json",
+      "bytes": 5255,
+      "sha256": "4fe733086249aec25c8f5cba50482c2d0df6378327bb7d78f71ef52afb5d789b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-compare_different.json",
+      "bytes": 5057,
+      "sha256": "9a9ef4aee92ca4e89c82e5718817e51f27243f01993479f764b335704b3be54f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-compare_equal.json",
+      "bytes": 5265,
+      "sha256": "7fc1c6a63c23d5a3b7534ea125f6c0680d473837a4fde37bb81c199307c367f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-exchange.json",
+      "bytes": 5260,
+      "sha256": "9e777cb275bae9f82c814d9b7340a2fd77b7c9f1a68dd8f6dc87ae346abbcb27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-max.json",
+      "bytes": 5281,
+      "sha256": "ecf2a059ce72c5c6a6dcdbfce120e5e630944b315e812893bf055ec546d61abc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-min.json",
+      "bytes": 5281,
+      "sha256": "2656ea38c39c87244b0ea11e6b44854d09d24ca945a483505b9d40c068fda75a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-or.json",
+      "bytes": 5271,
+      "sha256": "9e20b758634aecec3ee2edf53b2c1cb727298bdf531def15ced1128ce0f79292"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-store_different.json",
+      "bytes": 3030,
+      "sha256": "7810f57aad2821264e1e8d2f1e8938ab17546a937b43472db53d6a8d500e7ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-store_equal.json",
+      "bytes": 3238,
+      "sha256": "830d85ee8a5ad1ace3b0ea45c548cb35b5d7636c323d2010fa31930e54426ef0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-32902-typed-1-xor.json",
+      "bytes": 5272,
+      "sha256": "3cf6ec6faa212caecb69f1b69e8035f272990dff4cb641ab930e268c15ed1e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-add.json",
+      "bytes": 5179,
+      "sha256": "da7b38865ec4fe32cf1db0b39950ff7e0c9c2949d626277ca722be2399bbfc2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-add_no_result.json",
+      "bytes": 3170,
+      "sha256": "e0b957eea74aa3b982a3e877b205555cc7d9a123a9d4d3111fe402c711afcfc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-and.json",
+      "bytes": 5167,
+      "sha256": "eb847fc40ee1116d129497695e29e2e075e82b2946757cc10614fb564e368367"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-compare_different.json",
+      "bytes": 4963,
+      "sha256": "80087cd7e2dc317f5f8a6f7a9dbb1e7d27cea3ac8165fb2522fbd9fafda1935d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-compare_equal.json",
+      "bytes": 5177,
+      "sha256": "f32b126e0bf44763ce2cf7a6e95dc1a290e6ee8ea6bcaa25f5362bd2dc402264"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-exchange.json",
+      "bytes": 5172,
+      "sha256": "f563a9428cbc4784e3f6c9427205ea43f9cc2c9c018fa3b967a2d4cdc5bb5258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-max.json",
+      "bytes": 5193,
+      "sha256": "a3621e895884690378d952a9a8c95d021f7ee26820c7ac4cd8adcd82fadd971a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-min.json",
+      "bytes": 5187,
+      "sha256": "3a3b44d9fbb9664096b2abf74fa0fa33e043139d6b8793fec6adb1146dbbce81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-or.json",
+      "bytes": 5177,
+      "sha256": "8d44fabfb6751f67bc5bb2f118ab252514c5d610156256a13c194122a0269b7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-store_different.json",
+      "bytes": 2942,
+      "sha256": "5085f2936d630fe21c0686fe364eea63cf755f31ff444fa42fb7aa93964322c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-store_equal.json",
+      "bytes": 3156,
+      "sha256": "336ab82f85e5c3d277794e8da0597f3c4a524315cfb44a6fe233d7f5eb0c08e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-0-xor.json",
+      "bytes": 5178,
+      "sha256": "1eee976489a802957c873d31255bf11359e82f9b65967ebfef8d80db1b6f64ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-add.json",
+      "bytes": 5189,
+      "sha256": "a9bdcc1c32e7e8171e7b8fc58ebf0faf18ba9688d9aeae6e1724fff7865b73dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-add_no_result.json",
+      "bytes": 3174,
+      "sha256": "718d1ef9ac11fb8970f6f9933fb51fc375377d64f9f85cb800f56dc1030b951d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-and.json",
+      "bytes": 5172,
+      "sha256": "4cc4aa7f1c9d78588669597890ce0d7199afe1de1131f9a8312ddb89c416a8be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-compare_different.json",
+      "bytes": 4974,
+      "sha256": "a44ba63370b060380a9b09674505f5b6558373b258986ab44a428f780bfae1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-compare_equal.json",
+      "bytes": 5182,
+      "sha256": "c3952a8ee6d959c38eec6538d01933da871ecc91249d4e53228350c0528d288e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-exchange.json",
+      "bytes": 5177,
+      "sha256": "25431883e4022c785676d77be7ed300292d5446696bf2e4a66d9edca2cb59b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-max.json",
+      "bytes": 5198,
+      "sha256": "d0a53b229d51f8e30ef9cca253d0bfa7427fcc4a33b91ed07db28c9db9819260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-min.json",
+      "bytes": 5198,
+      "sha256": "30ab38146421a597f410e805b5b10dacb15f799e72c2acaadc4d21a682b3384e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-or.json",
+      "bytes": 5188,
+      "sha256": "29f02fd1f3b2f5a2a289279fd985b9080b67511d7aeb4bef5cfd25069b0df448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-store_different.json",
+      "bytes": 2947,
+      "sha256": "ae0f253d80ae47d0d23f042a98796be225b507b0081833c7ba71004a72a0929a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-store_equal.json",
+      "bytes": 3155,
+      "sha256": "667b4260c3472b1b83c416ea20183eda1475dda304674d018912b1c9ce6a4768"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-texture-1-xor.json",
+      "bytes": 5189,
+      "sha256": "d713b105156ef3110564737231b896d612cfb46398a02ef09597a12884f29a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-add.json",
+      "bytes": 5261,
+      "sha256": "34dea1959dd3aa1ae4f23d080abc8e0bdf32797ebda4b7b0840489eb83e2d3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-add_no_result.json",
+      "bytes": 3252,
+      "sha256": "0ec88624c43e931c1df2b48b3b9d00d287e683b5938bb1410aa1213f1cd60139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-and.json",
+      "bytes": 5249,
+      "sha256": "88d4aff3cd7a4ed46c7ed143654fddcc35a0c8e6728aaca2d1d41c7d01d6fee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-compare_different.json",
+      "bytes": 5045,
+      "sha256": "507790dfd0456d74be5f202f75c2ed2055b2fe4405bf6679079aedbc9e553c67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-compare_equal.json",
+      "bytes": 5259,
+      "sha256": "5008361454f6eeef914a80c10826b8ae2b665774daec4d43a1edd5934f994be3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-exchange.json",
+      "bytes": 5254,
+      "sha256": "b9fe7644d080007d15e946b07e3176eb362a46c34b6dc6d687cde52fce4c85cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-max.json",
+      "bytes": 5275,
+      "sha256": "84487043c4f7536c9ad4a53ceaab965d0d089355f998756ed74c96fe4f821bfa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-min.json",
+      "bytes": 5269,
+      "sha256": "91b743e0ecbc290316ad4968f55bf3f16753882cd9508e72182896c612ddedfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-or.json",
+      "bytes": 5259,
+      "sha256": "1f3ee5f65bcda873731db77f5c66439ca66273d888caa09298a59c1f6fa1412b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-store_different.json",
+      "bytes": 3024,
+      "sha256": "f111534a96c9a82f7839d78905eb17988cb8f71f7d872e385fbdd6a6df1153fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-store_equal.json",
+      "bytes": 3238,
+      "sha256": "4d595fe96880954f8c5bf400e0e653c60df580fb5f97c16eabad23cd760e0084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-0-xor.json",
+      "bytes": 5260,
+      "sha256": "9fedba4ac745fc5a842e5396bf41f347618e0031259d40ceebbdc280f069bf73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-add.json",
+      "bytes": 5271,
+      "sha256": "ca3e26d72135ffcecd410e243fd2072c50c8bb01957fb317b1f8a64f4e14f12c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-add_no_result.json",
+      "bytes": 3256,
+      "sha256": "0c45ab7ce62008ef2e56f4d574151b89b32284c008827d299b77c59d978ba061"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-and.json",
+      "bytes": 5254,
+      "sha256": "68d6544d48e2a82304348ece4116890462523cb22aad26ceede512e427f77314"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-compare_different.json",
+      "bytes": 5056,
+      "sha256": "00239962174c5dac22e6cda4e538b3fe5825662958e1892548d648e39175f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-compare_equal.json",
+      "bytes": 5264,
+      "sha256": "3c6ca39cd51f8dc9a48ceea9cfcd09db608f270f6de5d0fb89fde286ed682b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-exchange.json",
+      "bytes": 5259,
+      "sha256": "33990bd7c1c41ce145326e080fbb3cfe2907cefad685c8f2304f07b341039932"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-max.json",
+      "bytes": 5280,
+      "sha256": "1bcfb095ab6aae075ac9497078da17d020c4872861f8479d8845cda23977ad94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-min.json",
+      "bytes": 5280,
+      "sha256": "bc62c90006e97e87e033adf44257c8d7f90d583c2527f398c1b977da7af24237"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-or.json",
+      "bytes": 5270,
+      "sha256": "9ddd9f145b62d326fc91a946fec67ae461e4ec25da243376b358ec2758a1e33d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-store_different.json",
+      "bytes": 3029,
+      "sha256": "eaa32156e3b2b2de388f4d15c5c109acb90a192176fc97ab46266b73357fcfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-store_equal.json",
+      "bytes": 3237,
+      "sha256": "42bfb43cf0e89518d8ec3afc0f4b90f78ff1b6b3fcc3151b8b200f42419503ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedInstructions-4318-typed-1-xor.json",
+      "bytes": 5271,
+      "sha256": "b3bde9e522f8b7622507cf2ed65ccaa4b02abd78dcd4255e71423ebbcbde3f42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-10-0.json",
+      "bytes": 8152,
+      "sha256": "e1ccbea94e9122e88eef395dc4c3190545b7039535a25fbe10812a8979311820"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-10-1.json",
+      "bytes": 7823,
+      "sha256": "81e2c102e11fb36016b3d5f1af5ee5ae2e2d29ade465e5ed4814fa6d5402e555"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-10-2.json",
+      "bytes": 7814,
+      "sha256": "9d2474e7ef1d703df34d9f1ff5697ad4c1608cb93b90f62f01be0633cabe30d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-28-0.json",
+      "bytes": 8139,
+      "sha256": "4f3d61f532ce125ff574857b87a34601e89bdd3b3ea151b55e40dc725e5fb870"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-28-1.json",
+      "bytes": 7823,
+      "sha256": "62d9418db9e56c4a578de980e837f97481fab840d31cb3773663d5cb7247a47c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-28-2.json",
+      "bytes": 7814,
+      "sha256": "2cc34b0802781d0e5eee3f0abc516cdaf4ad741fd63c1d1a49ec7fc62accaecd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-31-0.json",
+      "bytes": 8129,
+      "sha256": "33518c3e3ff5af5b05d86d6b9bee68708c9354bd3ca3f2d66f076f8ec4ef0ff7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-31-1.json",
+      "bytes": 7823,
+      "sha256": "80a9ece404e7e25379b07e302baa52990ba770753d45a0bd19d86a6e74716b1d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-31-2.json",
+      "bytes": 7814,
+      "sha256": "f78ce9c1ca78407f67c3f85a94177d96d26c6b46f0e332644411d3e4b5666fd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-41-0.json",
+      "bytes": 8084,
+      "sha256": "a912fc4d43edb6fb4412c5e179da08d0331eefeb28c84de326cb487f37c6be71"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-41-1.json",
+      "bytes": 7844,
+      "sha256": "06a22b8c38d629e1ab8d82d3bdac48c213a52001173d6f75534926b81ef9a762"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-41-2.json",
+      "bytes": 7835,
+      "sha256": "3fce7af9d17cc1d6039f4aa700dd17f3d813adf1dd9da47988340b69cbe976ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-42-0.json",
+      "bytes": 8043,
+      "sha256": "a6f03a666e3ccf027d92125bb5e1bcc390b4b3754ebd9970bb7dac6d476be0c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-42-1.json",
+      "bytes": 7823,
+      "sha256": "5909c333564262f9058bd0ce9e30ed51bd408064f6dde6b766854cd07a021492"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-42-2.json",
+      "bytes": 7814,
+      "sha256": "b7c27bbb495fb43153c04e88a4bde6ab152db079fb5c337f06d2ed611245aacf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-43-0.json",
+      "bytes": 8073,
+      "sha256": "174b61e36cac3bf61b0cf08b739486e6c9fe6d1f8c055283bec564f15e35f3f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-43-1.json",
+      "bytes": 7823,
+      "sha256": "9a07a589f7fb19e710f155bf661e8329312939b138622f7de740a22dd29faa3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-1-43-2.json",
+      "bytes": 7814,
+      "sha256": "14bcc8284b88d589d54cb87b82e60917102e790489b08a18c93f489b233b40f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-10-0.json",
+      "bytes": 8537,
+      "sha256": "64b7cf25385b8932c117655e9a6ac5f16e016c4faff269e25535b8f7cbdaf084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-10-1.json",
+      "bytes": 8207,
+      "sha256": "9d3b2d08bf75f3f03c06fdbadc463fce720b39b467a9db02412512b4516fb9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-10-2.json",
+      "bytes": 8198,
+      "sha256": "45432549af15ecedd62835c1239448e93b824b698185aa9eeed746e8d5a5eeca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-28-0.json",
+      "bytes": 8076,
+      "sha256": "22f1a6fe3c0bd06a064ad9d787c68d806a22c5a15c00ef6c6229a13bcbc94d82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-28-1.json",
+      "bytes": 7759,
+      "sha256": "625c70f08a447037e16bfb9fb61aa419372d1ae175f5fecf4f5828cb8b637aea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-28-2.json",
+      "bytes": 7750,
+      "sha256": "a47ecabfe8c34b0dd683ca50b0b971d61b6c83bc5ecbfb419d8626b22917d341"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-31-0.json",
+      "bytes": 8066,
+      "sha256": "eea314953b7c809c0bee16bd1bcda108031bd6ddd7abe7487e55a29fde0135e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-31-1.json",
+      "bytes": 7759,
+      "sha256": "20369b4ce5004a122685a0e5ddb2fc336cb929ca4822c9245cc5595be52d7252"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-31-2.json",
+      "bytes": 7750,
+      "sha256": "b62c09e25f260f44cd0d13b073729e574707d0840a5fb8897a1c97d9916c5ddc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-41-0.json",
+      "bytes": 8021,
+      "sha256": "1215ded84f22adf0a5a0b50e6df8a883a71a323b853db60608cce547663a9574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-41-1.json",
+      "bytes": 7780,
+      "sha256": "c0901f56c51eed2b8d3073eddfbbfd9a80b30f22a9fa870d27f5286ab6a3fe0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-41-2.json",
+      "bytes": 7771,
+      "sha256": "9f3e7072bd9bb557d4d6d0a272e67ebf4cb9b9efb5b680c0c1c02d4597db3b34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-42-0.json",
+      "bytes": 7980,
+      "sha256": "03aa40cd84a6e862a1a9488e8782627c978d6a501351dfdf4f36da5261129327"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-42-1.json",
+      "bytes": 7759,
+      "sha256": "fbd327ac488617774afedbddb75e0ea153704f701d0747e38b77bdb647b8a7a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-42-2.json",
+      "bytes": 7750,
+      "sha256": "8368a6314c8a2d5b45ea7d2d373ac8743d2a1411d0e2ab2da602f3a32ca36efb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-43-0.json",
+      "bytes": 8010,
+      "sha256": "fa90c02807dd5fdca911c959ccf39181e640a54778422fe2af70470bd4608c00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-43-1.json",
+      "bytes": 7759,
+      "sha256": "86511ca3548c145c0379f71526bf01ef1224b3613dc5f809ec804cbe166cc4f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-2-43-2.json",
+      "bytes": 7750,
+      "sha256": "e8370c5e714209ed378e5dde11921824be375e9d649c7773728c9046f790a5cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-10-0.json",
+      "bytes": 13018,
+      "sha256": "50cd2a924b3b3d644c8cd849e58a20364cf1fefd2ea29f1049a690b246f0069a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-10-1.json",
+      "bytes": 12687,
+      "sha256": "46493465b94415bf18ef61fc6105852e2cb8e4ff02247df53e996021b9d328d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-10-2.json",
+      "bytes": 12678,
+      "sha256": "f0c7b594253bc9ffe5524c452ee4b278801e3ed1d0d5fe7f65061b191abd0d2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-28-0.json",
+      "bytes": 10317,
+      "sha256": "ce174fa8d2c050b3543eb7f1fc3955ccf245f68e3a4e1991eaded97daa6f8e39"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-28-1.json",
+      "bytes": 9999,
+      "sha256": "a6d1e3104b6ec2278ba51137b1760b8986a6ae00c50505d3c3c03386823b9ed5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-28-2.json",
+      "bytes": 9990,
+      "sha256": "5f3f7cd536afc81d8feebeed10e47f1212026a99d240fb347ee3c919349f2288"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-31-0.json",
+      "bytes": 10307,
+      "sha256": "ff34006c8579223126ee919a5d870d351a340fc3ac664e3987ccd59928b42b31"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-31-1.json",
+      "bytes": 9999,
+      "sha256": "3e996b68088d2d0c206ffed7cdd0316dc8302845ea6875429b61cbc27b4c2b34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-31-2.json",
+      "bytes": 9990,
+      "sha256": "cecfc48db69f5cfa2dc9ace4d23179ad5ee38d28957456a26eafbd57410d53d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-41-0.json",
+      "bytes": 10262,
+      "sha256": "e77d940824a40abc642583bba0458520105759f43c23e5f46c0c7eea8c167bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-41-1.json",
+      "bytes": 10020,
+      "sha256": "317ecbad4655b8cb5cf18bce2828ee1185e339275ada57b1dcb4990a49511f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-41-2.json",
+      "bytes": 10011,
+      "sha256": "622b068f277e5ca7155f05fe0f7d2e46df747bb66f69e7bda7f11622213587ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-42-0.json",
+      "bytes": 10221,
+      "sha256": "a2880ca0fe2a3ccf187ea6aafb46076800d8185617867c3d9c8bcda6e445ed37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-42-1.json",
+      "bytes": 9999,
+      "sha256": "05e3a600a98b86b02965c2e55faebce0b4e154cfb7bd3e290561fb7b94ad5e08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-42-2.json",
+      "bytes": 9990,
+      "sha256": "ce73adbf6ebec0228656983c6b2d7ac919cc0dd2a47fb9825879470d89ee07b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-43-0.json",
+      "bytes": 10251,
+      "sha256": "126b0655c31e7947b14f43456019f6c4ed32493b4b69264623470d7a10091148"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-43-1.json",
+      "bytes": 9999,
+      "sha256": "9a3afbfda61b2492066dc13ca45542ada090f4a4659979021f2ad1930821871e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-3-43-2.json",
+      "bytes": 9990,
+      "sha256": "ce4f40c7764400302e638e47684123cf815d6a7aab2fd197abfc063dc658acd1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-10-0.json",
+      "bytes": 45019,
+      "sha256": "895cec726e513d97e620a76b7ab0fe7dd2a0a197805df49b38e7abe8cdb40766"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-10-1.json",
+      "bytes": 44687,
+      "sha256": "4e57639fe30c18b3a3e2cb956f3177c2c190742fd6982cded1aeb3dc8eba2930"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-10-2.json",
+      "bytes": 45019,
+      "sha256": "d2f0742bbb4a7e784b200dadff61776fd141efa2fc9e061eb9cb3d5d51115674"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-28-0.json",
+      "bytes": 26318,
+      "sha256": "acbc48d9a09f60baaa141c0987e243ccb2f148e5036dc88d309bea688f4349f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-28-1.json",
+      "bytes": 25999,
+      "sha256": "e5508c6be4a5031d177ba5188a83dc847081c98fe11f911eca5525e9644d849e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-28-2.json",
+      "bytes": 26318,
+      "sha256": "7258f988ae80c71f64a9c5df82ec1000b760fb8097084d03a4fe6b217d0665c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-31-0.json",
+      "bytes": 26308,
+      "sha256": "4ccbc21ec40d525a335f7e186e5fd7f78867cf03de7966e34da6e0a1b9782c31"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-31-1.json",
+      "bytes": 25999,
+      "sha256": "fd9257649cd2f6eb11272665195c86bbae3f3e033fac632f773795a42f001095"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-31-2.json",
+      "bytes": 26308,
+      "sha256": "445bab31935ade9cb73314a8087d02be5fbf128498bef36978628a38daf24b4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-41-0.json",
+      "bytes": 26263,
+      "sha256": "49bf3f4fe24522e3e908e70eb239d33e5ce01b12f739076ed85dbacc9a898691"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-41-1.json",
+      "bytes": 26020,
+      "sha256": "b38770fd9cf36d399ec11137a98063d01577ce037f5820bdc366b4a682612897"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-41-2.json",
+      "bytes": 26263,
+      "sha256": "703eecec5c3ba9a4d2e01777e73033a08f38ead6fe3944289ef652d79c16ecd9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-42-0.json",
+      "bytes": 26222,
+      "sha256": "c893c7c9659e06a5989fe5a04e9639f52c3c21a95184584c77a3e02e38934521"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-42-1.json",
+      "bytes": 25999,
+      "sha256": "77097b5a392e5801f64bb4c70f19163f155be4e033ef7fb545453b7b2498526a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-42-2.json",
+      "bytes": 26222,
+      "sha256": "10cccca3bb7cbf05461fe349f0e922c37f2e3262156fa94a6510ceb660a787a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-43-0.json",
+      "bytes": 26252,
+      "sha256": "427c3bb005ca962fd268ab81f6784d3f25f56e1e7f85bbe40c8e8fd1b3b66d26"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-43-1.json",
+      "bytes": 25999,
+      "sha256": "e4baa394ba39c274b89a0138807f3a13eb0dc59be317519d44a3a9672ae9243c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-5-43-2.json",
+      "bytes": 26252,
+      "sha256": "8993648bfdfde7404e0b0664018ffef1fe811d1ee942a982e8e62d57ada03c99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-10-0.json",
+      "bytes": 10330,
+      "sha256": "3bd0062aea4b116e2abe38b805baf82b20bbd546a03edf48da117f42be487eb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-10-1.json",
+      "bytes": 9999,
+      "sha256": "3f203ed96e91bdcaab3c98c4a9128d5a008a5dca60ef6b26e17a881cc8dc56eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-10-2.json",
+      "bytes": 9990,
+      "sha256": "2861bf0338cd91c9e866fa1909032dd93c15820a298974b87864274da3c6d853"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-28-0.json",
+      "bytes": 8973,
+      "sha256": "295a2d5df18af03fac82bbdfaecac2dd3b5b5ec456815abad82a6c918130e426"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-28-1.json",
+      "bytes": 8655,
+      "sha256": "1849d57d595834f81bc545e6930269680d219959d34cb72cd477cbe4038d98f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-28-2.json",
+      "bytes": 8646,
+      "sha256": "40fe922edab4604e3e88c849f2448cc63bd0d650619c26e52eee7f0dc096c93a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-31-0.json",
+      "bytes": 8963,
+      "sha256": "9d8b1c89063f42b0fad6900307a7dac7620be81ad96262ac851f9b85c5e1bf2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-31-1.json",
+      "bytes": 8655,
+      "sha256": "017b53dfc7a34e872f590a5da47e5074f05d119f252f10047e3610af0b63cef8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-31-2.json",
+      "bytes": 8646,
+      "sha256": "500ec0791e7855afe3f8636c21fb818d0e506e10d58e38ba7145b3feb452d603"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-41-0.json",
+      "bytes": 8918,
+      "sha256": "f8dcf1a0577e32b487e811c9395b4aabcce8978c38d7f2a97e823d1725576772"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-41-1.json",
+      "bytes": 8676,
+      "sha256": "e31dded847ef37e180696c34659bf7b7ca7a886a717e4d66bc30a481672d61d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-41-2.json",
+      "bytes": 8667,
+      "sha256": "f35383421dd86bb324b129722d93631cb2e765d9602358ea5a2c42c63b6dc06c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-42-0.json",
+      "bytes": 8877,
+      "sha256": "11d7b95ef843908ffda0c871c2d5df1a1ef89eb2e81b17f35e2752e019564f7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-42-1.json",
+      "bytes": 8655,
+      "sha256": "ed3ad8248ab7878ec182c2a4b13f21c633a1e993d569851aa72e33d695169f24"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-42-2.json",
+      "bytes": 8646,
+      "sha256": "045b7f64c7b0e2953ee303d7ffafa138d629abd1d330085f7c58cfa47b85f04f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-43-0.json",
+      "bytes": 8907,
+      "sha256": "b9b27fa741340b5cf31a3e2cbb8c9d81d998d2a82dc89c3b5d5da4e2e420c552"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-43-1.json",
+      "bytes": 8655,
+      "sha256": "138cb3ae7bcbe778d8fac18674d3eaed3beee5224097a9b127ebd8c54b3d8305"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-7-43-2.json",
+      "bytes": 8646,
+      "sha256": "11c8bf8bfb2280fc9dad1705827fee5a50dacc649b1cc40ba6a9d27a0238b19d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-10-0.json",
+      "bytes": 23771,
+      "sha256": "5b9b6e2e59209a7198b16f76d2fb592d227b25cde75baee40ea5051f3d63b728"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-10-1.json",
+      "bytes": 23439,
+      "sha256": "c9b9f7ae42bf1a22ffa00b41d9ae5edcf17261fde045ddc497dae750ec944cc9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-10-2.json",
+      "bytes": 23430,
+      "sha256": "d6cf13a1ccc67e0fea7ecda4f5f3ea840b526af68f98c9f66c89542916a5ab91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-28-0.json",
+      "bytes": 15693,
+      "sha256": "79caf0bd924397e42352aee398b9ad4995fa4950728685db66af00e3dd276e4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-28-1.json",
+      "bytes": 15375,
+      "sha256": "fb11b923163ca2ebaca4b7345fce0f9bf248efb2cb250daa7d037b224186792c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-28-2.json",
+      "bytes": 15366,
+      "sha256": "181cc404578f5f58544d44110d0c006ace7b8be97674647bdd961ee2c6afafa9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-31-0.json",
+      "bytes": 15683,
+      "sha256": "111366e791f48b16e2700c61a134f41d4351027e7293c62987ab5954fdd9d0ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-31-1.json",
+      "bytes": 15375,
+      "sha256": "060b1b2a02af74b5c115503daed08429c743af1ccec8158bf3b11828ebdb3327"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-31-2.json",
+      "bytes": 15366,
+      "sha256": "2ad08e811cd39fa80840f38bbc7b6845f4624c27eb7b83b2884e4fe3e6307cda"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-41-0.json",
+      "bytes": 15638,
+      "sha256": "2c45e2168610e98faf21d74e5d2b014474e968a990859bd60147d477f419eabd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-41-1.json",
+      "bytes": 15396,
+      "sha256": "2e9f854eb22d838784e4c87a07a66a3a631b0ef71bdd6ed31440a65ebb720037"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-41-2.json",
+      "bytes": 15387,
+      "sha256": "50428e0b6a7ab40455c0fb08a6509f0a93054f26ed2995eabc9a8efcd5395848"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-42-0.json",
+      "bytes": 15597,
+      "sha256": "2359290bbee2c157dfddd300dfbdd3759130cb535ce1cb28f64f4d14e6240a68"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-42-1.json",
+      "bytes": 15375,
+      "sha256": "e6c0ff26ac78c65e8a4c483643b8124f2207a2bc5858e69406dcef0a1c10f539"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-42-2.json",
+      "bytes": 15366,
+      "sha256": "926095301d551d0d68ad044d29a6d6658c30db976e10b3bb8695e7d2a8a524fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-43-0.json",
+      "bytes": 15627,
+      "sha256": "bb83673cd2bc33741af0ae2254f0fc0743ac44967a4b3d2bf876912a2b3acec6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-43-1.json",
+      "bytes": 15375,
+      "sha256": "9446c80a42b807dadb5908bea74929c261c491722bea2866afa34e49495b0423"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-0-8-43-2.json",
+      "bytes": 15366,
+      "sha256": "fbe2e33cb98c9246d18ea1bcd81695841fd279a61264ae35f637f3cab2ba5942"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-10-0.json",
+      "bytes": 8156,
+      "sha256": "5292d20b5b65caaaf7403046da8da8a1dcbeb237e185dd106a6a206d5b0d38a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-10-1.json",
+      "bytes": 7827,
+      "sha256": "715e1c77f277997e20d53356265b4ca0fb97253961abdbb5a2f35e022f7e1269"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-10-2.json",
+      "bytes": 7818,
+      "sha256": "5fc4e1c250cb779c0fb9e4615408314cfa681122b0c986936f997d0fb1d20cf4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-28-0.json",
+      "bytes": 8143,
+      "sha256": "95b8e8f53167f2d4851b2e44713dc534ca7c5ffd7e262f832aefbc27f3937c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-28-1.json",
+      "bytes": 7827,
+      "sha256": "06d573695fbc15b925cf8dd482fc320301555d4c27c5997da3c18697de0c6a53"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-28-2.json",
+      "bytes": 7818,
+      "sha256": "b35fd5a8680a55bc0cf41a403a84154ed3c9a8d203da60c914ad3089987556fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-31-0.json",
+      "bytes": 8133,
+      "sha256": "39375be3a6c9cb6b078b58ad56927b1c1cad01c437ec55e2a9200a6eef71f7a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-31-1.json",
+      "bytes": 7827,
+      "sha256": "bedabc7abc0be914f2cbb4988d8921b67132dee0296e8e8e985698d14f4b947e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-31-2.json",
+      "bytes": 7818,
+      "sha256": "341ad3d8fec32baba773a67d9e02fcb6ca6197af84244348a24d3221e985e044"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-41-0.json",
+      "bytes": 8088,
+      "sha256": "418a2a3b8ba9d5f98dba7b44463aed49f17640bb21f654c8adcbde62fc590f08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-41-1.json",
+      "bytes": 7848,
+      "sha256": "cd3b2006cd712f066f602a49f50fc664554acf6c477661c0c9dde78c82cd3657"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-41-2.json",
+      "bytes": 7839,
+      "sha256": "0c9a183d51a6caed162f157d6b6dc857fbd8e7f940c068b56d195f1eba9d591a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-42-0.json",
+      "bytes": 8047,
+      "sha256": "211d8aece1c78e6cbe3ee4c74961e0296561421f5e5d53a412d2404107411200"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-42-1.json",
+      "bytes": 7827,
+      "sha256": "63ebaca0475aa492d855ed6e2bb764910309838e4950cab481ca0e0a425bdce3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-42-2.json",
+      "bytes": 7818,
+      "sha256": "067c0026ba6a00f426f85e24daeda3504da8d4155c0a879dea819d8f88a76a5d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-43-0.json",
+      "bytes": 8077,
+      "sha256": "31cac0c96b8f5c596e9688416818535067c788b6dfdcaee1cd02ba461d4edfb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-43-1.json",
+      "bytes": 7827,
+      "sha256": "0765795db2293fe79039a5c1aa3c86b3a1268e2c4d261bf64ee42942a60ea496"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-1-43-2.json",
+      "bytes": 7818,
+      "sha256": "4f822feaac9c43f1693b4a97f81712c428d2139171794df3cb0121ad5d1b3974"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-10-0.json",
+      "bytes": 8541,
+      "sha256": "8faefae97b377cf5763c0f46882913ec2b5ad35969f7f941f6005d809145c8c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-10-1.json",
+      "bytes": 8211,
+      "sha256": "1e0ec80a5b9eb46eec00afa751dee12642b4c6bacc0b7d1f8edadc0258296b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-10-2.json",
+      "bytes": 8202,
+      "sha256": "7913c3cda6a25f3dbbe920ebbebc9b0a820df26faab04cd29bc13acbdbef6af0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-28-0.json",
+      "bytes": 8080,
+      "sha256": "d4e20c940cbd136d3182ddac2ec316666389e889e014e3341fd1f78548225aba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-28-1.json",
+      "bytes": 7763,
+      "sha256": "69e7de071f3f3e31db3dfd0dd8521de26d5d67d026fe658b99fd54ed564c1246"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-28-2.json",
+      "bytes": 7754,
+      "sha256": "d4291f5ef47e206685bbddaa683888bd7d7f3b73d8772c53e113e9a541e5e045"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-31-0.json",
+      "bytes": 8070,
+      "sha256": "162cba3c89170c50424149c0c578e67f495e3c81fd92521429a8c55407614e02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-31-1.json",
+      "bytes": 7763,
+      "sha256": "d7fa764c985288a46deb0ad4617f42146a590146b60a776e574e7b370f34ee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-31-2.json",
+      "bytes": 7754,
+      "sha256": "555fb975b34340421fe00a5d1a4ce5951e9faeb887f4ce47d0785398c18c8a64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-41-0.json",
+      "bytes": 8025,
+      "sha256": "f66f3fb5694256790d211f52c3f13d58677c939b0debeab79efdbbe6d0c23811"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-41-1.json",
+      "bytes": 7784,
+      "sha256": "b545f8a8b9fd6092529b963cb7750e19158cc1f5135a4fab9d4b48d5385df356"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-41-2.json",
+      "bytes": 7775,
+      "sha256": "a42506bb97763219fefd47c114cd8be42f5c5138b279f196785e633cc36af452"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-42-0.json",
+      "bytes": 7984,
+      "sha256": "5b3a908fc5bb83f3e761210d35279567f4cd8a77c190e764fe37d5f68ebdcd80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-42-1.json",
+      "bytes": 7763,
+      "sha256": "bf5bd764566153311ce013596211f894f6817a64b850b29004b4bfb930062385"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-42-2.json",
+      "bytes": 7754,
+      "sha256": "1bac519df336bdd5ef1d2a213cbf07fd42497750ba429b49e5f776509e669baf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-43-0.json",
+      "bytes": 8014,
+      "sha256": "36d0fe9c89baf9a6312456e1906838939e48040e6188e1416928e79a35e5d6b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-43-1.json",
+      "bytes": 7763,
+      "sha256": "e9554b54f6d303727a619e3d666ba799ddc9772a1029939113b7865af9341a10"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-2-43-2.json",
+      "bytes": 7754,
+      "sha256": "65235eca3a3a5461288b89979d89ef4c4045b20996848f444c1e863a8a07d521"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-10-0.json",
+      "bytes": 13022,
+      "sha256": "85f5eb80b61133466e7233573795246371afe70e37a8b4c5266c78ef7a120b88"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-10-1.json",
+      "bytes": 12691,
+      "sha256": "d1305bcf98fe901ea47717bedd6253b80536696a3976ad7bac12c1eaa487a4f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-10-2.json",
+      "bytes": 12682,
+      "sha256": "6fc0077d47728377314ecaf06440566d146c09cfea58f06f58650d23df4ad04c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-28-0.json",
+      "bytes": 10321,
+      "sha256": "41f7381be5a47c05811244361feaf63afe5df3b312b65266c1aa505cc115e673"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-28-1.json",
+      "bytes": 10003,
+      "sha256": "8c732afdb2467e55f0944a177db1a41c4de9118e17627c7a7f5625750a1eac81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-28-2.json",
+      "bytes": 9994,
+      "sha256": "b27d750e1d6669056f9feacff178cbefdce157189346b9cd23443f6bd8732e87"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-31-0.json",
+      "bytes": 10311,
+      "sha256": "e73be718b320963e03d8cc8519fa8171f087b8f5d2362e95b8b3fcd92c625180"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-31-1.json",
+      "bytes": 10003,
+      "sha256": "6931875a7501d577a3c2426b32666ee6c647afe0974bed9cfeb5dfe4d919424d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-31-2.json",
+      "bytes": 9994,
+      "sha256": "f50e0ebc1b2148b15121e11c4625a056ecec0cc3bffdbed35f4d786c57b65359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-41-0.json",
+      "bytes": 10266,
+      "sha256": "02762dd9649cdd0f073c445cc1f7b1073f03b86d7bfceb7e5b4bc743fae53641"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-41-1.json",
+      "bytes": 10024,
+      "sha256": "b7d50d54626a042cfffc77a6f9e166f6c5c556ab2cb23d1e3ceaf8da1d94e3d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-41-2.json",
+      "bytes": 10015,
+      "sha256": "22d70e670d132f3766ebef01a250776feeaf26c4c050ff85f2ba0320843ee08f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-42-0.json",
+      "bytes": 10225,
+      "sha256": "3a58956ad95477a037ed0600bf82ef03d600df97dea35b58f5e163f718dc4c1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-42-1.json",
+      "bytes": 10003,
+      "sha256": "6c528fca105bdffd04adce2e3da3a098d794a2d5d16f40e9ca9767e72903f0a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-42-2.json",
+      "bytes": 9994,
+      "sha256": "1e76e580acbfbb0d1d76e8f176e4dabf38786341f735da514dd0c72e7542a44d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-43-0.json",
+      "bytes": 10255,
+      "sha256": "5dfaae9b675f5bb5b98305c17a0540eb633163dcc38a0ef2cca8fcc8dbf5dd7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-43-1.json",
+      "bytes": 10003,
+      "sha256": "c1a8a12e458f65279e572dd7fab92c956e1ebbcb19c6d138edffef3db9d11477"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-3-43-2.json",
+      "bytes": 9994,
+      "sha256": "f881d6bfc6395c71c2e930cdc2a28ba1f3bd3da603d9e55a0fafe68cfdbe3d6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-10-0.json",
+      "bytes": 45023,
+      "sha256": "b75472f50f23c43c100424f1444a6874bfbc73081c1fab12afb18f7e03b43906"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-10-1.json",
+      "bytes": 44691,
+      "sha256": "aefff13ee329b104815d3b1f59262127afe10ebe88818dce9a36417743d50a5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-10-2.json",
+      "bytes": 44682,
+      "sha256": "ddefed8e0e77848d9895db2588154a9d6d9db92e35730d878d2760eae2ebd7f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-28-0.json",
+      "bytes": 26322,
+      "sha256": "81a36d6ede41569f343d9c33a6f1a639cf7920ca650697b98f621e66aff303b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-28-1.json",
+      "bytes": 26003,
+      "sha256": "01caa1f887b5324a44876619da43297629713be667e7a8a72d153d6955f8d478"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-28-2.json",
+      "bytes": 25994,
+      "sha256": "d4b926037b10f48576a687af4bcdcb12950fa9cf0ef59a80efdcbdb96e7ab765"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-31-0.json",
+      "bytes": 26312,
+      "sha256": "8244d46d1f0b8f34943e0f7f973114cecd13f523ffb35daea8691a12cf7a7131"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-31-1.json",
+      "bytes": 26003,
+      "sha256": "e63b2da92745d01587dd16bfe2b432fcac935c8705be453ceeaa758cdd99e9a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-31-2.json",
+      "bytes": 25994,
+      "sha256": "f38b0939ebb044cac6b0539fac6ae09f4b98e473796eeaf54df16835e3154cd8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-41-0.json",
+      "bytes": 26267,
+      "sha256": "3139fd946b139daf72e5f13c5dc383bf9b3715fe4fa75486dce8c2c17beeb5ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-41-1.json",
+      "bytes": 26024,
+      "sha256": "a63d510a526b716cfab88bb3e1bf3cb05ae1cb4de8bdd97b3ad9a7d576cca187"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-41-2.json",
+      "bytes": 26015,
+      "sha256": "cff74bac10df3459f85e8546dbbe582c8df763370a382058c73c8cc210d34e60"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-42-0.json",
+      "bytes": 26226,
+      "sha256": "8baf22c0ee7660274b41993ff759bdc5e0d8577e5f343372cd8a33e267853350"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-42-1.json",
+      "bytes": 26003,
+      "sha256": "45650a6cdb3409aae7f618f24dca824ac9bf8abb8e0a5ea20545d576912ce0f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-42-2.json",
+      "bytes": 25994,
+      "sha256": "1655ec3f1fd03f4b700805871923544d184cf1abeb61d3f36ff0d6a6e6ee2e9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-43-0.json",
+      "bytes": 26256,
+      "sha256": "1e3690be6e133ebcc60c9b4e1befe0171d146fdb994b341756d7275323249349"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-43-1.json",
+      "bytes": 26003,
+      "sha256": "b04e9af41dc767d0dd1b67a845dcb281243275740f6b3649f6c9f67ad7fd10a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-5-43-2.json",
+      "bytes": 25994,
+      "sha256": "c776ca1c91917a6711c223d152413dd146f50f1eeed1f1ece5fec3439d520b2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-10-0.json",
+      "bytes": 10334,
+      "sha256": "f96d58009648a0de7912cbd112268ef90a6d0fa718f49828be13d42920896072"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-10-1.json",
+      "bytes": 10003,
+      "sha256": "7c6fb763b2e5ee8a8139e21a5bfdb502c38ad2fc769995fcf2681dca912b3703"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-10-2.json",
+      "bytes": 9994,
+      "sha256": "fa2076358c895a64ed1ef301a90f85ed5c5b1154b16ac311fc8dedb980aafa7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-28-0.json",
+      "bytes": 8977,
+      "sha256": "c02dc1b575a6432e42aacf803edf6da74946d9f7932fc1211af9f9c49eff7626"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-28-1.json",
+      "bytes": 8659,
+      "sha256": "86819458b8e973d6fd1b919dd7793f0cdcbdfa82b82080ac0a02189ba03af913"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-28-2.json",
+      "bytes": 8650,
+      "sha256": "15ce6142c97b3113af6221194c2d9ff7b8ff0dfe82e8e38a9ea8dd87f8c0aac8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-31-0.json",
+      "bytes": 8967,
+      "sha256": "d35d20033ed0290a69dbfbddae5edf70f308e1d0e9c59172abfd561d0cea45d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-31-1.json",
+      "bytes": 8659,
+      "sha256": "2545e25215750fc253f2383728ccc09864e7185304057ca6a25876c15da8e8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-31-2.json",
+      "bytes": 8650,
+      "sha256": "c244307a33a2c1eb8ed5275611639a0a8418d8d864a9d23f695b471bb5920cd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-41-0.json",
+      "bytes": 8922,
+      "sha256": "77c048c99476e5d4136ea32a96c441e1623aead0cf97b122e7c52381895034b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-41-1.json",
+      "bytes": 8680,
+      "sha256": "a95e6cedac84a21d5394ba97032bc0a3fe126cdf6fc035db1478728a86e23d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-41-2.json",
+      "bytes": 8671,
+      "sha256": "4950e0f6692ba29c39079ec41f99db152e017980fa6442c0532c968ca327cfcb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-42-0.json",
+      "bytes": 8881,
+      "sha256": "e3f87a593dc03427d26424d2e9b21830669e7ae867f130827eb2749c20b1662e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-42-1.json",
+      "bytes": 8659,
+      "sha256": "45955377d0c1f6540c0b1f1f0c0c8948c7d4123849ed65f2fb2a1f0e01ebdd42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-42-2.json",
+      "bytes": 8650,
+      "sha256": "4463c6d8f889ea9d7ee7d0c1377ac1d4e7a9ad623742792302a0ec9df47071a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-43-0.json",
+      "bytes": 8911,
+      "sha256": "bf728bb7ecbd6b260d6c281dac7327618d6fb84ec648b3c309493ae954e6a3f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-43-1.json",
+      "bytes": 8659,
+      "sha256": "39ac662c7078fb8209b80999d128f8989f6a61b44c856c60198ecc44fe9d058c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-7-43-2.json",
+      "bytes": 8650,
+      "sha256": "c47c211eaa10386d7f98c4be361a6b4e67c2dc76a992968f986b4e1b3c88362c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-10-0.json",
+      "bytes": 23775,
+      "sha256": "e3cb4e7dd680e805c9914cf8f9de707d6cb878c693e91382b04c1700ce2dc7b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-10-1.json",
+      "bytes": 23443,
+      "sha256": "f1bd23bc838971fdd5a89661e7429ce89f35fe6301aeb5a93488a8e8aacb3e46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-10-2.json",
+      "bytes": 23434,
+      "sha256": "377518bf89e9032b5987bc2cb33189ebd5c78548f9bb831d40ac0ec6ca74a31f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-28-0.json",
+      "bytes": 15697,
+      "sha256": "067fbad1afdb86f3d9fdcfc30ed70ab7b4073f24064ff2a80a8abbfa7b12e88c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-28-1.json",
+      "bytes": 15379,
+      "sha256": "5b4cf1e01b500baf7f18ed35b0d5bafb9921da235e53d34dd29661b50660c8c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-28-2.json",
+      "bytes": 15370,
+      "sha256": "bb88f7cd8d045334cf9320189fdda00cdd43205ff29f4cd7bb35c145db674eff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-31-0.json",
+      "bytes": 15687,
+      "sha256": "47b45111425cf91124e920966d236bb594ce4f945edfd72ab9386ba8418ac1be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-31-1.json",
+      "bytes": 15379,
+      "sha256": "e909c8ea7947b898d62f5b484e7ec1c4d8f2bf10c558714f90112839c5a1e456"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-31-2.json",
+      "bytes": 15370,
+      "sha256": "6cb92a865de6cd0100f0ff0e290c181c5fb8dbc89be824e50c4606b536851fbd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-41-0.json",
+      "bytes": 15642,
+      "sha256": "685c3bedb379c25d7ff0fbce13e114e4d62b3bb941f4daf3b4d5d9c9cea48cf0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-41-1.json",
+      "bytes": 15400,
+      "sha256": "981b3dfd1b44b49ba67eee32cb83addf01531840900e2d9d4620657db7d3a0b3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-41-2.json",
+      "bytes": 15391,
+      "sha256": "d69d6e6d9f9fee9cc50f130132a01b362a38cf933383ee2812275c64f2328a57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-42-0.json",
+      "bytes": 15601,
+      "sha256": "6b2d633e38e471705a4a475bd59e4a1f367aec5e3ad0c97a8555c1d3fc4c6d93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-42-1.json",
+      "bytes": 15379,
+      "sha256": "f56f0857d4f481c42d70fa15a2f4158da41fd510baef518e02612e0087a51415"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-42-2.json",
+      "bytes": 15370,
+      "sha256": "290b4419155834fa9263e18f4fb856c3c00790750b90fc3a255f95b6ebe72fe3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-43-0.json",
+      "bytes": 15631,
+      "sha256": "597d9df05400623a0fdd5b3ec44745c9d45f5243b1b9e57f09abf7f8bb7ef1c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-43-1.json",
+      "bytes": 15379,
+      "sha256": "b9a29e928067163f2d66766e4e4d88719adb91180bf9b448490f5a6ca7616e27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-32902-8-43-2.json",
+      "bytes": 15370,
+      "sha256": "af7db8ad24321406177439320a70dc6fe482a5932123a4760b789c0c23725bd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-10-0.json",
+      "bytes": 8155,
+      "sha256": "d2815b0c0e6a7b165cde2f37f2eb8ecd4bcce02db972755a7ba7128223e45679"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-10-1.json",
+      "bytes": 7826,
+      "sha256": "dc16d1872539aaabec47afcea7e9ac0fc409f7f2f0bc39450106ea3e65c1bbeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-10-2.json",
+      "bytes": 7817,
+      "sha256": "3b82ffaed618f605570154681a584938fccdd9e6c5d6f77d78460ad6f3e2e3fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-28-0.json",
+      "bytes": 8144,
+      "sha256": "a9fac9f4e7c82622130d45ffbb437588cb6e6f486200cd216c1e9f936498b952"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-28-1.json",
+      "bytes": 7826,
+      "sha256": "b9c898659b42b694a3e5fb992fcd15a76738b2e84d8886174cfc33b23966704c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-28-2.json",
+      "bytes": 7817,
+      "sha256": "428c49a53af832e93f9b5566e05c740fa3b99adec13634926e898c5d7eaea9dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-31-0.json",
+      "bytes": 8138,
+      "sha256": "ca7ecb8c83d91be7a1d732801b912b829f1aa9a46f40eee6e771522400f42e3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-31-1.json",
+      "bytes": 7826,
+      "sha256": "ce40cfed6ec63f8b449537a7e827645023b576b9d106c117630b1f9505d027cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-31-2.json",
+      "bytes": 7817,
+      "sha256": "1e60d0a43e7621dc7e4306bc3a3fc2fd18efb79742f6f51cd4768e99c0378144"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-41-0.json",
+      "bytes": 8087,
+      "sha256": "9155ccccd95905ac2b71124378fd43935bb3cc802463801bdab6dfbc722fb2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-41-1.json",
+      "bytes": 7847,
+      "sha256": "ec88519446b12f795808956ba64fad86885afc8c4a55beaa063b4dac1dd1e44a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-41-2.json",
+      "bytes": 7838,
+      "sha256": "24647b95b09696554f6ee601eaece2c09e9db97f2c7966cb54eb21c505dc689e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-42-0.json",
+      "bytes": 8046,
+      "sha256": "9c8faec82ea5c8274a9e06e6ec2dfdd8551026ee0038bdd550370a99c0267594"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-42-1.json",
+      "bytes": 7826,
+      "sha256": "c9a10842111a9b699710b3d79f9217b09e43a918d989e3f940370812f242377d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-42-2.json",
+      "bytes": 7817,
+      "sha256": "e7ef94fe7c8690dd61ec46ba9e6171598f8c71aa19005c3832b454694e7171be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-43-0.json",
+      "bytes": 8076,
+      "sha256": "bbc9ffbcbcaf4dd82ac0f1648f568a76c76aa64fcc26208072b9c7e0b0a8455f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-43-1.json",
+      "bytes": 7826,
+      "sha256": "65bb98715e6efe1014d0a15e51abbba79ed83d4b3bf3d09a9cea357998edbc63"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-1-43-2.json",
+      "bytes": 7817,
+      "sha256": "398bd3e3ef2647be22a20c18da18c5730320c1c84629563ecc5a86b959a07eee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-10-0.json",
+      "bytes": 8540,
+      "sha256": "fbbe13c87d476bbaf9b9bd66d2facbefcbac036dc847393c5d06e8d327c25952"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-10-1.json",
+      "bytes": 8210,
+      "sha256": "1d8cc8b7575e60483c5847d14c8c2371c905048ef86e82c79b4a1453892550b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-10-2.json",
+      "bytes": 8201,
+      "sha256": "6824407a7682b7dfa330704e831f5ded88ec176387ef98e3f95abbf22d289e0d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-28-0.json",
+      "bytes": 8081,
+      "sha256": "401f750883307a3cafdfd2c1024f3609e55098b83c67e54ac4a263241d484732"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-28-1.json",
+      "bytes": 7762,
+      "sha256": "0f4c04b92394073b18c62eeda77c53bda8b46e41761172621fbe88413d01397e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-28-2.json",
+      "bytes": 7753,
+      "sha256": "35dd80b2a214d1aead80790464b8e8df812d0b00f40987d0bdc384c404b003ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-31-0.json",
+      "bytes": 8075,
+      "sha256": "87a533f535dc28e1ecc2feb3f0fc6ec95c26b8bb37a99c424d4069f207f440aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-31-1.json",
+      "bytes": 7762,
+      "sha256": "412f858aeaa2a00f58721efd03a6591982f91466d14e3c6fac196b4560f0ffa0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-31-2.json",
+      "bytes": 7753,
+      "sha256": "b8220577af5a8ab352db77f236d9966986e66e608de47922f49a20609d52e1b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-41-0.json",
+      "bytes": 8024,
+      "sha256": "ae0caf0f4c249a8bc712de277a5a7be14a0b24046579ca94614f05fd5675ad9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-41-1.json",
+      "bytes": 7783,
+      "sha256": "22fc0159d72daa569de56521d8aabdb28e3381c502940a69019eb70ffbbbb811"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-41-2.json",
+      "bytes": 7774,
+      "sha256": "061dead20ccf9ed3c4a2412b0381e3dfd049ef2ef301c7c749e971959bd91bd4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-42-0.json",
+      "bytes": 7983,
+      "sha256": "61421b90d4972c885157738cd863db3798c47fa97cb67251207028f45c0944d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-42-1.json",
+      "bytes": 7762,
+      "sha256": "e29fa8a0d34d7cb0bcbd5bb2b8ec5e5ee8c7a40b1f812c5e5d9b676623020a23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-42-2.json",
+      "bytes": 7753,
+      "sha256": "7c185eb591af47095d36a12387d2d9083805bdbc53575a8cf6e32a151623ec37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-43-0.json",
+      "bytes": 8013,
+      "sha256": "80865f7101cf364fd3656b75fed4ecd86cf4fee8985a82bfc1cebf2759006525"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-43-1.json",
+      "bytes": 7762,
+      "sha256": "a2062492e06aa0c9fb733be7afe20a129a4e7be1996c346cd5e96d53b1f747d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-2-43-2.json",
+      "bytes": 7753,
+      "sha256": "d41a12dd063a3cd6fe733fbd9b494132191956d7f570460f200002161acf3103"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-10-0.json",
+      "bytes": 13021,
+      "sha256": "f4768e1559addbcdeba220bba79efaf6e1fb51534bfa720ba3229056eed70000"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-10-1.json",
+      "bytes": 12690,
+      "sha256": "bd7693b65f1f648c22d8ea6f5cc50b7d9e10229878bc5f0bb56ee855b1bec388"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-10-2.json",
+      "bytes": 12681,
+      "sha256": "8e836208beed3e2fefa5a49f9440365c33be709f0fecbe8748cfe86bba5303a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-28-0.json",
+      "bytes": 10322,
+      "sha256": "fbf82ea112946e31cc5e05d69608a412143327149f63b1511f13331df0cd1996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-28-1.json",
+      "bytes": 10002,
+      "sha256": "754b2d748cc49d7e3305e3771dea075019f20b74681c789ceb86334d4308010b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-28-2.json",
+      "bytes": 9993,
+      "sha256": "dac5e760fd3b71ad9586effb35a8547456d17d3891a7c4817aeb7bdd2ad92204"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-31-0.json",
+      "bytes": 10316,
+      "sha256": "d8e1699595c891c8754387b3cc4d6273b8ce1f7c6872117c5fd7114dae86c7d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-31-1.json",
+      "bytes": 10002,
+      "sha256": "f8060ea6ed8b2c04708d11686b4e9f362aab08fd5d310bf5af2f691c1231e364"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-31-2.json",
+      "bytes": 9993,
+      "sha256": "9b0a9ecabb43fa07700944ebb55a24b942d528ff7a477ca6bae923971e170c9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-41-0.json",
+      "bytes": 10265,
+      "sha256": "1c7ced71fe65d0a555e0c06a556579ef816c16990ae8b9e64e37db36ceec7a15"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-41-1.json",
+      "bytes": 10023,
+      "sha256": "b004d7bad5444fda3487ad7d73129f1563ffabef3fb08e6e6e1832f6eefaf26a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-41-2.json",
+      "bytes": 10014,
+      "sha256": "55e350bd282f3695095becede2cf9638ececfdbb4bccd69634542d916de8aabd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-42-0.json",
+      "bytes": 10224,
+      "sha256": "8ce23d4d9005a98f07f3685b8e30a16d7b216b20d27e92360018c21c96e4f284"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-42-1.json",
+      "bytes": 10002,
+      "sha256": "006a1232e53f68e60228914448c6127b3630d87a8da81620f273b8d46cf6c556"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-42-2.json",
+      "bytes": 9993,
+      "sha256": "c5ca0ceacfe31f51947008c7f213f6ab7ce8ee16d37324e6f6576913a71a30f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-43-0.json",
+      "bytes": 10254,
+      "sha256": "b92e97283ecf19df1ee0660596d39f5f722eda3e8097b3ae04875cd7f34c7db2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-43-1.json",
+      "bytes": 10002,
+      "sha256": "6aa7d1b52fdca49378ff1cfdacb1f1c0fcb02bf8e26af46c0016e5d4870e9279"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-3-43-2.json",
+      "bytes": 9993,
+      "sha256": "19f22219f0830004a52895a974670e7e7a673c00905173bc17faabcd45e8be39"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-10-0.json",
+      "bytes": 45022,
+      "sha256": "c1b11be808b9dea707c0ebbef12ed3575b4d1f6989b739d43e48ea448358dc54"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-10-1.json",
+      "bytes": 44690,
+      "sha256": "de6181eb2e8c0e841b51a0628e7c7f49472a45c4b6725ba6a58cd3270dadc951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-10-2.json",
+      "bytes": 44681,
+      "sha256": "1d5d5e44c0fe33d6c57212158bfd5c8e912a99c61a4cc2a72ae425bedd3ea6c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-28-0.json",
+      "bytes": 26323,
+      "sha256": "b106c46f7a1a913d44778cfe90267a8486172b7a5e4a5f20cfc6a90fe570d2f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-28-1.json",
+      "bytes": 26002,
+      "sha256": "b5797f8efa518f903c889dab19c08483b82bcb1c82007b9606c8e3627453fc51"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-28-2.json",
+      "bytes": 25993,
+      "sha256": "8d65a66a835e5177ef94173469d6c31d78a34b1fa71900b02b8a13f5c21ec026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-31-0.json",
+      "bytes": 26317,
+      "sha256": "ab23fd42b705386edc4e2fb04a842ef6bf59e989f25af3c23b8225eb1683738c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-31-1.json",
+      "bytes": 26002,
+      "sha256": "b6c6a958946556c4750e9ffea364763c16ae3b603cbd28bdd285bf2474c78aee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-31-2.json",
+      "bytes": 25993,
+      "sha256": "0130ff718d5f24e675828dfc62c8e537b9c9b9042f6c29977713fd43a902575c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-41-0.json",
+      "bytes": 26266,
+      "sha256": "64dc57c9fc169f27c7b79e7754769e26e1ecc08057ae746cb577163161f2a4ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-41-1.json",
+      "bytes": 26023,
+      "sha256": "e9bfdf4ca398123b21bb37cb2235eeef4316437b67604b5083ff2286229ec78c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-41-2.json",
+      "bytes": 26014,
+      "sha256": "f4fd462c3b47806d010d523486a90e94cb3fc03113fb5ce818202eb887a93689"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-42-0.json",
+      "bytes": 26225,
+      "sha256": "5a43bba8562671c730a5351d8e591c943ff837fc289b34d96e1a866a0bb29b1c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-42-1.json",
+      "bytes": 26002,
+      "sha256": "ebdda7954a3139cf9aff4cb3cf71fcd096a825467f47fb6e5f77d69578a73f2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-42-2.json",
+      "bytes": 25993,
+      "sha256": "fddcd7a401a8b1e374c407a88cb40e2f275bcce605df8acc9a461f2b30aad298"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-43-0.json",
+      "bytes": 26255,
+      "sha256": "c27d20e0edc4a3ea230e1dc8a644f515a15d82c112d13c76f26b1c0322ba8064"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-43-1.json",
+      "bytes": 26002,
+      "sha256": "04a5a44cd78d37c1bb04aa221f1b03d69cfe61dad30e9d4068d58cfb671e231d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-5-43-2.json",
+      "bytes": 25993,
+      "sha256": "ff7b8313410638c5737dc5dc8a6980452f413d1214b9879af53e988072b4d308"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-10-0.json",
+      "bytes": 10333,
+      "sha256": "41ca0db1d207f578c241bf41e8391f39f1f868a5b93674a2af8f99db1716c953"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-10-1.json",
+      "bytes": 10002,
+      "sha256": "05fad3a4c78348ed04d1ba40423d64ffcd3c1543b885c04277868d3b681c38fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-10-2.json",
+      "bytes": 9993,
+      "sha256": "cd93d6cb53f51775e7cb2adc2cbb71cc5c091d09b927a7043c23d505d6b1e664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-28-0.json",
+      "bytes": 8978,
+      "sha256": "f5e32577edea45451f19360be756727b28fbe0374d68a58c9e3d43eaca02797c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-28-1.json",
+      "bytes": 8658,
+      "sha256": "ba41618dd3513e3381d77afec2ccda5d99de5eb3d0329325cebb06e840916e3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-28-2.json",
+      "bytes": 8649,
+      "sha256": "94688075446b613406fe1e78cc8d4c531214e939438f94bf336979f4ce6ef0ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-31-0.json",
+      "bytes": 8972,
+      "sha256": "eced6d52aeb6de2d6a3fcf6640d7f53932f39da56856dbeeaf81360fe6a97445"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-31-1.json",
+      "bytes": 8658,
+      "sha256": "bcda69e4cd58adb5864ad7ed9b027ee491f95e1699aa827c40944982d58482df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-31-2.json",
+      "bytes": 8649,
+      "sha256": "41e76481689926456deef6ab9bce535f10d8317028386c7770a062f9c221e270"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-41-0.json",
+      "bytes": 8921,
+      "sha256": "bf14a2eb9c6ac538febafbe53423c92fb5dbcc6d8b3aad4ad638451000f798ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-41-1.json",
+      "bytes": 8679,
+      "sha256": "e570099c76965ce2ebcc8743a2b55094f7aafa8968e3b3a8da9713a97f4fc98c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-41-2.json",
+      "bytes": 8670,
+      "sha256": "b29e8c3042a72cb8ec905f3ca151f6eecc8a8b09af64c6411f9fb3e5d1aec3ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-42-0.json",
+      "bytes": 8880,
+      "sha256": "ea073b9af65128d272072d35a002b5b292b638b49510127fe5453a78183e5815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-42-1.json",
+      "bytes": 8658,
+      "sha256": "beaf668880c44b9fd211aba554a93f33cabc8e32e003af6aada3373e332a2515"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-42-2.json",
+      "bytes": 8649,
+      "sha256": "10acb99245ef75e22a4fef5bc387240f9b431624472704bc490d5c8cc30f8e66"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-43-0.json",
+      "bytes": 8910,
+      "sha256": "76d99ee64f600c37052891c7bbfe93fad74096bd587821ffa12a75963edb3b24"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-43-1.json",
+      "bytes": 8658,
+      "sha256": "341e4419b4b27027ac952b80d57a7f638170f45cd14229eb2bcef0c0f9d6e70e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-7-43-2.json",
+      "bytes": 8649,
+      "sha256": "0680ce20ef17205e707febb723d196411f6a526289bd84f62b50e706fe6cb1fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-10-0.json",
+      "bytes": 23774,
+      "sha256": "60191f738266e44566deb7fe45406d13c3b53c643175b3c20a19f5f5d5ccc93f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-10-1.json",
+      "bytes": 23442,
+      "sha256": "67d31c4996501c00ae4794222c649786fefa239abbf63b1852ffb3e86df7c51a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-10-2.json",
+      "bytes": 23433,
+      "sha256": "0cb24c8fadb57c4ee2982f087e9ef96aef5b105bb929c0afcbeea375c2685fa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-28-0.json",
+      "bytes": 15698,
+      "sha256": "c90651df3048524044e5b402b4242e8e1ae739bf73c933dbaad6ab4f37f4ced5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-28-1.json",
+      "bytes": 15378,
+      "sha256": "5cd045502024728a6b1f67648f0ba432397c14a17805f5f6d4d0e8bbcad3030f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-28-2.json",
+      "bytes": 15369,
+      "sha256": "a206cb92218eed44d689ca2fd50e7bfc6e185a7af5bb650c4fdf6d40ab19dd03"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-31-0.json",
+      "bytes": 15692,
+      "sha256": "2c2846acb96da7b8f98951310cee354054eaaf46a238245c96cc6006812836e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-31-1.json",
+      "bytes": 15378,
+      "sha256": "cf7d39ed03889fd2133224aad8a33718ee60acac4d392e43cd49928079ccdc07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-31-2.json",
+      "bytes": 15369,
+      "sha256": "3f00e597a29058cfc8768edd6b509aa7dfffc6d410caf824e9ae2b65bb44504e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-41-0.json",
+      "bytes": 15641,
+      "sha256": "7ef92fedfb6046d0c104c466e1ea5c19117ebb6a71d38fb357728ae172d46f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-41-1.json",
+      "bytes": 15399,
+      "sha256": "509574feec6c78bb49669a34d982109064ec55efc21780c206d4aeb3ef192f0b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-41-2.json",
+      "bytes": 15390,
+      "sha256": "b9ebacf581cb43302a7c81197c0eb44af3c80764b2d69d8364de2d1b306562cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-42-0.json",
+      "bytes": 15600,
+      "sha256": "1d6dc6e0dcf755b6ed160e5fd763b5a5b5d86678ca3063ddc9e146b311d175c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-42-1.json",
+      "bytes": 15378,
+      "sha256": "a5eb758e678b5494ae7aaac88fe668d4354527155fa34db02e13be398a4b3efb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-42-2.json",
+      "bytes": 15369,
+      "sha256": "b1739e94e3043b92d31857d00732596d7ce8d06276eb5b9ae09718c1161eb052"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-43-0.json",
+      "bytes": 15630,
+      "sha256": "3746a216e719f0e5b78eed1799e9cb868a02e27d58e75303c8cf98946b0a64b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-43-1.json",
+      "bytes": 15378,
+      "sha256": "1b713d1357ab08d15e186ce9fef1d85786c64503f4ac556847a021889d37bed4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-final/typedPixelReadWrite-4318-8-43-2.json",
+      "bytes": 15369,
+      "sha256": "efdf47c36e4ac4aa2b5dcbb2d4c76956651460a1048fa6976877d443305a8f02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-10-0.json",
+      "bytes": 8152,
+      "sha256": "e1ccbea94e9122e88eef395dc4c3190545b7039535a25fbe10812a8979311820"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-10-1.json",
+      "bytes": 7823,
+      "sha256": "81e2c102e11fb36016b3d5f1af5ee5ae2e2d29ade465e5ed4814fa6d5402e555"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-10-2.json",
+      "bytes": 7814,
+      "sha256": "9d2474e7ef1d703df34d9f1ff5697ad4c1608cb93b90f62f01be0633cabe30d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-41-0.json",
+      "bytes": 8084,
+      "sha256": "a912fc4d43edb6fb4412c5e179da08d0331eefeb28c84de326cb487f37c6be71"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-41-1.json",
+      "bytes": 7844,
+      "sha256": "06a22b8c38d629e1ab8d82d3bdac48c213a52001173d6f75534926b81ef9a762"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-41-2.json",
+      "bytes": 7835,
+      "sha256": "3fce7af9d17cc1d6039f4aa700dd17f3d813adf1dd9da47988340b69cbe976ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-42-0.json",
+      "bytes": 8043,
+      "sha256": "a6f03a666e3ccf027d92125bb5e1bcc390b4b3754ebd9970bb7dac6d476be0c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-42-1.json",
+      "bytes": 7823,
+      "sha256": "5909c333564262f9058bd0ce9e30ed51bd408064f6dde6b766854cd07a021492"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-42-2.json",
+      "bytes": 7814,
+      "sha256": "b7c27bbb495fb43153c04e88a4bde6ab152db079fb5c337f06d2ed611245aacf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-43-0.json",
+      "bytes": 8073,
+      "sha256": "174b61e36cac3bf61b0cf08b739486e6c9fe6d1f8c055283bec564f15e35f3f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-43-1.json",
+      "bytes": 7823,
+      "sha256": "9a07a589f7fb19e710f155bf661e8329312939b138622f7de740a22dd29faa3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-1-43-2.json",
+      "bytes": 7814,
+      "sha256": "14bcc8284b88d589d54cb87b82e60917102e790489b08a18c93f489b233b40f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-10-0.json",
+      "bytes": 8537,
+      "sha256": "64b7cf25385b8932c117655e9a6ac5f16e016c4faff269e25535b8f7cbdaf084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-10-1.json",
+      "bytes": 8207,
+      "sha256": "9d3b2d08bf75f3f03c06fdbadc463fce720b39b467a9db02412512b4516fb9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-10-2.json",
+      "bytes": 8198,
+      "sha256": "45432549af15ecedd62835c1239448e93b824b698185aa9eeed746e8d5a5eeca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-41-0.json",
+      "bytes": 8021,
+      "sha256": "1215ded84f22adf0a5a0b50e6df8a883a71a323b853db60608cce547663a9574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-41-1.json",
+      "bytes": 7780,
+      "sha256": "c0901f56c51eed2b8d3073eddfbbfd9a80b30f22a9fa870d27f5286ab6a3fe0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-41-2.json",
+      "bytes": 7771,
+      "sha256": "9f3e7072bd9bb557d4d6d0a272e67ebf4cb9b9efb5b680c0c1c02d4597db3b34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-42-0.json",
+      "bytes": 7980,
+      "sha256": "03aa40cd84a6e862a1a9488e8782627c978d6a501351dfdf4f36da5261129327"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-42-1.json",
+      "bytes": 7759,
+      "sha256": "fbd327ac488617774afedbddb75e0ea153704f701d0747e38b77bdb647b8a7a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-42-2.json",
+      "bytes": 7750,
+      "sha256": "8368a6314c8a2d5b45ea7d2d373ac8743d2a1411d0e2ab2da602f3a32ca36efb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-43-0.json",
+      "bytes": 8010,
+      "sha256": "fa90c02807dd5fdca911c959ccf39181e640a54778422fe2af70470bd4608c00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-43-1.json",
+      "bytes": 7759,
+      "sha256": "86511ca3548c145c0379f71526bf01ef1224b3613dc5f809ec804cbe166cc4f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-2-43-2.json",
+      "bytes": 7750,
+      "sha256": "e8370c5e714209ed378e5dde11921824be375e9d649c7773728c9046f790a5cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-10-0.json",
+      "bytes": 13018,
+      "sha256": "50cd2a924b3b3d644c8cd849e58a20364cf1fefd2ea29f1049a690b246f0069a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-10-1.json",
+      "bytes": 12687,
+      "sha256": "46493465b94415bf18ef61fc6105852e2cb8e4ff02247df53e996021b9d328d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-10-2.json",
+      "bytes": 12678,
+      "sha256": "f0c7b594253bc9ffe5524c452ee4b278801e3ed1d0d5fe7f65061b191abd0d2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-41-0.json",
+      "bytes": 10262,
+      "sha256": "e77d940824a40abc642583bba0458520105759f43c23e5f46c0c7eea8c167bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-41-1.json",
+      "bytes": 10020,
+      "sha256": "317ecbad4655b8cb5cf18bce2828ee1185e339275ada57b1dcb4990a49511f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-41-2.json",
+      "bytes": 10011,
+      "sha256": "622b068f277e5ca7155f05fe0f7d2e46df747bb66f69e7bda7f11622213587ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-42-0.json",
+      "bytes": 10221,
+      "sha256": "a2880ca0fe2a3ccf187ea6aafb46076800d8185617867c3d9c8bcda6e445ed37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-42-1.json",
+      "bytes": 9999,
+      "sha256": "05e3a600a98b86b02965c2e55faebce0b4e154cfb7bd3e290561fb7b94ad5e08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-42-2.json",
+      "bytes": 9990,
+      "sha256": "ce73adbf6ebec0228656983c6b2d7ac919cc0dd2a47fb9825879470d89ee07b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-43-0.json",
+      "bytes": 10251,
+      "sha256": "126b0655c31e7947b14f43456019f6c4ed32493b4b69264623470d7a10091148"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-43-1.json",
+      "bytes": 9999,
+      "sha256": "9a3afbfda61b2492066dc13ca45542ada090f4a4659979021f2ad1930821871e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-3-43-2.json",
+      "bytes": 9990,
+      "sha256": "ce4f40c7764400302e638e47684123cf815d6a7aab2fd197abfc063dc658acd1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-10-0.json",
+      "bytes": 45019,
+      "sha256": "895cec726e513d97e620a76b7ab0fe7dd2a0a197805df49b38e7abe8cdb40766"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-10-1.json",
+      "bytes": 44687,
+      "sha256": "4e57639fe30c18b3a3e2cb956f3177c2c190742fd6982cded1aeb3dc8eba2930"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-10-2.json",
+      "bytes": 45019,
+      "sha256": "d2f0742bbb4a7e784b200dadff61776fd141efa2fc9e061eb9cb3d5d51115674"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-41-0.json",
+      "bytes": 26263,
+      "sha256": "49bf3f4fe24522e3e908e70eb239d33e5ce01b12f739076ed85dbacc9a898691"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-41-1.json",
+      "bytes": 26020,
+      "sha256": "b38770fd9cf36d399ec11137a98063d01577ce037f5820bdc366b4a682612897"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-41-2.json",
+      "bytes": 26263,
+      "sha256": "703eecec5c3ba9a4d2e01777e73033a08f38ead6fe3944289ef652d79c16ecd9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-42-0.json",
+      "bytes": 26222,
+      "sha256": "c893c7c9659e06a5989fe5a04e9639f52c3c21a95184584c77a3e02e38934521"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-42-1.json",
+      "bytes": 25999,
+      "sha256": "77097b5a392e5801f64bb4c70f19163f155be4e033ef7fb545453b7b2498526a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-42-2.json",
+      "bytes": 26222,
+      "sha256": "10cccca3bb7cbf05461fe349f0e922c37f2e3262156fa94a6510ceb660a787a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-43-0.json",
+      "bytes": 26252,
+      "sha256": "427c3bb005ca962fd268ab81f6784d3f25f56e1e7f85bbe40c8e8fd1b3b66d26"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-43-1.json",
+      "bytes": 25999,
+      "sha256": "e4baa394ba39c274b89a0138807f3a13eb0dc59be317519d44a3a9672ae9243c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-5-43-2.json",
+      "bytes": 26252,
+      "sha256": "8993648bfdfde7404e0b0664018ffef1fe811d1ee942a982e8e62d57ada03c99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-10-0.json",
+      "bytes": 10330,
+      "sha256": "3bd0062aea4b116e2abe38b805baf82b20bbd546a03edf48da117f42be487eb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-10-1.json",
+      "bytes": 9999,
+      "sha256": "3f203ed96e91bdcaab3c98c4a9128d5a008a5dca60ef6b26e17a881cc8dc56eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-10-2.json",
+      "bytes": 9990,
+      "sha256": "2861bf0338cd91c9e866fa1909032dd93c15820a298974b87864274da3c6d853"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-41-0.json",
+      "bytes": 8918,
+      "sha256": "f8dcf1a0577e32b487e811c9395b4aabcce8978c38d7f2a97e823d1725576772"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-41-1.json",
+      "bytes": 8676,
+      "sha256": "e31dded847ef37e180696c34659bf7b7ca7a886a717e4d66bc30a481672d61d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-41-2.json",
+      "bytes": 8667,
+      "sha256": "f35383421dd86bb324b129722d93631cb2e765d9602358ea5a2c42c63b6dc06c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-42-0.json",
+      "bytes": 8877,
+      "sha256": "11d7b95ef843908ffda0c871c2d5df1a1ef89eb2e81b17f35e2752e019564f7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-42-1.json",
+      "bytes": 8655,
+      "sha256": "ed3ad8248ab7878ec182c2a4b13f21c633a1e993d569851aa72e33d695169f24"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-42-2.json",
+      "bytes": 8646,
+      "sha256": "045b7f64c7b0e2953ee303d7ffafa138d629abd1d330085f7c58cfa47b85f04f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-43-0.json",
+      "bytes": 8907,
+      "sha256": "b9b27fa741340b5cf31a3e2cbb8c9d81d998d2a82dc89c3b5d5da4e2e420c552"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-43-1.json",
+      "bytes": 8655,
+      "sha256": "138cb3ae7bcbe778d8fac18674d3eaed3beee5224097a9b127ebd8c54b3d8305"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-7-43-2.json",
+      "bytes": 8646,
+      "sha256": "11c8bf8bfb2280fc9dad1705827fee5a50dacc649b1cc40ba6a9d27a0238b19d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-10-0.json",
+      "bytes": 23771,
+      "sha256": "5b9b6e2e59209a7198b16f76d2fb592d227b25cde75baee40ea5051f3d63b728"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-10-1.json",
+      "bytes": 23439,
+      "sha256": "c9b9f7ae42bf1a22ffa00b41d9ae5edcf17261fde045ddc497dae750ec944cc9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-10-2.json",
+      "bytes": 23430,
+      "sha256": "d6cf13a1ccc67e0fea7ecda4f5f3ea840b526af68f98c9f66c89542916a5ab91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-41-0.json",
+      "bytes": 15638,
+      "sha256": "2c45e2168610e98faf21d74e5d2b014474e968a990859bd60147d477f419eabd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-41-1.json",
+      "bytes": 15396,
+      "sha256": "2e9f854eb22d838784e4c87a07a66a3a631b0ef71bdd6ed31440a65ebb720037"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-41-2.json",
+      "bytes": 15387,
+      "sha256": "50428e0b6a7ab40455c0fb08a6509f0a93054f26ed2995eabc9a8efcd5395848"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-42-0.json",
+      "bytes": 15597,
+      "sha256": "2359290bbee2c157dfddd300dfbdd3759130cb535ce1cb28f64f4d14e6240a68"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-42-1.json",
+      "bytes": 15375,
+      "sha256": "e6c0ff26ac78c65e8a4c483643b8124f2207a2bc5858e69406dcef0a1c10f539"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-42-2.json",
+      "bytes": 15366,
+      "sha256": "926095301d551d0d68ad044d29a6d6658c30db976e10b3bb8695e7d2a8a524fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-43-0.json",
+      "bytes": 15627,
+      "sha256": "bb83673cd2bc33741af0ae2254f0fc0743ac44967a4b3d2bf876912a2b3acec6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-43-1.json",
+      "bytes": 15375,
+      "sha256": "9446c80a42b807dadb5908bea74929c261c491722bea2866afa34e49495b0423"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-0-8-43-2.json",
+      "bytes": 15366,
+      "sha256": "fbe2e33cb98c9246d18ea1bcd81695841fd279a61264ae35f637f3cab2ba5942"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-10-0.json",
+      "bytes": 8156,
+      "sha256": "5292d20b5b65caaaf7403046da8da8a1dcbeb237e185dd106a6a206d5b0d38a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-10-1.json",
+      "bytes": 7827,
+      "sha256": "715e1c77f277997e20d53356265b4ca0fb97253961abdbb5a2f35e022f7e1269"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-10-2.json",
+      "bytes": 7818,
+      "sha256": "5fc4e1c250cb779c0fb9e4615408314cfa681122b0c986936f997d0fb1d20cf4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-41-0.json",
+      "bytes": 8088,
+      "sha256": "418a2a3b8ba9d5f98dba7b44463aed49f17640bb21f654c8adcbde62fc590f08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-41-1.json",
+      "bytes": 7848,
+      "sha256": "cd3b2006cd712f066f602a49f50fc664554acf6c477661c0c9dde78c82cd3657"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-41-2.json",
+      "bytes": 7839,
+      "sha256": "0c9a183d51a6caed162f157d6b6dc857fbd8e7f940c068b56d195f1eba9d591a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-42-0.json",
+      "bytes": 8047,
+      "sha256": "211d8aece1c78e6cbe3ee4c74961e0296561421f5e5d53a412d2404107411200"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-42-1.json",
+      "bytes": 7827,
+      "sha256": "63ebaca0475aa492d855ed6e2bb764910309838e4950cab481ca0e0a425bdce3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-42-2.json",
+      "bytes": 7818,
+      "sha256": "067c0026ba6a00f426f85e24daeda3504da8d4155c0a879dea819d8f88a76a5d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-43-0.json",
+      "bytes": 8077,
+      "sha256": "31cac0c96b8f5c596e9688416818535067c788b6dfdcaee1cd02ba461d4edfb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-43-1.json",
+      "bytes": 7827,
+      "sha256": "0765795db2293fe79039a5c1aa3c86b3a1268e2c4d261bf64ee42942a60ea496"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-1-43-2.json",
+      "bytes": 7818,
+      "sha256": "4f822feaac9c43f1693b4a97f81712c428d2139171794df3cb0121ad5d1b3974"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-10-0.json",
+      "bytes": 8541,
+      "sha256": "8faefae97b377cf5763c0f46882913ec2b5ad35969f7f941f6005d809145c8c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-10-1.json",
+      "bytes": 8211,
+      "sha256": "1e0ec80a5b9eb46eec00afa751dee12642b4c6bacc0b7d1f8edadc0258296b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-10-2.json",
+      "bytes": 8202,
+      "sha256": "7913c3cda6a25f3dbbe920ebbebc9b0a820df26faab04cd29bc13acbdbef6af0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-41-0.json",
+      "bytes": 8025,
+      "sha256": "f66f3fb5694256790d211f52c3f13d58677c939b0debeab79efdbbe6d0c23811"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-41-1.json",
+      "bytes": 7784,
+      "sha256": "b545f8a8b9fd6092529b963cb7750e19158cc1f5135a4fab9d4b48d5385df356"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-41-2.json",
+      "bytes": 7775,
+      "sha256": "a42506bb97763219fefd47c114cd8be42f5c5138b279f196785e633cc36af452"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-42-0.json",
+      "bytes": 7984,
+      "sha256": "5b3a908fc5bb83f3e761210d35279567f4cd8a77c190e764fe37d5f68ebdcd80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-42-1.json",
+      "bytes": 7763,
+      "sha256": "bf5bd764566153311ce013596211f894f6817a64b850b29004b4bfb930062385"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-42-2.json",
+      "bytes": 7754,
+      "sha256": "1bac519df336bdd5ef1d2a213cbf07fd42497750ba429b49e5f776509e669baf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-43-0.json",
+      "bytes": 8014,
+      "sha256": "36d0fe9c89baf9a6312456e1906838939e48040e6188e1416928e79a35e5d6b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-43-1.json",
+      "bytes": 7763,
+      "sha256": "e9554b54f6d303727a619e3d666ba799ddc9772a1029939113b7865af9341a10"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-2-43-2.json",
+      "bytes": 7754,
+      "sha256": "65235eca3a3a5461288b89979d89ef4c4045b20996848f444c1e863a8a07d521"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-10-0.json",
+      "bytes": 13022,
+      "sha256": "85f5eb80b61133466e7233573795246371afe70e37a8b4c5266c78ef7a120b88"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-10-1.json",
+      "bytes": 12691,
+      "sha256": "d1305bcf98fe901ea47717bedd6253b80536696a3976ad7bac12c1eaa487a4f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-10-2.json",
+      "bytes": 12682,
+      "sha256": "6fc0077d47728377314ecaf06440566d146c09cfea58f06f58650d23df4ad04c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-41-0.json",
+      "bytes": 10266,
+      "sha256": "02762dd9649cdd0f073c445cc1f7b1073f03b86d7bfceb7e5b4bc743fae53641"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-41-1.json",
+      "bytes": 10024,
+      "sha256": "b7d50d54626a042cfffc77a6f9e166f6c5c556ab2cb23d1e3ceaf8da1d94e3d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-41-2.json",
+      "bytes": 10015,
+      "sha256": "22d70e670d132f3766ebef01a250776feeaf26c4c050ff85f2ba0320843ee08f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-42-0.json",
+      "bytes": 10225,
+      "sha256": "3a58956ad95477a037ed0600bf82ef03d600df97dea35b58f5e163f718dc4c1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-42-1.json",
+      "bytes": 10003,
+      "sha256": "6c528fca105bdffd04adce2e3da3a098d794a2d5d16f40e9ca9767e72903f0a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-42-2.json",
+      "bytes": 9994,
+      "sha256": "1e76e580acbfbb0d1d76e8f176e4dabf38786341f735da514dd0c72e7542a44d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-43-0.json",
+      "bytes": 10255,
+      "sha256": "5dfaae9b675f5bb5b98305c17a0540eb633163dcc38a0ef2cca8fcc8dbf5dd7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-43-1.json",
+      "bytes": 10003,
+      "sha256": "c1a8a12e458f65279e572dd7fab92c956e1ebbcb19c6d138edffef3db9d11477"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-3-43-2.json",
+      "bytes": 9994,
+      "sha256": "f881d6bfc6395c71c2e930cdc2a28ba1f3bd3da603d9e55a0fafe68cfdbe3d6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-10-0.json",
+      "bytes": 45023,
+      "sha256": "b75472f50f23c43c100424f1444a6874bfbc73081c1fab12afb18f7e03b43906"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-10-1.json",
+      "bytes": 44691,
+      "sha256": "aefff13ee329b104815d3b1f59262127afe10ebe88818dce9a36417743d50a5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-10-2.json",
+      "bytes": 44682,
+      "sha256": "ddefed8e0e77848d9895db2588154a9d6d9db92e35730d878d2760eae2ebd7f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-41-0.json",
+      "bytes": 26267,
+      "sha256": "3139fd946b139daf72e5f13c5dc383bf9b3715fe4fa75486dce8c2c17beeb5ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-41-1.json",
+      "bytes": 26024,
+      "sha256": "a63d510a526b716cfab88bb3e1bf3cb05ae1cb4de8bdd97b3ad9a7d576cca187"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-41-2.json",
+      "bytes": 26015,
+      "sha256": "cff74bac10df3459f85e8546dbbe582c8df763370a382058c73c8cc210d34e60"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-42-0.json",
+      "bytes": 26226,
+      "sha256": "8baf22c0ee7660274b41993ff759bdc5e0d8577e5f343372cd8a33e267853350"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-42-1.json",
+      "bytes": 26003,
+      "sha256": "45650a6cdb3409aae7f618f24dca824ac9bf8abb8e0a5ea20545d576912ce0f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-42-2.json",
+      "bytes": 25994,
+      "sha256": "1655ec3f1fd03f4b700805871923544d184cf1abeb61d3f36ff0d6a6e6ee2e9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-43-0.json",
+      "bytes": 26256,
+      "sha256": "1e3690be6e133ebcc60c9b4e1befe0171d146fdb994b341756d7275323249349"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-43-1.json",
+      "bytes": 26003,
+      "sha256": "b04e9af41dc767d0dd1b67a845dcb281243275740f6b3649f6c9f67ad7fd10a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-5-43-2.json",
+      "bytes": 25994,
+      "sha256": "c776ca1c91917a6711c223d152413dd146f50f1eeed1f1ece5fec3439d520b2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-10-0.json",
+      "bytes": 10334,
+      "sha256": "f96d58009648a0de7912cbd112268ef90a6d0fa718f49828be13d42920896072"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-10-1.json",
+      "bytes": 10003,
+      "sha256": "7c6fb763b2e5ee8a8139e21a5bfdb502c38ad2fc769995fcf2681dca912b3703"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-10-2.json",
+      "bytes": 9994,
+      "sha256": "fa2076358c895a64ed1ef301a90f85ed5c5b1154b16ac311fc8dedb980aafa7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-41-0.json",
+      "bytes": 8922,
+      "sha256": "77c048c99476e5d4136ea32a96c441e1623aead0cf97b122e7c52381895034b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-41-1.json",
+      "bytes": 8680,
+      "sha256": "a95e6cedac84a21d5394ba97032bc0a3fe126cdf6fc035db1478728a86e23d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-41-2.json",
+      "bytes": 8671,
+      "sha256": "4950e0f6692ba29c39079ec41f99db152e017980fa6442c0532c968ca327cfcb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-42-0.json",
+      "bytes": 8881,
+      "sha256": "e3f87a593dc03427d26424d2e9b21830669e7ae867f130827eb2749c20b1662e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-42-1.json",
+      "bytes": 8659,
+      "sha256": "45955377d0c1f6540c0b1f1f0c0c8948c7d4123849ed65f2fb2a1f0e01ebdd42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-42-2.json",
+      "bytes": 8650,
+      "sha256": "4463c6d8f889ea9d7ee7d0c1377ac1d4e7a9ad623742792302a0ec9df47071a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-43-0.json",
+      "bytes": 8911,
+      "sha256": "bf728bb7ecbd6b260d6c281dac7327618d6fb84ec648b3c309493ae954e6a3f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-43-1.json",
+      "bytes": 8659,
+      "sha256": "39ac662c7078fb8209b80999d128f8989f6a61b44c856c60198ecc44fe9d058c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-7-43-2.json",
+      "bytes": 8650,
+      "sha256": "c47c211eaa10386d7f98c4be361a6b4e67c2dc76a992968f986b4e1b3c88362c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-10-0.json",
+      "bytes": 23775,
+      "sha256": "e3cb4e7dd680e805c9914cf8f9de707d6cb878c693e91382b04c1700ce2dc7b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-10-1.json",
+      "bytes": 23443,
+      "sha256": "f1bd23bc838971fdd5a89661e7429ce89f35fe6301aeb5a93488a8e8aacb3e46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-10-2.json",
+      "bytes": 23434,
+      "sha256": "377518bf89e9032b5987bc2cb33189ebd5c78548f9bb831d40ac0ec6ca74a31f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-41-0.json",
+      "bytes": 15642,
+      "sha256": "685c3bedb379c25d7ff0fbce13e114e4d62b3bb941f4daf3b4d5d9c9cea48cf0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-41-1.json",
+      "bytes": 15400,
+      "sha256": "981b3dfd1b44b49ba67eee32cb83addf01531840900e2d9d4620657db7d3a0b3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-41-2.json",
+      "bytes": 15391,
+      "sha256": "d69d6e6d9f9fee9cc50f130132a01b362a38cf933383ee2812275c64f2328a57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-42-0.json",
+      "bytes": 15601,
+      "sha256": "6b2d633e38e471705a4a475bd59e4a1f367aec5e3ad0c97a8555c1d3fc4c6d93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-42-1.json",
+      "bytes": 15379,
+      "sha256": "f56f0857d4f481c42d70fa15a2f4158da41fd510baef518e02612e0087a51415"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-42-2.json",
+      "bytes": 15370,
+      "sha256": "290b4419155834fa9263e18f4fb856c3c00790750b90fc3a255f95b6ebe72fe3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-43-0.json",
+      "bytes": 15631,
+      "sha256": "597d9df05400623a0fdd5b3ec44745c9d45f5243b1b9e57f09abf7f8bb7ef1c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-43-1.json",
+      "bytes": 15379,
+      "sha256": "b9a29e928067163f2d66766e4e4d88719adb91180bf9b448490f5a6ca7616e27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-32902-8-43-2.json",
+      "bytes": 15370,
+      "sha256": "af7db8ad24321406177439320a70dc6fe482a5932123a4760b789c0c23725bd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-10-0.json",
+      "bytes": 8155,
+      "sha256": "d2815b0c0e6a7b165cde2f37f2eb8ecd4bcce02db972755a7ba7128223e45679"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-10-1.json",
+      "bytes": 7826,
+      "sha256": "dc16d1872539aaabec47afcea7e9ac0fc409f7f2f0bc39450106ea3e65c1bbeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-10-2.json",
+      "bytes": 7817,
+      "sha256": "3b82ffaed618f605570154681a584938fccdd9e6c5d6f77d78460ad6f3e2e3fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-41-0.json",
+      "bytes": 8087,
+      "sha256": "9155ccccd95905ac2b71124378fd43935bb3cc802463801bdab6dfbc722fb2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-41-1.json",
+      "bytes": 7847,
+      "sha256": "ec88519446b12f795808956ba64fad86885afc8c4a55beaa063b4dac1dd1e44a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-41-2.json",
+      "bytes": 7838,
+      "sha256": "24647b95b09696554f6ee601eaece2c09e9db97f2c7966cb54eb21c505dc689e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-42-0.json",
+      "bytes": 8046,
+      "sha256": "9c8faec82ea5c8274a9e06e6ec2dfdd8551026ee0038bdd550370a99c0267594"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-42-1.json",
+      "bytes": 7826,
+      "sha256": "c9a10842111a9b699710b3d79f9217b09e43a918d989e3f940370812f242377d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-42-2.json",
+      "bytes": 7817,
+      "sha256": "e7ef94fe7c8690dd61ec46ba9e6171598f8c71aa19005c3832b454694e7171be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-43-0.json",
+      "bytes": 8076,
+      "sha256": "bbc9ffbcbcaf4dd82ac0f1648f568a76c76aa64fcc26208072b9c7e0b0a8455f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-43-1.json",
+      "bytes": 7826,
+      "sha256": "65bb98715e6efe1014d0a15e51abbba79ed83d4b3bf3d09a9cea357998edbc63"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-1-43-2.json",
+      "bytes": 7817,
+      "sha256": "398bd3e3ef2647be22a20c18da18c5730320c1c84629563ecc5a86b959a07eee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-10-0.json",
+      "bytes": 8540,
+      "sha256": "fbbe13c87d476bbaf9b9bd66d2facbefcbac036dc847393c5d06e8d327c25952"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-10-1.json",
+      "bytes": 8210,
+      "sha256": "1d8cc8b7575e60483c5847d14c8c2371c905048ef86e82c79b4a1453892550b8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-10-2.json",
+      "bytes": 8201,
+      "sha256": "6824407a7682b7dfa330704e831f5ded88ec176387ef98e3f95abbf22d289e0d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-41-0.json",
+      "bytes": 8024,
+      "sha256": "ae0caf0f4c249a8bc712de277a5a7be14a0b24046579ca94614f05fd5675ad9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-41-1.json",
+      "bytes": 7783,
+      "sha256": "22fc0159d72daa569de56521d8aabdb28e3381c502940a69019eb70ffbbbb811"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-41-2.json",
+      "bytes": 7774,
+      "sha256": "061dead20ccf9ed3c4a2412b0381e3dfd049ef2ef301c7c749e971959bd91bd4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-42-0.json",
+      "bytes": 7983,
+      "sha256": "61421b90d4972c885157738cd863db3798c47fa97cb67251207028f45c0944d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-42-1.json",
+      "bytes": 7762,
+      "sha256": "e29fa8a0d34d7cb0bcbd5bb2b8ec5e5ee8c7a40b1f812c5e5d9b676623020a23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-42-2.json",
+      "bytes": 7753,
+      "sha256": "7c185eb591af47095d36a12387d2d9083805bdbc53575a8cf6e32a151623ec37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-43-0.json",
+      "bytes": 8013,
+      "sha256": "80865f7101cf364fd3656b75fed4ecd86cf4fee8985a82bfc1cebf2759006525"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-43-1.json",
+      "bytes": 7762,
+      "sha256": "a2062492e06aa0c9fb733be7afe20a129a4e7be1996c346cd5e96d53b1f747d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-2-43-2.json",
+      "bytes": 7753,
+      "sha256": "d41a12dd063a3cd6fe733fbd9b494132191956d7f570460f200002161acf3103"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-10-0.json",
+      "bytes": 13021,
+      "sha256": "f4768e1559addbcdeba220bba79efaf6e1fb51534bfa720ba3229056eed70000"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-10-1.json",
+      "bytes": 12690,
+      "sha256": "bd7693b65f1f648c22d8ea6f5cc50b7d9e10229878bc5f0bb56ee855b1bec388"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-10-2.json",
+      "bytes": 12681,
+      "sha256": "8e836208beed3e2fefa5a49f9440365c33be709f0fecbe8748cfe86bba5303a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-41-0.json",
+      "bytes": 10265,
+      "sha256": "1c7ced71fe65d0a555e0c06a556579ef816c16990ae8b9e64e37db36ceec7a15"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-41-1.json",
+      "bytes": 10023,
+      "sha256": "b004d7bad5444fda3487ad7d73129f1563ffabef3fb08e6e6e1832f6eefaf26a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-41-2.json",
+      "bytes": 10014,
+      "sha256": "55e350bd282f3695095becede2cf9638ececfdbb4bccd69634542d916de8aabd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-42-0.json",
+      "bytes": 10224,
+      "sha256": "8ce23d4d9005a98f07f3685b8e30a16d7b216b20d27e92360018c21c96e4f284"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-42-1.json",
+      "bytes": 10002,
+      "sha256": "006a1232e53f68e60228914448c6127b3630d87a8da81620f273b8d46cf6c556"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-42-2.json",
+      "bytes": 9993,
+      "sha256": "c5ca0ceacfe31f51947008c7f213f6ab7ce8ee16d37324e6f6576913a71a30f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-43-0.json",
+      "bytes": 10254,
+      "sha256": "b92e97283ecf19df1ee0660596d39f5f722eda3e8097b3ae04875cd7f34c7db2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-43-1.json",
+      "bytes": 10002,
+      "sha256": "6aa7d1b52fdca49378ff1cfdacb1f1c0fcb02bf8e26af46c0016e5d4870e9279"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-3-43-2.json",
+      "bytes": 9993,
+      "sha256": "19f22219f0830004a52895a974670e7e7a673c00905173bc17faabcd45e8be39"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-10-0.json",
+      "bytes": 45022,
+      "sha256": "c1b11be808b9dea707c0ebbef12ed3575b4d1f6989b739d43e48ea448358dc54"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-10-1.json",
+      "bytes": 44690,
+      "sha256": "de6181eb2e8c0e841b51a0628e7c7f49472a45c4b6725ba6a58cd3270dadc951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-10-2.json",
+      "bytes": 44681,
+      "sha256": "1d5d5e44c0fe33d6c57212158bfd5c8e912a99c61a4cc2a72ae425bedd3ea6c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-41-0.json",
+      "bytes": 26266,
+      "sha256": "64dc57c9fc169f27c7b79e7754769e26e1ecc08057ae746cb577163161f2a4ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-41-1.json",
+      "bytes": 26023,
+      "sha256": "e9bfdf4ca398123b21bb37cb2235eeef4316437b67604b5083ff2286229ec78c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-41-2.json",
+      "bytes": 26014,
+      "sha256": "f4fd462c3b47806d010d523486a90e94cb3fc03113fb5ce818202eb887a93689"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-42-0.json",
+      "bytes": 26225,
+      "sha256": "5a43bba8562671c730a5351d8e591c943ff837fc289b34d96e1a866a0bb29b1c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-42-1.json",
+      "bytes": 26002,
+      "sha256": "ebdda7954a3139cf9aff4cb3cf71fcd096a825467f47fb6e5f77d69578a73f2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-42-2.json",
+      "bytes": 25993,
+      "sha256": "fddcd7a401a8b1e374c407a88cb40e2f275bcce605df8acc9a461f2b30aad298"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-43-0.json",
+      "bytes": 26255,
+      "sha256": "c27d20e0edc4a3ea230e1dc8a644f515a15d82c112d13c76f26b1c0322ba8064"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-43-1.json",
+      "bytes": 26002,
+      "sha256": "04a5a44cd78d37c1bb04aa221f1b03d69cfe61dad30e9d4068d58cfb671e231d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-5-43-2.json",
+      "bytes": 25993,
+      "sha256": "ff7b8313410638c5737dc5dc8a6980452f413d1214b9879af53e988072b4d308"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-10-0.json",
+      "bytes": 10333,
+      "sha256": "41ca0db1d207f578c241bf41e8391f39f1f868a5b93674a2af8f99db1716c953"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-10-1.json",
+      "bytes": 10002,
+      "sha256": "05fad3a4c78348ed04d1ba40423d64ffcd3c1543b885c04277868d3b681c38fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-10-2.json",
+      "bytes": 9993,
+      "sha256": "cd93d6cb53f51775e7cb2adc2cbb71cc5c091d09b927a7043c23d505d6b1e664"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-41-0.json",
+      "bytes": 8921,
+      "sha256": "bf14a2eb9c6ac538febafbe53423c92fb5dbcc6d8b3aad4ad638451000f798ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-41-1.json",
+      "bytes": 8679,
+      "sha256": "e570099c76965ce2ebcc8743a2b55094f7aafa8968e3b3a8da9713a97f4fc98c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-41-2.json",
+      "bytes": 8670,
+      "sha256": "b29e8c3042a72cb8ec905f3ca151f6eecc8a8b09af64c6411f9fb3e5d1aec3ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-42-0.json",
+      "bytes": 8880,
+      "sha256": "ea073b9af65128d272072d35a002b5b292b638b49510127fe5453a78183e5815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-42-1.json",
+      "bytes": 8658,
+      "sha256": "beaf668880c44b9fd211aba554a93f33cabc8e32e003af6aada3373e332a2515"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-42-2.json",
+      "bytes": 8649,
+      "sha256": "10acb99245ef75e22a4fef5bc387240f9b431624472704bc490d5c8cc30f8e66"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-43-0.json",
+      "bytes": 8910,
+      "sha256": "76d99ee64f600c37052891c7bbfe93fad74096bd587821ffa12a75963edb3b24"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-43-1.json",
+      "bytes": 8658,
+      "sha256": "341e4419b4b27027ac952b80d57a7f638170f45cd14229eb2bcef0c0f9d6e70e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-7-43-2.json",
+      "bytes": 8649,
+      "sha256": "0680ce20ef17205e707febb723d196411f6a526289bd84f62b50e706fe6cb1fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-10-0.json",
+      "bytes": 23774,
+      "sha256": "60191f738266e44566deb7fe45406d13c3b53c643175b3c20a19f5f5d5ccc93f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-10-1.json",
+      "bytes": 23442,
+      "sha256": "67d31c4996501c00ae4794222c649786fefa239abbf63b1852ffb3e86df7c51a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-10-2.json",
+      "bytes": 23433,
+      "sha256": "0cb24c8fadb57c4ee2982f087e9ef96aef5b105bb929c0afcbeea375c2685fa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-41-0.json",
+      "bytes": 15641,
+      "sha256": "7ef92fedfb6046d0c104c466e1ea5c19117ebb6a71d38fb357728ae172d46f6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-41-1.json",
+      "bytes": 15399,
+      "sha256": "509574feec6c78bb49669a34d982109064ec55efc21780c206d4aeb3ef192f0b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-41-2.json",
+      "bytes": 15390,
+      "sha256": "b9ebacf581cb43302a7c81197c0eb44af3c80764b2d69d8364de2d1b306562cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-42-0.json",
+      "bytes": 15600,
+      "sha256": "1d6dc6e0dcf755b6ed160e5fd763b5a5b5d86678ca3063ddc9e146b311d175c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-42-1.json",
+      "bytes": 15378,
+      "sha256": "a5eb758e678b5494ae7aaac88fe668d4354527155fa34db02e13be398a4b3efb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-42-2.json",
+      "bytes": 15369,
+      "sha256": "b1739e94e3043b92d31857d00732596d7ce8d06276eb5b9ae09718c1161eb052"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-43-0.json",
+      "bytes": 15630,
+      "sha256": "3746a216e719f0e5b78eed1799e9cb868a02e27d58e75303c8cf98946b0a64b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-43-1.json",
+      "bytes": 15378,
+      "sha256": "1b713d1357ab08d15e186ce9fef1d85786c64503f4ac556847a021889d37bed4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial/typedPixelReadWrite-4318-8-43-2.json",
+      "bytes": 15369,
+      "sha256": "efdf47c36e4ac4aa2b5dcbb2d4c76956651460a1048fa6976877d443305a8f02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial-console.txt",
+      "bytes": 55350,
+      "sha256": "77d19db26e77c86c341d45835ae5c51d03c70883eeb36fdc1fdc52ae31e24022"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-initial.txt",
+      "bytes": 44080,
+      "sha256": "d9cbb1c0e085a577007e5c316f95dea7462c3ff23d73e5b130db907428a6137f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-platform.json",
+      "bytes": 539,
+      "sha256": "70459b0969a457fdff41ff3cd4afd9d7814b75fa74fb522037949f3dae7d609e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-regression-dxbc-pixel-memory.txt",
+      "bytes": 36199,
+      "sha256": "86337836401e7630b0793525f4a5c50d4670a3dcb25e73ca9b55ad6969ffa45c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-regression-dxbc-texture-uav.txt",
+      "bytes": 353967,
+      "sha256": "7fb532e57040f9dee1eb79bb3d62f91b2e099d407f1b033f11db8c32b4da280f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-regression-dxbc-typed-pixel.txt",
+      "bytes": 2596907,
+      "sha256": "afdabfdd806f41366774635655c71e2e3f23673f536ecc88c749dae02b739cf9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-regression-native-pixel-checkpoint-inputs.txt",
+      "bytes": 49046,
+      "sha256": "9ff28e1e9987145f914ec32f9c8eea27215db86d0d2965e65c56d40d66cad572"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-regression-summary.json",
+      "bytes": 803,
+      "sha256": "604e72a929730d844536220ced0695cf6ca41f788c1a0e054fffa0497df98179"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-typed-uav-validation.json",
+      "bytes": 215,
+      "sha256": "09c4dc0b20d6fcf3e12355150f19b3a64ac70674efb47b78198f7c10e95f8701"
+    }
+  ]
+}
