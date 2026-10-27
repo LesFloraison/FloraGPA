@@ -359,7 +359,10 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(outcome.error.toStdString());
             if (outcome.result.at("context").at("frame_sha256") != frame_->sha256())
                 throw std::runtime_error("Native analysis frame changed");
-            if (runningNativeDebug_) {
+            if (runningNativeMesh_) {
+                accepted = replayMesh_->finishNative(nativeRequestId_, outcome.result, outcome.mesh);
+                statusBar()->showMessage(accepted ? "Replay mesh ready" : "Analysis context changed", 3000);
+            } else if (runningNativeDebug_) {
                 accepted = nativeDebug_->finish(nativeRequestId_, outcome.debugSession);
                 statusBar()->showMessage(accepted ? "Native compute trace ready" : "Analysis context changed", 3000);
             } else {
@@ -370,7 +373,9 @@ MainWindow::MainWindow() : loader_(this) {
                 statusBar()->showMessage(accepted ? "Replay metrics ready" : "Analysis context changed", 3000);
             }
         } catch (const std::exception &error) {
-            if (runningNativeDebug_)
+            if (runningNativeMesh_)
+                replayMesh_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}}, {});
+            else if (runningNativeDebug_)
                 nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
             else
                 nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
@@ -382,6 +387,7 @@ MainWindow::MainWindow() : loader_(this) {
                 statusBar()->showMessage("Native analysis cancelled", 3000);
         }
         runningNativeDebug_ = false;
+        runningNativeMesh_ = false;
         emit taskFinished(accepted);
     });
     connect(&process_, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
@@ -1529,6 +1535,10 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
                          : history_->finish(historyRequestId_, result);
 }
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
+    if (kind == RdcAnalysis::Mesh && replayMesh_->nativeMode()) {
+        readNativeMesh();
+        return;
+    }
     if (busy() || !frame_)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
@@ -1580,11 +1590,40 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         emit taskFinished(false);
     }
 }
+void MainWindow::readNativeMesh() {
+    if (busy() || !frame_)
+        return;
+    nativeRequestId_ = replayMesh_->requestId();
+    nativeContextKey_ = historyContextKey();
+    runningNativeMesh_ = true;
+    runningNativeDebug_ = false;
+    try {
+        replayTimer_.stop();
+        textureTimer_.stop();
+        bufferTimer_.stop();
+        auto options = replayMesh_->request();
+        options.erase("action");
+        if (adapter_->currentIndex() == 1)
+            options["warp"] = true;
+        else if (const auto vendor = selectedReplayVendor(*adapter_))
+            options["gpu_vendor"] = *vendor;
+        nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                              "mesh", options, experiment_ ? experiment_->document() : nlohmann::json());
+        setBusy(true);
+        statusBar()->showMessage("Reading native replay mesh…");
+    } catch (const std::exception &error) {
+        runningNativeMesh_ = false;
+        replayMesh_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}}, {});
+        showError(QString::fromUtf8(error.what()));
+        emit taskFinished(false);
+    }
+}
 void MainWindow::readNativeCounters() {
     if (busy() || !frame_)
         return;
     nativeRequestId_ = nativeCounters_->requestId();
     runningNativeDebug_ = false;
+    runningNativeMesh_ = false;
     nativeContextKey_ = historyContextKey();
     try {
         replayTimer_.stop();
@@ -1611,6 +1650,7 @@ void MainWindow::readNativeDebug() {
     nativeRequestId_ = nativeDebug_->requestId();
     nativeContextKey_ = historyContextKey();
     runningNativeDebug_ = true;
+    runningNativeMesh_ = false;
     try {
         replayTimer_.stop();
         textureTimer_.stop();

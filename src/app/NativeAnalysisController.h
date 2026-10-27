@@ -7,10 +7,12 @@
 
 namespace flora {
 class NativeDebugSession;
+struct NativeReplayMesh;
 struct NativeAnalysisOutcome {
     nlohmann::json job, result;
     NativeArtifactBytes artifacts;
     std::shared_ptr<NativeDebugSession> debugSession;
+    std::shared_ptr<NativeReplayMesh> mesh;
     QString error;
     QByteArray workerLog;
     bool cancelled = false;

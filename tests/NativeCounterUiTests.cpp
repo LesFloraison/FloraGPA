@@ -157,6 +157,14 @@ class NativeCounterUiTests : public QObject {
         QVERIFY(outcome.cancelled && outcome.result.is_null());
         controller.start(capture, worker, "debug-vertex", {{"gpa_event", 1000}, {"warp", true}}, nullptr);
         QTRY_COMPARE_WITH_TIMEOUT(finishes, 6, 30000);
+        QVERIFY2(outcome.error.isEmpty(), qPrintable(outcome.error));
+        QVERIFY(outcome.debugSession);
+        QCOMPARE(outcome.result.at("context").at("action"), Json("debug-vertex"));
+        noExternalModules(outcome.result);
+        // VS execution is implemented; the reserved PS entry still exercises
+        // propagation of the original Worker diagnostic without a fallback.
+        controller.start(capture, worker, "debug-pixel", {{"gpa_event", 1000}, {"warp", true}}, nullptr);
+        QTRY_COMPARE_WITH_TIMEOUT(finishes, 7, 30000);
         QVERIFY(outcome.error.contains("not implemented"));
         QVERIFY(outcome.workerLog.contains("not implemented"));
     }

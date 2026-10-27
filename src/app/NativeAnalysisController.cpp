@@ -1,6 +1,7 @@
 #include "NativeAnalysisController.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeDebugSession.h"
+#include "application/NativeReplayMesh.h"
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -78,6 +79,11 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
             validateNativeAnalysisResult(outcome.job, outcome.result);
             outcome.artifacts = readNativeArtifacts(directory->filePath("result"),
                                                     outcome.result.at("artifacts"), maximumBytes, cancelled);
+            if (action == "mesh") {
+                outcome.mesh = std::make_shared<NativeReplayMesh>(
+                    nativeReplayMesh(outcome.job, outcome.result, outcome.artifacts, cancelled));
+                outcome.artifacts.clear();
+            }
             if (action == "debug-thread" || action == "debug-vertex") {
                 outcome.debugSession = std::make_shared<NativeDebugSession>(
                     outcome.job, outcome.result, outcome.artifacts, maximumBytes, cancelled);

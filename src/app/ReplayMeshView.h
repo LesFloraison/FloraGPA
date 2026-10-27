@@ -2,6 +2,7 @@
 #include <QByteArray>
 #include <QMap>
 #include <QWidget>
+#include <memory>
 #include <nlohmann/json.hpp>
 class QAction;
 class QComboBox;
@@ -11,6 +12,7 @@ class QPlainTextEdit;
 namespace flora {
 class MeshView;
 class ReplayMeshTableModel;
+struct NativeReplayMesh;
 class ReplayMeshView final : public QWidget {
     Q_OBJECT
   public:
@@ -20,9 +22,12 @@ class ReplayMeshView final : public QWidget {
     void setWorkerBusy(bool busy);
     QString backendPath() const { return backendPath_; }
     void setBackendPath(const QString &path, bool persist = true);
+    void setNativeMode(bool);
+    bool nativeMode() const;
     Json request() const;
     uint64_t requestId() const { return requestId_; }
     bool finish(uint64_t request, const Json &result, const QString &directory);
+    bool finishNative(uint64_t request, const Json &result, std::shared_ptr<NativeReplayMesh> mesh);
     const Json &result() const { return result_; }
     void exportResult(const QString &path) const;
   signals:
@@ -39,8 +44,9 @@ class ReplayMeshView final : public QWidget {
     uint64_t requestId_{};
     bool busy_{};
     Json result_;
+    std::shared_ptr<NativeReplayMesh> native_;
     QMap<QString, QByteArray> files_;
-    QAction *read_, *cancel_, *export_, *backend_;
+    QAction *read_, *cancel_, *export_, *backend_, *nativeMode_;
     QComboBox *stage_;
     QLineEdit *instance_;
     QLabel *summary_;

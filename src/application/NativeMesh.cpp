@@ -4,6 +4,13 @@ namespace flora {
 NativeMesh readNativeMesh(const nlohmann::json &job, const nlohmann::json &result, const QString &directory,
                           uint64_t maximumBytes, const CancelCheck &cancelled) {
     validateNativeAnalysisResult(job, result);
+    return decodeNativeMesh(job, result,
+                            readNativeArtifacts(directory, result.at("artifacts"), maximumBytes, cancelled),
+                            cancelled);
+}
+NativeMesh decodeNativeMesh(const nlohmann::json &job, const nlohmann::json &result,
+                            NativeArtifactBytes artifacts, const CancelCheck &cancelled) {
+    validateNativeAnalysisResult(job, result);
     if (job.at("action") != "mesh")
         throw std::runtime_error("Expected a native mesh analysis");
     NativeMesh mesh;
@@ -19,7 +26,7 @@ NativeMesh readNativeMesh(const nlohmann::json &job, const nlohmann::json &resul
     if (options.contains("instance") &&
         report.at("instance_selection").at("instance") != options.at("instance"))
         throw std::runtime_error("Native mesh belongs to another instance");
-    mesh.artifacts = readNativeArtifacts(directory, result.at("artifacts"), maximumBytes, cancelled);
+    mesh.artifacts = std::move(artifacts);
     if (!mesh.artifacts.contains("vertices.bin"))
         throw std::runtime_error("Native mesh vertex storage is missing");
     const auto &raw = mesh.artifacts["vertices.bin"];
