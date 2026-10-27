@@ -84,8 +84,8 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     nativeMode_ = bar->addAction("Native preview");
     nativeMode_->setObjectName("replayMeshNative");
     nativeMode_->setCheckable(true);
-    nativeMode_->setToolTip("Analyze the GPA frame directly. Instanced HS/DS/GS with UAV access is not yet "
-                            "supported; failures do not switch backends.");
+    nativeMode_->setToolTip("Analyze the GPA frame directly. Some instanced HS/DS/GS UAV dependencies are "
+                            "not yet supported; failures do not switch backends.");
     backend_ = bar->addAction("RenderDoc…");
     backend_->setObjectName("replayMeshBackend");
     summary_ = new QLabel("No mesh");

@@ -2,6 +2,7 @@
 #include "CheckpointInspection.h"
 #include "DrawParameters.h"
 #include "DxbcCheckpoint.h"
+#include "DxbcGeometryDependencies.h"
 #include "DxbcHull.h"
 #include "DxbcIdentity.h"
 #include "DxbcInspection.h"
@@ -244,6 +245,7 @@ class PostTransformCapture {
             {"vertices", report.at("vertices")}, {"primitives", primitives}, {"sha256", report.at("sha256")}},
             queries = Json::array();
         std::string strategy;
+        Json independence = nullptr;
         uint64_t first = 0, last = primitives;
         if (total == 1)
             strategy = "single_original_instance";
@@ -258,10 +260,49 @@ class PostTransformCapture {
             strategy = "uniform_vs_output";
         } else {
             const std::map<std::string, unsigned> indices{{"vs", 0}, {"hs", 1}, {"ds", 2}, {"gs", 3}};
+            bool hasUav = false;
             for (const auto &stage : report.at("executed_stages"))
-                if (declaresUav(code(state.stages[indices.at(stage.get<std::string>())].shader)))
+                hasUav |= declaresUav(code(state.stages[indices.at(stage.get<std::string>())].shader));
+            if (hasUav) {
+                const auto fail = [] {
                     throw std::runtime_error("Instance boundaries through HS/DS/GS with UAV access are not "
                                              "verified; inspect all instances or select VS");
+                };
+                independence = {{"stages", Json::object()}, {"input_aliases_excluded", false}};
+                for (const auto &stage : report.at("executed_stages")) {
+                    const auto name = stage.get<std::string>();
+                    const auto proof = geometryUavIndependence(code(state.stages[indices.at(name)].shader));
+                    if (proof.at("proved") != true)
+                        fail();
+                    independence["stages"][name] = proof;
+                }
+                // Use actual resource ownership: experiment edits can change a
+                // buffer while another view retains its original storage.
+                std::set<ID3D11Resource *> writable;
+                std::vector<Com<ID3D11Resource>> owners;
+                std::vector<Id> outputs(state.rtv.begin(), state.rtv.end());
+                outputs.insert(outputs.end(), state.omExtended.begin(), state.omExtended.end());
+                if (state.rtCount > outputs.size())
+                    fail();
+                for (uint32_t i = state.omStart; i < state.rtCount; ++i)
+                    if (outputs[i]) {
+                        Com<ID3D11Resource> owner;
+                        r.get<ID3D11View>(outputs[i])->GetResource(&owner);
+                        writable.insert(owner.Get());
+                        owners.push_back(std::move(owner));
+                    }
+                auto checkInput = [&](Id id) {
+                    if (id && writable.contains(r.get<ID3D11Resource>(id)))
+                        fail();
+                };
+                checkInput(state.ib);
+                for (auto id : state.vb)
+                    checkInput(id);
+                for (const auto &stage : report.at("executed_stages"))
+                    for (auto id : state.stages[indices.at(stage.get<std::string>())].cb)
+                        checkInput(id);
+                independence["input_aliases_excluded"] = true;
+            }
             strategy = "native_prefix_statistics";
             auto prefix = [&](uint32_t count) -> uint64_t {
                 if (!count)
@@ -300,6 +341,7 @@ class PostTransformCapture {
                                         {"indirect_arguments", indirect},
                                         {"full_capture", full},
                                         {"prefix_queries", queries},
+                                        {"uav_independence", independence},
                                         {"system_ids_rewritten", false},
                                         {"input_offsets_rewritten", false}};
         auto &limits = report["limits"];

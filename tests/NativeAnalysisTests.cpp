@@ -2,6 +2,7 @@
 #include "HullCapture.h"
 #include "MsaaCapture.h"
 #include "StreamCapture.h"
+#include "UavGeometryCapture.h"
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeCounters.h"
@@ -213,7 +214,7 @@ class NativeAnalysisTests final : public QObject {
         QTest::addColumn<unsigned>("vendor");
         for (const auto vendor : {0u, 0x10deu, 0x8086u})
             for (const auto scenario :
-                 {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav", "gs", "auto"})
+                 {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav", "ds-uav-independent", "gs", "auto"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(scenario).arg(vendor)))
                     << QString(scenario) << vendor;
     }
@@ -243,6 +244,8 @@ class NativeAnalysisTests final : public QObject {
             auto fixture = scenario == "instanced" || scenario.startsWith("ds") ? testing::hullCapture()
                            : scenario == "gs" || scenario == "auto"             ? testing::streamCapture()
                                                                     : testing::depthStencilCapture();
+            if (scenario == "ds-uav")
+                fixture = testing::hullUavReadCapture();
             const auto event = scenario == "instanced" || scenario.startsWith("ds") || scenario == "auto"
                                    ? 200u
                                : scenario == "gs" ? 150u
@@ -324,7 +327,7 @@ class NativeAnalysisTests final : public QObject {
             // Both original GS draws emit three vertices into the same SO cursor before DrawAuto.
             const auto expected =
                 scenario == "ds-uav" ? 12u
-                : scenario == "instanced" || scenario == "ds" || scenario == "auto" || scenario == "indexed"
+                : scenario == "instanced" || scenario == "ds" || scenario == "ds-uav-independent" || scenario == "auto" || scenario == "indexed"
                     ? 6u
                     : 3u;
             QCOMPARE(mesh.geometry.report.at("vertices").get<unsigned>(), expected);

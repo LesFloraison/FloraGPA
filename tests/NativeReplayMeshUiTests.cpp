@@ -1,6 +1,7 @@
 #include "DepthStencilCapture.h"
 #include "HullCapture.h"
 #include "StreamCapture.h"
+#include "UavGeometryCapture.h"
 #include "app/MainWindow.h"
 #include "app/ReplayMeshView.h"
 #include "application/NativeAnalysisJobs.h"
@@ -47,7 +48,7 @@ class NativeReplayMeshUiTests : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("stage");
         for (auto vendor : {0u, 4318u, 32902u})
-            for (const auto stage : {"vs", "gs", "ds", "ds-uav"})
+            for (const auto stage : {"vs", "gs", "ds", "ds-uav", "ds-uav-independent"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage)))
                     << vendor << QString(stage);
     }
@@ -134,6 +135,8 @@ class NativeReplayMeshUiTests : public QObject {
             auto fixture = stage == "vs"   ? testing::depthStencilCapture()
                            : stage == "gs" ? testing::streamCapture()
                                            : testing::hullCapture();
+            if (stage == "ds-uav")
+                fixture = testing::hullUavReadCapture();
             if (stage == "ds") {
                 fixture.entries.erase(std::remove_if(fixture.entries.begin(), fixture.entries.end(),
                                                      [](const auto &entry) { return entry.id == 7003; }),
@@ -194,7 +197,9 @@ class NativeReplayMeshUiTests : public QObject {
             const auto result = Json::parse(read(runNativeAnalysisJob(job, worker, 60)).toStdString());
             auto artifacts = readNativeArtifacts(output, result.at("artifacts"), 64ull * 1024 * 1024);
             auto mesh = std::make_shared<NativeReplayMesh>(nativeReplayMesh(job, result, artifacts));
-            QCOMPARE(result.at("data").at("shader_stage"), Json(stage.toStdString()));
+            QCOMPARE(result.at("data").at("shader_stage"), Json(stage.startsWith("ds") ? "ds" : stage.toStdString()));
+            if (stage == "ds-uav-independent")
+                QVERIFY(result.at("data").at("instance_selection").at("uav_independence").at("input_aliases_excluded") == true);
             QVERIFY(!mesh->positions.positions.empty());
             QVERIFY(!mesh->positions.faces.empty());
             QCOMPARE(mesh->positions.positions.size(), result.at("data").at("vertices").get<size_t>());
