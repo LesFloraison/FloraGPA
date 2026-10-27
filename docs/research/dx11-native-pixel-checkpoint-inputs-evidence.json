@@ -1,0 +1,4214 @@
+{
+  "schema": 1,
+  "stage": [
+    "P5",
+    "P6"
+  ],
+  "scope": "current_bound_inputs_and_serialized_typed_atomics",
+  "implementation_commit": "0df2c3c1c37cd0507d0b2e56001f24ce198b6ef4",
+  "research_report": "DX11_NATIVE_PIXEL_CHECKPOINT_INPUTS.md",
+  "status": "validated_increment",
+  "complete_pixel_history": false,
+  "public_ps_debugging": false,
+  "full_renderdoc_removal": false,
+  "owned_validation": {
+    "data_cases": 294,
+    "qt_passed": 296,
+    "failed": 0,
+    "skipped": 0,
+    "milliseconds": 48711,
+    "corruption_controls": 294,
+    "accepted_directory": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence",
+    "accepted_log": "artifacts/dx11-native/pixel-checkpoint-inputs-final-tests.txt"
+  },
+  "regression": {
+    "suites": [
+      {
+        "suite": "dxbc-pixel-memory",
+        "passed": 650,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 10257
+      },
+      {
+        "suite": "dxbc-texture-uav",
+        "passed": 765,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 90278
+      },
+      {
+        "suite": "dxbc-input-snapshot",
+        "passed": 82,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 6828
+      },
+      {
+        "suite": "dxbc-execution-trace",
+        "passed": 21,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 614
+      },
+      {
+        "suite": "dxbc-group",
+        "passed": 182,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 14107
+      },
+      {
+        "suite": "dxbc-memory",
+        "passed": 246,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 20267
+      },
+      {
+        "suite": "native-pixel-outputs",
+        "passed": 95,
+        "failed": 0,
+        "skipped": 0,
+        "blacklisted": 0,
+        "milliseconds": 9212
+      }
+    ],
+    "total_passed": 2041
+  },
+  "total_qt_passed": 2337,
+  "regression_ctest_seconds": 152.91,
+  "product_build_targets": [
+    "FloraGPA",
+    "FloraGPA.Cli",
+    "FloraGPA.Worker"
+  ],
+  "initial_failures": [
+    "Typed buffer/texture atomics were rejected as missing buffer declarations on all adapters.",
+    "Intel multi-primitive atomic draw outputs did not imply geometry storage order. Ordered references now use independent serialized original draws; unordered results and their constraints remain recorded.",
+    "A new test initially passed PixelQuadStep to a GroupStep serializer; it now uses the same explicit conversion as the production trace writer."
+  ],
+  "hardware_observations": [
+    {
+      "case": "3D mip 1, FirstWSlice 1, WSize 2, relative z 2",
+      "vendor": 0,
+      "atomic_byte_offset": 2260,
+      "add_zero_access_detected": true
+    },
+    {
+      "case": "3D mip 1, FirstWSlice 1, WSize 2, relative z 2",
+      "vendor": 4318,
+      "atomic_byte_offset": null,
+      "add_zero_access_detected": false
+    },
+    {
+      "case": "3D mip 1, FirstWSlice 1, WSize 2, relative z 2",
+      "vendor": 32902,
+      "atomic_byte_offset": null,
+      "add_zero_access_detected": false
+    }
+  ],
+  "remaining_gates": [
+    "Production raster inputs and checkpoint resource snapshots are not yet joined into public fragment history.",
+    "General active PS typed loads/stores, source-debug parity and original fragment qualification remain open.",
+    "Independent scheduler atomicity does not recover the original GPU invocation order.",
+    "No new GPA debugger +0x3c0 implementation conclusion or standalone package audit is claimed."
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 126012,
+      "sha256": "72b5159f0d1e913b3a77ea08a06808bc2a849a032d797cc52b90e6262a376d7d"
+    },
+    {
+      "path": "src/application/DxbcAtomic.h",
+      "bytes": 559,
+      "sha256": "cdcb5bd30a92067624397ad0c3e86d17a900e903d2fe625d9c2379605942f505"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 88162,
+      "sha256": "5370b4db15a22b6dbc246affc2f369fa8e6ddb9662eb937390c2ee125dbfaaae"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "bytes": 8594,
+      "sha256": "7a12862db12a6b6e4cddec292a99127e174f3332c2baed630fcc983a302b4fc1"
+    },
+    {
+      "path": "src/application/DxbcExecutionTrace.cpp",
+      "bytes": 21912,
+      "sha256": "192ae92feb3c890b7664433ad92707b6ce9373ed7740dcfe0027a2109f118516"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 101681,
+      "sha256": "09a47facfa922376ab74f251fbd09d7633c4357bce24567a28e2fb91f6f98264"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "bytes": 5023,
+      "sha256": "94ee571ddc1dc401b5ad07b8aa7a47d3987caf964095e011d02f70a3833d6f75"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "bytes": 41913,
+      "sha256": "08096b2fcc08cfe0a5733a7d9745d0f9ac12998af36387d369b3bd2ab24137ca"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "bytes": 3357,
+      "sha256": "87b34e85252a877e96f0ecd8d34d676c927a98d8e8d9303bb4911183c455209d"
+    },
+    {
+      "path": "src/application/DxbcMemory.cpp",
+      "bytes": 19937,
+      "sha256": "c5460bdce0efdb6905bac424a177154f86b3fcab85951cb8965a46cb544ff7df"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "bytes": 6227,
+      "sha256": "2106788a902808110017635a97935fb948ff51a69930d896b46102d4ac1d4f02"
+    },
+    {
+      "path": "src/application/DxbcTextureUav.cpp",
+      "bytes": 12921,
+      "sha256": "dbe90f45fa639178b6c5f2b04fb4d05caf97caf328cb859c7ac859cf2081117a"
+    },
+    {
+      "path": "src/application/NativePixelOutputs.cpp",
+      "bytes": 10718,
+      "sha256": "8eca058ff1912054a4e73e1a680ae9bb151ac955461ae2f52fe6b173799448d3"
+    },
+    {
+      "path": "tests/NativePixelCheckpointInputsTests.cpp",
+      "bytes": 40742,
+      "sha256": "f82aacaf582104b1da42acf1fd07267219ed153d79bd5f1ff8edaa68ece05ac0"
+    },
+    {
+      "path": "tools/validate_native_pixel_checkpoint_inputs.py",
+      "bytes": 12183,
+      "sha256": "9b9860dceef99e4b0f67139317b2899ae8ce1b973f5864a4f107489ae6a4a20e"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "780a9fa34fade0c90870ce40458c0cf5b824c23fccc1c066e1c542f719d2514d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5568512,
+      "sha256": "0795019d8eb8531945054597ddba723ce18791d99566b120fb8efdd8bd4e6bba"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5568512,
+      "sha256": "8c6b2694f8a38b92cb4375246202a589a455bb910786a03bb43d33e6b959bf14"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2033664,
+      "sha256": "191d37d77743369917e252ddd898cb2d30c8163744cf786d3579daa28e99fa81"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelMemoryTests.exe",
+      "bytes": 506368,
+      "sha256": "40fbecb7627733bd45d7b104f3ae454094950871bc537369e9bee4a19b87d02d"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTextureUavTests.exe",
+      "bytes": 1573376,
+      "sha256": "0c36076beef38bd863f88e633479344697c341c46ee89cfc300052c3ca60ef12"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputSnapshotTests.exe",
+      "bytes": 1687552,
+      "sha256": "cd73b9fea805c68fad1624c03cde66208f9dfc6829e14c3bf67f389952bf8a42"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1853952,
+      "sha256": "f1c32387a341e72ffd1226fcbc3efd7fe065c234a27ae298d7d523ecf40ebf47"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcGroupTests.exe",
+      "bytes": 545792,
+      "sha256": "ba6145bf03e4b85b29ef9001e905cddcabd460cfbddf92badeca54e8b02e9fb5"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcMemoryTests.exe",
+      "bytes": 491520,
+      "sha256": "bbf310d6114f89ed19be4fc83626a598c94905a79844d1563417c62e5dd31bfd"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelOutputsTests.exe",
+      "bytes": 550912,
+      "sha256": "aa9e551c061565b38af68689ad64e82679d0bbc97949153a00fb17159e82dbbb"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInputProbe.exe",
+      "bytes": 1787904,
+      "sha256": "787c7d7743990745bbed08c0dfa3d323bd6d834752ab4e9673b80b754ae02230"
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-build.txt",
+      "bytes": 5519,
+      "sha256": "730dbda239a242335eefe736ed5b9c520ba35e87078633247379a51d97fdacb2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-console.txt",
+      "bytes": 38295,
+      "sha256": "c570f57429eebc6cc895d1dd740508b8be163c722b7b6e937f3de703a293b04d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-0-append.json",
+      "bytes": 30545,
+      "sha256": "4abd8197e6ac0196ab1f6089de982318f36b5e9f64102eaaa2e4a0c5a6ce9c7c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-0-counter.json",
+      "bytes": 30562,
+      "sha256": "0427c1ac0375e40a7a2c5050faa11f71e835f73e7a16d6cb2def9687d436b1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-0-raw.json",
+      "bytes": 30554,
+      "sha256": "c8a716446914b4a6810ae6296f05e057c0b2bc444011b3a8d37673069f8ac0ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-0-texture.json",
+      "bytes": 29498,
+      "sha256": "5739570a0abb6ccc83cc26320dce480adf4c086bc4bd6cb415192824c565cac5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-0-typed.json",
+      "bytes": 30556,
+      "sha256": "6df53c4c697737fbf16ae1b8ea204d0c9af19e605894c0eb0018380cbadd1053"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-32902-append.json",
+      "bytes": 30561,
+      "sha256": "fdf11d8f6bf12a891f971f2fccc6de01f4aa68bb6556efbc36a2c9fdf3f0d827"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-32902-counter.json",
+      "bytes": 30578,
+      "sha256": "3af5b7443889dfe67fdebbfaa71e6cfabe786302d996e333c355afad558d5881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-32902-raw.json",
+      "bytes": 30570,
+      "sha256": "773d6614f19cf4471ea5e48628e635547fbc13307521ab312bf28db3c48b5eec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-32902-texture.json",
+      "bytes": 29514,
+      "sha256": "ec51ba76a77ce7e66a80b89c007219f0a833d3fff0a00241a7c9c0279b9b9571"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-32902-typed.json",
+      "bytes": 30572,
+      "sha256": "5c86ffdde4bd46b3e6caf0e1e07628d39262bbd796bca241bc5cadaf949fc0a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-4318-append.json",
+      "bytes": 30556,
+      "sha256": "026c398f7d8717adaece5960b524af37cb0aab237eebac94678801366e74e249"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-4318-counter.json",
+      "bytes": 30573,
+      "sha256": "44c86b55f18a31fa52a0bdf1a353b013935426916110ce76e55f1121b9216914"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-4318-raw.json",
+      "bytes": 30565,
+      "sha256": "e54d19ef7f20d1099001c2b4c07d13985dc76014e60c8e613e7def56d6218f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-4318-texture.json",
+      "bytes": 29509,
+      "sha256": "2cd42e8fd79ff8f02fcd366f793939b1086114f229063729b1360dd6a3422401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/prefixes-4318-typed.json",
+      "bytes": 30567,
+      "sha256": "fff602dc98acc16d1f41e0852491da0729374cc4fe24abe8db1e0e720d780880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-0-texture.json",
+      "bytes": 1114,
+      "sha256": "8b03ac4754566cc169113553982f00b39e5bf4e5b05277f5e8346a4b15e3aee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-0-typed.json",
+      "bytes": 1639,
+      "sha256": "74d486c4f70a1fe3dfcfd523aac6fff48851c2401b91d5ffa58b12059813aaeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-32902-texture.json",
+      "bytes": 1118,
+      "sha256": "85c491b60bd47a233b25ba939d1bf9f7050a24f3a80b42366e74c9d890a83a1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-32902-typed.json",
+      "bytes": 1643,
+      "sha256": "442248c9462087f881d0eb8c6cb743dbf849a36535b9c2d91c00a47e1d7a65cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-4318-texture.json",
+      "bytes": 1117,
+      "sha256": "f2d8133211f41a88d82cf4dced6ec40bc5acd9dcbaab21cb4e4b062db7cf3cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedBounds-4318-typed.json",
+      "bytes": 1642,
+      "sha256": "f795d580fa6e351ef05f9e1b87d11a6dec993542160ace792dbdb2ae721a4168"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-add.json",
+      "bytes": 5176,
+      "sha256": "6500d647cd3dd2fb8b9317e2330e244d214a151aeefcba61884ee17c2be45815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-add_no_result.json",
+      "bytes": 3167,
+      "sha256": "23c6514d50ef7241440b02a2f85382b296f8ffe6dc51efd8b0e5247197a4cd04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-and.json",
+      "bytes": 5164,
+      "sha256": "f9a766a466e4acc582212b0e6fdd222a5eab6a5f54100ce88ff7fe5b569de7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-compare_different.json",
+      "bytes": 4960,
+      "sha256": "875986e9adc88a92a56e8a14acc710316da0a502fad032775c0fdf1ea46bae8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-compare_equal.json",
+      "bytes": 5174,
+      "sha256": "9d7829e60bb7b1e6b9eb170dbd86e9ec64c5b15c5ca3568b606e08aab238f53e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-exchange.json",
+      "bytes": 5169,
+      "sha256": "d9811d85d6c6fef0d83e16c068755951e8d895d5b7aa94b86e3e93434628acf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-max.json",
+      "bytes": 5190,
+      "sha256": "074436e3e667f0bca8ecbc59ff080ef8cca5e2cb5431796e328e002e0674a737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-min.json",
+      "bytes": 5184,
+      "sha256": "47810c56111096da4e28066e8fb73f182ae0f6bdb30c9d8fbdadd2b845ea95d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-or.json",
+      "bytes": 5174,
+      "sha256": "fa31d85055c11a5973f71cda7b1ef9651ac7b7983652dad02dd0f626c80c74b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-store_different.json",
+      "bytes": 2939,
+      "sha256": "4266868d0178fce22b1cf0c1ecc24f5792a1bfe55953d2c6fcd30b4bd17e1e75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-store_equal.json",
+      "bytes": 3153,
+      "sha256": "4c99df42b5b33b9fbf60cf9b44be26032c517424f3b840a2143828d2a1cd7613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-0-xor.json",
+      "bytes": 5175,
+      "sha256": "242c756a428cf7f4cf072a077dda491cf944dca6fa715289a60da8a3e46826d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-add.json",
+      "bytes": 5186,
+      "sha256": "f783880073a3ecf0ec42dae5f7c168c37cb45e67275dcf4052022314a6cb35a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "d970ac907ce3882b3f276824271cbd7c1be447fb5909b60aa86a15fde9acbf3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-and.json",
+      "bytes": 5169,
+      "sha256": "7ec0ce96f289d7af3a0e8e765b5176acc5f23c5b6d200209c8a7e80ff0f3c3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-compare_different.json",
+      "bytes": 4971,
+      "sha256": "df0d7163dc2a9be5e046fa7fd5b17a7d2947f9c16705c3a887356ae09b03c9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-compare_equal.json",
+      "bytes": 5179,
+      "sha256": "8bb307e2e9fc265304c25549851f5d2da1e7835bb26951aec3c75a4f8a6df8fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-exchange.json",
+      "bytes": 5174,
+      "sha256": "9a15f0b7edb1f8770f742d63d5c1b13644d34a76f9c10b35f2ef4625baf1bb40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-max.json",
+      "bytes": 5195,
+      "sha256": "5010ef356ecdb76598eee2cacffc4e49f0462b7c4a922afec951dc3ce8253622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-min.json",
+      "bytes": 5195,
+      "sha256": "739c448728790e908a738e62b655ad3a3f408e221a8ef70e787fe7cb4277aa57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-or.json",
+      "bytes": 5185,
+      "sha256": "e8cd21ecf6770116a68c01d09680ee4afda05e9871adc87a6cca8605b06c1eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-store_different.json",
+      "bytes": 2944,
+      "sha256": "9f0ea78decff46620a882fa22c58e4e1fb4656a3c80b00702bfed70d075bb2eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-store_equal.json",
+      "bytes": 3152,
+      "sha256": "f77abbdb7fa6bea922797821166ce75b91c4879d2a282d72543be37a38f44ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-texture-1-xor.json",
+      "bytes": 5186,
+      "sha256": "f89162b73de07cacbd1a9ef9ae0ba1f8b7841d6bcfce765bf0f524dd6ef7127d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-add.json",
+      "bytes": 5258,
+      "sha256": "14e5bc649cadb901e63044e4a7da55e3b61423893c01870019e5efcd9a186a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-add_no_result.json",
+      "bytes": 3249,
+      "sha256": "ecce6596e16f264bfd8df2766a0736862d0c127caf1ec9081b1b1b8d262902e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-and.json",
+      "bytes": 5246,
+      "sha256": "7f0434a8871e977ea56f725ee21b6f211a003e4a9bcedbcad483baee4ceeff79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-compare_different.json",
+      "bytes": 5042,
+      "sha256": "0f2d81c3bb38c9dee24dc1abf8fde3978d70eb64fa1a59e8efc7aa8a362353bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-compare_equal.json",
+      "bytes": 5256,
+      "sha256": "7232ce50ade31c3fe54a308e18dd8044714dc0b31bbd65e7629fe6e78f45e1a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-exchange.json",
+      "bytes": 5251,
+      "sha256": "8e89deebbfc7bd0e5a8d261ed58b5ff4d9ae8307bd245b55446d668f81bbc4b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-max.json",
+      "bytes": 5272,
+      "sha256": "c653d92d40bdbc0b4648cfa415694abb6ad44090c8645c194d3dde3097822aa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-min.json",
+      "bytes": 5266,
+      "sha256": "ef0b3a4f4a7382c2e5775b83f298568955405d6e0747af3c1869bcd6aa860c91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-or.json",
+      "bytes": 5256,
+      "sha256": "dc1d9f8bb6b06166af5e42fcccb0b1be7b573659c3cb7a17cc4872ae161e0585"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-store_different.json",
+      "bytes": 3021,
+      "sha256": "938433dab7928b1ea365634943c5f707c151ab34e7caec4974208e74fe7b535b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-store_equal.json",
+      "bytes": 3235,
+      "sha256": "a1ce0dd46da6285678535a3ec95bf05cbf97317376745dec6d75b90ff3235bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-0-xor.json",
+      "bytes": 5257,
+      "sha256": "f51694f26a5baee892bf6fc6063ae7e972ffcef4d84d8e253774280ec11ab5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-add.json",
+      "bytes": 5268,
+      "sha256": "0bcc30efd767b82a7d8e4c1e5c87d68f5d78dbb5f31f4d4023bb08f6fc905eea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "defca3044616d803a55a6f69a17ff7772eca5e67abde1008e261d09d7a8b8b78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-and.json",
+      "bytes": 5251,
+      "sha256": "5db24db8b50aedf4834defe74ac0c2df1b65688f8e869cf47d3d1c202a724bad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-compare_different.json",
+      "bytes": 5053,
+      "sha256": "dc82b39ec2f0ee3490229ac64cc8bb9a82cc8450266c8b944fb793a466da6b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-compare_equal.json",
+      "bytes": 5261,
+      "sha256": "4f0398ccedfef449d528beef1253cdbc8a80c520b5a794839b24499bdfaa98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-exchange.json",
+      "bytes": 5256,
+      "sha256": "92ce7faf1400e8c04138b5c042ee0c918644031a298b39f113f6a32aa9311d98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-max.json",
+      "bytes": 5277,
+      "sha256": "ada8391f219a9e466586ff9ca0eb61104ee30cd80ff1e043ba8a97aad0164d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-min.json",
+      "bytes": 5277,
+      "sha256": "bfff11c36ad202f0ac17caf80133a6cb9ddc93e4d5e28f1326dc2aec5c1e1880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-or.json",
+      "bytes": 5267,
+      "sha256": "10440dd1569af2665eab4560a5475ab33a1ccc796e813eb85e3e0d36d1d1d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-store_different.json",
+      "bytes": 3026,
+      "sha256": "e6909b147abb1f57a37cb659ac22772840df544000614973814e7edefc9b249c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-store_equal.json",
+      "bytes": 3234,
+      "sha256": "cfe7ab4966bf9fed9445db71e5eecf1e9c8a71a8da8fb9127ea8b2fe315202b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-0-typed-1-xor.json",
+      "bytes": 5268,
+      "sha256": "18a4d5a82431503c7f9884a5a29b07b9b9275b1c8c306d68e875a3b5c92416f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-add.json",
+      "bytes": 5180,
+      "sha256": "6ac823e878c54a43a05975e3785d7a98f181b720e48e81971b6a8f61f48b1d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "9ac306557ac4abaeaa739d23c696cdafff626e56ad2401e598f301e1a64e2197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-and.json",
+      "bytes": 5168,
+      "sha256": "646c0c2c295b0bc3a7c28d3426159b28c4c95cb140bd9be4030c8170e3c7a372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-compare_different.json",
+      "bytes": 4964,
+      "sha256": "524db941c9e789be5132850d7c8b439880563635a67e8a1e1bfc3419d53163ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-compare_equal.json",
+      "bytes": 5178,
+      "sha256": "981d2366124b476220ae2aa36df12bc2d84d76962859960595dc6f50dfd2da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-exchange.json",
+      "bytes": 5173,
+      "sha256": "615d77dcc2bb4cafa051ad9d8a3948afcb00e2ca64f480bdbca8638e7bf69b08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-max.json",
+      "bytes": 5194,
+      "sha256": "1dab95b3e45ed40e857fb4b4c13c151ce3cf055f8fcb7285a5ab467c1956827f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-min.json",
+      "bytes": 5188,
+      "sha256": "c63179bb196b0c64532d255b83ec4485c0d498703ebb0c4021c2d52e4cf1fc3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-or.json",
+      "bytes": 5178,
+      "sha256": "176f52d314bd6db49a083396fda4c750d14be5fe6bfffd80aeb4c57662810996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-store_different.json",
+      "bytes": 2943,
+      "sha256": "2fe214aeeded009c4a83445ab080a5def632e3b0fb21424e74f8093642b697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-store_equal.json",
+      "bytes": 3157,
+      "sha256": "c19758bdfe56757a3f3b3334721474a668605c018af261da2edb9acf8c6efca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-0-xor.json",
+      "bytes": 5179,
+      "sha256": "f9adf8452f9affdd71ed459a0a89490b3076d574432079851783b166b69f3d0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-add.json",
+      "bytes": 5190,
+      "sha256": "a014ec06feb684f0cd92eaaa5678cea1c36afe3112eda44f5018a5ed8e49100e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-add_no_result.json",
+      "bytes": 3175,
+      "sha256": "8fad2700e0a292ae54cf4efb94735c8e8afc0d32ffb69835176c0d160998d432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-and.json",
+      "bytes": 5173,
+      "sha256": "7879a49e1da84bc2c38ada857f9996e39aabfc6509273f74ff2852236a2d9163"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-compare_different.json",
+      "bytes": 4975,
+      "sha256": "44f6a3130d5ced6f4fc4c6332b11153c2aad7d23706e490e3a862e63f5c56383"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-compare_equal.json",
+      "bytes": 5183,
+      "sha256": "0f9db85be82732f804f1de0e1570fb6d714c5a4089982cf81934d9f8212f1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-exchange.json",
+      "bytes": 5178,
+      "sha256": "86ad9965db844f761bda7621517bcc49c2a2eae3560c515392f7dedcbaaf706e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-max.json",
+      "bytes": 5199,
+      "sha256": "356216d8b558540134ceae030ef28e34c48f6eee99c25bd516b3b3c4a2e83529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-min.json",
+      "bytes": 5199,
+      "sha256": "78761a957d02063e2cc9f0d62b0485ad6e7db3b68f1524fb33773ccf07f79644"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-or.json",
+      "bytes": 5189,
+      "sha256": "221df31fcb3a69a32315d8503b967c9d28d7ed2fbf5ef5bacec105b0ff307ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-store_different.json",
+      "bytes": 2948,
+      "sha256": "c7c3e88539d138c1e3decd5475e537a565b4aaea9d11759e07cbf1da06626bde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-store_equal.json",
+      "bytes": 3156,
+      "sha256": "4a1f46fae9183f59f882bbd4146e1269855d3604fd061fdf55036fe1843acade"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-texture-1-xor.json",
+      "bytes": 5190,
+      "sha256": "9f4433a744ef68c3d1b497e85ef71f2630dfbf414f3fa3490ae5482ed775c267"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-add.json",
+      "bytes": 5262,
+      "sha256": "ff653e61655bb87c5e451d7bc2fb407642c2cefa59de8c6792cb2f907fa0cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "b2a9b9a1b351d3949dea2e0514e9805d40a78b3369b1afe2034b6ba811236db3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-and.json",
+      "bytes": 5250,
+      "sha256": "147335fe4066efc2cccc128e9d655700a257933754082a7abb6369ea05de8b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-compare_different.json",
+      "bytes": 5046,
+      "sha256": "35dc31de3edbf10c0616316ed2321425b61db8861e47ae215b67498a21fc54da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-compare_equal.json",
+      "bytes": 5260,
+      "sha256": "8d2cb36b3fbdce79f799d08ba15f2d77f3c90e1635f80c69d82d6e31a7ad39e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-exchange.json",
+      "bytes": 5255,
+      "sha256": "74a6966f1c0b4b97a36b190804d05fde1121fe5066846f886290fed3205b491d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-max.json",
+      "bytes": 5276,
+      "sha256": "6ad07358caa3d1827523126ee6c3adced9838efd2436132098119cdb7ebf141a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-min.json",
+      "bytes": 5270,
+      "sha256": "518ccc02c14df693628f521a05f55e8493ad1dddd5f8f96fb4fc7ce7626ab2ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-or.json",
+      "bytes": 5260,
+      "sha256": "bab608cb588d1830e3f0bc5d57a6784d1975c38e67a5c42bbfd9bc550dec053f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-store_different.json",
+      "bytes": 3025,
+      "sha256": "ef93a86834500d32a6bf4b6439acc1327ecc666838697a1d460f72305e474663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-store_equal.json",
+      "bytes": 3239,
+      "sha256": "ef677d01e69f41da3655db99498bb8203ad9a4e43f1b4d771ad146ef57b724a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-0-xor.json",
+      "bytes": 5261,
+      "sha256": "76be66196f474dfe4bf1c37c68ad0906e8ca6931b851f6fdb0a1acbbc41e13c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-add.json",
+      "bytes": 5272,
+      "sha256": "a259631e6c6e59f5f8447172efe6f030b25a35cdbe0a6daf1d88580e3e2d67a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-add_no_result.json",
+      "bytes": 3257,
+      "sha256": "d3be8f761ea065e2f3bdf06ef7ffbbcf264cf31eb4c9ab9e5a991045d39e7309"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-and.json",
+      "bytes": 5255,
+      "sha256": "4fe733086249aec25c8f5cba50482c2d0df6378327bb7d78f71ef52afb5d789b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-compare_different.json",
+      "bytes": 5057,
+      "sha256": "9a9ef4aee92ca4e89c82e5718817e51f27243f01993479f764b335704b3be54f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-compare_equal.json",
+      "bytes": 5265,
+      "sha256": "7fc1c6a63c23d5a3b7534ea125f6c0680d473837a4fde37bb81c199307c367f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-exchange.json",
+      "bytes": 5260,
+      "sha256": "9e777cb275bae9f82c814d9b7340a2fd77b7c9f1a68dd8f6dc87ae346abbcb27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-max.json",
+      "bytes": 5281,
+      "sha256": "ecf2a059ce72c5c6a6dcdbfce120e5e630944b315e812893bf055ec546d61abc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-min.json",
+      "bytes": 5281,
+      "sha256": "2656ea38c39c87244b0ea11e6b44854d09d24ca945a483505b9d40c068fda75a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-or.json",
+      "bytes": 5271,
+      "sha256": "9e20b758634aecec3ee2edf53b2c1cb727298bdf531def15ced1128ce0f79292"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-store_different.json",
+      "bytes": 3030,
+      "sha256": "7810f57aad2821264e1e8d2f1e8938ab17546a937b43472db53d6a8d500e7ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-store_equal.json",
+      "bytes": 3238,
+      "sha256": "830d85ee8a5ad1ace3b0ea45c548cb35b5d7636c323d2010fa31930e54426ef0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-32902-typed-1-xor.json",
+      "bytes": 5272,
+      "sha256": "3cf6ec6faa212caecb69f1b69e8035f272990dff4cb641ab930e268c15ed1e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-add.json",
+      "bytes": 5179,
+      "sha256": "da7b38865ec4fe32cf1db0b39950ff7e0c9c2949d626277ca722be2399bbfc2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-add_no_result.json",
+      "bytes": 3170,
+      "sha256": "e0b957eea74aa3b982a3e877b205555cc7d9a123a9d4d3111fe402c711afcfc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-and.json",
+      "bytes": 5167,
+      "sha256": "eb847fc40ee1116d129497695e29e2e075e82b2946757cc10614fb564e368367"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-compare_different.json",
+      "bytes": 4963,
+      "sha256": "80087cd7e2dc317f5f8a6f7a9dbb1e7d27cea3ac8165fb2522fbd9fafda1935d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-compare_equal.json",
+      "bytes": 5177,
+      "sha256": "f32b126e0bf44763ce2cf7a6e95dc1a290e6ee8ea6bcaa25f5362bd2dc402264"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-exchange.json",
+      "bytes": 5172,
+      "sha256": "f563a9428cbc4784e3f6c9427205ea43f9cc2c9c018fa3b967a2d4cdc5bb5258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-max.json",
+      "bytes": 5193,
+      "sha256": "a3621e895884690378d952a9a8c95d021f7ee26820c7ac4cd8adcd82fadd971a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-min.json",
+      "bytes": 5187,
+      "sha256": "3a3b44d9fbb9664096b2abf74fa0fa33e043139d6b8793fec6adb1146dbbce81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-or.json",
+      "bytes": 5177,
+      "sha256": "8d44fabfb6751f67bc5bb2f118ab252514c5d610156256a13c194122a0269b7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-store_different.json",
+      "bytes": 2942,
+      "sha256": "5085f2936d630fe21c0686fe364eea63cf755f31ff444fa42fb7aa93964322c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-store_equal.json",
+      "bytes": 3156,
+      "sha256": "336ab82f85e5c3d277794e8da0597f3c4a524315cfb44a6fe233d7f5eb0c08e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-0-xor.json",
+      "bytes": 5178,
+      "sha256": "1eee976489a802957c873d31255bf11359e82f9b65967ebfef8d80db1b6f64ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-add.json",
+      "bytes": 5189,
+      "sha256": "a9bdcc1c32e7e8171e7b8fc58ebf0faf18ba9688d9aeae6e1724fff7865b73dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-add_no_result.json",
+      "bytes": 3174,
+      "sha256": "718d1ef9ac11fb8970f6f9933fb51fc375377d64f9f85cb800f56dc1030b951d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-and.json",
+      "bytes": 5172,
+      "sha256": "4cc4aa7f1c9d78588669597890ce0d7199afe1de1131f9a8312ddb89c416a8be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-compare_different.json",
+      "bytes": 4974,
+      "sha256": "a44ba63370b060380a9b09674505f5b6558373b258986ab44a428f780bfae1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-compare_equal.json",
+      "bytes": 5182,
+      "sha256": "c3952a8ee6d959c38eec6538d01933da871ecc91249d4e53228350c0528d288e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-exchange.json",
+      "bytes": 5177,
+      "sha256": "25431883e4022c785676d77be7ed300292d5446696bf2e4a66d9edca2cb59b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-max.json",
+      "bytes": 5198,
+      "sha256": "d0a53b229d51f8e30ef9cca253d0bfa7427fcc4a33b91ed07db28c9db9819260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-min.json",
+      "bytes": 5198,
+      "sha256": "30ab38146421a597f410e805b5b10dacb15f799e72c2acaadc4d21a682b3384e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-or.json",
+      "bytes": 5188,
+      "sha256": "29f02fd1f3b2f5a2a289279fd985b9080b67511d7aeb4bef5cfd25069b0df448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-store_different.json",
+      "bytes": 2947,
+      "sha256": "ae0f253d80ae47d0d23f042a98796be225b507b0081833c7ba71004a72a0929a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-store_equal.json",
+      "bytes": 3155,
+      "sha256": "667b4260c3472b1b83c416ea20183eda1475dda304674d018912b1c9ce6a4768"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-texture-1-xor.json",
+      "bytes": 5189,
+      "sha256": "d713b105156ef3110564737231b896d612cfb46398a02ef09597a12884f29a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-add.json",
+      "bytes": 5261,
+      "sha256": "34dea1959dd3aa1ae4f23d080abc8e0bdf32797ebda4b7b0840489eb83e2d3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-add_no_result.json",
+      "bytes": 3252,
+      "sha256": "0ec88624c43e931c1df2b48b3b9d00d287e683b5938bb1410aa1213f1cd60139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-and.json",
+      "bytes": 5249,
+      "sha256": "88d4aff3cd7a4ed46c7ed143654fddcc35a0c8e6728aaca2d1d41c7d01d6fee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-compare_different.json",
+      "bytes": 5045,
+      "sha256": "507790dfd0456d74be5f202f75c2ed2055b2fe4405bf6679079aedbc9e553c67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-compare_equal.json",
+      "bytes": 5259,
+      "sha256": "5008361454f6eeef914a80c10826b8ae2b665774daec4d43a1edd5934f994be3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-exchange.json",
+      "bytes": 5254,
+      "sha256": "b9fe7644d080007d15e946b07e3176eb362a46c34b6dc6d687cde52fce4c85cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-max.json",
+      "bytes": 5275,
+      "sha256": "84487043c4f7536c9ad4a53ceaab965d0d089355f998756ed74c96fe4f821bfa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-min.json",
+      "bytes": 5269,
+      "sha256": "91b743e0ecbc290316ad4968f55bf3f16753882cd9508e72182896c612ddedfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-or.json",
+      "bytes": 5259,
+      "sha256": "1f3ee5f65bcda873731db77f5c66439ca66273d888caa09298a59c1f6fa1412b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-store_different.json",
+      "bytes": 3024,
+      "sha256": "f111534a96c9a82f7839d78905eb17988cb8f71f7d872e385fbdd6a6df1153fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-store_equal.json",
+      "bytes": 3238,
+      "sha256": "4d595fe96880954f8c5bf400e0e653c60df580fb5f97c16eabad23cd760e0084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-0-xor.json",
+      "bytes": 5260,
+      "sha256": "9fedba4ac745fc5a842e5396bf41f347618e0031259d40ceebbdc280f069bf73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-add.json",
+      "bytes": 5271,
+      "sha256": "ca3e26d72135ffcecd410e243fd2072c50c8bb01957fb317b1f8a64f4e14f12c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-add_no_result.json",
+      "bytes": 3256,
+      "sha256": "0c45ab7ce62008ef2e56f4d574151b89b32284c008827d299b77c59d978ba061"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-and.json",
+      "bytes": 5254,
+      "sha256": "68d6544d48e2a82304348ece4116890462523cb22aad26ceede512e427f77314"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-compare_different.json",
+      "bytes": 5056,
+      "sha256": "00239962174c5dac22e6cda4e538b3fe5825662958e1892548d648e39175f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-compare_equal.json",
+      "bytes": 5264,
+      "sha256": "3c6ca39cd51f8dc9a48ceea9cfcd09db608f270f6de5d0fb89fde286ed682b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-exchange.json",
+      "bytes": 5259,
+      "sha256": "33990bd7c1c41ce145326e080fbb3cfe2907cefad685c8f2304f07b341039932"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-max.json",
+      "bytes": 5280,
+      "sha256": "1bcfb095ab6aae075ac9497078da17d020c4872861f8479d8845cda23977ad94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-min.json",
+      "bytes": 5280,
+      "sha256": "bc62c90006e97e87e033adf44257c8d7f90d583c2527f398c1b977da7af24237"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-or.json",
+      "bytes": 5270,
+      "sha256": "9ddd9f145b62d326fc91a946fec67ae461e4ec25da243376b358ec2758a1e33d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-store_different.json",
+      "bytes": 3029,
+      "sha256": "eaa32156e3b2b2de388f4d15c5c109acb90a192176fc97ab46266b73357fcfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-store_equal.json",
+      "bytes": 3237,
+      "sha256": "42bfb43cf0e89518d8ec3afc0f4b90f78ff1b6b3fcc3151b8b200f42419503ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-evidence/typedInstructions-4318-typed-1-xor.json",
+      "bytes": 5271,
+      "sha256": "b3bde9e522f8b7622507cf2ed65ccaa4b02abd78dcd4255e71423ebbcbde3f42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-rebuild.txt",
+      "bytes": 11799,
+      "sha256": "b370c51cc0190ac71d7a8de264bae4bf16b76a8e5eedf4986d466d45e055ebf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-tests.txt",
+      "bytes": 14288,
+      "sha256": "79cb921aad4d8052304673f0654498276f0e70342addd667dcded130313b7eaa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-atomic-validation.json",
+      "bytes": 194,
+      "sha256": "93bc3d508d9594347d2e2e211a92c83c088cb115a87f66b56b10783d8cb9ffc1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-build.txt",
+      "bytes": 9513,
+      "sha256": "38e3a02a5993603eee3b8e33a9e77f39080e141cb2812c30b877772ba91ef2aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-diagnostic-build.txt",
+      "bytes": 3281,
+      "sha256": "0a4e6d2895395b7587c1991b828685922fffeabdc62f994896776e1d9982bf85"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-diagnostic-console.txt",
+      "bytes": 1656,
+      "sha256": "c2f2df0d60246ad2b3e6eac3ebd2720b4b148588cbdd80c8b77758ebde33c0ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-diagnostic-evidence/prefixes-32902-counter.json",
+      "bytes": 3576,
+      "sha256": "4593e61b2f3f5b8d2e5002aefb4c6c6215b6993c65fb9f5fdf2910239501f265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-diagnostic-evidence/prefixes-32902-raw.json",
+      "bytes": 3573,
+      "sha256": "0517fe47ce494a9b6e8ca47a03df0a9aff990464aa73bc6f8b644a1d3febb0cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-diagnostic-tests.txt",
+      "bytes": 919,
+      "sha256": "da27f1944c37cc991e2493086efcccd6305b7663dfc77054d589bcf854b5f647"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-console.txt",
+      "bytes": 57717,
+      "sha256": "f0b2480a65bc037d7076af428e0d05162983a926c78718d10267c1c02c2d6a7b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-0-texture.json",
+      "bytes": 5852,
+      "sha256": "4e66461d6383fa54d4e4c2020bd411dfbebee4833e7cc44dd896d4bd6e381835"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-0-typed.json",
+      "bytes": 5934,
+      "sha256": "38a9d9afecd0369a2a602d71fa6391d06ddc34cd31e29aa18d00d92db5f84e17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-32902-texture.json",
+      "bytes": 5856,
+      "sha256": "9ab61ba6eaf1e7cd2f6a8aeadcd2437172cc9fe682b2b1d2eff072e069fae944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-32902-typed.json",
+      "bytes": 5938,
+      "sha256": "e01fcc25f4a4db185ffd9b947b202b345262dcbdd0ad413753e652b3a1403bf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-4318-texture.json",
+      "bytes": 5855,
+      "sha256": "0daeb9b665235e84153f5ae368d04a935e6bd4b014696e52eb12834d0c163532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/computeGroup-4318-typed.json",
+      "bytes": 5937,
+      "sha256": "32274448ee1422b0465024eb41c34437eab59a844ab76717ab597ffca5da2370"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-0-append.json",
+      "bytes": 30545,
+      "sha256": "4abd8197e6ac0196ab1f6089de982318f36b5e9f64102eaaa2e4a0c5a6ce9c7c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-0-counter.json",
+      "bytes": 30562,
+      "sha256": "0427c1ac0375e40a7a2c5050faa11f71e835f73e7a16d6cb2def9687d436b1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-0-raw.json",
+      "bytes": 30554,
+      "sha256": "c8a716446914b4a6810ae6296f05e057c0b2bc444011b3a8d37673069f8ac0ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-0-texture.json",
+      "bytes": 29498,
+      "sha256": "5739570a0abb6ccc83cc26320dce480adf4c086bc4bd6cb415192824c565cac5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-0-typed.json",
+      "bytes": 30556,
+      "sha256": "6df53c4c697737fbf16ae1b8ea204d0c9af19e605894c0eb0018380cbadd1053"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-32902-append.json",
+      "bytes": 30561,
+      "sha256": "fdf11d8f6bf12a891f971f2fccc6de01f4aa68bb6556efbc36a2c9fdf3f0d827"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-32902-counter.json",
+      "bytes": 30578,
+      "sha256": "3af5b7443889dfe67fdebbfaa71e6cfabe786302d996e333c355afad558d5881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-32902-raw.json",
+      "bytes": 30570,
+      "sha256": "773d6614f19cf4471ea5e48628e635547fbc13307521ab312bf28db3c48b5eec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-32902-texture.json",
+      "bytes": 29514,
+      "sha256": "ec51ba76a77ce7e66a80b89c007219f0a833d3fff0a00241a7c9c0279b9b9571"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-32902-typed.json",
+      "bytes": 30572,
+      "sha256": "5c86ffdde4bd46b3e6caf0e1e07628d39262bbd796bca241bc5cadaf949fc0a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-4318-append.json",
+      "bytes": 30556,
+      "sha256": "026c398f7d8717adaece5960b524af37cb0aab237eebac94678801366e74e249"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-4318-counter.json",
+      "bytes": 30573,
+      "sha256": "44c86b55f18a31fa52a0bdf1a353b013935426916110ce76e55f1121b9216914"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-4318-raw.json",
+      "bytes": 30565,
+      "sha256": "e54d19ef7f20d1099001c2b4c07d13985dc76014e60c8e613e7def56d6218f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-4318-texture.json",
+      "bytes": 29509,
+      "sha256": "2cd42e8fd79ff8f02fcd366f793939b1086114f229063729b1360dd6a3422401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/prefixes-4318-typed.json",
+      "bytes": 30567,
+      "sha256": "fff602dc98acc16d1f41e0852491da0729374cc4fe24abe8db1e0e720d780880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-42-0.json",
+      "bytes": 721,
+      "sha256": "73b0b6e58071573f7a7ce1ecddfa3ccd862d88b05155d27c6a1f7adc63cd79a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-42-1.json",
+      "bytes": 720,
+      "sha256": "17f42e3afff79ac6e19e57edce52424f1922fb0367ba1e659983d789af71748a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-42-2.json",
+      "bytes": 711,
+      "sha256": "2c855f58820a2e1bb95aa08a9eb2fabda621fc4266f1a9d5ef5de404eba3c964"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-42-3.json",
+      "bytes": 711,
+      "sha256": "8d2d54b85dbe298a09135ffd32e5346012d37362f9f6ab9998f42c86ef0c84f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-43-0.json",
+      "bytes": 721,
+      "sha256": "a1a04edae07e959cbfa0e9391fc9b89f94e44a1d3403b997d26fe480aecee149"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-43-1.json",
+      "bytes": 720,
+      "sha256": "908c204aceb7e7b6cdd6935648f235f1e06ebacc0ffec00c74e8109cc3b71a22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-43-2.json",
+      "bytes": 711,
+      "sha256": "606eeed7750d9dbf63bb8e4e2e32f2d13d0a8df5244e087f2e935fd5d1c6fb1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-2-43-3.json",
+      "bytes": 711,
+      "sha256": "e9b52c67f23ad83b406463cac875b03619aaed9f4b9943f1a2e9a8acbdea8973"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-42-0.json",
+      "bytes": 722,
+      "sha256": "51395c77ae0df7a893e9edb0cc3a52e1e1519b55e100afa416f89fd7f0e07b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-42-1.json",
+      "bytes": 720,
+      "sha256": "d457b957f3b3db69b08a7b939a6fa62195fad0f818f0dffa7b87421d0e5bc972"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-42-2.json",
+      "bytes": 711,
+      "sha256": "ea75347ad93ac8566c7eecca3f423d234f237ce0fb43c7247744a3aca87ef764"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-42-3.json",
+      "bytes": 711,
+      "sha256": "c83bb5875cd8f0418688de6deeef5a99e53e26e33b1cc2f3fe87b73b2dc811b1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-43-0.json",
+      "bytes": 722,
+      "sha256": "0072f1b8cea4f2f6b0b4284483d56a95cb32dfb2037294cfeba78d0f17839372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-43-1.json",
+      "bytes": 720,
+      "sha256": "44409e018287a76c94309955cfb2d6936a76f552b69382872ae7841e1e212c2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-43-2.json",
+      "bytes": 711,
+      "sha256": "ae761d2631ccb80ff52b4d6d7335222cbf622e1a113f738339facea45625b2ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-3-43-3.json",
+      "bytes": 711,
+      "sha256": "c1b0abae5959f45bbf04c33fb306054624c273c6460a0226c3d8b3588980616b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-42-0.json",
+      "bytes": 723,
+      "sha256": "613d8d97b208113b470b45d9a7b947d1b04db3809e07959af126224015469a80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-42-1.json",
+      "bytes": 719,
+      "sha256": "48674e2f5d2d3417f7b11abf2e910ce0b756aed7d3d7297a83c3463a05131c46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-42-2.json",
+      "bytes": 722,
+      "sha256": "3e6727cf84a0d6465d8c45095b6e9dcf0df6cbb2559272ee0641af06fe590609"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-42-3.json",
+      "bytes": 722,
+      "sha256": "9210b03cf0ef159d8d3b288bf0a498811a7f95b7ffcdb240f1208764b552bcf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-43-0.json",
+      "bytes": 723,
+      "sha256": "be93e0cc333f8de0d0612f6c1ebb03e85e2d223d63707c212fab48dbc7a6aaae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-43-1.json",
+      "bytes": 719,
+      "sha256": "b6d4bd054d352d9dc25c1e0c54ea6103a2f9c561ed5cca0f141c0cd3814ecee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-43-2.json",
+      "bytes": 722,
+      "sha256": "54f1f64ac1e319c3d4a0c1b20c2660d1782804adc66f875b9e57f3aba66466e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-5-43-3.json",
+      "bytes": 722,
+      "sha256": "ec49742472d3d5d595f40429465df557c2f1fb112a771a6806797fc63649812c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-42-0.json",
+      "bytes": 722,
+      "sha256": "37f10d6140c1cbe534763578c31fc71e776da636fac875ca25bd1f0cc9abe01e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-42-1.json",
+      "bytes": 720,
+      "sha256": "65bce02fac1a8372d3af2a70137576d9327c8a38097e160253aeb73b6f09cb7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-42-2.json",
+      "bytes": 711,
+      "sha256": "4323799f29399b55506cf43a52e61c44a520985ebf4eaf8374fb905b5a191e20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-42-3.json",
+      "bytes": 711,
+      "sha256": "dfef00fbb4c9b8ab5ffe1b418c1cf2c3561ba89dbb64f2c4400d9e67b8ba9b93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-43-0.json",
+      "bytes": 722,
+      "sha256": "e82203aaff839822806984ad1dab29d193a775e13ced20180c0be06138aab944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-43-1.json",
+      "bytes": 720,
+      "sha256": "773185e78e9950e23247c1b9e434cee961df5bca12656dc835ee1c5b50ed3250"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-43-2.json",
+      "bytes": 711,
+      "sha256": "503aa584f25005a448f8627672692f6f5352325d9b79fe46eae231e4d01b50af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-7-43-3.json",
+      "bytes": 711,
+      "sha256": "50d695ddd56955991ea7be78af345632f978a823e0ba99727d7a31c78652090f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-42-0.json",
+      "bytes": 722,
+      "sha256": "b8d8383cceddd9153a23db48cc5d7d6b70dea9a509db6adc296bcc8ca9ddbd2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-42-1.json",
+      "bytes": 720,
+      "sha256": "0023b4c061b9bdaae34c0fa7beaad9eb9523fdb3527414e315d18902c49d9287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-42-2.json",
+      "bytes": 711,
+      "sha256": "800d6be500001b01fe35442fb9f884250622aecc37937bf7e39c82cc3740e3a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-42-3.json",
+      "bytes": 711,
+      "sha256": "fd6ec96b9c3c11f491cd2c4a6aca63d9722e12b2da8ab8b9934fe61a2d69faef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-43-0.json",
+      "bytes": 722,
+      "sha256": "ca0c91ab3290c70abd88e33f4de45b39d1cd2deda622fd647b62a61db616ae02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-43-1.json",
+      "bytes": 720,
+      "sha256": "355f128c153c59dbde9b132b593e6c487a60fe75c6f647970e7bf646201c7865"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-43-2.json",
+      "bytes": 711,
+      "sha256": "37f16fa1ed74e04538774005a3689fbf3cb919a42b9ac5677f63e036cb0376e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-0-8-43-3.json",
+      "bytes": 711,
+      "sha256": "a755162ccb1e39b7fce36635f9df6f31dc217bab15b6111d5d282cf95b68cf6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-42-0.json",
+      "bytes": 725,
+      "sha256": "a741f9f67e31fa28bb5b3b0ad31de75d49c0fe32b0c951a44ef984d6c967f34c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-42-1.json",
+      "bytes": 724,
+      "sha256": "b9de379125674a87ff390b33f8cd3694fbfe1e2ef89463af1cf1a5c8dc6804ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-42-2.json",
+      "bytes": 715,
+      "sha256": "6fb507d4837092fb1e682755b66cdb50b25feaff675fa9df4ab0103e36664edf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-42-3.json",
+      "bytes": 715,
+      "sha256": "0cc7b1c655b812038879a086f6e05a5607d78c4a9d72a0addfa9fa9f5cf68021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-43-0.json",
+      "bytes": 725,
+      "sha256": "437a5a5175dab96a778cf6f3694c3ffb4efdd30e0429046e7f4686b6a3f61604"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-43-1.json",
+      "bytes": 724,
+      "sha256": "b5bb6c6ed7915a354f8bde8350ce977f9a3f06ef812c6316e2c6b267a50df94a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-43-2.json",
+      "bytes": 715,
+      "sha256": "eb5137d3b463bba99046b6bdf0aa3e1ee6378b78ce2a56d76f95189d1deeffb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-2-43-3.json",
+      "bytes": 715,
+      "sha256": "7c228f2b44bf11bb6ea88c2c3c34fd6f26b46f46630783138e4b0e8553cbba34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-42-0.json",
+      "bytes": 726,
+      "sha256": "45202042de949a0a3be6de6a509d116251d8c9738f8257b0825a11fdbd322258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-42-1.json",
+      "bytes": 724,
+      "sha256": "df3573ee8675fafdc0f0a803eddd0511cdb1a159c6db9196a017a415d39c5fd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-42-2.json",
+      "bytes": 715,
+      "sha256": "11f021dd3c4ac1b49173c15aa0ccd585d881777fe2bd92686543ad5eb21a4afa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-42-3.json",
+      "bytes": 715,
+      "sha256": "93362633d12e1fcfe46471b826d2005371c6ada07a1e2ca421bad3f97c3d8947"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-43-0.json",
+      "bytes": 726,
+      "sha256": "882c58ad6a4c2d1915a82a7b75b7dbd1956c2d339a469d5febba48d3ad4c8d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-43-1.json",
+      "bytes": 724,
+      "sha256": "988b3f950022b19782d18b8fbf29764b39b59fe28b47be542d7f3a4b17b26341"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-43-2.json",
+      "bytes": 715,
+      "sha256": "090a592df5704b4934a5369317e8e945bfd0f50ca07cbb035c900363cb1538d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-3-43-3.json",
+      "bytes": 715,
+      "sha256": "858f7f9a28c3a34c299db361518d39f1db10a45b06b0bb58f905e51c4614b903"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-42-0.json",
+      "bytes": 727,
+      "sha256": "b09aa217c51c62c8751bec7853d6b9604656ab3de5e860e3eda639c194da0770"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-42-1.json",
+      "bytes": 723,
+      "sha256": "67aecc2ee000ac79d33be337449ef65954e6d491e6489b80a87cda87e344eed5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-42-2.json",
+      "bytes": 714,
+      "sha256": "78ebb0c318b63fb0be927209c8d1114919575411e272d8b029d31096ecebe8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-42-3.json",
+      "bytes": 714,
+      "sha256": "363c8d26cebbc61d356f00df71dd5b6d4ce463e07c48a857a4a5615e852f3524"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-43-0.json",
+      "bytes": 727,
+      "sha256": "e851d79f286f6337e5df090fbb2b340ef9ba49babdc439e8acd45881a2d4a668"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-43-1.json",
+      "bytes": 723,
+      "sha256": "1e523fb70d70511a0134631b93a391acff82bf66d7daf184f850f8b5abc9caeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-43-2.json",
+      "bytes": 714,
+      "sha256": "c79765e5d7d8a90951439cb939a384882449a30048c4ebf593c4796798af7538"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-5-43-3.json",
+      "bytes": 714,
+      "sha256": "02b8b47d587824d62f73e8d7ec5d7efce32d6e1606e302228e17b42fb91f18d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-42-0.json",
+      "bytes": 726,
+      "sha256": "28c12c5edaae8dff38f1ccd844ca0edc8461cadea68f782363e554db36d92da3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-42-1.json",
+      "bytes": 724,
+      "sha256": "209bc2c1bb82acb2ace71fb8ae278aaaa6c9e2a635d8ab7427a7768cd3cc4b58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-42-2.json",
+      "bytes": 715,
+      "sha256": "9223543d6dee112d8fb8b846178f753a857c39343444e4bc642536ec98cd4f17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-42-3.json",
+      "bytes": 715,
+      "sha256": "3c26107fbc883ebf29623b39e366b3e3951b6372abc84178aa093fc825394474"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-43-0.json",
+      "bytes": 726,
+      "sha256": "53a0b028ec4551dcb36c1de75992216cfba58db61716830c74ed37badac0c842"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-43-1.json",
+      "bytes": 724,
+      "sha256": "3957cc1ee4a3746157983cc97bf7eeed3204355bc5937bcf8a704176bcd4c839"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-43-2.json",
+      "bytes": 715,
+      "sha256": "86780bbb9d304a0f5e660d989122dbf7b76b3fa6c4c774bdf18d502fe61c0a2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-7-43-3.json",
+      "bytes": 715,
+      "sha256": "13ddf7c216e74849392134f9232e94795c50a7c658cd1c45aa7ed70ffaaf6675"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-42-0.json",
+      "bytes": 726,
+      "sha256": "c3c7cdaf7f472dcf6c8dd338016b1bae91e3006893eb38eba819ff835dc66fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-42-1.json",
+      "bytes": 724,
+      "sha256": "8a490106379ba6a483c9e901a951145ed8b8d67c4dd2f77b4426386b1898cdd0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-42-2.json",
+      "bytes": 715,
+      "sha256": "2dae21c5d1b69006bcb86e2547a7442a457eef595c8ca02fec0309e43f1a8494"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-42-3.json",
+      "bytes": 715,
+      "sha256": "cbc1871ea485a8d6045e6f4d5bb202433372fb860aa18e144d02133f0650a747"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-43-0.json",
+      "bytes": 726,
+      "sha256": "fb04bd712bd31d80afebf7f80c20f8cd622f720f7eba5f3020e883d323dd2c19"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-43-1.json",
+      "bytes": 724,
+      "sha256": "83dc5dcb3a9b5161f9c31ac902a2d009920e59e1f86ada70dc86bb37237d6788"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-43-2.json",
+      "bytes": 715,
+      "sha256": "bbf6f1e0e0f5b6d6f8d72546e7e84ae6c5990f35a7be6d924568abac52f2c0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-32902-8-43-3.json",
+      "bytes": 715,
+      "sha256": "f4289ec4ba92bb86f97d1e07cd5f26067f86bea0432222393d54c6d75d895d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-42-0.json",
+      "bytes": 724,
+      "sha256": "652922bfdefe362b68b48db60c15327c3cf26e8143c5992925070fefe7d159ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-42-1.json",
+      "bytes": 723,
+      "sha256": "d5c3a8a393c54851f717dcf1e54560344deb84290500356d78b21c2004c5103e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-42-2.json",
+      "bytes": 714,
+      "sha256": "44a9fd078e997cf6e46fc1bd00909a2b26e918c1556869ad6e8f8ef63804512c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-42-3.json",
+      "bytes": 714,
+      "sha256": "8d3037bf14064d0a839237e761de7b2e552e0644730e8e5163fa1a7abe51bd33"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-43-0.json",
+      "bytes": 724,
+      "sha256": "cc30f400dad19376a420337f622fabf5f6f81f5048bbd33f9878d8931dcd40c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-43-1.json",
+      "bytes": 723,
+      "sha256": "369818db4bd0108f1839067f1deafc9f0eb10751ab46f17ad5093904d0c550f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-43-2.json",
+      "bytes": 714,
+      "sha256": "2b154a8ae6b6458f239c78450d167c71d44f43021904795f5c6bee41baaf9928"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-2-43-3.json",
+      "bytes": 714,
+      "sha256": "255c5651b2c70ee2e1043b6b1e43879cfa4c4f9e6fc0ebd7bb9d3b5225fc7a99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-42-0.json",
+      "bytes": 725,
+      "sha256": "418ea61a5d19d1a43ed5de01ac1eff9a2a865448aff4fafacae07e1afd44b7bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-42-1.json",
+      "bytes": 723,
+      "sha256": "6cdfcd8bea802790baeee583826e53ea39467b1ee8fbafe4d6a5de3d83c4fda8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-42-2.json",
+      "bytes": 714,
+      "sha256": "1558b3d948e4305ae948c1434869ae9c32e5631dde8d846a5a52307406518d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-42-3.json",
+      "bytes": 714,
+      "sha256": "9b054c5026396fecd6d33d13d04298c811b90bce3c7f6a3f55e08163385b58ed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-43-0.json",
+      "bytes": 725,
+      "sha256": "d21e3b9828886e699f902e9f1a2fd48c1b3980c1dec148a93b011cb24ebfb9ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-43-1.json",
+      "bytes": 723,
+      "sha256": "ba35c253d0141b61505625cffc12039b7c814ee9676551b761b4f8daef04ebbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-43-2.json",
+      "bytes": 714,
+      "sha256": "4c96bf89c766d4ad814f99431b88f967686dfbab35b651c7134e3ac0245578cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-3-43-3.json",
+      "bytes": 714,
+      "sha256": "244cc32c18e7ce7de4f6d25c730b627ea12a197166793d2bb25a48046ea1589b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-42-0.json",
+      "bytes": 726,
+      "sha256": "363360f34f3b0fcece9f1241898520cafa368673d23cee412dc6e434b6567b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-42-1.json",
+      "bytes": 722,
+      "sha256": "808c86af6827998fd22f6ff1a80a82afe0f070780d36a3943a0aff130bfb4a69"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-42-2.json",
+      "bytes": 713,
+      "sha256": "2396046e740843078aafbbeaac763757fe59a6cf46061712a0b346c05d57b4e1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-42-3.json",
+      "bytes": 713,
+      "sha256": "23ef03705beed90c7389c69e973d173dba81208dff05669fbbb154708f32b276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-43-0.json",
+      "bytes": 726,
+      "sha256": "cd4a82cdfbf066ec799c902d8fd2d2b142e00eb28ae94511577a5317a38ac3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-43-1.json",
+      "bytes": 722,
+      "sha256": "bff2045205ea5a4f033e78ea8fe311c13b4eaea5ed6eb42c7afbb9f94a1182c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-43-2.json",
+      "bytes": 713,
+      "sha256": "f4957cc239a4ce21fd26bd3ebdb10d3a524bac0764949f9d7f1c630bc649e387"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-5-43-3.json",
+      "bytes": 713,
+      "sha256": "824850b76dd29745628b9964816dc28e69de5c32060e857c49c29721aed97c89"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-42-0.json",
+      "bytes": 725,
+      "sha256": "b941453180f15d7a130beb6bbf2be9436e96a91d5235cf3547720cc13d022da0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-42-1.json",
+      "bytes": 723,
+      "sha256": "fdd94ff8e6f59a31e2b1ac37756e491f4023c0f09fd4764201fac3dc7ead7536"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-42-2.json",
+      "bytes": 714,
+      "sha256": "7bb0465204b5deb052fde74c4479bc86bef720bffabb925f2f5fe46fac76d951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-42-3.json",
+      "bytes": 714,
+      "sha256": "c795f7109d87581d75a87f94c798605ac9da540733f89ef2274fafec6f6a0986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-43-0.json",
+      "bytes": 725,
+      "sha256": "75477670558e1cbab6fdda828f023f74777de75a9534257604e092db9843e625"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-43-1.json",
+      "bytes": 723,
+      "sha256": "e65b53dd8ac13d65150c77beca067a460e40fa1b909546c153f63499e521e1a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-43-2.json",
+      "bytes": 714,
+      "sha256": "b8cabe11f0ee49ca29eefd8382a26cba1075ff83c7141e04f38e661decb255d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-7-43-3.json",
+      "bytes": 714,
+      "sha256": "9c3175ea640c947e5f59590ad87494c16ed26c226a2300105d9f464269254f82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-42-0.json",
+      "bytes": 725,
+      "sha256": "0f33c1812e81e6ead81cbabcc415260b513bfbf4a3a7a23d5055c009a820058b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-42-1.json",
+      "bytes": 723,
+      "sha256": "70146a79bf1f6d4958f49800cc72b9a5cd63a5549f237e0f81b67a1f2f6a617b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-42-2.json",
+      "bytes": 714,
+      "sha256": "b85e2a3ec613a8bc58ccb1a80687ee34fd29b503be11bff4add50cd42d321162"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-42-3.json",
+      "bytes": 714,
+      "sha256": "ee505908b8a370fd6dd633f06b14fb846575757868e59d9fba9da3ef9712db90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-43-0.json",
+      "bytes": 725,
+      "sha256": "3190708874ead1213b6dbf336f58a0df55ab1ac4a950f0c146c995b97924b35f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-43-1.json",
+      "bytes": 723,
+      "sha256": "149e399c1013ba41ac4157076dfcb29b2831759f284757d9d63953d294f07d23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-43-2.json",
+      "bytes": 714,
+      "sha256": "cc584908d120b2afac805c92432d2be093fca94fdc991bfc47939e7594b6fa17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/textureRegions-4318-8-43-3.json",
+      "bytes": 714,
+      "sha256": "18aab3c72a4a0cd055b61cb13cdedfc4cf4f5237f4798d534f723861f02b187a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-0-texture.json",
+      "bytes": 1114,
+      "sha256": "8b03ac4754566cc169113553982f00b39e5bf4e5b05277f5e8346a4b15e3aee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-0-typed.json",
+      "bytes": 1639,
+      "sha256": "74d486c4f70a1fe3dfcfd523aac6fff48851c2401b91d5ffa58b12059813aaeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-32902-texture.json",
+      "bytes": 1118,
+      "sha256": "85c491b60bd47a233b25ba939d1bf9f7050a24f3a80b42366e74c9d890a83a1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-32902-typed.json",
+      "bytes": 1643,
+      "sha256": "442248c9462087f881d0eb8c6cb743dbf849a36535b9c2d91c00a47e1d7a65cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-4318-texture.json",
+      "bytes": 1117,
+      "sha256": "f2d8133211f41a88d82cf4dced6ec40bc5acd9dcbaab21cb4e4b062db7cf3cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedBounds-4318-typed.json",
+      "bytes": 1642,
+      "sha256": "f795d580fa6e351ef05f9e1b87d11a6dec993542160ace792dbdb2ae721a4168"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-add.json",
+      "bytes": 5176,
+      "sha256": "6500d647cd3dd2fb8b9317e2330e244d214a151aeefcba61884ee17c2be45815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-add_no_result.json",
+      "bytes": 3167,
+      "sha256": "23c6514d50ef7241440b02a2f85382b296f8ffe6dc51efd8b0e5247197a4cd04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-and.json",
+      "bytes": 5164,
+      "sha256": "f9a766a466e4acc582212b0e6fdd222a5eab6a5f54100ce88ff7fe5b569de7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-compare_different.json",
+      "bytes": 4960,
+      "sha256": "875986e9adc88a92a56e8a14acc710316da0a502fad032775c0fdf1ea46bae8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-compare_equal.json",
+      "bytes": 5174,
+      "sha256": "9d7829e60bb7b1e6b9eb170dbd86e9ec64c5b15c5ca3568b606e08aab238f53e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-exchange.json",
+      "bytes": 5169,
+      "sha256": "d9811d85d6c6fef0d83e16c068755951e8d895d5b7aa94b86e3e93434628acf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-max.json",
+      "bytes": 5190,
+      "sha256": "074436e3e667f0bca8ecbc59ff080ef8cca5e2cb5431796e328e002e0674a737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-min.json",
+      "bytes": 5184,
+      "sha256": "47810c56111096da4e28066e8fb73f182ae0f6bdb30c9d8fbdadd2b845ea95d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-or.json",
+      "bytes": 5174,
+      "sha256": "fa31d85055c11a5973f71cda7b1ef9651ac7b7983652dad02dd0f626c80c74b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-store_different.json",
+      "bytes": 2939,
+      "sha256": "4266868d0178fce22b1cf0c1ecc24f5792a1bfe55953d2c6fcd30b4bd17e1e75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-store_equal.json",
+      "bytes": 3153,
+      "sha256": "4c99df42b5b33b9fbf60cf9b44be26032c517424f3b840a2143828d2a1cd7613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-0-xor.json",
+      "bytes": 5175,
+      "sha256": "242c756a428cf7f4cf072a077dda491cf944dca6fa715289a60da8a3e46826d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-add.json",
+      "bytes": 5186,
+      "sha256": "f783880073a3ecf0ec42dae5f7c168c37cb45e67275dcf4052022314a6cb35a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "d970ac907ce3882b3f276824271cbd7c1be447fb5909b60aa86a15fde9acbf3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-and.json",
+      "bytes": 5169,
+      "sha256": "7ec0ce96f289d7af3a0e8e765b5176acc5f23c5b6d200209c8a7e80ff0f3c3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-compare_different.json",
+      "bytes": 4971,
+      "sha256": "df0d7163dc2a9be5e046fa7fd5b17a7d2947f9c16705c3a887356ae09b03c9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-compare_equal.json",
+      "bytes": 5179,
+      "sha256": "8bb307e2e9fc265304c25549851f5d2da1e7835bb26951aec3c75a4f8a6df8fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-exchange.json",
+      "bytes": 5174,
+      "sha256": "9a15f0b7edb1f8770f742d63d5c1b13644d34a76f9c10b35f2ef4625baf1bb40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-max.json",
+      "bytes": 5195,
+      "sha256": "5010ef356ecdb76598eee2cacffc4e49f0462b7c4a922afec951dc3ce8253622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-min.json",
+      "bytes": 5195,
+      "sha256": "739c448728790e908a738e62b655ad3a3f408e221a8ef70e787fe7cb4277aa57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-or.json",
+      "bytes": 5185,
+      "sha256": "e8cd21ecf6770116a68c01d09680ee4afda05e9871adc87a6cca8605b06c1eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-store_different.json",
+      "bytes": 2944,
+      "sha256": "9f0ea78decff46620a882fa22c58e4e1fb4656a3c80b00702bfed70d075bb2eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-store_equal.json",
+      "bytes": 3152,
+      "sha256": "f77abbdb7fa6bea922797821166ce75b91c4879d2a282d72543be37a38f44ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-texture-1-xor.json",
+      "bytes": 5186,
+      "sha256": "f89162b73de07cacbd1a9ef9ae0ba1f8b7841d6bcfce765bf0f524dd6ef7127d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-add.json",
+      "bytes": 5258,
+      "sha256": "14e5bc649cadb901e63044e4a7da55e3b61423893c01870019e5efcd9a186a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-add_no_result.json",
+      "bytes": 3249,
+      "sha256": "ecce6596e16f264bfd8df2766a0736862d0c127caf1ec9081b1b1b8d262902e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-and.json",
+      "bytes": 5246,
+      "sha256": "7f0434a8871e977ea56f725ee21b6f211a003e4a9bcedbcad483baee4ceeff79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-compare_different.json",
+      "bytes": 5042,
+      "sha256": "0f2d81c3bb38c9dee24dc1abf8fde3978d70eb64fa1a59e8efc7aa8a362353bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-compare_equal.json",
+      "bytes": 5256,
+      "sha256": "7232ce50ade31c3fe54a308e18dd8044714dc0b31bbd65e7629fe6e78f45e1a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-exchange.json",
+      "bytes": 5251,
+      "sha256": "8e89deebbfc7bd0e5a8d261ed58b5ff4d9ae8307bd245b55446d668f81bbc4b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-max.json",
+      "bytes": 5272,
+      "sha256": "c653d92d40bdbc0b4648cfa415694abb6ad44090c8645c194d3dde3097822aa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-min.json",
+      "bytes": 5266,
+      "sha256": "ef0b3a4f4a7382c2e5775b83f298568955405d6e0747af3c1869bcd6aa860c91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-or.json",
+      "bytes": 5256,
+      "sha256": "dc1d9f8bb6b06166af5e42fcccb0b1be7b573659c3cb7a17cc4872ae161e0585"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-store_different.json",
+      "bytes": 3021,
+      "sha256": "938433dab7928b1ea365634943c5f707c151ab34e7caec4974208e74fe7b535b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-store_equal.json",
+      "bytes": 3235,
+      "sha256": "a1ce0dd46da6285678535a3ec95bf05cbf97317376745dec6d75b90ff3235bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-0-xor.json",
+      "bytes": 5257,
+      "sha256": "f51694f26a5baee892bf6fc6063ae7e972ffcef4d84d8e253774280ec11ab5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-add.json",
+      "bytes": 5268,
+      "sha256": "0bcc30efd767b82a7d8e4c1e5c87d68f5d78dbb5f31f4d4023bb08f6fc905eea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "defca3044616d803a55a6f69a17ff7772eca5e67abde1008e261d09d7a8b8b78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-and.json",
+      "bytes": 5251,
+      "sha256": "5db24db8b50aedf4834defe74ac0c2df1b65688f8e869cf47d3d1c202a724bad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-compare_different.json",
+      "bytes": 5053,
+      "sha256": "dc82b39ec2f0ee3490229ac64cc8bb9a82cc8450266c8b944fb793a466da6b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-compare_equal.json",
+      "bytes": 5261,
+      "sha256": "4f0398ccedfef449d528beef1253cdbc8a80c520b5a794839b24499bdfaa98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-exchange.json",
+      "bytes": 5256,
+      "sha256": "92ce7faf1400e8c04138b5c042ee0c918644031a298b39f113f6a32aa9311d98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-max.json",
+      "bytes": 5277,
+      "sha256": "ada8391f219a9e466586ff9ca0eb61104ee30cd80ff1e043ba8a97aad0164d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-min.json",
+      "bytes": 5277,
+      "sha256": "bfff11c36ad202f0ac17caf80133a6cb9ddc93e4d5e28f1326dc2aec5c1e1880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-or.json",
+      "bytes": 5267,
+      "sha256": "10440dd1569af2665eab4560a5475ab33a1ccc796e813eb85e3e0d36d1d1d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-store_different.json",
+      "bytes": 3026,
+      "sha256": "e6909b147abb1f57a37cb659ac22772840df544000614973814e7edefc9b249c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-store_equal.json",
+      "bytes": 3234,
+      "sha256": "cfe7ab4966bf9fed9445db71e5eecf1e9c8a71a8da8fb9127ea8b2fe315202b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-0-typed-1-xor.json",
+      "bytes": 5268,
+      "sha256": "18a4d5a82431503c7f9884a5a29b07b9b9275b1c8c306d68e875a3b5c92416f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-add.json",
+      "bytes": 5180,
+      "sha256": "6ac823e878c54a43a05975e3785d7a98f181b720e48e81971b6a8f61f48b1d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "9ac306557ac4abaeaa739d23c696cdafff626e56ad2401e598f301e1a64e2197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-and.json",
+      "bytes": 5168,
+      "sha256": "646c0c2c295b0bc3a7c28d3426159b28c4c95cb140bd9be4030c8170e3c7a372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-compare_different.json",
+      "bytes": 4964,
+      "sha256": "524db941c9e789be5132850d7c8b439880563635a67e8a1e1bfc3419d53163ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-compare_equal.json",
+      "bytes": 5178,
+      "sha256": "981d2366124b476220ae2aa36df12bc2d84d76962859960595dc6f50dfd2da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-exchange.json",
+      "bytes": 5173,
+      "sha256": "615d77dcc2bb4cafa051ad9d8a3948afcb00e2ca64f480bdbca8638e7bf69b08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-max.json",
+      "bytes": 5194,
+      "sha256": "1dab95b3e45ed40e857fb4b4c13c151ce3cf055f8fcb7285a5ab467c1956827f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-min.json",
+      "bytes": 5188,
+      "sha256": "c63179bb196b0c64532d255b83ec4485c0d498703ebb0c4021c2d52e4cf1fc3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-or.json",
+      "bytes": 5178,
+      "sha256": "176f52d314bd6db49a083396fda4c750d14be5fe6bfffd80aeb4c57662810996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-store_different.json",
+      "bytes": 2943,
+      "sha256": "2fe214aeeded009c4a83445ab080a5def632e3b0fb21424e74f8093642b697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-store_equal.json",
+      "bytes": 3157,
+      "sha256": "c19758bdfe56757a3f3b3334721474a668605c018af261da2edb9acf8c6efca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-0-xor.json",
+      "bytes": 5179,
+      "sha256": "f9adf8452f9affdd71ed459a0a89490b3076d574432079851783b166b69f3d0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-add.json",
+      "bytes": 5190,
+      "sha256": "a014ec06feb684f0cd92eaaa5678cea1c36afe3112eda44f5018a5ed8e49100e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-add_no_result.json",
+      "bytes": 3175,
+      "sha256": "8fad2700e0a292ae54cf4efb94735c8e8afc0d32ffb69835176c0d160998d432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-and.json",
+      "bytes": 5173,
+      "sha256": "7879a49e1da84bc2c38ada857f9996e39aabfc6509273f74ff2852236a2d9163"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-compare_different.json",
+      "bytes": 4975,
+      "sha256": "44f6a3130d5ced6f4fc4c6332b11153c2aad7d23706e490e3a862e63f5c56383"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-compare_equal.json",
+      "bytes": 5183,
+      "sha256": "0f9db85be82732f804f1de0e1570fb6d714c5a4089982cf81934d9f8212f1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-exchange.json",
+      "bytes": 5178,
+      "sha256": "86ad9965db844f761bda7621517bcc49c2a2eae3560c515392f7dedcbaaf706e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-max.json",
+      "bytes": 5199,
+      "sha256": "356216d8b558540134ceae030ef28e34c48f6eee99c25bd516b3b3c4a2e83529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-min.json",
+      "bytes": 5199,
+      "sha256": "78761a957d02063e2cc9f0d62b0485ad6e7db3b68f1524fb33773ccf07f79644"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-or.json",
+      "bytes": 5189,
+      "sha256": "221df31fcb3a69a32315d8503b967c9d28d7ed2fbf5ef5bacec105b0ff307ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-store_different.json",
+      "bytes": 2948,
+      "sha256": "c7c3e88539d138c1e3decd5475e537a565b4aaea9d11759e07cbf1da06626bde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-store_equal.json",
+      "bytes": 3156,
+      "sha256": "4a1f46fae9183f59f882bbd4146e1269855d3604fd061fdf55036fe1843acade"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-texture-1-xor.json",
+      "bytes": 5190,
+      "sha256": "9f4433a744ef68c3d1b497e85ef71f2630dfbf414f3fa3490ae5482ed775c267"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-add.json",
+      "bytes": 5262,
+      "sha256": "ff653e61655bb87c5e451d7bc2fb407642c2cefa59de8c6792cb2f907fa0cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "b2a9b9a1b351d3949dea2e0514e9805d40a78b3369b1afe2034b6ba811236db3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-and.json",
+      "bytes": 5250,
+      "sha256": "147335fe4066efc2cccc128e9d655700a257933754082a7abb6369ea05de8b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-compare_different.json",
+      "bytes": 5046,
+      "sha256": "35dc31de3edbf10c0616316ed2321425b61db8861e47ae215b67498a21fc54da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-compare_equal.json",
+      "bytes": 5260,
+      "sha256": "8d2cb36b3fbdce79f799d08ba15f2d77f3c90e1635f80c69d82d6e31a7ad39e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-exchange.json",
+      "bytes": 5255,
+      "sha256": "74a6966f1c0b4b97a36b190804d05fde1121fe5066846f886290fed3205b491d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-max.json",
+      "bytes": 5276,
+      "sha256": "6ad07358caa3d1827523126ee6c3adced9838efd2436132098119cdb7ebf141a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-min.json",
+      "bytes": 5270,
+      "sha256": "518ccc02c14df693628f521a05f55e8493ad1dddd5f8f96fb4fc7ce7626ab2ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-or.json",
+      "bytes": 5260,
+      "sha256": "bab608cb588d1830e3f0bc5d57a6784d1975c38e67a5c42bbfd9bc550dec053f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-store_different.json",
+      "bytes": 3025,
+      "sha256": "ef93a86834500d32a6bf4b6439acc1327ecc666838697a1d460f72305e474663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-store_equal.json",
+      "bytes": 3239,
+      "sha256": "ef677d01e69f41da3655db99498bb8203ad9a4e43f1b4d771ad146ef57b724a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-0-xor.json",
+      "bytes": 5261,
+      "sha256": "76be66196f474dfe4bf1c37c68ad0906e8ca6931b851f6fdb0a1acbbc41e13c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-add.json",
+      "bytes": 5272,
+      "sha256": "a259631e6c6e59f5f8447172efe6f030b25a35cdbe0a6daf1d88580e3e2d67a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-add_no_result.json",
+      "bytes": 3257,
+      "sha256": "d3be8f761ea065e2f3bdf06ef7ffbbcf264cf31eb4c9ab9e5a991045d39e7309"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-and.json",
+      "bytes": 5255,
+      "sha256": "4fe733086249aec25c8f5cba50482c2d0df6378327bb7d78f71ef52afb5d789b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-compare_different.json",
+      "bytes": 5057,
+      "sha256": "9a9ef4aee92ca4e89c82e5718817e51f27243f01993479f764b335704b3be54f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-compare_equal.json",
+      "bytes": 5265,
+      "sha256": "7fc1c6a63c23d5a3b7534ea125f6c0680d473837a4fde37bb81c199307c367f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-exchange.json",
+      "bytes": 5260,
+      "sha256": "9e777cb275bae9f82c814d9b7340a2fd77b7c9f1a68dd8f6dc87ae346abbcb27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-max.json",
+      "bytes": 5281,
+      "sha256": "ecf2a059ce72c5c6a6dcdbfce120e5e630944b315e812893bf055ec546d61abc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-min.json",
+      "bytes": 5281,
+      "sha256": "2656ea38c39c87244b0ea11e6b44854d09d24ca945a483505b9d40c068fda75a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-or.json",
+      "bytes": 5271,
+      "sha256": "9e20b758634aecec3ee2edf53b2c1cb727298bdf531def15ced1128ce0f79292"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-store_different.json",
+      "bytes": 3030,
+      "sha256": "7810f57aad2821264e1e8d2f1e8938ab17546a937b43472db53d6a8d500e7ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-store_equal.json",
+      "bytes": 3238,
+      "sha256": "830d85ee8a5ad1ace3b0ea45c548cb35b5d7636c323d2010fa31930e54426ef0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-32902-typed-1-xor.json",
+      "bytes": 5272,
+      "sha256": "3cf6ec6faa212caecb69f1b69e8035f272990dff4cb641ab930e268c15ed1e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-add.json",
+      "bytes": 5179,
+      "sha256": "da7b38865ec4fe32cf1db0b39950ff7e0c9c2949d626277ca722be2399bbfc2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-add_no_result.json",
+      "bytes": 3170,
+      "sha256": "e0b957eea74aa3b982a3e877b205555cc7d9a123a9d4d3111fe402c711afcfc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-and.json",
+      "bytes": 5167,
+      "sha256": "eb847fc40ee1116d129497695e29e2e075e82b2946757cc10614fb564e368367"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-compare_different.json",
+      "bytes": 4963,
+      "sha256": "80087cd7e2dc317f5f8a6f7a9dbb1e7d27cea3ac8165fb2522fbd9fafda1935d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-compare_equal.json",
+      "bytes": 5177,
+      "sha256": "f32b126e0bf44763ce2cf7a6e95dc1a290e6ee8ea6bcaa25f5362bd2dc402264"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-exchange.json",
+      "bytes": 5172,
+      "sha256": "f563a9428cbc4784e3f6c9427205ea43f9cc2c9c018fa3b967a2d4cdc5bb5258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-max.json",
+      "bytes": 5193,
+      "sha256": "a3621e895884690378d952a9a8c95d021f7ee26820c7ac4cd8adcd82fadd971a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-min.json",
+      "bytes": 5187,
+      "sha256": "3a3b44d9fbb9664096b2abf74fa0fa33e043139d6b8793fec6adb1146dbbce81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-or.json",
+      "bytes": 5177,
+      "sha256": "8d44fabfb6751f67bc5bb2f118ab252514c5d610156256a13c194122a0269b7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-store_different.json",
+      "bytes": 2942,
+      "sha256": "5085f2936d630fe21c0686fe364eea63cf755f31ff444fa42fb7aa93964322c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-store_equal.json",
+      "bytes": 3156,
+      "sha256": "336ab82f85e5c3d277794e8da0597f3c4a524315cfb44a6fe233d7f5eb0c08e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-0-xor.json",
+      "bytes": 5178,
+      "sha256": "1eee976489a802957c873d31255bf11359e82f9b65967ebfef8d80db1b6f64ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-add.json",
+      "bytes": 5189,
+      "sha256": "a9bdcc1c32e7e8171e7b8fc58ebf0faf18ba9688d9aeae6e1724fff7865b73dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-add_no_result.json",
+      "bytes": 3174,
+      "sha256": "718d1ef9ac11fb8970f6f9933fb51fc375377d64f9f85cb800f56dc1030b951d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-and.json",
+      "bytes": 5172,
+      "sha256": "4cc4aa7f1c9d78588669597890ce0d7199afe1de1131f9a8312ddb89c416a8be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-compare_different.json",
+      "bytes": 4974,
+      "sha256": "a44ba63370b060380a9b09674505f5b6558373b258986ab44a428f780bfae1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-compare_equal.json",
+      "bytes": 5182,
+      "sha256": "c3952a8ee6d959c38eec6538d01933da871ecc91249d4e53228350c0528d288e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-exchange.json",
+      "bytes": 5177,
+      "sha256": "25431883e4022c785676d77be7ed300292d5446696bf2e4a66d9edca2cb59b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-max.json",
+      "bytes": 5198,
+      "sha256": "d0a53b229d51f8e30ef9cca253d0bfa7427fcc4a33b91ed07db28c9db9819260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-min.json",
+      "bytes": 5198,
+      "sha256": "30ab38146421a597f410e805b5b10dacb15f799e72c2acaadc4d21a682b3384e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-or.json",
+      "bytes": 5188,
+      "sha256": "29f02fd1f3b2f5a2a289279fd985b9080b67511d7aeb4bef5cfd25069b0df448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-store_different.json",
+      "bytes": 2947,
+      "sha256": "ae0f253d80ae47d0d23f042a98796be225b507b0081833c7ba71004a72a0929a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-store_equal.json",
+      "bytes": 3155,
+      "sha256": "667b4260c3472b1b83c416ea20183eda1475dda304674d018912b1c9ce6a4768"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-texture-1-xor.json",
+      "bytes": 5189,
+      "sha256": "d713b105156ef3110564737231b896d612cfb46398a02ef09597a12884f29a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-add.json",
+      "bytes": 5261,
+      "sha256": "34dea1959dd3aa1ae4f23d080abc8e0bdf32797ebda4b7b0840489eb83e2d3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-add_no_result.json",
+      "bytes": 3252,
+      "sha256": "0ec88624c43e931c1df2b48b3b9d00d287e683b5938bb1410aa1213f1cd60139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-and.json",
+      "bytes": 5249,
+      "sha256": "88d4aff3cd7a4ed46c7ed143654fddcc35a0c8e6728aaca2d1d41c7d01d6fee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-compare_different.json",
+      "bytes": 5045,
+      "sha256": "507790dfd0456d74be5f202f75c2ed2055b2fe4405bf6679079aedbc9e553c67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-compare_equal.json",
+      "bytes": 5259,
+      "sha256": "5008361454f6eeef914a80c10826b8ae2b665774daec4d43a1edd5934f994be3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-exchange.json",
+      "bytes": 5254,
+      "sha256": "b9fe7644d080007d15e946b07e3176eb362a46c34b6dc6d687cde52fce4c85cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-max.json",
+      "bytes": 5275,
+      "sha256": "84487043c4f7536c9ad4a53ceaab965d0d089355f998756ed74c96fe4f821bfa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-min.json",
+      "bytes": 5269,
+      "sha256": "91b743e0ecbc290316ad4968f55bf3f16753882cd9508e72182896c612ddedfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-or.json",
+      "bytes": 5259,
+      "sha256": "1f3ee5f65bcda873731db77f5c66439ca66273d888caa09298a59c1f6fa1412b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-store_different.json",
+      "bytes": 3024,
+      "sha256": "f111534a96c9a82f7839d78905eb17988cb8f71f7d872e385fbdd6a6df1153fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-store_equal.json",
+      "bytes": 3238,
+      "sha256": "4d595fe96880954f8c5bf400e0e653c60df580fb5f97c16eabad23cd760e0084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-0-xor.json",
+      "bytes": 5260,
+      "sha256": "9fedba4ac745fc5a842e5396bf41f347618e0031259d40ceebbdc280f069bf73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-add.json",
+      "bytes": 5271,
+      "sha256": "ca3e26d72135ffcecd410e243fd2072c50c8bb01957fb317b1f8a64f4e14f12c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-add_no_result.json",
+      "bytes": 3256,
+      "sha256": "0c45ab7ce62008ef2e56f4d574151b89b32284c008827d299b77c59d978ba061"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-and.json",
+      "bytes": 5254,
+      "sha256": "68d6544d48e2a82304348ece4116890462523cb22aad26ceede512e427f77314"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-compare_different.json",
+      "bytes": 5056,
+      "sha256": "00239962174c5dac22e6cda4e538b3fe5825662958e1892548d648e39175f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-compare_equal.json",
+      "bytes": 5264,
+      "sha256": "3c6ca39cd51f8dc9a48ceea9cfcd09db608f270f6de5d0fb89fde286ed682b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-exchange.json",
+      "bytes": 5259,
+      "sha256": "33990bd7c1c41ce145326e080fbb3cfe2907cefad685c8f2304f07b341039932"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-max.json",
+      "bytes": 5280,
+      "sha256": "1bcfb095ab6aae075ac9497078da17d020c4872861f8479d8845cda23977ad94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-min.json",
+      "bytes": 5280,
+      "sha256": "bc62c90006e97e87e033adf44257c8d7f90d583c2527f398c1b977da7af24237"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-or.json",
+      "bytes": 5270,
+      "sha256": "9ddd9f145b62d326fc91a946fec67ae461e4ec25da243376b358ec2758a1e33d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-store_different.json",
+      "bytes": 3029,
+      "sha256": "eaa32156e3b2b2de388f4d15c5c109acb90a192176fc97ab46266b73357fcfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-store_equal.json",
+      "bytes": 3237,
+      "sha256": "42bfb43cf0e89518d8ec3afc0f4b90f78ff1b6b3fcc3151b8b200f42419503ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-evidence/typedInstructions-4318-typed-1-xor.json",
+      "bytes": 5271,
+      "sha256": "b3bde9e522f8b7622507cf2ed65ccaa4b02abd78dcd4255e71423ebbcbde3f42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-tests.txt",
+      "bytes": 23264,
+      "sha256": "b22099f9bad59911c0c60453ca8a9c3d0be7fd4fe43823d0485f29e347802a7b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-final-validation.json",
+      "bytes": 194,
+      "sha256": "437e18ac79ba0d12d425888b0cfa69b59b4f6594b310744f5ae2c4476a506eed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-group-build.txt",
+      "bytes": 3281,
+      "sha256": "e5f94ba1ccb681b27c4fe2d42620e1026840621a6b06f6737d1b3912fe831f61"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-0-append.json",
+      "bytes": 28676,
+      "sha256": "a47fa5f598b3905747647aa31147b86863b3d1fe68aa7c4a07d0f470220f64d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-0-counter.json",
+      "bytes": 28683,
+      "sha256": "f97188e96fb5223951f73321d0ae7223291757b9b6f03afa6509fb336f7f92a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-0-raw.json",
+      "bytes": 28685,
+      "sha256": "111e6476ebcdc8a47bb4261fc7e0400f044a5be7551b413f63f7e5ab4ce4266f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-32902-append.json",
+      "bytes": 28692,
+      "sha256": "f8227f8a5dcaf266250fd55ef5cd2f67b3f1213a1463d38c110fb635072a8fe6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-4318-append.json",
+      "bytes": 28687,
+      "sha256": "b04be0b5ce797edb7041f5de419b7e2538c686fa143fa79ddd7dbf4be7d6ba16"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-4318-counter.json",
+      "bytes": 28694,
+      "sha256": "31e23f32884be754820b88465e01f78e18152e89515f982eccfc2acafd107e28"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/prefixes-4318-raw.json",
+      "bytes": 28696,
+      "sha256": "d13a744212c3335a411dd21c115c957bc8f9bcb9cad3cfd332902ef8319dd7cc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-evidence/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-initial-tests.txt",
+      "bytes": 2724,
+      "sha256": "803019dbd4a9b8fecc51aa687b95471d68502afbd3bbf64c8cf864bd80d7295d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-platform.json",
+      "bytes": 539,
+      "sha256": "70459b0969a457fdff41ff3cd4afd9d7814b75fa74fb522037949f3dae7d609e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-build.txt",
+      "bytes": 18120,
+      "sha256": "7e87b841386bf772692ac2ada7d6f11b8ce17e8cc08ed5b3d3b6e3bcc8cd24d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-console.txt",
+      "bytes": 56925,
+      "sha256": "57faed44780fde7b7b141873a653e04fdeaf82952d5c1249d7552e89d27e391f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-0-append.json",
+      "bytes": 30545,
+      "sha256": "4abd8197e6ac0196ab1f6089de982318f36b5e9f64102eaaa2e4a0c5a6ce9c7c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-0-counter.json",
+      "bytes": 30562,
+      "sha256": "0427c1ac0375e40a7a2c5050faa11f71e835f73e7a16d6cb2def9687d436b1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-0-raw.json",
+      "bytes": 30554,
+      "sha256": "c8a716446914b4a6810ae6296f05e057c0b2bc444011b3a8d37673069f8ac0ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-0-texture.json",
+      "bytes": 29498,
+      "sha256": "5739570a0abb6ccc83cc26320dce480adf4c086bc4bd6cb415192824c565cac5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-0-typed.json",
+      "bytes": 30556,
+      "sha256": "6df53c4c697737fbf16ae1b8ea204d0c9af19e605894c0eb0018380cbadd1053"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-32902-append.json",
+      "bytes": 30561,
+      "sha256": "fdf11d8f6bf12a891f971f2fccc6de01f4aa68bb6556efbc36a2c9fdf3f0d827"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-32902-counter.json",
+      "bytes": 30578,
+      "sha256": "3af5b7443889dfe67fdebbfaa71e6cfabe786302d996e333c355afad558d5881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-32902-raw.json",
+      "bytes": 30570,
+      "sha256": "773d6614f19cf4471ea5e48628e635547fbc13307521ab312bf28db3c48b5eec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-32902-texture.json",
+      "bytes": 29514,
+      "sha256": "ec51ba76a77ce7e66a80b89c007219f0a833d3fff0a00241a7c9c0279b9b9571"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-32902-typed.json",
+      "bytes": 30572,
+      "sha256": "5c86ffdde4bd46b3e6caf0e1e07628d39262bbd796bca241bc5cadaf949fc0a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-4318-append.json",
+      "bytes": 30556,
+      "sha256": "026c398f7d8717adaece5960b524af37cb0aab237eebac94678801366e74e249"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-4318-counter.json",
+      "bytes": 30573,
+      "sha256": "44c86b55f18a31fa52a0bdf1a353b013935426916110ce76e55f1121b9216914"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-4318-raw.json",
+      "bytes": 30565,
+      "sha256": "e54d19ef7f20d1099001c2b4c07d13985dc76014e60c8e613e7def56d6218f4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-4318-texture.json",
+      "bytes": 29509,
+      "sha256": "2cd42e8fd79ff8f02fcd366f793939b1086114f229063729b1360dd6a3422401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/prefixes-4318-typed.json",
+      "bytes": 30567,
+      "sha256": "fff602dc98acc16d1f41e0852491da0729374cc4fe24abe8db1e0e720d780880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/recovery-0.json",
+      "bytes": 113,
+      "sha256": "7d515996bffad3d51539939889a1f8340307509b05601f4756d530b7392cb650"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/recovery-32902.json",
+      "bytes": 117,
+      "sha256": "654108e475410e3fa732777f567d2feb16eb5cc0330589a9cb988875bf852557"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/recovery-4318.json",
+      "bytes": 116,
+      "sha256": "3aadeb498600a1f41021aaeede0393277ae4499dd5049777cbe343844fe0b3a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-42-0.json",
+      "bytes": 721,
+      "sha256": "73b0b6e58071573f7a7ce1ecddfa3ccd862d88b05155d27c6a1f7adc63cd79a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-42-1.json",
+      "bytes": 720,
+      "sha256": "17f42e3afff79ac6e19e57edce52424f1922fb0367ba1e659983d789af71748a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-42-2.json",
+      "bytes": 711,
+      "sha256": "2c855f58820a2e1bb95aa08a9eb2fabda621fc4266f1a9d5ef5de404eba3c964"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-42-3.json",
+      "bytes": 711,
+      "sha256": "8d2d54b85dbe298a09135ffd32e5346012d37362f9f6ab9998f42c86ef0c84f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-43-0.json",
+      "bytes": 721,
+      "sha256": "a1a04edae07e959cbfa0e9391fc9b89f94e44a1d3403b997d26fe480aecee149"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-43-1.json",
+      "bytes": 720,
+      "sha256": "908c204aceb7e7b6cdd6935648f235f1e06ebacc0ffec00c74e8109cc3b71a22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-43-2.json",
+      "bytes": 711,
+      "sha256": "606eeed7750d9dbf63bb8e4e2e32f2d13d0a8df5244e087f2e935fd5d1c6fb1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-2-43-3.json",
+      "bytes": 711,
+      "sha256": "e9b52c67f23ad83b406463cac875b03619aaed9f4b9943f1a2e9a8acbdea8973"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-42-0.json",
+      "bytes": 722,
+      "sha256": "51395c77ae0df7a893e9edb0cc3a52e1e1519b55e100afa416f89fd7f0e07b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-42-1.json",
+      "bytes": 720,
+      "sha256": "d457b957f3b3db69b08a7b939a6fa62195fad0f818f0dffa7b87421d0e5bc972"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-42-2.json",
+      "bytes": 711,
+      "sha256": "ea75347ad93ac8566c7eecca3f423d234f237ce0fb43c7247744a3aca87ef764"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-42-3.json",
+      "bytes": 711,
+      "sha256": "c83bb5875cd8f0418688de6deeef5a99e53e26e33b1cc2f3fe87b73b2dc811b1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-43-0.json",
+      "bytes": 722,
+      "sha256": "0072f1b8cea4f2f6b0b4284483d56a95cb32dfb2037294cfeba78d0f17839372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-43-1.json",
+      "bytes": 720,
+      "sha256": "44409e018287a76c94309955cfb2d6936a76f552b69382872ae7841e1e212c2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-43-2.json",
+      "bytes": 711,
+      "sha256": "ae761d2631ccb80ff52b4d6d7335222cbf622e1a113f738339facea45625b2ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-3-43-3.json",
+      "bytes": 711,
+      "sha256": "c1b0abae5959f45bbf04c33fb306054624c273c6460a0226c3d8b3588980616b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-42-0.json",
+      "bytes": 723,
+      "sha256": "613d8d97b208113b470b45d9a7b947d1b04db3809e07959af126224015469a80"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-42-1.json",
+      "bytes": 719,
+      "sha256": "48674e2f5d2d3417f7b11abf2e910ce0b756aed7d3d7297a83c3463a05131c46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-42-2.json",
+      "bytes": 722,
+      "sha256": "3e6727cf84a0d6465d8c45095b6e9dcf0df6cbb2559272ee0641af06fe590609"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-42-3.json",
+      "bytes": 722,
+      "sha256": "9210b03cf0ef159d8d3b288bf0a498811a7f95b7ffcdb240f1208764b552bcf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-43-0.json",
+      "bytes": 723,
+      "sha256": "be93e0cc333f8de0d0612f6c1ebb03e85e2d223d63707c212fab48dbc7a6aaae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-43-1.json",
+      "bytes": 719,
+      "sha256": "b6d4bd054d352d9dc25c1e0c54ea6103a2f9c561ed5cca0f141c0cd3814ecee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-43-2.json",
+      "bytes": 722,
+      "sha256": "54f1f64ac1e319c3d4a0c1b20c2660d1782804adc66f875b9e57f3aba66466e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-5-43-3.json",
+      "bytes": 722,
+      "sha256": "ec49742472d3d5d595f40429465df557c2f1fb112a771a6806797fc63649812c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-42-0.json",
+      "bytes": 722,
+      "sha256": "37f10d6140c1cbe534763578c31fc71e776da636fac875ca25bd1f0cc9abe01e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-42-1.json",
+      "bytes": 720,
+      "sha256": "65bce02fac1a8372d3af2a70137576d9327c8a38097e160253aeb73b6f09cb7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-42-2.json",
+      "bytes": 711,
+      "sha256": "4323799f29399b55506cf43a52e61c44a520985ebf4eaf8374fb905b5a191e20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-42-3.json",
+      "bytes": 711,
+      "sha256": "dfef00fbb4c9b8ab5ffe1b418c1cf2c3561ba89dbb64f2c4400d9e67b8ba9b93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-43-0.json",
+      "bytes": 722,
+      "sha256": "e82203aaff839822806984ad1dab29d193a775e13ced20180c0be06138aab944"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-43-1.json",
+      "bytes": 720,
+      "sha256": "773185e78e9950e23247c1b9e434cee961df5bca12656dc835ee1c5b50ed3250"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-43-2.json",
+      "bytes": 711,
+      "sha256": "503aa584f25005a448f8627672692f6f5352325d9b79fe46eae231e4d01b50af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-7-43-3.json",
+      "bytes": 711,
+      "sha256": "50d695ddd56955991ea7be78af345632f978a823e0ba99727d7a31c78652090f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-42-0.json",
+      "bytes": 722,
+      "sha256": "b8d8383cceddd9153a23db48cc5d7d6b70dea9a509db6adc296bcc8ca9ddbd2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-42-1.json",
+      "bytes": 720,
+      "sha256": "0023b4c061b9bdaae34c0fa7beaad9eb9523fdb3527414e315d18902c49d9287"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-42-2.json",
+      "bytes": 711,
+      "sha256": "800d6be500001b01fe35442fb9f884250622aecc37937bf7e39c82cc3740e3a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-42-3.json",
+      "bytes": 711,
+      "sha256": "fd6ec96b9c3c11f491cd2c4a6aca63d9722e12b2da8ab8b9934fe61a2d69faef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-43-0.json",
+      "bytes": 722,
+      "sha256": "ca0c91ab3290c70abd88e33f4de45b39d1cd2deda622fd647b62a61db616ae02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-43-1.json",
+      "bytes": 720,
+      "sha256": "355f128c153c59dbde9b132b593e6c487a60fe75c6f647970e7bf646201c7865"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-43-2.json",
+      "bytes": 711,
+      "sha256": "37f16fa1ed74e04538774005a3689fbf3cb919a42b9ac5677f63e036cb0376e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-0-8-43-3.json",
+      "bytes": 711,
+      "sha256": "a755162ccb1e39b7fce36635f9df6f31dc217bab15b6111d5d282cf95b68cf6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-42-0.json",
+      "bytes": 725,
+      "sha256": "a741f9f67e31fa28bb5b3b0ad31de75d49c0fe32b0c951a44ef984d6c967f34c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-42-1.json",
+      "bytes": 724,
+      "sha256": "b9de379125674a87ff390b33f8cd3694fbfe1e2ef89463af1cf1a5c8dc6804ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-42-2.json",
+      "bytes": 715,
+      "sha256": "6fb507d4837092fb1e682755b66cdb50b25feaff675fa9df4ab0103e36664edf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-42-3.json",
+      "bytes": 715,
+      "sha256": "0cc7b1c655b812038879a086f6e05a5607d78c4a9d72a0addfa9fa9f5cf68021"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-43-0.json",
+      "bytes": 725,
+      "sha256": "437a5a5175dab96a778cf6f3694c3ffb4efdd30e0429046e7f4686b6a3f61604"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-43-1.json",
+      "bytes": 724,
+      "sha256": "b5bb6c6ed7915a354f8bde8350ce977f9a3f06ef812c6316e2c6b267a50df94a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-43-2.json",
+      "bytes": 715,
+      "sha256": "eb5137d3b463bba99046b6bdf0aa3e1ee6378b78ce2a56d76f95189d1deeffb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-2-43-3.json",
+      "bytes": 715,
+      "sha256": "7c228f2b44bf11bb6ea88c2c3c34fd6f26b46f46630783138e4b0e8553cbba34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-42-0.json",
+      "bytes": 726,
+      "sha256": "45202042de949a0a3be6de6a509d116251d8c9738f8257b0825a11fdbd322258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-42-1.json",
+      "bytes": 724,
+      "sha256": "df3573ee8675fafdc0f0a803eddd0511cdb1a159c6db9196a017a415d39c5fd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-42-2.json",
+      "bytes": 715,
+      "sha256": "11f021dd3c4ac1b49173c15aa0ccd585d881777fe2bd92686543ad5eb21a4afa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-42-3.json",
+      "bytes": 715,
+      "sha256": "93362633d12e1fcfe46471b826d2005371c6ada07a1e2ca421bad3f97c3d8947"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-43-0.json",
+      "bytes": 726,
+      "sha256": "882c58ad6a4c2d1915a82a7b75b7dbd1956c2d339a469d5febba48d3ad4c8d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-43-1.json",
+      "bytes": 724,
+      "sha256": "988b3f950022b19782d18b8fbf29764b39b59fe28b47be542d7f3a4b17b26341"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-43-2.json",
+      "bytes": 715,
+      "sha256": "090a592df5704b4934a5369317e8e945bfd0f50ca07cbb035c900363cb1538d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-3-43-3.json",
+      "bytes": 715,
+      "sha256": "858f7f9a28c3a34c299db361518d39f1db10a45b06b0bb58f905e51c4614b903"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-42-0.json",
+      "bytes": 727,
+      "sha256": "b09aa217c51c62c8751bec7853d6b9604656ab3de5e860e3eda639c194da0770"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-42-1.json",
+      "bytes": 723,
+      "sha256": "67aecc2ee000ac79d33be337449ef65954e6d491e6489b80a87cda87e344eed5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-42-2.json",
+      "bytes": 714,
+      "sha256": "78ebb0c318b63fb0be927209c8d1114919575411e272d8b029d31096ecebe8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-42-3.json",
+      "bytes": 714,
+      "sha256": "363c8d26cebbc61d356f00df71dd5b6d4ce463e07c48a857a4a5615e852f3524"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-43-0.json",
+      "bytes": 727,
+      "sha256": "e851d79f286f6337e5df090fbb2b340ef9ba49babdc439e8acd45881a2d4a668"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-43-1.json",
+      "bytes": 723,
+      "sha256": "1e523fb70d70511a0134631b93a391acff82bf66d7daf184f850f8b5abc9caeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-43-2.json",
+      "bytes": 714,
+      "sha256": "c79765e5d7d8a90951439cb939a384882449a30048c4ebf593c4796798af7538"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-5-43-3.json",
+      "bytes": 714,
+      "sha256": "02b8b47d587824d62f73e8d7ec5d7efce32d6e1606e302228e17b42fb91f18d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-42-0.json",
+      "bytes": 726,
+      "sha256": "28c12c5edaae8dff38f1ccd844ca0edc8461cadea68f782363e554db36d92da3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-42-1.json",
+      "bytes": 724,
+      "sha256": "209bc2c1bb82acb2ace71fb8ae278aaaa6c9e2a635d8ab7427a7768cd3cc4b58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-42-2.json",
+      "bytes": 715,
+      "sha256": "9223543d6dee112d8fb8b846178f753a857c39343444e4bc642536ec98cd4f17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-42-3.json",
+      "bytes": 715,
+      "sha256": "3c26107fbc883ebf29623b39e366b3e3951b6372abc84178aa093fc825394474"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-43-0.json",
+      "bytes": 726,
+      "sha256": "53a0b028ec4551dcb36c1de75992216cfba58db61716830c74ed37badac0c842"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-43-1.json",
+      "bytes": 724,
+      "sha256": "3957cc1ee4a3746157983cc97bf7eeed3204355bc5937bcf8a704176bcd4c839"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-43-2.json",
+      "bytes": 715,
+      "sha256": "86780bbb9d304a0f5e660d989122dbf7b76b3fa6c4c774bdf18d502fe61c0a2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-7-43-3.json",
+      "bytes": 715,
+      "sha256": "13ddf7c216e74849392134f9232e94795c50a7c658cd1c45aa7ed70ffaaf6675"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-42-0.json",
+      "bytes": 726,
+      "sha256": "c3c7cdaf7f472dcf6c8dd338016b1bae91e3006893eb38eba819ff835dc66fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-42-1.json",
+      "bytes": 724,
+      "sha256": "8a490106379ba6a483c9e901a951145ed8b8d67c4dd2f77b4426386b1898cdd0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-42-2.json",
+      "bytes": 715,
+      "sha256": "2dae21c5d1b69006bcb86e2547a7442a457eef595c8ca02fec0309e43f1a8494"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-42-3.json",
+      "bytes": 715,
+      "sha256": "cbc1871ea485a8d6045e6f4d5bb202433372fb860aa18e144d02133f0650a747"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-43-0.json",
+      "bytes": 726,
+      "sha256": "fb04bd712bd31d80afebf7f80c20f8cd622f720f7eba5f3020e883d323dd2c19"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-43-1.json",
+      "bytes": 724,
+      "sha256": "83dc5dcb3a9b5161f9c31ac902a2d009920e59e1f86ada70dc86bb37237d6788"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-43-2.json",
+      "bytes": 715,
+      "sha256": "bbf6f1e0e0f5b6d6f8d72546e7e84ae6c5990f35a7be6d924568abac52f2c0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-32902-8-43-3.json",
+      "bytes": 715,
+      "sha256": "f4289ec4ba92bb86f97d1e07cd5f26067f86bea0432222393d54c6d75d895d9c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-42-0.json",
+      "bytes": 724,
+      "sha256": "652922bfdefe362b68b48db60c15327c3cf26e8143c5992925070fefe7d159ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-42-1.json",
+      "bytes": 723,
+      "sha256": "d5c3a8a393c54851f717dcf1e54560344deb84290500356d78b21c2004c5103e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-42-2.json",
+      "bytes": 714,
+      "sha256": "44a9fd078e997cf6e46fc1bd00909a2b26e918c1556869ad6e8f8ef63804512c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-42-3.json",
+      "bytes": 714,
+      "sha256": "8d3037bf14064d0a839237e761de7b2e552e0644730e8e5163fa1a7abe51bd33"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-43-0.json",
+      "bytes": 724,
+      "sha256": "cc30f400dad19376a420337f622fabf5f6f81f5048bbd33f9878d8931dcd40c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-43-1.json",
+      "bytes": 723,
+      "sha256": "369818db4bd0108f1839067f1deafc9f0eb10751ab46f17ad5093904d0c550f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-43-2.json",
+      "bytes": 714,
+      "sha256": "2b154a8ae6b6458f239c78450d167c71d44f43021904795f5c6bee41baaf9928"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-2-43-3.json",
+      "bytes": 714,
+      "sha256": "255c5651b2c70ee2e1043b6b1e43879cfa4c4f9e6fc0ebd7bb9d3b5225fc7a99"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-42-0.json",
+      "bytes": 725,
+      "sha256": "418ea61a5d19d1a43ed5de01ac1eff9a2a865448aff4fafacae07e1afd44b7bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-42-1.json",
+      "bytes": 723,
+      "sha256": "6cdfcd8bea802790baeee583826e53ea39467b1ee8fbafe4d6a5de3d83c4fda8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-42-2.json",
+      "bytes": 714,
+      "sha256": "1558b3d948e4305ae948c1434869ae9c32e5631dde8d846a5a52307406518d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-42-3.json",
+      "bytes": 714,
+      "sha256": "9b054c5026396fecd6d33d13d04298c811b90bce3c7f6a3f55e08163385b58ed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-43-0.json",
+      "bytes": 725,
+      "sha256": "d21e3b9828886e699f902e9f1a2fd48c1b3980c1dec148a93b011cb24ebfb9ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-43-1.json",
+      "bytes": 723,
+      "sha256": "ba35c253d0141b61505625cffc12039b7c814ee9676551b761b4f8daef04ebbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-43-2.json",
+      "bytes": 714,
+      "sha256": "4c96bf89c766d4ad814f99431b88f967686dfbab35b651c7134e3ac0245578cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-3-43-3.json",
+      "bytes": 714,
+      "sha256": "244cc32c18e7ce7de4f6d25c730b627ea12a197166793d2bb25a48046ea1589b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-42-0.json",
+      "bytes": 726,
+      "sha256": "363360f34f3b0fcece9f1241898520cafa368673d23cee412dc6e434b6567b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-42-1.json",
+      "bytes": 722,
+      "sha256": "808c86af6827998fd22f6ff1a80a82afe0f070780d36a3943a0aff130bfb4a69"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-42-2.json",
+      "bytes": 713,
+      "sha256": "2396046e740843078aafbbeaac763757fe59a6cf46061712a0b346c05d57b4e1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-42-3.json",
+      "bytes": 713,
+      "sha256": "23ef03705beed90c7389c69e973d173dba81208dff05669fbbb154708f32b276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-43-0.json",
+      "bytes": 726,
+      "sha256": "cd4a82cdfbf066ec799c902d8fd2d2b142e00eb28ae94511577a5317a38ac3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-43-1.json",
+      "bytes": 722,
+      "sha256": "bff2045205ea5a4f033e78ea8fe311c13b4eaea5ed6eb42c7afbb9f94a1182c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-43-2.json",
+      "bytes": 713,
+      "sha256": "f4957cc239a4ce21fd26bd3ebdb10d3a524bac0764949f9d7f1c630bc649e387"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-5-43-3.json",
+      "bytes": 713,
+      "sha256": "824850b76dd29745628b9964816dc28e69de5c32060e857c49c29721aed97c89"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-42-0.json",
+      "bytes": 725,
+      "sha256": "b941453180f15d7a130beb6bbf2be9436e96a91d5235cf3547720cc13d022da0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-42-1.json",
+      "bytes": 723,
+      "sha256": "fdd94ff8e6f59a31e2b1ac37756e491f4023c0f09fd4764201fac3dc7ead7536"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-42-2.json",
+      "bytes": 714,
+      "sha256": "7bb0465204b5deb052fde74c4479bc86bef720bffabb925f2f5fe46fac76d951"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-42-3.json",
+      "bytes": 714,
+      "sha256": "c795f7109d87581d75a87f94c798605ac9da540733f89ef2274fafec6f6a0986"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-43-0.json",
+      "bytes": 725,
+      "sha256": "75477670558e1cbab6fdda828f023f74777de75a9534257604e092db9843e625"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-43-1.json",
+      "bytes": 723,
+      "sha256": "e65b53dd8ac13d65150c77beca067a460e40fa1b909546c153f63499e521e1a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-43-2.json",
+      "bytes": 714,
+      "sha256": "b8cabe11f0ee49ca29eefd8382a26cba1075ff83c7141e04f38e661decb255d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-7-43-3.json",
+      "bytes": 714,
+      "sha256": "9c3175ea640c947e5f59590ad87494c16ed26c226a2300105d9f464269254f82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-42-0.json",
+      "bytes": 725,
+      "sha256": "0f33c1812e81e6ead81cbabcc415260b513bfbf4a3a7a23d5055c009a820058b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-42-1.json",
+      "bytes": 723,
+      "sha256": "70146a79bf1f6d4958f49800cc72b9a5cd63a5549f237e0f81b67a1f2f6a617b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-42-2.json",
+      "bytes": 714,
+      "sha256": "b85e2a3ec613a8bc58ccb1a80687ee34fd29b503be11bff4add50cd42d321162"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-42-3.json",
+      "bytes": 714,
+      "sha256": "ee505908b8a370fd6dd633f06b14fb846575757868e59d9fba9da3ef9712db90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-43-0.json",
+      "bytes": 725,
+      "sha256": "3190708874ead1213b6dbf336f58a0df55ab1ac4a950f0c146c995b97924b35f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-43-1.json",
+      "bytes": 723,
+      "sha256": "149e399c1013ba41ac4157076dfcb29b2831759f284757d9d63953d294f07d23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-43-2.json",
+      "bytes": 714,
+      "sha256": "cc584908d120b2afac805c92432d2be093fca94fdc991bfc47939e7594b6fa17"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/textureRegions-4318-8-43-3.json",
+      "bytes": 714,
+      "sha256": "18aab3c72a4a0cd055b61cb13cdedfc4cf4f5237f4798d534f723861f02b187a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-0-texture.json",
+      "bytes": 1114,
+      "sha256": "8b03ac4754566cc169113553982f00b39e5bf4e5b05277f5e8346a4b15e3aee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-0-typed.json",
+      "bytes": 1639,
+      "sha256": "74d486c4f70a1fe3dfcfd523aac6fff48851c2401b91d5ffa58b12059813aaeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-32902-texture.json",
+      "bytes": 1118,
+      "sha256": "85c491b60bd47a233b25ba939d1bf9f7050a24f3a80b42366e74c9d890a83a1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-32902-typed.json",
+      "bytes": 1643,
+      "sha256": "442248c9462087f881d0eb8c6cb743dbf849a36535b9c2d91c00a47e1d7a65cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-4318-texture.json",
+      "bytes": 1117,
+      "sha256": "f2d8133211f41a88d82cf4dced6ec40bc5acd9dcbaab21cb4e4b062db7cf3cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedBounds-4318-typed.json",
+      "bytes": 1642,
+      "sha256": "f795d580fa6e351ef05f9e1b87d11a6dec993542160ace792dbdb2ae721a4168"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-add.json",
+      "bytes": 5176,
+      "sha256": "6500d647cd3dd2fb8b9317e2330e244d214a151aeefcba61884ee17c2be45815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-add_no_result.json",
+      "bytes": 3167,
+      "sha256": "23c6514d50ef7241440b02a2f85382b296f8ffe6dc51efd8b0e5247197a4cd04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-and.json",
+      "bytes": 5164,
+      "sha256": "f9a766a466e4acc582212b0e6fdd222a5eab6a5f54100ce88ff7fe5b569de7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-compare_different.json",
+      "bytes": 4960,
+      "sha256": "875986e9adc88a92a56e8a14acc710316da0a502fad032775c0fdf1ea46bae8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-compare_equal.json",
+      "bytes": 5174,
+      "sha256": "9d7829e60bb7b1e6b9eb170dbd86e9ec64c5b15c5ca3568b606e08aab238f53e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-exchange.json",
+      "bytes": 5169,
+      "sha256": "d9811d85d6c6fef0d83e16c068755951e8d895d5b7aa94b86e3e93434628acf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-max.json",
+      "bytes": 5190,
+      "sha256": "074436e3e667f0bca8ecbc59ff080ef8cca5e2cb5431796e328e002e0674a737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-min.json",
+      "bytes": 5184,
+      "sha256": "47810c56111096da4e28066e8fb73f182ae0f6bdb30c9d8fbdadd2b845ea95d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-or.json",
+      "bytes": 5174,
+      "sha256": "fa31d85055c11a5973f71cda7b1ef9651ac7b7983652dad02dd0f626c80c74b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-store_different.json",
+      "bytes": 2939,
+      "sha256": "4266868d0178fce22b1cf0c1ecc24f5792a1bfe55953d2c6fcd30b4bd17e1e75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-store_equal.json",
+      "bytes": 3153,
+      "sha256": "4c99df42b5b33b9fbf60cf9b44be26032c517424f3b840a2143828d2a1cd7613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-0-xor.json",
+      "bytes": 5175,
+      "sha256": "242c756a428cf7f4cf072a077dda491cf944dca6fa715289a60da8a3e46826d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-add.json",
+      "bytes": 5186,
+      "sha256": "f783880073a3ecf0ec42dae5f7c168c37cb45e67275dcf4052022314a6cb35a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "d970ac907ce3882b3f276824271cbd7c1be447fb5909b60aa86a15fde9acbf3f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-and.json",
+      "bytes": 5169,
+      "sha256": "7ec0ce96f289d7af3a0e8e765b5176acc5f23c5b6d200209c8a7e80ff0f3c3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-compare_different.json",
+      "bytes": 4971,
+      "sha256": "df0d7163dc2a9be5e046fa7fd5b17a7d2947f9c16705c3a887356ae09b03c9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-compare_equal.json",
+      "bytes": 5179,
+      "sha256": "8bb307e2e9fc265304c25549851f5d2da1e7835bb26951aec3c75a4f8a6df8fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-exchange.json",
+      "bytes": 5174,
+      "sha256": "9a15f0b7edb1f8770f742d63d5c1b13644d34a76f9c10b35f2ef4625baf1bb40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-max.json",
+      "bytes": 5195,
+      "sha256": "5010ef356ecdb76598eee2cacffc4e49f0462b7c4a922afec951dc3ce8253622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-min.json",
+      "bytes": 5195,
+      "sha256": "739c448728790e908a738e62b655ad3a3f408e221a8ef70e787fe7cb4277aa57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-or.json",
+      "bytes": 5185,
+      "sha256": "e8cd21ecf6770116a68c01d09680ee4afda05e9871adc87a6cca8605b06c1eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-store_different.json",
+      "bytes": 2944,
+      "sha256": "9f0ea78decff46620a882fa22c58e4e1fb4656a3c80b00702bfed70d075bb2eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-store_equal.json",
+      "bytes": 3152,
+      "sha256": "f77abbdb7fa6bea922797821166ce75b91c4879d2a282d72543be37a38f44ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-texture-1-xor.json",
+      "bytes": 5186,
+      "sha256": "f89162b73de07cacbd1a9ef9ae0ba1f8b7841d6bcfce765bf0f524dd6ef7127d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-add.json",
+      "bytes": 5258,
+      "sha256": "14e5bc649cadb901e63044e4a7da55e3b61423893c01870019e5efcd9a186a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-add_no_result.json",
+      "bytes": 3249,
+      "sha256": "ecce6596e16f264bfd8df2766a0736862d0c127caf1ec9081b1b1b8d262902e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-and.json",
+      "bytes": 5246,
+      "sha256": "7f0434a8871e977ea56f725ee21b6f211a003e4a9bcedbcad483baee4ceeff79"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-compare_different.json",
+      "bytes": 5042,
+      "sha256": "0f2d81c3bb38c9dee24dc1abf8fde3978d70eb64fa1a59e8efc7aa8a362353bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-compare_equal.json",
+      "bytes": 5256,
+      "sha256": "7232ce50ade31c3fe54a308e18dd8044714dc0b31bbd65e7629fe6e78f45e1a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-exchange.json",
+      "bytes": 5251,
+      "sha256": "8e89deebbfc7bd0e5a8d261ed58b5ff4d9ae8307bd245b55446d668f81bbc4b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-max.json",
+      "bytes": 5272,
+      "sha256": "c653d92d40bdbc0b4648cfa415694abb6ad44090c8645c194d3dde3097822aa7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-min.json",
+      "bytes": 5266,
+      "sha256": "ef0b3a4f4a7382c2e5775b83f298568955405d6e0747af3c1869bcd6aa860c91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-or.json",
+      "bytes": 5256,
+      "sha256": "dc1d9f8bb6b06166af5e42fcccb0b1be7b573659c3cb7a17cc4872ae161e0585"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-store_different.json",
+      "bytes": 3021,
+      "sha256": "938433dab7928b1ea365634943c5f707c151ab34e7caec4974208e74fe7b535b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-store_equal.json",
+      "bytes": 3235,
+      "sha256": "a1ce0dd46da6285678535a3ec95bf05cbf97317376745dec6d75b90ff3235bcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-0-xor.json",
+      "bytes": 5257,
+      "sha256": "f51694f26a5baee892bf6fc6063ae7e972ffcef4d84d8e253774280ec11ab5c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-add.json",
+      "bytes": 5268,
+      "sha256": "0bcc30efd767b82a7d8e4c1e5c87d68f5d78dbb5f31f4d4023bb08f6fc905eea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "defca3044616d803a55a6f69a17ff7772eca5e67abde1008e261d09d7a8b8b78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-and.json",
+      "bytes": 5251,
+      "sha256": "5db24db8b50aedf4834defe74ac0c2df1b65688f8e869cf47d3d1c202a724bad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-compare_different.json",
+      "bytes": 5053,
+      "sha256": "dc82b39ec2f0ee3490229ac64cc8bb9a82cc8450266c8b944fb793a466da6b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-compare_equal.json",
+      "bytes": 5261,
+      "sha256": "4f0398ccedfef449d528beef1253cdbc8a80c520b5a794839b24499bdfaa98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-exchange.json",
+      "bytes": 5256,
+      "sha256": "92ce7faf1400e8c04138b5c042ee0c918644031a298b39f113f6a32aa9311d98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-max.json",
+      "bytes": 5277,
+      "sha256": "ada8391f219a9e466586ff9ca0eb61104ee30cd80ff1e043ba8a97aad0164d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-min.json",
+      "bytes": 5277,
+      "sha256": "bfff11c36ad202f0ac17caf80133a6cb9ddc93e4d5e28f1326dc2aec5c1e1880"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-or.json",
+      "bytes": 5267,
+      "sha256": "10440dd1569af2665eab4560a5475ab33a1ccc796e813eb85e3e0d36d1d1d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-store_different.json",
+      "bytes": 3026,
+      "sha256": "e6909b147abb1f57a37cb659ac22772840df544000614973814e7edefc9b249c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-store_equal.json",
+      "bytes": 3234,
+      "sha256": "cfe7ab4966bf9fed9445db71e5eecf1e9c8a71a8da8fb9127ea8b2fe315202b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-0-typed-1-xor.json",
+      "bytes": 5268,
+      "sha256": "18a4d5a82431503c7f9884a5a29b07b9b9275b1c8c306d68e875a3b5c92416f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-add.json",
+      "bytes": 5180,
+      "sha256": "6ac823e878c54a43a05975e3785d7a98f181b720e48e81971b6a8f61f48b1d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-add_no_result.json",
+      "bytes": 3171,
+      "sha256": "9ac306557ac4abaeaa739d23c696cdafff626e56ad2401e598f301e1a64e2197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-and.json",
+      "bytes": 5168,
+      "sha256": "646c0c2c295b0bc3a7c28d3426159b28c4c95cb140bd9be4030c8170e3c7a372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-compare_different.json",
+      "bytes": 4964,
+      "sha256": "524db941c9e789be5132850d7c8b439880563635a67e8a1e1bfc3419d53163ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-compare_equal.json",
+      "bytes": 5178,
+      "sha256": "981d2366124b476220ae2aa36df12bc2d84d76962859960595dc6f50dfd2da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-exchange.json",
+      "bytes": 5173,
+      "sha256": "615d77dcc2bb4cafa051ad9d8a3948afcb00e2ca64f480bdbca8638e7bf69b08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-max.json",
+      "bytes": 5194,
+      "sha256": "1dab95b3e45ed40e857fb4b4c13c151ce3cf055f8fcb7285a5ab467c1956827f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-min.json",
+      "bytes": 5188,
+      "sha256": "c63179bb196b0c64532d255b83ec4485c0d498703ebb0c4021c2d52e4cf1fc3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-or.json",
+      "bytes": 5178,
+      "sha256": "176f52d314bd6db49a083396fda4c750d14be5fe6bfffd80aeb4c57662810996"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-store_different.json",
+      "bytes": 2943,
+      "sha256": "2fe214aeeded009c4a83445ab080a5def632e3b0fb21424e74f8093642b697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-store_equal.json",
+      "bytes": 3157,
+      "sha256": "c19758bdfe56757a3f3b3334721474a668605c018af261da2edb9acf8c6efca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-0-xor.json",
+      "bytes": 5179,
+      "sha256": "f9adf8452f9affdd71ed459a0a89490b3076d574432079851783b166b69f3d0f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-add.json",
+      "bytes": 5190,
+      "sha256": "a014ec06feb684f0cd92eaaa5678cea1c36afe3112eda44f5018a5ed8e49100e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-add_no_result.json",
+      "bytes": 3175,
+      "sha256": "8fad2700e0a292ae54cf4efb94735c8e8afc0d32ffb69835176c0d160998d432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-and.json",
+      "bytes": 5173,
+      "sha256": "7879a49e1da84bc2c38ada857f9996e39aabfc6509273f74ff2852236a2d9163"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-compare_different.json",
+      "bytes": 4975,
+      "sha256": "44f6a3130d5ced6f4fc4c6332b11153c2aad7d23706e490e3a862e63f5c56383"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-compare_equal.json",
+      "bytes": 5183,
+      "sha256": "0f9db85be82732f804f1de0e1570fb6d714c5a4089982cf81934d9f8212f1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-exchange.json",
+      "bytes": 5178,
+      "sha256": "86ad9965db844f761bda7621517bcc49c2a2eae3560c515392f7dedcbaaf706e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-max.json",
+      "bytes": 5199,
+      "sha256": "356216d8b558540134ceae030ef28e34c48f6eee99c25bd516b3b3c4a2e83529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-min.json",
+      "bytes": 5199,
+      "sha256": "78761a957d02063e2cc9f0d62b0485ad6e7db3b68f1524fb33773ccf07f79644"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-or.json",
+      "bytes": 5189,
+      "sha256": "221df31fcb3a69a32315d8503b967c9d28d7ed2fbf5ef5bacec105b0ff307ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-store_different.json",
+      "bytes": 2948,
+      "sha256": "c7c3e88539d138c1e3decd5475e537a565b4aaea9d11759e07cbf1da06626bde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-store_equal.json",
+      "bytes": 3156,
+      "sha256": "4a1f46fae9183f59f882bbd4146e1269855d3604fd061fdf55036fe1843acade"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-texture-1-xor.json",
+      "bytes": 5190,
+      "sha256": "9f4433a744ef68c3d1b497e85ef71f2630dfbf414f3fa3490ae5482ed775c267"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-add.json",
+      "bytes": 5262,
+      "sha256": "ff653e61655bb87c5e451d7bc2fb407642c2cefa59de8c6792cb2f907fa0cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-add_no_result.json",
+      "bytes": 3253,
+      "sha256": "b2a9b9a1b351d3949dea2e0514e9805d40a78b3369b1afe2034b6ba811236db3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-and.json",
+      "bytes": 5250,
+      "sha256": "147335fe4066efc2cccc128e9d655700a257933754082a7abb6369ea05de8b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-compare_different.json",
+      "bytes": 5046,
+      "sha256": "35dc31de3edbf10c0616316ed2321425b61db8861e47ae215b67498a21fc54da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-compare_equal.json",
+      "bytes": 5260,
+      "sha256": "8d2cb36b3fbdce79f799d08ba15f2d77f3c90e1635f80c69d82d6e31a7ad39e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-exchange.json",
+      "bytes": 5255,
+      "sha256": "74a6966f1c0b4b97a36b190804d05fde1121fe5066846f886290fed3205b491d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-max.json",
+      "bytes": 5276,
+      "sha256": "6ad07358caa3d1827523126ee6c3adced9838efd2436132098119cdb7ebf141a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-min.json",
+      "bytes": 5270,
+      "sha256": "518ccc02c14df693628f521a05f55e8493ad1dddd5f8f96fb4fc7ce7626ab2ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-or.json",
+      "bytes": 5260,
+      "sha256": "bab608cb588d1830e3f0bc5d57a6784d1975c38e67a5c42bbfd9bc550dec053f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-store_different.json",
+      "bytes": 3025,
+      "sha256": "ef93a86834500d32a6bf4b6439acc1327ecc666838697a1d460f72305e474663"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-store_equal.json",
+      "bytes": 3239,
+      "sha256": "ef677d01e69f41da3655db99498bb8203ad9a4e43f1b4d771ad146ef57b724a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-0-xor.json",
+      "bytes": 5261,
+      "sha256": "76be66196f474dfe4bf1c37c68ad0906e8ca6931b851f6fdb0a1acbbc41e13c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-add.json",
+      "bytes": 5272,
+      "sha256": "a259631e6c6e59f5f8447172efe6f030b25a35cdbe0a6daf1d88580e3e2d67a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-add_no_result.json",
+      "bytes": 3257,
+      "sha256": "d3be8f761ea065e2f3bdf06ef7ffbbcf264cf31eb4c9ab9e5a991045d39e7309"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-and.json",
+      "bytes": 5255,
+      "sha256": "4fe733086249aec25c8f5cba50482c2d0df6378327bb7d78f71ef52afb5d789b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-compare_different.json",
+      "bytes": 5057,
+      "sha256": "9a9ef4aee92ca4e89c82e5718817e51f27243f01993479f764b335704b3be54f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-compare_equal.json",
+      "bytes": 5265,
+      "sha256": "7fc1c6a63c23d5a3b7534ea125f6c0680d473837a4fde37bb81c199307c367f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-exchange.json",
+      "bytes": 5260,
+      "sha256": "9e777cb275bae9f82c814d9b7340a2fd77b7c9f1a68dd8f6dc87ae346abbcb27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-max.json",
+      "bytes": 5281,
+      "sha256": "ecf2a059ce72c5c6a6dcdbfce120e5e630944b315e812893bf055ec546d61abc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-min.json",
+      "bytes": 5281,
+      "sha256": "2656ea38c39c87244b0ea11e6b44854d09d24ca945a483505b9d40c068fda75a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-or.json",
+      "bytes": 5271,
+      "sha256": "9e20b758634aecec3ee2edf53b2c1cb727298bdf531def15ced1128ce0f79292"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-store_different.json",
+      "bytes": 3030,
+      "sha256": "7810f57aad2821264e1e8d2f1e8938ab17546a937b43472db53d6a8d500e7ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-store_equal.json",
+      "bytes": 3238,
+      "sha256": "830d85ee8a5ad1ace3b0ea45c548cb35b5d7636c323d2010fa31930e54426ef0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-32902-typed-1-xor.json",
+      "bytes": 5272,
+      "sha256": "3cf6ec6faa212caecb69f1b69e8035f272990dff4cb641ab930e268c15ed1e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-add.json",
+      "bytes": 5179,
+      "sha256": "da7b38865ec4fe32cf1db0b39950ff7e0c9c2949d626277ca722be2399bbfc2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-add_no_result.json",
+      "bytes": 3170,
+      "sha256": "e0b957eea74aa3b982a3e877b205555cc7d9a123a9d4d3111fe402c711afcfc4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-and.json",
+      "bytes": 5167,
+      "sha256": "eb847fc40ee1116d129497695e29e2e075e82b2946757cc10614fb564e368367"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-compare_different.json",
+      "bytes": 4963,
+      "sha256": "80087cd7e2dc317f5f8a6f7a9dbb1e7d27cea3ac8165fb2522fbd9fafda1935d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-compare_equal.json",
+      "bytes": 5177,
+      "sha256": "f32b126e0bf44763ce2cf7a6e95dc1a290e6ee8ea6bcaa25f5362bd2dc402264"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-exchange.json",
+      "bytes": 5172,
+      "sha256": "f563a9428cbc4784e3f6c9427205ea43f9cc2c9c018fa3b967a2d4cdc5bb5258"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-max.json",
+      "bytes": 5193,
+      "sha256": "a3621e895884690378d952a9a8c95d021f7ee26820c7ac4cd8adcd82fadd971a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-min.json",
+      "bytes": 5187,
+      "sha256": "3a3b44d9fbb9664096b2abf74fa0fa33e043139d6b8793fec6adb1146dbbce81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-or.json",
+      "bytes": 5177,
+      "sha256": "8d44fabfb6751f67bc5bb2f118ab252514c5d610156256a13c194122a0269b7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-store_different.json",
+      "bytes": 2942,
+      "sha256": "5085f2936d630fe21c0686fe364eea63cf755f31ff444fa42fb7aa93964322c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-store_equal.json",
+      "bytes": 3156,
+      "sha256": "336ab82f85e5c3d277794e8da0597f3c4a524315cfb44a6fe233d7f5eb0c08e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-0-xor.json",
+      "bytes": 5178,
+      "sha256": "1eee976489a802957c873d31255bf11359e82f9b65967ebfef8d80db1b6f64ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-add.json",
+      "bytes": 5189,
+      "sha256": "a9bdcc1c32e7e8171e7b8fc58ebf0faf18ba9688d9aeae6e1724fff7865b73dd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-add_no_result.json",
+      "bytes": 3174,
+      "sha256": "718d1ef9ac11fb8970f6f9933fb51fc375377d64f9f85cb800f56dc1030b951d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-and.json",
+      "bytes": 5172,
+      "sha256": "4cc4aa7f1c9d78588669597890ce0d7199afe1de1131f9a8312ddb89c416a8be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-compare_different.json",
+      "bytes": 4974,
+      "sha256": "a44ba63370b060380a9b09674505f5b6558373b258986ab44a428f780bfae1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-compare_equal.json",
+      "bytes": 5182,
+      "sha256": "c3952a8ee6d959c38eec6538d01933da871ecc91249d4e53228350c0528d288e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-exchange.json",
+      "bytes": 5177,
+      "sha256": "25431883e4022c785676d77be7ed300292d5446696bf2e4a66d9edca2cb59b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-max.json",
+      "bytes": 5198,
+      "sha256": "d0a53b229d51f8e30ef9cca253d0bfa7427fcc4a33b91ed07db28c9db9819260"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-min.json",
+      "bytes": 5198,
+      "sha256": "30ab38146421a597f410e805b5b10dacb15f799e72c2acaadc4d21a682b3384e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-or.json",
+      "bytes": 5188,
+      "sha256": "29f02fd1f3b2f5a2a289279fd985b9080b67511d7aeb4bef5cfd25069b0df448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-store_different.json",
+      "bytes": 2947,
+      "sha256": "ae0f253d80ae47d0d23f042a98796be225b507b0081833c7ba71004a72a0929a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-store_equal.json",
+      "bytes": 3155,
+      "sha256": "667b4260c3472b1b83c416ea20183eda1475dda304674d018912b1c9ce6a4768"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-texture-1-xor.json",
+      "bytes": 5189,
+      "sha256": "d713b105156ef3110564737231b896d612cfb46398a02ef09597a12884f29a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-add.json",
+      "bytes": 5261,
+      "sha256": "34dea1959dd3aa1ae4f23d080abc8e0bdf32797ebda4b7b0840489eb83e2d3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-add_no_result.json",
+      "bytes": 3252,
+      "sha256": "0ec88624c43e931c1df2b48b3b9d00d287e683b5938bb1410aa1213f1cd60139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-and.json",
+      "bytes": 5249,
+      "sha256": "88d4aff3cd7a4ed46c7ed143654fddcc35a0c8e6728aaca2d1d41c7d01d6fee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-compare_different.json",
+      "bytes": 5045,
+      "sha256": "507790dfd0456d74be5f202f75c2ed2055b2fe4405bf6679079aedbc9e553c67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-compare_equal.json",
+      "bytes": 5259,
+      "sha256": "5008361454f6eeef914a80c10826b8ae2b665774daec4d43a1edd5934f994be3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-exchange.json",
+      "bytes": 5254,
+      "sha256": "b9fe7644d080007d15e946b07e3176eb362a46c34b6dc6d687cde52fce4c85cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-max.json",
+      "bytes": 5275,
+      "sha256": "84487043c4f7536c9ad4a53ceaab965d0d089355f998756ed74c96fe4f821bfa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-min.json",
+      "bytes": 5269,
+      "sha256": "91b743e0ecbc290316ad4968f55bf3f16753882cd9508e72182896c612ddedfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-or.json",
+      "bytes": 5259,
+      "sha256": "1f3ee5f65bcda873731db77f5c66439ca66273d888caa09298a59c1f6fa1412b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-store_different.json",
+      "bytes": 3024,
+      "sha256": "f111534a96c9a82f7839d78905eb17988cb8f71f7d872e385fbdd6a6df1153fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-store_equal.json",
+      "bytes": 3238,
+      "sha256": "4d595fe96880954f8c5bf400e0e653c60df580fb5f97c16eabad23cd760e0084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-0-xor.json",
+      "bytes": 5260,
+      "sha256": "9fedba4ac745fc5a842e5396bf41f347618e0031259d40ceebbdc280f069bf73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-add.json",
+      "bytes": 5271,
+      "sha256": "ca3e26d72135ffcecd410e243fd2072c50c8bb01957fb317b1f8a64f4e14f12c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-add_no_result.json",
+      "bytes": 3256,
+      "sha256": "0c45ab7ce62008ef2e56f4d574151b89b32284c008827d299b77c59d978ba061"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-and.json",
+      "bytes": 5254,
+      "sha256": "68d6544d48e2a82304348ece4116890462523cb22aad26ceede512e427f77314"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-compare_different.json",
+      "bytes": 5056,
+      "sha256": "00239962174c5dac22e6cda4e538b3fe5825662958e1892548d648e39175f429"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-compare_equal.json",
+      "bytes": 5264,
+      "sha256": "3c6ca39cd51f8dc9a48ceea9cfcd09db608f270f6de5d0fb89fde286ed682b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-exchange.json",
+      "bytes": 5259,
+      "sha256": "33990bd7c1c41ce145326e080fbb3cfe2907cefad685c8f2304f07b341039932"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-max.json",
+      "bytes": 5280,
+      "sha256": "1bcfb095ab6aae075ac9497078da17d020c4872861f8479d8845cda23977ad94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-min.json",
+      "bytes": 5280,
+      "sha256": "bc62c90006e97e87e033adf44257c8d7f90d583c2527f398c1b977da7af24237"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-or.json",
+      "bytes": 5270,
+      "sha256": "9ddd9f145b62d326fc91a946fec67ae461e4ec25da243376b358ec2758a1e33d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-store_different.json",
+      "bytes": 3029,
+      "sha256": "eaa32156e3b2b2de388f4d15c5c109acb90a192176fc97ab46266b73357fcfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-store_equal.json",
+      "bytes": 3237,
+      "sha256": "42bfb43cf0e89518d8ec3afc0f4b90f78ff1b6b3fcc3151b8b200f42419503ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-evidence/typedInstructions-4318-typed-1-xor.json",
+      "bytes": 5271,
+      "sha256": "b3bde9e522f8b7622507cf2ed65ccaa4b02abd78dcd4255e71423ebbcbde3f42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-tests.txt",
+      "bytes": 22848,
+      "sha256": "2340c9eab04ef1ea948101b6549ec5308808807c56dcf7f528533a419de09a25"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-region-validation.json",
+      "bytes": 194,
+      "sha256": "7a112ef4b763511390aa3f3b6d1e73aba3de4446cc78a71c248fbf492a1a1584"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-ctest.txt",
+      "bytes": 936,
+      "sha256": "9f2724a3538625e5ca8e6ba2d7ad64411db64812152ddfd7a7050e0b737253b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-execution-trace.txt",
+      "bytes": 2781,
+      "sha256": "c036766a4ac4f2af37ee3194780cdbbd1e3b19882a4800b7d6731ec0e5d8c000"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-group.txt",
+      "bytes": 134384,
+      "sha256": "52183211bbb97eafd73d85c3c270e2a41b0902dd5e95afc3d8c20d07ed70ecf0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-input-snapshot.txt",
+      "bytes": 45944,
+      "sha256": "9b9359576c950b93c435de0ead37b961d3dfcdc387bab29fff457855db608a0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-memory.txt",
+      "bytes": 431288,
+      "sha256": "a535396281717d3d65d5ef5be3685bae8a9e0c23cc259806c7c8435b99c25d84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-pixel-memory.txt",
+      "bytes": 36199,
+      "sha256": "4dce81261a4e22422710bcdd48cfe4d715d8c65e8b60239e1942812cc5c5efad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-dxbc-texture-uav.txt",
+      "bytes": 353967,
+      "sha256": "368ee71788e7cfee3bf3a314a55afc4a9788fbd557f20ca674c3ce96dc3eb5c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-native-pixel-outputs.txt",
+      "bytes": 5486,
+      "sha256": "1a483be83c5b7fffe6541b6bdb0087b098b3f332f68de322dd4b063456f6c813"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-checkpoint-inputs-regression-summary.json",
+      "bytes": 1220,
+      "sha256": "f901bb59ded66c409b9d70f3b61b95a36183b015e133b135dd88e8a9492ecba3"
+    }
+  ]
+}
