@@ -51,6 +51,58 @@ void write(const QString &path, const QByteArray &bytes) {
 class DxbcPixelTraceTests : public QObject {
     Q_OBJECT
   private slots:
+    void helperMemoryJournal() {
+        QTemporaryDir dir;
+        auto input=fixture();
+        input.bytecode =
+            compileHlsl("RWByteAddressBuffer data:register(u1);"
+                        "uint4 main():SV_Target{uint old;data.InterlockedAdd(0,1,old);DeviceMemoryBarrier();"
+                        "return uint4(old,data.Load(4),7,9);}",
+                        "ps_5_0")
+                .bytecode;
+        const auto path = dir.filePath("memory.jsonl");
+        const auto report = exportPixelExecutionTrace(path, input, options(0, 0));
+        QCOMPARE(report.at("final_active_mask"), Json(0));
+        {
+            ExecutionTraceReader reader(path, digest(read(path)));
+            reader.moveTo(reader.size());
+            for (unsigned i = 0; i < 4; ++i) {
+                const auto output = reader.registerValue(i, {2, {0}});
+                QCOMPARE(output.valid, uint8_t(12));
+                QCOMPARE(output.bits[2], 7u);
+                QCOMPARE(output.bits[3], 9u);
+            }
+            reader.moveTo(0);
+        }
+        bool fence = false;
+        QByteArray changed;
+        for (const auto &line : read(path).split('\n')) {
+            if (line.isEmpty())
+                continue;
+            auto row = Json::parse(line.constData(), line.constData() + line.size());
+            if (row.at("record") == "step" && row.at("sync_flags") == 0x4000) {
+                fence = true;
+                row["sync_flags"] = 0;
+            }
+            changed += QByteArray::fromStdString(row.dump()) + '\n';
+        }
+        QVERIFY(fence);
+        const auto corrupt = dir.filePath("missing-fence.jsonl");
+        write(corrupt, changed);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, ExecutionTraceReader(corrupt, digest(changed)));
+    }
+    void previousPixelModel() {
+        QTemporaryDir dir;
+        const auto path = dir.filePath("previous.jsonl");
+        exportPixelExecutionTrace(path, fixture(), options(0, 15));
+        auto contents = read(path);
+        QVERIFY(contents.contains("coherent-pixel-memory/3"));
+        contents.replace("coherent-pixel-memory/3", "coherent-pixel-sampling/2");
+        write(path, contents);
+        ExecutionTraceReader reader(path, digest(contents));
+        reader.moveTo(reader.size());
+        reader.moveTo(0);
+    }
     void roundtrip_data() {
         QTest::addColumn<uint32_t>("lane");
         QTest::addColumn<uint32_t>("mask");

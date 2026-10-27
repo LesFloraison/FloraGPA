@@ -812,8 +812,6 @@ Step Lane::step() {
     const auto &args = p.operands.at(s.pc);
     const auto op = instruction.opcode;
     const bool derivative = op == 11 || op == 12 || (op >= 122 && op <= 125);
-    if (s.quad && s.helper && op >= 163 && op <= 190)
-        fail("Pixel helper memory semantics require independent validation");
     Step result{s.sequence, s.pc, instruction.wordOffset, {}, s.calls, {}, false};
     uint32_t next = s.pc + 1;
     auto calls = s.calls;
@@ -840,7 +838,52 @@ Step Lane::step() {
                 fail("Undefined APPEND address outside this invocation's allocation or consumption");
         }
     };
-    if (op == 190) {
+    const auto suppressedResource = [&]() -> const Operand * {
+        if (!s.quad || !s.helper || op < 163 || op > 189)
+            return nullptr;
+        unsigned index = 0;
+        if (op == 163)
+            index = 2;
+        else if (op == 165 || op == 167)
+            index = unsigned(args.size() - 1);
+        else if (op >= 178)
+            index = 1;
+        return args.at(index).kind == 30 ? &args[index] : nullptr;
+    }();
+    if (suppressedResource) {
+        // Inactive PS invocations cannot access UAV memory or hidden counters.
+        // Returned values are undefined, not an observed zero or a speculative read.
+        const auto binding = s.address(*suppressedResource);
+        const bool typed = p.typedResources.contains(binding);
+        const bool buffered = p.bufferStrides.contains(binding);
+        const bool declared = op == 163 || op == 164
+                                  ? typed
+                                  : buffered || (typed && op >= 169 && op != 178 && op != 179);
+        if (suppressedResource->modifier || !declared)
+            fail("Invalid suppressed pixel UAV declaration");
+        const bool returned = op == 163 || op == 165 || op == 167 || op >= 178;
+        result.atomic = op >= 169;
+        if (returned && args[0].kind != 13) {
+            const auto &destination = args[0];
+            if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) ||
+                (result.atomic && std::popcount(destination.mask) != 1))
+                fail("Invalid suppressed pixel UAV destination");
+            const auto target = s.address(destination);
+            if (s.inBounds(target)) {
+                const auto before = s.value(target);
+                auto after = before;
+                for (unsigned c = 0; c < 4; ++c)
+                    if (destination.mask & (1u << c)) {
+                        if (target.kind == 3 && c >= p.arrays.at(target.indices[0]).second)
+                            fail("Suppressed pixel UAV destination exceeds its register components");
+                        after.bits[c] = 0;
+                        after.valid &= uint8_t(~(1u << c));
+                    }
+                result.changes.push_back({target, before, after});
+            }
+        }
+    } else if (op == 190) {
         result.syncFlags = instruction.words[0] & 0x7800;
         if (!(result.syncFlags & 0x7000) || (result.syncFlags & 0x6000) == 0x6000 ||
             (p.stage != 5 && result.syncFlags != 0x4000))

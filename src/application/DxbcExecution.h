@@ -202,6 +202,6 @@ class PixelQuad {
     uint8_t activeMask() const;
     uint64_t derivativeBatches() const;
     uint64_t samplingBatches() const;
-    static constexpr const char *executionModel = "coherent-pixel-sampling/2";
+    static constexpr const char *executionModel = "coherent-pixel-memory/3";
 };
 } // namespace flora::dxbc_exec

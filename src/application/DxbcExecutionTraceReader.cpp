@@ -298,7 +298,8 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                 s.lanes = 1;
                 s.selectedLane = 0;
             } else if (row.at("stage") == "ps") {
-                require(row.at("execution_model") == PixelQuad::executionModel &&
+                require((row.at("execution_model") == PixelQuad::executionModel ||
+                         row.at("execution_model") == "coherent-pixel-sampling/2") &&
                             !row.contains("group_size") && !row.contains("group") &&
                             !row.contains("thread") && row.at("quad_input_provenance").is_object(),
                         "Invalid pixel trace identity");
@@ -405,7 +406,12 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
             if (s.header.at("stage") == "ps") {
                 const bool helper = !(pixelActive & (1u << lane));
                 require(boolean(row.at("helper_before")) == helper && !boolean(row.at("released_barrier")) &&
-                            number(row.at("barrier_epoch")) == 0 && number(row.at("sync_flags")) == 0 &&
+                            number(row.at("barrier_epoch")) == 0 &&
+                            number(row.at("sync_flags")) ==
+                                (s.instructions[instruction].opcode == 190 &&
+                                         s.header.at("execution_model") == PixelQuad::executionModel
+                                     ? 0x4000u
+                                     : 0u) &&
                             array(row.at("shared_changes")).empty(),
                         "Pixel trace helper or group state differs");
                 if (boolean(row.at("discarded"))) {

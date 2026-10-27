@@ -367,6 +367,11 @@ if(BUILD_TESTING)
   add_executable(FloraDxbcVertexInputsTests tests/DxbcVertexInputsTests.cpp)
   add_executable(FloraDxbcPixelInputsTests tests/DxbcPixelInputsTests.cpp)
   add_executable(FloraDxbcPixelOutputTests tests/DxbcPixelOutputTests.cpp)
+  add_executable(FloraDxbcPixelMemoryTests tests/DxbcPixelMemoryTests.cpp)
+  target_link_libraries(FloraDxbcPixelMemoryTests PRIVATE FloraExperiment Qt6::Test)
+  add_test(NAME dxbc_pixel_memory COMMAND FloraDxbcPixelMemoryTests -o "${CMAKE_BINARY_DIR}/dxbc-pixel-memory-$<CONFIG>.txt,txt")
+  set_tests_properties(dxbc_pixel_memory PROPERTIES RUN_SERIAL TRUE TIMEOUT 900
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   target_link_libraries(FloraDxbcPixelOutputTests PRIVATE FloraExperiment Qt6::Test)
   add_test(NAME dxbc_pixel_output COMMAND FloraDxbcPixelOutputTests -o "${CMAKE_BINARY_DIR}/dxbc-pixel-output-$<CONFIG>.txt,txt")
   set_tests_properties(dxbc_pixel_output PROPERTIES RUN_SERIAL TRUE TIMEOUT 900

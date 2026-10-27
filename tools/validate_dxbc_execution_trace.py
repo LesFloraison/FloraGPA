@@ -145,7 +145,8 @@ def validate(path, report, reader_report=None):
                 require(row["adapter"]["luid"] == report["adapter_luid"], "Trace adapter mismatch")
                 count = 4 if pixel else 1
                 if pixel:
-                    require(row["execution_model"] == "coherent-pixel-sampling/2", "Unknown pixel execution model")
+                    require(row["execution_model"] in ("coherent-pixel-sampling/2", "coherent-pixel-memory/3"),
+                            "Unknown pixel execution model")
                     active = integer(row["initial_active_mask"], 15)
                 else:
                     for axis in row["group_size"]:
@@ -176,8 +177,9 @@ def validate(path, report, reader_report=None):
                         require(inst["dxbc_opcode"] == 13, "Discard on a different opcode")
                         active &= ~(1 << lane)
                     require(row["active_mask_after"] == active, "Pixel active-mask chain mismatch")
+                    sync = 0x4000 if inst["dxbc_opcode"] == 190 and header["execution_model"] == "coherent-pixel-memory/3" else 0
                     require(row["barrier_epoch"] == 0 and row["released_barrier"] is False
-                            and row["sync_flags"] == 0 and not row["shared_changes"], "Compute state in pixel trace")
+                            and row["sync_flags"] == sync and not row["shared_changes"], "Compute state in pixel trace")
                     require(not helper or not any(row[k] for k in ("buffer_changes", "texture_changes", "counter_changes")),
                             "Pixel helper has side effects")
                 if row["next_instruction"] is not None:

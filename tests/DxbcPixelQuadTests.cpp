@@ -226,7 +226,7 @@ class DxbcPixelQuadTests final : public QObject {
         }
         QCOMPARE(vectors, 48u);
     }
-    void helperMemoryRejected() {
+    void helperStoresSuppressed() {
         const auto binary =
             compileHlsl("RWByteAddressBuffer output:register(u1);"
                         "uint4 main(float4 p:SV_Position):SV_Target{output.Store(0,1);return 0;}",
@@ -240,9 +240,9 @@ class DxbcPixelQuadTests final : public QObject {
         for (auto &input : inputs)
             input.memory = memory;
         PixelQuad helper(program, inputs, 0);
-        QVERIFY_THROWS_EXCEPTION(std::runtime_error, run(helper));
+        run(helper);
         QCOMPARE(memory->buffers().at(1).bytes, (std::vector<uint8_t>{7, 0, 0, 0}));
-        QVERIFY_THROWS_EXCEPTION(std::runtime_error, helper.step());
+        QVERIFY(helper.finished());
     }
     void rendezvousBudget() {
         std::vector<Words> rows{row(98 | (2 << 11), {{0x1010f2, 0}}),
