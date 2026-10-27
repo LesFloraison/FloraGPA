@@ -948,6 +948,16 @@ See `research/DX11_DEBUGGER_HOST_INITIALIZATION.md` for addresses, retained prob
 corrections and evidence limits. These manager implementations do not identify
 the debugger engine or close P1. Product behavior is unchanged by this research.
 
+## Original debugger alias-store continuation
+
+Ghidra scans now inspect offsets relative to the three known host subobjects.
+State-block, manager and stack matches are distinguished from the candidate
+engine field using disassembly, concrete tables and six guarded original-code
+state-block lifecycles. Thirty corrupted memory reports are rejected. See
+`research/DX11_DEBUGGER_HOST_ALIAS_STORES.md` for the bounded search, corrected
+caller edge and retained evidence. The debugger's non-null assignment and
+implementation remain unresolved; this does not enable public pixel debugging.
+
 ## Native Replay Mesh preview continuation
 
 Replay Mesh now offers explicit native GPA analysis through the shared Worker
