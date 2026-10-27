@@ -19,7 +19,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Pending |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads and outputs are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, helper memory behavior, public PS sessions and semantic/source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active typed-UAV and remaining precision semantics, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -765,3 +765,14 @@ remain failed evidence, with their distinct replay/teardown phases preserved.
 See `research/DX11_DEBUGGER_EXPLICIT_GPU.md`. Explicit Intel selection does not
 recover the debugger engine or close P1, and this research adds no GPA product
 dependency.
+
+## Pixel helper memory continuation
+
+`coherent-pixel-memory/3` executes helper SRV reads and suppresses inactive UAV
+accesses while preserving undefined return validity and prior writes. Independent
+NVIDIA, Intel and WARP draws validate 600 coverage/discard/memory/counter cases;
+four serial suites pass 2,141 checks. New GF2/BF1 journals and an unchanged older
+GF2 journal load and rewind. See `research/DX11_PIXEL_HELPER_MEMORY.md` for scope,
+retained fixture compilation failures and reproducible evidence. Original fragment
+qualification, active typed-UAV and remaining precision semantics, public PS jobs,
+source/UI parity, full history and P7/P8 acceptance remain required.

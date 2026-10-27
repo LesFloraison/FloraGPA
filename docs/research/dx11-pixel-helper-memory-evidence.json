@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "checkpoint": "native-pixel-helper-memory",
+  "base_commit": "5025a3352784976aa7f7b53ffd8c97bc88cf99f7",
+  "implementation_commit": "594a8404a93d282f1ea103c8bb107211e9a2435a",
+  "created_utc": "2026-10-27T00:15:03.868899+00:00",
+  "complete_release_acceptance": false,
+  "execution_model": "coherent-pixel-memory/3",
+  "helper_backend": "dxbc-gpu/20",
+  "suites": {
+    "memory": {
+      "passed": 650,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 9452,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-helper-memory-verified-tests.txt",
+        "bytes": 36335,
+        "sha256": "880ae9dfd8bf5763004f18e023826e7a8aa61efc55f4ce1f2fb1b409275883d0"
+      }
+    },
+    "trace-": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 445,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-helper-memory-verified-trace-tests.txt",
+        "bytes": 1527,
+        "sha256": "26e9d0949073482935e62f498fd32c48ed637464e10992bcd024a5b41898a2be"
+      }
+    },
+    "quad-": {
+      "passed": 1022,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 12175,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-helper-memory-verified-quad-tests.txt",
+        "bytes": 418862,
+        "sha256": "ab8d3c055048162d3f14a62936181a7c8e447a3ac3a0e7eea50ef6dc46cf92cb"
+      }
+    },
+    "execution-": {
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "milliseconds": 35151,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-helper-memory-verified-execution-tests.txt",
+        "bytes": 389008,
+        "sha256": "ac89f2d49d3f6cf2029a2a4fc5a07a2bf31433225e2846a8b644338b0e60bb83"
+      }
+    }
+  },
+  "gpu_matrix": {
+    "cases": 600,
+    "exact_output_components": 2592,
+    "exact_storage_words": 4800,
+    "counter_cases": 120
+  },
+  "negative_controls": 270,
+  "matrix_report": {
+    "path": "artifacts/dx11-native/pixel-helper-memory-final-validation.json",
+    "bytes": 278966,
+    "sha256": "8f0f8dd542d6efdff54f8438d706ca512d5a7936ea961289e92af06642244c20"
+  },
+  "interpreter_contract_cases": 48,
+  "helper_return_bits_observed": false,
+  "real_probes": {
+    "report": {
+      "path": "artifacts/dx11-native/pixel-helper-memory-real-validation.json",
+      "bytes": 38695,
+      "sha256": "5f05dd0781df32051a7bf6634468ee561a0df200fe3e32ca139819039d41eaf0"
+    },
+    "runs": [
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-helper-memory-real-gf2-4318/report.json",
+          "bytes": 2286,
+          "sha256": "c384d47dd29fea8d140bfdbf851dc13c57eb71f1824034488676c51fb076c3b5"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-helper-memory-real-gf2-4318/trace-reader.json",
+          "bytes": 24548,
+          "sha256": "068f7edb96dba1003abc1c289ed3d55994214f18bf9f979a9a3933c47bd366b4"
+        },
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "event": 113,
+        "vendor": 4318,
+        "luid": 68403,
+        "selected_steps": 25,
+        "global_steps": 100,
+        "source_symbols": "unavailable"
+      },
+      {
+        "report": {
+          "path": "artifacts/dx11-native/pixel-helper-memory-real-bf1-32902/report.json",
+          "bytes": 3298,
+          "sha256": "96278c885bb4859d9a1dce828a84bd729ea24a7f15d5614007de5a51f926d64f"
+        },
+        "reader": {
+          "path": "artifacts/dx11-native/pixel-helper-memory-real-bf1-32902/trace-reader.json",
+          "bytes": 47221,
+          "sha256": "c341ed759abf808e738982905a065b4f2dc88c8741365512ecff65cd91be26a5"
+        },
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "event": 2010,
+        "vendor": 32902,
+        "luid": 73907,
+        "selected_steps": 102,
+        "global_steps": 408,
+        "source_symbols": "unavailable"
+      }
+    ],
+    "negative_controls": 40,
+    "original_fragment_eligibility": false,
+    "independent_complete_ps_output_comparison": false
+  },
+  "previous_model": {
+    "trace": {
+      "path": "artifacts/dx11-native/pixel-output-precision-real-gf2-4318/pixel-trace.jsonl",
+      "bytes": 245312,
+      "sha256": "614a6f5dbb7aef8aefbe77bd3a0e62266b83ab9c21adf5a8593468820dc40d7a"
+    },
+    "reader": {
+      "path": "artifacts/dx11-native/pixel-helper-memory-previous-reader.json",
+      "bytes": 24550,
+      "sha256": "e8ad61f1c554651256cab7d221b482c83e6d55f86ed3d1251f9bdd67b79c353d"
+    },
+    "execution_model": "coherent-pixel-sampling/2",
+    "rewound": true
+  },
+  "retained_failed_attempt": {
+    "log": {
+      "path": "artifacts/dx11-native/pixel-helper-memory-full-tests.txt",
+      "bytes": 132321,
+      "sha256": "585499291483a869efa172c8c298c7623d9fc02121bb227f74dde14e47daa0d7"
+    },
+    "source": {
+      "path": "artifacts/dx11-native/pixel-helper-memory-counter-first-source.cpp",
+      "bytes": 27661,
+      "sha256": "8082d38509ab5a244f67633b8b2ea3950e75beffc8d229b352de26019131292a"
+    },
+    "passed": 511,
+    "failed": 120,
+    "reason": "FXC rejected potentially UAV-dependent derivatives in counter fixtures"
+  },
+  "final_build": {
+    "path": "artifacts/dx11-native/pixel-helper-memory-build7.txt",
+    "bytes": 10275,
+    "sha256": "8c5fa43bf27995958becacf281188b9732ade3e3eca848a01b20ca859c849680"
+  },
+  "verified_artifact_files": 1342,
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "73cd06164941582d2621c10ef1bb2c9f7c5e8d47c841afb6b01950b4d40c44e8"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5556224,
+      "sha256": "e5e7e16cd1ac908f1b2b0b1b6b1dff637d55cff03702335461dc935901599ffb"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5556224,
+      "sha256": "67a1acca3c24e98c9bf619a00b775167aae393b05230e61727614654c3bccf2b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelMemoryTests.exe",
+      "bytes": 503808,
+      "sha256": "c610f0df0975d7bba9114574d0f20c452c28e96ec07a99a1ba3f684b42e6b75b"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelQuadTests.exe",
+      "bytes": 550912,
+      "sha256": "6c600c7fc18d0b0442a006a7ee83df2417e3224708f73323df6e5ca30eed397a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelTraceTests.exe",
+      "bytes": 1330176,
+      "sha256": "c7c9fa1f7ee81f389c31e3195883d6b4322e22b613b58b2b55929b989519cee5"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 544256,
+      "sha256": "130f286e55ff43eb055898771c2ffd7613a16611be6963d5fb9ae3c5fe6fde04"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelGeometryProbe.exe",
+      "bytes": 2867200,
+      "sha256": "084353f1b58622480b4624a833fb75d0de00a70a9448b9e8885f537a957ba928"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 925696,
+      "sha256": "b2318555aa4a36b5f5f6965756055d068d8450a67a2b75695ab44f262347209e"
+    }
+  ],
+  "remaining_gates": [
+    "Original fragment qualification and complete Pixel History",
+    "Active PS typed UAV and remaining minimum-precision memory execution",
+    "Public PS jobs and source/UI parity",
+    "RenderDoc consumer/build/package removal",
+    "Independent clean-profile release acceptance"
+  ]
+}
