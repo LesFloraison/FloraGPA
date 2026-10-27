@@ -4,6 +4,9 @@
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFile>
 #include <QtTest>
 #include <bit>
 #include <cmath>
@@ -15,6 +18,32 @@ using namespace flora;
 using namespace flora::dxbc_exec;
 namespace {
 using Words = std::vector<uint32_t>;
+void saveDoubleEvidence(QString name, nlohmann::json report, Bytes native, Bytes oracle = {}) {
+    const auto root = qEnvironmentVariable("FLORA_DXBC_DOUBLE_EVIDENCE");
+    if (root.isEmpty())
+        return;
+    QDir directory(root);
+    if (!directory.mkpath("."))
+        throw std::runtime_error("Cannot create double evidence directory");
+    auto write = [&](const QString &suffix, Bytes data) {
+        QFile file(directory.filePath(name + suffix));
+        if (!file.open(QIODevice::WriteOnly | QIODevice::NewOnly) ||
+            file.write(reinterpret_cast<const char *>(data.data()), qint64(data.size())) !=
+                qint64(data.size()))
+            throw std::runtime_error("Cannot preserve double evidence file");
+        return QCryptographicHash::hash(
+                   QByteArrayView(reinterpret_cast<const char *>(data.data()), qsizetype(data.size())),
+                   QCryptographicHash::Sha256)
+            .toHex()
+            .toStdString();
+    };
+    report["schema"] = 1;
+    report["native_sha256"] = write(".native.dxbc", native);
+    report["oracle_sha256"] =
+        oracle.empty() ? nlohmann::json(nullptr) : nlohmann::json(write(".oracle.dxbc", oracle));
+    const auto text = report.dump(2) + "\n";
+    write(".json", {reinterpret_cast<const uint8_t *>(text.data()), text.size()});
+}
 Words op(uint32_t opcode, std::initializer_list<Words> operands = {}) {
     Words result{opcode};
     for (const auto &arg : operands)
@@ -224,6 +253,417 @@ const Fixture fixtures[]{
 class DxbcExecutionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void doubleInstructions_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("stage");
+        QTest::addColumn<uint32_t>("opcode");
+        QTest::addColumn<uint32_t>("form");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t stage : {0u, 1u, 5u})
+                for (uint32_t opcode : {191u, 192u, 193u, 194u, 195u, 196u, 197u, 198u, 199u, 200u, 201u,
+                                        202u, 210u, 211u, 212u, 214u, 215u, 216u, 217u})
+                    for (uint32_t form : {0u, 1u, 2u, 3u})
+                        QTest::newRow(
+                            qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(stage).arg(opcode).arg(form)))
+                            << vendor << stage << opcode << form;
+    }
+    void doubleInstructions() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, stage);
+        QFETCH(uint32_t, opcode);
+        QFETCH(uint32_t, form);
+        try {
+            const auto pair = [](double x, double y) {
+                const auto a = std::bit_cast<uint64_t>(x), b = std::bit_cast<uint64_t>(y);
+                return std::array<uint32_t, 4>{uint32_t(a), uint32_t(a >> 32), uint32_t(b),
+                                               uint32_t(b >> 32)};
+            };
+            const bool scalarResult =
+                (opcode >= 195 && opcode <= 198) || opcode == 201 || opcode == 214 || opcode == 215;
+            const bool scalarInput = opcode == 202 || opcode == 216 || opcode == 217;
+            const uint32_t mask = scalarResult ? (form == 1 ? 8u : 5u) : (form == 1 ? 12u : 15u);
+            const auto flags = op(106 | (1u << 12) | (opcode >= 210 ? 1u << 17 : 0u));
+            std::vector<std::array<uint32_t, 4>> values{pair(1.5, -2.25), pair(0.5, 4.0), pair(-1.0, 2.0)};
+            if (scalarInput)
+                values[0] = opcode == 202
+                                ? std::array<uint32_t, 4>{0x3fc00000, 0xc0100000, 0x40800000, 0x3f000000}
+                                : std::array<uint32_t, 4>{3, 0xfffffffd, 5, 9};
+            if (opcode == 200)
+                values[0] = {1, 0, 0, 1};
+            const size_t count =
+                opcode == 200 || opcode == 211 ? 3 : (opcode <= 198 || opcode == 210 ? 2 : 1);
+            Words operation{opcode};
+            const auto destination = dst(0, 0, mask);
+            operation.insert(operation.end(), destination.begin(), destination.end());
+            Inputs inputs;
+            uint8_t expectedValid = uint8_t(mask);
+            for (size_t i = 0; i < count; ++i) {
+                const bool scalar = scalarInput || (opcode == 200 && i == 0);
+                Words argument;
+                if (form == 2)
+                    argument = {scalar ? 0x4002u : 0x5002u, values[i][0], values[i][1], values[i][2],
+                                values[i][3]};
+                else {
+                    argument = {0x208e46, 0, uint32_t(i)};
+                    if (form == 1 && !scalar) {
+                        argument[0] = (argument[0] & ~0xff0u) | 0x4e0u;
+                        argument[0] |= 0x80000000u;
+                        argument.insert(argument.begin() + 1, 1u | (3u << 6));
+                    }
+                }
+                operation.insert(operation.end(), argument.begin(), argument.end());
+                auto value = Value::known(values[i]);
+                if (form == 3 && i == count - 1) {
+                    // Only the second result is uncertain; an unselected DMOVC branch stays irrelevant.
+                    value.valid = scalar ? 13 : 7;
+                    expectedValid &= uint8_t(scalarResult ? ~4u : ~12u);
+                }
+                inputs.constantBuffers[0].push_back(value);
+            }
+            operation[0] |= uint32_t(operation.size()) << 24;
+            const std::array<uint32_t, 4> sentinel{0x11223344, 0x55667788, 0x99aabbcc, 0xddeeff00};
+            expectedValid |= uint8_t(15u & ~mask);
+            std::vector<Words> rows{flags, op(89, {{0x208e46, 0, uint32_t(count)}}), op(104, {{1}})};
+            if (stage == 5)
+                rows.push_back(op(155, {{1, 1, 1}}));
+            rows.push_back(op(54, {dst(0, 0), vectorLiteral(sentinel)}));
+            rows.push_back(operation);
+            rows.push_back(op(62));
+            const auto bytes = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
+            const auto executable = makeDxbc({{0x58454853, bytes}});
+            Program program(executable);
+            Device device(vendor);
+            D3D11_FEATURE_DATA_DOUBLES doubles{};
+            D3D11_FEATURE_DATA_D3D11_OPTIONS extended{};
+            check(device.device->CheckFeatureSupport(D3D11_FEATURE_DOUBLES, &doubles, sizeof(doubles)),
+                  "Read double test capability");
+            check(
+                device.device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &extended, sizeof(extended)),
+                "Read extended double test capability");
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+            Lane lane(program, inputs);
+            lane.step();
+            const auto initialized = lane.registers();
+            nlohmann::json report{{"scope", "double_instruction_operand_semantics"},
+                                  {"vendor", vendor},
+                                  {"stage", stage},
+                                  {"opcode", opcode},
+                                  {"form", form},
+                                  {"mask", mask},
+                                  {"basic_support", bool(doubles.DoublePrecisionFloatShaderOps)},
+                                  {"extended_support", bool(extended.ExtendedDoublesShaderInstructions)},
+                                  {"identity", inputs.gpu->identity()}};
+            if (!doubles.DoublePrecisionFloatShaderOps ||
+                (opcode >= 210 && !extended.ExtendedDoublesShaderInstructions)) {
+                try {
+                    lane.step();
+                    QFAIL("Unsupported double instruction unexpectedly executed");
+                } catch (const std::runtime_error &error) {
+                    const std::string expected =
+                        doubles.DoublePrecisionFloatShaderOps
+                            ? "Selected adapter does not support extended double shader instructions"
+                            : "Selected adapter does not support double shader instructions";
+                    QCOMPARE(std::string(error.what()), expected);
+                    report["error"] = error.what();
+                }
+                QCOMPARE(lane.registers(), initialized);
+                QCOMPARE(inputs.gpu->operations(), uint64_t(0));
+                report["outcome"] = "hardware_unsupported";
+                report["gpu_operations"] = 0;
+                report["state_unchanged"] = true;
+                saveDoubleEvidence(QString("raw-") + QTest::currentDataTag(), report, executable);
+                qInfo() << "Double hardware unsupported: explicit rejection verified"
+                        << doubles.DoublePrecisionFloatShaderOps
+                        << extended.ExtendedDoublesShaderInstructions;
+                return;
+            }
+            const auto step = lane.step();
+            QVERIFY(step.instructionGpuAssisted);
+            QCOMPARE(step.changes.size(), size_t(1));
+            QCOMPARE(step.changes[0].before, Value::known(sentinel));
+            const auto actual = lane.value({0, {0}});
+            QCOMPARE(step.changes[0].after, actual);
+            QCOMPARE(actual.valid, expectedValid);
+            QCOMPARE(inputs.gpu->operations(), uint64_t(1));
+            // Execute the original operand encoding directly in an independent whole VS.
+            // This oracle does not call the instruction rewriting or assistance path.
+            const auto shader = gpuBinary({flags, op(89, {{0x208e46, 0, uint32_t(count)}}),
+                                           op(54, {dst(0, 0), vectorLiteral(sentinel)}), operation,
+                                           op(54, {dst(2, 0), src(0, 0)}), op(62)});
+            std::vector<uint32_t> constants;
+            for (size_t i = 0; i < count; ++i)
+                constants.insert(constants.end(), values[i].begin(), values[i].end());
+            const auto expected = device.run(shader, constants);
+            report["outcome"] = "compared";
+            report["actual"] = actual.bits;
+            report["expected"] = expected;
+            report["valid"] = actual.valid;
+            report["expected_valid"] = expectedValid;
+            report["gpu_operations"] = inputs.gpu->operations();
+            report["oracle_stage"] = 1;
+            saveDoubleEvidence(QString("raw-") + QTest::currentDataTag(), report, executable, shader);
+            qInfo().noquote() << QString::fromStdString(nlohmann::json({{"opcode", opcode},
+                                                                        {"stage", stage},
+                                                                        {"form", form},
+                                                                        {"expected", expected},
+                                                                        {"actual", actual.bits},
+                                                                        {"valid", actual.valid},
+                                                                        {"mask", mask},
+                                                                        {"identity", inputs.gpu->identity()}})
+                                                            .dump());
+            QCOMPARE(actual.bits, expected);
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void doubleGuards() {
+        const auto flags = op(106 | (1u << 12));
+        const auto source = src(0, 1);
+        for (uint32_t mask : {0u, 1u, 2u, 4u, 5u, 6u, 7u, 8u, 9u, 10u, 11u, 13u, 14u})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     Program(binary({flags, op(199, {dst(0, 0, mask), source}), op(62)})));
+        for (uint32_t mask : {0u, 7u, 11u, 13u, 14u, 15u})
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     Program(binary({flags, op(201, {dst(0, 0, mask), source}), op(62)})));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, Program(binary({op(199, {dst(0, 0), source}), op(62)})));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 Program(binary({flags, op(212, {dst(0, 0), source}), op(62)})));
+        for (uint32_t selection : {0u, 1u, 27u, 255u}) {
+            auto bad = source;
+            bad[0] = (bad[0] & ~0xff0u) | (selection << 4);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     Program(binary({flags, op(199, {dst(0, 0), bad}), op(62)})));
+        }
+        const Program program(binary({flags, op(199, {dst(0, 0), source}), op(62)}));
+        Lane missing(program, {});
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, missing.step());
+        QVERIFY(missing.registers().empty());
+    }
+    void doublePairState_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("stage");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t stage : {0u, 1u, 5u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage))) << vendor << stage;
+    }
+    void doublePairState() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, stage);
+        try {
+            Device device(vendor);
+            auto assist = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+            D3D11_FEATURE_DATA_DOUBLES support{};
+            check(device.device->CheckFeatureSupport(D3D11_FEATURE_DOUBLES, &support, sizeof(support)),
+                  "Read pair capability");
+            const auto flags = op(106 | (1u << 12));
+            const std::array<uint32_t, 4> original{0x12345678, 0xfff81234, 0x87654321, 0x00000000};
+            for (uint32_t kind : {0u, 2u, 3u}) {
+                if (kind == 2 && stage == 5)
+                    continue;
+                for (uint32_t selection : {0xe4u, 0x44u, 0x4eu, 0xeeu}) {
+                    const Register target{kind, kind == 3 ? Words{0, 1} : Words{0}};
+                    auto destination = dst(kind, 0);
+                    if (kind == 3) {
+                        destination[0] += 1u << 20;
+                        destination.push_back(1);
+                    }
+                    for (uint32_t modifier : {0u, 1u, 2u, 3u}) {
+                        Words source{0x208006 | (selection << 4), 0, 0};
+                        if (modifier) {
+                            source[0] |= 0x80000000u;
+                            source.insert(source.begin() + 1, 1u | (modifier << 6));
+                        }
+                        std::vector<Words> rows{flags, op(89, {{0x208e46, 0, 1}}), op(104, {{1}}),
+                                                op(105, {{0, 2, 4}})};
+                        if (stage == 5)
+                            rows.push_back(op(155, {{1, 1, 1}}));
+                        if (kind == 2)
+                            rows.push_back(op(101, {destination}));
+                        rows.push_back(op(199, {destination, source}));
+                        rows.push_back(op(62));
+                        const auto bytes = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
+                        const Program program(makeDxbc({{0x58454853, bytes}}));
+                        Inputs inputs;
+                        inputs.gpu = assist;
+                        inputs.constantBuffers[0] = {{original, 11}};
+                        Lane lane(program, inputs);
+                        if (!support.DoublePrecisionFloatShaderOps) {
+                            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+                            QVERIFY(lane.registers().empty());
+                            continue;
+                        }
+                        const auto step = lane.step();
+                        QVERIFY(step.instructionGpuAssisted);
+                        Value expected;
+                        for (unsigned pair = 0; pair < 2; ++pair) {
+                            const auto first = (selection >> (4 * pair)) & 3;
+                            expected.bits[2 * pair] = original[first];
+                            expected.bits[2 * pair + 1] = original[first + 1];
+                            if (modifier & 2)
+                                expected.bits[2 * pair + 1] &= 0x7fffffff;
+                            if (modifier & 1)
+                                expected.bits[2 * pair + 1] ^= 0x80000000;
+                            if (first == 0)
+                                expected.valid |= uint8_t(3u << (2 * pair));
+                        }
+                        QCOMPARE(lane.value(target), expected);
+                        QCOMPARE(step.changes.size(), size_t(1));
+                        QCOMPARE(step.changes[0].before, Value{});
+                        QCOMPARE(step.changes[0].after, expected);
+                    }
+                }
+            }
+            for (uint8_t conditionValid : {uint8_t(0), uint8_t(1), uint8_t(2), uint8_t(3)}) {
+                const auto bytes = writeDxbcProgram(
+                    {{(stage << 16) | 0x50, 0},
+                     {flags, op(89, {{0x208e46, 0, 3}}), op(104, {{1}}),
+                      op(200, {dst(0, 0), {0x208e46, 0, 0}, {0x208e46, 0, 1}, {0x208e46, 0, 2}}), op(62)}});
+                const Program program(makeDxbc({{0x58454853, bytes}}));
+                Inputs inputs;
+                inputs.gpu = assist;
+                inputs.constantBuffers[0] = {{{1, 0, 0, 1}, conditionValid}, {original, 3}, {original, 12}};
+                Lane lane(program, inputs);
+                if (!support.DoublePrecisionFloatShaderOps) {
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+                    continue;
+                }
+                lane.step();
+                const auto actual = lane.value({0, {0}});
+                QCOMPARE(actual.bits, original);
+                QCOMPARE(actual.valid, uint8_t((conditionValid & 1 ? 3 : 0) | (conditionValid & 2 ? 12 : 0)));
+            }
+            // Invalid indexable component declarations fail before issuing any GPU work.
+            const auto invalid = writeDxbcProgram(
+                {{(stage << 16) | 0x50, 0},
+                 {flags, op(105, {{0, 2, 2}}), op(199, {{0x2030f2, 0, 1}, {0x5002, 0, 0, 0, 0}}), op(62)}});
+            Program bad(makeDxbc({{0x58454853, invalid}}));
+            Inputs inputs;
+            inputs.gpu = assist;
+            Lane lane(bad, inputs);
+            const auto count = assist->operations();
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+            QCOMPARE(assist->operations(), count);
+            QVERIFY(lane.registers().empty());
+            qInfo().noquote() << QString::fromStdString(
+                nlohmann::json({{"pair_state_operations", count},
+                                {"double_support", bool(support.DoublePrecisionFloatShaderOps)},
+                                {"stage", stage},
+                                {"identity", assist->identity()}})
+                    .dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void compiledDoubles_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("scenario");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *scenario :
+                 {"arithmetic", "minmax", "comparison", "tofloat", "fromfloat", "toint", "touint", "fromint",
+                  "fromuint", "division", "conditional", "loop"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(scenario)))
+                    << vendor << QString(scenario);
+    }
+    void compiledDoubles() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, scenario);
+        try {
+            const std::map<QString, std::string> bodies{
+                {"arithmetic", "d = a * b + c;"},
+                {"minmax", "d = double2(min(a.x,b.x),max(a.y,b.y));"},
+                {"comparison", "return uint4(a.x<b.x,a.y>=b.y,a.x==b.x,a.y!=b.y);"},
+                {"tofloat", "return uint4(asuint(float2(a)), 0, 0);"},
+                {"fromfloat", "d = double2(asfloat(x.xy));"},
+                {"toint", "return uint4(int2(a),0,0);"},
+                {"touint", "return uint4(uint2(a),0,0);"},
+                {"fromint", "d = double2(asint(x.xy));"},
+                {"fromuint", "d = double2(x.xy);"},
+                {"division", "d = a / b;"},
+                {"conditional", "d = a.x > b.x ? a : b;"},
+                {"loop", "d=a;[loop]for(uint i=0;i<(z.x&7);++i){if(i==2)continue;d=d*b+c;}"}};
+            const auto shader =
+                compileHlsl("cbuffer Data:register(b0){uint4 x,y,z;}uint4 main():TEXCOORD0{"
+                            "double2 a=double2(asdouble(x.x,x.y),asdouble(x.z,x.w));"
+                            "double2 b=double2(asdouble(y.x,y.y),asdouble(y.z,y.w));"
+                            "double2 c=double2(asdouble(z.x,z.y),asdouble(z.z,z.w));double2 d;" +
+                                bodies.at(scenario) +
+                                "uint2 lo,hi;asuint(d,lo,hi);return uint4(lo.x,hi.x,lo.y,hi.y);}",
+                            "vs_5_0")
+                    .bytecode;
+            const Program program(shader);
+            QVERIFY(std::any_of(
+                program.instructions().begin(), program.instructions().end(), [](const Instruction &i) {
+                    return (i.opcode >= 191 && i.opcode <= 202) || (i.opcode >= 210 && i.opcode <= 217);
+                }));
+            Device device(vendor);
+            D3D11_FEATURE_DATA_DOUBLES support{};
+            check(device.device->CheckFeatureSupport(D3D11_FEATURE_DOUBLES, &support, sizeof(support)),
+                  "Read compiled double capability");
+            for (uint32_t dataset : {0u, 1u, 2u}) {
+                std::vector<std::array<uint32_t, 4>> values{{0, 0x3ff80000, 0, 0xc0020000},
+                                                            {0, 0x3fe00000, 0, 0x40100000},
+                                                            {3, 0xbff00000, 0, 0x40000000}};
+                if (dataset == 1)
+                    values[0] = {1, 0, 0, 0x80000000};
+                else if (dataset == 2)
+                    values[0] = {0x12345678, 0x7ff80000, 0, 0x7ff00000};
+                Inputs inputs;
+                inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+                for (const auto &value : values)
+                    inputs.constantBuffers[0].push_back(Value::known(value));
+                Lane lane(program, inputs);
+                nlohmann::json report{{"scope", "compiled_double_shader_semantics"},
+                                      {"vendor", vendor},
+                                      {"scenario", scenario.toStdString()},
+                                      {"dataset", dataset},
+                                      {"stage", 1},
+                                      {"basic_support", bool(support.DoublePrecisionFloatShaderOps)},
+                                      {"identity", inputs.gpu->identity()}};
+                const auto evidenceName = QString("compiled-%1-%2").arg(QTest::currentDataTag()).arg(dataset);
+                if (!support.DoublePrecisionFloatShaderOps) {
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(lane));
+                    report["outcome"] = "hardware_unsupported";
+                    saveDoubleEvidence(evidenceName, report, shader);
+                    qInfo() << "Compiled double hardware unsupported: explicit rejection verified" << dataset;
+                    continue;
+                }
+                const auto steps = execute(lane);
+                auto restored = lane.registers();
+                for (auto step = steps.rbegin(); step != steps.rend(); ++step)
+                    for (auto change = step->changes.rbegin(); change != step->changes.rend(); ++change) {
+                        QCOMPARE(restored[change->destination], change->after);
+                        restored[change->destination] = change->before;
+                    }
+                for (const auto &[reg, value] : restored)
+                    QCOMPARE(value, Value{});
+                std::vector<uint32_t> constants;
+                for (const auto &value : values)
+                    constants.insert(constants.end(), value.begin(), value.end());
+                const auto expected = device.run(shader, constants);
+                const auto actual = lane.value({2, {0}});
+                report["outcome"] = "compared";
+                report["actual"] = actual.bits;
+                report["expected"] = expected;
+                report["valid"] = actual.valid;
+                report["gpu_operations"] = inputs.gpu->operations();
+                report["reverse_journal_verified"] = true;
+                saveDoubleEvidence(evidenceName, report, shader, shader);
+                qInfo().noquote() << QString::fromStdString(
+                    nlohmann::json({{"scenario", scenario.toStdString()},
+                                    {"dataset", dataset},
+                                    {"expected", expected},
+                                    {"actual", actual.bits},
+                                    {"valid", actual.valid},
+                                    {"gpu_operations", inputs.gpu->operations()},
+                                    {"identity", inputs.gpu->identity()}})
+                        .dump());
+                QCOMPARE(actual.valid, uint8_t(15));
+                QCOMPARE(actual.bits, expected);
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void rawInstructions_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("opcode");

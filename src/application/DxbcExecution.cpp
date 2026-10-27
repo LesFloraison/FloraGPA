@@ -99,6 +99,15 @@ bool precisionArithmetic(uint32_t op) {
            op == 47 || (op >= 49 && op <= 57) || op == 59 || op == 60 || (op >= 64 && op <= 68) || op == 75 ||
            (op >= 77 && op <= 87) || (op >= 129 && op <= 142);
 }
+bool doubleOperation(uint32_t op) {
+    return (op >= 191 && op <= 202) || (op >= 210 && op <= 212) || (op >= 214 && op <= 217);
+}
+bool doubleScalarResult(uint32_t op) {
+    return (op >= 195 && op <= 198) || op == 201 || op == 214 || op == 215;
+}
+bool doubleScalarSource(uint32_t op, size_t source) {
+    return op == 202 || op == 216 || op == 217 || (op == 200 && source == 0);
+}
 uint32_t floatBits(float value) {
     const auto bits = std::bit_cast<uint32_t>(value);
     return (bits & 0x7f800000u) == 0 ? bits & 0x80000000u : bits;
@@ -322,11 +331,14 @@ Program::Program(Bytes dxbc) {
         fail("Native DXBC execution requires a VS/PS/CS SM4.0, SM4.1 or SM5.0 program");
     uint32_t offset = 2;
     bool executable = false, temps = false;
+    uint32_t globalFlags = 0;
     uint64_t arrayElements = 0, sharedBytes = 0;
     for (const auto &words : code->instructions) {
         const auto op = words[0] & 2047;
-        if (op == 106)
+        if (op == 106) {
             data->refactoringAllowed = (words[0] & (1u << 11)) != 0;
+            globalFlags = words[0];
+        }
         const bool decl = declaration(op);
         if (decl && executable)
             fail("DXBC declaration follows executable instructions");
@@ -346,6 +358,30 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
+            if (doubleOperation(op)) {
+                if (version != 0x50 || !(globalFlags & (1u << 12)) ||
+                    (op >= 210 && !(globalFlags & (1u << 17))))
+                    fail("Double DXBC instruction requires its SM5 capability declarations");
+                const auto &destination = args.at(0);
+                if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
+                    (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) ||
+                    (doubleScalarResult(op)
+                         ? !destination.mask || std::popcount(destination.mask) > 2
+                         : destination.mask != 3 && destination.mask != 12 && destination.mask != 15))
+                    fail("Invalid double DXBC destination mask or register");
+                for (size_t i = 1; i < args.size(); ++i) {
+                    const auto &source = args[i];
+                    if (doubleScalarSource(op, i - 1)) {
+                        if (source.kind == 5 || (op == 200 && source.modifier))
+                            fail("Invalid double DXBC scalar source");
+                    } else if (source.components != 2 || source.kind == 4 ||
+                               (source.select != std::array<uint32_t, 4>{0, 1, 2, 3} &&
+                                source.select != std::array<uint32_t, 4>{0, 1, 0, 1} &&
+                                source.select != std::array<uint32_t, 4>{2, 3, 0, 1} &&
+                                source.select != std::array<uint32_t, 4>{2, 3, 2, 3}))
+                        fail("Invalid double DXBC source pair selection");
+                }
+            }
             const bool precisionSampling =
                 data->stage == 0 && (op == 69 || op == 70 || op == 74) && args[0].kind != 2 &&
                 args[2].precision == 0 && args[3].precision == 0 &&
@@ -1362,6 +1398,57 @@ Step Lane::step() {
             }
         }
         result.atomic = true;
+    } else if (doubleOperation(op)) {
+        if (!s.inputs.gpu)
+            fail("Double DXBC execution requires the selected adapter GPU assist");
+        const auto &destination = args[0];
+        const auto target = s.address(destination);
+        if (target.kind == 3) {
+            const auto array = target.indices.size() == 2 ? p.arrays.find(target.indices[0]) : p.arrays.end();
+            if (array == p.arrays.end() || destination.mask >= (1u << array->second.second))
+                fail("Double DXBC destination exceeds indexable register components");
+        }
+        std::vector<Value> sources;
+        for (size_t i = 1; i < args.size(); ++i) {
+            if (doubleScalarSource(op, i - 1))
+                sources.push_back(s.source(args[i], op != 202));
+            else {
+                auto raw = args[i];
+                raw.modifier = 0;
+                auto value = s.source(raw, true);
+                for (unsigned high : {1u, 3u}) {
+                    if (args[i].modifier & 2)
+                        value.bits[high] &= 0x7fffffffu;
+                    if (args[i].modifier & 1)
+                        value.bits[high] ^= 0x80000000u;
+                }
+                sources.push_back(value);
+            }
+        }
+        const auto before = s.value(target);
+        const auto native = s.inputs.gpu
+                                ->instruction(p.stage, instruction, {target}, {destination.mask}, sources,
+                                              {before}, p.refactoringAllowed)
+                                .at(0);
+        auto after = before;
+        unsigned scalar = 0;
+        for (unsigned component = 0; component < 4; ++component) {
+            if (!(destination.mask & (1u << component)))
+                continue;
+            const unsigned pair = doubleScalarResult(op) ? scalar++ : component / 2;
+            bool known = true;
+            for (size_t i = 0; i < sources.size(); ++i) {
+                if (op == 200 && i != 0 && i != (sources[0].bits[pair] ? 1u : 2u))
+                    continue;
+                const uint8_t required = uint8_t(doubleScalarSource(op, i) ? 1u << pair : 3u << (2 * pair));
+                known &= (sources[i].valid & required) == required;
+            }
+            after.bits[component] = native.bits[component];
+            after.valid = uint8_t((after.valid & ~(1u << component)) | (known ? 1u << component : 0u));
+        }
+        if (s.inBounds(target))
+            result.changes.push_back({target, before, after});
+        result.instructionGpuAssisted = true;
     } else if (op == 6 || op == 10 || op == 21 || op == 23 || op == 44 || op == 48 || op == 58) {
         // Structural instructions remain visible in the trace.
     } else {

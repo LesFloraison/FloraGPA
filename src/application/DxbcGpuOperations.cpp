@@ -1138,7 +1138,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/20"}};
+            {"backend", "dxbc-gpu/21"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1664,6 +1664,24 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
                                               const std::vector<Value> &before, bool refactoringAllowed) {
     if (stage != 0 && stage != 1 && stage != 5)
         throw std::runtime_error("Native instruction assistance requires a VS, PS or CS");
+    const auto opcode = instruction.opcode;
+    const bool doubles = (opcode >= 191 && opcode <= 202) || (opcode >= 210 && opcode <= 212) ||
+                         (opcode >= 214 && opcode <= 217);
+    if (doubles) {
+        D3D11_FEATURE_DATA_DOUBLES support{};
+        check(state_->device->CheckFeatureSupport(D3D11_FEATURE_DOUBLES, &support, sizeof(support)),
+              "Query native double instruction support");
+        if (!support.DoublePrecisionFloatShaderOps)
+            throw std::runtime_error("Selected adapter does not support double shader instructions");
+        if (opcode >= 210) {
+            D3D11_FEATURE_DATA_D3D11_OPTIONS options{};
+            check(state_->device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &options, sizeof(options)),
+                  "Query native extended double instruction support");
+            if (!options.ExtendedDoublesShaderInstructions)
+                throw std::runtime_error(
+                    "Selected adapter does not support extended double shader instructions");
+        }
+    }
     const auto operands = checkpoint::instructionOperands(instruction.words);
     if (targets.empty() || targets.size() > 2 || masks.size() != targets.size() ||
         before.size() != targets.size() || operands.ranges.size() != targets.size() + sources.size())
@@ -1718,7 +1736,7 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
                           precision(i));
         else {
             const auto [begin, end] = operands.ranges[i];
-            if (((instruction.words[begin] >> 12) & 255) == 4)
+            if (const auto kind = (instruction.words[begin] >> 12) & 255; kind == 4 || kind == 5)
                 arg.assign(instruction.words.begin() + begin, instruction.words.begin() + end);
             else
                 arg = annotate({0x208e46, 0, uint32_t(i - targets.size())}, precision(i));
@@ -1743,10 +1761,11 @@ std::vector<Value> GpuOperations::instruction(uint32_t stage, const Instruction 
             rows.push_back(row(158, {dest(30, 0), {16}}));
         } else
             rows.push_back(row(101, {annotate(dest(2, 0), preserveOutput ? precision(selected) : 0)}));
-        if (minimumPrecision || refactoringAllowed)
-            rows.insert(
-                rows.begin(),
-                row(106 | (minimumPrecision ? 1u << 16 : 0u) | (refactoringAllowed ? 1u << 11 : 0u), {}));
+        if (minimumPrecision || refactoringAllowed || doubles)
+            rows.insert(rows.begin(),
+                        row(106 | (minimumPrecision ? 1u << 16 : 0u) | (refactoringAllowed ? 1u << 11 : 0u) |
+                                (doubles ? (1u << 12) | (opcode >= 210 ? 1u << 17 : 0u) : 0u),
+                            {}));
         // Initialize only components the operation does not write. Literal
         // operands remain literal to preserve the driver's instruction lowering.
         for (size_t i = 0; i < targets.size(); ++i) {
