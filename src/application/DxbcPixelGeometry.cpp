@@ -57,8 +57,9 @@ struct Source {
     std::vector<uint32_t> components;
 };
 } // namespace
-PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, const PixelInputShader &pixel,
-                                        uint64_t ordinal, std::optional<uint32_t> primitiveId) {
+static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, const PixelInputShader &pixel,
+                                      uint64_t ordinal, uint64_t count, std::optional<uint32_t> primitiveId,
+                                      bool range) {
     const auto &meta = geometry.report;
     const auto factor = meta.at("vertices_per_primitive").get<uint32_t>();
     const auto primitives = meta.at("primitives").get<uint64_t>();
@@ -66,7 +67,8 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
     const auto sourceStride = meta.at("stride").get<uint32_t>();
     if (factor < 1 || factor > 3 || !sourceStride || primitives > UINT64_MAX / factor ||
         vertices != primitives * factor || vertices > geometry.bytes.size() / sourceStride ||
-        vertices * sourceStride != geometry.bytes.size() || ordinal >= primitives)
+        vertices * sourceStride != geometry.bytes.size() || ordinal >= primitives || !count ||
+        count > primitives - ordinal || count > UINT32_MAX / factor)
         throw std::runtime_error("Invalid or unselected expanded pixel geometry");
     if (meta.value("geometry_stage", std::string()) != "final_pre_rasterization" ||
         meta.value("statistics_only", false))
@@ -77,12 +79,12 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
         Source s{a.at("semantic").get<std::string>(),  a.at("index").get<uint32_t>(),
                  a.at("system_value").get<uint32_t>(), a.at("component_type").get<uint32_t>(),
                  a.at("offset").get<uint32_t>(),       a.at("components").get<std::vector<uint32_t>>()};
-        const auto count = a.at("component_count").get<uint32_t>();
+        const auto componentCount = a.at("component_count").get<uint32_t>();
         std::set<uint32_t> unique(s.components.begin(), s.components.end());
         if (s.name.empty() || s.name.find('\0') != std::string::npos || s.type < 1 || s.type > 3 ||
-            count != s.components.size() || !count || count > 4 || unique.size() != count ||
-            *unique.rbegin() > 3 || s.offset > sourceStride || count > (sourceStride - s.offset) / 4 ||
-            !names.emplace(lower(s.name), s.index).second)
+            componentCount != s.components.size() || !componentCount || componentCount > 4 ||
+            unique.size() != componentCount || *unique.rbegin() > 3 || s.offset > sourceStride ||
+            componentCount > (sourceStride - s.offset) / 4 || !names.emplace(lower(s.name), s.index).second)
             throw std::runtime_error("Invalid pixel geometry source attribute");
         sources.push_back(std::move(s));
     }
@@ -151,7 +153,9 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
     PixelGeometryBridge result;
     result.stride = uint32_t(payloadSlots.size()) * 16;
     result.verticesPerPrimitive = factor;
-    result.vertices.resize(size_t(factor) * result.stride);
+    if (count > SIZE_MAX / factor / result.stride)
+        throw std::runtime_error("Pixel geometry range allocation overflow");
+    result.vertices.resize(size_t(count) * factor * result.stride);
     Json mapping = Json::array();
     for (const auto &f : outputs) {
         const auto *s = find(f);
@@ -176,7 +180,7 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
                     throw std::runtime_error("Pixel geometry producer component is missing");
                 sourceIndex = size_t(it - s->components.begin());
             }
-            for (uint32_t vertex = 0; vertex < factor; ++vertex) {
+            for (uint64_t vertex = 0; vertex < count * factor; ++vertex) {
                 uint32_t value = primitiveId.value_or(0);
                 if (s) {
                     const auto offset =
@@ -258,6 +262,19 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
                        {"output_mapping", mapping},
                        {"scope", "isolated_final_primitive_input_observation"},
                        {"original_fragment_eligibility", false}};
+    if (range) {
+        result.identity["version"] = 2;
+        result.identity["primitive_count"] = count;
+        result.identity["scope"] = "isolated_final_geometry_range_input_observation";
+    }
     return result;
+}
+PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, const PixelInputShader &pixel,
+                                        uint64_t ordinal, std::optional<uint32_t> primitiveId) {
+    return makeBridge(geometry, pixel, ordinal, 1, primitiveId, false);
+}
+PixelGeometryBridge pixelGeometryRangeBridge(const PostTransformGeometry &geometry,
+                                             const PixelInputShader &pixel, uint64_t first, uint64_t count) {
+    return makeBridge(geometry, pixel, first, count, {}, true);
 }
 } // namespace flora::dxbc_exec

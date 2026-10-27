@@ -243,11 +243,15 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
     checkCancellation(cancelled);
     if (!reference || !pixel.records || !timeoutMs || timeoutMs > 60000 || !maxBytes ||
         bridge.verticesPerPrimitive < 1 || bridge.verticesPerPrimitive > 3 || !bridge.stride ||
-        bridge.stride % 16 || bridge.stride > 512 ||
-        bridge.vertices.size() != size_t(bridge.verticesPerPrimitive) * bridge.stride ||
+        bridge.stride % 16 || bridge.stride > 512 || bridge.vertices.empty() ||
+        bridge.vertices.size() % (size_t(bridge.verticesPerPrimitive) * bridge.stride) ||
+        bridge.vertices.size() / bridge.stride > UINT32_MAX ||
         bridge.identity.at("input_register") != pixel.reg || state.viewports.size() > 16 ||
         state.scissors.size() > 16)
         throw std::runtime_error("Invalid private pixel raster request");
+    const auto primitiveCount = bridge.vertices.size() / bridge.stride / bridge.verticesPerPrimitive;
+    if (bridge.identity.value("primitive_count", uint64_t(1)) != primitiveCount)
+        throw std::runtime_error("Private pixel geometry range count differs from storage");
     const auto &selection = *pixel.records;
     const auto &target = state.target;
     const bool layerOutput =
@@ -464,7 +468,7 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
                                         ? D3D11_PRIMITIVE_TOPOLOGY_LINELIST
                                         : D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     checkCancellation(cancelled);
-    context->Draw(bridge.verticesPerPrimitive, 0);
+    context->Draw(UINT(bridge.vertices.size() / bridge.stride), 0);
     context->ClearState();
     context->CopyResource(staging.Get(), output.Get());
     GpuCompletion completion(device.Get(), context.Get(), cancelled, timeoutMs);
@@ -519,7 +523,9 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
                        {"input_register", pixel.reg},
                        {"shader_sha256", pixel.originalShaderSha256},
                        {"valid_mask", pixel.mask},
-                       {"scope", "isolated_primitive_pre_depth_inputs"},
+                       {"scope", bridge.identity.contains("primitive_count")
+                                     ? "isolated_geometry_range_pre_depth_inputs"
+                                     : "isolated_primitive_pre_depth_inputs"},
                        {"original_fragment_eligibility", false},
                        {"record_order", "unspecified"},
                        {"geometry", bridge.identity}};

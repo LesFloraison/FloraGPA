@@ -592,6 +592,15 @@ class DxbcPixelInputsTests : public QObject {
                                     "b:DATA1):SV_Target{return float4(a,b);}");
             const auto pixel = pixelInputShader(ps, inputRegister(ps, "DATA"));
             const auto bridge = pixelGeometryBridge(geometry, pixel, 1);
+            const auto range = pixelGeometryRangeBridge(geometry, pixel, 0, 2);
+            auto concatenated = pixelGeometryBridge(geometry, pixel, 0).vertices;
+            concatenated.insert(concatenated.end(), bridge.vertices.begin(), bridge.vertices.end());
+            QCOMPARE(range.vertices, concatenated);
+            QCOMPARE(range.vertexShader, bridge.vertexShader);
+            QCOMPARE(range.geometryShader, bridge.geometryShader);
+            QCOMPARE(range.identity.at("primitive_count"), nlohmann::json(2));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryRangeBridge(geometry, pixel, 0, 0));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryRangeBridge(geometry, pixel, 1, 2));
             QCOMPARE(bridge.verticesPerPrimitive, factor);
             QCOMPARE(bridge.identity.at("primitive_ordinal").get<uint64_t>(), uint64_t(1));
             std::set<uint32_t> systems;

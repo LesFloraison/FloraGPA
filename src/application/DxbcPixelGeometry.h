@@ -15,4 +15,8 @@ struct PixelGeometryBridge {
 PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &, const PixelInputShader &,
                                         uint64_t primitiveOrdinal,
                                         std::optional<uint32_t> uncapturedPrimitiveId = {});
+// Batch already-expanded geometry without treating storage ordinals as shader
+// primitive IDs. Uncaptured shader primitive IDs cannot be supplied for a range.
+PixelGeometryBridge pixelGeometryRangeBridge(const PostTransformGeometry &, const PixelInputShader &,
+                                             uint64_t firstPrimitive, uint64_t primitiveCount);
 } // namespace flora::dxbc_exec
