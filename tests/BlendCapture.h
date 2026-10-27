@@ -100,7 +100,12 @@ inline std::array<uint32_t, 4> blendPixel(Replay &replay, Id id = 1000, UINT sam
         check(device->CreateTexture2D(&desc, nullptr, &copy), "MSAA oracle copy");
         context->CopyResource(copy.Get(), source.Get());
         Com<ID3D11ShaderResourceView> srv;
-        check(device->CreateShaderResourceView(copy.Get(), nullptr, &srv), "MSAA oracle SRV");
+        // Replay storage may be typeless; the oracle still uses the captured
+        // typed interpretation and the original exact-value assertions.
+        D3D11_SHADER_RESOURCE_VIEW_DESC view{};
+        view.Format = DXGI_FORMAT(replay.frame().resource(id).desc[4]);
+        view.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+        check(device->CreateShaderResourceView(copy.Get(), &view, &srv), "MSAA oracle SRV");
         D3D11_BUFFER_DESC bd{
             16, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0, D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
             16};

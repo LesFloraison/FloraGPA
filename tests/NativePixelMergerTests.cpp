@@ -13,9 +13,11 @@ using namespace flora::dxbc_exec;
 using Json = nlohmann::json;
 namespace {
 void save(const Json &result, const Json &outputs) {
-    const auto root = qEnvironmentVariable("FLORA_PIXEL_MERGER_EVIDENCE");
+    auto root = qEnvironmentVariable("FLORA_PIXEL_MERGER_EVIDENCE");
     if (root.isEmpty())
         return;
+    if (QString::fromLatin1(QTest::currentTestFunction()) == "msaa")
+        root += "/msaa";
     QDir dir(root);
     if (!dir.exists() && !QDir().mkpath(root))
         throw std::runtime_error("Cannot create merger evidence directory");
@@ -24,6 +26,25 @@ void save(const Json &result, const Json &outputs) {
     if (!file.open(QIODevice::WriteOnly | QIODevice::NewOnly) ||
         file.write(text.data(), qint64(text.size())) != qint64(text.size()))
         throw std::runtime_error("Cannot save merger evidence");
+}
+std::vector<uint8_t> storage(Replay &replay, Id resource, uint32_t format, uint32_t samples,
+                             const char *phase = "before") {
+    if (samples == 1)
+        return replay.observeTextureStorage(resource, 1024).bytes;
+    std::vector<uint8_t> result;
+    for (uint32_t sample = 0; sample < samples; ++sample) {
+        std::vector<uint8_t> bytes;
+        try {
+            bytes = replay.readMsaa(resource, sample, format).bytes;
+        } catch (const std::exception &e) {
+            throw std::runtime_error(std::string("Reference ") + phase + " sample " + std::to_string(sample) +
+                                     " resource " + std::to_string(resource) + " read: " + e.what());
+        }
+        if (format == 20)
+            std::fill(bytes.begin() + 5, bytes.end(), 0);
+        result.insert(result.end(), bytes.begin(), bytes.end());
+    }
+    return result;
 }
 Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id depth,
          NativePixelMergerState &state, ReplayOptions options = {}) {
@@ -35,25 +56,26 @@ Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id dept
     options.warp = !vendor;
     options.vendor = vendor ? std::optional(vendor) : std::nullopt;
     options.debug = true;
-    options.blendEdits[event] = {state.blend, state.blendFactor, state.sampleMask};
+    options.blendEdits[event] = {state.blend, state.blendFactor, state.sampleMask & state.coverageMask};
     options.depthStencilEdits[event] = {state.depthStencil, state.stencilRef};
     options.before = true;
     Replay before(frame, options);
     const auto snapshot = snapshotResourceInputs(before, 4);
     const auto outputs = evaluateNativePixelOutputs(snapshot, {});
-    state.color = before.observeTextureStorage(color, 1024).bytes;
+    state.color = storage(before, color, state.colorFormat, state.samples.Count);
     if (depth)
-        state.depth = before.observeTextureStorage(depth, 1024).bytes;
+        state.depth = storage(before, depth, state.depthFormat, state.samples.Count);
     auto result = mergeNativePixelOutput(before.nativeDevice(), options.warp, state, outputs, 0);
-    if (before.observeTextureStorage(color, 1024).bytes != state.color ||
-        (depth && before.observeTextureStorage(depth, 1024).bytes != state.depth))
+    if (storage(before, color, state.colorFormat, state.samples.Count, "after diagnostic") != state.color ||
+        (depth &&
+         storage(before, depth, state.depthFormat, state.samples.Count, "after diagnostic") != state.depth))
         throw std::runtime_error("Private merger changed reference storage");
     options.before = false;
     Replay after(frame, options);
     after.run();
-    const auto expectedColor = after.observeTextureStorage(color, 1024).bytes;
-    const auto expectedDepth =
-        depth ? after.observeTextureStorage(depth, 1024).bytes : std::vector<uint8_t>();
+    const auto expectedColor = storage(after, color, state.colorFormat, state.samples.Count, "after");
+    const auto expectedDepth = depth ? storage(after, depth, state.depthFormat, state.samples.Count, "after")
+                                     : std::vector<uint8_t>();
     result["reference_color"] = expectedColor;
     result["reference_depth"] = expectedDepth;
     result["reference_storage_unchanged"] = true;
@@ -268,6 +290,135 @@ class NativePixelMergerTests final : public QObject {
             QFAIL(e.what());
         }
     }
+    void msaa_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<QString>("mode");
+        QTest::addColumn<uint32_t>("sample");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {2u, 4u})
+                for (const auto *name : {"blend",
+                                         "write-mask",
+                                         "coverage",
+                                         "sample-mask",
+                                         "unchanged",
+                                         "dual",
+                                         "alpha",
+                                         "coverage-output",
+                                         "discard",
+                                         "sequence",
+                                         "depth",
+                                         "depth-fail",
+                                         "stencil",
+                                         "read-only-depth",
+                                         "read-only-stencil",
+                                         "d16",
+                                         "d32",
+                                         "d32s8",
+                                         "format-half",
+                                         "format-srgb",
+                                         "format-bgra",
+                                         "format-inherit"})
+                    for (uint32_t sample = 0; sample < (std::string(name) == "coverage" ? samples : 1);
+                         ++sample)
+                        QTest::newRow(
+                            qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(samples).arg(name).arg(sample)))
+                            << vendor << samples << QString(name) << sample;
+    }
+    void msaa() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(QString, mode);
+            QFETCH(uint32_t, sample);
+            const bool depth = mode == "depth" || mode == "depth-fail" || mode == "stencil" ||
+                               mode.startsWith("read-only") || mode == "d16" || mode == "d32" ||
+                               mode == "d32s8";
+            auto capture = depth ? testing::depthStencilCapture()
+                                 : testing::blendCapture(1, mode == "dual", false, samples);
+            NativePixelMergerState state;
+            state.samples.Count = samples;
+            state.colorFormat = depth                   ? 28
+                                : mode == "format-half" ? 10
+                                : mode == "format-srgb" ? 29
+                                : mode == "format-bgra" ? 87
+                                                        : 2;
+            state.coverageMask = mode == "coverage" ? 1u << sample : UINT32_MAX;
+            state.sampleMask = mode == "sample-mask" ? 0 : mode == "sequence" ? 2 : 0x55555555;
+            state.blend.AlphaToCoverageEnable = mode == "alpha" || mode == "coverage-output";
+            auto &blend = state.blend.RenderTarget[0];
+            if (mode == "blend" || mode == "dual") {
+                blend.BlendEnable = TRUE;
+                blend.SrcBlend = mode == "dual" ? D3D11_BLEND_SRC1_COLOR : D3D11_BLEND_SRC_ALPHA;
+                blend.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+            }
+            if (mode == "write-mask")
+                blend.RenderTargetWriteMask = 5;
+            if (mode == "unchanged")
+                blend.RenderTargetWriteMask = 0;
+            ReplayOptions options;
+            if (mode == "sequence")
+                options.blendEdits[100] = {state.blend, state.blendFactor, 1};
+            if (mode == "coverage-output" || mode == "discard")
+                options.shaders[12] =
+                    compileHlsl(mode == "discard"
+                                    ? "float4 main():SV_Target{discard;return float4(.5,.25,.75,.5);}"
+                                    : "struct O{float4 c:SV_Target;uint mask:SV_Coverage;};O main(){O "
+                                      "o;o.c=float4(.5,.25,.75,0);o.mask=3;return o;}",
+                                "ps_5_0")
+                        .bytecode;
+            if (depth) {
+                state.depthFormat = mode == "d16" ? 55 : mode == "d32" ? 40 : mode == "d32s8" ? 20 : 45;
+                state.rasterDepthBits = 0;
+                state.stencilRef = 0xa5;
+                state.depthStencil.StencilEnable =
+                    mode == "stencil" || mode.startsWith("read-only") || mode == "d32s8";
+                state.depthStencil.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+                if (mode == "depth-fail")
+                    state.depthStencil.DepthFunc = D3D11_COMPARISON_NEVER;
+                state.depthViewFlags = mode == "read-only-depth" ? 1 : mode == "read-only-stencil" ? 2 : 0;
+                for (const auto &entry : capture.entries) {
+                    if (entry.id == 20 || entry.id == 720)
+                        testing::put(capture.bytes, size_t(entry.offset) + 36, samples);
+                    if (entry.id == 720)
+                        testing::put(capture.bytes, size_t(entry.offset) + 32, state.depthFormat);
+                    if (entry.id == 21)
+                        testing::put(capture.bytes, size_t(entry.offset) + 28, 6u);
+                    if (entry.id == 722) {
+                        testing::put(capture.bytes, size_t(entry.offset) + 24, state.depthFormat);
+                        testing::put(capture.bytes, size_t(entry.offset) + 28, 5u);
+                        testing::put(capture.bytes, size_t(entry.offset) + 32, state.depthViewFlags);
+                    }
+                    if (entry.id == 724)
+                        testing::put(capture.bytes, size_t(entry.offset) + 48, 1u);
+                    if (entry.id == 810) {
+                        testing::put(capture.bytes, size_t(entry.offset) + 16, Id(723));
+                        if (mode == "d16" || mode == "d32")
+                            testing::put(capture.bytes, size_t(entry.offset) + 24, 1u);
+                    }
+                }
+                capture.add(723, 5, 0x8e,
+                            testing::statePack(Id(0), Id(0), Id(720), state.depthFormat, 5u, 0u, 0u, 0u, 0u));
+            } else if (mode.startsWith("format")) {
+                for (const auto &entry : capture.entries) {
+                    if (entry.id == 1000)
+                        testing::put(capture.bytes, size_t(entry.offset) + 32, state.colorFormat);
+                    if (entry.id == 1002)
+                        testing::put(capture.bytes, size_t(entry.offset) + 24,
+                                     mode == "format-inherit" ? 0u : state.colorFormat);
+                }
+            }
+            const auto result = run(capture, vendor,
+                                    depth                ? 1000
+                                    : mode == "sequence" ? 200
+                                                         : 100,
+                                    depth ? 20 : 1000, depth ? 720 : 0, state, options);
+            QCOMPARE(result.at("scope"), Json("private_multisample_output_merger"));
+            QCOMPARE(result.at("sample_count"), Json(samples));
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
     void boundaries() {
         auto capture = testing::blendCapture();
         QTemporaryDir dir;
@@ -312,6 +463,14 @@ class NativePixelMergerTests final : public QObject {
         invalid = s;
         invalid.timeoutMs = 60001;
         QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        for (UINT count : {0u, 3u, 64u}) {
+            invalid = s;
+            invalid.samples.Count = count;
+            QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
+        }
+        invalid = s;
+        invalid.samples.Quality = 1;
+        QVERIFY_EXCEPTION_THROWN(attempt(invalid, outputs), std::invalid_argument);
         unsigned checks = 0;
         QVERIFY_EXCEPTION_THROWN(
             mergeNativePixelOutput(replay.nativeDevice(), true, s, outputs, 0, [&] { return ++checks > 2; }),
@@ -319,6 +478,16 @@ class NativePixelMergerTests final : public QObject {
         const auto a = attempt(s, outputs);
         const auto b = attempt(s, outputs);
         QCOMPARE(a.at("color_after"), b.at("color_after"));
+        QCOMPARE(replay.observeTextureStorage(1000, 1024).bytes, s.color);
+        auto multisample = s;
+        multisample.samples.Count = 2;
+        multisample.color.insert(multisample.color.end(), s.color.begin(), s.color.end());
+        checks = 0;
+        QVERIFY_EXCEPTION_THROWN(mergeNativePixelOutput(replay.nativeDevice(), true, multisample, outputs, 0,
+                                                        [&] { return ++checks > 3; }),
+                                 OperationCancelled);
+        const auto resumed = attempt(multisample, outputs);
+        QCOMPARE(resumed.at("color_after"), attempt(multisample, outputs).at("color_after"));
         QCOMPARE(replay.observeTextureStorage(1000, 1024).bytes, s.color);
     }
 };

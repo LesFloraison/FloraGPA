@@ -1,4 +1,5 @@
 #include "InspectionCopyBindings.h"
+#include "NativeMsaaTransfer.h"
 #include "Replay.h"
 #include <algorithm>
 
@@ -33,6 +34,8 @@ Com<ID3D11Resource> Replay::createEditTexture(const Resource &resource, std::opt
     }
     auto d = desc.read<D3D11_TEXTURE2D_DESC>();
     desc.end();
+    if (d.SampleDesc.Count > 1)
+        d.Format = DXGI_FORMAT(nativeMsaaStorageFormat(d.Format));
     Com<ID3D11Texture2D> object;
     check(device_->CreateTexture2D(&d, init, &object), "Create edited Texture2D");
     return object;

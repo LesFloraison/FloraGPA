@@ -1,5 +1,6 @@
 #include "../common/PackedColor.hpp"
 #include "Replay.h"
+#include "NativeMsaaTransfer.h"
 #include "BlendState.h"
 #include "Device.h"
 #include "NativeSample.h"
@@ -234,27 +235,43 @@ IUnknown *Replay::object(Id id) {
                 result = obj;
             } else {
                 auto desc = descriptor<D3D11_TEXTURE2D_DESC>(descBytes);
+                // Typed views preserve captured interpretation. Typeless MSAA
+                // allocation also avoids destructive typed-to-typeless readback
+                // copies on Intel drivers when a resource is inspected repeatedly.
+                if (desc.SampleDesc.Count > 1)
+                    desc.Format = DXGI_FORMAT(nativeMsaaStorageFormat(desc.Format));
                 Com<ID3D11Texture2D> obj;
                 check(device_->CreateTexture2D(&desc, init, &obj), "CreateTexture2D");
                 result = obj;
             }
         } else if (t >= 0x8c && t <= 0x8f) {
-            auto source = get<ID3D11Resource>(r.read<Id>());
+            const auto sourceId = r.read<Id>();
+            auto source = get<ID3D11Resource>(sourceId);
+            const auto sourceResource = frame_.resource(sourceId);
+            const auto viewFormat = [&](DXGI_FORMAT format) {
+                if (format == DXGI_FORMAT_UNKNOWN && sourceResource.type == 0x85 &&
+                    sourceResource.desc[5] > 1)
+                    return DXGI_FORMAT(sourceResource.desc[4]);
+                return format;
+            };
             auto raw = r.take(r.remaining());
             if (t == 0x8c) {
                 auto desc = descriptor<D3D11_SHADER_RESOURCE_VIEW_DESC>(raw);
+                desc.Format = viewFormat(desc.Format);
                 Com<ID3D11ShaderResourceView> obj;
                 check(device_->CreateShaderResourceView(source, &desc, &obj), "CreateSRV");
                 result = obj;
             }
             if (t == 0x8d) {
                 auto desc = descriptor<D3D11_RENDER_TARGET_VIEW_DESC>(raw);
+                desc.Format = viewFormat(desc.Format);
                 Com<ID3D11RenderTargetView> obj;
                 check(device_->CreateRenderTargetView(source, &desc, &obj), "CreateRTV");
                 result = obj;
             }
             if (t == 0x8e) {
                 auto desc = descriptor<D3D11_DEPTH_STENCIL_VIEW_DESC>(raw);
+                desc.Format = viewFormat(desc.Format);
                 Com<ID3D11DepthStencilView> obj;
                 check(device_->CreateDepthStencilView(source, &desc, &obj), "CreateDSV");
                 result = obj;

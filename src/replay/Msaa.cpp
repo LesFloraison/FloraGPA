@@ -1,4 +1,4 @@
-#include "Replay.h"
+#include "NativeMsaaTransfer.h"
 #include "Unpredicated.h"
 #include <d3dcompiler.h>
 
@@ -51,12 +51,18 @@ std::optional<std::pair<uint32_t, uint32_t>> integerFamily(uint32_t format, uint
 }
 } // namespace
 
+uint32_t nativeMsaaStorageFormat(uint32_t format) {
+    const auto family = integerFamily(format, format);
+    return family ? family->first : format;
+}
+
 MsaaStorage Replay::readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat) {
     const auto resource = frame_.resource(id);
     return readMsaaStorage(get<ID3D11Resource>(id), resource, sample, typedFormat);
 }
-MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &resource,
-                                   std::optional<uint32_t> sample, uint32_t typedFormat) {
+MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *context, ID3D11Resource *source,
+                                  const Resource &resource, std::optional<uint32_t> sample,
+                                  uint32_t typedFormat, const NativeTextureReadback &readback) {
     const auto info = textureInfo(resource);
     if (info.dimension != 3 || info.samples <= 1 || info.mips != 1)
         throw std::runtime_error("MSAA inspection requires a multisampled 2D texture with one mip");
@@ -85,17 +91,15 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
         D3D11_TEXTURE2D_DESC desc{};
         std::memcpy(&desc, r.desc.data(), sizeof desc);
         Com<ID3D11Texture2D> out;
-        check(device_->CreateTexture2D(&desc, nullptr, &out), "Create MSAA inspection texture");
+        check(device->CreateTexture2D(&desc, nullptr, &out), "Create MSAA inspection texture");
         return out;
     };
     auto target = texture(targetResource);
     UINT support = 0;
-    check(device_->CheckFormatSupport(DXGI_FORMAT(targetFormat), &support), "MSAA resolve format support");
+    check(device->CheckFormatSupport(DXGI_FORMAT(targetFormat), &support), "MSAA resolve format support");
     const bool hardware = !sample && !depth && (support & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE);
-    Unpredicated unpredicated(context_.Get());
-    PredicateIsolation isolation(*this);
     Com<ID3D11DeviceContext> deferred;
-    check(device_->CreateDeferredContext(0, &deferred), "Create MSAA inspection context");
+    check(device->CreateDeferredContext(0, &deferred), "Create MSAA inspection context");
     if (hardware) {
         result.mode = "hardware_resolve";
         for (uint32_t layer = 0; layer < info.layers; ++layer)
@@ -113,7 +117,7 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
         auto vertex = compileMsaa(
             "float4 main(uint i:SV_VertexID):SV_Position{return float4(i==2?3:-1,i==1?3:-1,0,1);}", "vs_5_0");
         Com<ID3D11VertexShader> vs;
-        check(device_->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), nullptr, &vs),
+        check(device->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), nullptr, &vs),
               "Create MSAA VS");
         deferred->VSSetShader(vs.Get(), nullptr, 0);
         deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -125,7 +129,7 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
         raster.DepthClipEnable = TRUE;
         raster.MultisampleEnable = bits ? TRUE : FALSE;
         Com<ID3D11RasterizerState> rs;
-        check(device_->CreateRasterizerState(&raster, &rs), "Create MSAA rasterizer");
+        check(device->CreateRasterizerState(&raster, &rs), "Create MSAA rasterizer");
         deferred->RSSetState(rs.Get());
         auto srv = [&](uint32_t format, uint32_t first, uint32_t count) {
             D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
@@ -133,14 +137,14 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
             desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
             desc.Texture2DMSArray = {first, count};
             Com<ID3D11ShaderResourceView> view;
-            check(device_->CreateShaderResourceView(readable.Get(), &desc, &view), "Create MSAA SRV");
+            check(device->CreateShaderResourceView(readable.Get(), &desc, &view), "Create MSAA SRV");
             return view;
         };
         auto pixel = [&](const std::string &text) {
             auto binary = compileMsaa(text, "ps_5_0");
             Com<ID3D11PixelShader> ps;
             check(
-                device_->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
+                device->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
                 "Create MSAA PS");
             deferred->PSSetShader(ps.Get(), nullptr, 0);
             deferred->Draw(3, 0);
@@ -159,7 +163,7 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
                               D3D11_COMPARISON_ALWAYS};
             desc.BackFace = desc.FrontFace;
             Com<ID3D11DepthStencilState> state;
-            check(device_->CreateDepthStencilState(&desc, &state), "Create MSAA depth stencil state");
+            check(device->CreateDepthStencilState(&desc, &state), "Create MSAA depth stencil state");
             deferred->OMSetDepthStencilState(state.Get(), write ? 0 : 255);
         };
         if (depth && !bits) {
@@ -172,7 +176,7 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
                 desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
                 desc.Texture2DArray = {0, layer, 1};
                 Com<ID3D11DepthStencilView> view;
-                check(device_->CreateDepthStencilView(target.Get(), &desc, &view), "Create MSAA result DSV");
+                check(device->CreateDepthStencilView(target.Get(), &desc, &view), "Create MSAA result DSV");
                 deferred->ClearDepthStencilView(
                     view.Get(), D3D11_CLEAR_DEPTH | (stencilView ? D3D11_CLEAR_STENCIL : 0), 0, 0);
                 deferred->OMSetRenderTargets(0, nullptr, view.Get());
@@ -214,8 +218,7 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
                 desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
                 desc.Texture2DArray = {0, layer, 1};
                 Com<ID3D11RenderTargetView> output;
-                check(device_->CreateRenderTargetView(target.Get(), &desc, &output),
-                      "Create MSAA result RTV");
+                check(device->CreateRenderTargetView(target.Get(), &desc, &output), "Create MSAA result RTV");
                 auto raw = output.Get();
                 deferred->OMSetRenderTargets(1, &raw, nullptr);
                 const auto coordinate = "int3(int2(p.xy)," + std::to_string(bits ? 0 : layer) + ")";
@@ -231,9 +234,9 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
     }
     Com<ID3D11CommandList> commands;
     check(deferred->FinishCommandList(FALSE, &commands), "Finish MSAA inspection commands");
-    context_->ExecuteCommandList(commands.Get(), TRUE);
-    check(device_->GetDeviceRemovedReason(), "MSAA inspection device status");
-    result.bytes = readTextureStorage(target.Get(), targetResource);
+    context->ExecuteCommandList(commands.Get(), TRUE);
+    check(device->GetDeviceRemovedReason(), "MSAA inspection device status");
+    result.bytes = readback(target.Get(), targetResource);
     if (!bits && (targetFormat == 88 || targetFormat == 93)) {
         result.canonicalX = true;
         for (size_t i = 3; i < result.bytes.size(); i += 4)
@@ -241,8 +244,9 @@ MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &reso
     }
     return result;
 }
-void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resource,
-                             const TexturePatch &patch) {
+void writeNativeMsaaSample(ID3D11Device *device, ID3D11DeviceContext *context, ID3D11Resource *destination,
+                           const Resource &resource, const TexturePatch &patch,
+                           const NativeTextureCreate &createTexture) {
     validateTexturePatch(resource, patch);
     const auto info = textureInfo(resource);
     const auto code = msaaEditEncoding(resource, patch.typedFormat);
@@ -252,26 +256,26 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
     targetResource.desc[7] = D3D11_USAGE_DEFAULT;
     targetResource.desc[8] = packedDepth ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
     targetResource.desc[9] = targetResource.desc[10] = 0;
-    auto target = createEditTexture(targetResource);
+    auto target = createTexture(targetResource, std::nullopt);
     const auto sourceFormat = packedDepth ? ((*code.depth)[0] == 20 ? 17u : 42u) : code.access;
     Resource sourceResource;
     sourceResource.type = 0x85;
     sourceResource.desc = {
         info.width, info.height, 1, 1, sourceFormat, 1, 0, 0, D3D11_BIND_SHADER_RESOURCE, 0, 0};
-    auto source = createEditTexture(sourceResource, Bytes(patch.bytes));
+    auto source = createTexture(sourceResource, Bytes(patch.bytes));
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
     srvDesc.Format = DXGI_FORMAT(sourceFormat);
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = 1;
     Com<ID3D11ShaderResourceView> srv;
-    check(device_->CreateShaderResourceView(source.Get(), &srvDesc, &srv), "Create MSAA edit source SRV");
+    check(device->CreateShaderResourceView(source.Get(), &srvDesc, &srv), "Create MSAA edit source SRV");
     Com<ID3D11DeviceContext> deferred;
-    check(device_->CreateDeferredContext(0, &deferred), "Create MSAA edit context");
+    check(device->CreateDeferredContext(0, &deferred), "Create MSAA edit context");
     deferred->CopyResource(target.Get(), destination);
     auto vertex = compileMsaa(
         "float4 main(uint i:SV_VertexID):SV_Position{return float4(i==2?3:-1,i==1?3:-1,0,1);}", "vs_5_0");
     Com<ID3D11VertexShader> vs;
-    check(device_->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), nullptr, &vs),
+    check(device->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), nullptr, &vs),
           "Create MSAA edit VS");
     deferred->VSSetShader(vs.Get(), nullptr, 0);
     deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -283,7 +287,7 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
     raster.DepthClipEnable = TRUE;
     raster.MultisampleEnable = TRUE;
     Com<ID3D11RasterizerState> rs;
-    check(device_->CreateRasterizerState(&raster, &rs), "Create MSAA edit rasterizer");
+    check(device->CreateRasterizerState(&raster, &rs), "Create MSAA edit rasterizer");
     deferred->RSSetState(rs.Get());
     deferred->OMSetBlendState(nullptr, nullptr, 1u << *patch.sample);
     auto rawSrv = srv.Get();
@@ -291,7 +295,7 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
     const auto pixel = [&](const std::string &text) {
         auto binary = compileMsaa(text, "ps_5_0");
         Com<ID3D11PixelShader> ps;
-        check(device_->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
+        check(device->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
               "Create MSAA edit PS");
         deferred->PSSetShader(ps.Get(), nullptr, 0);
         deferred->Draw(3, 0);
@@ -302,7 +306,7 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
         desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
         desc.Texture2DMSArray = {patch.layer, 1};
         Com<ID3D11DepthStencilView> dsv;
-        check(device_->CreateDepthStencilView(target.Get(), &desc, &dsv), "Create MSAA edit DSV");
+        check(device->CreateDepthStencilView(target.Get(), &desc, &dsv), "Create MSAA edit DSV");
         deferred->OMSetRenderTargets(0, nullptr, dsv.Get());
         const auto depthState = [&](bool depth, UINT mask, UINT reference) {
             D3D11_DEPTH_STENCIL_DESC ds{};
@@ -317,7 +321,7 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
                             D3D11_COMPARISON_ALWAYS};
             ds.BackFace = ds.FrontFace;
             Com<ID3D11DepthStencilState> state;
-            check(device_->CreateDepthStencilState(&ds, &state), "Create MSAA edit depth stencil state");
+            check(device->CreateDepthStencilState(&ds, &state), "Create MSAA edit depth stencil state");
             deferred->OMSetDepthStencilState(state.Get(), reference);
         };
         const bool wide = (*code.depth)[0] == 20;
@@ -343,7 +347,7 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
         desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
         desc.Texture2DMSArray = {patch.layer, 1};
         Com<ID3D11RenderTargetView> rtv;
-        check(device_->CreateRenderTargetView(target.Get(), &desc, &rtv), "Create MSAA edit RTV");
+        check(device->CreateRenderTargetView(target.Get(), &desc, &rtv), "Create MSAA edit RTV");
         auto raw = rtv.Get();
         deferred->OMSetRenderTargets(1, &raw, nullptr);
         const std::string kind = code.integerBits ? "uint4" : "float4";
@@ -354,9 +358,23 @@ void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resour
     deferred->CopyResource(destination, target.Get());
     Com<ID3D11CommandList> commands;
     check(deferred->FinishCommandList(FALSE, &commands), "Finish MSAA edit commands");
+    context->ExecuteCommandList(commands.Get(), TRUE);
+    check(device->GetDeviceRemovedReason(), "MSAA sample edit");
+}
+MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &resource,
+                                    std::optional<uint32_t> sample, uint32_t typedFormat) {
     Unpredicated unpredicated(context_.Get());
     PredicateIsolation isolation(*this);
-    context_->ExecuteCommandList(commands.Get(), TRUE);
-    check(device_->GetDeviceRemovedReason(), "MSAA sample edit");
+    return readNativeMsaaStorage(
+        device_.Get(), context_.Get(), source, resource, sample, typedFormat,
+        [&](ID3D11Resource *target, const Resource &layout) { return readTextureStorage(target, layout); });
+}
+void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resource,
+                             const TexturePatch &patch) {
+    Unpredicated unpredicated(context_.Get());
+    PredicateIsolation isolation(*this);
+    writeNativeMsaaSample(
+        device_.Get(), context_.Get(), destination, resource, patch,
+        [&](const Resource &layout, std::optional<Bytes> bytes) { return createEditTexture(layout, bytes); });
 }
 } // namespace flora
