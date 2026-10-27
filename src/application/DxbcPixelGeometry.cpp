@@ -59,7 +59,7 @@ struct Source {
 } // namespace
 static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, const PixelInputShader &pixel,
                                       uint64_t ordinal, uint64_t count, std::optional<uint32_t> primitiveId,
-                                      bool range) {
+                                      bool range, uint64_t maxBytes = UINT64_MAX) {
     const auto &meta = geometry.report;
     const auto factor = meta.at("vertices_per_primitive").get<uint32_t>();
     const auto primitives = meta.at("primitives").get<uint64_t>();
@@ -158,6 +158,8 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
     result.verticesPerPrimitive = factor;
     if (count > SIZE_MAX / factor / result.stride)
         throw std::runtime_error("Pixel geometry range allocation overflow");
+    if (count * factor * result.stride > maxBytes)
+        throw std::runtime_error("Pixel geometry bridge payload budget exceeded");
     result.vertices.resize(size_t(count) * factor * result.stride);
     Json mapping = Json::array();
     for (const auto &f : outputs) {
@@ -289,5 +291,33 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &geometry, c
 PixelGeometryBridge pixelGeometryRangeBridge(const PostTransformGeometry &geometry,
                                              const PixelInputShader &pixel, uint64_t first, uint64_t count) {
     return makeBridge(geometry, pixel, first, count, {}, true);
+}
+PixelGeometryBridge pixelShaderGeometryRangeBridge(const PostTransformGeometry &geometry, Bytes original,
+                                                   uint64_t first, uint64_t count, uint64_t maxBytes) {
+    PixelInputShader layout;
+    layout.reg = UINT32_MAX;
+    if (!original.empty()) {
+        layout.originalShaderSha256 = sha256(original);
+        for (auto field : pixelShaderInputSignature(original)) {
+            if (field.reg == UINT32_MAX)
+                continue;
+            // The rasterizer needs complete position even when the original
+            // PS declares or consumes only part of that system input.
+            if (field.system == 1) {
+                if (field.type != 3 || !(field.mask & 1))
+                    throw std::runtime_error("Original PS position has an incompatible layout");
+                field.mask = 15;
+            }
+            layout.inputSignature.push_back(std::move(field));
+        }
+    }
+    auto result = makeBridge(geometry, layout, first, count, {}, true, maxBytes);
+    result.identity["version"] = 4;
+    result.identity["scope"] = "private_original_ps_geometry_range";
+    result.identity["input_register"] = nullptr;
+    result.identity["pixel_shader_sha256"] =
+        original.empty() ? Json(nullptr) : Json(layout.originalShaderSha256);
+    result.identity["original_pixel_shader_preserved"] = true;
+    return result;
 }
 } // namespace flora::dxbc_exec

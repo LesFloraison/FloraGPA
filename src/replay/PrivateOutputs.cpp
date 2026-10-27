@@ -3,6 +3,72 @@
 #include "Unpredicated.h"
 #include <set>
 namespace flora {
+uint64_t Replay::privateOutputPayloadBytes(const State &state, bool copyStreamOutput,
+                                           const CancelCheck &cancelled) {
+    std::vector<Id> views(state.rtv.begin(), state.rtv.end());
+    views.insert(views.end(), state.omExtended.begin(), state.omExtended.end());
+    if (state.rtCount > views.size() || state.soCount > 4)
+        throw std::runtime_error("Private output payload binding bounds");
+    views.resize(state.rtCount);
+    views.push_back(state.dsv);
+    std::map<ID3D11Resource *, Com<ID3D11Resource>> sources;
+    for (auto id : views)
+        if (id) {
+            checkCancellation(cancelled);
+            Com<ID3D11Resource> resource;
+            get<ID3D11View>(id)->GetResource(&resource);
+            sources.emplace(resource.Get(), resource);
+        }
+    if (copyStreamOutput)
+        for (uint32_t i = 0; i < state.soCount; ++i)
+            if (state.so[i]) {
+                auto *resource = get<ID3D11Buffer>(state.so[i]);
+                sources.emplace(resource, resource);
+            }
+    uint64_t total = 0;
+    for (const auto &[pointer, source] : sources) {
+        checkCancellation(cancelled);
+        D3D11_RESOURCE_DIMENSION dimension{};
+        source->GetType(&dimension);
+        uint64_t size = 0;
+        if (dimension == D3D11_RESOURCE_DIMENSION_BUFFER) {
+            Com<ID3D11Buffer> buffer;
+            check(source.As(&buffer), "Describe private buffer payload");
+            D3D11_BUFFER_DESC desc{};
+            buffer->GetDesc(&desc);
+            size = desc.ByteWidth;
+        } else {
+            Resource resource;
+            auto describe = [&]<class T, class D>(uint16_t type) {
+                Com<T> texture;
+                check(source.As(&texture), "Describe private texture payload");
+                D desc{};
+                texture->GetDesc(&desc);
+                resource.type = type;
+                resource.desc.resize(sizeof(desc) / 4);
+                std::memcpy(resource.desc.data(), &desc, sizeof desc);
+            };
+            if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE1D)
+                describe.operator()<ID3D11Texture1D, D3D11_TEXTURE1D_DESC>(0x84);
+            else if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE2D)
+                describe.operator()<ID3D11Texture2D, D3D11_TEXTURE2D_DESC>(0x85);
+            else if (dimension == D3D11_RESOURCE_DIMENSION_TEXTURE3D)
+                describe.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(0x86);
+            else
+                throw std::runtime_error("Unknown private output dimension");
+            const auto layout = textureSubresources(resource);
+            size = layout.back().offset + layout.back().size;
+            const auto samples = textureInfo(resource).samples;
+            if (!samples || size > UINT64_MAX / samples)
+                throw std::runtime_error("Private output payload overflow");
+            size *= samples;
+        }
+        if (size > UINT64_MAX - total)
+            throw std::runtime_error("Private output payload overflow");
+        total += size;
+    }
+    return total;
+}
 std::vector<Replay::PrivateSoPosition> Replay::privateStreamOutputPositions(const State &state) {
     if (state.soCount > 4)
         throw std::runtime_error("Private SO target count exceeds four");
@@ -31,7 +97,8 @@ std::vector<Replay::PrivateSoPosition> Replay::privateStreamOutputPositions(cons
     return result;
 }
 void Replay::withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect,
-                                bool copyStreamOutput) {
+                                bool copyStreamOutput, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     const auto positions = copyStreamOutput && state.soCount ? privateStreamOutputPositions(state)
                                                              : std::vector<PrivateSoPosition>{};
     const auto savedSignature = soSignature_;
@@ -86,6 +153,7 @@ void Replay::withPrivateOutputs(const Event &event, const State &state, const st
     };
     try {
         for (auto id : views) {
+            checkCancellation(cancelled);
             auto view = get<ID3D11View>(id);
             view->GetResource(&owners[id]);
         }
@@ -95,6 +163,7 @@ void Replay::withPrivateOutputs(const Event &event, const State &state, const st
         for (const auto &position : positions)
             sources.emplace_back(get<ID3D11Buffer>(position.resource));
         for (auto source : sources) {
+            checkCancellation(cancelled);
             if (!clones.contains(source.Get())) {
                 D3D11_RESOURCE_DIMENSION kind;
                 source->GetType(&kind);
@@ -153,6 +222,7 @@ void Replay::withPrivateOutputs(const Event &event, const State &state, const st
                 }
         }
         for (const auto &[id, owner] : owners) {
+            checkCancellation(cancelled);
             const auto clone = clones.find(owner.Get());
             if (clone == clones.end())
                 continue;
@@ -202,7 +272,9 @@ void Replay::withPrivateOutputs(const Event &event, const State &state, const st
                     context_->SOSetTargets(state.soCount, buffers.data(), offsets.data());
                 }
             }
+            checkCancellation(cancelled);
             inspect();
+            checkCancellation(cancelled);
         }
     } catch (...) {
         restore();

@@ -155,6 +155,7 @@ class Replay {
     friend class PostTransformCapture;
     friend class CoverageCapture;
     friend class NativePixelOcclusionCapture;
+    friend class NativePixelGeometryReplay;
     friend class QuadSerialState;
     friend class QuadFinalState;
     friend class QuadResources;
@@ -276,8 +277,10 @@ class Replay {
         uint32_t offset, capacity;
     };
     std::vector<PrivateSoPosition> privateStreamOutputPositions(const State &state);
+    uint64_t privateOutputPayloadBytes(const State &state, bool copyStreamOutput,
+                                       const CancelCheck &cancelled);
     void withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect,
-                            bool copyStreamOutput = false);
+                            bool copyStreamOutput = false, const CancelCheck &cancelled = {});
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;

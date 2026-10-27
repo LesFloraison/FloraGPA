@@ -6,6 +6,9 @@ struct PixelInputBinding {
     std::string semantic;
     uint32_t index, system, type, reg, mask, used, precision;
 };
+// Validated original SM4/SM5 input signature, preserving hardware register,
+// component placement, used mask, system value and minimum precision.
+std::vector<PixelInputBinding> pixelShaderInputSignature(Bytes original);
 struct PixelInputRecordSelection {
     uint32_t x = 0, y = 0, sample = 0, layer = 0, maxRecords = 32;
     bool layerInput = false;

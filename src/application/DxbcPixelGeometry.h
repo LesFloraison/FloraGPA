@@ -19,4 +19,10 @@ PixelGeometryBridge pixelGeometryBridge(const PostTransformGeometry &, const Pix
 // primitive IDs. Uncaptured shader primitive IDs cannot be supplied for a range.
 PixelGeometryBridge pixelGeometryRangeBridge(const PostTransformGeometry &, const PixelInputShader &,
                                              uint64_t firstPrimitive, uint64_t primitiveCount);
+// Matches an unmodified PS input signature for private geometry re-execution.
+// Empty shader bytes select a null PS (for example, depth-only drawing).
+// The caller retains the original PS, resource bindings and output state.
+PixelGeometryBridge pixelShaderGeometryRangeBridge(const PostTransformGeometry &, Bytes originalPixelShader,
+                                                   uint64_t firstPrimitive, uint64_t primitiveCount,
+                                                   uint64_t maxBytes = 256ull * 1024 * 1024);
 } // namespace flora::dxbc_exec

@@ -74,6 +74,36 @@ std::vector<uint8_t> signature(const std::vector<Field> &fields) {
     return result;
 }
 bool declaration(uint32_t op) { return (op >= 88 && op <= 106) || (op >= 143 && op <= 162); }
+struct PixelProgram {
+    DxbcProgram program;
+    std::vector<Field> inputs;
+};
+PixelProgram readPixelProgram(Bytes original) {
+    Bytes input, code;
+    uint32_t inputTag = 0;
+    std::set<uint32_t> tags;
+    for (const auto &[tag, bytes] : readDxbcParts(original)) {
+        if (!tags.insert(tag).second)
+            throw std::runtime_error("Duplicate pixel input DXBC chunk");
+        if (tag == ISGN || tag == ISG1) {
+            if (inputTag)
+                throw std::runtime_error("Conflicting pixel input signatures");
+            inputTag = tag;
+            input = bytes;
+        }
+        if (tag == SHDR || tag == SHEX) {
+            if (!code.empty())
+                throw std::runtime_error("Conflicting pixel input programs");
+            code = bytes;
+        }
+    }
+    if (!inputTag || code.empty())
+        throw std::runtime_error("Pixel input capture requires a signature and executable");
+    auto program = readDxbcProgram(code);
+    if (program.header[0] != 0x40 && program.header[0] != 0x41 && program.header[0] != 0x50)
+        throw std::runtime_error("Pixel input capture requires an SM4/SM5 pixel shader");
+    return {std::move(program), signature(input, inputTag)};
+}
 // Only the independently compiled template is rewritten. Walk framed operands
 // so immediate data equal to a register token cannot be accidentally changed.
 size_t rewrite(Row &row, size_t pos, const std::map<uint32_t, uint32_t> &temps, unsigned depth = 0) {
@@ -170,36 +200,21 @@ RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
 #endif
 })";
 } // namespace
+std::vector<PixelInputBinding> pixelShaderInputSignature(Bytes original) {
+    std::vector<PixelInputBinding> result;
+    for (const auto &field : readPixelProgram(original).inputs)
+        result.push_back({field.name, field.semantic, field.system, field.type, field.reg, field.mask,
+                          field.used, field.precision});
+    return result;
+}
 PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
                                   std::optional<PixelInputRecordSelection> records) {
     if (inputRegister >= 32)
         throw std::runtime_error("Pixel input register is outside v0..v31");
     if (records && (!records->maxRecords || records->maxRecords > 4096 || records->sample >= 32))
         throw std::runtime_error("Invalid pixel input record limits/sample");
-    Bytes input, code;
-    uint32_t inputTag = 0;
-    std::set<uint32_t> tags;
-    for (const auto &[tag, bytes] : readDxbcParts(original)) {
-        if (!tags.insert(tag).second)
-            throw std::runtime_error("Duplicate pixel input DXBC chunk");
-        if (tag == ISGN || tag == ISG1) {
-            if (inputTag)
-                throw std::runtime_error("Conflicting pixel input signatures");
-            inputTag = tag;
-            input = bytes;
-        }
-        if (tag == SHDR || tag == SHEX) {
-            if (!code.empty())
-                throw std::runtime_error("Conflicting pixel input programs");
-            code = bytes;
-        }
-    }
-    if (!inputTag || code.empty())
-        throw std::runtime_error("Pixel input capture requires a signature and executable");
-    const auto originalProgram = readDxbcProgram(code);
-    if (originalProgram.header[0] != 0x40 && originalProgram.header[0] != 0x41 &&
-        originalProgram.header[0] != 0x50)
-        throw std::runtime_error("Pixel input capture requires an SM4/SM5 pixel shader");
+    const auto parsed = readPixelProgram(original);
+    const auto &originalProgram = parsed.program;
     PixelInputShader result;
     result.originalShaderSha256 = sha256(original);
     result.reg = inputRegister;
@@ -245,7 +260,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
     std::vector<Field> fields;
     uint32_t signatureMask = 0;
     std::optional<Field> position, sample, layer;
-    for (auto f : signature(input, inputTag)) {
+    for (auto f : parsed.inputs) {
         if (f.reg != inputRegister)
             continue;
         f.reg = 0;
