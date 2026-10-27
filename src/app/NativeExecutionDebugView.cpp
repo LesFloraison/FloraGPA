@@ -205,7 +205,9 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     auto registerLayout = new QVBoxLayout(registerPage);
     interpretation_ = new QComboBox;
     interpretation_->setObjectName("nativeDebugInterpretation");
-    interpretation_->addItems({"float", "int", "uint", "hex"});
+    interpretation_->addItems({"float", "double", "int", "uint", "hex"});
+    interpretation_->setToolTip(
+        "Double interpretation uses the xy and zw word pairs; both words must be known.");
     registerLayout->addWidget(interpretation_);
     registers_ = table("nativeDebugRegisters", {"Register", "Value", "Raw 32-bit components", "Valid XYZW"});
     registers_->setColumnWidth(0, 170);

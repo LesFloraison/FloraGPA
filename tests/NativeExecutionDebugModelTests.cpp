@@ -49,6 +49,41 @@ void save(const QString &path, const std::string &text) {
 class NativeExecutionDebugModelTests : public QObject {
     Q_OBJECT
   private slots:
+    void doubleRegisterInterpretation_data() {
+        QTest::addColumn<uint32_t>("valid");
+        for (uint32_t valid = 0; valid < 16; ++valid)
+            QTest::newRow(qPrintable(QString::number(valid))) << valid;
+    }
+    void doubleRegisterInterpretation() {
+        QFETCH(uint32_t, valid);
+        auto input = fixture(false);
+        input.inputs.constantBuffers[3] = {{{1, 0x3ff00000, 0, 0x80000000}, uint8_t(valid)},
+                                           Value::known({0x12345678, 0x7ff81234, 0, 0xfff00000}),
+                                           Value::known({1, 0, 0, 0})};
+        QTemporaryDir directory;
+        const auto path = directory.filePath("double.jsonl");
+        exportGroupExecutionTrace(path, input);
+        NativeExecutionDebugModel model(path, analysisFileDigest(path), input.bytecode);
+        const auto raw = model.registerValues();
+        const auto rows = model.registerRows("double");
+        std::map<std::string, std::string> text;
+        for (const auto &row : rows)
+            text[row[0]] = row[1];
+        QCOMPARE(text.at("cb3[0]"), std::string((valid & 3) == 3 ? "1.0000000000000002" : "unknown") + ", " +
+                                        ((valid & 12) == 12 ? "-0.0" : "unknown"));
+        QCOMPARE(text.at("cb3[1]"), std::string("nan, -inf"));
+        QCOMPARE(text.at("cb3[2]"), std::string("5e-324, 0.0"));
+        QCOMPARE(model.registerValues(), raw);
+        const auto snapshot =
+            model.inspect(NativeDebugCommand::Position, 0, model.configuration(), "double", true);
+        QCOMPARE(snapshot.at("register_rows"), rows);
+        QCOMPARE(snapshot.at("report").at("registers"), raw);
+        model.move(model.size());
+        QCOMPARE(model.registerRows("double").size(), model.registerValues().size());
+        model.move(0);
+        QCOMPARE(model.registerValues(), raw);
+        QCOMPARE(model.registerRows("double"), rows);
+    }
     void subroutineInputBoundaries() {
         using Words = std::vector<uint32_t>;
         const auto op = [](uint32_t opcode, Words operands = {}) {

@@ -178,22 +178,26 @@ Json NativeExecutionDebugModel::registersAt(size_t position) {
 }
 Json NativeExecutionDebugModel::registerValues() { return registersAt(position_); }
 Json NativeExecutionDebugModel::registerRows(const std::string &interpretation) {
-    require(interpretation == "float" || interpretation == "int" || interpretation == "uint" ||
-                interpretation == "hex",
+    require(interpretation == "float" || interpretation == "double" || interpretation == "int" ||
+                interpretation == "uint" || interpretation == "hex",
             "Unsupported native register interpretation");
     Json result = Json::array();
     for (const auto &row : registerValues()) {
         checkCancellation(operationCancelled_);
         std::string text;
-        for (size_t i = 0; i < 4; ++i) {
+        const size_t width = interpretation == "double" ? 2 : 1;
+        for (size_t i = 0; i < 4; i += width) {
             if (i)
                 text += ", ";
-            if (!row.at("written")[i].get<bool>()) {
+            if (!row.at("written")[i].get<bool>() || (width == 2 && !row.at("written")[i + 1].get<bool>())) {
                 text += "unknown";
                 continue;
             }
             const auto bits = row.at("bits")[i].get<uint32_t>();
-            if (interpretation == "hex")
+            if (interpretation == "double")
+                text += source_detail::scalarText(
+                    "double", uint64_t(bits) | (row.at("bits")[i + 1].get<uint64_t>() << 32));
+            else if (interpretation == "hex")
                 text += "0x" + QString::number(bits, 16).rightJustified(8, QChar('0')).toStdString();
             else if (interpretation == "uint")
                 text += std::to_string(bits);

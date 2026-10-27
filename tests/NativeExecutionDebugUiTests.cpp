@@ -43,6 +43,17 @@ class NativeExecutionDebugUiTests final : public QObject {
         QVERIFY(view.finish(view.requestId(), selected));
         QCOMPARE(view.exportReport().at("invocation"), f.result.at("data").at("invocation"));
         const auto initial = view.model()->registerValues();
+        auto interpretation = view.findChild<QComboBox *>("nativeDebugInterpretation");
+        QVERIFY(interpretation && interpretation->findText("double") >= 0);
+        interpretation->setCurrentText("double");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QCOMPARE(view.model()->registerValues(), initial);
+        auto registers = view.findChild<QTreeWidget *>("nativeDebugRegisters");
+        QVERIFY(registers);
+        const auto doubleRows = view.model()->registerRows("double");
+        QCOMPARE(size_t(registers->topLevelItemCount()), doubleRows.size());
+        for (int i = 0; i < registers->topLevelItemCount(); ++i)
+            QCOMPARE(registers->topLevelItem(i)->text(1), QString::fromStdString(doubleRows[i][1]));
         trigger(view, "nativeDebugNext");
         QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
         QCOMPARE(view.model()->position(), size_t(1));

@@ -653,11 +653,12 @@ class Snapshot {
         }
         if (vertex)
             vertexInputs(context, *vertex, *invocation);
-        bool minimumPrecision = false;
+        bool minimumPrecision = false, doublePrecision = false;
         for (const auto &[tag, bytes] : readDxbcParts(result.bytecode))
             if (tag == 0x58454853 || tag == 0x52444853)
                 for (const auto &words : readDxbcProgram(bytes).instructions) {
                     minimumPrecision |= (words[0] & 2047) == 106 && (words[0] & (1u << 16));
+                    doublePrecision |= (words[0] & 2047) == 106 && (words[0] & (1u << 12));
                     if ((words[0] & 2047) == 110 || (words[0] & 2047) == 111) {
                         checkpoint::InstructionOperands operands;
                         try {
@@ -678,7 +679,8 @@ class Snapshot {
             textures->rasterizerQueries = sampleQueries(nullptr);
         checkCancellation(cancelled);
         std::shared_ptr<GpuOperations> gpu;
-        if (((result.stage == 0 || result.stage == 4 || minimumPrecision || !textures->metadata.empty()) &&
+        if (((result.stage == 0 || result.stage == 4 || minimumPrecision || doublePrecision ||
+              !textures->metadata.empty()) &&
              replay.featureLevel() >= D3D_FEATURE_LEVEL_11_0) ||
             std::any_of(views.begin(), views.end(), [](const auto &item) { return item.second.format != 0; }))
             gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), replay.options().warp, cancelled);

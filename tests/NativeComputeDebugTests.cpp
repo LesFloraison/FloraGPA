@@ -3,11 +3,13 @@
 #include "application/HlslCompilation.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeComputeDebug.h"
+#include "application/NativeDebugSession.h"
 #include "application/NativeExecutionDebugModel.h"
 #include <QFile>
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <bit>
 using namespace flora;
 using namespace flora::testing;
 using Json = nlohmann::json;
@@ -46,6 +48,164 @@ QString worker() { return QCoreApplication::applicationDirPath() + "/FloraGPA.Wo
 class NativeComputeDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void doubleSourceWorkflow_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void doubleSourceWorkflow() {
+        QFETCH(uint32_t, vendor);
+        try {
+            QTemporaryDir temporary;
+            const auto retained = qEnvironmentVariable("FLORA_DOUBLE_SOURCE_EVIDENCE");
+            const auto directory =
+                retained.isEmpty() ? temporary.path() : QDir(retained).filePath(QString::number(vendor));
+            QVERIFY(QDir().mkpath(directory));
+            QDir dir(directory);
+            const auto capture = dir.filePath("frame.gpa_frame");
+            computeCapture(true).save(capture);
+            Frame frame(capture.toStdWString());
+            const std::string source = R"(cbuffer Constants:register(b0){uint4 c;}
+RWStructuredBuffer<uint> output:register(u0);
+[numthreads(1,1,1)]void main(){
+    double total = asdouble(1u, 0x3ff00000u);
+    [loop]for(uint i=0;i<3;++i){
+        total += double(c.x) * 0.25;
+    }
+    double2 pair = double2(total, -total);
+    uint low,high;
+    asuint(pair.x,low,high);
+    output[0]=low; output[1]=high;
+    asuint(pair.y,low,high);
+    output[2]=low; output[3]=high;
+})";
+            Com<ID3DBlob> compiled, errors;
+            check(D3DCompile(source.data(), source.size(), "double-workflow.hlsl", nullptr, nullptr, "main",
+                             "cs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &compiled,
+                             &errors),
+                  "Compile double source workflow");
+            const auto begin = static_cast<const uint8_t *>(compiled->GetBufferPointer());
+            std::vector<uint8_t> shader(begin, begin + compiled->GetBufferSize());
+            Experiment project(frame);
+            project.setShader(frame, 15, shader, source, "main");
+            const auto experiment = dir.filePath("experiment.json");
+            project.save(experiment);
+            Json selection{{"gpa_event", 100}, {"max_steps", 1000}, {"max_trace_bytes", 1048576}};
+            selection[vendor ? "gpu_vendor" : "warp"] = vendor ? Json(vendor) : Json(true);
+            const auto job = prepareNativeAnalysisJob(capture, "debug-thread", dir.filePath("worker"),
+                                                      worker(), selection, experiment);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 30));
+            validateNativeAnalysisResult(job, result);
+            auto artifacts = readNativeArtifacts(dir.filePath("worker"), result.at("artifacts"), 1048576);
+            NativeDebugSession session(job, result, artifacts);
+            auto &model = session.model();
+            QVERIFY(!model.files().empty());
+            QCOMPARE(model.result().at("source_variables").at("status"), Json("available"));
+            std::set<uint64_t> totals;
+            Json observations = Json::array();
+            size_t selected = 0;
+            for (size_t i = 0; i < model.size(); ++i) {
+                model.move(i);
+                for (const auto &value : model.sourceValues()) {
+                    if (value.at("name") != "total" || value.at("status") != "available")
+                        continue;
+                    QCOMPARE(value.at("type"), Json("double"));
+                    const auto bits = value.at("bits").get<uint64_t>();
+                    const auto evaluated = model.evaluate(i, "total");
+                    QCOMPARE(evaluated.kind, std::string("double"));
+                    QCOMPARE(std::bit_cast<uint64_t>(std::get<double>(evaluated.scalar())), bits);
+                    const auto expected = std::bit_cast<double>(bits) + 0.25;
+                    QCOMPARE(std::get<double>(model.evaluate(i, "total + double(0.25)").scalar()), expected);
+                    totals.insert(bits);
+                    observations.push_back({{"position", i},
+                                            {"source", value},
+                                            {"watch", evaluated.text()},
+                                            {"location", model.location()}});
+                    if (bits == 0x3ff0000000000001ull)
+                        selected = i;
+                }
+            }
+            QVERIFY(totals.contains(0x3ff0000000000001ull));
+            QVERIFY(totals.contains(0x3ff8000000000001ull));
+            QVERIFY(totals.contains(0x4000000000000000ull));
+            QVERIFY(totals.contains(0x4004000000000000ull));
+            QVERIFY(selected > 0);
+            model.move(selected);
+            const auto raw = model.registerValues();
+            const auto display = model.registerRows("double");
+            model.addWatch("total");
+            QCOMPARE(model.watchResults()[0].at("value"), Json("1.0000000000000002"));
+            model.toggleInstruction(model.rows()[selected].at("instruction"));
+            model.move(0);
+            QCOMPARE(model.seek(0), selected);
+            model.toggleInstruction(model.rows()[selected].at("instruction"));
+            model.source().setRule(0, 6, "total >= double(2)", "always", 1);
+            const auto conditional = model.seek(0);
+            QCOMPARE(std::get<double>(model.evaluate(conditional, "total").scalar()), 2.0);
+            QCOMPARE(model.source().encounterCount(conditional, {0, 6}), size_t(3));
+            model.move(selected);
+            auto config = model.configuration();
+            model.importConfiguration(config);
+            QCOMPARE(model.configuration(), config);
+            session.exportArchive(dir.filePath("session.zip"), model.exportReport());
+            NativeDebugSession restored(job, result, artifacts);
+            restored.model().importConfiguration(config);
+            restored.model().move(selected);
+            QCOMPARE(restored.model().registerValues(), raw);
+            QCOMPARE(restored.model().registerRows("double"), display);
+            QCOMPARE(restored.model().watchResults(), model.watchResults());
+            dxbc_exec::ExecutionTraceReader trace(session.tracePath(),
+                                                  result.at("artifacts").at("trace.jsonl").at("sha256"));
+            trace.moveTo(trace.size());
+            const auto output = trace.storage().at({dxbc_exec::TraceSpace::Buffer, 7});
+            auto replayOptions = options(vendor);
+            replayOptions.before = false;
+            project.apply(frame, replayOptions);
+            Replay replay(frame, replayOptions);
+            replay.run();
+            const auto original = replay.readBuffer(7);
+            QCOMPARE(output.bytes, original);
+            QCOMPARE(output.valid, std::vector<uint8_t>(16, 1));
+            const std::array<uint32_t, 4> expected{0, 0x40040000, 0, 0xc0040000};
+            QCOMPARE(original, std::vector<uint8_t>(reinterpret_cast<const uint8_t *>(expected.data()),
+                                                    reinterpret_cast<const uint8_t *>(expected.data() + 4)));
+            QProcess cli;
+            QStringList arguments{"analyze",      capture,    "debug-thread", "--gpa-event",      "100",
+                                  "--experiment", experiment, "--out",        dir.filePath("cli")};
+            if (vendor)
+                arguments << "--gpu-vendor" << QString::number(vendor);
+            else
+                arguments << "--warp";
+            cli.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", arguments);
+            QVERIFY(cli.waitForFinished(30000));
+            QCOMPARE(cli.exitCode(), 0);
+            const auto cliResult = load(dir.filePath("cli/result.json"));
+            QCOMPARE(cliResult.at("data").at("invocation"), result.at("data").at("invocation"));
+            dxbc_exec::ExecutionTraceReader cliTrace(
+                dir.filePath("cli/trace.jsonl"), cliResult.at("artifacts").at("trace.jsonl").at("sha256"));
+            cliTrace.moveTo(cliTrace.size());
+            QCOMPARE(cliTrace.storage().at({dxbc_exec::TraceSpace::Buffer, 7}).bytes, original);
+            Json report{{"vendor", vendor},
+                        {"observations", observations},
+                        {"source_values", totals},
+                        {"selected", selected},
+                        {"conditional_position", conditional},
+                        {"conditional_total", model.evaluate(conditional, "total").text()},
+                        {"conditional_encounter", 3},
+                        {"original_output", original},
+                        {"native_output", output.bytes},
+                        {"raw_registers", raw},
+                        {"double_registers", display},
+                        {"configuration", config},
+                        {"watch_results", model.watchResults()},
+                        {"analysis_context", result.at("context")}};
+            QFile reportFile(dir.filePath("workflow.json"));
+            QVERIFY(reportFile.open(QIODevice::WriteOnly));
+            reportFile.write(QByteArray::fromStdString(report.dump(2)));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void dispatchBoundary_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<int>("mode");
