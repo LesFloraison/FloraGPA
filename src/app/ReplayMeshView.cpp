@@ -238,14 +238,16 @@ bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
     model_->setMesh(meshData);
     preview_->setMesh(preview);
     summary_->setText(
-        QString("API %1 · %2 · %3 vertex references · %4 faces")
+        QString("API %1 · %2 · %3 vertices · %4 references · %5 faces")
             .arg(event_)
             .arg(QString::fromStdString(result.at("data").at("shader_stage").get<std::string>()))
             .arg(meshData->positions.size())
+            .arg(meshData->indexCount)
             .arg(meshData->faces.size()));
     summary_->setToolTip(
-        preview.isEmpty() ? "Preview requires three finite position components. Raw values and exports are preserved."
-                          : QString());
+        preview.isEmpty()
+            ? "Preview requires three finite position components. Raw values and exports are preserved."
+            : QString());
     if (!details_->isHidden())
         details_->setPlainText(QString::fromStdString(result_.dump(2)));
     updateActions();

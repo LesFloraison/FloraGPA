@@ -117,7 +117,10 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--uav-independent", action="store_true", help="Require the expanded 15-row GPU matrix")
     parser.add_argument("--resource-reads", action="store_true", help="Require all 18 GPU rows including immutable reads")
+    parser.add_argument("--indexed-presentation", action="store_true", help="Require compact vertex presentation tests")
     args = parser.parse_args()
+    if args.indexed_presentation:
+        args.resource_reads = True
     if args.resource_reads:
         args.uav_independent = True
     expected = {f"{v}-{s}" for v in (0, 4318, 32902) for s in ("vs", "gs", "ds", "ds-uav")}
@@ -126,7 +129,7 @@ def main():
     if args.resource_reads:
         expected |= {f"{v}-gs-read" for v in (0, 4318, 32902)}
     require({p.name for p in args.directory.iterdir() if p.is_dir()} == expected, "complete matrix")
-    passed = 29 if args.resource_reads else 26 if args.uav_independent else 23
+    passed = 35 if args.indexed_presentation else 29 if args.resource_reads else 26 if args.uav_independent else 23
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     records, gates, controls = [], [], 0
@@ -143,6 +146,8 @@ def main():
             continue
         result = read_json(folder / "result.json")
         files = {p.name: p.read_bytes() for p in folder.iterdir() if p.is_file()}
+        if args.indexed_presentation:
+            require(files["post_vertices.bin"] == files["vertices.bin"], "unique synthetic vertex records")
         records.append(validate(name, job, result, files))
         for target in ("request", "module", "vertex", "csv", "obj"):
             altered, changed = copy.deepcopy(result), dict(files)

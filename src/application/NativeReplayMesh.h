@@ -10,6 +10,8 @@ struct NativeReplayMesh {
 };
 // Validates retained native artifacts against their raw vertex storage. Position
 // exports preserve the existing mesh view's CSV and perspective-divide behavior.
+// Input identities are sorted and compacted only when every output byte matches;
+// the retained presentation maps compact vertices back to original output rows.
 NativeReplayMesh nativeReplayMesh(const nlohmann::json &job, const nlohmann::json &result,
                                   const NativeArtifactBytes &, const CancelCheck & = {});
 } // namespace flora

@@ -52,6 +52,23 @@ def validate_modules(modules):
                 "private GPA module loaded outside its installation directory")
 
 
+def compact_sources(data, raw, identities):
+    stride = data["stride"]
+    require(len(identities) == data["vertices"], "identity count")
+    unique, variants, keys = {}, {}, []
+    for i, identity in enumerate(identities):
+        owner = tuple(identity[:2])
+        key = owner + (raw[i * stride:(i + 1) * stride],)
+        if key not in unique:
+            variant = variants.get(owner, 0)
+            variants[owner] = variant + 1
+            unique[key] = (owner + (variant,), i)
+        keys.append(key)
+    order = sorted(unique, key=lambda key: unique[key][0])
+    remap = {key: i for i, key in enumerate(order)}
+    return [unique[key][1] for key in order], [remap[key] for key in keys]
+
+
 def validate_stage(folder, label, event, instance, vendor, worker_hash, stage):
     result, job = load(folder / "result.json"), load(folder / "job.json")
     data, context = result["data"], result["context"]
@@ -85,22 +102,33 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage):
             "raw vertex storage")
     attribute = next(a for a in data["attributes"] if a["system_value"] == 1 and a["component_type"] == 3)
     require(attribute["components"] == [0, 1, 2, 3] and attribute["offset"] + 16 <= stride, "position layout")
-    positions = [struct.unpack_from("<4f", raw, i * stride + attribute["offset"]) for i in range(count)]
+    presentation = load(folder / "presentation.json")
+    mapping = presentation.get("replay_mesh")
+    sources, references = list(range(count)), list(range(count))
+    if mapping is not None:
+        if "vertex_identity" in data:
+            sources, references = compact_sources(data, raw, load(folder / "identities.json"))
+        require(mapping == {"schema": 1, "strategy": "sorted_input_identities_and_output_variants"
+                            if "vertex_identity" in data else "expanded_outputs", "vertex_sources": sources,
+                            "reference_vertices": references, "vertex_stride": stride, "index_count": count},
+                "independent compact identity mapping")
+        require((folder / "post_vertices.bin").read_bytes() ==
+                b"".join(raw[i * stride:(i + 1) * stride] for i in sources), "compact vertex records")
+    positions = [struct.unpack_from("<4f", raw, i * stride + attribute["offset"]) for i in sources]
     rows = list(csv.reader(io.StringIO((folder / "post_vertices.csv").read_text(encoding="utf-8"))))
-    require(rows[0] == ["vertex", "x", "y", "z", "w"] and len(rows) == count + 1, "CSV layout")
+    require(rows[0] == ["vertex", "x", "y", "z", "w"] and len(rows) == len(sources) + 1, "CSV layout")
     for i, (row, position) in enumerate(zip(rows[1:], positions)):
         require(int(row[0]) == i and len(row) == 5 and
                 all(same_float(float(a), b) for a, b in zip(row[1:], position)), "CSV position value")
     obj = [line.split() for line in (folder / "post_geometry.obj").read_text(encoding="utf-8").splitlines()]
     obj_positions = [row[1:] for row in obj if row and row[0] == "v"]
-    require(len(obj_positions) == count, "OBJ position count")
+    require(len(obj_positions) == len(sources), "OBJ position count")
     for row, position in zip(obj_positions, positions):
         w = position[3] or 1
         require(len(row) == 3 and all(same_float(float(a), b / w) for a, b in zip(row, position)),
                 "OBJ perspective divide")
     faces = [[int(v) - 1 for v in row[1:]] for row in obj if row and row[0] == "f"]
-    require(all(len(face) == 3 and all(0 <= v < count for v in face) for face in faces), "face bounds")
-    presentation = load(folder / "presentation.json")
+    require(all(len(face) == 3 and all(0 <= v < len(sources) for v in face) for face in faces), "face bounds")
     invalid_clip = any(p[3] == 0 or not all(map(math.isfinite, p)) for p in positions)
     if invalid_clip:
         require(presentation["obj_unavailable_reason"] ==
@@ -109,7 +137,8 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage):
                 "unavailable canonical preview")
     else:
         require(presentation["obj_unavailable_reason"] is None and
-                presentation["mesh"]["faces"] == [[v + 1 for v in face] for face in faces], "presentation faces")
+                [[references[v - 1] for v in face] for face in presentation["mesh"]["faces"]] == faces,
+                "presentation faces")
     if stage == "vs-inputs":
         for extension, name in (("csv", "post_vertices.csv"), ("obj", "post_geometry.obj")):
             require((folder / ("ui-export." + extension)).read_bytes() == (folder / name).read_bytes(),
@@ -134,7 +163,9 @@ def compare(inputs, final, instance):
         require(row[2] == data["input_assembly"]["references"][i], "vertex identity")
         vertices.append(row[4])
     expected_faces = [vertices[i:i + 3] for i in range(0, len(vertices) - 2, 3)]
-    require(faces == expected_faces, "independent triangle-list reconstruction")
+    mapping = presentation.get("replay_mesh", {"reference_vertices": list(range(data["vertices"]))})
+    require(faces == [[mapping["reference_vertices"][v] for v in face] for face in expected_faces],
+            "independent triangle-list reconstruction")
     stride = data["stride"]
     expected = b"".join(raw[v * stride:(v + 1) * stride] for face in expected_faces for v in face)
     differing = sum(a != b for a, b in zip(expected, actual)) + abs(len(expected) - len(actual))
@@ -198,7 +229,8 @@ def main():
                         for stage in ("vs-inputs", "final")]
                 for snapshot, part in zip(probe["records"], pair):
                     context = load(folder / snapshot["stage"] / "result.json")["context_id"]
-                    require(snapshot["context_id"] == context and snapshot["vertices"] == part[0]["vertices"] and
+                    vertex_count = len(part[3]["replay_mesh"]["vertex_sources"]) if "replay_mesh" in part[3] else part[0]["vertices"]
+                    require(snapshot["context_id"] == context and snapshot["vertices"] == vertex_count and
                             snapshot["faces"] == len(part[2]) and snapshot["elapsed_ms"] > 0,
                             "probe result identity and presentation counts")
                 record.update(compare(*pair, instance))

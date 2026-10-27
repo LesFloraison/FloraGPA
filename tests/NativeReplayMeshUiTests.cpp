@@ -33,6 +33,37 @@ void write(const QString &path, const QByteArray &bytes) {
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size())
         throw std::runtime_error("Cannot save native mesh test output");
 }
+NativeReplayMesh present(PostTransformGeometry geometry) {
+    geometry.report["sha256"] = sha256(geometry.bytes);
+    const auto tables = postTransformTables(geometry);
+    for (const auto key :
+         {"vertex_references", "obj_vertices", "obj_faces", "obj_lines", "obj_points",
+          "obj_unavailable_reason", "unique_vertices", "unique_identities", "conflicting_identities"})
+        geometry.report[key] = tables.at(key);
+    Json job{{"schema", nativeAnalysisSchema},
+             {"backend", nativeAnalysisBackend},
+             {"backend_sha256", "owned-fixture"},
+             {"frame_sha256", "owned-fixture"},
+             {"experiment_sha256", nullptr},
+             {"action", "mesh"},
+             {"options", {{"gpa_event", 1}, {"stage", "vs-inputs"}}},
+             {"request_id", "owned-fixture"}};
+    auto context = job;
+    context.erase("request_id");
+    Json result{{"schema", nativeAnalysisSchema},
+                {"backend", nativeAnalysisBackend},
+                {"ok", true},
+                {"request_id", job.at("request_id")},
+                {"context", context},
+                {"context_id", analysisIdentity(context)},
+                {"data", geometry.report}};
+    auto files = postTransformFiles(geometry);
+    Json identities = Json::array();
+    for (const auto &identity : geometry.identities)
+        identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
+    files["identities.json"] = QByteArray::fromStdString(identities.dump());
+    return nativeReplayMesh(job, result, files);
+}
 } // namespace
 class NativeReplayMeshUiTests : public QObject {
     Q_OBJECT
@@ -51,6 +82,97 @@ class NativeReplayMeshUiTests : public QObject {
             for (const auto stage : {"vs", "gs", "ds", "ds-uav", "ds-uav-independent", "gs-read"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage)))
                     << vendor << QString(stage);
+    }
+    void indexedPresentation_data() {
+        QTest::addColumn<QString>("mode");
+        for (const auto mode :
+             {"repeated", "attribute-variant", "signed-zero", "nan-payload", "instances", "cut"})
+            QTest::newRow(mode) << QString(mode);
+    }
+    void indexedPresentation() {
+        try {
+            QFETCH(QString, mode);
+            const bool cut = mode == "cut", instances = mode == "instances";
+            const bool variant =
+                mode == "attribute-variant" || mode == "signed-zero" || mode == "nan-payload";
+            const uint32_t count = cut ? 3 : 6;
+            const Json inputs = cut         ? Json::array({5, nullptr, 2, 5})
+                                : instances ? Json::array({5, 2, 5})
+                                            : Json::array({5, 2, 5, 9, 2, 5});
+            PostTransformGeometry geometry;
+            geometry.report = {{"requested_stage", "vs-inputs"},
+                               {"shader_stage", "vs"},
+                               {"event", {{"id", 1}}},
+                               {"stream", 0},
+                               {"vertices", count},
+                               {"primitives", count},
+                               {"vertices_per_primitive", 1},
+                               {"stride", 20},
+                               {"input_topology", cut ? 5 : 4},
+                               {"vertex_identity", {{"source", "owned-fixture"}}},
+                               {"input_assembly",
+                                {{"references", inputs},
+                                 {"row_references", Json::array()},
+                                 {"instance_count", instances ? 2 : 1}}},
+                               {"attributes",
+                                {{{"system_value", 1},
+                                  {"component_type", 3},
+                                  {"components", {0, 1, 2, 3}},
+                                  {"component_count", 4},
+                                  {"offset", 0},
+                                  {"semantic", "SV_Position"},
+                                  {"index", 0}},
+                                 {{"system_value", 0},
+                                  {"component_type", 3},
+                                  {"components", {0}},
+                                  {"component_count", 1},
+                                  {"offset", 16},
+                                  {"semantic", "VALUE"},
+                                  {"index", 0}}}}};
+            geometry.bytes.resize(count * 20);
+            const std::array<float, 4> position{2, 4, 6, 2};
+            for (uint32_t row = 0; row < count; ++row) {
+                const uint32_t slot = cut ? (row ? row + 1 : 0) : instances ? row % 3 : row;
+                const auto id = inputs[slot].get<uint32_t>();
+                geometry.identities.push_back({instances ? row / 3 : 0, int64_t(id), id});
+                geometry.report["input_assembly"]["row_references"].push_back(slot);
+                std::memcpy(geometry.bytes.data() + row * 20, position.data(), 16);
+                uint32_t value = mode == "nan-payload" ? 0x7fc00001u : 0;
+                if (variant && row == 2)
+                    value = mode == "signed-zero"   ? 0x80000000u
+                            : mode == "nan-payload" ? 0x7fc00002u
+                                                    : 0x3f800000u;
+                std::memcpy(geometry.bytes.data() + row * 20 + 16, &value, 4);
+            }
+            const auto model = present(geometry);
+            const auto sources = cut         ? Json::array({1, 0})
+                                 : instances ? Json::array({1, 0, 4, 3})
+                                 : variant   ? Json::array({1, 0, 2, 3})
+                                             : Json::array({1, 0, 3});
+            const auto references = cut         ? Json::array({1, 0, 1})
+                                    : instances ? Json::array({1, 0, 1, 3, 2, 3})
+                                    : variant   ? Json::array({1, 0, 2, 3, 0, 1})
+                                                : Json::array({1, 0, 1, 2, 0, 1});
+            QCOMPARE(model.tables.at("replay_mesh").at("vertex_sources"), sources);
+            QCOMPARE(model.tables.at("replay_mesh").at("reference_vertices"), references);
+            QCOMPARE(model.positions.positions.size(), sources.size());
+            QCOMPARE(model.positions.indexCount, uint64_t(cut ? 4 : 6));
+            QCOMPARE(model.positions.faces.size(), size_t(cut ? 0 : 2));
+            for (size_t i = 0; i < model.positions.faces.size(); ++i)
+                for (size_t j = 0; j < 3; ++j)
+                    QCOMPARE(model.positions.faces[i][j], references[i * 3 + j].get<uint64_t>());
+            QByteArray expected;
+            for (const auto &source : sources)
+                expected.append(
+                    reinterpret_cast<const char *>(geometry.bytes.data() + source.get<size_t>() * 20), 20);
+            QCOMPARE(model.files.value("post_vertices.bin"), expected);
+            QCOMPARE(model.files.value("vertices.bin"),
+                     QByteArray(reinterpret_cast<const char *>(geometry.bytes.data()),
+                                qsizetype(geometry.bytes.size())));
+            QCOMPARE(model.tables.at("tables").at("expanded_vertices").at("rows").size(), size_t(count));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void positionExports_data() {
         QTest::addColumn<uint32_t>("components");

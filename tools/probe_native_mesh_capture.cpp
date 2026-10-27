@@ -121,12 +121,15 @@ int main(int argc, char **argv) {
                 require(exported.at("presentation") == mesh->tables, "UI JSON presentation mismatch");
             }
             save(QDir(directory).filePath("post_vertices.csv"), mesh->files["post_vertices.csv"]);
+            save(QDir(directory).filePath("post_vertices.bin"), mesh->files["post_vertices.bin"]);
             save(QDir(directory).filePath("post_geometry.obj"), mesh->files["post_geometry.obj"]);
             save(QDir(directory).filePath("presentation.json"),
                  QByteArray::fromStdString(mesh->tables.dump(2)));
             records.push_back({{"stage", stage},
                                {"ui_presented", present},
                                {"vertices", mesh->positions.positions.size()},
+                               {"output_references", result.at("data").at("vertices")},
+                               {"index_count", mesh->positions.indexCount},
                                {"faces", mesh->positions.faces.size()},
                                {"elapsed_ms", stageElapsed.elapsed()},
                                {"context_id", mesh->contextId}});
