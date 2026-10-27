@@ -18,7 +18,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
-| P5 | Fragment history, failure reasons and shader outputs | Independent selected-region occlusion preserves original shaders, scissor and output sample restrictions; exact ordinary-draw controls pass on three adapters; query interpretation differences, original fragment qualification and extraction remain open |
+| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion and batched pre-depth geometry candidates are tested on three adapters; candidates retain storage ordinals and explicit unknown original identities; query interpretation differences, original fragment qualification and extraction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active typed-UAV and remaining precision semantics, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
@@ -799,3 +799,13 @@ early-depth/forced-sample differences, so results remain raw diagnostic counts
 with unknown original fragment eligibility. See
 `research/DX11_NATIVE_PIXEL_OCCLUSION.md`. This is an internal P5 building block;
 full fragment history, public PS integration and P7/P8 remain required.
+
+## Batched pixel candidate continuation
+
+Captured final geometry can now be rasterized in a single private range pass to
+find candidate storage ordinals at a selected pixel/sample/layer. The 120-case
+synthetic matrix matches 660 independent draw queries; 72 owned-capture checks
+verify raw candidate records. Nine GF2/BF1/Helldivers probes complete with matching
+ordinal sets across adapters. See `research/DX11_NATIVE_PIXEL_CANDIDATES.md` for
+scope, budget limits and reproducible evidence. Candidate order and original
+eligibility remain unknown; public history/PS cutover and P7/P8 remain open.
