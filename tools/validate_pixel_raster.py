@@ -10,7 +10,7 @@ from validate_pixel_input_capture import MODES
 
 
 def verify(meta, raw, targets=None):
-    require(meta["backend"] == "dxbc-pixel-raster-inputs/1", "Unknown raster backend")
+    require(meta["backend"] in ("dxbc-pixel-raster-inputs/1", "dxbc-pixel-raster-inputs/2"), "Unknown raster backend")
     require(meta["scope"] == "isolated_primitive_pre_depth_inputs"
             and meta["original_fragment_eligibility"] is False, "Incorrect observation scope")
     capacity = meta["max_records"]
@@ -29,7 +29,11 @@ def verify(meta, raw, targets=None):
         words = list(struct.iter_unpack("<4I", raw[16 + i * 144:16 + (i + 1) * 144]))
         require(words[4][:2] == (x, y) and all(v in (0, 1) for v in words[4][2:]), "Invalid pixel/quad role")
         rx, ry = words[4][2:]
-        require(words[8] == (layer, sample, 0, 0), "Invalid record layer/sample")
+        require(words[8][:2] == (layer, sample), "Invalid record layer/sample")
+        if meta["backend"] == "dxbc-pixel-raster-inputs/1":
+            require(words[8][2:] == (0, 0), "Legacy reserved record words were written")
+        else:
+            require(words[8][3] in (0, 1), "Invalid observed front-face Boolean")
         direction = struct.unpack("<4f", struct.pack("<4I", *words[7]))
         require(direction == (-1.0 if rx else 1.0, -1.0 if ry else 1.0, 0.0, 0.0),
                 "Invalid quad orientation")

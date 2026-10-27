@@ -3,6 +3,7 @@
 #include "application/DxbcPixelInputs.h"
 #include "application/DxbcPixelRaster.h"
 #include "application/HlslCompilation.h"
+#include "application/NativePixelInvocation.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
 #include <QDir>
@@ -186,6 +187,133 @@ std::vector<Words> read(Device &d, Target &target, unsigned samples) {
 class DxbcPixelInputsTests : public QObject {
     Q_OBJECT
   private slots:
+    void mergerInputs_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<bool>("reverse");
+        QTest::addColumn<bool>("sloped");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 4u})
+                for (bool reverse : {false, true})
+                    for (bool sloped : {false, true})
+                        for (const auto *mode : {"constant", "position", "front", "sample"})
+                            QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5")
+                                                         .arg(vendor)
+                                                         .arg(samples)
+                                                         .arg(reverse)
+                                                         .arg(sloped)
+                                                         .arg(mode)))
+                                << vendor << samples << reverse << sloped << QString(mode);
+    }
+    void mergerInputs() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(bool, reverse);
+            QFETCH(bool, sloped);
+            QFETCH(QString, mode);
+            Device d(vendor);
+            const auto vs =
+                compile(std::string("struct O{float4 p:SV_Position;float a:DATA;};"
+                                    "O main(uint id:SV_VertexID){O o;o.p=float4(id==1?3:-1,id==2?-3:1,") +
+                            (sloped ? "id==0?.125:id==1?.875:.625" : ".25") + ",1);o.a=id;return o;}",
+                        "vs_5_0");
+            Com<ID3D11VertexShader> vertex;
+            check(d.device->CreateVertexShader(vs.data(), vs.size(), nullptr, &vertex),
+                  "Create raster-depth VS");
+            d.context->VSSetShader(vertex.Get(), nullptr, 0);
+            auto geometry = captureGeometry(d, vs);
+            Target target;
+            D3D11_TEXTURE2D_DESC td{16,
+                                    16,
+                                    1,
+                                    1,
+                                    DXGI_FORMAT_R32G32B32A32_UINT,
+                                    {samples, 0},
+                                    D3D11_USAGE_DEFAULT,
+                                    D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+                                    0,
+                                    0};
+            check(d.device->CreateTexture2D(&td, nullptr, &target.texture), "Create raster-depth reference");
+            check(d.device->CreateRenderTargetView(target.texture.Get(), nullptr, &target.rtv),
+                  "Create raster-depth RTV");
+            check(d.device->CreateShaderResourceView(target.texture.Get(), nullptr, &target.srv),
+                  "Create raster-depth SRV");
+            D3D11_RASTERIZER_DESC raster{};
+            raster.FillMode = D3D11_FILL_SOLID;
+            raster.CullMode = D3D11_CULL_NONE;
+            raster.DepthClipEnable = TRUE;
+            raster.MultisampleEnable = samples > 1;
+            raster.FrontCounterClockwise = reverse;
+            Com<ID3D11RasterizerState> rs;
+            check(d.device->CreateRasterizerState(&raster, &rs), "Create raster-depth state");
+            d.context->RSSetState(rs.Get());
+            const D3D11_VIEWPORT viewport{0, 0, 16, 16, .2f, .8f};
+            d.context->RSSetViewports(1, &viewport);
+            const bool sampled = mode == "sample";
+            const auto reference = compile(
+                std::string(
+                    "uint4 main(float4 p:SV_Position,bool front:SV_IsFrontFace,uint coverage:SV_Coverage") +
+                (sampled ? ",uint sample:SV_SampleIndex" : "") +
+                "):SV_Target{return uint4(asuint(p.z),front?1:0,coverage," + (sampled ? "sample" : "0") +
+                ");}");
+            Com<ID3D11PixelShader> shader;
+            check(d.device->CreatePixelShader(reference.data(), reference.size(), nullptr, &shader),
+                  "Create independent raster-depth PS");
+            d.context->PSSetShader(shader.Get(), nullptr, 0);
+            d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+            d.context->Draw(3, 0);
+            d.context->OMSetRenderTargets(0, nullptr, nullptr);
+            const auto raw = read(d, target, samples);
+            d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+            const auto state = pixelRasterState(d.context.Get(), 0);
+            const auto original = compile(
+                mode == "constant"   ? "uint4 main():SV_Target{return uint4(1,2,3,4);}"
+                : mode == "position" ? "float4 main(float4 p:SV_Position):SV_Target{return p.x;}"
+                : mode == "front"
+                    ? "uint4 main(bool f:SV_IsFrontFace):SV_Target{return f?1:0;}"
+                    : "float4 main(sample float a:DATA,uint s:SV_SampleIndex):SV_Target{return a+s;}");
+            const auto invocation = captureNativePixelInvocationInputs(
+                d.device.Get(), !vendor, state, geometry, original, 0, {3, 2, samples - 1, 0, 1, false});
+            const auto &observed = invocation.inputProvenance.at("selected_raster");
+            const auto expected = raw[(2 * 16 + 3) * samples + samples - 1];
+            QCOMPARE(observed.at("depth_bits"), nlohmann::json(expected[0]));
+            QCOMPARE(observed.at("front_face"), nlohmann::json(expected[1] != 0));
+            QCOMPARE(observed.at("coverage_mask"), nlohmann::json(expected[2]));
+            QCOMPARE(observed.at("sample"), nlohmann::json(samples - 1));
+            QCOMPARE(observed.at("lane"), nlohmann::json(invocation.selectedLane));
+            QCOMPARE(expected[1], uint32_t(!reverse));
+            QCOMPARE(expected[3], sampled ? samples - 1 : 0u);
+            QCOMPARE(invocation.inputProvenance.at("sample_frequency"), nlohmann::json(sampled));
+            d.validate();
+            const auto root = qEnvironmentVariable("FLORA_RASTER_MERGER_INPUTS_EVIDENCE");
+            if (!root.isEmpty()) {
+                if (!QDir().mkpath(root))
+                    throw std::runtime_error("Cannot create raster merger evidence directory");
+                QFile file(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag()) + ".json"));
+                const auto text = nlohmann::json{
+                    {"schema", 1},
+                    {"kind", "private_raster_merger_inputs_probe"},
+                    {"vendor_request", vendor},
+                    {"samples", samples},
+                    {"reverse", reverse},
+                    {"sloped", sloped},
+                    {"mode", mode.toStdString()},
+                    {"reference", expected},
+                    {"original_shader_sha256", sha256(original)},
+                    {"reference_shader_sha256", sha256(reference)},
+                    {"provenance", invocation.inputProvenance},
+                    {"original_fragment_eligibility",
+                     nullptr}}.dump(2);
+                if (!file.open(QIODevice::WriteOnly | QIODevice::NewOnly) ||
+                    file.write(text.data(), qint64(text.size())) != qint64(text.size()))
+                    throw std::runtime_error("Cannot save raster merger input evidence");
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void capture_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");

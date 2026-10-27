@@ -40,7 +40,7 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
     if (first.records.size() != 1)
         throw std::runtime_error("Pixel trace requires a unique observed invocation");
     const auto &anchor = first.records[0].words;
-    if (anchor[4][2] > 1 || anchor[4][3] > 1 || anchor[8][1] >= 32)
+    if (anchor[4][2] > 1 || anchor[4][3] > 1 || anchor[8][1] >= 32 || anchor[8][3] > 1)
         throw std::runtime_error("Pixel trace observation has invalid quad/sample identity");
     result.selectedLane = anchor[4][2] + 2 * anchor[4][3];
     result.activeMask = 0;
@@ -62,7 +62,7 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
         const auto &pass = found->second;
         const auto &meta = pass.identity;
         if (pass.records.size() != 1 || meta.at("records") != 1 || meta.at("input_register") != reg ||
-            meta.at("backend") != "dxbc-pixel-raster-inputs/1" || meta.at("shader_sha256") != shaderHash ||
+            meta.at("backend") != "dxbc-pixel-raster-inputs/2" || meta.at("shader_sha256") != shaderHash ||
             meta.at("valid_mask") != mask || meta.at("sample_frequency") != sampleFrequency ||
             meta.at("scope") != "isolated_primitive_pre_depth_inputs" ||
             meta.at("original_fragment_eligibility") != false)
@@ -91,6 +91,12 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
                               {"original_fragment_eligibility", false},
                               {"sample_frequency", sampleFrequency},
                               {"coverage_only", coverageOnly},
+                              {"selected_raster",
+                               {{"depth_bits", anchor[8][2]},
+                                {"front_face", anchor[8][3] != 0},
+                                {"coverage_mask", anchor[6][result.selectedLane]},
+                                {"sample", anchor[8][1]},
+                                {"lane", result.selectedLane}}},
                               {"passes", passes}};
     return result;
 }

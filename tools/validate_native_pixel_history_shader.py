@@ -49,6 +49,14 @@ def validate(r, vendor):
                         p["primitive_ordinal"] == row["primitive_ordinal"] and
                         p["original_primitive_id"] == row["original_primitive_id"], "geometry join")
                 require(len(p["passes"]) > 0, "missing input observation")
+                if any(item['backend'] == 'dxbc-pixel-raster-inputs/2' for item in p['passes']):
+                    raster = p['selected_raster']
+                    require(all(item['backend'] == 'dxbc-pixel-raster-inputs/2' for item in p['passes']) and
+                            type(raster['depth_bits']) is int and 0 <= raster['depth_bits'] <= 0xffffffff and
+                            type(raster['front_face']) is bool and raster['sample'] == sample and
+                            raster['lane'] == out['selected_lane'] and
+                            type(raster['coverage_mask']) is int and 0 <= raster['coverage_mask'] <= 0xffffffff and
+                            raster['coverage_mask'] & (1 << sample), 'measured output-merger input join')
                 for observation in p["passes"]:
                     require(observation["records"] == 1 and observation["shader_sha256"] == out["shader_sha256"]
                             and observation["adapter_luid"] == luid and observation["adapter_vendor"] == adapter["vendor"]
@@ -143,6 +151,12 @@ def main():
                         lambda r: r["records"][0]["private_shader_outputs"][0].update(completed_primitives=999999),
                         lambda r: r["records"][0]["private_shader_outputs"][0]["input_provenance"].update(geometry_sha256="0"*64),
                         lambda r: r["records"][0]["private_shader_outputs"][0]["input_provenance"]["passes"][0].update(sample=31)]
+            if 'selected_raster' in report['records'][0]['private_shader_outputs'][0]['input_provenance']:
+                for key, value in [('depth_bits', -1), ('front_face', 2), ('sample', -1), ('lane', 4),
+                                   ('coverage_mask', 0)]:
+                    changes.append(lambda r, k=key, v=value:
+                                   r['records'][0]['private_shader_outputs'][0]['input_provenance']
+                                   ['selected_raster'].update({k: v}))
         for change in changes:
             broken = copy.deepcopy(report); change(broken)
             try:

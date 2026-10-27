@@ -22,6 +22,8 @@ struct PixelRasterState {
 PixelRasterState pixelRasterState(ID3D11DeviceContext *, std::optional<uint32_t> colorSlot = {});
 nlohmann::json pixelRasterIdentity(const PixelRasterState &);
 struct PixelInputRecord {
+    // The final vector contains layer, raster sample, selected-lane raster
+    // depth bits and front-face Boolean. Version 1 reserved its last two words.
     std::array<std::array<uint32_t, 4>, 9> words;
 };
 struct PixelRasterInputs {

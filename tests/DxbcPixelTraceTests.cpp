@@ -53,7 +53,7 @@ class DxbcPixelTraceTests : public QObject {
   private slots:
     void helperMemoryJournal() {
         QTemporaryDir dir;
-        auto input=fixture();
+        auto input = fixture();
         input.bytecode =
             compileHlsl("RWByteAddressBuffer data:register(u1);"
                         "uint4 main():SV_Target{uint old;data.InterlockedAdd(0,1,old);DeviceMemoryBarrier();"
@@ -208,11 +208,11 @@ class DxbcPixelTraceTests : public QObject {
             PixelInputRecord r{};
             r.words[4] = {3, 2, 1, 0};
             r.words[6] = {1, 2, 0, 1};
-            r.words[8] = {0, 1, 0, 0};
+            r.words[8] = {0, 1, 0x3e800000, 1};
             for (uint32_t lane = 0; lane < 4; ++lane)
                 r.words[lane] = {reg, lane, 0x7fc0abcd, 0xffffffff};
             p.records.push_back(r);
-            p.identity = {{"backend", "dxbc-pixel-raster-inputs/1"},
+            p.identity = {{"backend", "dxbc-pixel-raster-inputs/2"},
                           {"shader_sha256", sha256(code)},
                           {"records", 1},
                           {"input_register", reg},
@@ -239,6 +239,11 @@ class DxbcPixelTraceTests : public QObject {
         const auto joined = pixelTraceInputs(code, passes);
         QCOMPARE(joined.activeMask, uint8_t(11)); // Pixel-frequency neighbors may cover another sample.
         QCOMPARE(joined.selectedLane, 1u);
+        QCOMPARE(joined.inputProvenance.at("selected_raster"), Json({{"depth_bits", 0x3e800000},
+                                                                     {"front_face", true},
+                                                                     {"coverage_mask", 2},
+                                                                     {"sample", 1},
+                                                                     {"lane", 1}}));
         QCOMPARE(joined.registers[3].at({1, {1}}), Value::known({1, 3, 0x7fc0abcd, 0xffffffff}));
         for (const auto *field : {"adapter_luid", "valid_mask", "shader_sha256", "x"}) {
             auto bad = passes;
@@ -246,6 +251,17 @@ class DxbcPixelTraceTests : public QObject {
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelTraceInputs(code, bad));
         }
         auto bad = passes;
+        bad[0].identity["backend"] = "dxbc-pixel-raster-inputs/1";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelTraceInputs(code, bad));
+        for (unsigned component : {2u, 3u}) {
+            bad = passes;
+            bad[1].records[0].words[8][component] ^= 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelTraceInputs(code, bad));
+        }
+        bad = passes;
+        bad[0].records[0].words[8][3] = bad[1].records[0].words[8][3] = 2;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelTraceInputs(code, bad));
+        bad = passes;
         bad[1].records[0].words[6][0] ^= 1;
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelTraceInputs(code, bad));
         bad = passes;

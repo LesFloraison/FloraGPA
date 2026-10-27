@@ -488,7 +488,7 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         std::memcpy(&record, result.storage.data() + 16 + i * 144, 144);
         const auto &location = record.words[4], &identity = record.words[8], &direction = record.words[7];
         if (location[0] != selection.x || location[1] != selection.y || location[2] > 1 || location[3] > 1 ||
-            identity != std::array<uint32_t, 4>{selection.layer, selection.sample, 0, 0} ||
+            identity[0] != selection.layer || identity[1] != selection.sample || identity[3] > 1 ||
             std::bit_cast<float>(direction[0]) != (location[2] ? -1.f : 1.f) ||
             std::bit_cast<float>(direction[1]) != (location[3] ? -1.f : 1.f) ||
             (direction[2] & 0x7fffffffu) || (direction[3] & 0x7fffffffu))
@@ -499,7 +499,7 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
             throw std::runtime_error("Private pixel record lacks selected sample coverage");
         result.records.push_back(record);
     }
-    result.identity = {{"backend", "dxbc-pixel-raster-inputs/1"},
+    result.identity = {{"backend", "dxbc-pixel-raster-inputs/2"},
                        {"adapter_vendor", actual.VendorId},
                        {"adapter_device", actual.DeviceId},
                        {"adapter_luid",

@@ -164,7 +164,11 @@ struct Output {
     uint4 coverage:SV_Target6; uint4 orientation:SV_Target7;
 };
 RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
-            uint coverage:SV_Coverage SAMPLE_ARGUMENT LAYER_ARGUMENT) {
+            uint coverage:SV_Coverage SAMPLE_ARGUMENT LAYER_ARGUMENT
+#if RECORD_MODE
+            , bool front:SV_IsFrontFace
+#endif
+            ) {
 #if RECORD_MODE
     uint record=MAX_RECORDS;
     [branch] if(all(asuint(int2(floor(position.xy)))==uint2(SELECT_X,SELECT_Y)) &&
@@ -194,7 +198,7 @@ RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
             records.Store4(address+32,o.c);records.Store4(address+48,o.d);
             records.Store4(address+64,o.location);records.Store4(address+80,o.samples);
             records.Store4(address+96,o.coverage);records.Store4(address+112,o.orientation);
-            records.Store4(address+128,uint4(LAYER_VALUE,SELECT_SAMPLE,0,0));
+            records.Store4(address+128,uint4(LAYER_VALUE,SELECT_SAMPLE,asuint(position.z),front?1u:0u));
 #else
     return o;
 #endif
@@ -259,7 +263,7 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
         throw std::runtime_error("Pixel input register is not declared");
     std::vector<Field> fields;
     uint32_t signatureMask = 0;
-    std::optional<Field> position, sample, layer;
+    std::optional<Field> position, sample, layer, front;
     for (auto f : parsed.inputs) {
         if (!inputRegister || f.reg != *inputRegister)
             continue;
@@ -272,6 +276,8 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
             sample = f;
         if (f.system == 4)
             layer = f;
+        if (f.system == 9)
+            front = f;
         fields.push_back(std::move(f));
     }
     if (result.mask & ~signatureMask)
@@ -282,21 +288,26 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
         throw std::runtime_error("Invalid pixel sample-index signature");
     if (layer && (layer->type != 1 || !std::has_single_bit(layer->mask)))
         throw std::runtime_error("Invalid pixel render-target array-index signature");
+    if (front && (front->type != 1 || !std::has_single_bit(front->mask)))
+        throw std::runtime_error("Invalid pixel front-face signature");
     // A selected position register may only read z/w in the original shader.
-    // Add xy for orientation without making those components valid observations.
+    // Add xy for orientation and z for record depth without making added
+    // components valid original shader register observations.
     if (position) {
         bool expanded = false;
         for (auto &row : selectedDeclarations)
             if ((row[0] & 2047) == 100 && row.back() == 1) {
-                row[1] |= 3u << 4;
+                row[1] |= (records ? 7u : 3u) << 4;
                 expanded = true;
                 break;
             }
         if (!expanded)
             throw std::runtime_error("Pixel position declaration is missing");
         for (auto &f : fields)
-            if (f.system == 1)
-                f.used |= 3;
+            if (f.system == 1) {
+                f.used |= records ? 7 : 3;
+                f.mask |= records ? 7 : 3;
+            }
     }
     std::string defines;
     if (records) {
@@ -338,12 +349,13 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     for (auto &row : program.instructions)
         if ((row[0] & 2047) == 104) {
             temporary = row.at(1);
-            row.at(1) += 4;
+            row.at(1) += 5;
         }
-    if (!temporary || temporary > 4092 || output.empty())
+    if (!temporary || temporary > 4091 || output.empty())
         throw std::runtime_error("Unexpected pixel input transport template");
     std::map<uint32_t, uint32_t> remap;
-    std::map<uint32_t, uint32_t> helperRegisters;
+    std::map<std::pair<uint32_t, uint32_t>, uint32_t> helperRegisters;
+    uint32_t helperTemps = 1;
     uint32_t nextRegister = inputRegister ? 1 : 0;
     std::vector<Row> initialize{{0x05000036, 0x1000f2, temporary, 0x4001, 0}};
     if (inputRegister)
@@ -359,11 +371,16 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
             continue;
         }
         const bool isPosition = f.system == 1;
-        if (!isPosition && f.system != 10 && f.system != 4)
+        if (!isPosition && f.system != 10 && f.system != 4 && f.system != 9)
             throw std::runtime_error("Unexpected pixel transport input semantic");
-        const auto temp = temporary + (isPosition ? 1 : f.system == 10 ? 2 : 3);
-        remap[sourceRegister] = temp;
-        const auto existing = isPosition ? position : f.system == 10 ? sample : layer;
+        // The compiler can pack multiple system semantics into one register.
+        // Preserve that shared temporary while remapping declarations by both
+        // register and semantic, including components supplied by the original.
+        auto [mapped, inserted] = remap.try_emplace(sourceRegister, temporary + helperTemps);
+        if (inserted)
+            ++helperTemps;
+        const auto temp = mapped->second;
+        const auto existing = isPosition ? position : f.system == 10 ? sample : f.system == 4 ? layer : front;
         uint32_t reg = 0, swizzle = 0xe4;
         if (existing) {
             if (!isPosition)
@@ -371,7 +388,7 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
         } else {
             reg = f.reg = nextRegister++;
             fields.push_back(f);
-            helperRegisters[sourceRegister] = reg;
+            helperRegisters[{sourceRegister, f.system}] = reg;
         }
         initialize.push_back({0x05000036, 0x100002 | (f.used << 4), temp, 0x101006 | (swizzle << 4), reg});
     }
@@ -380,7 +397,7 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     for (auto row : program.instructions) {
         const auto op = row[0] & 2047;
         if (op >= 98 && op <= 100 && ((row.at(1) >> 12) & 255) == 1) {
-            const auto found = helperRegisters.find(row.at(2));
+            const auto found = helperRegisters.find({row.at(2), op == 98 ? 0u : row.back()});
             if (found != helperRegisters.end()) {
                 row[2] = found->second;
                 declarations.push_back(std::move(row));
