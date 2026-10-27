@@ -1,8 +1,8 @@
 #pragma once
 #include "replay/Replay.h"
-#include <nlohmann/json.hpp>
 #include <QByteArray>
 #include <QMap>
+#include <nlohmann/json.hpp>
 namespace flora {
 struct PostTransformOptions {
     std::string stage = "final";
@@ -21,6 +21,8 @@ struct PostTransformGeometry {
     };
     std::vector<Identity> identities;
     std::vector<uint8_t> downstreamBytes;
+    // Optional shader primitive IDs in final-stream order, never storage ordinals.
+    std::vector<uint32_t> primitiveIds;
 };
 // The replay must be positioned before this event, with its snapshot prepared.
 PostTransformGeometry inspectPostTransform(Replay &replay, Id event,
@@ -30,6 +32,14 @@ PostTransformGeometry inspectPostTransform(Replay &replay, Id event,
 PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &event, const State &state,
                                                 uint32_t stream = 0,
                                                 uint64_t maxBytes = 256ull * 1024 * 1024);
+// Adds observed primitive IDs for pixel diagnostics. An original GS supplies
+// its own ID output; without a GS, a separate system-ID SO pass is used only
+// when pre-raster UAV declarations cannot make repeated geometry ambiguous.
+PostTransformGeometry captureBoundPixelGeometry(Replay &, const Event &, const State &, uint32_t stream = 0,
+                                                uint64_t maxBytes = 256ull * 1024 * 1024);
+PostTransformGeometry inspectPixelGeometry(Replay &, Id event, uint32_t stream = 0,
+                                           uint64_t maxBytes = 256ull * 1024 * 1024);
+std::span<const uint32_t> validatedPixelPrimitiveIds(const PostTransformGeometry &);
 nlohmann::json postTransformLayout(Bytes bytecode, uint32_t stream);
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory);
 nlohmann::json postTransformTables(const PostTransformGeometry &geometry);

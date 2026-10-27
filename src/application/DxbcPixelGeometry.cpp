@@ -65,6 +65,9 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
     const auto primitives = meta.at("primitives").get<uint64_t>();
     const auto vertices = meta.at("vertices").get<uint64_t>();
     const auto sourceStride = meta.at("stride").get<uint32_t>();
+    const auto primitiveIds = validatedPixelPrimitiveIds(geometry);
+    if (!primitiveIds.empty() && primitiveId)
+        throw std::runtime_error("Cannot override observed pipeline primitive IDs");
     if (factor < 1 || factor > 3 || !sourceStride || primitives > UINT64_MAX / factor ||
         vertices != primitives * factor || vertices > geometry.bytes.size() / sourceStride ||
         vertices * sourceStride != geometry.bytes.size() || ordinal >= primitives || !count ||
@@ -159,8 +162,9 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
     Json mapping = Json::array();
     for (const auto &f : outputs) {
         const auto *s = find(f);
+        const bool observed = !s && f.system == 7 && !primitiveIds.empty();
         const bool supplied = !s && f.system == 7 && primitiveId.has_value();
-        if (!s && !supplied)
+        if (!s && !supplied && !observed)
             throw std::runtime_error("Pixel geometry producer value is missing: " + f.semantic +
                                      std::to_string(f.index));
         if (s && f.system == 7 && primitiveId)
@@ -182,6 +186,8 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
             }
             for (uint64_t vertex = 0; vertex < count * factor; ++vertex) {
                 uint32_t value = primitiveId.value_or(0);
+                if (observed)
+                    value = primitiveIds[size_t(ordinal + vertex / factor)];
                 if (s) {
                     const auto offset =
                         (ordinal * factor + vertex) * sourceStride + s->offset + sourceIndex * 4;
@@ -194,16 +200,17 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
                               {"semantic_component", component},
                               {"source_byte_offset", s ? Json(s->offset + sourceIndex * 4) : Json(nullptr)}});
         }
-        mapping.push_back(
-            {{"semantic", f.semantic},
-             {"index", f.index},
-             {"system_value", f.system},
-             {"component_type", f.type},
-             {"register", f.reg},
-             {"mask", f.mask},
-             {"slot", payloadSlots.at(f.reg)},
-             {"source", supplied ? "explicit_original_primitive_id" : "captured_final_geometry"},
-             {"components", copied}});
+        mapping.push_back({{"semantic", f.semantic},
+                           {"index", f.index},
+                           {"system_value", f.system},
+                           {"component_type", f.type},
+                           {"register", f.reg},
+                           {"mask", f.mask},
+                           {"slot", payloadSlots.at(f.reg)},
+                           {"source", observed   ? "observed_pipeline_primitive_id"
+                                      : supplied ? "explicit_original_primitive_id"
+                                                 : "captured_final_geometry"},
+                           {"components", copied}});
     }
     std::vector<Field> bridgeFields;
     const bool minimumPrecision =
@@ -266,6 +273,12 @@ static PixelGeometryBridge makeBridge(const PostTransformGeometry &geometry, con
         result.identity["version"] = 2;
         result.identity["primitive_count"] = count;
         result.identity["scope"] = "isolated_final_geometry_range_input_observation";
+    }
+    if (!primitiveIds.empty()) {
+        result.identity["version"] = 3;
+        result.identity["primitive_identity"] = meta.at("primitive_identity");
+        result.identity["original_primitive_id"] =
+            range ? Json(nullptr) : Json(primitiveIds[size_t(ordinal)]);
     }
     return result;
 }

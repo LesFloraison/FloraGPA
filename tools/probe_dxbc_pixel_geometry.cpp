@@ -193,7 +193,8 @@ int main(int argc, char **argv) {
                 geometryOptions.stream = readStreamOutputDeclaration(frame, declaration).rasterizedStream;
         if (geometryOptions.stream == UINT32_MAX)
             throw std::runtime_error("Selected draw has no rasterized GS stream");
-        const auto geometry = inspectPostTransform(replay, event, geometryOptions);
+        const auto geometry =
+            inspectPixelGeometry(replay, event, geometryOptions.stream, geometryOptions.maxBytes);
         std::optional<PixelInputRecordSelection> selection;
         if (args.size() > 6) {
             selection.emplace();
@@ -255,6 +256,9 @@ int main(int argc, char **argv) {
         }
         save(directory, "source-geometry.json", geometry.report);
         save(directory, "source-geometry.bin", Bytes(geometry.bytes));
+        save(directory, "primitive-ids.bin",
+             Bytes(reinterpret_cast<const uint8_t *>(geometry.primitiveIds.data()),
+                   geometry.primitiveIds.size() * sizeof(uint32_t)));
         shader(directory, "original-ps", ps);
         Com<IDXGIDevice> dxgi;
         Com<IDXGIAdapter> adapter;

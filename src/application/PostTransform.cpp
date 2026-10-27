@@ -8,6 +8,7 @@
 #include "DxbcOutputLog.h"
 #include "EventDescription.h"
 #include "Geometry.h"
+#include "HlslCompilation.h"
 #include "InvocationSelector.h"
 #include "OutputLogGeometry.h"
 #include "ShaderInspector.h"
@@ -100,6 +101,63 @@ Json postTransformLayout(Bytes bytecode, uint32_t stream) {
     if (fields.empty() || entries > 128 || stride > 2048)
         throw std::runtime_error("No supported output signature for the selected stream");
     return {{"attributes", fields}, {"stride", stride}};
+}
+static std::vector<uint8_t> primitiveIdentityDomainShader(Bytes original) {
+    std::vector<uint8_t> helper;
+    std::vector<uint32_t> domains;
+    for (const auto &[tag, bytes] : readDxbcParts(original))
+        if (tag == 0x58454853 || tag == 0x52444853)
+            for (const auto &row : readDxbcProgram(bytes).instructions)
+                if ((row[0] & 2047) == 149)
+                    domains.push_back((row[0] >> 11) & 3);
+    if (domains.size() != 1 || !domains[0])
+        throw std::runtime_error("Primitive identity requires a known tessellation domain");
+    const std::string name = domains[0] == 1 ? "isoline" : domains[0] == 2 ? "tri" : "quad";
+    // Observe the patch system value in the DS. An inserted GS can
+    // receive different IDs from the original PS on WARP tessellation.
+    const std::string constants = domains[0] == 1 ? "struct C{float e[2]:SV_TessFactor;};"
+                                  : domains[0] == 2
+                                      ? "struct C{float e[3]:SV_TessFactor;float i:SV_InsideTessFactor;};"
+                                      : "struct C{float e[4]:SV_TessFactor;float i[2]:SV_InsideTessFactor;};";
+    helper = compileHlsl(constants + "[domain(\"" + name +
+                             "\")]uint main(C c,uint id:SV_PrimitiveID):FLORA_PRIMITIVE_ID{return id;}",
+                         "ds_5_0", "main", "native-patch-identity.hlsl")
+                 .bytecode;
+    // HS/DS linkage requires the complete original control-point
+    // and patch-constant signatures even though this pass reads
+    // only the patch system value.
+    const auto originalParts = readDxbcParts(original);
+    const auto helperParts = readDxbcParts(helper);
+    DxbcProgram program;
+    for (const auto &[tag, bytes] : helperParts)
+        if (tag == 0x58454853 || tag == 0x52444853)
+            program = readDxbcProgram(bytes);
+    std::erase_if(program.instructions, [](const auto &row) { return (row[0] & 2047) == 147; });
+    std::vector<std::vector<uint32_t>> inputs;
+    for (const auto &[tag, bytes] : originalParts)
+        if (tag == 0x58454853 || tag == 0x52444853)
+            for (const auto &row : readDxbcProgram(bytes).instructions) {
+                const auto op = row[0] & 2047;
+                if ((op == 95 || op == 96 || op == 97 || op == 147) &&
+                    std::find(program.instructions.begin(), program.instructions.end(), row) ==
+                        program.instructions.end())
+                    inputs.push_back(row);
+            }
+    program.instructions.insert(program.instructions.begin(), inputs.begin(), inputs.end());
+    const auto executable = writeDxbcProgram(program);
+    DxbcParts linked;
+    const auto inputSignature = [](uint32_t tag) {
+        return tag == 0x4e475349 || tag == 0x31475349 || tag == 0x47534350 || tag == 0x31475350;
+    };
+    for (const auto &[tag, bytes] : helperParts)
+        if (tag == 0x58454853 || tag == 0x52444853)
+            linked.emplace_back(tag, executable);
+        else if (tag == 0x4e47534f || tag == 0x3547534f || tag == 0x3147534f)
+            linked.emplace_back(tag, bytes);
+    for (const auto &[tag, bytes] : originalParts)
+        if (inputSignature(tag))
+            linked.emplace_back(tag, bytes);
+    return makeDxbc(linked);
 }
 class PostTransformCapture {
     Replay &r;
@@ -252,7 +310,8 @@ class PostTransformCapture {
             "Selected bytes are sliced from the full capture; prefix queries determine only boundaries.");
     }
     PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false,
-                                  Bytes overrideCode = {}, const std::function<void()> &configure = {}) {
+                                  Bytes overrideCode = {}, const std::function<void()> &configure = {},
+                                  bool generatedGeometry = false) {
         const auto requested = options.stage == "hs"                                         ? "ds"
                                : options.stage == "vs-index" || options.stage == "vs-inputs" ? "vs"
                                                                                              : options.stage;
@@ -268,7 +327,7 @@ class PostTransformCapture {
             throw std::runtime_error("DS geometry requires a paired hull shader");
         auto bytes = overrideCode.empty() ? code(rid) : overrideCode;
         auto info = inspectShader(bytes);
-        const bool executableGs = stage == "gs" && info.at("stage") == "gs";
+        const bool executableGs = (stage == "gs" || generatedGeometry) && info.at("stage") == "gs";
         if (requested == "gs" && !executableGs)
             throw std::runtime_error("Selected GS is an SO signature provider");
         auto description = postTransformLayout(bytes, options.stream);
@@ -331,14 +390,14 @@ class PostTransformCapture {
                 entries.push_back({options.stream, semantics[i].c_str(), fields[i].at("index").get<UINT>(),
                                    component.get<BYTE>(), 1, 0});
         auto program = addEmptyInputSignature(bytes);
-        const auto linkage = executableGs ? shaderClassLinkage(r.frame_, rid) : 0;
+        const auto linkage = executableGs && !generatedGeometry ? shaderClassLinkage(r.frame_, rid) : 0;
         Com<ID3D11GeometryShader> shader;
         check(r.device_->CreateGeometryShaderWithStreamOutput(
                   program.data(), program.size(), entries.data(), UINT(entries.size()), &stride, 1,
                   D3D11_SO_NO_RASTERIZED_STREAM, r.get<ID3D11ClassLinkage>(linkage), &shader),
               "Create post-transform SO shader");
         std::array<ID3D11ClassInstance *, 256> classes{};
-        UINT classCount = executableGs ? state.stages[3].classCount : 0;
+        UINT classCount = executableGs && !generatedGeometry ? state.stages[3].classCount : 0;
         if (r.options_.shaders.contains(rid) && info.at("interface_slots") == 0)
             classCount = 0;
         for (UINT i = 0; i < classCount; ++i)
@@ -1256,6 +1315,139 @@ class PostTransformCapture {
             throw std::runtime_error("Post-transform geometry requires a Draw");
         return capture(event, state);
     }
+    PostTransformGeometry pixelGeometry(const Event &event, const State &state) {
+        auto result = bound(event, state);
+        const auto count = result.report.at("primitives").get<uint64_t>();
+        const auto factor = result.report.at("vertices_per_primitive").get<uint32_t>();
+        const auto stride = result.report.at("stride").get<uint32_t>();
+        auto &identity = result.report["primitive_identity"];
+        identity = {{"schema", 1},
+                    {"status", "unavailable"},
+                    {"source", nullptr},
+                    {"geometry_sha256", sha256(result.bytes)},
+                    {"primitive_count", count},
+                    {"pipeline_order", "selected_stream_output_order"},
+                    {"original_gpu_schedule", false},
+                    {"instance", nullptr}};
+        const bool originalGs =
+            state.stages[3].shader && inspectShader(code(state.stages[3].shader)).at("stage") == "gs";
+        if (originalGs) {
+            const Json *field = nullptr;
+            for (const auto &attribute : result.report.at("attributes"))
+                if (attribute.at("system_value") == 7) {
+                    if (field || attribute.at("component_type") != 1 || attribute.at("component_count") != 1)
+                        throw std::runtime_error("Invalid captured GS primitive ID layout");
+                    field = &attribute;
+                }
+            if (!field) {
+                identity["reason"] = "original_geometry_shader_does_not_emit_primitive_id";
+                return result;
+            }
+            const auto offset = field->at("offset").get<uint32_t>();
+            if (offset > stride || stride - offset < 4)
+                throw std::runtime_error("Captured GS primitive ID exceeds its vertex");
+            for (uint64_t i = 0; i < count; ++i)
+                result.primitiveIds.push_back(
+                    Reader(Bytes(result.bytes).subspan(size_t(i * factor * stride + offset), 4))
+                        .read<uint32_t>());
+            identity["source"] = "original_gs_leading_vertex_output";
+        } else {
+            bool mutableInputs = !result.report.at("pre_raster_uav_isolation").at("stages").empty();
+            // Reflection-stripped shaders still retain executable UAV declarations.
+            for (uint32_t stage = 0; stage < 3; ++stage)
+                if (state.stages[stage].shader)
+                    for (const auto &[tag, bytes] : readDxbcParts(code(state.stages[stage].shader)))
+                        if (tag == 0x58454853 || tag == 0x52444853)
+                            for (const auto &row : readDxbcProgram(bytes).instructions)
+                                if ((row[0] & 2047) >= 156 && (row[0] & 2047) <= 158)
+                                    mutableInputs = true;
+            if (options.stream || mutableInputs) {
+                identity["reason"] = "separate_identity_pass_requires_one_stream_without_pre_raster_uavs";
+                return result;
+            }
+            uint32_t inputCount = factor;
+            std::string primitive = factor == 1 ? "point" : factor == 2 ? "line" : "triangle";
+            if (!state.stages[2].shader) {
+                if (state.topology == 10 || state.topology == 11) {
+                    primitive = "lineadj";
+                    inputCount = 4;
+                }
+                if (state.topology == 12 || state.topology == 13) {
+                    primitive = "triangleadj";
+                    inputCount = 6;
+                }
+            }
+            const bool domain = state.stages[2].shader != 0;
+            std::vector<uint8_t> helper;
+            Com<ID3D11DomainShader> domainShader;
+            if (domain) {
+                helper = primitiveIdentityDomainShader(code(state.stages[2].shader));
+                check(r.device_->CreateDomainShader(helper.data(), helper.size(), nullptr, &domainShader),
+                      "Create patch identity domain shader");
+            } else {
+                helper = compileHlsl("struct V{float4 p:SV_Position;};struct O{uint id:FLORA_PRIMITIVE_ID;};"
+                                     "[maxvertexcount(1)]void main(" +
+                                         primitive + " V v[" + std::to_string(inputCount) +
+                                         "],uint id:SV_PrimitiveID,inout PointStream<O> output){O "
+                                         "o;o.id=id;output.Append(o);}",
+                                     "gs_5_0", "main", "native-primitive-identity.hlsl")
+                             .bytecode;
+            }
+            const auto identityFactor = domain ? factor : 1u;
+            if (result.bytes.size() > options.maxBytes ||
+                count > (options.maxBytes - result.bytes.size()) / 4 / identityFactor)
+                throw std::runtime_error("Pixel geometry identity budget exceeded");
+            const auto savedLimit = options.maxBytes;
+            options.maxBytes -= result.bytes.size();
+            PostTransformGeometry ids;
+            try {
+                ids = capture(
+                    event, state, false, helper,
+                    [&] {
+                        if (domain)
+                            r.context_->DSSetShader(domainShader.Get(), nullptr, 0);
+                    },
+                    !domain);
+            } catch (...) {
+                options.maxBytes = savedLimit;
+                throw;
+            }
+            options.maxBytes = savedLimit;
+            if (ids.report.at("primitives") != count ||
+                ids.report.at("vertices_per_primitive") != identityFactor || ids.report.at("stride") != 4 ||
+                ids.bytes.size() != count * identityFactor * 4)
+                throw std::runtime_error("System primitive ID pass disagrees with captured geometry");
+            Reader values(ids.bytes);
+            while (values.remaining()) {
+                const auto id = values.read<uint32_t>();
+                for (uint32_t v = 1; v < identityFactor; ++v)
+                    if (values.read<uint32_t>() != id)
+                        throw std::runtime_error("Patch ID differs inside one primitive");
+                result.primitiveIds.push_back(id);
+            }
+            identity["source"] =
+                domain ? "native_domain_patch_id_stream_output" : "native_system_primitive_id_stream_output";
+            identity["helper_sha256"] = sha256(helper);
+            identity["pass"] = ids.report;
+        }
+        identity["status"] = "observed";
+        identity["ids_sha256"] = sha256(Bytes(reinterpret_cast<const uint8_t *>(result.primitiveIds.data()),
+                                              result.primitiveIds.size() * sizeof(uint32_t)));
+        return result;
+    }
+    PostTransformGeometry pixelGeometry(Id id) {
+        if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
+            throw std::runtime_error("Pixel geometry requires a completed before-event replay");
+        const auto event = r.frame_.event(id);
+        const auto state = r.prepareState(event);
+        PostTransformGeometry result;
+        r.inspectEventInputs(id, [&] {
+            bind(event, state);
+            result = pixelGeometry(event, state);
+        });
+        result.report["event"] = inspectionEvent(r.frame_, id);
+        return result;
+    }
     CheckpointInspection registers(Id id, const CheckpointInspectionOptions &request) {
         if (request.stage != "gs" && request.stage != "ds" && request.stage != "hs")
             throw std::runtime_error("Native checkpoint stage must be GS, DS or HS");
@@ -1359,6 +1551,47 @@ PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &eve
     options.stream = stream;
     options.maxBytes = maxBytes;
     return PostTransformCapture(replay, options).bound(event, state);
+}
+PostTransformGeometry captureBoundPixelGeometry(Replay &replay, const Event &event, const State &state,
+                                                uint32_t stream, uint64_t maxBytes) {
+    PostTransformOptions options;
+    options.stream = stream;
+    options.maxBytes = maxBytes;
+    return PostTransformCapture(replay, options).pixelGeometry(event, state);
+}
+PostTransformGeometry inspectPixelGeometry(Replay &replay, Id event, uint32_t stream, uint64_t maxBytes) {
+    PostTransformOptions options;
+    options.stream = stream;
+    options.maxBytes = maxBytes;
+    return PostTransformCapture(replay, options).pixelGeometry(event);
+}
+std::span<const uint32_t> validatedPixelPrimitiveIds(const PostTransformGeometry &geometry) {
+    const auto &meta = geometry.report;
+    if (!meta.contains("primitive_identity")) {
+        if (!geometry.primitiveIds.empty())
+            throw std::runtime_error("Primitive IDs lack capture provenance");
+        return {};
+    }
+    const auto &identity = meta.at("primitive_identity");
+    if (identity.at("schema") != 1 || identity.at("geometry_sha256") != sha256(geometry.bytes) ||
+        identity.at("primitive_count") != meta.at("primitives") ||
+        identity.at("pipeline_order") != "selected_stream_output_order" ||
+        identity.at("original_gpu_schedule") != false)
+        throw std::runtime_error("Pixel primitive identity provenance mismatch");
+    if (identity.at("status") == "unavailable") {
+        if (!geometry.primitiveIds.empty())
+            throw std::runtime_error("Unavailable primitive IDs contain values");
+        return {};
+    }
+    if (identity.at("status") != "observed" || meta.at("primitives") != geometry.primitiveIds.size() ||
+        (identity.at("source") != "native_system_primitive_id_stream_output" &&
+         identity.at("source") != "native_domain_patch_id_stream_output" &&
+         identity.at("source") != "original_gs_leading_vertex_output") ||
+        identity.at("ids_sha256") !=
+            sha256(Bytes(reinterpret_cast<const uint8_t *>(geometry.primitiveIds.data()),
+                         geometry.primitiveIds.size() * sizeof(uint32_t))))
+        throw std::runtime_error("Pixel primitive ID storage mismatch");
+    return geometry.primitiveIds;
 }
 Json postTransformTables(const PostTransformGeometry &geometry) {
     if (geometry.report.value("requested_stage", std::string{}) == "hs")

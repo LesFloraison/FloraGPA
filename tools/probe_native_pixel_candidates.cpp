@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
                 geometryOptions.stream = readStreamOutputDeclaration(frame, declaration).rasterizedStream;
         if (geometryOptions.stream == UINT32_MAX)
             throw std::runtime_error("Draw has no rasterized stream");
-        auto geometry = inspectPostTransform(replay, event, geometryOptions);
+        auto geometry = inspectPixelGeometry(replay, event, geometryOptions.stream, geometryOptions.maxBytes);
         NativePixelCandidateSelection selection;
         selection.x = uint32_t(number(3));
         selection.y = uint32_t(number(4));
@@ -72,6 +72,8 @@ int main(int argc, char **argv) {
         result.report["elapsed_ms"] = timer.elapsed();
         result.report["records_sha256"] = sha256(result.observations.storage);
         save("source-geometry.bin", geometry.bytes);
+        save("primitive-ids.bin", Bytes(reinterpret_cast<const uint8_t *>(geometry.primitiveIds.data()),
+                                        geometry.primitiveIds.size() * sizeof(uint32_t)));
         save("records.bin", result.observations.storage);
         const auto text = result.report.dump(2);
         save("report.json", Bytes(reinterpret_cast<const uint8_t *>(text.data()), text.size()));
