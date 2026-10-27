@@ -1,0 +1,2203 @@
+{
+  "schema": 1,
+  "stage": "P5",
+  "scope": "private_original_ps_geometry_range",
+  "implementation_commit": "0c6ef6af11567528a1d888da019dc17628203150",
+  "research_report": "DX11_NATIVE_PIXEL_GEOMETRY_REPLAY.md",
+  "status": "validated_increment",
+  "complete_pixel_history": false,
+  "public_ps_debugging": false,
+  "full_renderdoc_removal": false,
+  "owned_validation": {
+    "data_cases": 78,
+    "qt_passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "corruption_controls": 390,
+    "accepted_directory": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence"
+  },
+  "regression": {
+    "qt_passed": 453,
+    "failed": 0,
+    "skipped": 0,
+    "ctest_suites": 5,
+    "seconds": 145.74,
+    "accepted_new_suite_rerun_seconds": 13.76
+  },
+  "real_validation": [
+    {
+      "case": "pixel-geometry-replay-final-real-gf2-0",
+      "bytes": 14745600,
+      "changed_bytes": 0,
+      "passing_samples": 3686400,
+      "elapsed_ms": 236
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-gf2-4318",
+      "bytes": 14745600,
+      "changed_bytes": 0,
+      "passing_samples": 3686400,
+      "elapsed_ms": 378
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-gf2-32902",
+      "bytes": 14745600,
+      "changed_bytes": 0,
+      "passing_samples": 3686400,
+      "elapsed_ms": 345
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-bf1-0",
+      "bytes": 7749120,
+      "changed_bytes": 143966,
+      "passing_samples": 76145,
+      "elapsed_ms": 1796
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-bf1-4318",
+      "bytes": 7749120,
+      "changed_bytes": 101799,
+      "passing_samples": 75435,
+      "elapsed_ms": 1144
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-bf1-32902",
+      "bytes": 7749120,
+      "changed_bytes": 141515,
+      "passing_samples": 74859,
+      "elapsed_ms": 1537
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-hd-0",
+      "bytes": 262144,
+      "changed_bytes": 14661,
+      "passing_samples": 6240,
+      "elapsed_ms": 1478
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-hd-4318",
+      "bytes": 262144,
+      "changed_bytes": 14661,
+      "passing_samples": 6240,
+      "elapsed_ms": 1068
+    },
+    {
+      "case": "pixel-geometry-replay-final-real-hd-32902",
+      "bytes": 262144,
+      "changed_bytes": 14661,
+      "passing_samples": 24960,
+      "elapsed_ms": 1392
+    }
+  ],
+  "observations": [
+    "GF2 primary color bytes remain unchanged with nonzero occlusion.",
+    "Intel early-depth/discard and Helldivers occlusion differ from other adapters but match the unmodified original draw on the same device.",
+    "Raw earlier runs are retained; accepted evidence includes the strengthened original-prefix query checks."
+  ],
+  "limits": [
+    "Original fragment eligibility, full history, pre-raster side effects and original scheduling are not established.",
+    "Logical payload bounds exclude baseline replay, observer allocations and driver overhead.",
+    "Static probe imports are not a dynamic product-module audit."
+  ],
+  "raw_artifacts": [
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-build.txt",
+      "bytes": 1040,
+      "sha256": "e68a88f0b46b6f80681b5a9b246179a951ad8ba859fd8d4ae63a7361990aab52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-console.txt",
+      "bytes": 79323,
+      "sha256": "9fb62e196c58696b27f4f5a9c30c4cd0fc70c9bddbca39120443b205e4a7228c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "702ff435c8d7333c031e2c643e16d08272fc848ed3c9b157527c72b9cb6a943d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "0edc4d17370fa62026795122dcee6e08a881a0b225a21b06c1351abf5ee6d562"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "a55fb724e3c330d8f169f0803e67702c611b614159d086112521ff51b4482549"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-blend.json",
+      "bytes": 11267,
+      "sha256": "e56c59b31f13698b0d8c36ed5d22d93d3480b0ed7122333692d7020ee4cac4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11267,
+      "sha256": "e3fcf315db0808653791108d01c41bdb9718fbe1927e7fd8c5e8140be78f517f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-depth.json",
+      "bytes": 11267,
+      "sha256": "0b17ac0a9f88e7f3bf52a3cae4c3f587a54ad9fecca0d7fef5c1cd724319087b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11267,
+      "sha256": "6be7a1d897bd72e21d67073558ed32a5aa3347f36ae9fd1c2dfddf553d08383d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-discard.json",
+      "bytes": 11680,
+      "sha256": "207039af711855b25ca4b4018c41417cc7fe1a2fa63eaf0fd7b5c0148b525838"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11680,
+      "sha256": "62012ad4b974e64405db725ba87fda8c8c43e7595862bb7999daf679d5567e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-inputs.json",
+      "bytes": 14072,
+      "sha256": "93129c6d0df4714115d9ed4bbcdeb75ad955c775528a122e09f7f2396c57eb64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11267,
+      "sha256": "37d3fe21d8e6da9be94c1705cd5c34c7395d41b8f2f5d86624f8402dbd892cba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11267,
+      "sha256": "ab8954190dd063713127c064e30e695f0b2a61477de29b5b33ca94ad756ef1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11258,
+      "sha256": "3ef451f470d6c46cfe9c1fae77c993eab02f63fc907f01be74db04e8dbbc73fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-scissor.json",
+      "bytes": 11331,
+      "sha256": "4dc6f1293c4d5f7a112e942a411bbf725595f63cba6c1ebb8a4db9720e0bb276"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-stencil.json",
+      "bytes": 11267,
+      "sha256": "2b64315879000323d2f5f2457597de9bfd7499fba8eba59e7a7c981a9303dfcf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11267,
+      "sha256": "1d904c2194a088186b6b7577791e25a3125a498201c123c203e1ab4b36b61792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-blend.json",
+      "bytes": 11271,
+      "sha256": "faf21bfb372e8d27681b9ba1d28777d0b0fc7bc5238b6fe1d4951e58c0c9c265"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11271,
+      "sha256": "2885b402afa63347c8d89b08067ce4e029b0434aab326ae4024614762a4c4e48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-depth.json",
+      "bytes": 11271,
+      "sha256": "6a19625bc29899f4d418106df562e4f0c67eff0a46406ec462b3db4f3aba958c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11271,
+      "sha256": "bbe09c4666c722f33d9d8a6b6b65e6e7fc73520a94e447ef893c5ffabb6d961f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-discard.json",
+      "bytes": 11684,
+      "sha256": "87e9f88d8e6caeb1dc4a88a747d8d981990dc9881958cbe3ce2a3a5e1c1bf7b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11684,
+      "sha256": "22f4d75c08039d36157853159684913f412171c6ee62a47631041bac924b85ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14076,
+      "sha256": "6713b8cacb0bb73e8eae4fc7051c219615cf2df61f2127df5fc5094e5e6d1ac9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11271,
+      "sha256": "226c781f986bf24a301eed15c341064f3aa5cc45c9f73dd189eaaba17b337851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11271,
+      "sha256": "876cb3092807288ac0c1897b9af36385ea9a5ccbd844e86f134f160f5705f6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11262,
+      "sha256": "a99c10d749bdebc2806b2e382720c386fab47b7e531bd6122b557227c1cbfb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11335,
+      "sha256": "612eea13d97c9dfe2827337d83d25c00bb23281c5e686cc7b81ff250bf1bb80f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11271,
+      "sha256": "9fc889df80d9fe80441c85389709fcb1146a3d85e52a48614d3280b6decc66df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11271,
+      "sha256": "0c31fc8c0184966ce7d25d0db612d182ce8be8d6a676ad2d39ff7c7bd2027fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-blend.json",
+      "bytes": 11270,
+      "sha256": "c1f1e28e9d5e5bf03fb42419a20f7f912fdf59f437aa8c296a8b46c842a3e3e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11270,
+      "sha256": "b2280ea31152f4a4ace8367041fa6165279505158c9f78a081c502289cd99c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-depth.json",
+      "bytes": 11270,
+      "sha256": "c8729ff6e17e551e1478b18d9767b246a11d7cf5961fab92df848f2608d70ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11270,
+      "sha256": "77a28df58a7608f71ee56169f1378e0ac2c145c79bb8ef23cb946453da361911"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-discard.json",
+      "bytes": 11683,
+      "sha256": "54cdc2e65701953ad44298dcab19309c56a50f8c057c7397d5d16d7c004754e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11683,
+      "sha256": "a731bcf154797ada68e6d4dac346acad2bb2afb6f74496f28546188ef02bc8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14075,
+      "sha256": "e72ea42a0e613be5f8f545e45f57d52443d3467d00eb31e13e6f15a09887c1d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11270,
+      "sha256": "f85cfd56afd8b3f1f2c6e780709377b9da1dbcba5c40c27f78f5121a0e6ef682"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11270,
+      "sha256": "27ab7679ea9e8f5c2ef15d85be5f69e589bc7a391d4eebf4c3f84b7981eb49e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11261,
+      "sha256": "1e6924e0c80aa00cfc31ed90cf4437eaa13933f2f82c42ae1704e25c5ac76197"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11334,
+      "sha256": "5066ffae7b29b011467cde69ecb8d64dc79fe962c0f851525a0281b761d04b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11270,
+      "sha256": "48e23dca431baada3986191bae3452e83b28e3f4ced66b56374ace7f7466305f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11270,
+      "sha256": "aaf3848b56338c6916e5578d51bc7f1d3d4b2217dfc5e2cd33b560e2d5354e77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-accepted-tests.txt",
+      "bytes": 5666,
+      "sha256": "624b9fa3418d1c8983e3add2a2ea14bf6e6faf65659061d73e7bb8c77d301acf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-complete-validation.json",
+      "bytes": 1926,
+      "sha256": "2f4977b6f18ec3070391eb3abc25ee0690ce77d41b17e0159685524bdeefc19d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-build.txt",
+      "bytes": 3932,
+      "sha256": "17c5abcf27bf2e0ba64ab5ef53b44158781331b5e524a3af1776283476e19f8f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-console.txt",
+      "bytes": 70587,
+      "sha256": "ebb0543c0171098d8f1048250926a3a3aeb6153b36386c7f495b46ee0f722259"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-0-append.json",
+      "bytes": 10685,
+      "sha256": "ec886e9531afc53a2a90a2cd0bd721632bd6ca7b71366dbfe9a25792ca784a0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-0-classes.json",
+      "bytes": 10685,
+      "sha256": "711e7edce86ea26dd874fb90f09b3b6f8a84ec5477c7763ac349e152d3db063c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-0-counter.json",
+      "bytes": 10685,
+      "sha256": "b4787f39b6c91c719af0a79eb3a161c8de1242e7ea6ef78c6270abbcfa91f65e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10685,
+      "sha256": "47dc7be3d3ab8010a767e4495d6f9aaccacc8b858c9893e7f5d00767bc199360"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6484,
+      "sha256": "6cb834cbcced1eaa2d73847f1a9994eb42b23cb14d52e8c766e29a1af8db4038"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-32902-append.json",
+      "bytes": 10689,
+      "sha256": "ff71ebef3a5a0fa611cec264a0bb3d4fb4dd65ed75699e1cc4200bb289af0cde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-32902-classes.json",
+      "bytes": 10689,
+      "sha256": "e288761034c8b1e48cdc0cec5f46f081da7b83708bf84747d464fd6be96268af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-32902-counter.json",
+      "bytes": 10689,
+      "sha256": "f70f3150ec8bd5a4cb0927ee06a71952e19086f9bb0ddd57b7b607504ce2aee4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10689,
+      "sha256": "64122a94bcb898c2b6e707a795df71bc6c8ea49980a912f1ae898af66988bc25"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6488,
+      "sha256": "90962c8db92dea96f900d1fb3302e1268b259f233ff30db683db30d079db4046"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-4318-append.json",
+      "bytes": 10688,
+      "sha256": "6ec425a5ce50eb4756018929c27e3b131063c21e226e3024d06766cd5ab611e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-4318-classes.json",
+      "bytes": 10688,
+      "sha256": "ba1d1f34bc1c34be9c245b8d74e2ae9364ca97441f93f8423be2a80b9634ac83"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-4318-counter.json",
+      "bytes": 10688,
+      "sha256": "3d98419bcedcc5f23bc69822da1aaf4c7f19b890c07573f7d9af83cac9bd735c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10688,
+      "sha256": "770e774cabd034814325cb86e0de13fb602f2aec99aea1ea29cf262911e4a2ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6487,
+      "sha256": "75058949f0020c6037687b732e5770709cdbc5cc1ffbcdb953029395bd86a9a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-blend.json",
+      "bytes": 11204,
+      "sha256": "913bccf05739d6139ab25821bf0378439551632479e8933d69eef533df725d54"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11204,
+      "sha256": "77f29d9737d19986abce04feba979eef7d6fd3b4a05ab2e8ea87fa706d9e0f1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-depth.json",
+      "bytes": 11204,
+      "sha256": "7fb805e5ebaa386819b5d899233fa96da262a1f96ef117e12b4ef19be8573083"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11204,
+      "sha256": "cbebd3b70adb8bb7aefbd3416537b677801d06e1405199df7e4c4b1cdfde5ce7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-discard.json",
+      "bytes": 11617,
+      "sha256": "010030d5ecb0f7ceeb90a93e58ad89d0257eb0f1e610fd613acd9ca25477215a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11617,
+      "sha256": "a4c5901d38bf5e6431c64150d35a6f6d9be24862a93fee1f3d41e89101631980"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-inputs.json",
+      "bytes": 14009,
+      "sha256": "ae1a2a77b8c0be12c939019db3f0ce8b7fba481e70472b648baadf025c2287ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11204,
+      "sha256": "48fc1d4511664d890fb6d927719b6cf7fda3433ce6ac9de778359a19c663129e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11204,
+      "sha256": "a80c752a3c55c9a2decc49c5d15cb35c1ae06f63acb570165a7a9b43fd5df624"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11195,
+      "sha256": "b2d442599ca6f1ec4a388a7e84e57b6371cf392a07edf8c86867e2c6dd1ea1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-scissor.json",
+      "bytes": 11268,
+      "sha256": "e8b4ad9f7a19da6eb58779821b7eeacaaacbf6baf01487daabbfdd5ae2a2cd5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-stencil.json",
+      "bytes": 11204,
+      "sha256": "7ffed5a8417f82b3b9c6764380670383e5d3d289fc09694a2c359cb11e502e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11204,
+      "sha256": "c35f4358142cde81b84c81c3731b953227275d8ec977a5ee2dcd9ed78b9efeba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-blend.json",
+      "bytes": 11208,
+      "sha256": "5862ee4f01e141100fd5b01b2412809fe735cb8da059eb7e51a287d6d68a7712"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11208,
+      "sha256": "21b76e9d5b9301ae1ac34fa71940417a2720e5f60fb595fc3cf5f32e4d1a7172"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-depth.json",
+      "bytes": 11208,
+      "sha256": "6b0d32736f7435ab04b02ea457fdba783eac305d0561df60c30ef7b8ad4d6892"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11208,
+      "sha256": "394bc2c3a770a1cfac7631388f19981b48ec7e3a204124d0aa8c8e06537d1a09"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-discard.json",
+      "bytes": 11621,
+      "sha256": "e6b4b34508093e6dc9032cc1e3d3f085fda6420f788aa4678712fc9e0c405d71"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11621,
+      "sha256": "416d7a13768a598a5e320e04a7eff827c39053c86f8b5eb5cbd85ecfd040cd5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14013,
+      "sha256": "a7cdc0420e05b19ae25cb91ee0beba0888bece94f3278d74f1259cb077fc1cd4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11208,
+      "sha256": "0372efc278078c45511b9a75d18f681b91a5fc6d6ee587504dc4b8aa9f805319"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11208,
+      "sha256": "a0105e8b9dfc1bf6939b21f4f06f4396ce788ce6c786e8c1be8b1ad0dcbaf3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11199,
+      "sha256": "4db50e52b23b2a5347eab2d51f40a0b3dea14ba88ed00a1cebbf08e8734564da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11272,
+      "sha256": "1169407358e1a5456c9c5020329d29fc4e12b2687a03fcc3c89fa5634abf375c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11208,
+      "sha256": "aa5dbc3c55abdbd96bd146a70e7647d9508f1c27a6491cb067daa24613d193e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11208,
+      "sha256": "54b353903422c6666d5320bd7611a447e2e2da21ee792444dd898a22abd2b003"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-blend.json",
+      "bytes": 11207,
+      "sha256": "f7811419595c64124a2502cc40d194060d70dd5b8359ba4ca397775cfda511a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11207,
+      "sha256": "b71a973d03068543616fbce589480db80cd2deb8a6543e2ad0b96b564f6dea6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-depth.json",
+      "bytes": 11207,
+      "sha256": "c340d5631a585b3a1f7839cd788e5a23df5a2fe9789fa905bbeb270f0ed7a373"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11207,
+      "sha256": "7bc691e73d5116aae9e9c54ebfea6778047d827aa311a32baaf8523b4e50684c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-discard.json",
+      "bytes": 11620,
+      "sha256": "180d2d1cb035f087e6202f2c9d05b64ca488ae465c0228cebd73c95ddf3506c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11620,
+      "sha256": "bf41730693abc099cbaeca98b9fad93da9143620462e7a08071e7d64f43fecd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14012,
+      "sha256": "91181bc1a02b55393afdc5df495fcee7c46ba8c1c78d4e894872b787f097a4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11207,
+      "sha256": "aed0ab313cc154d03b65f23778758c9847f22861e30ba18b135a876aebe18be7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11207,
+      "sha256": "a30f98749dcec334e025a1eb064bcbee2e55e441c4e584275f25ed1f98164e32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11198,
+      "sha256": "2eee9e1e325d0de696a750de1395c6029c91bc3184fb3698bdfa555497603efc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11271,
+      "sha256": "c383213ea43f94dbdc16008977def69d0e20a09cb70e29c5b4d7f615ca38e792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11207,
+      "sha256": "795bc43268851f0b9019999a2ada4e928888864e4c93fdacf5120bc7ab038614"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11207,
+      "sha256": "9935f48bf86c080066127363bbbbe23c40de20ceea0b075eb52adecad82964fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/msaa-0.json",
+      "bytes": 10680,
+      "sha256": "4fb9029f9f7dcc6418e64f6f58abc48c91c6819321f9a6bb28a19d84be9c7f82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/msaa-32902.json",
+      "bytes": 10684,
+      "sha256": "77603257002203cc10b148b80288222c88f26c99ffa6189beb8adec2bfc3416c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/msaa-4318.json",
+      "bytes": 10683,
+      "sha256": "b9c929b99f9e51170721dba64de1540737acabbc0908b4622f229c701e37e5f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/recovery-0.json",
+      "bytes": 10629,
+      "sha256": "6092a3c1c01e769776727e2ade63285319a00f3979a21ddab6313c67534dadc6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/recovery-32902.json",
+      "bytes": 10633,
+      "sha256": "c7cb0df246a83d67964bb4ccec0f8d698f18cd4e94761c0db14ef339e985cd0d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/recovery-4318.json",
+      "bytes": 10632,
+      "sha256": "58f025e05db7e287c71f37e0d0b1ce3f2a93362897bb20eb7c37ad769e0f016e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-0-0.json",
+      "bytes": 5691,
+      "sha256": "57ab01949fd6b847991044c8de7331b4e6b98da64f20f874421a5297ed3c0656"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-0-1.json",
+      "bytes": 5691,
+      "sha256": "25cf252f9bc9a41fb814ec7fb8750f6fd033df41ba8ec545678338e121f830f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-32902-0.json",
+      "bytes": 5695,
+      "sha256": "a73be9f6553aecc8e1c2a30b1822a7d576d93c50b0db170489a74d09cec6f568"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-32902-1.json",
+      "bytes": 5695,
+      "sha256": "68c68a39bc75bebaef20caf67c19c71e3366dab3f63c03f3ad3c15919b4be603"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-4318-0.json",
+      "bytes": 5694,
+      "sha256": "ac86a6bf36686547c97fec232288be9d463a625b28c6af59111f6d99466340b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-evidence/streamOutput-4318-1.json",
+      "bytes": 5694,
+      "sha256": "06d250414a83c49e7bfa0c2d653ed6d1294a4893d8a6f403d3b14ce989a2fc40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-expanded-tests.txt",
+      "bytes": 4876,
+      "sha256": "451b03490333623860147f5b6d30feaccd052f5d856f7fd309d854ed1fa1aa58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-build.txt",
+      "bytes": 10641,
+      "sha256": "e10c391e12ee19eb58d34fa26fcc490641ae5216aa91c56a24af4fcc70732f46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-ctest.txt",
+      "bytes": 756,
+      "sha256": "d444346b9463e862d5e5595ab21b6eb2a4ce58cde639378ed0e98174f765aa08"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-0-append.json",
+      "bytes": 10692,
+      "sha256": "85f7f57ca8f786dc69f27d1c99780390d28774feaa9e9ac223c26895854792e9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-0-classes.json",
+      "bytes": 10692,
+      "sha256": "85f1c27a151d449052b2af675d4ec4ebde509df59848e2ea9d3989b225824662"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-0-counter.json",
+      "bytes": 10692,
+      "sha256": "a96cac874ba051be6cdde7f44486740c917f96c9bd6df9d43c2f98ad2e688769"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-0-predicate_pass.json",
+      "bytes": 10692,
+      "sha256": "c77ec3d5d422816ff15129f41015a31c85646fbc030bfaf6f0c3b2fe453e7ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-0-predicate_skip.json",
+      "bytes": 6491,
+      "sha256": "a7f20451ef2ff37d4dba2529d486e401905a5715deb3f37ca4b7ff86e617e6ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-32902-append.json",
+      "bytes": 10696,
+      "sha256": "b5221300a91ddbade41920254e822cc2d51f7801b4b4db33796d765bb27e5cd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-32902-classes.json",
+      "bytes": 10696,
+      "sha256": "b2cd5f383291bd3bd13b64657ddf4a64da3e32d7014b8006638fdbd50a9b1aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-32902-counter.json",
+      "bytes": 10696,
+      "sha256": "68138714d2290485c3a2805989ea0bc1a2c061df134398960280b9ba9c947a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-32902-predicate_pass.json",
+      "bytes": 10696,
+      "sha256": "2d4be97711dbc03571d299955457c24e7af6ab5d67f2c729141fe57a4238e513"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-32902-predicate_skip.json",
+      "bytes": 6495,
+      "sha256": "1ed8b89eb8fb21b64d48d16183ca586fdd7ecfa9904d60bdea9572b9ff582033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-4318-append.json",
+      "bytes": 10695,
+      "sha256": "4250c11c71cbbdb7fb6437ea305f6024bf2a1d83216199acdb5949e1d12c20c5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-4318-classes.json",
+      "bytes": 10695,
+      "sha256": "69bb6e05d770a8cd0f84282188355991067b0a52f17598b2a55ff3e7e87697a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-4318-counter.json",
+      "bytes": 10695,
+      "sha256": "413ec14e13f6e5b182b9b4d9dd3cfac22073653693aa6b57462e17a9e4c14fd3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-4318-predicate_pass.json",
+      "bytes": 10695,
+      "sha256": "bc0093a1bf789c50cf356110b9b9207c0da55b2f2ded1be64a59772fcc579cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/bindings-4318-predicate_skip.json",
+      "bytes": 6494,
+      "sha256": "0b3c457e906d2ad290d10181790b5741167fed9d025d98b7e612a676b9f75574"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-blend.json",
+      "bytes": 11211,
+      "sha256": "53d66b29ae9fe6eeddc70e89f2a098db7d365bc04daa046058c55f2033cc323d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11211,
+      "sha256": "41f51809ba1548e3f0b570a6f085bd28e5326dba0ebc109f224ee27f374a8789"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-depth.json",
+      "bytes": 11211,
+      "sha256": "605d9afc3f15cd81e4f968aecb5aa7e7edc18aa8460993ac469b38022715a6bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11211,
+      "sha256": "a729ef310805f7571ba4e5ea024103bdd416125645e337d6ace8de46374820c0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-discard.json",
+      "bytes": 11624,
+      "sha256": "0d9419e258b42f26b739c42ce801f95eb719d67bda208781fe56f2e3824c475c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11624,
+      "sha256": "16cf4914fcbcbce76b37055ba336625ea6660d508251c4da9914b7b9523c903d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-inputs.json",
+      "bytes": 14016,
+      "sha256": "88dfb37393379ce97633a4f60c00e037d80ec164813af30b157078cad25b956b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11211,
+      "sha256": "253502aa26df09691a9febef78030fe82ae4dfcb1f848a76a1304a82023b2077"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11211,
+      "sha256": "c6687dc5e59140054ccd4ff843d575fbdc7351b1d12c4bfa58c18ac41f96c9a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11202,
+      "sha256": "446379b8a1505c49c32ae9e9b6b575da7fe8f3c734759a003e4b8348a47fad40"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-scissor.json",
+      "bytes": 11275,
+      "sha256": "4a9c42649925ad2179c081541e6f4eee1e6a903b424b238729aa739bd09dfc73"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-stencil.json",
+      "bytes": 11211,
+      "sha256": "9016444cfabe7cc94c3493523a51522159c4033307535b1c86a44cd152c032e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11211,
+      "sha256": "1785ae66fba064c1aaecd8c7e9193d6f2941a2928c1df4bf376f1648748099b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-blend.json",
+      "bytes": 11215,
+      "sha256": "a528551a23088a403bdf4208d061bd2e2ef235169882c95ee03a0f24eb1cac49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11215,
+      "sha256": "085fe3b4a01508a33d75dda41a85ef0148fdf99899e1af303e102794d3ba4364"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-depth.json",
+      "bytes": 11215,
+      "sha256": "5ef9a3eeb6a34c10692d5b4b593d11a969735b5ca7a8cf1e06a8ec1454a1588a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11215,
+      "sha256": "8ade12f0a6a3d02439f751551fb7fae5cb7a411e544051f25877c5e97f67735e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-discard.json",
+      "bytes": 11628,
+      "sha256": "4ed0a16a248910a1a41b8c4120fbcc717c32c622d23f3c6ee2841de0fb4fb437"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11628,
+      "sha256": "514e239769be0d004342b1c3d662f54c3477e2c206b48c093e5f385b77c84f5d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14020,
+      "sha256": "6ffb6242ae0b59ab2b91e2c54b85a857d02a436580eb42cde7b64bfaa062e3cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11215,
+      "sha256": "2b71add960a39b3c570aa178a6828d97319854db6bbb517c69041892fa53e13c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11215,
+      "sha256": "8c97fb66afa5c43fbaa37fbe20cc96ea86b3d7cf2f971b9f0c288a27195dcab2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11206,
+      "sha256": "197e3dedff3f8240b79c287f10dee2b200071368a9934ace12cec4da92210751"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11279,
+      "sha256": "80f96d24ca20ef106c317c0bbca5419f4f6d02486cf3cbfc2515f16f04da134a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11215,
+      "sha256": "7f2073b458162e419e0e8748aada224a59194e6c212332aee5d817e31ef98459"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11215,
+      "sha256": "f4758985c6174d56b6bfb3657bcaf0a704a45e78f80450956fdf52e2a0b3b0d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-blend.json",
+      "bytes": 11214,
+      "sha256": "76b8c6e7f7fa3b2827117e6b1977ff3c89849c7f0bf524e497418ebd6d256a2b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11214,
+      "sha256": "13df24aff63ec30480069ab42d7280cc1c133a45479a215c917270d559de7cab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-depth.json",
+      "bytes": 11214,
+      "sha256": "51b0e1eac3e834d8104070d868325b2adc2b73def9dfe1e0940780e202133fce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11214,
+      "sha256": "9988e5eb03b5cdf6453d604e839eb2768022c1a8ec7cadcdba73775b94d33af5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-discard.json",
+      "bytes": 11627,
+      "sha256": "9c627ea8dd27a00350cdf67e215206a676b89b1659a3fef2722c791199a98447"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11627,
+      "sha256": "98957dc7aa2f03783dec89dd96a365c6d2a49f3a871784caa8b7e67d7393e418"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14019,
+      "sha256": "040c44f24eeafd3d0632537802f0bb1c1fa96ba2b0b028c53889febbfbc03317"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11214,
+      "sha256": "5ebeaab35f8f30b579efa99e88d6f437622af2d63dd4eb0e1df81a3cf955e159"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11214,
+      "sha256": "bed993c172eb405c4757c59ccb77c33ac5225f92a662580ae448dabe8433a21a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11205,
+      "sha256": "d3ab40ce548c146cb3664cf9df3cb873ed182564b91773c7953bd52bbaddf5a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11278,
+      "sha256": "068989e620e62a8d96e5f4b6806af9f06bf7280abbabc1069f4735fc4563e74f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11214,
+      "sha256": "dd3cf95a54621dc93375bfbced389380829b1dc36751862cacc68a4cbde767f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11214,
+      "sha256": "49acc81acc5f0c92d9ee9ffe579b208565e31123ceda144a3781b15685d26ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/msaa-0.json",
+      "bytes": 10687,
+      "sha256": "b2b92b674785f43e6cc792d832496c64e7e265ce5c16fa96456eda6c39c54693"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/msaa-32902.json",
+      "bytes": 10691,
+      "sha256": "be4e15ed16086223b08714d41ef272378f7d2d004b6626aec0e638318a57f07c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/msaa-4318.json",
+      "bytes": 10690,
+      "sha256": "e0edd65c21c980799f7c245484474e7f959127a99bf6bc0b4088545d06851359"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/recovery-0.json",
+      "bytes": 10636,
+      "sha256": "edd3c4c4a500f968db61babc01fb089fef7d74a628a289b305b975ed404ed366"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/recovery-32902.json",
+      "bytes": 10640,
+      "sha256": "b25c3dd185afdf093e8513835e85db164cfa4794235086143f975c1a3ae9a054"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/recovery-4318.json",
+      "bytes": 10639,
+      "sha256": "761bb4f23ec142447f020471f20c3eac40de0b6a0f3ce987e8f54a643cedb80c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-0-disabled.json",
+      "bytes": 6584,
+      "sha256": "1da21bf21c440e38e94f7e3fea58f8f746c7f3badcaf8886b057129db27dc0a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-0-empty.json",
+      "bytes": 6582,
+      "sha256": "6539cbc76e7f51cf7396d25d2fa3dddbea6cfb0c7c3ca2ee64ca61c3c867584a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-0-null_ps.json",
+      "bytes": 10657,
+      "sha256": "1aa9e82a08777a7e0381fd993a73f87e93ecbd14c187ce52e7ebd5aa55b1d5df"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-0-subset.json",
+      "bytes": 11198,
+      "sha256": "738ba3dde296c655626d4f5f6127ad88db126ebc2ea5ce43f10146b3bd59f11a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-32902-disabled.json",
+      "bytes": 6588,
+      "sha256": "fed1508659e6d735ac5a907bcdedd63badbd6e7fbaada6f88b57aae66782390a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-32902-empty.json",
+      "bytes": 6586,
+      "sha256": "683f9f54c525513f05bd68b734f2c078fdcc3a5ce02be0548705462edf327532"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-32902-null_ps.json",
+      "bytes": 10661,
+      "sha256": "67513e81f16be8cd0ff6cd45013087f3cb3e59843c4a6f83edfaf939663ac0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-32902-subset.json",
+      "bytes": 11202,
+      "sha256": "13c0d868d1820b840d65deaf6f3fcc1db53d985d42df18f2ce1af3c30a1514f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-4318-disabled.json",
+      "bytes": 6587,
+      "sha256": "5d27c00a9b4773a3c50e6995c3a1e07508553ca811d9e24fa8db6ab8483e65b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-4318-empty.json",
+      "bytes": 6585,
+      "sha256": "0eef0d7387506385a978a9641ad9b20514d96c3e26d1b51bbbb8f97b41bae3a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-4318-null_ps.json",
+      "bytes": 10660,
+      "sha256": "627a82a01b5190213029e370006e583c3faa9861a6d1871162ea4c9fbeee4342"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/selections-4318-subset.json",
+      "bytes": 11201,
+      "sha256": "e2cb512d57d8560f67955c2038df2315ef2b09fe473241f82a9b765188d6611b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-0-0.json",
+      "bytes": 5698,
+      "sha256": "a61d749ecbb894d3407308fb64e7365371e2ab04247e0553c88425efa5e0e283"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-0-1.json",
+      "bytes": 5698,
+      "sha256": "dea383bb2cf511d9cc7334eb27dfa5a90bf219e3b6e27374112c57a85fd912bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-32902-0.json",
+      "bytes": 5702,
+      "sha256": "d081c27887406cc085533b1cca593aadacc02cf8f384f0582d340136309f9d81"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-32902-1.json",
+      "bytes": 5702,
+      "sha256": "2b2f0d7e311096f5aa7da4effa32220f97e3ee895a064a7805a91cbd26b218c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-4318-0.json",
+      "bytes": 5701,
+      "sha256": "8fe93496ebc0b0b82ac0ae71fd3ee97be67a863c39b5beb1c6e5acee454f24f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-evidence/streamOutput-4318-1.json",
+      "bytes": 5701,
+      "sha256": "ad8e4f279edd7723d8c8da8ffdeabda938adc326796c01c68ad9d9c1dabe3026"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0/before.bin",
+      "bytes": 7749120,
+      "sha256": "2a2851ceff32ab6123fcb3806f20f3d15570af88e408d5b8d4fbe8b9fea6e5fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0/private.bin",
+      "bytes": 7749120,
+      "sha256": "bb3d6ec7fce636401026519faa490f32b0c1fb339bb676977ff63b807770bee1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0/reference.bin",
+      "bytes": 7749120,
+      "sha256": "bb3d6ec7fce636401026519faa490f32b0c1fb339bb676977ff63b807770bee1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0/report.json",
+      "bytes": 16379,
+      "sha256": "eb7de561f254867e2cc85b19887c023dd636a1873d1eabcfb5a481fcc5bf6d44"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0/restored.bin",
+      "bytes": 7749120,
+      "sha256": "2a2851ceff32ab6123fcb3806f20f3d15570af88e408d5b8d4fbe8b9fea6e5fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-0.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902/before.bin",
+      "bytes": 7749120,
+      "sha256": "5b5e4c07ade9484fc51f67638425fb81555a032885672c199b0942bab3f93ffd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902/private.bin",
+      "bytes": 7749120,
+      "sha256": "4abf71e0847e9169b09d66c720e96ce820a1ae341287431d8edfd704719bfea8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902/reference.bin",
+      "bytes": 7749120,
+      "sha256": "4abf71e0847e9169b09d66c720e96ce820a1ae341287431d8edfd704719bfea8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902/report.json",
+      "bytes": 16383,
+      "sha256": "466b54a80d8dc4565af7329d85877346948f138d79d7387d5788b7a0f4fe6360"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902/restored.bin",
+      "bytes": 7749120,
+      "sha256": "5b5e4c07ade9484fc51f67638425fb81555a032885672c199b0942bab3f93ffd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-32902.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318/before.bin",
+      "bytes": 7749120,
+      "sha256": "a5d1c6a826af15a0934c26cbcb56e38a137467d6a62c187de5632cbe0d22fe5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318/private.bin",
+      "bytes": 7749120,
+      "sha256": "e32618a94247b08f624068d8e2095205d408545b1d623ce709a6bfe889c8bdc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318/reference.bin",
+      "bytes": 7749120,
+      "sha256": "e32618a94247b08f624068d8e2095205d408545b1d623ce709a6bfe889c8bdc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318/report.json",
+      "bytes": 16382,
+      "sha256": "3bda11d21cd5185edd60125b9a8f29e35dccb86f005974dbc358d952cd4b12e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318/restored.bin",
+      "bytes": 7749120,
+      "sha256": "a5d1c6a826af15a0934c26cbcb56e38a137467d6a62c187de5632cbe0d22fe5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-bf1-4318.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0/report.json",
+      "bytes": 14674,
+      "sha256": "20cfc77358189d6ec668d58cf440c9c7ed0187e61e937197d9ecc3fe3bf6ea95"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-0.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902/report.json",
+      "bytes": 14678,
+      "sha256": "05a395786b4b5b91b493bd688fa829d2a6e24fdac52d3e3ebdd65db7c5ebf0f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-32902.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318/report.json",
+      "bytes": 14677,
+      "sha256": "76e94862501767464ef09442aca67b32953d97d2ba7ab3e77c9e9c87a5b2dd70"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-gf2-4318.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0/private.bin",
+      "bytes": 262144,
+      "sha256": "d85b9fc02bc3c694ebf44ec01bbc26845530eaf73dddc5bdfd858be339d4bbe7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0/reference.bin",
+      "bytes": 262144,
+      "sha256": "d85b9fc02bc3c694ebf44ec01bbc26845530eaf73dddc5bdfd858be339d4bbe7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0/report.json",
+      "bytes": 15193,
+      "sha256": "586653e509a8f44207d33145d28d4d9d30d56790c46b125d3708b12ce4f4052b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-0.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902/private.bin",
+      "bytes": 262144,
+      "sha256": "e00cbd87e101e1df44fb5ed0038577024d58d8752ca1eda1fac96bc074ea0129"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902/reference.bin",
+      "bytes": 262144,
+      "sha256": "e00cbd87e101e1df44fb5ed0038577024d58d8752ca1eda1fac96bc074ea0129"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902/report.json",
+      "bytes": 15199,
+      "sha256": "336a66c2ceb9d62231c94f7a750a0d36544f4053673de3d149a7c620effc1fa5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-32902.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318/private.bin",
+      "bytes": 262144,
+      "sha256": "a903f85f2d27251d720a2956e44d2d662d9c65be32f99500a19e3a3bc826ae75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318/reference.bin",
+      "bytes": 262144,
+      "sha256": "a903f85f2d27251d720a2956e44d2d662d9c65be32f99500a19e3a3bc826ae75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318/report.json",
+      "bytes": 15196,
+      "sha256": "67e4a58d0730d32f8c1c22bc9e46944cb872ea97b9d9bd123002bd28127d01a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-hd-4318.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-real-runs.json",
+      "bytes": 4231,
+      "sha256": "c5be20064d771bfd064f66acd614a59ac93b3175ae7058dc668c477e38ed8ecd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-final-tests.txt",
+      "bytes": 5666,
+      "sha256": "3b480805a5ca606147abe5f5d572ec67029ca3be33c17b23f95491d530ff06bb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-blend.json",
+      "bytes": 11204,
+      "sha256": "913bccf05739d6139ab25821bf0378439551632479e8933d69eef533df725d54"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-color_mask.json",
+      "bytes": 11204,
+      "sha256": "77f29d9737d19986abce04feba979eef7d6fd3b4a05ab2e8ea87fa706d9e0f1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-depth.json",
+      "bytes": 11204,
+      "sha256": "7fb805e5ebaa386819b5d899233fa96da262a1f96ef117e12b4ef19be8573083"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-depth_reject.json",
+      "bytes": 11204,
+      "sha256": "cbebd3b70adb8bb7aefbd3416537b677801d06e1405199df7e4c4b1cdfde5ce7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-discard.json",
+      "bytes": 11617,
+      "sha256": "010030d5ecb0f7ceeb90a93e58ad89d0257eb0f1e610fd613acd9ca25477215a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-early_discard.json",
+      "bytes": 11617,
+      "sha256": "a4c5901d38bf5e6431c64150d35a6f6d9be24862a93fee1f3d41e89101631980"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-inputs.json",
+      "bytes": 14009,
+      "sha256": "ae1a2a77b8c0be12c939019db3f0ce8b7fba481e70472b648baadf025c2287ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-ordinary.json",
+      "bytes": 11204,
+      "sha256": "48fc1d4511664d890fb6d927719b6cf7fda3433ce6ac9de778359a19c663129e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-partial_position.json",
+      "bytes": 11204,
+      "sha256": "a80c752a3c55c9a2decc49c5d15cb35c1ae06f63acb570165a7a9b43fd5df624"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-sample_mask.json",
+      "bytes": 11195,
+      "sha256": "b2d442599ca6f1ec4a388a7e84e57b6371cf392a07edf8c86867e2c6dd1ea1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-scissor.json",
+      "bytes": 11268,
+      "sha256": "e8b4ad9f7a19da6eb58779821b7eeacaaacbf6baf01487daabbfdd5ae2a2cd5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-stencil.json",
+      "bytes": 11204,
+      "sha256": "7ffed5a8417f82b3b9c6764380670383e5d3d289fc09694a2c359cb11e502e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-0-stencil_reject.json",
+      "bytes": 11204,
+      "sha256": "c35f4358142cde81b84c81c3731b953227275d8ec977a5ee2dcd9ed78b9efeba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-blend.json",
+      "bytes": 11208,
+      "sha256": "5862ee4f01e141100fd5b01b2412809fe735cb8da059eb7e51a287d6d68a7712"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-color_mask.json",
+      "bytes": 11208,
+      "sha256": "21b76e9d5b9301ae1ac34fa71940417a2720e5f60fb595fc3cf5f32e4d1a7172"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-depth.json",
+      "bytes": 11208,
+      "sha256": "6b0d32736f7435ab04b02ea457fdba783eac305d0561df60c30ef7b8ad4d6892"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-depth_reject.json",
+      "bytes": 11208,
+      "sha256": "394bc2c3a770a1cfac7631388f19981b48ec7e3a204124d0aa8c8e06537d1a09"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-discard.json",
+      "bytes": 11621,
+      "sha256": "e6b4b34508093e6dc9032cc1e3d3f085fda6420f788aa4678712fc9e0c405d71"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-early_discard.json",
+      "bytes": 11621,
+      "sha256": "416d7a13768a598a5e320e04a7eff827c39053c86f8b5eb5cbd85ecfd040cd5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-inputs.json",
+      "bytes": 14013,
+      "sha256": "a7cdc0420e05b19ae25cb91ee0beba0888bece94f3278d74f1259cb077fc1cd4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-ordinary.json",
+      "bytes": 11208,
+      "sha256": "0372efc278078c45511b9a75d18f681b91a5fc6d6ee587504dc4b8aa9f805319"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-partial_position.json",
+      "bytes": 11208,
+      "sha256": "a0105e8b9dfc1bf6939b21f4f06f4396ce788ce6c786e8c1be8b1ad0dcbaf3e6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-sample_mask.json",
+      "bytes": 11199,
+      "sha256": "4db50e52b23b2a5347eab2d51f40a0b3dea14ba88ed00a1cebbf08e8734564da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-scissor.json",
+      "bytes": 11272,
+      "sha256": "1169407358e1a5456c9c5020329d29fc4e12b2687a03fcc3c89fa5634abf375c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-stencil.json",
+      "bytes": 11208,
+      "sha256": "aa5dbc3c55abdbd96bd146a70e7647d9508f1c27a6491cb067daa24613d193e4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-32902-stencil_reject.json",
+      "bytes": 11208,
+      "sha256": "54b353903422c6666d5320bd7611a447e2e2da21ee792444dd898a22abd2b003"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-blend.json",
+      "bytes": 11207,
+      "sha256": "f7811419595c64124a2502cc40d194060d70dd5b8359ba4ca397775cfda511a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-color_mask.json",
+      "bytes": 11207,
+      "sha256": "b71a973d03068543616fbce589480db80cd2deb8a6543e2ad0b96b564f6dea6a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-depth.json",
+      "bytes": 11207,
+      "sha256": "c340d5631a585b3a1f7839cd788e5a23df5a2fe9789fa905bbeb270f0ed7a373"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-depth_reject.json",
+      "bytes": 11207,
+      "sha256": "7bc691e73d5116aae9e9c54ebfea6778047d827aa311a32baaf8523b4e50684c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-discard.json",
+      "bytes": 11620,
+      "sha256": "180d2d1cb035f087e6202f2c9d05b64ca488ae465c0228cebd73c95ddf3506c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-early_discard.json",
+      "bytes": 11620,
+      "sha256": "bf41730693abc099cbaeca98b9fad93da9143620462e7a08071e7d64f43fecd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-inputs.json",
+      "bytes": 14012,
+      "sha256": "91181bc1a02b55393afdc5df495fcee7c46ba8c1c78d4e894872b787f097a4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-ordinary.json",
+      "bytes": 11207,
+      "sha256": "aed0ab313cc154d03b65f23778758c9847f22861e30ba18b135a876aebe18be7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-partial_position.json",
+      "bytes": 11207,
+      "sha256": "a30f98749dcec334e025a1eb064bcbee2e55e441c4e584275f25ed1f98164e32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-sample_mask.json",
+      "bytes": 11198,
+      "sha256": "2eee9e1e325d0de696a750de1395c6029c91bc3184fb3698bdfa555497603efc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-scissor.json",
+      "bytes": 11271,
+      "sha256": "c383213ea43f94dbdc16008977def69d0e20a09cb70e29c5b4d7f615ca38e792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-stencil.json",
+      "bytes": 11207,
+      "sha256": "795bc43268851f0b9019999a2ada4e928888864e4c93fdacf5120bc7ab038614"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/checkpoints-4318-stencil_reject.json",
+      "bytes": 11207,
+      "sha256": "9935f48bf86c080066127363bbbbe23c40de20ceea0b075eb52adecad82964fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/msaa-0.json",
+      "bytes": 10680,
+      "sha256": "9979806f4be3fdef0e113970a0a2e0d699e7b464484613369ecd7dfaf303a470"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/msaa-32902.json",
+      "bytes": 10684,
+      "sha256": "b5641703d413802f4fa9175769fcaee6a32666377b38049db57f4c61f3032d1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/msaa-4318.json",
+      "bytes": 10683,
+      "sha256": "0935be565995b5675c45e4ba5f617e0f91bebc9b04c681d74efe6628c91ba12f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/recovery-0.json",
+      "bytes": 10629,
+      "sha256": "6092a3c1c01e769776727e2ade63285319a00f3979a21ddab6313c67534dadc6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/recovery-32902.json",
+      "bytes": 10633,
+      "sha256": "c7cb0df246a83d67964bb4ccec0f8d698f18cd4e94761c0db14ef339e985cd0d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-evidence/recovery-4318.json",
+      "bytes": 10632,
+      "sha256": "58f025e05db7e287c71f37e0d0b1ce3f2a93362897bb20eb7c37ad769e0f016e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-initial-tests.txt",
+      "bytes": 3497,
+      "sha256": "eeb2627c38013a23a80b762ae3d1f8a2f5f6a1d2a2154415415605997675a2b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-platform.json",
+      "bytes": 450,
+      "sha256": "b1ef843e08b0e61965bf9807ff5b66723bc4e6abbd199b752b390f5666517698"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-probe-build.txt",
+      "bytes": 1044,
+      "sha256": "dc0daa04cae2a0e6606b91b02ca38be65e2c472aa37aabd5e9ab9c3915c62713"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-probe-imports.txt",
+      "bytes": 836,
+      "sha256": "84d86e407d15c566e38f32c8d06a8110f3830561cea0ebdd0db4fb6b2bd28594"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-products-build.txt",
+      "bytes": 4313,
+      "sha256": "27236e7838c53df1ae2f2ac5746faffb5eac37cac5b538bb9c3cb87fae517210"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0/before.bin",
+      "bytes": 7749120,
+      "sha256": "2a2851ceff32ab6123fcb3806f20f3d15570af88e408d5b8d4fbe8b9fea6e5fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0/private.bin",
+      "bytes": 7749120,
+      "sha256": "bb3d6ec7fce636401026519faa490f32b0c1fb339bb676977ff63b807770bee1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0/reference.bin",
+      "bytes": 7749120,
+      "sha256": "bb3d6ec7fce636401026519faa490f32b0c1fb339bb676977ff63b807770bee1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0/report.json",
+      "bytes": 16305,
+      "sha256": "9bd64d2194b37210cc3e128a21815b4324d5fd8c8aea3bb91523a4ca63e9e9ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0/restored.bin",
+      "bytes": 7749120,
+      "sha256": "2a2851ceff32ab6123fcb3806f20f3d15570af88e408d5b8d4fbe8b9fea6e5fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-0.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902/before.bin",
+      "bytes": 7749120,
+      "sha256": "5b5e4c07ade9484fc51f67638425fb81555a032885672c199b0942bab3f93ffd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902/private.bin",
+      "bytes": 7749120,
+      "sha256": "4abf71e0847e9169b09d66c720e96ce820a1ae341287431d8edfd704719bfea8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902/reference.bin",
+      "bytes": 7749120,
+      "sha256": "4abf71e0847e9169b09d66c720e96ce820a1ae341287431d8edfd704719bfea8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902/report.json",
+      "bytes": 16309,
+      "sha256": "9ff9e0b1219f1f81c2397a77155cc4d28270de831df1fc8abf33e14f15591de1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902/restored.bin",
+      "bytes": 7749120,
+      "sha256": "5b5e4c07ade9484fc51f67638425fb81555a032885672c199b0942bab3f93ffd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-32902.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318/before.bin",
+      "bytes": 7749120,
+      "sha256": "a5d1c6a826af15a0934c26cbcb56e38a137467d6a62c187de5632cbe0d22fe5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318/private.bin",
+      "bytes": 7749120,
+      "sha256": "e32618a94247b08f624068d8e2095205d408545b1d623ce709a6bfe889c8bdc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318/reference.bin",
+      "bytes": 7749120,
+      "sha256": "e32618a94247b08f624068d8e2095205d408545b1d623ce709a6bfe889c8bdc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318/report.json",
+      "bytes": 16308,
+      "sha256": "34d143899c05f3f03d6e4d1f1362b7a8d61a83deacde4f5fd472ee859131bf50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318/restored.bin",
+      "bytes": 7749120,
+      "sha256": "a5d1c6a826af15a0934c26cbcb56e38a137467d6a62c187de5632cbe0d22fe5b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-bf1-4318.log",
+      "bytes": 11227,
+      "sha256": "b4018211937baa7da51f9dd4bd62b9bcf686a64092d71af6f9903538b18eec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0/report.json",
+      "bytes": 14598,
+      "sha256": "c628508a256ec2075509c3874454cb3b84fbdc2c10a3c50a7362be0a8854628d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-0.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902/report.json",
+      "bytes": 14602,
+      "sha256": "129c04834b0d4dd9533f256b84cbbfe31ffc299e155a1a9879ed2d71ba672b18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-32902.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318/before.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318/private.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318/reference.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318/report.json",
+      "bytes": 14601,
+      "sha256": "8e648161825777efd5b2fb468b06007f4cdfe3dc7e0c81d594d503dc1766cdab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318/restored.bin",
+      "bytes": 14745600,
+      "sha256": "cdea412a9ed18f710d049559b136cac7464688e601467877214a7316fd55753b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-gf2-4318.log",
+      "bytes": 738,
+      "sha256": "4e34b7558395f21b795272d59ace548b58d277956220c6cb8bee05c8095dc504"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0/private.bin",
+      "bytes": 262144,
+      "sha256": "d85b9fc02bc3c694ebf44ec01bbc26845530eaf73dddc5bdfd858be339d4bbe7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0/reference.bin",
+      "bytes": 262144,
+      "sha256": "d85b9fc02bc3c694ebf44ec01bbc26845530eaf73dddc5bdfd858be339d4bbe7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0/report.json",
+      "bytes": 15120,
+      "sha256": "42753004488bdd235045c925322503f00a6cd5e18a39d076f02535cefd1a93d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-0.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902/private.bin",
+      "bytes": 262144,
+      "sha256": "e00cbd87e101e1df44fb5ed0038577024d58d8752ca1eda1fac96bc074ea0129"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902/reference.bin",
+      "bytes": 262144,
+      "sha256": "e00cbd87e101e1df44fb5ed0038577024d58d8752ca1eda1fac96bc074ea0129"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902/report.json",
+      "bytes": 15125,
+      "sha256": "e20243b13599be4c47a07cf0f9efb769ac8e5942f251cb9965a71d9c0e56d271"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-32902.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318/before.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318/private.bin",
+      "bytes": 262144,
+      "sha256": "a903f85f2d27251d720a2956e44d2d662d9c65be32f99500a19e3a3bc826ae75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318/reference.bin",
+      "bytes": 262144,
+      "sha256": "a903f85f2d27251d720a2956e44d2d662d9c65be32f99500a19e3a3bc826ae75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318/report.json",
+      "bytes": 15123,
+      "sha256": "1e384c10fe1733411f56251ac834116667140bff3ae476683b737bed13664e3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318/restored.bin",
+      "bytes": 262144,
+      "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-hd-4318.log",
+      "bytes": 1079,
+      "sha256": "6ffed364775c9e702085a305eefe416708057b9b8d76d25d3c6ba6b8c1fe2376"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-real-runs.json",
+      "bytes": 4110,
+      "sha256": "f1147c0cb3587297372b00360d2a280377e50eee44f7bf9433b8b17364737d21"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-regression-dxbc-pixel-inputs.txt",
+      "bytes": 7423,
+      "sha256": "065900eb44c2bdbafdb50badefaa567de5bfe1cb462d8d0b056f3acf79eb7877"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-regression-native-pixel-candidates.txt",
+      "bytes": 8456,
+      "sha256": "b61b8801dc80dc2ce2d02011687e70e47b751a364c19532dfa85f104656c6620"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-regression-native-primitive-identity.txt",
+      "bytes": 7019,
+      "sha256": "f63d688a0a7d5408bda7fe1fbc74eadb418b2ddfab4f2829aee3c45c59287e4d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-regression-post-transform.txt",
+      "bytes": 6187,
+      "sha256": "c545362480358eb77e12a752d770c877aa8e5a323d30c3f8f1c3853cda0ca8a9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-verified-validation.json",
+      "bytes": 1926,
+      "sha256": "2f4977b6f18ec3070391eb3abc25ee0690ce77d41b17e0159685524bdeefc19d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-geometry-replay-verified-validation.log",
+      "bytes": 1928,
+      "sha256": "5a5492e36ae80004fd43ce919e7541534d245a515efbf675937c7f277052a6c9"
+    }
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 125188,
+      "sha256": "cdbb9b4ef3d6cbe9a56710b64662dbc6fc60573d8b111c3939d422c8d4f661c8"
+    },
+    {
+      "path": "src/application/DxbcPixelGeometry.cpp",
+      "bytes": 16530,
+      "sha256": "9733d6714fccfe55fec2edef01fec89af7e232e54eda8c342ef914fd32233bcd"
+    },
+    {
+      "path": "src/application/DxbcPixelGeometry.h",
+      "bytes": 1772,
+      "sha256": "6a32aa84ff398687774e765044f2b1f0b1d63bf863df0909191acccac24145aa"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.cpp",
+      "bytes": 20074,
+      "sha256": "9779eecbdb984c5e09340113042ea5cfdfb0a6bef8aa46fa34b62f86cb4be956"
+    },
+    {
+      "path": "src/application/DxbcPixelInputs.h",
+      "bytes": 2222,
+      "sha256": "85b5a260aea4e45015e3911482038d0487571f1eb0343924b288518e5b149c22"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.cpp",
+      "bytes": 13147,
+      "sha256": "1a4590e0e4b126c7b7662b3948b89827af8d50eb0c70a2e044300a474093346f"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.h",
+      "bytes": 1331,
+      "sha256": "c0df753bd9e8d9099fefc36176e6377977650fed34a45a40b98b831fdaddc9c1"
+    },
+    {
+      "path": "src/replay/PrivateOutputs.cpp",
+      "bytes": 14612,
+      "sha256": "952ea204f6341772b9f54045ca39c64807223194446dc2e19c9258ff641b89a1"
+    },
+    {
+      "path": "src/replay/Replay.h",
+      "bytes": 21984,
+      "sha256": "94c4b377b21885a8d06bb3c96a49101e32829a8e5c7561158e1e77b58da44918"
+    },
+    {
+      "path": "tests/NativePixelGeometryReplayTests.cpp",
+      "bytes": 21695,
+      "sha256": "c0b2e26caea0ea05b618b68fe832b7f56aa9efbc3b924d258a797086942b567e"
+    },
+    {
+      "path": "tools/probe_native_pixel_geometry_replay.cpp",
+      "bytes": 5770,
+      "sha256": "3ade1b34296030a0759f3d1271bf922743e7eabe1c29f0c1f1c7be564738aba5"
+    },
+    {
+      "path": "tools/validate_native_pixel_geometry_replay.py",
+      "bytes": 9168,
+      "sha256": "f603c03d48c2c2cc7516b7ab708d346ccd4016f6e99dbb7d0b351aee55e6b1c5"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "build/vs2022/Release/FloraGPA.exe",
+      "bytes": 4965376,
+      "sha256": "b0467a31acfd93776984b53ecec1fc35ecf4f40e0a6d657e9a5e727688c959bd"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 5565440,
+      "sha256": "fea3eecd129d8b2d20f6495c32a84ccb5e9337052e207445e76cc0d7bb91a6c3"
+    },
+    {
+      "path": "build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 5565440,
+      "sha256": "8616c9aad825582399040edc3d96a2fd0f08660e6544e876bd0c7bef226c94b0"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelGeometryReplayProbe.exe",
+      "bytes": 1314816,
+      "sha256": "df3711062d53ba6b822495796f4674e2d75e218dddb95d701aa45ee79341c469"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelGeometryReplayTests.exe",
+      "bytes": 1432064,
+      "sha256": "3a77f50a4f8606f98eb58db401f2976ea88f6e1c23a04923bd30cc37de7e819a"
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcPixelInputsTests.exe",
+      "bytes": 514560,
+      "sha256": "254cff1bd3d3e2a56edb57836ab689e0d26055c59d82806b65e05cec85cce364"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePrimitiveIdentityTests.exe",
+      "bytes": 1554432,
+      "sha256": "d175b737e37519d0c61235d6153602e401875d6cbe920954d7b21909b3ab1ac7"
+    },
+    {
+      "path": "build/vs2022/Release/FloraNativePixelCandidatesTests.exe",
+      "bytes": 485888,
+      "sha256": "231e13c850e93516a634251819b7e4366028136bbe03949c745b5015f7dce210"
+    },
+    {
+      "path": "build/vs2022/Release/FloraPostTransformTests.exe",
+      "bytes": 6064640,
+      "sha256": "ac70fca9f718d2ca14c6f49b7a4b8707bdece9c3670f63673039b172c55ae8f3"
+    }
+  ]
+}

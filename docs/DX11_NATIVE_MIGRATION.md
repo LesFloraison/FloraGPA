@@ -18,7 +18,7 @@ VS/PS/CS debugger or fragment history implementation.
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; verified mesh artifact reader and VS identity exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
-| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging and observed primitive IDs are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
+| P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private geometry checkpoints are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, active typed-UAV and remaining precision semantics, public PS sessions and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
@@ -857,3 +857,15 @@ fragment eligibility. Upstream UAV ambiguity, including reflection-stripped
 declarations, remains explicit. See `research/DX11_NATIVE_PRIMITIVE_IDENTITY.md`
 for the 108-case matrix, real captures, independent runtime controls and remaining
 gates. Public pixel debugging, complete history and dependency removal are pending.
+
+## Original pixel shader geometry replay continuation
+
+Private geometry ranges now execute the unmodified PS with original resource,
+class, rasterizer and output-merger bindings. Consecutive checkpoints retain
+private color/depth/UAV writes while restoring original resources, hidden UAV
+counters and SO cursors. Seventy-eight data cases pass on three adapters, and
+nine real-capture probes match primary storage and original-draw queries on the
+same adapter. See `research/DX11_NATIVE_PIXEL_GEOMETRY_REPLAY.md` for evidence,
+query differences between local adapters, payload/deadline limits and the
+remaining fragment-qualification boundary. This internal diagnostic does not
+close full history, public PS debugging or P7/P8 acceptance.
