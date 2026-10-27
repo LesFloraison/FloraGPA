@@ -2,6 +2,11 @@
 
 ## Scope and independent comparison
 
+This report describes the initial expanded presentation. The subsequent compact
+identity implementation and frozen-main export comparison are documented in
+`DX11_NATIVE_MESH_INDEXED_PRESENTATION.md`. Raw Worker data remains unchanged;
+current presentation files include an explicit compact-row mapping.
+
 `FloraNativeMeshCaptureProbe` runs two isolated native analysis jobs for each
 selection: `vs-inputs` and final pre-rasterization stream output. The first result
 passes through `NativeReplayMesh`, the actual `ReplayMeshView` position table and

@@ -978,3 +978,14 @@ See `research/DX11_NATIVE_MESH_REAL_CAPTURES.md` for 84 rejected corruptions,
 module snapshots, elapsed time and memory measurements, and retained initial
 validator failures. This is selected native-path consistency evidence; baseline
 RenderDoc export parity, remaining P3 cases and default cutover remain open.
+
+## Indexed mesh presentation continuation
+
+Native Replay Mesh now preserves compact input identities in its table and
+CSV/OBJ exports, with full-byte output variants and explicit source/reference
+maps. Five of seven selected NVIDIA frozen-main exports now match exactly;
+all seven have identical indices and referenced vertex records. Two strict
+differences remain because the baseline instance-zero export also contains later
+instances; additional native all-instance jobs reproduce those entire buffers.
+See `research/DX11_NATIVE_MESH_INDEXED_PRESENTATION.md` for the 35 passing UI
+checks, 21 real adapter/selection combinations and the still-failed strict gate.

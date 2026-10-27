@@ -84,6 +84,10 @@ These commands describe the initial preview commit. For the current expanded
 matrix, use `DX11_NATIVE_GEOMETRY_RESOURCE_READS.md`; the original validator mode
 remains available for the retained initial evidence.
 
+The current compact presentation adds six CPU cases. Use
+`DX11_NATIVE_MESH_INDEXED_PRESENTATION.md` and `--indexed-presentation` when
+validating a fresh current-source UI run.
+
 Use the configured Visual Studio Release build with Qt available. Build
 `FloraGPA`, `FloraNativeReplayMeshUiTests`, `FloraReplayMeshUiTests`,
 `FloraNativeAnalysisTests`, `FloraNativeCounterUiTests` and
