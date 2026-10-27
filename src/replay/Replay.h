@@ -154,6 +154,7 @@ class RenderDocCapture;
 class Replay {
     friend class PostTransformCapture;
     friend class CoverageCapture;
+    friend class NativePixelOcclusionCapture;
     friend class QuadSerialState;
     friend class QuadFinalState;
     friend class QuadResources;
