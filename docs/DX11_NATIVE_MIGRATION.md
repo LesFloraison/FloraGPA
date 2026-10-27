@@ -1044,3 +1044,14 @@ suite passes 1,341 checks without failures or skips; five report validators reje
 17,514 corruptions. See `research/DX11_NATIVE_DEPTH_ONLY_MERGER.md` for the
 reproduction commands and evidence limits. Original fragment eligibility,
 complete Pixel History, debugger parity and P7/P8 removal gates remain open.
+
+## Measured raster input continuation
+
+Private pixel records now preserve selected `SV_Position.z`, front-face state
+and coverage through shader-output/history provenance. System-input rewriting
+also handles compiler-packed sample-index/front-face components correctly.
+Five suites pass 1,208 checks; 96 independent raster probes and nine real
+capture/adapter history selections pass, with 1,824 rejected corrupt reports.
+See `research/DX11_NATIVE_RASTER_MERGER_INPUTS.md` for the retained initial
+failures, template disassembly, reproduction and limits. Actual state extraction
+and complete merger/history qualification remain open alongside P7/P8.
