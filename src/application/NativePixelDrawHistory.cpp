@@ -3,6 +3,8 @@
 #include "NativePixel.h"
 #include "NativePixelCandidates.h"
 #include "NativePixelGeometryReplay.h"
+#include "NativePixelInvocation.h"
+#include "NativePixelOutputs.h"
 #include <algorithm>
 #include <chrono>
 #include <set>
@@ -170,7 +172,8 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                                              const NativePixelDrawHistoryLimits &limits,
                                              const CancelCheck &cancelled) {
     if (!s.maxRecords || !limits.maxCandidates || limits.maxCandidates > 2048 || !limits.timeoutMs ||
-        limits.timeoutMs > 60000 || !limits.maxBytes)
+        limits.timeoutMs > 60000 || !limits.maxBytes ||
+        (limits.evaluateShaderOutputs && (!limits.maxShaderBytes || !limits.maxShaderSteps)))
         throw std::invalid_argument("Invalid private pixel history limits");
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
     const CancelCheck bounded = [&] {
@@ -185,6 +188,20 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
     Json before, previous, after, candidateReports = Json::array(), records = Json::array(),
                                   unattributed = Json::array();
     std::map<uint64_t, Json> candidates;
+    struct Invocation {
+        dxbc_exec::PixelTraceOptions inputs;
+        std::vector<uint32_t> samples;
+        uint64_t bytes = 0;
+    };
+    std::map<uint64_t, std::vector<Invocation>> shaderInputs;
+    std::vector<uint8_t> pixelCode;
+    Id pixelShader = 0;
+    uint64_t shaderRetained = 0, shaderSteps = 0, shaderInvocations = 0;
+    auto retainShader = [&](uint64_t bytes) {
+        if (bytes > limits.maxShaderBytes - shaderRetained)
+            throw std::runtime_error("Private pixel shader retention budget exceeded");
+        shaderRetained += bytes;
+    };
     auto snapshot = [&](Replay &replay) {
         ++reads;
         return readPixel(replay, decoder, target, s, bounded, readBytes);
@@ -196,6 +213,20 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         before = snapshot(r);
         total = geometry.report.at("primitives").get<uint64_t>();
         std::set<uint64_t> checkpoints;
+        if (limits.evaluateShaderOutputs && total) {
+            bool present = false;
+            r.inspectNativeState([&](auto *context, const auto &) {
+                Com<ID3D11PixelShader> shader;
+                context->PSGetShader(&shader, nullptr, nullptr);
+                present = shader != nullptr;
+            });
+            if (present) {
+                auto inputs = dxbc_exec::snapshotBoundResourceInputs(r, 4, limits.maxShaderBytes, bounded);
+                pixelCode = std::move(inputs.bytecode);
+                pixelShader = inputs.shader;
+                retainShader(pixelCode.size());
+            }
+        }
         if (total) {
             auto discovery = target.raster;
             // Discover geometry before the application sample mask; rejected
@@ -243,6 +274,47 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                 candidateReports.push_back(std::move(found.report));
             }
         }
+        if (limits.evaluateShaderOutputs) {
+            auto discovery = target.raster;
+            discovery.sampleMask = UINT32_MAX;
+            for (auto &[ordinal, candidate] : candidates) {
+                candidate["private_shader_outputs"] = Json::array();
+                candidate["pixel_shader_bound"] = pixelShader != 0;
+                if (!pixelShader)
+                    continue;
+                std::set<uint32_t> samples;
+                for (const auto &observation : candidate.at("observations"))
+                    samples.insert(observation.at("raster_sample").get<uint32_t>());
+                for (auto sample : samples) {
+                    auto inputs = captureNativePixelInvocationInputs(
+                        r.nativeDevice(), r.options().warp, discovery, geometry, pixelCode, ordinal,
+                        {s.x, s.y, sample, target.view.at("relative_layer").get<uint32_t>()},
+                        {limits.maxBytes, limits.timeoutMs}, bounded);
+                    auto &invocations = shaderInputs[ordinal];
+                    const bool pixelFrequency = inputs.inputProvenance.at("sample_frequency") == false;
+                    auto duplicate =
+                        std::find_if(invocations.begin(), invocations.end(), [&](const auto &old) {
+                            return pixelFrequency && old.inputs.activeMask == inputs.activeMask &&
+                                   old.inputs.selectedLane == inputs.selectedLane &&
+                                   old.inputs.registers == inputs.registers;
+                        });
+                    if (duplicate != invocations.end()) {
+                        const auto bytes = inputs.inputProvenance.dump().size();
+                        retainShader(bytes);
+                        duplicate->bytes += bytes;
+                        duplicate->inputs.inputProvenance["equivalent_sample_observations"].push_back(
+                            std::move(inputs.inputProvenance));
+                        duplicate->samples.push_back(sample);
+                        continue;
+                    }
+                    const uint64_t bytes =
+                        inputs.inputProvenance.dump().size() +
+                        uint64_t(4 * 33) * (sizeof(dxbc_exec::Register) + sizeof(dxbc_exec::Value));
+                    retainShader(bytes);
+                    invocations.push_back({std::move(inputs), {sample}, bytes});
+                }
+            }
+        }
         return std::vector<uint64_t>(checkpoints.begin(), checkpoints.end());
     };
     const auto replay = replayNativePixelGeometryCheckpoints(
@@ -255,7 +327,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             } else {
                 const auto found = candidates.find(completed);
                 if (count == completed + 1 && found != candidates.end()) {
-                    auto row = found->second;
+                    auto row = std::move(found->second);
                     row["event"] = event;
                     row["record_kind"] = "private_primitive_storage";
                     row["before"] = previous;
@@ -280,9 +352,51 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             completed = count;
             previous = std::move(current);
             after = previous;
+            if (auto pending = shaderInputs.find(count); pending != shaderInputs.end()) {
+                auto resources = dxbc_exec::snapshotBoundResourceInputs(
+                    privateReplay, 4, limits.maxShaderBytes - shaderRetained, bounded);
+                if (resources.shader != pixelShader || resources.bytecode != pixelCode ||
+                    resources.resourceObservation != "current_native_bindings")
+                    throw std::runtime_error("Private pixel shader resource context changed");
+                uint64_t sourceBytes = resources.bytecode.size();
+                auto account = [&](uint64_t bytes) {
+                    if (bytes > limits.maxShaderBytes - shaderRetained - sourceBytes)
+                        throw std::runtime_error("Private pixel shader input-copy budget exceeded");
+                    sourceBytes += bytes;
+                };
+                if (sourceBytes > limits.maxShaderBytes - shaderRetained)
+                    throw std::runtime_error("Private pixel shader bytecode budget exceeded");
+                for (const auto &[slot, values] : resources.inputs.constantBuffers)
+                    account(values.size() * sizeof(dxbc_exec::Value));
+                if (resources.inputs.memory)
+                    for (const auto &[id, buffer] : resources.inputs.memory->buffers())
+                        account(buffer.bytes.size() + buffer.valid.size());
+                if (resources.inputs.textures)
+                    for (const auto &[id, texture] : resources.inputs.textures->resources)
+                        account(texture.storage.bytes.size() + texture.storage.valid.size());
+                for (auto &invocation : pending->second) {
+                    checkCancellation(bounded);
+                    if (shaderSteps >= limits.maxShaderSteps)
+                        throw std::runtime_error("Private pixel shader global step budget exceeded");
+                    invocation.inputs.maxSteps = limits.maxShaderSteps - shaderSteps;
+                    invocation.inputs.maxBytes = limits.maxShaderBytes - shaderRetained - sourceBytes;
+                    if (!invocation.inputs.maxBytes)
+                        throw std::runtime_error("Private pixel shader execution storage budget exceeded");
+                    auto output = evaluateNativePixelOutputs(resources, invocation.inputs, bounded);
+                    shaderSteps += output.at("global_steps").get<uint64_t>();
+                    ++shaderInvocations;
+                    output["resource_boundary"] = "before_private_primitive";
+                    output["completed_primitives"] = count;
+                    output["candidate_raster_samples"] = invocation.samples;
+                    shaderRetained -= invocation.bytes;
+                    retainShader(output.dump().size());
+                    candidates.at(count)["private_shader_outputs"].push_back(std::move(output));
+                }
+                shaderInputs.erase(pending);
+            }
         },
         limits.maxBytes, limits.timeoutMs, bounded);
-    if (completed != total || records.size() != candidates.size())
+    if (completed != total || records.size() != candidates.size() || !shaderInputs.empty())
         throw std::runtime_error("Incomplete private pixel checkpoint join");
     const auto restored = snapshot(r);
     if (!equal(before, restored))
@@ -311,6 +425,13 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         {"unattributed_changes", unattributed},
         {"candidate_passes", candidateReports},
         {"geometry_replay", replay},
+        {"shader_evaluation",
+         {{"requested", limits.evaluateShaderOutputs},
+          {"invocations", shaderInvocations},
+          {"global_steps", shaderSteps},
+          {"retained_payload_bytes", shaderRetained},
+          {"resource_boundary", "before_private_primitive"},
+          {"original_fragment_eligibility", nullptr}}},
         {"readback_count", reads},
         {"readback_bytes", readBytes},
         {"order", "captured_geometry_storage"},

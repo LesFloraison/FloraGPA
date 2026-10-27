@@ -39,4 +39,7 @@ struct PixelInputShader {
 // The generated SM5 helper requires a feature-level-11 device.
 PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
                                   std::optional<PixelInputRecordSelection> records = {});
+// Observes quad coverage and selection without inventing a source register.
+// reg is UINT32_MAX and mask is zero; ordinary input declarations are not copied.
+PixelInputShader pixelCoverageShader(Bytes original, const PixelInputRecordSelection &records);
 } // namespace flora::dxbc_exec

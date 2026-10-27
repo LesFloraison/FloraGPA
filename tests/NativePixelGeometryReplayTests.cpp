@@ -103,6 +103,233 @@ Capture layeredHistoryCapture(bool volume) {
 class NativePixelGeometryReplayTests final : public QObject {
     Q_OBJECT
   private slots:
+    void shaderHistoryBoundaries_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *mode : {"depth_reject", "stencil_reject", "null_ps", "forced"})
+                QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
+    }
+    void shaderHistoryBoundaries() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        const bool forced = mode == "forced";
+        const Id event = forced ? 100 : 1000, resource = forced ? 1000 : mode == "null_ps" ? 720 : 20;
+        auto c = forced ? blendCapture() : depthStencilCapture();
+        auto o = options(vendor, event);
+        if (mode == "null_ps") {
+            std::erase_if(c.entries, [](const auto &e) { return e.id == 990; });
+            State s{};
+            s.topology = 4;
+            s.sampleMask = UINT32_MAX;
+            s.omStart = 8;
+            s.dsv = 722;
+            s.viewports = 22;
+            s.rasterizer = 724;
+            s.stages[0].shader = 30;
+            c.add(990, 3, 3, snapshot(s));
+        }
+        auto depth = depthState();
+        if (mode == "depth_reject") {
+            depth.DepthEnable = TRUE;
+            depth.DepthFunc = D3D11_COMPARISON_NEVER;
+        }
+        if (mode == "stencil_reject") {
+            depth.StencilEnable = TRUE;
+            depth.FrontFace.StencilFunc = depth.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
+        }
+        o.depthStencilEdits[event].descriptor = depth;
+        if (forced) {
+            D3D11_RASTERIZER_DESC2 d{};
+            d.FillMode = D3D11_FILL_SOLID;
+            d.CullMode = D3D11_CULL_NONE;
+            d.DepthClipEnable = TRUE;
+            d.ForcedSampleCount = 4;
+            o.rasterizerEdits[event].descriptor = d;
+        }
+        o.shaders[forced ? 12 : 32] =
+            compileClassProgram("float4 main():SV_Target{return float4(.25,.125,.375,.5);}", "ps_5_0");
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        Replay reference(f, o);
+        reference.run();
+        const auto expected = reference.readTexture(resource);
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readTexture(resource);
+        NativeHistorySelection selection;
+        selection.resource = resource;
+        NativePixelDrawHistoryLimits limits;
+        limits.evaluateShaderOutputs = true;
+        auto report = collectNativePixelDrawHistory(r, event, selection, limits);
+        QCOMPARE(report.at("records").size(), size_t(1));
+        const auto &row = report.at("records")[0];
+        QCOMPARE(row.at("after").at("bytes").get<std::vector<uint8_t>>(), expected);
+        QCOMPARE(row.at("pixel_shader_bound"), Json(mode != "null_ps"));
+        QCOMPARE(row.at("private_shader_outputs").size(), mode == "null_ps" ? size_t(0) : size_t(1));
+        if (mode != "null_ps") {
+            const auto &out = row.at("private_shader_outputs")[0];
+            const auto &value = out.at("lanes")[out.at("selected_lane").get<size_t>()].at("outputs")[0];
+            QCOMPARE(value.at("raw_bits"), Json::array({0x3e800000u, 0x3e000000u, 0x3ec00000u, 0x3f000000u}));
+            QCOMPARE(value.at("valid_mask"), Json(15));
+            QVERIFY(out.at("original_fragment_eligibility").is_null());
+            if (forced) {
+                QCOMPARE(out.at("candidate_raster_samples"), Json::array({0, 1, 2, 3}));
+                QCOMPARE(out.at("input_provenance").at("equivalent_sample_observations").size(), size_t(3));
+            } else
+                QCOMPARE(row.at("observed_value_changed"), Json(false));
+        }
+        QCOMPARE(r.readTexture(resource), initial);
+        report["status"] = "ok";
+        report["mode"] = mode.toStdString();
+        evidence(report);
+    }
+
+    void shaderHistory_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        QTest::addColumn<uint32_t>("sample");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *mode :
+                 {"constant", "coverage", "varying", "derivative", "sample", "masked", "discard"})
+                for (uint32_t sample : {0u, 3u})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(mode).arg(sample)))
+                        << vendor << QString(mode) << sample;
+    }
+    void shaderHistory() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        QFETCH(uint32_t, sample);
+        const uint32_t samples = sample ? 4 : 1;
+        auto c = blendCapture(1, false, false, samples);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 100);
+        const auto signature = mode == "sample"     ? "uint s:SV_SampleIndex"
+                               : mode == "coverage" ? "uint c:SV_Coverage"
+                               : mode == "constant" ? ""
+                                                    : "float4 p:SV_Position";
+        const auto body = mode == "sample"       ? "return float4(s*.25,.125,.375,.5);"
+                          : mode == "coverage"   ? "return float4(c,.125,.375,.5);"
+                          : mode == "constant"   ? "return float4(.25,.125,.375,.5);"
+                          : mode == "derivative" ? "return float4(ddx_fine(p.x),ddy_fine(p.y),p.xy);"
+                          : mode == "discard"    ? "if(p.x<1)discard;return float4(p.xy,.375,.5);"
+                                                 : "return float4(p.xy,.375,.5);";
+        o.shaders[12] = compileClassProgram(
+            std::string("float4 main(") + signature + "):SV_Target{" + body + "}", "ps_5_0");
+        if (mode == "masked")
+            o.blendEdits[100].sampleMask = 0;
+        Replay original(f, o);
+        original.run();
+        const auto gpu = blendPixel(original, 1000, sample);
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = samples == 1 ? r.readTexture(1000) : r.readMsaa(1000, sample, 2).bytes;
+        NativeHistorySelection selection;
+        selection.resource = 1000;
+        selection.sample = sample;
+        NativePixelDrawHistoryLimits limits;
+        limits.evaluateShaderOutputs = true;
+        auto report = collectNativePixelDrawHistory(r, 100, selection, limits);
+        QCOMPARE(report.at("records").size(), size_t(1));
+        const auto &row = report.at("records")[0];
+        QCOMPARE(row.at("private_shader_outputs").size(), size_t(1));
+        const auto &out = row.at("private_shader_outputs")[0];
+        QCOMPARE(out.at("resource_observation"), Json("current_native_bindings"));
+        QCOMPARE(out.at("resource_boundary"), Json("before_private_primitive"));
+        QCOMPARE(out.at("completed_primitives"), Json(0));
+        QVERIFY(out.at("original_fragment_eligibility").is_null());
+        QVERIFY(row.at("original_fragment_eligibility").is_null());
+        QVERIFY(row.at("shader_output").is_null());
+        const auto lane = out.at("selected_lane").get<size_t>();
+        const auto &result = out.at("lanes")[lane];
+        QCOMPARE(result.at("discarded"), Json(mode == "discard"));
+        if (mode != "discard") {
+            const auto &value = result.at("outputs")[0];
+            QCOMPARE(value.at("valid_mask"), Json(15));
+            if (mode != "masked")
+                QCOMPARE((value.at("raw_bits").get<std::array<uint32_t, 4>>()), gpu);
+            else {
+                const std::array<float, 4> expected{.5f, .5f, .375f, .5f};
+                std::array<uint32_t, 4> bits{};
+                std::memcpy(bits.data(), expected.data(), 16);
+                QCOMPARE((value.at("raw_bits").get<std::array<uint32_t, 4>>()), bits);
+                QCOMPARE(row.at("observed_value_changed"), Json(false));
+            }
+        }
+        if (mode == "constant" || mode == "coverage")
+            QCOMPARE(out.at("input_provenance").at("coverage_only"), Json(true));
+        if (mode == "sample")
+            QCOMPARE(out.at("input_provenance").at("sample_frequency"), Json(true));
+        if (mode == "derivative")
+            QVERIFY(out.at("derivative_batches").get<uint64_t>() > 0);
+        QCOMPARE(samples == 1 ? r.readTexture(1000) : r.readMsaa(1000, sample, 2).bytes, initial);
+        std::array<uint32_t, 4> observed{};
+        const auto after = report.at("after").at("bytes").get<std::vector<uint8_t>>();
+        QCOMPARE(after.size(), size_t(16));
+        std::memcpy(observed.data(), after.data(), 16);
+        QCOMPARE(observed, gpu);
+        report["reference_gpu_bits"] = gpu;
+        report["mode"] = mode.toStdString();
+        report["status"] = "ok";
+        evidence(report);
+    }
+    void shaderHistoryRecovery_data() { devices(); }
+    void shaderHistoryRecovery() {
+        QFETCH(uint32_t, vendor);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        auto c = blendCapture();
+        drawCount(c, 100, 6);
+        c.save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 100);
+        o.shaders[10] = compileClassProgram(
+            "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return float4(i==2?3:-1,i==1?3:-1,0,1);}",
+            "vs_5_0");
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readTexture(1000);
+        NativeHistorySelection select;
+        select.resource = 1000;
+        NativePixelDrawHistoryLimits limits;
+        limits.evaluateShaderOutputs = true;
+        auto first = collectNativePixelDrawHistory(r, 100, select, limits);
+        QCOMPARE(first.at("shader_evaluation").at("invocations"), Json(2));
+        const auto steps = first.at("shader_evaluation").at("global_steps").get<uint64_t>();
+        QVERIFY(steps > 1);
+        limits.maxShaderSteps = steps - 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, collectNativePixelDrawHistory(r, 100, select, limits));
+        QCOMPARE(r.readTexture(1000), initial);
+        limits.maxShaderSteps = 1000000;
+        limits.maxShaderBytes = 1;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, collectNativePixelDrawHistory(r, 100, select, limits));
+        QCOMPARE(r.readTexture(1000), initial);
+        limits.maxShaderBytes = 256ull * 1024 * 1024;
+        bool cancelled = false;
+        try {
+            collectNativePixelDrawHistory(r, 100, select, limits, [] { return true; });
+        } catch (const std::exception &) {
+            cancelled = true;
+        }
+        QVERIFY(cancelled);
+        QCOMPARE(r.readTexture(1000), initial);
+        auto retry = collectNativePixelDrawHistory(r, 100, select, limits);
+        QCOMPARE(retry.at("after"), first.at("after"));
+        QCOMPARE(retry.at("shader_evaluation"), first.at("shader_evaluation"));
+        QCOMPARE(r.readTexture(1000), initial);
+        retry["status"] = "ok";
+        retry["failure_recovery"] = true;
+        evidence(retry);
+    }
+
     void drawHistory_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");

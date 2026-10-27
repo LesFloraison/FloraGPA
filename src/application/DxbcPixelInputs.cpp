@@ -207,9 +207,9 @@ std::vector<PixelInputBinding> pixelShaderInputSignature(Bytes original) {
                           field.used, field.precision});
     return result;
 }
-PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
-                                  std::optional<PixelInputRecordSelection> records) {
-    if (inputRegister >= 32)
+static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint32_t> inputRegister,
+                                              std::optional<PixelInputRecordSelection> records) {
+    if (inputRegister && *inputRegister >= 32)
         throw std::runtime_error("Pixel input register is outside v0..v31");
     if (records && (!records->maxRecords || records->maxRecords > 4096 || records->sample >= 32))
         throw std::runtime_error("Invalid pixel input record limits/sample");
@@ -217,7 +217,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
     const auto &originalProgram = parsed.program;
     PixelInputShader result;
     result.originalShaderSha256 = sha256(original);
-    result.reg = inputRegister;
+    result.reg = inputRegister.value_or(UINT32_MAX);
     result.records = records;
     std::vector<Row> selectedDeclarations;
     bool minimumPrecision = false;
@@ -244,7 +244,7 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
             throw std::runtime_error("Invalid pixel input declaration length/register");
         const auto interpolation = (row[0] >> 11) & 15;
         result.sampleFrequency |= interpolation == 6 || interpolation == 7 || (op != 98 && row.back() == 10);
-        if (row[index] != inputRegister)
+        if (!inputRegister || row[index] != *inputRegister)
             continue;
         const auto mask = (row[1] >> 4) & 15;
         if (!mask || (result.mask & mask))
@@ -255,13 +255,13 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
         remapped[index] = 0;
         selectedDeclarations.push_back(std::move(remapped));
     }
-    if (!result.mask)
+    if (inputRegister && !result.mask)
         throw std::runtime_error("Pixel input register is not declared");
     std::vector<Field> fields;
     uint32_t signatureMask = 0;
     std::optional<Field> position, sample, layer;
     for (auto f : parsed.inputs) {
-        if (f.reg != inputRegister)
+        if (!inputRegister || f.reg != *inputRegister)
             continue;
         f.reg = 0;
         f.used = f.mask & result.mask;
@@ -344,9 +344,10 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
         throw std::runtime_error("Unexpected pixel input transport template");
     std::map<uint32_t, uint32_t> remap;
     std::map<uint32_t, uint32_t> helperRegisters;
-    uint32_t nextRegister = 1;
-    std::vector<Row> initialize{{0x05000036, 0x1000f2, temporary, 0x4001, 0},
-                                {0x05000036, 0x100002 | (result.mask << 4), temporary, 0x101e46, 0}};
+    uint32_t nextRegister = inputRegister ? 1 : 0;
+    std::vector<Row> initialize{{0x05000036, 0x1000f2, temporary, 0x4001, 0}};
+    if (inputRegister)
+        initialize.push_back({0x05000036, 0x100002 | (result.mask << 4), temporary, 0x101e46, 0});
     for (auto f : templateFields) {
         if (f.reg == UINT32_MAX) {
             fields.push_back(f);
@@ -418,6 +419,13 @@ PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
         result.inputSignature.push_back(
             {f.name, f.semantic, f.system, f.type, f.reg, f.mask, f.used, f.precision});
     return result;
+}
+PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
+                                  std::optional<PixelInputRecordSelection> records) {
+    return buildPixelInputShader(original, inputRegister, records);
+}
+PixelInputShader pixelCoverageShader(Bytes original, const PixelInputRecordSelection &records) {
+    return buildPixelInputShader(original, std::nullopt, records);
 }
 Value PixelInputShader::decode(const std::array<uint32_t, 4> &bits) const { return {bits, uint8_t(mask)}; }
 } // namespace flora::dxbc_exec

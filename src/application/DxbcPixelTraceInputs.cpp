@@ -12,16 +12,16 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
     for (const auto &instruction : program.instructions()) {
         const auto &row = instruction.words;
         const auto op = instruction.opcode;
-        if (op < 98 || op > 100)
+        if (op != 95 && (op < 98 || op > 100))
             continue;
         if (row.size() < 2)
             throw std::runtime_error("Truncated pixel input declaration");
         const auto kind = (row[1] >> 12) & 255;
-        if (kind == 35) {
+        if (kind == 35 && op == 95) {
             coverageInput = true;
             continue;
         }
-        if (kind != 1)
+        if (kind != 1 || op == 95)
             throw std::runtime_error("Unobserved special pixel input");
         const auto index = (row[1] & 0x80000000u) ? 3u : 2u;
         if (row.size() <= index || row[index] >= 32)
@@ -30,6 +30,9 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
         const auto interpolation = (row[0] >> 11) & 15;
         sampleFrequency |= interpolation == 6 || interpolation == 7 || (op != 98 && row.back() == 10);
     }
+    const bool coverageOnly = masks.empty();
+    if (coverageOnly)
+        masks.emplace(UINT32_MAX, 0);
     if (masks.size() != observed.size())
         throw std::runtime_error("Pixel trace observation register set differs");
     PixelTraceOptions result;
@@ -78,14 +81,16 @@ PixelTraceOptions pixelTraceInputs(Bytes original, const std::map<uint32_t, Pixe
         for (unsigned i = 4; i < 9; ++i)
             if (pass.records[0].words[i] != anchor[i])
                 throw std::runtime_error("Pixel trace observed quad identities differ across registers");
-        for (unsigned lane = 0; lane < 4; ++lane)
-            result.registers[lane][{1, {reg}}] = {pass.records[0].words[lane], uint8_t(mask)};
+        if (!coverageOnly)
+            for (unsigned lane = 0; lane < 4; ++lane)
+                result.registers[lane][{1, {reg}}] = {pass.records[0].words[lane], uint8_t(mask)};
         passes.push_back(meta);
     }
     result.inputProvenance = {{"source", "unique-private-raster-quad/1"},
                               {"scope", "isolated_primitive_pre_depth_inputs"},
                               {"original_fragment_eligibility", false},
                               {"sample_frequency", sampleFrequency},
+                              {"coverage_only", coverageOnly},
                               {"passes", passes}};
     return result;
 }

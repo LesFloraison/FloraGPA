@@ -1,5 +1,6 @@
 #include "StateCapture.h"
 #include "application/HlslCompilation.h"
+#include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
 #include "application/NativePixelOutputs.h"
 #include <QDir>
@@ -184,6 +185,55 @@ Capture textureRegion(uint32_t dimension, uint32_t format) {
 class NativePixelCheckpointInputsTests final : public QObject {
     Q_OBJECT
   private slots:
+    void shaderHistory_data() { prefixes_data(); }
+    void shaderHistory() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        fixture(mode).save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, mode);
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto original = storage(r, mode), color = r.readTexture(20);
+        const auto bound = bindings(r);
+        const bool counted = mode == "counter" || mode == "append";
+        const auto counter = counted ? r.readCounter(12) : 0;
+        NativeHistorySelection selection;
+        selection.resource = 20;
+        NativePixelDrawHistoryLimits limits;
+        limits.evaluateShaderOutputs = true;
+        auto report = collectNativePixelDrawHistory(r, 200, selection, limits);
+        QCOMPARE(report.at("records").size(), size_t(3));
+        for (uint32_t i = 0; i < 3; ++i) {
+            const auto &row = report.at("records")[i];
+            QCOMPARE(row.at("private_shader_outputs").size(), size_t(1));
+            const auto &out = row.at("private_shader_outputs")[0];
+            QCOMPARE(out.at("completed_primitives"), Json(i));
+            QCOMPARE(out.at("resource_observation"), Json("current_native_bindings"));
+            const auto &value = out.at("lanes")[out.at("selected_lane").get<size_t>()].at("outputs")[0];
+            const std::array<uint32_t, 4> expected{mode == "append" ? 7u : i, 11, 17, 23};
+            QCOMPARE(value.at("valid_mask"), Json(15));
+            QCOMPARE((value.at("raw_bits").get<std::array<uint32_t, 4>>()), expected);
+            const auto bytes = row.at("after").at("bytes").get<std::vector<uint8_t>>();
+            std::array<uint32_t, 4> native{};
+            QCOMPARE(bytes.size(), size_t(16));
+            std::memcpy(native.data(), bytes.data(), 16);
+            QCOMPARE(native, expected);
+            QVERIFY(out.at("input_provenance").at("coverage_only").get<bool>());
+        }
+        QCOMPARE(storage(r, mode), original);
+        QCOMPARE(r.readTexture(20), color);
+        QCOMPARE(bindings(r), bound);
+        if (counted)
+            QCOMPARE(r.readCounter(12), counter);
+        report["mode"] = mode.toStdString();
+        report["status"] = "ok";
+        save(report);
+    }
+
     void computeGroup_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
