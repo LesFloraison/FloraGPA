@@ -1055,3 +1055,15 @@ capture/adapter history selections pass, with 1,824 rejected corrupt reports.
 See `research/DX11_NATIVE_RASTER_MERGER_INPUTS.md` for the retained initial
 failures, template disassembly, reproduction and limits. Actual state extraction
 and complete merger/history qualification remain open alongside P7/P8.
+
+## Live output-merger state continuation
+
+Native merger snapshots now read actual RTV/DSV bindings, typed subresources,
+blend/depth state and selected MSAA storage with bounded, cancellable readback.
+The complete matrix passes 1,353 checks with no failures or skips; six validators
+reject 29,610 corrupted reports, and four related replay test entries pass.
+Independent D3D11 state creation distinguishes authored descriptors from actual
+disabled-stencil fields without weakening numerical or historical checks. See
+`research/DX11_NATIVE_PIXEL_MERGER_SNAPSHOTS.md` for retained failures, the
+interrupted run, precision limits and reproduction commands. Complete merger
+integration, original fragment eligibility and P7/P8 acceptance remain open.
