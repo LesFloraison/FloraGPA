@@ -32,6 +32,7 @@ endif()
 if(BUILD_TESTING)
   # Explicit development probe; never deployed and not run by the default tests.
   add_executable(FloraOriginalDebuggerWatch EXCLUDE_FROM_ALL tools/native/probe_original_debugger_watch.cpp)
+  add_executable(FloraOriginalResearchHost EXCLUDE_FROM_ALL tools/native/original_research_host.cpp)
   target_include_directories(FloraOriginalDebuggerWatch PRIVATE third_party)
   target_link_libraries(FloraOriginalDebuggerWatch PRIVATE bcrypt)
   add_executable(FloraReplayFinalSamplesProbe EXCLUDE_FROM_ALL tools/native/replay_final_samples_probe.cpp)
