@@ -18,8 +18,14 @@ struct PixelInputShader {
     std::string originalShaderSha256;
     uint32_t reg = 0, mask = 0;
     bool sampleFrequency = false;
-    // When present, a private u1 raw buffer replaces all MRT writes. Its first
-    // word is an atomic record count; records start at byte 16 and span 144 bytes.
+    // Implicit sample-frequency shaders retain their original trigger. A
+    // private integer RTV associates records with storage samples without
+    // adding SV_SampleIndex to a shader that did not declare it.
+    bool sampleRecordTarget = false;
+    // When present, a private u1 raw buffer stores records, with an optional
+    // integer sample-index RTV. The header retains the allocation count,
+    // selected record index and an opaque frequency-trigger bit union.
+    // Records start at byte 16 and span 144 bytes.
     // The private observation shader never needs a free application UAV slot.
     std::optional<PixelInputRecordSelection> records;
     // Compact signature consumed by a private pre-raster bridge. D3D11 links

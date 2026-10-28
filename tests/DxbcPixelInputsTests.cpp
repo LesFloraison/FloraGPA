@@ -187,6 +187,246 @@ std::vector<Words> read(Device &d, Target &target, unsigned samples) {
 class DxbcPixelInputsTests : public QObject {
     Q_OBJECT
   private slots:
+    void positionInterpolation_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<uint32_t>("sample");
+        QTest::addColumn<bool>("edge");
+        QTest::addColumn<bool>("positionFirst");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 4u})
+                for (uint32_t sample = 0; sample < samples; ++sample)
+                    for (bool edge : {false, true}) {
+                        if (edge && (samples == 1 || (sample != 0 && sample != 2)))
+                            continue;
+                        for (bool positionFirst : {false, true})
+                            for (const auto *mode : {"center", "centroid", "sample", "attribute-sample"})
+                                QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5-%6")
+                                                             .arg(vendor)
+                                                             .arg(samples)
+                                                             .arg(sample)
+                                                             .arg(edge)
+                                                             .arg(positionFirst)
+                                                             .arg(mode)))
+                                    << vendor << samples << sample << edge << positionFirst << QString(mode);
+                    }
+    }
+    void positionInterpolation() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, samples);
+        QFETCH(uint32_t, sample);
+        QFETCH(bool, edge);
+        QFETCH(bool, positionFirst);
+        QFETCH(QString, mode);
+        using Json = nlohmann::json;
+        Json report{{"schema", 1},
+                    {"kind", "native_position_interpolation_probe"},
+                    {"vendor_request", vendor},
+                    {"samples", samples},
+                    {"sample", sample},
+                    {"edge", edge},
+                    {"position_first", positionFirst},
+                    {"mode", mode.toStdString()},
+                    {"status", "pending"},
+                    {"original_fragment_eligibility", nullptr}};
+        std::string failure;
+        try {
+            Device d(vendor);
+            const auto vs = compile(std::string("struct O{") +
+                                        (positionFirst ? "float4 p:SV_Position;float4 a:DATA;"
+                                                       : "float4 a:DATA;float4 p:SV_Position;") +
+                                        "};O main(uint i:SV_VertexID){O o;o.p=float4(i==1?1:-1,i==2?-1:1,"
+                                        "i==0?.125:i==1?.875:.625,1);o.a=float4(i,i+1,i+2,i+3);return o;}",
+                                    "vs_5_0");
+            Com<ID3D11VertexShader> vertex;
+            check(d.device->CreateVertexShader(vs.data(), vs.size(), nullptr, &vertex), "Create position VS");
+            d.context->VSSetShader(vertex.Get(), nullptr, 0);
+            const auto geometry = captureGeometry(d, vs);
+            Target target;
+            D3D11_TEXTURE2D_DESC td{16,
+                                    16,
+                                    1,
+                                    1,
+                                    DXGI_FORMAT_R32G32B32A32_UINT,
+                                    {samples, 0},
+                                    D3D11_USAGE_DEFAULT,
+                                    D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+                                    0,
+                                    0};
+            check(d.device->CreateTexture2D(&td, nullptr, &target.texture), "Create position target");
+            check(d.device->CreateRenderTargetView(target.texture.Get(), nullptr, &target.rtv),
+                  "Create position RTV");
+            check(d.device->CreateShaderResourceView(target.texture.Get(), nullptr, &target.srv),
+                  "Create position SRV");
+            D3D11_RASTERIZER_DESC raster{};
+            raster.FillMode = D3D11_FILL_SOLID;
+            raster.CullMode = D3D11_CULL_NONE;
+            raster.DepthClipEnable = TRUE;
+            raster.MultisampleEnable = samples > 1;
+            Com<ID3D11RasterizerState> rs;
+            check(d.device->CreateRasterizerState(&raster, &rs), "Create position rasterizer");
+            d.context->RSSetState(rs.Get());
+            const D3D11_VIEWPORT viewport{0, 0, 16, 16, 0, 1};
+            d.context->RSSetViewports(1, &viewport);
+            const std::string position =
+                (mode == "center" || mode == "attribute-sample" ? "" : mode.toStdString() + " ") +
+                std::string("noperspective float4 p:SV_Position");
+            const std::string data = mode == "attribute-sample" ? "sample float4 a:DATA" : "float4 a:DATA";
+            const auto source = "uint4 main(" +
+                                (positionFirst ? position + "," + data : data + "," + position) +
+                                "):SV_Target{return uint4(asuint(p.z),asuint(a.x),asuint(a.y),asuint(p.x));}";
+            const auto original = compile(source);
+            report["source"] = source;
+            report["shader_sha256"] = sha256(original);
+            Com<ID3DBlob> disassembly;
+            check(D3DDisassemble(original.data(), original.size(), 0, nullptr, &disassembly),
+                  "Disassemble original position PS");
+            report["shader_disassembly"] =
+                std::string(static_cast<const char *>(disassembly->GetBufferPointer()));
+            Com<ID3D11PixelShader> shader;
+            check(d.device->CreatePixelShader(original.data(), original.size(), nullptr, &shader),
+                  "Create position PS");
+            d.context->PSSetShader(shader.Get(), nullptr, 0);
+            d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+            const float clear[4]{};
+            d.context->ClearRenderTargetView(target.rtv.Get(), clear);
+            d.context->Draw(3, 0);
+            d.context->OMSetRenderTargets(0, nullptr, nullptr);
+            const auto raw = read(d, target, samples);
+            d.validate();
+            d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+            const uint32_t x = edge ? 7 : 3, y = edge ? 8 : 2;
+            const auto expected = raw[(y * 16 + x) * samples + sample];
+            report["reference"] = expected;
+            report["x"] = x;
+            report["y"] = y;
+            const auto positionReg = inputRegister(original, "SV_Position");
+            const auto dataReg = inputRegister(original, "DATA");
+            report["position_register"] = positionReg;
+            report["data_register"] = dataReg;
+            if ((mode == "sample" || mode == "attribute-sample") && samples == 4) {
+                auto observe = [&] {
+                    d.context->ClearRenderTargetView(target.rtv.Get(), clear);
+                    d.context->Draw(3, 0);
+                    d.context->OMSetRenderTargets(0, nullptr, nullptr);
+                    const auto bytes = read(d, target, samples);
+                    d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+                    d.validate();
+                    return bytes[(y * 16 + x) * samples + sample];
+                };
+                const auto indexedSource = "uint4 main(" +
+                                           (positionFirst ? position + "," + data : data + "," + position) +
+                                           ",uint s:SV_SampleIndex):SV_Target{return "
+                                           "uint4(asuint(p.z),asuint(a.x),asuint(a.y),asuint(p.x)+s);}";
+                const auto indexedCode = compile(indexedSource);
+                Com<ID3D11PixelShader> indexedShader;
+                check(d.device->CreatePixelShader(indexedCode.data(), indexedCode.size(), nullptr,
+                                                  &indexedShader),
+                      "Create independent indexed position PS");
+                d.context->PSSetShader(indexedShader.Get(), nullptr, 0);
+                auto indexedValue = observe();
+                indexedValue[3] -= sample;
+                report["explicit_sample_index_reference"] = indexedValue;
+                d.context->PSSetShader(shader.Get(), nullptr, 0);
+                const auto gsSource =
+                    std::string("struct O{") +
+                    (positionFirst ? "float4 p:SV_Position;float4 a:DATA;"
+                                   : "float4 a:DATA;float4 p:SV_Position;") +
+                    "};[maxvertexcount(3)]void main(triangle O input[3],inout TriangleStream<O> output){"
+                    "output.Append(input[0]);output.Append(input[1]);output.Append(input[2]);}";
+                const auto gsCode = compile(gsSource, "gs_5_0");
+                Com<ID3D11GeometryShader> passthrough;
+                check(d.device->CreateGeometryShader(gsCode.data(), gsCode.size(), nullptr, &passthrough),
+                      "Create independent position GS");
+                d.context->GSSetShader(passthrough.Get(), nullptr, 0);
+                report["geometry_shader_reference"] = observe();
+                d.context->GSSetShader(nullptr, nullptr, 0);
+            }
+            const auto invocation = captureNativePixelInvocationInputs(
+                d.device.Get(), !vendor, pixelRasterState(d.context.Get(), 0), geometry, original, 0,
+                {x, y, sample, 0, 2, false});
+            const auto &p = invocation.registers[invocation.selectedLane].at({1, {positionReg}});
+            const auto &a = invocation.registers[invocation.selectedLane].at({1, {dataReg}});
+            report["position_bits"] = p.bits;
+            report["position_valid"] = p.valid;
+            report["data_bits"] = a.bits;
+            report["data_valid"] = a.valid;
+            report["provenance"] = invocation.inputProvenance;
+            if ((mode == "sample" || mode == "attribute-sample") && samples == 4 && sample == 3 && !edge &&
+                positionFirst) {
+                auto expanded = geometry;
+                expanded.bytes.insert(expanded.bytes.end(), geometry.bytes.begin(), geometry.bytes.end());
+                expanded.report["vertices"] = 6;
+                expanded.report["primitives"] = 2;
+                const auto capture = pixelInputShader(original, positionReg,
+                                                      PixelInputRecordSelection{x, y, sample, 0, 2, false});
+                const auto range = pixelGeometryRangeBridge(expanded, capture, 0, 2);
+                const auto state = pixelRasterState(d.context.Get(), 0);
+                const auto observed =
+                    capturePixelRasterInputs(d.device.Get(), !vendor, state, range, capture);
+                report["range_observation"] = observed.identity;
+                if (observed.records.size() != 2 || observed.identity.at("private_draws") != 2)
+                    throw std::runtime_error("Implicit sample geometry range lost records");
+                for (const auto &record : observed.records)
+                    if (record.words[record.words[4][2] + 2 * record.words[4][3]] != p.bits)
+                        throw std::runtime_error("Implicit sample geometry range input differs");
+                auto masked = state;
+                masked.sampleMask = 0;
+                if (!capturePixelRasterInputs(d.device.Get(), !vendor, masked, range, capture)
+                         .records.empty())
+                    throw std::runtime_error("Masked implicit sample retained a record");
+                QVERIFY_THROWS_EXCEPTION(
+                    std::runtime_error,
+                    capturePixelRasterInputs(d.device.Get(), !vendor, state, range, capture, 1));
+                unsigned checks = 0;
+                QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                         capturePixelRasterInputs(d.device.Get(), !vendor, state, range,
+                                                                  capture, 1024 * 1024,
+                                                                  [&] { return ++checks >= 8; }));
+                report["range_recovery_checks"] = checks;
+                const auto retried = capturePixelRasterInputs(d.device.Get(), !vendor, state, range, capture);
+                if (retried.records.size() != observed.records.size())
+                    throw std::runtime_error("Implicit sample retry lost records");
+                for (size_t i = 0; i < observed.records.size(); ++i)
+                    if (retried.records[i].words != observed.records[i].words)
+                        throw std::runtime_error("Implicit sample retry changed input values");
+                Com<ID3D11PixelShader> boundShader;
+                Com<ID3D11RenderTargetView> boundTarget;
+                d.context->PSGetShader(&boundShader, nullptr, nullptr);
+                d.context->OMGetRenderTargets(1, &boundTarget, nullptr);
+                if (boundShader.Get() != shader.Get() || boundTarget.Get() != target.rtv.Get())
+                    throw std::runtime_error("Implicit sample diagnostics changed original bindings");
+                d.context->Draw(3, 0);
+                d.context->OMSetRenderTargets(0, nullptr, nullptr);
+                const auto postCancel = read(d, target, samples)[(y * 16 + x) * samples + sample];
+                d.context->OMSetRenderTargets(1, target.rtv.GetAddressOf(), nullptr);
+                report["post_cancel_reference"] = postCancel;
+                report["retry_records"] = retried.records.size();
+                if (postCancel != expected)
+                    throw std::runtime_error("Original drawing changed after implicit sample cancellation");
+            }
+            if (positionReg == dataReg || p.valid != 5 || a.valid != 3 ||
+                Words{p.bits[2], a.bits[0], a.bits[1], p.bits[0]} != expected ||
+                invocation.inputProvenance.at("selected_raster").at("depth_bits") != expected[0])
+                throw std::runtime_error("Original GPU position/data inputs differ");
+            d.validate();
+            report["status"] = "ok";
+        } catch (const std::exception &error) {
+            failure = error.what();
+            report["status"] = "failed";
+            report["error"] = failure;
+        }
+        const auto root = qEnvironmentVariable("FLORA_POSITION_INTERPOLATION_EVIDENCE");
+        if (!root.isEmpty()) {
+            QVERIFY(QDir().mkpath(root));
+            QFile file(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag()) + ".json"));
+            QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+            const auto text = report.dump(2);
+            QCOMPARE(file.write(text.data(), qint64(text.size())), qint64(text.size()));
+        }
+        QVERIFY2(failure.empty(), failure.c_str());
+    }
     void mergerInputs_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("samples");
@@ -499,8 +739,18 @@ class DxbcPixelInputsTests : public QObject {
                                                                 recordBridge, recordShader);
             QCOMPARE(recordCapture.records.size(), size_t(1));
             const auto address = (2 * 16 + 3) * samples + samples - 1;
-            for (unsigned i = 0; i < 8; ++i)
-                QCOMPARE(recordCapture.records[0].words[i], observed[i][address]);
+            for (unsigned i = 0; i < 8; ++i) {
+                if (i == 5 && recordShader.sampleRecordTarget) {
+                    // No SV_SampleIndex was declared or injected. These words
+                    // remain unavailable; the integer RTV identifies storage.
+                    QCOMPARE(recordCapture.identity.at("sample_index_observed"), nlohmann::json(false));
+                    QCOMPARE(recordCapture.records[0].words[i], Words{});
+                } else
+                    QCOMPARE(recordCapture.records[0].words[i], observed[i][address]);
+            }
+            const auto &selectedRecord = recordCapture.records[0].words;
+            const auto selectedLane = selectedRecord[4][2] + 2 * selectedRecord[4][3];
+            QCOMPARE(selectedRecord[selectedLane], expected[address]);
             Com<ID3D11RenderTargetView> stillBound;
             d.context->OMGetRenderTargets(1, &stillBound, nullptr);
             QCOMPARE(stillBound.Get(), targets[0].rtv.Get());
@@ -941,6 +1191,39 @@ class DxbcPixelInputsTests : public QObject {
                 }
         QVERIFY(originalInterpolation);
         QVERIFY(sampleIndex);
+        const PixelInputRecordSelection selection{1, 1, 0, 0, 1, false};
+        const auto records = pixelInputShader(original, reg, selection);
+        QVERIFY(records.sampleRecordTarget);
+        QVERIFY(std::none_of(records.inputSignature.begin(), records.inputSignature.end(),
+                             [](const auto &field) { return field.system == 10; }));
+        bool retainedTrigger = false;
+        for (const auto &[tag, bytes] : readDxbcParts(records.bytecode))
+            if (tag == 0x58454853)
+                for (const auto &row : readDxbcProgram(bytes).instructions)
+                    if ((row[0] & 2047) == 98 && ((row[0] >> 11) & 15) == 6)
+                        retainedTrigger = true;
+        QVERIFY(retainedTrigger);
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> owned;
+        bool emptied = false;
+        for (const auto &[tag, bytes] : readDxbcParts(original)) {
+            std::vector<uint8_t> copy(bytes.begin(), bytes.end());
+            if (tag == 0x58454853) {
+                auto program = readDxbcProgram(bytes);
+                for (auto &row : program.instructions)
+                    if ((row[0] & 2047) == 98 && ((row[0] >> 11) & 15) == 6) {
+                        row[1] &= ~0xf0u;
+                        emptied = true;
+                    }
+                copy = writeDxbcProgram(program);
+            }
+            owned.emplace_back(tag, std::move(copy));
+        }
+        QVERIFY(emptied);
+        DxbcParts parts;
+        for (const auto &[tag, bytes] : owned)
+            parts.emplace_back(tag, bytes);
+        const auto malformed = makeDxbc(parts);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelInputShader(malformed, reg, selection));
     }
     void rejectsReservedPrecision() {
         const auto original = compile("float4 main(min16float4 a:DATA):SV_Target{return float4(a);}");

@@ -144,9 +144,16 @@ size_t rewrite(Row &row, size_t pos, const std::map<uint32_t, uint32_t> &temps, 
 const char *body = R"(
 #if RECORD_MODE
 RWByteAddressBuffer records:register(u1);
+#if INDEX_RECORDS
+#define RETURN_TYPE uint
+#define RETURN_SEMANTIC :SV_Target
+#else
 #define RETURN_TYPE void
+#define RETURN_SEMANTIC
+#endif
 #else
 #define RETURN_TYPE Output
+#define RETURN_SEMANTIC
 #endif
 uint4 transport(uint4 value, float2 role, uint target) {
     float2 delta = float2(target & 1u, target >> 1u) - role;
@@ -164,12 +171,18 @@ struct Output {
     uint4 coverage:SV_Target6; uint4 orientation:SV_Target7;
 };
 RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
-            uint coverage:SV_Coverage SAMPLE_ARGUMENT LAYER_ARGUMENT
+            uint coverage:SV_Coverage SAMPLE_ARGUMENT LAYER_ARGUMENT FREQUENCY_ARGUMENT
 #if RECORD_MODE
             , bool front:SV_IsFrontFace
 #endif
-            ) {
+            ) RETURN_SEMANTIC {
 #if RECORD_MODE
+#if KEEP_FREQUENCY_TRIGGER
+    // Retain a real original sample-frequency attribute even when another
+    // register is selected. The private header retains its opaque bit union.
+    uint unusedFrequency;
+    records.InterlockedOr(12,asuint(frequencyTrigger.x),unusedFrequency);
+#endif
     uint record=MAX_RECORDS;
     [branch] if(all(asuint(int2(floor(position.xy)))==uint2(SELECT_X,SELECT_Y)) &&
                 LAYER_VALUE==SELECT_LAYER && (coverage&(1u<<SELECT_SAMPLE))!=0 && SAMPLE_MATCH)
@@ -199,6 +212,9 @@ RETURN_TYPE main(float4 source:FLORA_VALUE, float4 position:SV_Position,
             records.Store4(address+64,o.location);records.Store4(address+80,o.samples);
             records.Store4(address+96,o.coverage);records.Store4(address+112,o.orientation);
             records.Store4(address+128,uint4(LAYER_VALUE,SELECT_SAMPLE,asuint(position.z),front?1u:0u));
+#if INDEX_RECORDS
+            return record+1u;
+#endif
 #else
     return o;
 #endif
@@ -224,7 +240,9 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     result.reg = inputRegister.value_or(UINT32_MAX);
     result.records = records;
     std::vector<Row> selectedDeclarations;
-    bool minimumPrecision = false;
+    std::optional<Row> originalPositionDeclaration;
+    std::optional<Row> originalFrequencyDeclaration;
+    bool minimumPrecision = false, explicitSampleIndex = false, selectedFrequency = false;
     for (const auto &row : originalProgram.instructions) {
         const auto op = row[0] & 2047;
         if (op < 98 || op > 100)
@@ -248,8 +266,23 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
             throw std::runtime_error("Invalid pixel input declaration length/register");
         const auto interpolation = (row[0] >> 11) & 15;
         result.sampleFrequency |= interpolation == 6 || interpolation == 7 || (op != 98 && row.back() == 10);
+        if ((interpolation == 6 || interpolation == 7) && !originalFrequencyDeclaration)
+            originalFrequencyDeclaration = row;
+        explicitSampleIndex |= op != 98 && row.back() == 10;
+        if (op == 100 && row.back() == 1) {
+            if (originalPositionDeclaration) {
+                auto previous = *originalPositionDeclaration, current = row;
+                previous[1] &= ~0xf0u;
+                current[1] &= ~0xf0u;
+                if (previous != current)
+                    throw std::runtime_error("Conflicting pixel position declarations");
+            }
+            originalPositionDeclaration = row;
+            minimumPrecision |= index == 3;
+        }
         if (!inputRegister || row[index] != *inputRegister)
             continue;
+        selectedFrequency |= interpolation == 6 || interpolation == 7;
         const auto mask = (row[1] >> 4) & 15;
         if (!mask || (result.mask & mask))
             throw std::runtime_error("Overlapping or empty pixel input declaration");
@@ -309,29 +342,41 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
                 f.mask |= records ? 7 : 3;
             }
     }
-    std::string defines;
+    result.sampleRecordTarget = records && result.sampleFrequency && !explicitSampleIndex;
+    const auto positionInterpolation =
+        originalPositionDeclaration ? ((*originalPositionDeclaration)[0] >> 11) & 15 : 0;
+    const bool keepFrequency = result.sampleRecordTarget && !selectedFrequency &&
+                               positionInterpolation != 6 && positionInterpolation != 7;
+    if (keepFrequency && !originalFrequencyDeclaration)
+        throw std::runtime_error("Missing original sample-frequency trigger");
+    const bool sampleIndex = result.sampleFrequency && !result.sampleRecordTarget;
+    std::string defines =
+        result.sampleRecordTarget ? "#define INDEX_RECORDS 1\n" : "#define INDEX_RECORDS 0\n";
     if (records) {
-        for (const auto &[name, value] :
-             std::initializer_list<std::pair<const char *, uint32_t>>{{"SELECT_X", records->x},
-                                                                      {"SELECT_Y", records->y},
-                                                                      {"SELECT_SAMPLE", records->sample},
-                                                                      {"SELECT_LAYER", records->layer},
-                                                                      {"MAX_RECORDS", records->maxRecords}})
+        for (const auto &[name, value] : std::initializer_list<std::pair<const char *, uint32_t>>{
+                 {"SELECT_X", records->x},
+                 {"SELECT_Y", records->y},
+                 {"SELECT_SAMPLE", records->sample},
+                 {"SELECT_LAYER", records->layer},
+                 {"MAX_RECORDS", records->maxRecords * (result.sampleRecordTarget ? 32u : 1u)}})
             defines += "#define " + std::string(name) + " " + std::to_string(value) + "u\n";
         defines += "#define RECORD_MODE 1\n";
-        defines += result.sampleFrequency ? "#define SAMPLE_MATCH (sample==SELECT_SAMPLE)\n"
-                                          : "#define SAMPLE_MATCH true\n";
+        defines +=
+            sampleIndex ? "#define SAMPLE_MATCH (sample==SELECT_SAMPLE)\n" : "#define SAMPLE_MATCH true\n";
     } else
         defines += "#define RECORD_MODE 0\n";
     defines +=
         records && records->layerInput
             ? "#define LAYER_ARGUMENT , uint layer:SV_RenderTargetArrayIndex\n#define LAYER_VALUE layer\n"
             : "#define LAYER_ARGUMENT\n#define LAYER_VALUE (0u)\n";
+    defines += keepFrequency ? "#define KEEP_FREQUENCY_TRIGGER 1\n#define FREQUENCY_ARGUMENT ,float4 "
+                               "frequencyTrigger:FLORA_FREQUENCY\n"
+                             : "#define KEEP_FREQUENCY_TRIGGER 0\n#define FREQUENCY_ARGUMENT\n";
     const std::string source =
         defines +
-        std::string(result.sampleFrequency ? "#define SAMPLE_ARGUMENT , uint sample:SV_SampleIndex\n"
-                                             "#define SAMPLE_VALUE sample\n"
-                                           : "#define SAMPLE_ARGUMENT\n#define SAMPLE_VALUE (0u)\n") +
+        std::string(sampleIndex ? "#define SAMPLE_ARGUMENT , uint sample:SV_SampleIndex\n"
+                                  "#define SAMPLE_VALUE sample\n"
+                                : "#define SAMPLE_ARGUMENT\n#define SAMPLE_VALUE (0u)\n") +
         body;
     const auto compiled = compileHlsl(source, "ps_5_0", "main", "Flora pixel input transport").bytecode;
     DxbcProgram program{};
@@ -370,6 +415,32 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
             remap[sourceRegister] = temporary;
             continue;
         }
+        if (f.name == "FLORA_FREQUENCY") {
+            auto declaration = *originalFrequencyDeclaration;
+            const auto index = (declaration[1] & 0x80000000u) ? 3u : 2u;
+            const auto mask = (declaration[1] >> 4) & 15;
+            if (!mask)
+                throw std::runtime_error("Empty original sample-frequency attribute mask");
+            const auto component = std::countr_zero(mask);
+            const auto original =
+                std::find_if(parsed.inputs.begin(), parsed.inputs.end(), [&](const auto &field) {
+                    return field.reg == declaration[index] && (field.mask & (1u << component));
+                });
+            if (original == parsed.inputs.end() || original->type != 3)
+                throw std::runtime_error("Invalid original sample-frequency attribute");
+            auto field = *original;
+            const auto reg = field.reg = nextRegister++;
+            field.mask = field.used = 1u << component;
+            fields.push_back(field);
+            declaration[index] = reg;
+            declaration[1] = (declaration[1] & ~0xf0u) | (1u << (component + 4));
+            selectedDeclarations.push_back(std::move(declaration));
+            minimumPrecision |= index == 3;
+            const auto temp = temporary + helperTemps++;
+            remap[sourceRegister] = temp;
+            initialize.push_back({0x05000036, 0x100012, temp, 0x101006 | ((0x55u * component) << 4), reg});
+            continue;
+        }
         const bool isPosition = f.system == 1;
         if (!isPosition && f.system != 10 && f.system != 4 && f.system != 9)
             throw std::runtime_error("Unexpected pixel transport input semantic");
@@ -387,6 +458,10 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
                 swizzle = 0x55u * std::countr_zero(existing->mask);
         } else {
             reg = f.reg = nextRegister++;
+            if (isPosition && originalPositionDeclaration)
+                for (const auto &original : parsed.inputs)
+                    if (original.system == 1)
+                        f.precision = original.precision;
             fields.push_back(f);
             helperRegisters[{sourceRegister, f.system}] = reg;
         }
@@ -399,7 +474,15 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
         if (op >= 98 && op <= 100 && ((row.at(1) >> 12) & 255) == 1) {
             const auto found = helperRegisters.find({row.at(2), op == 98 ? 0u : row.back()});
             if (found != helperRegisters.end()) {
-                row[2] = found->second;
+                if (op == 100 && row.back() == 1 && originalPositionDeclaration) {
+                    // Every register pass observes the same original position
+                    // interpolation. Only the helper's needed component mask changes.
+                    const auto mask = row[1] & 0xf0u;
+                    row = *originalPositionDeclaration;
+                    row[1] = (row[1] & ~0xf0u) | mask;
+                    row[(row[1] & 0x80000000u) ? 3 : 2] = found->second;
+                } else
+                    row[2] = found->second;
                 declarations.push_back(std::move(row));
             }
         } else if (declaration(op)) {

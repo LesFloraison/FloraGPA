@@ -22,8 +22,8 @@ nlohmann::json captureNativePixelSampleDepth(ID3D11Device *device, bool warp,
         return false;
     };
     checkCancellation(bounded);
-    const auto shader = compileHlsl("float4 main(sample noperspective float4 position:SV_Position):SV_Target{"
-                                    "return position;}",
+    const auto shader = compileHlsl("float4 main(sample noperspective float4 position:SV_Position,"
+                                    "uint index:SV_SampleIndex):SV_Target{return position+float(index);}",
                                     "ps_5_0")
                             .bytecode;
     const auto fields = pixelShaderInputSignature(shader);

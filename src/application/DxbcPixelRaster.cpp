@@ -1,7 +1,9 @@
 #include "DxbcPixelRaster.h"
 #include "DxbcGpuCompletion.h"
+#include "HlslCompilation.h"
 #include <algorithm>
 #include <bit>
+#include <chrono>
 #include <cmath>
 #include <d3d11sdklayers.h>
 
@@ -250,6 +252,14 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         bridge.identity.at("input_register") != pixel.reg || state.viewports.size() > 16 ||
         state.scissors.size() > 16)
         throw std::runtime_error("Invalid private pixel raster request");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    const auto callerCancellation = std::move(cancelled);
+    cancelled = [callerCancellation, deadline] {
+        checkCancellation(callerCancellation);
+        if (std::chrono::steady_clock::now() >= deadline)
+            throw std::runtime_error("Private pixel raster deadline");
+        return false;
+    };
     const auto primitiveCount = bridge.vertices.size() / bridge.stride / bridge.verticesPerPrimitive;
     if (bridge.identity.value("primitive_count", uint64_t(1)) != primitiveCount)
         throw std::runtime_error("Private pixel geometry range count differs from storage");
@@ -273,7 +283,12 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
             !std::isfinite(v.Height) || !std::isfinite(v.MinDepth) || !std::isfinite(v.MaxDepth) ||
             v.Width < 0 || v.Height < 0)
             throw std::runtime_error("Invalid private pixel raster viewport");
-    const UINT recordBytes = 16 + 144 * selection.maxRecords;
+    const bool indexTarget = pixel.sampleRecordTarget && samples > 1;
+    if (indexTarget &&
+        (target.dimension != D3D11_RESOURCE_DIMENSION_TEXTURE2D || state.rasterizer.ForcedSampleCount))
+        throw std::runtime_error("Implicit sample input mapping requires a multisample texture");
+    const UINT recordCapacity = selection.maxRecords * (pixel.sampleRecordTarget ? 32u : 1u);
+    const UINT recordBytes = 16 + 144 * recordCapacity;
     uint64_t required = uint64_t(recordBytes) * 2 + bridge.vertices.size(), targetBytes = 0;
     if (target.dimension != D3D11_RESOURCE_DIMENSION_UNKNOWN) {
         const auto [pitch, rows] = pitches(target.width, target.height, target.format);
@@ -285,6 +300,21 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         if (targetBytes > UINT64_MAX - required)
             throw std::runtime_error("Private pixel raster allocation overflow");
         required += targetBytes;
+    }
+    uint64_t indexBytes = 0;
+    if (indexTarget) {
+        indexBytes = 4;
+        for (auto dimension : {target.width, target.height, target.layers, target.samples.Count}) {
+            if (dimension > UINT64_MAX / indexBytes)
+                throw std::runtime_error("Pixel sample-index target allocation overflow");
+            indexBytes *= dimension;
+        }
+        if (indexBytes > UINT64_MAX - required)
+            throw std::runtime_error("Pixel sample-index target budget overflow");
+        required += indexBytes;
+        if (required > UINT64_MAX - 4)
+            throw std::runtime_error("Pixel sample-index staging budget overflow");
+        required += 4;
     }
     if (required > maxBytes)
         throw std::runtime_error("Private pixel raster allocation budget exceeded");
@@ -356,6 +386,32 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         } else
             check(device->CreateRenderTargetView(carrier.Get(), nullptr, &color),
                   "Create private pixel color view");
+    }
+    Com<ID3D11ShaderResourceView> recordIndices;
+    if (indexTarget) {
+        const D3D11_TEXTURE2D_DESC desc{target.width,
+                                        target.height,
+                                        1,
+                                        target.layers,
+                                        DXGI_FORMAT_R32_UINT,
+                                        target.samples,
+                                        D3D11_USAGE_DEFAULT,
+                                        D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+                                        0,
+                                        0};
+        Com<ID3D11Texture2D> indices;
+        check(device->CreateTexture2D(&desc, nullptr, &indices), "Create pixel record-index target");
+        color.Reset();
+        check(device->CreateRenderTargetView(indices.Get(), nullptr, &color),
+              "Create pixel record-index RTV");
+        D3D11_SHADER_RESOURCE_VIEW_DESC view{};
+        view.Format = DXGI_FORMAT_R32_UINT;
+        view.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+        view.Texture2DMSArray.ArraySize = target.layers;
+        check(device->CreateShaderResourceView(indices.Get(), &view, &recordIndices),
+              "Create pixel record-index SRV");
+        const float zero[4]{};
+        context->ClearRenderTargetView(color.Get(), zero);
     }
     // Keep every possible 2x2 neighbor of the selected pixel inside the private
     // guard. Intersect existing scissors without translating viewport/sample
@@ -450,6 +506,8 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
     check(device->CreateDepthStencilState(&depthDesc, &depthState), "Create private pixel pre-depth state");
     context->OMSetDepthStencilState(depthState.Get(), 0);
     D3D11_BLEND_DESC blendDesc{};
+    if (indexTarget)
+        blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     Com<ID3D11BlendState> blend;
     check(device->CreateBlendState(&blendDesc, &blend), "Create private pixel no-color-write state");
     context->OMSetBlendState(blend.Get(), nullptr, state.sampleMask);
@@ -468,8 +526,61 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
                                     : bridge.verticesPerPrimitive == 2
                                         ? D3D11_PRIMITIVE_TOPOLOGY_LINELIST
                                         : D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    checkCancellation(cancelled);
-    context->Draw(UINT(bridge.vertices.size() / bridge.stride), 0);
+    Com<ID3D11ComputeShader> readIndex;
+    Com<ID3D11Buffer> indexStaging;
+    if (indexTarget) {
+        const auto source =
+            std::string("Texture2DMSArray<uint> indices:register(t0);"
+                        "RWByteAddressBuffer records:register(u0);[numthreads(1,1,1)]void main(){"
+                        "records.Store(4,indices.Load(int3(") +
+            std::to_string(selection.x) + "," + std::to_string(selection.y) + "," +
+            std::to_string(selection.layer) + ")," + std::to_string(selection.sample) + "));}";
+        checkCancellation(cancelled);
+        const auto code = compileHlsl(source, "cs_5_0").bytecode;
+        check(device->CreateComputeShader(code.data(), code.size(), nullptr, &readIndex),
+              "Create pixel index readback CS");
+        const D3D11_BUFFER_DESC indexDesc{4, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+        check(device->CreateBuffer(&indexDesc, nullptr, &indexStaging), "Create pixel index staging");
+    }
+    std::vector<uint32_t> selectedIndices;
+    const auto draws = indexTarget ? primitiveCount : 1;
+    for (size_t primitive = 0; primitive < draws; ++primitive) {
+        checkCancellation(cancelled);
+        if (indexTarget) {
+            const float clear[4]{};
+            context->ClearRenderTargetView(color.Get(), clear);
+            context->OMSetRenderTargetsAndUnorderedAccessViews(1, color.GetAddressOf(), depth.Get(), 1, 1,
+                                                               uav.GetAddressOf(), nullptr);
+        }
+        context->Draw(indexTarget ? bridge.verticesPerPrimitive
+                                  : UINT(bridge.vertices.size() / bridge.stride),
+                      indexTarget ? UINT(primitive * bridge.verticesPerPrimitive) : 0);
+        if (!indexTarget)
+            continue;
+        ID3D11UnorderedAccessView *noUav = nullptr;
+        ID3D11ShaderResourceView *noSrv = nullptr;
+        context->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 1, 1, &noUav, nullptr);
+        context->CSSetShader(readIndex.Get(), nullptr, 0);
+        context->CSSetShaderResources(0, 1, recordIndices.GetAddressOf());
+        context->CSSetUnorderedAccessViews(0, 1, uav.GetAddressOf(), nullptr);
+        context->Dispatch(1, 1, 1);
+        context->CSSetShaderResources(0, 1, &noSrv);
+        context->CSSetUnorderedAccessViews(0, 1, &noUav, nullptr);
+        if (primitiveCount > 1) {
+            const D3D11_BOX header{4, 0, 0, 8, 1, 1};
+            context->CopySubresourceRegion(indexStaging.Get(), 0, 0, 0, 0, output.Get(), 0, &header);
+            GpuCompletion indexCompletion(device.Get(), context.Get(), cancelled, timeoutMs);
+            indexCompletion.submit();
+            const auto headerData = indexCompletion.map(indexStaging.Get());
+            uint32_t index = 0;
+            std::memcpy(&index, headerData.pData, sizeof index);
+            context->Unmap(indexStaging.Get(), 0);
+            if (index)
+                selectedIndices.push_back(index);
+            if (selectedIndices.size() > selection.maxRecords)
+                throw std::runtime_error("Private pixel selected range record overflow");
+        }
+    }
     context->ClearState();
     context->CopyResource(staging.Get(), output.Get());
     GpuCompletion completion(device.Get(), context.Get(), cancelled, timeoutMs);
@@ -482,9 +593,16 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
     validate(device.Get());
     checkCancellation(cancelled);
     const auto count = Reader(result.storage).read<uint32_t>();
-    if (count > selection.maxRecords)
+    if (count > recordCapacity)
         throw std::runtime_error("Private pixel input record overflow");
+    const auto selectedIndex = Reader(Bytes(result.storage).subspan(4)).read<uint32_t>();
+    if (indexTarget && primitiveCount == 1 && selectedIndex)
+        selectedIndices.push_back(selectedIndex);
+    if (std::any_of(selectedIndices.begin(), selectedIndices.end(), [&](auto i) { return i > count; }))
+        throw std::runtime_error("Private pixel sample record index is outside captured storage");
     for (uint32_t i = 0; i < count; ++i) {
+        if (indexTarget && !std::binary_search(selectedIndices.begin(), selectedIndices.end(), i + 1))
+            continue;
         PixelInputRecord record{};
         std::memcpy(&record, result.storage.data() + 16 + i * 144, 144);
         const auto &location = record.words[4], &identity = record.words[8], &direction = record.words[7];
@@ -496,40 +614,50 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
             throw std::runtime_error("Invalid private pixel quad identity/orientation");
         const auto lane = location[2] + 2 * location[3];
         if (!(record.words[6][lane] & (1u << selection.sample)) ||
-            record.words[5][lane] != (pixel.sampleFrequency ? selection.sample : 0u))
+            record.words[5][lane] !=
+                (pixel.sampleFrequency && !pixel.sampleRecordTarget ? selection.sample : 0u))
             throw std::runtime_error("Private pixel record lacks selected sample coverage");
         result.records.push_back(record);
     }
-    result.identity = {{"backend", "dxbc-pixel-raster-inputs/2"},
-                       {"adapter_vendor", actual.VendorId},
-                       {"adapter_device", actual.DeviceId},
-                       {"adapter_luid",
-                        (uint64_t(uint32_t(actual.AdapterLuid.HighPart)) << 32) | actual.AdapterLuid.LowPart},
-                       {"feature_level", uint32_t(level)},
-                       {"warp", warp},
-                       {"x", selection.x},
-                       {"y", selection.y},
-                       {"sample", selection.sample},
-                       {"layer", selection.layer},
-                       {"records", count},
-                       {"max_records", selection.maxRecords},
-                       {"record_stride", 144},
-                       {"logical_resource_bytes", required},
-                       {"target_logical_bytes", targetBytes},
-                       {"target_samples", target.samples.Count},
-                       {"raster_samples", samples},
-                       {"sample_mask", state.sampleMask},
-                       {"private_scissor_guard", {guard.left, guard.top, guard.right, guard.bottom}},
-                       {"sample_frequency", pixel.sampleFrequency},
-                       {"input_register", pixel.reg},
-                       {"shader_sha256", pixel.originalShaderSha256},
-                       {"valid_mask", pixel.mask},
-                       {"scope", bridge.identity.contains("primitive_count")
-                                     ? "isolated_geometry_range_pre_depth_inputs"
-                                     : "isolated_primitive_pre_depth_inputs"},
-                       {"original_fragment_eligibility", false},
-                       {"record_order", "unspecified"},
-                       {"geometry", bridge.identity}};
+    if (result.records.size() > selection.maxRecords)
+        throw std::runtime_error("Private pixel selected record overflow");
+    result.identity = {
+        {"backend", "dxbc-pixel-raster-inputs/2"},
+        {"adapter_vendor", actual.VendorId},
+        {"adapter_device", actual.DeviceId},
+        {"adapter_luid",
+         (uint64_t(uint32_t(actual.AdapterLuid.HighPart)) << 32) | actual.AdapterLuid.LowPart},
+        {"feature_level", uint32_t(level)},
+        {"warp", warp},
+        {"x", selection.x},
+        {"y", selection.y},
+        {"sample", selection.sample},
+        {"layer", selection.layer},
+        {"records", result.records.size()},
+        {"storage_records", count},
+        {"selected_storage_record", indexTarget ? nlohmann::json(selectedIndex) : nlohmann::json(nullptr)},
+        {"selected_storage_records", selectedIndices},
+        {"sample_index_observed", pixel.sampleFrequency && !pixel.sampleRecordTarget},
+        {"private_draws", draws},
+        {"sample_identity_source", indexTarget ? "integer_storage_sample" : "shader_selection"},
+        {"index_target_logical_bytes", indexBytes},
+        {"max_records", selection.maxRecords},
+        {"record_stride", 144},
+        {"logical_resource_bytes", required},
+        {"target_logical_bytes", targetBytes},
+        {"target_samples", target.samples.Count},
+        {"raster_samples", samples},
+        {"sample_mask", state.sampleMask},
+        {"private_scissor_guard", {guard.left, guard.top, guard.right, guard.bottom}},
+        {"sample_frequency", pixel.sampleFrequency},
+        {"input_register", pixel.reg},
+        {"shader_sha256", pixel.originalShaderSha256},
+        {"valid_mask", pixel.mask},
+        {"scope", bridge.identity.contains("primitive_count") ? "isolated_geometry_range_pre_depth_inputs"
+                                                              : "isolated_primitive_pre_depth_inputs"},
+        {"original_fragment_eligibility", false},
+        {"record_order", "unspecified"},
+        {"geometry", bridge.identity}};
     result.identity["raster_state"] = pixelRasterIdentity(state);
     return result;
 }
