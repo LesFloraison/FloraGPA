@@ -166,7 +166,19 @@ std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Re
             result.resize(offset + size_t(size));
             const auto sub = mip + layer * info.mips;
             D3D11_MAPPED_SUBRESOURCE mapped{};
-            check(context_->Map(staging.Get(), sub, D3D11_MAP_READ, 0, &mapped), "Map texture storage");
+            if (cancelled)
+                context_->Flush();
+            for (;;) {
+                checkCancellation(cancelled);
+                const auto hr = context_->Map(staging.Get(), sub, D3D11_MAP_READ,
+                                              cancelled ? D3D11_MAP_FLAG_DO_NOT_WAIT : 0, &mapped);
+                if (hr != DXGI_ERROR_WAS_STILL_DRAWING) {
+                    check(hr, "Map texture storage");
+                    break;
+                }
+                check(device_->GetDeviceRemovedReason(), "Texture storage readback device status");
+                Sleep(1);
+            }
             if ((rows > 1 && mapped.RowPitch < row) ||
                 (depth > 1 && uint64_t(mapped.DepthPitch) < uint64_t(rows) * mapped.RowPitch)) {
                 context_->Unmap(staging.Get(), sub);

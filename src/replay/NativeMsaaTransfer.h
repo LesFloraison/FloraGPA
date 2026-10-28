@@ -12,7 +12,7 @@ using NativeTextureCreate = std::function<Com<ID3D11Resource>(const Resource &, 
 // Private diagnostics use a separate device/context; replay retains its guards.
 MsaaStorage readNativeMsaaStorage(ID3D11Device *, ID3D11DeviceContext *, ID3D11Resource *, const Resource &,
                                   std::optional<uint32_t> sample, uint32_t typedFormat,
-                                  const NativeTextureReadback &);
+                                  const NativeTextureReadback &, const CancelCheck & = {});
 void writeNativeMsaaSample(ID3D11Device *, ID3D11DeviceContext *, ID3D11Resource *, const Resource &,
                            const TexturePatch &, const NativeTextureCreate &);
 } // namespace flora

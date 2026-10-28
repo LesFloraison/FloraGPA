@@ -413,6 +413,8 @@ class Replay {
     std::optional<std::vector<uint8_t>> readTexturePoint(Id id, uint32_t x, uint32_t y, uint32_t slice,
                                                          uint32_t mip, uint32_t layer);
     MsaaStorage readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat);
+    MsaaStorage observeMsaaStorage(Id id, uint32_t sample, uint32_t typedFormat, uint64_t maxBytes,
+                                     const CancelCheck &cancelled = {}, uint32_t timeoutMs = 5000);
     uint32_t readCounter(Id view);
     struct PredicateResult {
         std::string status = "pending";

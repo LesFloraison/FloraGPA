@@ -247,7 +247,7 @@ target_sources(FloraExperiment PRIVATE src/application/NativePixelCandidates.cpp
 target_sources(FloraExperiment PRIVATE src/application/NativePixelGeometryReplay.cpp)
 target_sources(FloraExperiment PRIVATE src/application/NativePixelDrawHistory.cpp src/application/NativePixelInvocation.cpp)
 target_sources(FloraExperiment PRIVATE src/application/NativePixelOutputs.cpp)
-target_sources(FloraExperiment PRIVATE src/application/NativePixelMerger.cpp)
+target_sources(FloraExperiment PRIVATE src/application/NativePixelMerger.cpp src/application/NativePixelMergerSnapshot.cpp)
 target_sources(FloraExperiment PRIVATE src/application/NativeArtifacts.cpp src/application/NativeMesh.cpp src/application/NativePixel.cpp src/application/NativePixelGpu.cpp)
 target_sources(FloraExperiment PRIVATE src/application/QueryHistory.h)
 target_include_directories(FloraExperiment SYSTEM PUBLIC third_party)

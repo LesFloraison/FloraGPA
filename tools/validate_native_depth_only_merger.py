@@ -57,8 +57,16 @@ def validate(document, vendor, samples, fmt, mode):
     desc = [1, 0 if mode == 'no-depth-write' else 1,
             8 if mode == 'unchanged' else 1 if mode == 'depth-fail' else 2,
             int(stencil), 65535] + (face + [1, 1, 1, 8] if front else [1, 1, 1, 8] + face)
-    require(r['depth_stencil_descriptor'] == desc and r['front_face'] == front and r['stencil_ref'] == 0xa5,
-            'Wrong depth/stencil state')
+    if 'binding_snapshot' in r:
+        require(r['fixture_depth_stencil_descriptor'] == desc,
+                'Wrong authored depth/stencil state')
+        actual = r['depth_stencil_descriptor']
+        require(actual == r['reference_depth_stencil_descriptor'] and len(actual) == len(desc) and
+                actual[:5] == desc[:5] and (not stencil or actual[5:] == desc[5:]),
+                'Snapshot differs from independent D3D11 descriptor or active fixture state')
+    else:
+        require(r['depth_stencil_descriptor'] == desc, 'Wrong depth/stencil state')
+    require(r['front_face'] == front and r['stencil_ref'] == 0xa5, 'Wrong face or stencil reference')
     flags = 1 if mode == 'read-only-depth' else 2 if mode == 'read-only-stencil' else 0
     require(r['depth_view_flags'] == flags, 'Wrong read-only flags')
     mask = 0x55555555 if mode == 'sample-mask' else 0xffffffff
@@ -137,6 +145,9 @@ def main():
                        ('logical_payload_bound', 0), ('payload_limit', 1), ('effective_sample_mask', -1),
                        ('depth_view_flags', -1), ('passing_samples', -1),
                        ('reference_entire_draw_passing_samples', -1)]
+        if 'binding_snapshot' in document['result']:
+            corruptions += [('fixture_depth_stencil_descriptor', []),
+                            ('reference_depth_stencil_descriptor', []), ('depth_stencil_descriptor', [])]
         for key, value in corruptions:
             bad = copy.deepcopy(document)
             bad['result'][key] = value

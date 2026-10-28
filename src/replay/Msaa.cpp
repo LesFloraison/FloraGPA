@@ -1,5 +1,6 @@
 #include "NativeMsaaTransfer.h"
 #include "Unpredicated.h"
+#include <chrono>
 #include <d3dcompiler.h>
 
 namespace flora {
@@ -60,9 +61,42 @@ MsaaStorage Replay::readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typ
     const auto resource = frame_.resource(id);
     return readMsaaStorage(get<ID3D11Resource>(id), resource, sample, typedFormat);
 }
+MsaaStorage Replay::observeMsaaStorage(Id id, uint32_t sample, uint32_t typedFormat, uint64_t maxBytes,
+                                       const CancelCheck &cancelled, uint32_t timeoutMs) {
+    if (!timeoutMs || timeoutMs > 60000 || !maxBytes)
+        throw std::invalid_argument("Invalid live MSAA observation limits");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    const CancelCheck bounded = [&] {
+        checkCancellation(cancelled);
+        if (std::chrono::steady_clock::now() >= deadline)
+            throw std::runtime_error("Live MSAA observation deadline");
+        return false;
+    };
+    checkCancellation(bounded);
+    const auto resource = observeTextureMetadata(id).resource;
+    const auto info = textureInfo(resource);
+    if (info.samples <= 1 || sample >= info.samples)
+        throw std::invalid_argument("Live MSAA observation sample exceeds resource bounds");
+    const auto layout = textureSubresources(resource);
+    const auto bytes = layout.back().offset + layout.back().size;
+    if (bytes > maxBytes / info.samples)
+        throw std::runtime_error("Live MSAA observation payload budget exceeded");
+    Unpredicated unpredicated(context_.Get());
+    PredicateIsolation isolation(*this);
+    auto result = readNativeMsaaStorage(
+        device_.Get(), context_.Get(), get<ID3D11Resource>(id), resource, sample, typedFormat,
+        [&](ID3D11Resource *target, const Resource &storage) {
+            return readTextureStorage(target, storage, bounded);
+        },
+        bounded);
+    checkCancellation(bounded);
+    return result;
+}
 MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *context, ID3D11Resource *source,
                                   const Resource &resource, std::optional<uint32_t> sample,
-                                  uint32_t typedFormat, const NativeTextureReadback &readback) {
+                                  uint32_t typedFormat, const NativeTextureReadback &readback,
+                                  const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     const auto info = textureInfo(resource);
     if (info.dimension != 3 || info.samples <= 1 || info.mips != 1)
         throw std::runtime_error("MSAA inspection requires a multisampled 2D texture with one mip");
@@ -88,6 +122,7 @@ MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *con
         targetResource.desc[8] = D3D11_BIND_RENDER_TARGET;
     }
     auto texture = [&](const Resource &r) {
+        checkCancellation(cancelled);
         D3D11_TEXTURE2D_DESC desc{};
         std::memcpy(&desc, r.desc.data(), sizeof desc);
         Com<ID3D11Texture2D> out;
@@ -102,8 +137,10 @@ MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *con
     check(device->CreateDeferredContext(0, &deferred), "Create MSAA inspection context");
     if (hardware) {
         result.mode = "hardware_resolve";
-        for (uint32_t layer = 0; layer < info.layers; ++layer)
+        for (uint32_t layer = 0; layer < info.layers; ++layer) {
+            checkCancellation(cancelled);
             deferred->ResolveSubresource(target.Get(), layer, source, layer, DXGI_FORMAT(targetFormat));
+        }
     } else {
         result.mode = sample ? "selected_sample" : "gpa_shader_mean";
         auto copyResource = resource;
@@ -132,6 +169,7 @@ MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *con
         check(device->CreateRasterizerState(&raster, &rs), "Create MSAA rasterizer");
         deferred->RSSetState(rs.Get());
         auto srv = [&](uint32_t format, uint32_t first, uint32_t count) {
+            checkCancellation(cancelled);
             D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
             desc.Format = DXGI_FORMAT(format);
             desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
@@ -141,7 +179,9 @@ MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *con
             return view;
         };
         auto pixel = [&](const std::string &text) {
+            checkCancellation(cancelled);
             auto binary = compileMsaa(text, "ps_5_0");
+            checkCancellation(cancelled);
             Com<ID3D11PixelShader> ps;
             check(
                 device->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
@@ -233,10 +273,12 @@ MsaaStorage readNativeMsaaStorage(ID3D11Device *device, ID3D11DeviceContext *con
         }
     }
     Com<ID3D11CommandList> commands;
+    checkCancellation(cancelled);
     check(deferred->FinishCommandList(FALSE, &commands), "Finish MSAA inspection commands");
     context->ExecuteCommandList(commands.Get(), TRUE);
     check(device->GetDeviceRemovedReason(), "MSAA inspection device status");
     result.bytes = readback(target.Get(), targetResource);
+    checkCancellation(cancelled);
     if (!bits && (targetFormat == 88 || targetFormat == 93)) {
         result.canonicalX = true;
         for (size_t i = 3; i < result.bytes.size(); i += 4)
