@@ -716,8 +716,12 @@ struct GpuOperations::State {
                   "uint4 main(float4 p:SV_Position):SV_Target0{uint i=uint(p.x)+2*uint(p.y);"
                   "float4 address=asfloat(addresses[i]);float parameter=asfloat(parameters[i].x);";
         if (opcode == 108) {
-            source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,address." + coordinates +
-                      "),image.CalculateLevelOfDetailUnclamped(state,address." + coordinates +
+            const std::string lodCoordinates = dimension == 7    ? "x"
+                                               : dimension == 8  ? "xy"
+                                               : dimension == 10 ? "xyz"
+                                                                 : coordinates;
+            source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,address." + lodCoordinates +
+                      "),image.CalculateLevelOfDetailUnclamped(state,address." + lodCoordinates +
                       "),0,0);float4 result=0;";
         } else {
             source += "float4 sampled=image.";
@@ -1251,7 +1255,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/26"}};
+            {"backend", "dxbc-gpu/27"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {

@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <wrl/client.h>
@@ -65,9 +66,9 @@ struct Configuration {
 };
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 3 && argc != 4) {
-        std::cerr
-            << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [PRECISION_SCENARIO_1_TO_6_OR_LOD]\n";
+    if (argc < 3 || argc > 5) {
+        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP "
+                     "[PRECISION_SCENARIO_1_TO_6_OR_LOD] [LOD_DIMENSION]\n";
         return 2;
     }
     try {
@@ -75,10 +76,22 @@ int wmain(int argc, wchar_t **argv) {
         if (!std::filesystem::create_directory(directory))
             throw std::runtime_error("Output directory must be new");
         const uint32_t vendor = std::stoul(argv[2]);
-        const bool lod = argc == 4 && std::wstring(argv[3]) == L"lod";
+        const bool lod = argc >= 4 && std::wstring(argv[3]) == L"lod";
         const uint32_t precision = argc == 4 && !lod ? std::stoul(argv[3]) : 0;
-        if (precision > 6 || (argc == 4 && !lod && precision == 0))
+        if (precision > 6 || (argc == 4 && !lod && precision == 0) || (argc == 5 && !lod))
             throw std::runtime_error("Invalid minimum precision scenario");
+        const uint32_t dimension = argc == 5 ? std::stoul(argv[4]) : 3;
+        const std::map<uint32_t, std::pair<std::string, std::string>> shapes{
+            {2, {"Texture1D", "x"}},          {3, {"Texture2D", "xy"}},     {5, {"Texture3D", "xyz"}},
+            {6, {"TextureCube", "xyz"}},      {7, {"Texture1DArray", "x"}}, {8, {"Texture2DArray", "xy"}},
+            {10, {"TextureCubeArray", "xyz"}}};
+        const auto &[shape, lodCoordinates] = shapes.at(dimension);
+        const bool cube = dimension == 6 || dimension == 10;
+        const UINT layers = dimension == 10                    ? 12
+                            : dimension == 6                   ? 6
+                            : dimension == 7 || dimension == 8 ? 3
+                                                               : 1;
+        const UINT firstLayer = dimension == 10 ? 6 : dimension == 7 || dimension == 8 ? 1 : 0;
         ComPtr<IDXGIAdapter1> selected;
         if (vendor) {
             ComPtr<IDXGIFactory1> factory;
@@ -116,6 +129,7 @@ int wmain(int argc, wchar_t **argv) {
                     {"scope", "independent_pixel_sampling"},
                     {"vendor", vendor},
                     {"precision_scenario", precision},
+                    {"dimension", dimension},
                     {"adapter_vendor", actual.VendorId},
                     {"adapter_device", actual.DeviceId},
                     {"adapter_luid",
@@ -148,15 +162,20 @@ int wmain(int argc, wchar_t **argv) {
         ComPtr<ID3D11Buffer> constants;
         check(device->CreateBuffer(&bd, nullptr, &constants));
 
-        std::array<std::vector<float>, 4> texels;
-        std::array<D3D11_SUBRESOURCE_DATA, 4> subresources;
-        for (unsigned mip = 0; mip < 4; ++mip) {
-            const unsigned width = 8u >> mip;
-            for (unsigned y = 0; y < width; ++y)
-                for (unsigned x = 0; x < width; ++x)
-                    texels[mip].push_back(float(mip) + .25f + float(x) / 8 + float(y) / 64);
-            subresources[mip] = {texels[mip].data(), width * 4, 0};
-        }
+        std::vector<std::vector<float>> texels(layers * 4);
+        std::vector<D3D11_SUBRESOURCE_DATA> subresources(layers * 4);
+        for (unsigned layer = 0; layer < layers; ++layer)
+            for (unsigned mip = 0; mip < 4; ++mip) {
+                const unsigned width = 8u >> mip;
+                const unsigned height = dimension == 2 || dimension == 7 ? 1 : width;
+                const unsigned depth = dimension == 5 ? width : 1;
+                const auto index = layer * 4 + mip;
+                for (unsigned z = 0; z < depth; ++z)
+                    for (unsigned y = 0; y < height; ++y)
+                        for (unsigned x = 0; x < width; ++x)
+                            texels[index].push_back(float(mip) + .25f + float(x) / 8 + float(y) / 64);
+                subresources[index] = {texels[index].data(), width * 4, width * height * 4};
+            }
         std::vector<Configuration> configurations{
             {"point"},
             {"linear", 21},
@@ -172,6 +191,9 @@ int wmain(int argc, wchar_t **argv) {
             {"mirror-once", 0, 5},
             {"null-resource"},
             {"null-sampler"}};
+        if (argc == 5)
+            for (unsigned i = 1; i < configurations.size(); ++i)
+                configurations[i].filter |= 1;
         configurations[12].unboundResource = true;
         configurations[13].unboundSampler = true;
         for (unsigned function : {1u, 2u, 3u, 5u, 6u, 7u, 8u}) {
@@ -192,7 +214,7 @@ int wmain(int argc, wchar_t **argv) {
                     const std::string reduced = precision >= 5 ? "min10float" : "min16float";
                     const bool destinationPrecision = precision == 1 || precision >= 4;
                     std::string source =
-                        "Texture2D<" + (destinationPrecision ? reduced : "float") + "4> image:register(t0);";
+                        shape + "<" + (destinationPrecision ? reduced : "float") + "4> image:register(t0);";
                     source += comparison ? "SamplerComparisonState state:register(s0);"
                                          : "SamplerState state:register(s0);";
                     source += "cbuffer Inputs:register(b0){uint4 bits[4];uint discarded;}"
@@ -212,8 +234,9 @@ int wmain(int argc, wchar_t **argv) {
                     if (parameterPrecision)
                         source += reduced + " parameter=" + reduced + "(v.z)*" + reduced + "(1.0007);";
                     if (lod) {
-                        source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,v.xy),"
-                                  "image.CalculateLevelOfDetailUnclamped(state,v.xy),0,0);";
+                        source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,v." +
+                                  lodCoordinates + "),image.CalculateLevelOfDetailUnclamped(state,v." +
+                                  lodCoordinates + "),0,0);";
                     } else {
                         source += (destinationPrecision ? reduced : "float") + "4 sampled=image.";
                         source += comparison                ? "SampleCmp(state,"
@@ -305,24 +328,64 @@ int wmain(int argc, wchar_t **argv) {
                                                                                    : 14);
                          ++configuration) {
                         const auto &config = configurations[configuration];
-                        D3D11_TEXTURE2D_DESC descriptor{
-                            8,
-                            8,
-                            4,
-                            1,
-                            DXGI_FORMAT_R32_FLOAT,
-                            {1, 0},
-                            D3D11_USAGE_IMMUTABLE,
-                            D3D11_BIND_SHADER_RESOURCE,
-                            0,
-                            config.resourceMinimum ? D3D11_RESOURCE_MISC_RESOURCE_CLAMP : 0u};
-                        ComPtr<ID3D11Texture2D> texture;
-                        check(device->CreateTexture2D(&descriptor, subresources.data(), &texture));
+                        const UINT misc = (config.resourceMinimum ? D3D11_RESOURCE_MISC_RESOURCE_CLAMP : 0u) |
+                                          (cube ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0u);
+                        ComPtr<ID3D11Resource> texture;
+                        if (dimension == 2 || dimension == 7) {
+                            D3D11_TEXTURE1D_DESC descriptor{8,
+                                                            4,
+                                                            layers,
+                                                            DXGI_FORMAT_R32_FLOAT,
+                                                            D3D11_USAGE_IMMUTABLE,
+                                                            D3D11_BIND_SHADER_RESOURCE,
+                                                            0,
+                                                            misc};
+                            ComPtr<ID3D11Texture1D> value;
+                            check(device->CreateTexture1D(&descriptor, subresources.data(), &value));
+                            texture = value;
+                        } else if (dimension == 5) {
+                            D3D11_TEXTURE3D_DESC descriptor{8,
+                                                            8,
+                                                            8,
+                                                            4,
+                                                            DXGI_FORMAT_R32_FLOAT,
+                                                            D3D11_USAGE_IMMUTABLE,
+                                                            D3D11_BIND_SHADER_RESOURCE,
+                                                            0,
+                                                            misc};
+                            ComPtr<ID3D11Texture3D> value;
+                            check(device->CreateTexture3D(&descriptor, subresources.data(), &value));
+                            texture = value;
+                        } else {
+                            D3D11_TEXTURE2D_DESC descriptor{8,
+                                                            8,
+                                                            4,
+                                                            layers,
+                                                            DXGI_FORMAT_R32_FLOAT,
+                                                            {1, 0},
+                                                            D3D11_USAGE_IMMUTABLE,
+                                                            D3D11_BIND_SHADER_RESOURCE,
+                                                            0,
+                                                            misc};
+                            ComPtr<ID3D11Texture2D> value;
+                            check(device->CreateTexture2D(&descriptor, subresources.data(), &value));
+                            texture = value;
+                        }
                         D3D11_SHADER_RESOURCE_VIEW_DESC vd{};
-                        vd.Format = descriptor.Format;
-                        vd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+                        vd.Format = DXGI_FORMAT_R32_FLOAT;
+                        vd.ViewDimension = dimension == 2   ? D3D11_SRV_DIMENSION_TEXTURE1D
+                                           : dimension == 3 ? D3D11_SRV_DIMENSION_TEXTURE2D
+                                           : dimension == 5 ? D3D11_SRV_DIMENSION_TEXTURE3D
+                                           : dimension == 6 ? D3D11_SRV_DIMENSION_TEXTURECUBE
+                                           : dimension == 7 ? D3D11_SRV_DIMENSION_TEXTURE1DARRAY
+                                           : dimension == 8 ? D3D11_SRV_DIMENSION_TEXTURE2DARRAY
+                                                            : D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
                         vd.Texture2D.MostDetailedMip = config.firstMip;
                         vd.Texture2D.MipLevels = config.mipCount;
+                        if (dimension == 7 || dimension == 8 || dimension == 10) {
+                            vd.Texture2DArray.FirstArraySlice = firstLayer;
+                            vd.Texture2DArray.ArraySize = dimension == 10 ? 1 : 2;
+                        }
                         ComPtr<ID3D11ShaderResourceView> view;
                         check(device->CreateShaderResourceView(texture.Get(), &vd, &view));
                         D3D11_SAMPLER_DESC sd{};
@@ -419,6 +482,9 @@ int wmain(int argc, wchar_t **argv) {
                                 const auto diagnostics = validate(queue.Get(), undefined);
                                 report["cases"].push_back(
                                     {{"operation", operation},
+                                     {"dimension", dimension},
+                                     {"first_layer", firstLayer},
+                                     {"layer_count", layers - firstLayer},
                                      {"flow", flow},
                                      {"offset", offset},
                                      {"configuration", configuration},

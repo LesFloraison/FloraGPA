@@ -114,13 +114,15 @@ TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Regi
         return Value::known({});
     if (view.dimension != native)
         throw std::runtime_error("Sampling declaration disagrees with its native view");
-    const uint32_t required = dimension == 2                     ? 1
-                              : dimension == 3 || dimension == 7 ? 3
-                              : dimension == 10                  ? 15
-                                                                 : 7;
+    const uint32_t sampleRequired = dimension == 2                     ? 1
+                                    : dimension == 3 || dimension == 7 ? 3
+                                    : dimension == 10                  ? 15
+                                                                       : 7;
     const uint32_t gradientMask = dimension == 2 || dimension == 7   ? 1
                                   : dimension == 3 || dimension == 8 ? 3
                                                                      : 7;
+    // LOD depends on spatial derivatives, never the array layer coordinate.
+    const auto required = dimensionsOnly ? gradientMask : sampleRequired;
     const uint32_t operandMask = ddy ? gradientMask : 1;
     if ((address.valid & required) != required || (lodOrDdx.valid & operandMask) != operandMask ||
         (ddy && (ddy->valid & gradientMask) != gradientMask))
@@ -223,7 +225,10 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
         ((opcode == 69 || opcode == 108) && precision[2]) ||
         (opcode == 108 && std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; })))
         throw std::runtime_error("Invalid implicit sampling floating-point precision");
-    const uint32_t addressMask = dimension == 2                     ? 1
+    const uint32_t addressMask = opcode == 108                      ? (dimension == 2 || dimension == 7   ? 1
+                                                                       : dimension == 3 || dimension == 8 ? 3
+                                                                                                          : 7)
+                                 : dimension == 2                   ? 1
                                  : dimension == 3 || dimension == 7 ? 3
                                  : dimension == 10                  ? 15
                                                                     : 7;

@@ -1416,3 +1416,18 @@ cases and 10,416 exact component comparisons across three adapters. The final
 their expected values or undefined-case rejections. Other LOD shapes/formats,
 minimum precision and captured-game workflows remain unqualified. All full
 debugger, history, removal and independent release gates remain in force.
+
+### LOD array-coordinate validity and shape qualification
+
+Native LOD now uses only spatial coordinate validity for array resources. Unknown
+array-layer coordinates no longer incorrectly invalidate a known LOD result;
+unknown spatial coordinates still propagate unknown results. The helper HLSL uses
+the explicit spatial arity and its identity advances to `dxbc-gpu/27`.
+
+The [shape evidence](research/DX11_NATIVE_LOD_SHAPES.md) records nine reproduced
+before-fix failures and a 225-pass final regression on WARP, NVIDIA and Intel.
+Seven R32_FLOAT texture shapes cover 9,408 original/native LOD cases and 72,912
+exact active component comparisons. Point-mip and null-sampler outputs remain
+adapter observations, separate from the 7,104 linear-mip cases. Original sampling
+assertions remain unchanged. Integer formats, minimum precision, game workflows
+and all full debugger, history, dependency-removal and release gates remain open.

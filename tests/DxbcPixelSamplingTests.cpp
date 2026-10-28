@@ -59,7 +59,8 @@ Words row(uint32_t opcode, std::initializer_list<Words> args = {}) {
 }
 
 Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, uint32_t swizzle = 0xe4,
-                    bool indexed = false, uint32_t version = 0x50, uint32_t stage = 0) {
+                    bool indexed = false, uint32_t version = 0x50, uint32_t stage = 0,
+                    uint32_t dimension = 3) {
     const Words address = modifier ? Words{0x80101e46, 1 | (modifier << 6), 0} : Words{0x101e46, 0};
     const Words resource =
         indexed ? Words{0x00d07006 | (swizzle << 4), 0, 0x10100a, 1} : Words{0x107006 | (swizzle << 4), 0};
@@ -70,13 +71,13 @@ Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, 
         sample[0] = (sample[0] & 0xffffff) | (uint32_t(sample.size()) << 24);
     }
     if (indexed) {
-        sample.insert(sample.begin() + 1, {0x800000c2, 3u | (0x5555u << 6)});
+        sample.insert(sample.begin() + 1, {0x80000002 | (dimension << 6), 3u | (0x5555u << 6)});
         sample[0] = (sample[0] & 0xffffff) | (uint32_t(sample.size()) << 24) | 0x80000000u;
     }
     return Program(
         makeDxbc({{0x58454853,
                    writeDxbcProgram({{(stage << 16) | version, 0},
-                                     {row(88 | (3 << 11), {{0x1070f2, 0}, {0x5555}}),
+                                     {row(88 | (dimension << 11), {{0x1070f2, 0}, {0x5555}}),
                                       row(90 | (opcode == 70 ? 0x800 : 0), {{0x106000, 0}}),
                                       row(98 | (2 << 11), {{0x1010f2, 0}}),
                                       row(98 | (1 << 11), {{0x101032, 1}}), row(101, {{0x1020f2, 0}}),
@@ -86,27 +87,52 @@ std::shared_ptr<TextureInputs> textures(const Json &item) {
     auto result = std::make_shared<TextureInputs>();
     auto &texture = result->resources[1];
     texture.resource.id = 1;
-    texture.resource.type = 0x85;
+    const auto dimension = item.value("dimension", 3u);
+    const bool cube = dimension == 6 || dimension == 10;
+    const auto layers = dimension == 10                    ? 12u
+                        : dimension == 6                   ? 6u
+                        : dimension == 7 || dimension == 8 ? 3u
+                                                           : 1u;
+    texture.resource.type = dimension == 2 || dimension == 7 ? 0x84 : dimension == 5 ? 0x86 : 0x85;
     texture.minLod = item["resource_min_lod"].get<float>();
-    texture.resource.desc = {8, 8, 4, 1, 41, 1, 0, 0, 8, 0, texture.minLod ? 0x80u : 0u};
+    const auto misc = (texture.minLod ? 0x80u : 0u) | (cube ? 4u : 0u);
+    if (texture.resource.type == 0x84)
+        texture.resource.desc = {8, 4, layers, 41, 0, 8, 0, misc};
+    else if (texture.resource.type == 0x86)
+        texture.resource.desc = {8, 8, 8, 4, 41, 0, 8, 0, misc};
+    else
+        texture.resource.desc = {8, 8, 4, layers, 41, 1, 0, 0, 8, 0, misc};
     texture.subresources = textureSubresources(texture.resource);
     std::vector<uint8_t> bytes;
-    for (unsigned mip = 0; mip < 4; ++mip)
-        for (unsigned y = 0; y < (8u >> mip); ++y)
-            for (unsigned x = 0; x < (8u >> mip); ++x) {
-                const float value = float(mip) + .25f + float(x) / 8 + float(y) / 64;
-                const auto *begin = reinterpret_cast<const uint8_t *>(&value);
-                bytes.insert(bytes.end(), begin, begin + 4);
-            }
+    for (const auto &sub : texture.subresources)
+        for (unsigned z = 0; z < sub.depth; ++z)
+            for (unsigned y = 0; y < sub.height; ++y)
+                for (unsigned x = 0; x < sub.width; ++x) {
+                    const float value = float(sub.mip) + .25f + float(x) / 8 + float(y) / 64;
+                    const auto *begin = reinterpret_cast<const uint8_t *>(&value);
+                    bytes.insert(bytes.end(), begin, begin + 4);
+                }
     texture.storage = Buffer::known(std::move(bytes));
     auto &view = result->views[{7, {0}}];
     if (item["resource_bound"].get<bool>()) {
         view.resource = 1;
         view.format = 41;
-        view.dimension = 4;
+        view.dimension = dimension == 2   ? 2
+                         : dimension == 3 ? 4
+                         : dimension == 5 ? 8
+                         : dimension == 6 ? 9
+                         : dimension == 7 ? 3
+                         : dimension == 8 ? 5
+                                          : 10;
         view.firstMip = item["first_mip"].get<unsigned>();
         view.mipCount = item["mip_count"].get<unsigned>();
-        view.nativeDescriptor = {41, 4, view.firstMip, view.mipCount, 0, 0};
+        view.firstLayer = item.value("first_layer", 0u);
+        view.layerCount = item.value("layer_count", 1u);
+        view.nativeDescriptor = {41, view.dimension, view.firstMip, view.mipCount, 0, 0};
+        if (dimension == 7 || dimension == 8 || dimension == 10) {
+            view.nativeDescriptor[4] = view.firstLayer;
+            view.nativeDescriptor[5] = view.layerCount / (cube ? 6 : 1);
+        }
     }
     auto &sampler = result->samplers[{6, {0}}];
     if (!item["sampler_descriptor"].is_null()) {
@@ -154,11 +180,32 @@ class DxbcPixelSamplingTests final : public QObject {
     }
     void originalLod() {
         QFETCH(uint32_t, vendor);
+        runLod(vendor, 3);
+    }
+    void originalLodShapes_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        for (auto vendor : {0u, 4318u, 32902u})
+            for (auto dimension : {2u, 5u, 6u, 7u, 8u, 10u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(dimension))) << vendor << dimension;
+    }
+    void originalLodShapes() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, dimension);
+        runLod(vendor, dimension);
+    }
+
+  private:
+    void runLod(uint32_t vendor, uint32_t dimension) {
         try {
-            const auto directory = evidence.filePath(QString("lod-%1").arg(vendor));
+            const auto directory =
+                evidence.filePath(dimension == 3 ? QString("lod-%1").arg(vendor)
+                                                 : QString("lod-%1-%2").arg(vendor).arg(dimension));
             QProcess probe;
-            probe.start(QCoreApplication::applicationDirPath() + "/FloraPixelSamplingProbe.exe",
-                        {directory, QString::number(vendor), "lod"});
+            QStringList arguments{directory, QString::number(vendor), "lod"};
+            if (dimension != 3)
+                arguments.push_back(QString::number(dimension));
+            probe.start(QCoreApplication::applicationDirPath() + "/FloraPixelSamplingProbe.exe", arguments);
             if (!probe.waitForFinished(60000)) {
                 probe.kill();
                 probe.waitForFinished(5000);
@@ -232,6 +279,7 @@ class DxbcPixelSamplingTests final : public QObject {
             QFAIL(error.what());
         }
     }
+  private slots:
     void initTestCase() {
         if (qEnvironmentVariableIsSet("FLORA_KEEP_PIXEL_SAMPLING_EVIDENCE")) {
             evidence.setAutoRemove(false);
@@ -590,6 +638,56 @@ class DxbcPixelSamplingTests final : public QObject {
         Lane alone(instruction(108), input[0]);
         alone.step();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, alone.step());
+    }
+    void lodCoordinateValidity_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        for (auto vendor : {0u, 4318u, 32902u})
+            for (auto dimension : {2u, 3u, 5u, 6u, 7u, 8u, 10u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(dimension))) << vendor << dimension;
+    }
+    void lodCoordinateValidity() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, dimension);
+            auto item = reports.at(vendor)["cases"].at(0);
+            item["dimension"] = dimension;
+            item["first_layer"] = dimension == 10 ? 6u : dimension == 7 || dimension == 8 ? 1u : 0u;
+            item["layer_count"] = dimension == 6 || dimension == 10  ? 6u
+                                  : dimension == 7 || dimension == 8 ? 2u
+                                                                     : 1u;
+            // Use linear mip filtering for the semantic validity checks.
+            item["sampler_descriptor"][0] = 21;
+            auto input = operands(vendor, 69);
+            const auto storage = textures(item);
+            for (auto &lane : input)
+                lane.textures = storage;
+            auto code = instruction(108, 15, 0, 0xe4, false, 0x50, 0, dimension);
+            PixelQuad reference(code, input);
+            execute(reference);
+            const uint8_t spatial = dimension == 2 || dimension == 7   ? 1
+                                    : dimension == 3 || dimension == 8 ? 3
+                                                                       : 7;
+            for (auto &lane : input) {
+                lane.registers[{1, {0}}].valid = spatial;
+                for (unsigned c = 0; c < 4; ++c)
+                    if (!(spatial & (1u << c)))
+                        lane.registers[{1, {0}}].bits[c] = 0x7fc12345;
+            }
+            PixelQuad irrelevant(code, input);
+            execute(irrelevant);
+            for (unsigned lane = 0; lane < 4; ++lane) {
+                QCOMPARE(reference.lane(lane).value({2, {0}}).valid, uint8_t(15));
+                QCOMPARE(irrelevant.lane(lane).value({2, {0}}), reference.lane(lane).value({2, {0}}));
+            }
+            input[1].registers[{1, {0}}].valid &= ~1u;
+            PixelQuad unknown(code, input);
+            execute(unknown);
+            for (unsigned lane = 0; lane < 4; ++lane)
+                QCOMPARE(unknown.lane(lane).value({2, {0}}).valid, uint8_t(0));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void cancellation_data() {
         semantics_data();
