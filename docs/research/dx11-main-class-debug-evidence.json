@@ -1,0 +1,728 @@
+{
+  "schema": 1,
+  "baseline": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "implementation_commit": "3e0bdea6e206f65a274b7f727155d36b0fd1c589",
+  "full_parity": false,
+  "baseline_class_fixture_git_blob": "464d5c144f6316a6f586ef0ad54f850d7eafe30d",
+  "binaries": [
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\dx11-native-baseline\\Release\\FloraGPA.Cli.exe",
+      "sha256": "70e098eb36e5e81e3a744c5f723aed87bcf8f71b062335a0485ece520d757815",
+      "bytes": 4879872
+    },
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\dx11-native-baseline\\Release\\FloraGPA.Rdc.exe",
+      "sha256": "f9c38e18a4e8717f3b37c14a378cd4087baff3c286719b43d6d9f23b98eb9140",
+      "bytes": 570880
+    },
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Cli.exe",
+      "sha256": "2d750f159ec05947d091381bd65fefb5affa0cfbcfc6426fb824a0aa6a7fab6b",
+      "bytes": 6086144
+    },
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+      "sha256": "16046bf6e2058c89136fd788fb66acb64d2a6e1d0180689417026358103799f1",
+      "bytes": 6086144
+    },
+    {
+      "path": "C:\\Program Files\\RenderDoc\\renderdoc.dll",
+      "sha256": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3",
+      "bytes": 27160728
+    }
+  ],
+  "validation": {
+    "evidence_valid": true,
+    "full_parity": false,
+    "cases": [
+      {
+        "vendor": 0,
+        "created": false,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 20,
+        "native_group_stores": 4
+      },
+      {
+        "vendor": 0,
+        "created": true,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 40,
+        "native_group_stores": 4
+      },
+      {
+        "vendor": 4318,
+        "created": false,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 20,
+        "native_group_stores": 4
+      },
+      {
+        "vendor": 4318,
+        "created": true,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 40,
+        "native_group_stores": 4
+      },
+      {
+        "vendor": 32902,
+        "created": false,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 20,
+        "native_group_stores": 4
+      },
+      {
+        "vendor": 32902,
+        "created": true,
+        "baseline_steps": 4,
+        "baseline_r0_at_store": 0,
+        "baseline_class_body_observed": false,
+        "native_selected_steps": 7,
+        "native_selected_store": 40,
+        "native_group_stores": 4
+      }
+    ],
+    "corruption_rejections": 30
+  },
+  "files": [
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug/job.json",
+      "bytes": 584,
+      "sha256": "f51889051c6d247db0149e814f677898e27b6b6678ee8a1347679429cea8184d"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug/loaded_modules.json",
+      "bytes": 3993,
+      "sha256": "2df35fa8bf4e6169e32206b7cb3d58ff2e86b554f9aa4b08e3bcadb2605de214"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug/result.json",
+      "bytes": 55519,
+      "sha256": "c640a276336b2cb9ac0f46dcd0a920beec105afd9fc27ec3585e0a73356981f4"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-baseline-debug.stdout",
+      "bytes": 106,
+      "sha256": "2537bf6ec2e7ea9a19ebab59bcbe6313e2bb1f950138ff4f79216de5eda2e0b5"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "bc6d85359e5bcdd8976422f5db041b53ff092a12953a3f8c25b087480cc81209"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/job.json",
+      "bytes": 724,
+      "sha256": "6370cec058ac17d2dbdf6f3872a787d7892ff2dd0a41bb0a22769af93cbb7ab2"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/result.json",
+      "bytes": 5668,
+      "sha256": "c1b4baf2cdb6121b34bf343580a16b1a6889e92c09060ba3533106a12f3870e4"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/trace.jsonl",
+      "bytes": 105992,
+      "sha256": "e9e7579f880c8e5e184ab6fa9c8df734aa2b28016cb5ca5a4eb7cf00a1092d30"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-native-debug.stdout",
+      "bytes": 104,
+      "sha256": "f86b76519543620ef18b161e3c9e754cd0305853cb78091e72f701be7e852bea"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-recapture/independent_capture.rdc",
+      "bytes": 3915,
+      "sha256": "4adfddd3114e7a4d246de63039146c0ef0fa182a930e7d61c07788650be15f96"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-recapture/report.json",
+      "bytes": 5842,
+      "sha256": "d129f127dd55194f7d2e3666b72170c8fb5d3197c34b620e80ad6fe7c73b25a4"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-0-recapture.stdout",
+      "bytes": 6025,
+      "sha256": "d90dbb4b1e6df047df0ad2f429890498f9f797520244c553053bcc7619b5a4db"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug/job.json",
+      "bytes": 584,
+      "sha256": "1ad7032b4466d39ba3e42cd39a7754ae383bfb8a081cbeed599c0b3cd3c65cdb"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug/loaded_modules.json",
+      "bytes": 3953,
+      "sha256": "cc372324e2277462a7a61757695eb2e44eda3c6aba838f192147b9d834ba327f"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug/result.json",
+      "bytes": 37205,
+      "sha256": "f735d9878d544de22e9ccbbf1270d50955bdb699d0f8438a70bba42d549af9e3"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-baseline-debug.stdout",
+      "bytes": 106,
+      "sha256": "f2ae8048e66e8efcb929fb37635fec7ab8ac7bf97e23d628bc1a9588034ac8b6"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "9efe2194f62c27cebb7878615920c160325cbd2431a951f9b85c5b360709007e"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/job.json",
+      "bytes": 724,
+      "sha256": "cd71ba02de6f8ec1fa12bf93302c49f4454de4e5b5ded62d8c93e8f6c02c4d14"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/result.json",
+      "bytes": 5668,
+      "sha256": "512966223b79a334b1c42e6f6c8407f9cf721a683c99d4037d533e39bcecc320"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/trace.jsonl",
+      "bytes": 105993,
+      "sha256": "26ccb912c540572b8722f45eeacbec3a504577b687279111b51b767164c2ddaf"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-native-debug.stdout",
+      "bytes": 104,
+      "sha256": "975ad6a2eb82f8caa67c6ccada0967a1c92d41b8bf51320a88d09aacff6275bc"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-recapture/independent_capture.rdc",
+      "bytes": 3916,
+      "sha256": "716ddf781f43a77d3b0c92b1b3cef4a4bc92e9e7dc1de59c404232089db87023"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-recapture/report.json",
+      "bytes": 5842,
+      "sha256": "15024ad4398aa3c945a154371786b367036b1a7093280440acb091228fff86f6"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/0-1-recapture.stdout",
+      "bytes": 6025,
+      "sha256": "692a02ffeb5993c3cbba909984b44b7374f50d4872ccd4b727db8127731ba60f"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug/job.json",
+      "bytes": 592,
+      "sha256": "bcc4a30e52ac2654988df28b950dae0e0debd293ed3d909d400d34424df19514"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug/loaded_modules.json",
+      "bytes": 5417,
+      "sha256": "1aa7c5ad4c5afc6d43643aa6b643456ce7a47d89de0f11cb5ac940f59fac635c"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug/result.json",
+      "bytes": 56966,
+      "sha256": "52ed2b7f7e2cb67b00adf66f6ab48dac456d1d6070d15e63708de7e454be234b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-baseline-debug.stdout",
+      "bytes": 110,
+      "sha256": "704ccbe40d81a9508aa8700c4437641faee8bf96f973bceb218482583649f89f"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "9f90a381fbaec8c6ef0b22158a005131b06953b13231bcc730d5784536e11379"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/job.json",
+      "bytes": 739,
+      "sha256": "1e470a11450f3bf26ffd142f106fa9b9eface2bfb50fbc17b7cab2fd74d52706"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/result.json",
+      "bytes": 6088,
+      "sha256": "f0e524c23ff51c49447ad1efaab43bfa2e5c22bfeb10ca2b0e4a5a396dc2233a"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/trace.jsonl",
+      "bytes": 105995,
+      "sha256": "7cca694a9493f249fa4be43b59f9b9e37674f85e7ea0e588a8dec35fc3131d9b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-native-debug.stdout",
+      "bytes": 108,
+      "sha256": "d5385434f20f7bb7c13b95e482f4df2fe65a0b728a918b1503ad69cb439fbe97"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-recapture/independent_capture.rdc",
+      "bytes": 4084,
+      "sha256": "b36984cd04fd21f7ee26be07e379c32ad3ebe33d694859da23500b3419cf1578"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-recapture/report.json",
+      "bytes": 7372,
+      "sha256": "bfb89f5610cea3d556fd858ca4ab17d703f2680658e352ec52e7be337abb3b3a"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-0-recapture.stdout",
+      "bytes": 7570,
+      "sha256": "afac6b74d1c0b65194d0130f912a91f64d2dac31d7dc18c6f9689722aa1e179d"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug/job.json",
+      "bytes": 592,
+      "sha256": "1ed321358d3e5997eae448824cbac9e29228f1918ade97a9c80e7cf1e20a5908"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug/loaded_modules.json",
+      "bytes": 5417,
+      "sha256": "8a64609e593cd9ccd4a84c432ba4a141b22b00fba9edd85764d74ee6d37fa9ee"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug/result.json",
+      "bytes": 38694,
+      "sha256": "80dddad589fda52cd81babe6bc94c5af185efb690779e9ccb239785ad688796b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-baseline-debug.stdout",
+      "bytes": 110,
+      "sha256": "a7bc1ffc2ffb7add62778463ec14f84910d0ae25b8bbb066e852d4e134aa6340"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "3d6f7a790910c8805855f216f8169db31385ba838b20954258f4aa89319740c8"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/job.json",
+      "bytes": 739,
+      "sha256": "1e443495566d4c814845848ca4c58402989a14ddde88975a931285988c0a7f43"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/result.json",
+      "bytes": 6088,
+      "sha256": "fbdb9d04abc71f34de842b78540f35777d80360f3a4981bdc632f2fb70703cdc"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/trace.jsonl",
+      "bytes": 105996,
+      "sha256": "7f65f4075a059609a6b76994df1d395bec91b3d3d2d8f9a7762156d801f1896c"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-native-debug.stdout",
+      "bytes": 108,
+      "sha256": "c290c8a7d08634778ebb66d2c5e245bdc4e2132820563d3d30e3fbe83dbfa311"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-recapture/independent_capture.rdc",
+      "bytes": 4020,
+      "sha256": "559a1de1c8fb07aa72e443fc7a4fdedea4acc83eccd0ea9f1d2b46eb356802d7"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-recapture/report.json",
+      "bytes": 7372,
+      "sha256": "551811ed0f40549f4eca3647a2e7508ecc59befb78334f23ad4e94aa36a239c6"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/32902-1-recapture.stdout",
+      "bytes": 7570,
+      "sha256": "6a1108eeb3dd71d5d73b50ef4f1678f6bf346af1fa1f4e4d49a2be75d7f89a06"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug/job.json",
+      "bytes": 590,
+      "sha256": "79ba6c3b8eda5a0f8bc546ab1c94671d5d9eb37eb78769919219d76008d7961e"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "e951d6a817e63c39b6bf5948d66fadba866fb4edfa794d89a81be16c13a2b87f"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug/result.json",
+      "bytes": 55546,
+      "sha256": "0f186bd1527fb3cf18074c9e809acdcb5f4c38d99e1db37b8f61e239a1fd368d"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-baseline-debug.stdout",
+      "bytes": 109,
+      "sha256": "a56fdcd8699a6b1a827fe28b663c6a6ef7faf7ce2063c15a4b92c9b72978b4e2"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "3a4cfe41b9b57f066779a5dba848c64fdaae5016f5e7c50d703784b37c6f0973"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/job.json",
+      "bytes": 736,
+      "sha256": "c06c1f65746cf40bba077ce9557e39877c766c762816eccb70d75d5a98948c25"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/result.json",
+      "bytes": 6473,
+      "sha256": "4f8b54e8497975ecc50247658c6ba41e390d5f506cab7208f0c9a19fea25f0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/trace.jsonl",
+      "bytes": 105994,
+      "sha256": "755c77639a99820371ffe43f91e7a458e34a0ab8a174d2bfc53bbea06bd9dfd9"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-native-debug.stdout",
+      "bytes": 107,
+      "sha256": "1bd1e7bbde131f4848fb4a96233e3cfb60f4c306f4cedc89ae4ec2dafb5a47ad"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-recapture/independent_capture.rdc",
+      "bytes": 4010,
+      "sha256": "6d7e7199e0a865dd5167ee54c0e3958fd34f78709f3c5e64c4ac01bde2a69715"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-recapture/report.json",
+      "bytes": 6691,
+      "sha256": "16a02bd9f315ca5a45a1dbaa9e7d6c522002b5872ec94023ef8cf1576642174d"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-0-recapture.stdout",
+      "bytes": 6886,
+      "sha256": "75dadad35aaf62b8874d87df6b121c14baec0c96f05f51220de3076394780eb1"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug/debug_shader.asm",
+      "bytes": 802,
+      "sha256": "e87a2a1a99e76dcbc8c4975ca6c553a9b0156a6f2f39d0e24e4d5e8814ea0e20"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug/job.json",
+      "bytes": 590,
+      "sha256": "67b0453345925c32065a19c5202fd627a3fae32de17ad1254f1cfc32021c0c89"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "a45ea43c1dee60b6dbfef620f802f529d7bfbaaf93e9a4ae15ee6c3b6ecc7beb"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug/result.json",
+      "bytes": 37274,
+      "sha256": "6103a2a34e5b31d1c788aba54ea84d7a72f8dfecac7a0f42966f03ae24991b28"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-baseline-debug.stdout",
+      "bytes": 109,
+      "sha256": "2293cae3306c5a26faab128760836e3c5f633a5b7b1637711fba12803e9779d4"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/debug.json",
+      "bytes": 1280,
+      "sha256": "9dffc22ff70f06139eb34cfbdf81395470763e1087cacb3b30a76493ef6a23aa"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/job.json",
+      "bytes": 736,
+      "sha256": "f3e604c480b5770ac641f3e6126b9442e25930e41d5e6321a4d3a8c685bea8e2"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/result.json",
+      "bytes": 6473,
+      "sha256": "136e5c1afe96c53fbf839e18832a32ab4bf2e51992b535404a1b7619b80d73d4"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/shader.dxbc",
+      "bytes": 1512,
+      "sha256": "ab87992a36c1ec54fbb7d71d856b6a8a01019bf08b0196c6091a90c0baff0300"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/trace.jsonl",
+      "bytes": 105995,
+      "sha256": "e0df6c071d53154431a6581fe401eeb7b276ac699a2f38df0236ee95ea88937a"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-native-debug.stdout",
+      "bytes": 107,
+      "sha256": "891594bcc55af081f2239cbd651b44dd186fed39f045cd29ab0d7fc0bf0dd014"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-recapture/independent_capture.rdc",
+      "bytes": 3948,
+      "sha256": "fe941efea23ab9869ba4d1cddb296c60dd99d77c7ed2ee3d9053f6075c3be59e"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-recapture/report.json",
+      "bytes": 6691,
+      "sha256": "b4d02dc1aad9ceea4adbca940e6a0574e5f5510de477fe53f52721ac57064e41"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-recapture.stderr",
+      "bytes": 36,
+      "sha256": "f32f8203c3231f711916a038530a4dfd009cdf71109435d9e3f88a944299ef37"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/4318-1-recapture.stdout",
+      "bytes": 6886,
+      "sha256": "37f1c80e8a5508d16d0cd517c6f8e57df916f32ba41688e5c8d4a3a31b9bdf8f"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-matrix/matrix.json",
+      "bytes": 34068,
+      "sha256": "3fec504945d72c60851c57339baad55d406cf98f1a688801278ca561d05fa9dd"
+    },
+    {
+      "path": "artifacts/dx11-native/interface-main-debug-validation.json",
+      "bytes": 1745,
+      "sha256": "b0a3ffd48d162ea6095dc36d1217d901e759ec2731c94628c859593ed22e54e5"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-0.gpa_frame",
+      "bytes": 24946,
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-1.gpa_frame",
+      "bytes": 24942,
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-0.gpa_frame",
+      "bytes": 24946,
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-1.gpa_frame",
+      "bytes": 24942,
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-0.gpa_frame",
+      "bytes": 24946,
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-1.gpa_frame",
+      "bytes": 24942,
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80"
+    },
+    {
+      "path": "tests/ClassCapture.h",
+      "bytes": 5232,
+      "sha256": "5b1974cc3ac316f9b07bd157f937440867858b079a3732f0f0fd016641df438d"
+    },
+    {
+      "path": "tools/probe_baseline_class_debug.py",
+      "bytes": 5991,
+      "sha256": "3650ef468b2f583c4e1d7ab14b1e13759c60c9ced4e03a65d15716e2956e9ab6"
+    },
+    {
+      "path": "tools/validate_baseline_class_debug.py",
+      "bytes": 7183,
+      "sha256": "4c6911a8e65ed99861317d66e54f2b1fa736efe44c94dc7cf495fd7a3841a31c"
+    }
+  ]
+}

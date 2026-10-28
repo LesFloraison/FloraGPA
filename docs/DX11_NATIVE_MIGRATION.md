@@ -1314,3 +1314,14 @@ remain exact. See [the layout and control evidence](research/DX11_NATIVE_INTERFA
 This is partial P6 implementation, not a parity exemption or authorization for P7
 dependency deletion. Class texture/sampler members, general VS/PS and source
 debugging coverage, original fragment qualification and P1/P5/P8 gates remain open.
+
+### Class-debug baseline status versus instruction semantics
+
+Six frozen-main class-debug jobs return success on Software/NVIDIA/Intel, but
+their four-state traces never enter the class function bodies and leave the
+store's temporary input at zero. Six native Worker jobs execute those bodies,
+preserve return boundaries and record the authored 24 group writes. The saved
+observation validator rejects 30 corrupted traces. See [the focused baseline
+report](research/DX11_MAIN_CLASS_DEBUG_BASELINE.md). This separates job success
+from semantic coverage; it does not waive original GPU differences, establish
+general debug parity or close the detailed P0 matrix.
