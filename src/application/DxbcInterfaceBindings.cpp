@@ -102,9 +102,14 @@ InterfaceBindings resolveInterfaceBindings(Bytes shader, std::span<const Interfa
                 if (type >= types || desc[1] >= data.half(instance + 6))
                     throw std::runtime_error("Bound class instance array index exceeds shader metadata");
                 const auto definition = typeOffset + type * 12;
-                pointer.bits[0] = data.half(instance + 8);
-                pointer.bits[1] = data.half(instance + 10) + desc[1] * data.half(definition + 6);
-                pointer.valid = 3;
+                const auto buffer = data.half(instance + 8), offset = data.half(instance + 10);
+                if ((buffer == UINT16_MAX) != (offset == UINT16_MAX))
+                    throw std::runtime_error("Incomplete DXBC class constant buffer location");
+                if (buffer != UINT16_MAX) {
+                    pointer.bits[0] = buffer;
+                    pointer.bits[1] = offset + desc[1] * data.half(definition + 6);
+                    pointer.valid = 3;
+                }
                 for (uint32_t component = 2; component < 4; ++component) {
                     const auto base = data.half(instance + 8 + component * 2);
                     if (base != UINT16_MAX) {
@@ -116,7 +121,8 @@ InterfaceBindings resolveInterfaceBindings(Bytes shader, std::span<const Interfa
                 throw std::runtime_error("Invalid observed class creation flag");
             if (!choices.contains(type))
                 throw std::runtime_error("Bound class type is incompatible with interface slot");
-            if (pointer.bits[0] >= 14 || pointer.bits[1] >= 4096 ||
+            if (((pointer.valid & 1) && pointer.bits[0] >= 14) ||
+                ((pointer.valid & 2) && pointer.bits[1] >= 4096) ||
                 ((pointer.valid & 4) && pointer.bits[2] >= 128) ||
                 ((pointer.valid & 8) && pointer.bits[3] >= 16))
                 throw std::runtime_error("Bound class resource base exceeds the shader limits");

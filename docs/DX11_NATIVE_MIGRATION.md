@@ -1350,3 +1350,20 @@ management and resource processing; they do not establish an engine at `+0x3c0`.
 See [the accessor evidence](research/DX11_DEBUGGER_HOST_ACCESSORS.md). P1 still
 requires the engine's nonzero assignment, constructor, vtable and module. This
 research increment changes no product routing or existing acceptance gates.
+
+### Native class texture and sampler operations
+
+Resource-only named classes now preserve absent constant-buffer fields as
+unknown. Relocated texture loads, explicit samples and gathers use instruction
+type extensions and the actual class-selected bindings. Snapshot identity is
+`independent-replay-resource-inputs/9`.
+
+The new 96-case matrix validates native arithmetic on WARP/NVIDIA/Intel and
+matches 89 original GPU outputs. Seven Intel Gather differences remain failed.
+Paired controls show the original Intel path changes with an unrelated `t0/s0`
+binding while selected `t5/s7` and executable shader instructions remain unchanged.
+Existing sampling and texture regressions pass 2,514 cases; the previous interface
+suite retains the same 22 failures. See [the resource execution and control
+evidence](research/DX11_NATIVE_INTERFACE_RESOURCES.md). Captured class-resource
+qualification, full stage/source parity and complete dependency removal remain
+open; neither the new comparison suite nor the combined CTest run is green.

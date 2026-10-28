@@ -809,6 +809,46 @@ struct Lane::State {
         }
         return result;
     }
+    std::pair<uint32_t, uint32_t> textureDeclaration(const Operand &resource) const {
+        const auto binding = address(resource);
+        if (resource.kind == 7 && resource.indices.size() == 1 && resource.indices[0].relative) {
+            if (binding.indices[0] >= 128)
+                fail("DXBC indexed texture binding exceeds the slot limit");
+            // Indexed instructions carry their own type. A class can relocate the
+            // resource to a slot with no static declaration or a different type.
+            std::optional<uint32_t> dimension, returns;
+            const auto &words = program->instructions.at(pc).words;
+            for (size_t pos = 1; words.at(pos - 1) >> 31; ++pos) {
+                const auto token = words.at(pos), kind = token & 63;
+                if (kind == 2) {
+                    if (dimension || (token & 0x7ffff800))
+                        fail("Invalid indexed texture dimension extension");
+                    dimension = (token >> 6) & 31;
+                } else if (kind == 3) {
+                    if (returns || (token & 0x7fc00000))
+                        fail("Invalid indexed texture return extension");
+                    returns = (token >> 6) & 0xffff;
+                }
+            }
+            if (!dimension || !returns)
+                fail("Indexed texture execution requires instruction type extensions");
+            return {*dimension, *returns};
+        }
+        const auto found = program->typedResources.find(binding);
+        if (found == program->typedResources.end())
+            fail("Native typed execution requires a resource declaration");
+        return found->second;
+    }
+    void validateSampler(const Operand &sampler, bool comparison) const {
+        const auto binding = address(sampler);
+        if (binding.indices.size() != 1 || binding.indices[0] >= 16)
+            fail("Invalid DXBC sampler binding");
+        if (sampler.indices[0].relative)
+            return; // The operation selects comparison semantics for indexed samplers.
+        const auto found = program->samplers.find(binding);
+        if (found == program->samplers.end() || found->second != (comparison ? 1u : 0u))
+            fail("Sampling requires a matching sampler declaration");
+    }
     SamplingRequest sampling() const {
         const auto &s = *this;
         const auto &p = *program;
@@ -837,12 +877,8 @@ struct Lane::State {
                                       [](auto component) { return component != 0; }))
             fail("Comparison sampling requires a replicated red resource selection");
         const auto binding = s.address(resource), samplerBinding = s.address(sampler);
-        const auto declared = p.typedResources.find(binding);
-        const auto samplerDeclaration = p.samplers.find(samplerBinding);
-        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
-            samplerDeclaration->second != (comparison ? 1u : 0u))
-            fail("Explicit sampling requires matching texture and sampler declarations");
-        const auto [dimension, returns] = declared->second;
+        const auto [dimension, returns] = textureDeclaration(resource);
+        validateSampler(sampler, comparison);
         std::array<int32_t, 3> offsets{};
         std::set<uint32_t> extensions;
         for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
@@ -1254,12 +1290,8 @@ Step Lane::step() {
             (comparison && sampler.select[0]))
             fail("Invalid DXBC gather operands or stage");
         const auto binding = s.address(resource), samplerBinding = s.address(sampler);
-        const auto declared = p.typedResources.find(binding);
-        const auto samplerDeclaration = p.samplers.find(samplerBinding);
-        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
-            samplerDeclaration->second != (comparison ? 1u : 0u))
-            fail("Gather requires matching texture and sampler declarations");
-        const auto [dimension, returns] = declared->second;
+        const auto [dimension, returns] = s.textureDeclaration(resource);
+        s.validateSampler(sampler, comparison);
         if ((dimension != 3 && dimension != 6 && dimension != 8 && dimension != 10) ||
             (programmable && dimension != 3 && dimension != 8))
             fail("Invalid DXBC gather texture dimension");
@@ -1367,10 +1399,8 @@ Step Lane::step() {
         if (resource.modifier || resource.kind != (op == 45 || multisample ? 7u : 30u))
             fail("Invalid DXBC typed resource operand");
         const auto binding = s.address(resource);
-        const auto declaration = p.typedResources.find(binding);
-        if (declaration == p.typedResources.end())
-            fail("Native typed execution requires a resource declaration");
-        const auto dimension = declaration->second.first;
+        const auto declaration = s.textureDeclaration(resource);
+        const auto dimension = declaration.first;
         if (multisample != (dimension == 4 || dimension == 9))
             fail("DXBC load opcode disagrees with multisample resource dimension");
         const auto address = s.source(args[1], true);
@@ -1382,21 +1412,20 @@ Step Lane::step() {
                 fail("DXBC typed stores require a complete xyzw destination and a snapshot");
             if (dimension == 1)
                 result.memoryChanges = s.inputs.memory->storeTyped(
-                    binding, address.bits[0], declaration->second.second, s.source(args[2], false),
-                    args[1].kind == 4, result.memoryGpuAssisted, p.stage);
+                    binding, address.bits[0], declaration.second, s.source(args[2], false), args[1].kind == 4,
+                    result.memoryGpuAssisted, p.stage);
             else {
                 std::set<uint32_t> extensions;
                 for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
                     const auto token = instruction.words.at(pos), kind = token & 63;
                     if (!extensions.insert(kind).second ||
-                        (kind == 2 ? ((token >> 6) & 31) != dimension || (token & 0x7ffff800)
-                         : kind == 3
-                             ? ((token >> 6) & 0xffff) != declaration->second.second || (token & 0x7fc00000)
-                             : true))
+                        (kind == 2   ? ((token >> 6) & 31) != dimension || (token & 0x7ffff800)
+                         : kind == 3 ? ((token >> 6) & 0xffff) != declaration.second || (token & 0x7fc00000)
+                                     : true))
                         fail("Invalid typed texture UAV store extension");
                 }
                 result.textureChanges = s.inputs.textures->storeUav(
-                    binding, dimension, declaration->second.second, address, s.source(args[2], false),
+                    binding, dimension, declaration.second, address, s.source(args[2], false),
                     s.inputs.gpu.get(), result.memoryGpuAssisted, p.stage);
             }
         } else {
@@ -1407,13 +1436,12 @@ Step Lane::step() {
             const auto target = s.address(destination);
             Value value;
             if (dimension == 1)
-                value =
-                    s.inputs.memory
-                        ? s.inputs.memory->loadTyped(
-                              p.stage, binding, address.bits[0], declaration->second.second, resource.select,
-                              destination.mask, args[1].kind == 4, result.memoryGpuAssisted,
-                              {destination.precision, args[1].precision}, p.refactoringAllowed)
-                        : Value{};
+                value = s.inputs.memory
+                            ? s.inputs.memory->loadTyped(
+                                  p.stage, binding, address.bits[0], declaration.second, resource.select,
+                                  destination.mask, args[1].kind == 4, result.memoryGpuAssisted,
+                                  {destination.precision, args[1].precision}, p.refactoringAllowed)
+                            : Value{};
             else {
                 if (!multisample && dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 &&
                     dimension != 8)
@@ -1437,27 +1465,26 @@ Step Lane::step() {
                         if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
                             fail("DXBC texture load dimension extension disagrees with its declaration");
                     } else if (kind == 3) {
-                        if (((token >> 6) & 0xffff) != declaration->second.second)
+                        if (((token >> 6) & 0xffff) != declaration.second)
                             fail("DXBC texture load return extension disagrees with its declaration");
                     } else
                         fail("Unsupported DXBC texture load extension");
                 }
                 value =
                     !s.inputs.textures ? Value{}
-                    : multisample
-                        ? s.inputs.textures->loadMultisample(binding, dimension, declaration->second.second,
-                                                             address, s.source(args[3], true),
-                                                             resource.select, destination.mask, offsets,
-                                                             result.memoryGpuAssisted)
+                    : multisample ? s.inputs.textures->loadMultisample(binding, dimension, declaration.second,
+                                                                       address, s.source(args[3], true),
+                                                                       resource.select, destination.mask,
+                                                                       offsets, result.memoryGpuAssisted)
                     : op == 163
-                        ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second, address,
+                        ? s.inputs.textures->loadUav(binding, dimension, declaration.second, address,
                                                      resource.select, destination.mask, s.inputs.gpu.get(),
                                                      result.memoryGpuAssisted, p.stage)
                         : s.inputs.textures->load(
-                              p.stage, binding, dimension, declaration->second.second, address,
-                              resource.select, destination.mask, offsets, s.inputs.gpu.get(),
-                              result.memoryGpuAssisted, {destination.precision, args[1].precision},
-                              p.refactoringAllowed, destination.kind == 2, args[1].kind == 4);
+                              p.stage, binding, dimension, declaration.second, address, resource.select,
+                              destination.mask, offsets, s.inputs.gpu.get(), result.memoryGpuAssisted,
+                              {destination.precision, args[1].precision}, p.refactoringAllowed,
+                              destination.kind == 2, args[1].kind == 4);
             }
             if (s.inBounds(target)) {
                 const auto before = s.value(target);
