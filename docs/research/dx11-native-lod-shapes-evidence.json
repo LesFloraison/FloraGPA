@@ -1,0 +1,2033 @@
+{
+  "schema": 1,
+  "scope": "native_lod_shapes",
+  "passed": true,
+  "full_debug_parity": false,
+  "results": [
+    {
+      "vendor": 0,
+      "dimension": 2,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 0,
+      "dimension": 3,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 64
+    },
+    {
+      "vendor": 0,
+      "dimension": 5,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 0,
+      "dimension": 6,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 0,
+      "dimension": 7,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 0,
+      "dimension": 8,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 0,
+      "dimension": 10,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 2,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 3,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 64
+    },
+    {
+      "vendor": 4318,
+      "dimension": 5,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 6,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 7,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 8,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 4318,
+      "dimension": 10,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 2,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 3,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 64
+    },
+    {
+      "vendor": 32902,
+      "dimension": 5,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 6,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 7,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 8,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    },
+    {
+      "vendor": 32902,
+      "dimension": 10,
+      "cases": 448,
+      "components": 3472,
+      "linear_mip_cases": 384
+    }
+  ],
+  "rejected_corruptions": 63,
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/results.json",
+      "bytes": 5359874,
+      "sha256": "7e1bbeb5df5b89e2622b7483bc45217c9e5457db2b3e693826d7ebed57345463"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/0/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/results.json",
+      "bytes": 5359377,
+      "sha256": "87cbcb3b1f418f65e58a3b19623c7ded0f54a19958000369fc84d745af8ea6bd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/32902/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/results.json",
+      "bytes": 5364127,
+      "sha256": "b92cff10473c7f0a1fad4b9cd2abd6752c0c6e0c182f94a43d77492b972cfcb9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/4318/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-discard-0.asm.txt",
+      "bytes": 1842,
+      "sha256": "4b75447c193ab4c76fdc7461571ddf64f9c617043cfeaef473d9473012d77117"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "a4d02270b157e70f4e6487e659949a7f13fecb0f190dd108079ff7b662ca2b79"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-loop-0.asm.txt",
+      "bytes": 1821,
+      "sha256": "edb84283827397c642c9083c13113cadf7cb5e4d7a19bb300b7bc85569d3eca6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "08ba53b0d63aa42faecdac2ad301bc473e536a1846c46686d90986b28348be9e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-reconverge-0.asm.txt",
+      "bytes": 1830,
+      "sha256": "9795158b8f32dc49e13b9adaeff21f11e058fa430fd47d96e51e9e6d858dcf5b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "5b9338333e557c85c6f752b8b3d968f067d4d4e2140745ce975fa0b21800b4f7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "0892e6bd3207d67f0cab62a800f79bbedc71220e44ce7d85a1840d0bc81a231d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "4f391ace40b7ba122c77330bb0fe711d6b79c1b76ccd13286388d002f5092181"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/native-results.json",
+      "bytes": 857162,
+      "sha256": "914cf97048678810ab87a0546a3bfbf5a6725e9c59ce9bbe2879d25b15a7730e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0/results.json",
+      "bytes": 742215,
+      "sha256": "e91e97085aae589b0bbf9a4677de75934cf0e7ef44686f44308b2fd6f0196e30"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-discard-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "f3dec923af1bcc80c75096b09d778ef254a01ad1b164f474902b231b95c5a482"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "1677eabcfce3be2bd422db5886f5bb522560b0da13c31f134d3d2d0a8eb8a331"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-loop-0.asm.txt",
+      "bytes": 1854,
+      "sha256": "1cc9665251633ddfd9c86987ecc56bf1bfe3faffc8d5931ec32dea1caacdb71e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "8a684b4969aaedfd8aa99a355bce74522348abe094caf25762b37a629d674d35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-reconverge-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "e09ddc9e69bdae21507dd7e24d39c22b9a54107cf433ee04bb7f57c7d5e2a834"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "83b13b18937e89d0ccac86e6d8f071d444b57a44679af81da93d9a4a6f40896e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-uniform-0.asm.txt",
+      "bytes": 1661,
+      "sha256": "2a50673d228469f73494f1dd6aa9440740a4dd24794c2e7bee1c3be741decc0b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "1785c794921a21e685c5e588b1bba1dd5faa6179c9807ab7a3f074b98abb040f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/native-results.json",
+      "bytes": 861463,
+      "sha256": "f4d34c9ca2f81c90c1e97372f25dfd8bdf1b703f2b1f9933a4e1a97f39c86768"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-10/results.json",
+      "bytes": 744590,
+      "sha256": "9c1d08a6383f679666768f3703ae6c53f958650610245957481e5eec56ad5537"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-discard-0.asm.txt",
+      "bytes": 1761,
+      "sha256": "f82dc0b6f0275c6ef501afc4050c32a3aefa56b676ca265954278362dc849ef5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "5b6c9b2919ee948efd2aa67e612fe32793fbb9e12b9e1e0da171e79e7337abbd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-loop-0.asm.txt",
+      "bytes": 1777,
+      "sha256": "abae05c184de225dc276f4066582d13374a60eda2b510c558c463a36e79f2194"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "aff9db144e8d83892bc1422244662fd53c83fd044aea01bf7edfe2d9633ef9e4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-reconverge-0.asm.txt",
+      "bytes": 1755,
+      "sha256": "c11ff8a6d6f6ccee513f8ec33b3a460a28417d21dc9b1fe83f57cb330d4438ea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "2d61228deddfb202112487a06d9696ec4b3c796e5dc1a781a5054ea601b1a11c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-uniform-0.asm.txt",
+      "bytes": 1648,
+      "sha256": "7e2b8f7f3003a151e39698e531a92fb5f310ad9720ea51ca837a0ada5820c10b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "ba39b65e6dffaa13f6ef6cc3739316c419c1b6698ea5219ea4ee9843bbd13aa2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/native-results.json",
+      "bytes": 857486,
+      "sha256": "7550dafc9301504492dc1e92739c81254b48d160063ae6539da4a31cea0bcf56"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-2/results.json",
+      "bytes": 742377,
+      "sha256": "9e2ce855062c36f74473d449b9c01bfa7954fee68a6aa81b986b4fe366602ed6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "4c5ea1e39016d5c27f9f33308d12d84eae606a7badb4e9ad695f62045b5e8875"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "ce7f79a5d7a25e02d2b4a3e645ff56587f593ede10b0b19a58dbfd4612353251"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-loop-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "7f44fa8de0ca12ad2a15bb2dbbd383c30f4b338e142b55d81d0785f85c96d37c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "31fbc3ac45cdc0f7cbdef53d0284ff321edd3ae67d62fb56581d3790873ee20f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-reconverge-0.asm.txt",
+      "bytes": 1856,
+      "sha256": "0e69119d85aef860d0b1ebd3b2fb56dd2f7f313bcc8a931179b1c684b1bac77b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "161cfcc2c866f124f8628a77ee6c7d60dfaf45e3eb2bffebcde4df2f9e665cdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "ff70faa9b199b414daebac88679bce519c70f256eb4242e0e3e61244ac031f0e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "8e3399c312ad3937867d746f21d3542eb007a7e165b1da8f255e3000890b2c74"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/native-results.json",
+      "bytes": 861536,
+      "sha256": "4e625a4fcb6db51273556ba22ad9ab38f363636feb7f64109813e05acf82f868"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-5/results.json",
+      "bytes": 744402,
+      "sha256": "8c0d69fcbe588a996359f1d524ea50837d744ac1cd0248f788368089d653ca4e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-discard-0.asm.txt",
+      "bytes": 1870,
+      "sha256": "9fe6acd086392d490a70d3f88031eda4007236914e13fa5975eb92859ad42c38"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "9bd6ac72d80641cb1cd7eb871efe0a691bf4b3530b0020a25f39999dcf6a5448"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-loop-0.asm.txt",
+      "bytes": 1849,
+      "sha256": "0515530ecf4eef501ba4d068dd25e11feb4856895cf0cd03c2fa119856bf3f6c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "28bd9d2436a478e601f021947c74d5098e033290c3021d3d2186d7c2879583a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-reconverge-0.asm.txt",
+      "bytes": 1858,
+      "sha256": "64b83124a2eb12f1a6a0573469c8adb20ee50522a0e06c18ee3cfee4f0666e1e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "3b7c4571692b08957a456e7862468eeb28d11b6e44e87878fcb535af34809ff2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-uniform-0.asm.txt",
+      "bytes": 1656,
+      "sha256": "b2c39959a0a2358e0e0874bfea56e7938589cf844f69ec773132111f4fd5232b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "9c0d436e89ea50411adf9ef1fabfaae65caea75ba6b76dba25bfa799aecab161"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/native-results.json",
+      "bytes": 861014,
+      "sha256": "99913628b2f8887b0c63bc6b3e832c0affd63c58080485a988b99d398a214a77"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-6/results.json",
+      "bytes": 744141,
+      "sha256": "35414e2ce98d2aca9475a67d31f6918520d335de395aba6eef3ad7b98d2cacfc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-discard-0.asm.txt",
+      "bytes": 1766,
+      "sha256": "1f9cdea2dacce5671f8e49f210d8acd14562d2a8f9116f689b910b6fe1a3f459"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "21b5d6db0146cbe00428f224c8da195a08cf26ff2fa3329515ee7f4629cd63cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-loop-0.asm.txt",
+      "bytes": 1782,
+      "sha256": "4775dd92b5ab3e0a2f1fbf0a9ccf3992e472bb419d80efc1c5c45817b64c3cec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "a341d111b4a64a87883e5ba6eecae03bbceecc4057056baa4df64ff6f0e571be"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-reconverge-0.asm.txt",
+      "bytes": 1760,
+      "sha256": "632d0caac66748bf21aa5f0669b19a053d340eb2615b8f36efea22cb836bb0c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "60a782512e45137f73ffc41961ca53b6d00f12a9ddad35330105ddb7b46c16c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-uniform-0.asm.txt",
+      "bytes": 1653,
+      "sha256": "f99a6d1386a666e84b73015d9b8a597d839cd7633ab7e7719e86a4791d41327e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "7acc0cfbcf1f532f1fcd0cbcda884cc67661915334bc537c9f86ee664b6aeadb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/native-results.json",
+      "bytes": 857486,
+      "sha256": "a44edb40a3b1c89ca5652eb4c8f9b6333df8b1d2bd4c35d92d4fa471df7deb22"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-7/results.json",
+      "bytes": 742377,
+      "sha256": "31167ec78926a16da5bf83b4b84f3b0a832c77dda4290bf58958720c1095d46c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-discard-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "8e97e249834e29147653ac68760641bf64bd263c1033b566eed25eef9f48a830"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "2545e7308826625cc0face0a0353bd0c62dc89941166e846f991ad073967f859"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-loop-0.asm.txt",
+      "bytes": 1826,
+      "sha256": "75d0db6c343f3530fe993911d62a726d436cd670dbca067b7c7322badb0791d7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "6e59bd9501af87c00267614a63f86a015a18fa8ec869e2e717d236e15c2f5c3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-reconverge-0.asm.txt",
+      "bytes": 1835,
+      "sha256": "5b74d7b1910e6467d056f17e16959f9d5ccc34607a3ccea2c9bf8ff7bac2c3b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "b5ae2af5509a7efcca228716dd4dec5c691fd442cd72a97920343dcad8b31158"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-uniform-0.asm.txt",
+      "bytes": 1659,
+      "sha256": "83e41f456ae644e03d3b9777ead996965248bf890ca9ef9faa38d7a2127b47b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "de6bf514a483903a8f2e75fc559e240480a5509077f826ed8341e602a4e65fea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/native-results.json",
+      "bytes": 857324,
+      "sha256": "e58212ea5cd7c06dbdf0ddb4ccd89370832211c55740044f95c64198998f7c8e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-0-8/results.json",
+      "bytes": 742296,
+      "sha256": "8c44e365e65f854c91f52f75dd9ee3dfa89b088cb867d2502637be4c80956bb4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-discard-0.asm.txt",
+      "bytes": 1842,
+      "sha256": "4b75447c193ab4c76fdc7461571ddf64f9c617043cfeaef473d9473012d77117"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "a4d02270b157e70f4e6487e659949a7f13fecb0f190dd108079ff7b662ca2b79"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-loop-0.asm.txt",
+      "bytes": 1821,
+      "sha256": "edb84283827397c642c9083c13113cadf7cb5e4d7a19bb300b7bc85569d3eca6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "08ba53b0d63aa42faecdac2ad301bc473e536a1846c46686d90986b28348be9e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-reconverge-0.asm.txt",
+      "bytes": 1830,
+      "sha256": "9795158b8f32dc49e13b9adaeff21f11e058fa430fd47d96e51e9e6d858dcf5b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "5b9338333e557c85c6f752b8b3d968f067d4d4e2140745ce975fa0b21800b4f7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "0892e6bd3207d67f0cab62a800f79bbedc71220e44ce7d85a1840d0bc81a231d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "4f391ace40b7ba122c77330bb0fe711d6b79c1b76ccd13286388d002f5092181"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/native-results.json",
+      "bytes": 857173,
+      "sha256": "4d1acdb76eb44f24ead33bbdcd6fa6442ca024e3448d9764118d422029f927f6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902/results.json",
+      "bytes": 742222,
+      "sha256": "4a0649b61316441b861cb88680d0af0a8ebb67d4fbbd16c3a073d1000b51f727"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-discard-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "f3dec923af1bcc80c75096b09d778ef254a01ad1b164f474902b231b95c5a482"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "1677eabcfce3be2bd422db5886f5bb522560b0da13c31f134d3d2d0a8eb8a331"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-loop-0.asm.txt",
+      "bytes": 1854,
+      "sha256": "1cc9665251633ddfd9c86987ecc56bf1bfe3faffc8d5931ec32dea1caacdb71e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "8a684b4969aaedfd8aa99a355bce74522348abe094caf25762b37a629d674d35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-reconverge-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "e09ddc9e69bdae21507dd7e24d39c22b9a54107cf433ee04bb7f57c7d5e2a834"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "83b13b18937e89d0ccac86e6d8f071d444b57a44679af81da93d9a4a6f40896e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-uniform-0.asm.txt",
+      "bytes": 1661,
+      "sha256": "2a50673d228469f73494f1dd6aa9440740a4dd24794c2e7bee1c3be741decc0b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "1785c794921a21e685c5e588b1bba1dd5faa6179c9807ab7a3f074b98abb040f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/native-results.json",
+      "bytes": 861996,
+      "sha256": "ec69dbcf98e04034ef3dddcd603c3831dcb0a141b06e91e120a61fa85cb31c8c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-10/results.json",
+      "bytes": 744858,
+      "sha256": "63fbe33272c9cfac3fab8d93ed535375452cfaa508c394a4b737660895249e4e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-discard-0.asm.txt",
+      "bytes": 1761,
+      "sha256": "f82dc0b6f0275c6ef501afc4050c32a3aefa56b676ca265954278362dc849ef5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "5b6c9b2919ee948efd2aa67e612fe32793fbb9e12b9e1e0da171e79e7337abbd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-loop-0.asm.txt",
+      "bytes": 1777,
+      "sha256": "abae05c184de225dc276f4066582d13374a60eda2b510c558c463a36e79f2194"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "aff9db144e8d83892bc1422244662fd53c83fd044aea01bf7edfe2d9633ef9e4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-reconverge-0.asm.txt",
+      "bytes": 1755,
+      "sha256": "c11ff8a6d6f6ccee513f8ec33b3a460a28417d21dc9b1fe83f57cb330d4438ea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "2d61228deddfb202112487a06d9696ec4b3c796e5dc1a781a5054ea601b1a11c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-uniform-0.asm.txt",
+      "bytes": 1648,
+      "sha256": "7e2b8f7f3003a151e39698e531a92fb5f310ad9720ea51ca837a0ada5820c10b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "ba39b65e6dffaa13f6ef6cc3739316c419c1b6698ea5219ea4ee9843bbd13aa2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/native-results.json",
+      "bytes": 855751,
+      "sha256": "82206e25c6d13ac4941e767583e5579ef6b08fc9a3618ad8342c9a743433b89c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-2/results.json",
+      "bytes": 741511,
+      "sha256": "1e94041da1d5e56b8c3ddd6e5a488d5346789e4d63bf84122e95510bb61387c9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "4c5ea1e39016d5c27f9f33308d12d84eae606a7badb4e9ad695f62045b5e8875"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "ce7f79a5d7a25e02d2b4a3e645ff56587f593ede10b0b19a58dbfd4612353251"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-loop-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "7f44fa8de0ca12ad2a15bb2dbbd383c30f4b338e142b55d81d0785f85c96d37c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "31fbc3ac45cdc0f7cbdef53d0284ff321edd3ae67d62fb56581d3790873ee20f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-reconverge-0.asm.txt",
+      "bytes": 1856,
+      "sha256": "0e69119d85aef860d0b1ebd3b2fb56dd2f7f313bcc8a931179b1c684b1bac77b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "161cfcc2c866f124f8628a77ee6c7d60dfaf45e3eb2bffebcde4df2f9e665cdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "ff70faa9b199b414daebac88679bce519c70f256eb4242e0e3e61244ac031f0e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "8e3399c312ad3937867d746f21d3542eb007a7e165b1da8f255e3000890b2c74"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/native-results.json",
+      "bytes": 861547,
+      "sha256": "dd628558f1d7ee8841ecfbca3fdab1b3d55af7b891345792a42ab388d1dc679f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-5/results.json",
+      "bytes": 744409,
+      "sha256": "d70e742d5c2250ddd5ad0f607cf20cdaec11006598205ae26131f1ad42b94d53"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-discard-0.asm.txt",
+      "bytes": 1870,
+      "sha256": "9fe6acd086392d490a70d3f88031eda4007236914e13fa5975eb92859ad42c38"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "9bd6ac72d80641cb1cd7eb871efe0a691bf4b3530b0020a25f39999dcf6a5448"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-loop-0.asm.txt",
+      "bytes": 1849,
+      "sha256": "0515530ecf4eef501ba4d068dd25e11feb4856895cf0cd03c2fa119856bf3f6c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "28bd9d2436a478e601f021947c74d5098e033290c3021d3d2186d7c2879583a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-reconverge-0.asm.txt",
+      "bytes": 1858,
+      "sha256": "64b83124a2eb12f1a6a0573469c8adb20ee50522a0e06c18ee3cfee4f0666e1e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "3b7c4571692b08957a456e7862468eeb28d11b6e44e87878fcb535af34809ff2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-uniform-0.asm.txt",
+      "bytes": 1656,
+      "sha256": "b2c39959a0a2358e0e0874bfea56e7938589cf844f69ec773132111f4fd5232b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "9c0d436e89ea50411adf9ef1fabfaae65caea75ba6b76dba25bfa799aecab161"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/native-results.json",
+      "bytes": 861547,
+      "sha256": "6135340c37e8f8e65fc477dd55345dd8869fae309d50ba47851b55a484b1a6ce"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-6/results.json",
+      "bytes": 744409,
+      "sha256": "1316fa5e4a358744b4be5afa764452cd8d1c91d7599d6c4c3eb475388a32e73b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-discard-0.asm.txt",
+      "bytes": 1766,
+      "sha256": "1f9cdea2dacce5671f8e49f210d8acd14562d2a8f9116f689b910b6fe1a3f459"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "21b5d6db0146cbe00428f224c8da195a08cf26ff2fa3329515ee7f4629cd63cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-loop-0.asm.txt",
+      "bytes": 1782,
+      "sha256": "4775dd92b5ab3e0a2f1fbf0a9ccf3992e472bb419d80efc1c5c45817b64c3cec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "a341d111b4a64a87883e5ba6eecae03bbceecc4057056baa4df64ff6f0e571be"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-reconverge-0.asm.txt",
+      "bytes": 1760,
+      "sha256": "632d0caac66748bf21aa5f0669b19a053d340eb2615b8f36efea22cb836bb0c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "60a782512e45137f73ffc41961ca53b6d00f12a9ddad35330105ddb7b46c16c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-uniform-0.asm.txt",
+      "bytes": 1653,
+      "sha256": "f99a6d1386a666e84b73015d9b8a597d839cd7633ab7e7719e86a4791d41327e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "7acc0cfbcf1f532f1fcd0cbcda884cc67661915334bc537c9f86ee664b6aeadb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/native-results.json",
+      "bytes": 855751,
+      "sha256": "2df854eadc6310945ed9824a3d3ecd1a683703495e6369e2408d5c88e429ee33"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-7/results.json",
+      "bytes": 741511,
+      "sha256": "90b1f91ff28a3454aec8fc62d8850735d84e7633c99864fe999926537384b795"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-discard-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "8e97e249834e29147653ac68760641bf64bd263c1033b566eed25eef9f48a830"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "2545e7308826625cc0face0a0353bd0c62dc89941166e846f991ad073967f859"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-loop-0.asm.txt",
+      "bytes": 1826,
+      "sha256": "75d0db6c343f3530fe993911d62a726d436cd670dbca067b7c7322badb0791d7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "6e59bd9501af87c00267614a63f86a015a18fa8ec869e2e717d236e15c2f5c3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-reconverge-0.asm.txt",
+      "bytes": 1835,
+      "sha256": "5b74d7b1910e6467d056f17e16959f9d5ccc34607a3ccea2c9bf8ff7bac2c3b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "b5ae2af5509a7efcca228716dd4dec5c691fd442cd72a97920343dcad8b31158"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-uniform-0.asm.txt",
+      "bytes": 1659,
+      "sha256": "83e41f456ae644e03d3b9777ead996965248bf890ca9ef9faa38d7a2127b47b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "de6bf514a483903a8f2e75fc559e240480a5509077f826ed8341e602a4e65fea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/native-results.json",
+      "bytes": 857335,
+      "sha256": "b4c72e1451e2c377809b2b0ef91d721ce15a976ad1f57c6b81190242d4f359f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-32902-8/results.json",
+      "bytes": 742303,
+      "sha256": "50416047a65c5c3a14709126c21e195aaa1841e937eae591ffee66c110177649"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-discard-0.asm.txt",
+      "bytes": 1842,
+      "sha256": "4b75447c193ab4c76fdc7461571ddf64f9c617043cfeaef473d9473012d77117"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "a4d02270b157e70f4e6487e659949a7f13fecb0f190dd108079ff7b662ca2b79"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-loop-0.asm.txt",
+      "bytes": 1821,
+      "sha256": "edb84283827397c642c9083c13113cadf7cb5e4d7a19bb300b7bc85569d3eca6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "08ba53b0d63aa42faecdac2ad301bc473e536a1846c46686d90986b28348be9e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-reconverge-0.asm.txt",
+      "bytes": 1830,
+      "sha256": "9795158b8f32dc49e13b9adaeff21f11e058fa430fd47d96e51e9e6d858dcf5b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "5b9338333e557c85c6f752b8b3d968f067d4d4e2140745ce975fa0b21800b4f7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "0892e6bd3207d67f0cab62a800f79bbedc71220e44ce7d85a1840d0bc81a231d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "4f391ace40b7ba122c77330bb0fe711d6b79c1b76ccd13286388d002f5092181"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/native-results.json",
+      "bytes": 857332,
+      "sha256": "0d9e75c794cb91131402491c10a7352cdb2339869a3d32f5c890b5b378353572"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318/results.json",
+      "bytes": 742301,
+      "sha256": "94ab573686f46e549a093caa61b29945e77c5456aa04638805b0d4c03e8dcf8d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-discard-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "f3dec923af1bcc80c75096b09d778ef254a01ad1b164f474902b231b95c5a482"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "1677eabcfce3be2bd422db5886f5bb522560b0da13c31f134d3d2d0a8eb8a331"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-loop-0.asm.txt",
+      "bytes": 1854,
+      "sha256": "1cc9665251633ddfd9c86987ecc56bf1bfe3faffc8d5931ec32dea1caacdb71e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "8a684b4969aaedfd8aa99a355bce74522348abe094caf25762b37a629d674d35"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-reconverge-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "e09ddc9e69bdae21507dd7e24d39c22b9a54107cf433ee04bb7f57c7d5e2a834"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "83b13b18937e89d0ccac86e6d8f071d444b57a44679af81da93d9a4a6f40896e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-uniform-0.asm.txt",
+      "bytes": 1661,
+      "sha256": "2a50673d228469f73494f1dd6aa9440740a4dd24794c2e7bee1c3be741decc0b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "1785c794921a21e685c5e588b1bba1dd5faa6179c9807ab7a3f074b98abb040f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/native-results.json",
+      "bytes": 861993,
+      "sha256": "4eb39a1dcb2011aea72b2d71d32dea91d9ad48fe4f818414c1c664c77d9b40b9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-10/results.json",
+      "bytes": 744856,
+      "sha256": "d895676e9d0bacbb1b591e8569ac72821eb051e716dbd915a19c031ee0d46620"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-discard-0.asm.txt",
+      "bytes": 1761,
+      "sha256": "f82dc0b6f0275c6ef501afc4050c32a3aefa56b676ca265954278362dc849ef5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "5b6c9b2919ee948efd2aa67e612fe32793fbb9e12b9e1e0da171e79e7337abbd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-loop-0.asm.txt",
+      "bytes": 1777,
+      "sha256": "abae05c184de225dc276f4066582d13374a60eda2b510c558c463a36e79f2194"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "aff9db144e8d83892bc1422244662fd53c83fd044aea01bf7edfe2d9633ef9e4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-reconverge-0.asm.txt",
+      "bytes": 1755,
+      "sha256": "c11ff8a6d6f6ccee513f8ec33b3a460a28417d21dc9b1fe83f57cb330d4438ea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "2d61228deddfb202112487a06d9696ec4b3c796e5dc1a781a5054ea601b1a11c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-uniform-0.asm.txt",
+      "bytes": 1648,
+      "sha256": "7e2b8f7f3003a151e39698e531a92fb5f310ad9720ea51ca837a0ada5820c10b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "ba39b65e6dffaa13f6ef6cc3739316c419c1b6698ea5219ea4ee9843bbd13aa2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/native-results.json",
+      "bytes": 857494,
+      "sha256": "e5a896faa9fca6b0bf462ec497e7663508628e251a0eb01031fcf145c442596b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-2/results.json",
+      "bytes": 742382,
+      "sha256": "3383507da183994f19750bb4f40d3507236692bea1c860a5a7eec059e85cc209"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "4c5ea1e39016d5c27f9f33308d12d84eae606a7badb4e9ad695f62045b5e8875"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "ce7f79a5d7a25e02d2b4a3e645ff56587f593ede10b0b19a58dbfd4612353251"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-loop-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "7f44fa8de0ca12ad2a15bb2dbbd383c30f4b338e142b55d81d0785f85c96d37c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "31fbc3ac45cdc0f7cbdef53d0284ff321edd3ae67d62fb56581d3790873ee20f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-reconverge-0.asm.txt",
+      "bytes": 1856,
+      "sha256": "0e69119d85aef860d0b1ebd3b2fb56dd2f7f313bcc8a931179b1c684b1bac77b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "161cfcc2c866f124f8628a77ee6c7d60dfaf45e3eb2bffebcde4df2f9e665cdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-uniform-0.asm.txt",
+      "bytes": 1654,
+      "sha256": "ff70faa9b199b414daebac88679bce519c70f256eb4242e0e3e61244ac031f0e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "8e3399c312ad3937867d746f21d3542eb007a7e165b1da8f255e3000890b2c74"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/native-results.json",
+      "bytes": 861544,
+      "sha256": "addc391c92aa82581686e08c327d1766b61f1c2cf2f50e5a4f407764e2edaf9d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-5/results.json",
+      "bytes": 744407,
+      "sha256": "e8ac1332d582eec387554963718681e86f249ab966cf278db6c3ce7ad7503ecb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-discard-0.asm.txt",
+      "bytes": 1870,
+      "sha256": "9fe6acd086392d490a70d3f88031eda4007236914e13fa5975eb92859ad42c38"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-discard-0.dxbc",
+      "bytes": 1280,
+      "sha256": "9bd6ac72d80641cb1cd7eb871efe0a691bf4b3530b0020a25f39999dcf6a5448"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-loop-0.asm.txt",
+      "bytes": 1849,
+      "sha256": "0515530ecf4eef501ba4d068dd25e11feb4856895cf0cd03c2fa119856bf3f6c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-loop-0.dxbc",
+      "bytes": 1228,
+      "sha256": "28bd9d2436a478e601f021947c74d5098e033290c3021d3d2186d7c2879583a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-reconverge-0.asm.txt",
+      "bytes": 1858,
+      "sha256": "64b83124a2eb12f1a6a0573469c8adb20ee50522a0e06c18ee3cfee4f0666e1e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-reconverge-0.dxbc",
+      "bytes": 1208,
+      "sha256": "3b7c4571692b08957a456e7862468eeb28d11b6e44e87878fcb535af34809ff2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-uniform-0.asm.txt",
+      "bytes": 1656,
+      "sha256": "b2c39959a0a2358e0e0874bfea56e7938589cf844f69ec773132111f4fd5232b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "9c0d436e89ea50411adf9ef1fabfaae65caea75ba6b76dba25bfa799aecab161"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/native-results.json",
+      "bytes": 861544,
+      "sha256": "6e9a425b77de4038abb51d758c61432e670542cac9651002a874dd209c540d6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-6/results.json",
+      "bytes": 744407,
+      "sha256": "efb7c5c2c7c7228f6b6e62d2663defca2d725858f29a671313921cb27370c9f3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-discard-0.asm.txt",
+      "bytes": 1766,
+      "sha256": "1f9cdea2dacce5671f8e49f210d8acd14562d2a8f9116f689b910b6fe1a3f459"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "21b5d6db0146cbe00428f224c8da195a08cf26ff2fa3329515ee7f4629cd63cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-loop-0.asm.txt",
+      "bytes": 1782,
+      "sha256": "4775dd92b5ab3e0a2f1fbf0a9ccf3992e472bb419d80efc1c5c45817b64c3cec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-loop-0.dxbc",
+      "bytes": 1188,
+      "sha256": "a341d111b4a64a87883e5ba6eecae03bbceecc4057056baa4df64ff6f0e571be"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-reconverge-0.asm.txt",
+      "bytes": 1760,
+      "sha256": "632d0caac66748bf21aa5f0669b19a053d340eb2615b8f36efea22cb836bb0c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "60a782512e45137f73ffc41961ca53b6d00f12a9ddad35330105ddb7b46c16c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-uniform-0.asm.txt",
+      "bytes": 1653,
+      "sha256": "f99a6d1386a666e84b73015d9b8a597d839cd7633ab7e7719e86a4791d41327e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "7acc0cfbcf1f532f1fcd0cbcda884cc67661915334bc537c9f86ee664b6aeadb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/native-results.json",
+      "bytes": 857494,
+      "sha256": "9ae886f0bdf5b575b7e993e66544ddcd20db1905cb710723a7dd90f1f5eae8ec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-7/results.json",
+      "bytes": 742382,
+      "sha256": "fa1f1c8ab860c80c81fdb83d41eb3f477b221dc8705bd2e108d670f75ca90feb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-discard-0.asm.txt",
+      "bytes": 1847,
+      "sha256": "8e97e249834e29147653ac68760641bf64bd263c1033b566eed25eef9f48a830"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-discard-0.dxbc",
+      "bytes": 1252,
+      "sha256": "2545e7308826625cc0face0a0353bd0c62dc89941166e846f991ad073967f859"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-loop-0.asm.txt",
+      "bytes": 1826,
+      "sha256": "75d0db6c343f3530fe993911d62a726d436cd670dbca067b7c7322badb0791d7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-loop-0.dxbc",
+      "bytes": 1200,
+      "sha256": "6e59bd9501af87c00267614a63f86a015a18fa8ec869e2e717d236e15c2f5c3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-reconverge-0.asm.txt",
+      "bytes": 1835,
+      "sha256": "5b74d7b1910e6467d056f17e16959f9d5ccc34607a3ccea2c9bf8ff7bac2c3b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-reconverge-0.dxbc",
+      "bytes": 1180,
+      "sha256": "b5ae2af5509a7efcca228716dd4dec5c691fd442cd72a97920343dcad8b31158"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-uniform-0.asm.txt",
+      "bytes": 1659,
+      "sha256": "83e41f456ae644e03d3b9777ead996965248bf890ca9ef9faa38d7a2127b47b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/lod-uniform-0.dxbc",
+      "bytes": 1052,
+      "sha256": "de6bf514a483903a8f2e75fc559e240480a5509077f826ed8341e602a4e65fea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/native-results.json",
+      "bytes": 857494,
+      "sha256": "b2d34e1c20e7971439566e818e171138714b638b3bccf8ff27b929667c94f2f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-evidence/lod-4318-8/results.json",
+      "bytes": 742382,
+      "sha256": "b9bbdb198c9f7ac5d4102f30db2859fae7b49c7753ed4eb3466d448da9793f0e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final.txt",
+      "bytes": 96585,
+      "sha256": "b1ee5491f1c67035684c2b2fd9315c2dbf8e4f490c6efddd1770e89aee578fcd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_lod_shapes.py",
+      "bytes": 6144,
+      "sha256": "5503da8471af58f14627160ccf3d03c5d1df2e7e435b866d8814ee76722c80a4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-run1.txt",
+      "bytes": 4382,
+      "sha256": "d0c32048d47ba9fd425db2d124bc9be037e64ff14fa9f521ec0b3964aecf5aa2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-before-fix.txt",
+      "bytes": 3886,
+      "sha256": "4473f2bbbac494d8c26ee2fb614a3ddc10f2ea94db8781f8dac50898d9f4730b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-build2.log",
+      "bytes": 5777,
+      "sha256": "9f6dd62e80b2a1d814cb8716d3159f8b6b89ac890cc557bf17eb57b439750ccf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-build4.log",
+      "bytes": 6030,
+      "sha256": "5b61b768d17f8b209c1cd704a612ca51a907add71d5da41e6f0c727bd5eb91c9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-before-binaries/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 683520,
+      "sha256": "3cf4b5dfce28041c8010024ad77a6ae2500075611aed3ebc3cfce1cd0c0eb2a0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-before-binaries/FloraPixelSamplingProbe.exe",
+      "bytes": 140800,
+      "sha256": "898b2c8535ec22ffbb3645321a4037d9a3fd17da78016fedff126ece64b8af17"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-binaries/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 687616,
+      "sha256": "8f7c28e07a48febdfbb6e739f341a31083e5c03a86439e89227f2b093a1e3a0e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-binaries/FloraPixelSamplingProbe.exe",
+      "bytes": 140800,
+      "sha256": "7d42acbcea668eaef70cdc5db20c6f92aadc6f130eef8235320a13bb3e28c9c0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-binaries/FloraGPA.exe",
+      "bytes": 5143040,
+      "sha256": "6ae179042dff8da03f11ad38e2b847c9d77d4e6b79508a8da8be25d309f7999e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-binaries/FloraGPA.Cli.exe",
+      "bytes": 6095872,
+      "sha256": "345955e8c4f9405d013dae75f55e1881d214c63af8aa82702c8979120147eaa9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/lod-shapes-final-binaries/FloraGPA.Worker.exe",
+      "bytes": 6095872,
+      "sha256": "0d006c97ce197d61ba29b091fa79e2a3cdb7109f073064543a4bb5d0e7e8ae0b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcGpuOperations.cpp",
+      "bytes": 116923,
+      "sha256": "537430f6253a86d08654500eb9c059b0b3bcad1c7c9446746624b01c19bddda1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcTextureInputs.cpp",
+      "bytes": 32289,
+      "sha256": "23383829706d4190227b619aa17ed290100a541d33331bcf2f079df8b01c677c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tests/DxbcPixelSamplingTests.cpp",
+      "bytes": 39660,
+      "sha256": "621f89948555461b8a5b7b872c13236a2395dbaa90d8e4aebc4afbbaa2723bf0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/native/pixel_sampling_probe.cpp",
+      "bytes": 33256,
+      "sha256": "ce2f9065742a86e9c8d7f08abb910c557c518985320bfefe43c5824604a059fd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_lod.py",
+      "bytes": 6062,
+      "sha256": "e964544c3da0e75c17695a4113da39f0d62328cc4ea2401a71f62592931643cd"
+    }
+  ]
+}

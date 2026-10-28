@@ -65,6 +65,12 @@ including negative/unclamped values and different clamped values. This evidence
 covers the R32_FLOAT Texture2D fixtures; other shapes, integer resource types,
 minimum precision and captured-game LOD workflows are not qualified here.
 
+The point-mip-filter rows are adapter observations, not defined cross-device
+semantics: the Microsoft LOD reference explicitly leaves that filter combination
+undefined. Null-sampler observations also use the device's default sampler.
+See `DX11_NATIVE_LOD_SHAPES.md` for subsequent shape and coordinate-validity work
+and expanded linear-mip-filter coverage. The original ledger remains unchanged.
+
 Additional boundary tests cover destination masks and swizzles, SM4.1 parsing,
 relative `t3/s5` bindings with three helper lanes, unknown coordinates, missing
 versus null views, invalid shader stages/models and rejection outside a quad.
