@@ -73,8 +73,9 @@ void validate(ID3D11Device *device) {
     }
 }
 } // namespace
-PixelRasterState pixelRasterState(ID3D11DeviceContext *context, std::optional<uint32_t> colorSlot) {
-    if (!context || (colorSlot && *colorSlot >= 8))
+PixelRasterState pixelRasterState(ID3D11DeviceContext *context, std::optional<uint32_t> colorSlot,
+                                  bool depthOnly) {
+    if (!context || (colorSlot && (*colorSlot >= 8 || depthOnly)))
         throw std::runtime_error("Invalid pixel raster state request");
     PixelRasterState result;
     auto &rs = result.rasterizer;
@@ -118,7 +119,7 @@ PixelRasterState pixelRasterState(ID3D11DeviceContext *context, std::optional<ui
         color = colors[*colorSlot];
         if (!color)
             throw std::runtime_error("Requested pixel raster color view is not bound");
-    } else
+    } else if (!depthOnly)
         for (const auto &candidate : colors)
             if (candidate) {
                 color = candidate;

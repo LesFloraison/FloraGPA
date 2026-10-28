@@ -567,6 +567,11 @@ if(BUILD_TESTING)
   set_tests_properties(native_pixel_checkpoint_inputs PROPERTIES RUN_SERIAL TRUE TIMEOUT 300
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   add_executable(FloraNativePixelGeometryReplayTests tests/NativePixelGeometryReplayTests.cpp)
+  add_executable(FloraNativePixelSampleDepthTests tests/NativePixelSampleDepthTests.cpp)
+  target_link_libraries(FloraNativePixelSampleDepthTests PRIVATE FloraExperiment Qt6::Test)
+  add_test(NAME native_pixel_sample_depth COMMAND FloraNativePixelSampleDepthTests -o "${CMAKE_BINARY_DIR}/native-pixel-sample-depth-$<CONFIG>.txt,txt")
+  set_tests_properties(native_pixel_sample_depth PROPERTIES RUN_SERIAL TRUE TIMEOUT 300
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   target_link_libraries(FloraNativePixelGeometryReplayTests PRIVATE FloraExperiment Qt6::Test)
   add_test(NAME native_pixel_geometry_replay COMMAND FloraNativePixelGeometryReplayTests -o "${CMAKE_BINARY_DIR}/native-pixel-geometry-replay-$<CONFIG>.txt,txt")
   set_tests_properties(native_pixel_geometry_replay PROPERTIES RUN_SERIAL TRUE TIMEOUT 300

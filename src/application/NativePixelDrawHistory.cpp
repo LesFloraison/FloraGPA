@@ -280,6 +280,18 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         if (limits.evaluateShaderOutputs) {
             auto discovery = target.raster;
             discovery.sampleMask = UINT32_MAX;
+            std::optional<dxbc_exec::PixelRasterState> depthRaster;
+            r.inspectNativeState([&](auto *context, const auto &) {
+                auto state = dxbc_exec::pixelRasterState(context, {}, true);
+                if (state.target.depth) {
+                    state.sampleMask = UINT32_MAX;
+                    depthRaster = std::move(state);
+                }
+            });
+            // The bound depth format also determines depth bias for the
+            // original PS inputs, independently of the selected color view.
+            if (depthRaster)
+                discovery.target = depthRaster->target;
             for (auto &[ordinal, candidate] : candidates) {
                 candidate["private_shader_outputs"] = Json::array();
                 candidate["pixel_shader_bound"] = pixelShader != 0;
@@ -287,6 +299,14 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                     candidate["private_output_mergers"] = Json::array();
                 if (!pixelShader)
                     continue;
+                if (limits.evaluateOutputMerger && depthRaster) {
+                    auto observed = captureNativePixelSampleDepth(
+                        r.nativeDevice(), r.options().warp, *depthRaster, geometry, ordinal,
+                        {s.x, s.y, s.sample, target.view.at("relative_layer").get<uint32_t>()},
+                        {limits.maxBytes, limits.timeoutMs}, bounded);
+                    retainShader(observed.dump().size());
+                    candidate["sample_depth_observation"] = std::move(observed);
+                }
                 std::set<uint32_t> samples;
                 for (const auto &observation : candidate.at("observations"))
                     samples.insert(observation.at("raster_sample").get<uint32_t>());
@@ -427,6 +447,13 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                             throw std::runtime_error("Private merger input provenance differs");
                         auto state = mergerSnapshot->state;
                         state.rasterDepthBits = raster.at("depth_bits").get<uint32_t>();
+                        if (state.depthFormat) {
+                            const auto &depth = candidates.at(count).at("sample_depth_observation");
+                            if (depth.at("sample") != s.sample || depth.at("primitive_ordinal") != count ||
+                                depth.at("front_face") != raster.at("front_face"))
+                                throw std::runtime_error("Private merger sample-depth identity differs");
+                            state.rasterDepthBits = depth.at("depth_bits").get<uint32_t>();
+                        }
                         state.frontFace = raster.at("front_face").get<bool>();
                         state.coverageMask = raster.at("coverage_mask").get<uint32_t>();
                         // Only the selected storage sample is predicted. Other
@@ -457,6 +484,8 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                             {"selected_exact_storage_bits", targetSnapshot.at("exact_storage_bits")},
                             {"binding_snapshot", mergerSnapshot->identity},
                             {"raster_inputs", raster},
+                            {"raster_depth_source",
+                             state.depthFormat ? "sample_position_observation" : "unused"},
                             {"original_fragment_eligibility", nullptr},
                             {"observed_value_matches_checkpoint", false},
                             {"exact_storage_matches_checkpoint", false},

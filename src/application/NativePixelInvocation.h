@@ -13,4 +13,12 @@ captureNativePixelInvocationInputs(ID3D11Device *, bool warp, const dxbc_exec::P
                                    const PostTransformGeometry &, Bytes originalShader,
                                    uint64_t primitiveOrdinal, dxbc_exec::PixelInputRecordSelection,
                                    const NativePixelInvocationLimits & = {}, const CancelCheck & = {});
+// Independently observes position at the selected sample. The caller supplies
+// the actual depth target format so depth bias uses its correct precision.
+// Original PS inputs keep their original interpolation and execution frequency.
+nlohmann::json captureNativePixelSampleDepth(ID3D11Device *, bool warp, const dxbc_exec::PixelRasterState &,
+                                             const PostTransformGeometry &, uint64_t primitiveOrdinal,
+                                             dxbc_exec::PixelInputRecordSelection,
+                                             const NativePixelInvocationLimits & = {},
+                                             const CancelCheck & = {});
 } // namespace flora

@@ -43,8 +43,38 @@ def validate(r, vendor):
             require(m['source_sha256'] == hashlib.sha256(source).hexdigest(), 'Shader output digest')
             raster = joined['raster_inputs']
             require(raster == out['input_provenance']['selected_raster'] and
-                    m['raster_depth_bits'] == raster['depth_bits'] and m['front_face'] == raster['front_face'] and
+                    m['front_face'] == raster['front_face'] and
                     m['coverage_mask'] == raster['coverage_mask'], 'Measured raster join')
+            if 'sample_depth_observation' in row:
+                require(joined.get('raster_depth_source') == 'sample_position_observation', 'Lost depth source')
+            if joined.get('raster_depth_source') == 'sample_position_observation':
+                depth = row['sample_depth_observation']
+                observed = depth['observation']
+                target = observed['raster_state']['target']
+                require(depth['schema'] == 1 and depth['kind'] == 'native_pixel_sample_depth' and
+                        depth['backend'] == 'native-pixel-sample-depth/1' and
+                        depth['scope'] == 'isolated_primitive_sample_position' and
+                        depth['position_interpolation'] == 'linear_noperspective_sample' and
+                        depth['original_fragment_eligibility'] is None, 'Sample-depth observation identity')
+                require(len(depth['position_bits']) == 4 and depth['position_bits'][2] == depth['depth_bits'],
+                        'Sample-position raw bits')
+                require(depth['geometry_sha256'] == out['input_provenance']['geometry_sha256'] and
+                        depth['primitive_ordinal'] == row['primitive_ordinal'] and
+                        depth['sample'] == selection['sample'] and depth['front_face'] == raster['front_face'] and
+                        depth['coverage_mask'] & (1 << selection['sample']) and
+                        m['raster_depth_bits'] == depth['depth_bits'], 'Sample-depth input join')
+                require(observed['records'] == 1 and observed['sample_frequency'] is True and
+                        target['depth'] is True and target['format'] == m['depth_format'] and
+                        observed['adapter_luid'] == m['adapter']['luid'] and
+                        observed['adapter_vendor'] == m['adapter']['vendor'] and
+                        observed['adapter_device'] == m['adapter']['device'] and
+                        observed['layer'] == selection['subresource']['relative_layer'] and
+                        observed['geometry']['primitive_ordinal'] == row['primitive_ordinal'] and
+                        observed['geometry']['original_primitive_id'] == row['original_primitive_id'] and
+                        [observed['x'], observed['y'], observed['sample']] ==
+                        [selection['x'], selection['y'], selection['sample']], 'Sample-depth hardware context')
+            else:
+                require(m['raster_depth_bits'] == raster['depth_bits'], 'Legacy or unused depth join')
             sample = selection['sample']
             require(joined['selected_sample'] == sample and 0 <= sample < m['sample_count'] and
                     m['sample_mask'] == joined['application_sample_mask'] & (1 << sample) and
