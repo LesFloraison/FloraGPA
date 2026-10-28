@@ -1099,3 +1099,17 @@ pass. Equality of sample counts does not establish original invocation order.
 See `research/DX11_NATIVE_ORIGINAL_DRAW_OBSERVATION.md` for measured differences,
 reproduction, retained development failures and evidence hashes. Full fragment
 qualification, public debugger parity and P7/P8 acceptance remain open.
+
+## Private pixel completion continuation
+
+An internal diagnostic can now retain the original PS body and mark one existing
+private color output without extra UAV slots, input registers or temporaries.
+The final completion and geometry suites pass 386 Qt checks; nine real selections
+and 12 separate Intel dual-source repetitions also pass. Independent validators
+check 402 reports and reject 2,646 corruptions. Exact storage, alpha, side effects,
+other MRT results and recovery are verified; four final Intel query-contract
+deviations and an unreproduced earlier dual-source count failure remain explicit.
+See `research/DX11_NATIVE_PIXEL_COMPLETION.md` for reproduction, original logs,
+independent controls and scope limits. A diagnostic marker does not establish
+original fragment identity or ordering, and the helper does not yet qualify
+public pixel history/debugging. P1, remaining parity and P7/P8 gates stay open.
