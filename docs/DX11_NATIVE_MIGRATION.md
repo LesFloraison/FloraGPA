@@ -1261,3 +1261,17 @@ unsupported-format contracts and 36 journal round trips, with 99 corrupted
 reports rejected. See `research/DX11_NATIVE_GATHER.md` for retained development
 failures and bounded scope. Minimum-precision gather, feedback/status variants,
 captured invocation qualification, full P1/P5/P6 parity and P7/P8 remain open.
+
+## Minimum-precision gather continuation
+
+The four gather operations now preserve destination and source precision,
+modifiers, literal operands and VS/PS output declarations through the selected
+adapter. The helper identity advances to `dxbc-gpu/24`. Seven focused suites pass
+3,515 checks without failures or skips. The final minimum-precision matrix covers
+216 configurations, 2,880 original GPU comparisons and 72 reversible journal
+checks, rejecting 198 corruptions. The ordinary gather matrix also passes with
+2,808 comparisons, 108 unsupported-format contracts, 36 journal checks and 99
+corruption rejections. See `research/DX11_NATIVE_GATHER_PRECISION.md` for the
+retained mixed-precision transport failure and its independent correction.
+Integer gather format coverage, feedback/status operations, original fragment
+qualification, full P1/P5/P6 parity and P7/P8 acceptance remain open.
