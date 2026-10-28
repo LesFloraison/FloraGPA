@@ -4,6 +4,7 @@
 #include "NativePixelCandidates.h"
 #include "NativePixelGeometryReplay.h"
 #include "NativePixelInvocation.h"
+#include "NativePixelMergerSnapshot.h"
 #include "NativePixelOutputs.h"
 #include <algorithm>
 #include <chrono>
@@ -173,7 +174,8 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                                              const CancelCheck &cancelled) {
     if (!s.maxRecords || !limits.maxCandidates || limits.maxCandidates > 2048 || !limits.timeoutMs ||
         limits.timeoutMs > 60000 || !limits.maxBytes ||
-        (limits.evaluateShaderOutputs && (!limits.maxShaderBytes || !limits.maxShaderSteps)))
+        (limits.evaluateShaderOutputs && (!limits.maxShaderBytes || !limits.maxShaderSteps)) ||
+        (limits.evaluateOutputMerger && !limits.evaluateShaderOutputs))
         throw std::invalid_argument("Invalid private pixel history limits");
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
     const CancelCheck bounded = [&] {
@@ -197,6 +199,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
     std::vector<uint8_t> pixelCode;
     Id pixelShader = 0;
     uint64_t shaderRetained = 0, shaderSteps = 0, shaderInvocations = 0;
+    uint64_t mergerInvocations = 0, mergerReadbackBytes = 0;
     auto retainShader = [&](uint64_t bytes) {
         if (bytes > limits.maxShaderBytes - shaderRetained)
             throw std::runtime_error("Private pixel shader retention budget exceeded");
@@ -280,6 +283,8 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             for (auto &[ordinal, candidate] : candidates) {
                 candidate["private_shader_outputs"] = Json::array();
                 candidate["pixel_shader_bound"] = pixelShader != 0;
+                if (limits.evaluateOutputMerger)
+                    candidate["private_output_mergers"] = Json::array();
                 if (!pixelShader)
                     continue;
                 std::set<uint32_t> samples;
@@ -342,6 +347,17 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                     row["write_executed"] = nullptr;
                     row["shader_output"] = nullptr;
                     row["failure_reasons"] = nullptr;
+                    if (limits.evaluateOutputMerger)
+                        for (auto &merger : row.at("private_output_mergers")) {
+                            auto predicted = current;
+                            predicted["bytes"] = merger.at("selected_after");
+                            merger["observed_value_matches_checkpoint"] = equal(predicted, current);
+                            merger["exact_storage_matches_checkpoint"] =
+                                merger.at("selected_exact_storage_bits") == true &&
+                                        current.at("exact_storage_bits") == true
+                                    ? merger.at("observed_value_matches_checkpoint")
+                                    : Json(nullptr);
+                        }
                     records.push_back(std::move(row));
                 } else if (!equal(previous, current))
                     unattributed.push_back({{"first_primitive", completed},
@@ -374,6 +390,20 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                 if (resources.inputs.textures)
                     for (const auto &[id, texture] : resources.inputs.textures->resources)
                         account(texture.storage.bytes.size() + texture.storage.valid.size());
+                std::optional<NativePixelMergerSnapshot> mergerSnapshot;
+                if (limits.evaluateOutputMerger) {
+                    NativePixelMergerSelection selection;
+                    if (!target.raster.target.depth)
+                        selection.colorSlot = target.view.at("slot").get<uint32_t>();
+                    selection.x = s.x;
+                    selection.y = s.y;
+                    selection.layer = target.view.at("relative_layer").get<uint32_t>();
+                    selection.maxReadbackBytes = s.maxReadbackBytes;
+                    selection.timeoutMs = limits.timeoutMs;
+                    mergerSnapshot = snapshotNativePixelMergerState(privateReplay, selection, bounded);
+                    mergerReadbackBytes += mergerSnapshot->identity.at("readback_bytes").get<uint64_t>();
+                    mergerSnapshot->state.maxBytes = limits.maxBytes;
+                }
                 for (auto &invocation : pending->second) {
                     checkCancellation(bounded);
                     if (shaderSteps >= limits.maxShaderSteps)
@@ -388,6 +418,53 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                     output["resource_boundary"] = "before_private_primitive";
                     output["completed_primitives"] = count;
                     output["candidate_raster_samples"] = invocation.samples;
+                    if (mergerSnapshot) {
+                        const auto &provenance = output.at("input_provenance");
+                        const auto &raster = provenance.at("selected_raster");
+                        const auto lane = output.at("selected_lane").get<uint32_t>();
+                        if (raster.at("lane") != lane || provenance.at("primitive_ordinal") != count ||
+                            output.at("frame_sha256") != privateReplay.frame().sha256(bounded))
+                            throw std::runtime_error("Private merger input provenance differs");
+                        auto state = mergerSnapshot->state;
+                        state.rasterDepthBits = raster.at("depth_bits").get<uint32_t>();
+                        state.frontFace = raster.at("front_face").get<bool>();
+                        state.coverageMask = raster.at("coverage_mask").get<uint32_t>();
+                        // Only the selected storage sample is predicted. Other
+                        // samples can belong to distinct shader invocations.
+                        state.sampleMask &= 1u << s.sample;
+                        auto merged =
+                            mergeNativePixelOutput(privateReplay.nativeDevice(), privateReplay.options().warp,
+                                                   state, output, lane, bounded);
+                        const auto &targetSnapshot = mergerSnapshot->identity.at("targets").at(
+                            target.raster.target.depth && state.colorFormat ? 1 : 0);
+                        const auto &subresource = targetSnapshot.at("subresource");
+                        if (targetSnapshot.at("resource") != s.resource || subresource.at("mip") != s.mip ||
+                            subresource.at("array_layer") != s.layer || subresource.at("slice") != s.slice)
+                            throw std::runtime_error("Private merger target identity differs");
+                        const auto key = target.raster.target.depth ? "depth_after" : "color_after";
+                        const auto bytes = merged.at(key).get<std::vector<uint8_t>>();
+                        const auto texel = pitches(1, 1, target.view.at("format").get<uint32_t>()).first;
+                        const auto offset = size_t(s.sample) * texel;
+                        if (offset > bytes.size() || texel > bytes.size() - offset)
+                            throw std::runtime_error("Private merger selected sample bounds");
+                        Json joined = {
+                            {"scope", "one_private_shader_lane_on_selected_storage_sample"},
+                            {"shader_output_index", candidates.at(count).at("private_shader_outputs").size()},
+                            {"selected_sample", s.sample},
+                            {"application_sample_mask", mergerSnapshot->state.sampleMask},
+                            {"selected_after",
+                             std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + offset + texel)},
+                            {"selected_exact_storage_bits", targetSnapshot.at("exact_storage_bits")},
+                            {"binding_snapshot", mergerSnapshot->identity},
+                            {"raster_inputs", raster},
+                            {"original_fragment_eligibility", nullptr},
+                            {"observed_value_matches_checkpoint", false},
+                            {"exact_storage_matches_checkpoint", false},
+                            {"merger", std::move(merged)}};
+                        retainShader(joined.dump().size());
+                        candidates.at(count)["private_output_mergers"].push_back(std::move(joined));
+                        ++mergerInvocations;
+                    }
                     shaderRetained -= invocation.bytes;
                     retainShader(output.dump().size());
                     candidates.at(count)["private_shader_outputs"].push_back(std::move(output));
@@ -430,6 +507,12 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
           {"invocations", shaderInvocations},
           {"global_steps", shaderSteps},
           {"retained_payload_bytes", shaderRetained},
+          {"resource_boundary", "before_private_primitive"},
+          {"original_fragment_eligibility", nullptr}}},
+        {"merger_evaluation",
+         {{"requested", limits.evaluateOutputMerger},
+          {"invocations", mergerInvocations},
+          {"readback_bytes", mergerReadbackBytes},
           {"resource_boundary", "before_private_primitive"},
           {"original_fragment_eligibility", nullptr}}},
         {"readback_count", reads},

@@ -7,6 +7,9 @@ struct NativePixelDrawHistoryLimits {
     // Optional private shader evaluation has separate retained/input-copy and
     // global execution limits. It does not qualify original fragments.
     bool evaluateShaderOutputs = false;
+    // Join the private shader result with measured bindings and selected-sample
+    // storage. Comparison with the private GPU checkpoint remains explicit.
+    bool evaluateOutputMerger = false;
     uint64_t maxShaderBytes = 256ull * 1024 * 1024, maxShaderSteps = 1000000;
 };
 // Internal selected-texel checkpoints over a full private original-PS draw.

@@ -9,9 +9,9 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     try {
         const auto a = app.arguments();
-        if (a.size() != 12 && !(a.size() == 13 && a[12] == "outputs"))
+        if (a.size() != 12 && !(a.size() == 13 && (a[12] == "outputs" || a[12] == "merger")))
             throw std::runtime_error("Usage: FloraNativePixelDrawHistoryProbe FRAME EVENT RESOURCE X Y MIP "
-                                     "LAYER SLICE SAMPLE VENDOR NEW_DIRECTORY [outputs]");
+                                     "LAYER SLICE SAMPLE VENDOR NEW_DIRECTORY [outputs|merger]");
         auto number = [&](int i) {
             bool ok = false;
             const auto n = a[i].toULongLong(&ok, 0);
@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
         NativePixelDrawHistoryLimits limits;
         limits.timeoutMs = 60000;
         limits.evaluateShaderOutputs = a.size() == 13;
+        limits.evaluateOutputMerger = a.size() == 13 && a[12] == "merger";
         auto report = collectNativePixelDrawHistory(r, event, s, limits, cancel);
         o.before = o.prepareBeforeDraw = false;
         Replay reference(f, o);

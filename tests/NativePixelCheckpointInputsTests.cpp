@@ -375,10 +375,15 @@ class NativePixelCheckpointInputsTests final : public QObject {
         selection.resource = 20;
         NativePixelDrawHistoryLimits limits;
         limits.evaluateShaderOutputs = true;
+        limits.evaluateOutputMerger = true;
         auto report = collectNativePixelDrawHistory(r, 200, selection, limits);
+        QCOMPARE(report.at("merger_evaluation").at("invocations"), Json(3));
         QCOMPARE(report.at("records").size(), size_t(3));
         for (uint32_t i = 0; i < 3; ++i) {
             const auto &row = report.at("records")[i];
+            QCOMPARE(row.at("private_output_mergers").size(), size_t(1));
+            QCOMPARE(row.at("private_output_mergers")[0].at("observed_value_matches_checkpoint"), Json(true));
+            QCOMPARE(row.at("private_output_mergers")[0].at("exact_storage_matches_checkpoint"), Json(true));
             QCOMPARE(row.at("private_shader_outputs").size(), size_t(1));
             const auto &out = row.at("private_shader_outputs")[0];
             QCOMPARE(out.at("completed_primitives"), Json(i));

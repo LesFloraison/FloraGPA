@@ -3,6 +3,7 @@
 #include "StreamCapture.h"
 #include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
+#include "replay/BlendState.h"
 #include <QDir>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -10,6 +11,19 @@ using namespace flora;
 using namespace flora::testing;
 using Json = nlohmann::json;
 namespace {
+void verifyMergerJoin(const Json &report) {
+    QCOMPARE(report.at("merger_evaluation").at("requested"), Json(true));
+    QCOMPARE(report.at("merger_evaluation").at("invocations"),
+             report.at("shader_evaluation").at("invocations"));
+    for (const auto &row : report.at("records")) {
+        QCOMPARE(row.at("private_output_mergers").size(), row.at("private_shader_outputs").size());
+        for (const auto &merger : row.at("private_output_mergers")) {
+            QCOMPARE(merger.at("observed_value_matches_checkpoint"), Json(true));
+            QCOMPARE(merger.at("exact_storage_matches_checkpoint"), Json(true));
+            QVERIFY(merger.at("original_fragment_eligibility").is_null());
+        }
+    }
+}
 ReplayOptions options(uint32_t vendor, Id event) {
     ReplayOptions o;
     o.debug = true;
@@ -103,6 +117,84 @@ Capture layeredHistoryCapture(bool volume) {
 class NativePixelGeometryReplayTests final : public QObject {
     Q_OBJECT
   private slots:
+    void mergerHistory_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 4u})
+                for (const auto *mode : {"blend", "dual", "alpha", "write-mask", "unchanged"})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(samples).arg(mode)))
+                        << vendor << samples << QString(mode);
+    }
+    void mergerHistory() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, samples);
+        QFETCH(QString, mode);
+        auto capture = blendCapture(1, mode == "dual", false, samples);
+        drawCount(capture, 100, 6);
+        auto o = options(vendor, 100);
+        o.shaders[10] = compileClassProgram(
+            "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return float4(i==2?3:-1,i==1?3:-1,0,1);}",
+            "vs_5_0");
+        if (mode == "unchanged")
+            o.shaders[12] =
+                compileClassProgram("float4 main():SV_Target{return float4(.125,.5,.25,.25);}", "ps_5_0");
+        auto blend = defaultBlend();
+        auto &rt = blend.RenderTarget[0];
+        if (mode == "blend" || mode == "dual") {
+            rt.BlendEnable = TRUE;
+            rt.SrcBlend = mode == "dual" ? D3D11_BLEND_SRC1_COLOR : D3D11_BLEND_SRC_ALPHA;
+            rt.DestBlend = mode == "dual" ? D3D11_BLEND_INV_SRC1_COLOR : D3D11_BLEND_INV_SRC_ALPHA;
+        }
+        blend.AlphaToCoverageEnable = mode == "alpha";
+        if (mode == "write-mask")
+            rt.RenderTargetWriteMask = 5;
+        o.blendEdits[100].descriptor = blend;
+        QTemporaryDir directory;
+        const auto path = directory.filePath("frame.gpa_frame");
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        const uint32_t sample = samples - 1;
+        Json prefixes = Json::array();
+        for (uint32_t count : {1u, 2u}) {
+            auto prefix = capture;
+            drawCount(prefix, 100, count * 3);
+            const auto prefixPath = directory.filePath(QString("prefix-%1.gpa_frame").arg(count));
+            prefix.save(prefixPath);
+            Frame prefixFrame(prefixPath.toStdWString());
+            Replay reference(prefixFrame, o);
+            reference.run();
+            prefixes.push_back(blendPixel(reference, 1000, sample));
+        }
+        o.before = o.prepareBeforeDraw = true;
+        Replay replay(frame, o);
+        replay.run();
+        NativeHistorySelection selection;
+        selection.resource = 1000;
+        selection.sample = sample;
+        NativePixelDrawHistoryLimits limits;
+        limits.evaluateShaderOutputs = limits.evaluateOutputMerger = true;
+        auto report = collectNativePixelDrawHistory(replay, 100, selection, limits);
+        verifyMergerJoin(report);
+        QCOMPARE(report.at("records").size(), size_t(2));
+        for (size_t i = 0; i < 2; ++i) {
+            const auto &row = report.at("records")[i];
+            const auto bytes = row.at("after").at("bytes").get<std::vector<uint8_t>>();
+            QCOMPARE(bytes.size(), size_t(16));
+            std::array<uint32_t, 4> words{};
+            std::memcpy(words.data(), bytes.data(), 16);
+            QCOMPARE(Json(words), prefixes[i]);
+            if (mode == "unchanged") {
+                QCOMPARE(row.at("observed_value_changed"), Json(false));
+                QCOMPARE(row.at("private_output_mergers")[0].at("merger").at("passing_samples"), Json(1));
+            }
+        }
+        report["status"] = "ok";
+        report["mode"] = mode.toStdString();
+        report["reference_prefix_bits"] = prefixes;
+        evidence(report);
+    }
     void shaderHistoryBoundaries_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
@@ -164,7 +256,9 @@ class NativePixelGeometryReplayTests final : public QObject {
         selection.resource = resource;
         NativePixelDrawHistoryLimits limits;
         limits.evaluateShaderOutputs = true;
+        limits.evaluateOutputMerger = true;
         auto report = collectNativePixelDrawHistory(r, event, selection, limits);
+        verifyMergerJoin(report);
         QCOMPARE(report.at("records").size(), size_t(1));
         const auto &row = report.at("records")[0];
         QCOMPARE(row.at("after").at("bytes").get<std::vector<uint8_t>>(), expected);
@@ -236,7 +330,9 @@ class NativePixelGeometryReplayTests final : public QObject {
         selection.sample = sample;
         NativePixelDrawHistoryLimits limits;
         limits.evaluateShaderOutputs = true;
+        limits.evaluateOutputMerger = true;
         auto report = collectNativePixelDrawHistory(r, 100, selection, limits);
+        verifyMergerJoin(report);
         QCOMPARE(report.at("records").size(), size_t(1));
         const auto &row = report.at("records")[0];
         QCOMPARE(row.at("private_shader_outputs").size(), size_t(1));
@@ -301,7 +397,9 @@ class NativePixelGeometryReplayTests final : public QObject {
         select.resource = 1000;
         NativePixelDrawHistoryLimits limits;
         limits.evaluateShaderOutputs = true;
+        limits.evaluateOutputMerger = true;
         auto first = collectNativePixelDrawHistory(r, 100, select, limits);
+        verifyMergerJoin(first);
         QCOMPARE(first.at("shader_evaluation").at("invocations"), Json(2));
         const auto steps = first.at("shader_evaluation").at("global_steps").get<uint64_t>();
         QVERIFY(steps > 1);
@@ -322,6 +420,7 @@ class NativePixelGeometryReplayTests final : public QObject {
         QVERIFY(cancelled);
         QCOMPARE(r.readTexture(1000), initial);
         auto retry = collectNativePixelDrawHistory(r, 100, select, limits);
+        verifyMergerJoin(retry);
         QCOMPARE(retry.at("after"), first.at("after"));
         QCOMPARE(retry.at("shader_evaluation"), first.at("shader_evaluation"));
         QCOMPARE(r.readTexture(1000), initial);
