@@ -41,11 +41,17 @@ std::string instanceName(ID3D11ClassInstance *instance, bool type) {
 } // namespace
 int wmain(int argc, wchar_t **argv) {
     try {
-        if (argc != 3 && argc != 4)
+        if (argc < 3 || argc > 6)
             throw std::runtime_error("Usage: FloraDxbcInterfaceProbe NEW_DIRECTORY VENDOR "
-                                     "[array|static-array|single|single-u3|single-11_0|single-dynamic]");
-        const std::wstring fixture = argc == 4 ? argv[3] : L"array";
-        const bool single = fixture != L"array" && fixture != L"static-array";
+                                     "[array|static-array|single|single-u3|single-11_0|single-dynamic|wide-"
+                                     "array|multi-array|wide-multi-array] [debug|no-debug] [original.dxbc]");
+        const std::wstring fixture = argc >= 4 ? argv[3] : L"array";
+        const bool debugLayer = argc < 5 || std::wstring(argv[4]) == L"debug";
+        if (argc >= 5 && std::wstring(argv[4]) != L"debug" && std::wstring(argv[4]) != L"no-debug")
+            throw std::runtime_error("Unknown interface validation control");
+        const bool wide = fixture == L"wide-array" || fixture == L"wide-multi-array";
+        const bool multiple = fixture == L"multi-array" || fixture == L"wide-multi-array";
+        const bool single = fixture != L"array" && fixture != L"static-array" && !wide && !multiple;
         const bool dynamicSingle = fixture == L"single-dynamic";
         const bool lowLevel = fixture == L"single-11_0";
         if (single && fixture != L"single" && fixture != L"single-u3" && !lowLevel && !dynamicSingle)
@@ -81,8 +87,9 @@ int wmain(int argc, wchar_t **argv) {
         D3D_FEATURE_LEVEL level{};
         const D3D_FEATURE_LEVEL levels[]{D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
         check(D3D11CreateDevice(selected.Get(), vendor ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_WARP,
-                                nullptr, D3D11_CREATE_DEVICE_DEBUG, levels + unsigned(lowLevel),
-                                lowLevel ? 1 : 2, D3D11_SDK_VERSION, &device, &level, &context),
+                                nullptr, debugLayer ? D3D11_CREATE_DEVICE_DEBUG : 0,
+                                levels + unsigned(lowLevel), lowLevel ? 1 : 2, D3D11_SDK_VERSION, &device,
+                                &level, &context),
               "Create interface device");
         ComPtr<IDXGIDevice> dxgi;
         ComPtr<IDXGIAdapter> actual;
@@ -117,32 +124,64 @@ int wmain(int argc, wchar_t **argv) {
             source.replace(source.find("selected.apply"), 14, "selected[choose&1].apply");
         }
         ComPtr<ID3DBlob> binary, error, assembly;
-        const auto compiled = D3DCompile(source.data(), source.size(), "interface-probe.hlsl", nullptr,
-                                         nullptr, "main", "cs_5_0", 0, 0, &binary, &error);
-        if (FAILED(compiled) && error)
-            throw std::runtime_error(static_cast<const char *>(error->GetBufferPointer()));
-        check(compiled, "Compile interface shader");
+        if (wide) {
+            const auto first = source.find("class A:I");
+            const auto last = source.find("cbuffer Selection");
+            source.replace(
+                first, last - first,
+                "class A:I{uint4 padding;uint value;uint apply(uint x){return x+value+padding.x;}"
+                "uint other(uint x){return x^(value+padding.x);}};"
+                "class B:I{uint value;uint4 padding;uint apply(uint x){return x*(value+padding.x);}"
+                "uint other(uint x){return x+(value+padding.x)*3;}};");
+        }
+        if (multiple) {
+            source.replace(source.find("I selected[2];"), 14, "I selected[2]; I extra[2];");
+            const std::string call = "selected[1-i].other";
+            source.replace(source.find(call), call.size(), "extra[1-i].other");
+        }
+        if (argc == 6) {
+            std::ifstream input(fs::path(argv[5]), std::ios::binary | std::ios::ate);
+            const auto size = input.tellg();
+            if (!input || size <= 0 || size > 64 * 1024 * 1024)
+                throw std::runtime_error("Invalid original interface bytecode file");
+            check(D3DCreateBlob(size_t(size), &binary), "Allocate original interface bytecode");
+            input.seekg(0);
+            if (!input.read(static_cast<char *>(binary->GetBufferPointer()), std::streamsize(size)))
+                throw std::runtime_error("Cannot read original interface bytecode");
+        } else {
+            const auto compiled = D3DCompile(source.data(), source.size(), "interface-probe.hlsl", nullptr,
+                                             nullptr, "main", "cs_5_0", 0, 0, &binary, &error);
+            if (FAILED(compiled) && error)
+                throw std::runtime_error(static_cast<const char *>(error->GetBufferPointer()));
+            check(compiled, "Compile interface shader");
+        }
         check(D3DDisassemble(binary->GetBufferPointer(), binary->GetBufferSize(), 0, nullptr, &assembly),
               "Disassemble interface shader");
-        save(directory / "shader.hlsl", source.data(), source.size());
+        save(directory / (argc == 6 ? "fixture.hlsl" : "shader.hlsl"), source.data(), source.size());
         save(directory / "shader.dxbc", binary->GetBufferPointer(), binary->GetBufferSize());
         save(directory / "shader.asm", assembly->GetBufferPointer(), assembly->GetBufferSize());
         ComPtr<ID3D11ShaderReflection> reflection;
         check(D3DReflect(binary->GetBufferPointer(), binary->GetBufferSize(), IID_PPV_ARGS(&reflection)),
               "Reflect interface shader");
         const auto slots = reflection->GetNumInterfaceSlots();
-        if (slots != (single && !dynamicSingle ? 1u : 2u))
+        if (slots != (multiple ? 4u : single && !dynamicSingle ? 1u : 2u))
             throw std::runtime_error("Unexpected interface slot count");
+        const UINT selectedBase = reflection->GetVariableByName("selected")->GetInterfaceSlot(0);
+        const UINT extraBase = multiple ? reflection->GetVariableByName("extra")->GetInterfaceSlot(0) : 0;
+        if (selectedBase >= slots ||
+            (multiple && (extraBase + 2 > slots || selectedBase + 2 > slots || extraBase == selectedBase)))
+            throw std::runtime_error("Invalid reflected interface base");
         ComPtr<ID3D11ClassLinkage> linkage;
         ComPtr<ID3D11ComputeShader> shader;
         check(device->CreateClassLinkage(&linkage), "Create class linkage");
         check(device->CreateComputeShader(binary->GetBufferPointer(), binary->GetBufferSize(), linkage.Get(),
                                           &shader),
               "Create original interface shader");
-        std::array<uint32_t, 16> constants{};
-        for (uint32_t i = 0; i < 4; ++i)
+        std::vector<uint32_t> constants(wide ? 32 : 16);
+        for (uint32_t i = 0; i < constants.size() / 4; ++i)
             constants[i * 4] = (i + 1) * 10;
-        D3D11_BUFFER_DESC descriptor{64, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+        D3D11_BUFFER_DESC descriptor{
+            UINT(constants.size() * 4), D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
         const D3D11_SUBRESOURCE_DATA initial{constants.data(), 0, 0};
         ComPtr<ID3D11Buffer> cb, selection, output, staging;
         check(device->CreateBuffer(&descriptor, &initial, &cb), "Create class constants");
@@ -187,9 +226,21 @@ int wmain(int argc, wchar_t **argv) {
                 values = mode == 2 ? std::array<uint32_t, 2>{40, 20} : std::array<uint32_t, 2>{20, 30};
             }
             Json bindings = Json::array();
-            std::array<ID3D11ClassInstance *, 2> pointers{instances[0].Get(), instances[1].Get()};
+            if (wide) {
+                const std::array<std::array<uint32_t, 2>, 4> wideValues{
+                    {{70, 110}, {30, 150}, {90, 50}, {50, 70}}};
+                values = wideValues.at(mode);
+            }
+            std::vector<ID3D11ClassInstance *> pointers(slots);
+            pointers[selectedBase] = instances[0].Get();
+            if (slots > 1)
+                pointers[selectedBase + 1] = instances[1].Get();
             if (dynamicSingle)
-                pointers[1] = pointers[0];
+                pointers[selectedBase + 1] = pointers[selectedBase];
+            if (multiple) {
+                pointers[extraBase] = instances[1].Get();
+                pointers[extraBase + 1] = instances[0].Get();
+            }
             for (UINT slot = 0; slot < slots; ++slot) {
                 auto *instance = pointers[slot];
                 D3D11_CLASS_INSTANCE_DESC description{};
@@ -228,16 +279,20 @@ int wmain(int argc, wchar_t **argv) {
             std::memcpy(actualWords.data(), mapped.pData, sizeof actualWords);
             context->Unmap(staging.Get(), 0);
             for (uint32_t i = 0; i < 4; ++i)
-                expected[i] = single                                      ? values[0] + i
+                expected[i] = multiple ? (selector[0] ? i * values[1] + i + values[1] * 3
+                                                      : i + values[0] + (i ^ values[0]))
+                              : single ? values[0] + i
                               : selector[0] && fixture != L"static-array" ? i * values[1] + (i ^ values[0])
                                                                           : i + values[0] + i + values[1] * 3;
             cases.push_back(
                 {{"mode", mode}, {"bindings", bindings}, {"actual", actualWords}, {"expected", expected}});
         }
         ComPtr<ID3D11InfoQueue> queue;
-        check(device.As(&queue), "Read interface validation");
-        Json diagnostics = Json::array();
-        for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+        const auto validationStatus = device.As(&queue);
+        if (debugLayer || validationStatus != E_NOINTERFACE)
+            check(validationStatus, "Read interface validation");
+        Json diagnostics = queue ? Json::array() : Json(nullptr);
+        for (UINT64 i = 0; queue && i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
             SIZE_T size = 0;
             check(queue->GetMessage(i, nullptr, &size), "Read interface diagnostic size");
             std::vector<uint8_t> bytes(size);
@@ -253,6 +308,7 @@ int wmain(int argc, wchar_t **argv) {
             {"schema", 1},
             {"probe", "original_dxbc_interfaces"},
             {"fixture", std::string(fixture.begin(), fixture.end())},
+            {"bytecode_origin", argc == 6 ? "provided_original" : "compiled_fixture"},
             {"seed", 0xdeadbeef},
             {"output_slot", outputSlot},
             {"vendor", adapter.VendorId},
@@ -262,8 +318,14 @@ int wmain(int argc, wchar_t **argv) {
             {"warp", vendor == 0},
             {"feature_level", uint32_t(level)},
             {"slots", slots},
+            {"selected_base", selectedBase},
+            {"extra_base", multiple ? Json(extraBase) : Json(nullptr)},
+            {"constant_words", constants},
             {"cases", cases},
             {"diagnostics", diagnostics},
+            {"requested_debug_layer", debugLayer},
+            {"creation_flags", device->GetCreationFlags()},
+            {"validation_status", uint32_t(validationStatus)},
             {"passed", std::all_of(cases.begin(), cases.end(), [](const auto &item) {
                  return item.at("actual") == item.at("expected");
              })}}.dump(2);

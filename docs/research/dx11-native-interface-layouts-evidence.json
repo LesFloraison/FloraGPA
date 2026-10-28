@@ -1,0 +1,1493 @@
+{
+  "schema": 1,
+  "baseline": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "acceptance_passed": false,
+  "scope": "Independent expanded class layout and exact-bytecode debug-layer controls; native implementation remains partial",
+  "native_suite": {
+    "passed": 40,
+    "failed": 22,
+    "skipped": 0
+  },
+  "existing_suites": {
+    "count": 8,
+    "passed": 1842,
+    "failed": 0,
+    "skipped": 0
+  },
+  "layout_validation": {
+    "evidence_valid": true,
+    "configurations": 36,
+    "native_authored_matching_words": 144,
+    "original_gpu_matching_words": 67,
+    "original_gpu_mismatching_words": 77,
+    "corruption_rejections": 180,
+    "acceptance_passed": false
+  },
+  "debug_controls": {
+    "schema": 1,
+    "evidence_valid": true,
+    "probe_sha256": "dd18399edd062ac0c74c3721bbff118ef0895d1a87ac6d747c5dcff4277c3def",
+    "probes": 24,
+    "shared_shader_sha256": {
+      "single": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "wide-array": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "multi-array": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "wide-multi-array": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b"
+    },
+    "failed_probes": 12,
+    "identical_debug_plain_words": 168,
+    "acceptance_passed": false
+  },
+  "files": [
+    {
+      "path": "artifacts/dx11-native/interface-bounded-final-build.log",
+      "sha256": "67f83502aa597bc990775f7b0bd2a26d50fa303ba3108d0818f1f6047295ef6e",
+      "bytes": 5395
+    },
+    {
+      "path": "artifacts/dx11-native/interface-bounded-layout-validation.json",
+      "sha256": "e17f2e2d1ebcd9ad7c22df051e6c94850d9298f696c85292eee82ac735646ced",
+      "bytes": 242
+    },
+    {
+      "path": "artifacts/dx11-native/interface-debug-control-initial.py",
+      "sha256": "69b9fe062e56452b7ea4b625637db352ae3142dbaa301c8cb3b8b942db097d38",
+      "bytes": 3843
+    },
+    {
+      "path": "artifacts/dx11-native/interface-debug-shared-validation.json",
+      "sha256": "ffad6d63b95fe1bdca55200c852ece3a85a039fbc3354285ad191b9eae28ce20",
+      "bytes": 631
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-ctest.log",
+      "sha256": "8b1bef087b704b72ef4236dc7aee3b5ba0e4f9ffeaec822931ee7d4a1c94fc50",
+      "bytes": 2041
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-build.log",
+      "sha256": "8ba19032c0765106accf757fefa5e5b64f4fd3b10f7cacf957148c4cfb1bb68b",
+      "bytes": 14030
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-execution-Release.txt",
+      "sha256": "acb6ffb4e2cfb1283c1ea304392e4cb9ea94ec84c358e68f6feaf0f186f93cb6",
+      "bytes": 688512
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-execution-trace-reader-Release.txt",
+      "sha256": "31af447d3d28eef624cb29c0bf5cd467490a8e58ed20de3100df9fca7b4526f3",
+      "bytes": 4509
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-execution-trace-Release.txt",
+      "sha256": "8beb1594e94ce9b2e24b35d99f95475513667b03d54c55d728e77c1b206545fe",
+      "bytes": 2781
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-group-Release.txt",
+      "sha256": "ac969bf3f4604e2dd870243fb19afd65c780c4799a95c8699bad73f494d21263",
+      "bytes": 134384
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-input-snapshot-Release.txt",
+      "sha256": "60c5bbadd4ee1aa0328c30d367aa37163840c813669c0f404af970733d890268",
+      "bytes": 45944
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/dxbc-memory-Release.txt",
+      "sha256": "29d14c2b064a02c6e9cb70c38151fe6255d75f503969969a6f641cf7a49052a6",
+      "bytes": 431288
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/native-analysis-Release.txt",
+      "sha256": "0ecd16c26deb73a2c26defa50f7d2f4382da4e3983a75857757e0eb11fd2e2e7",
+      "bytes": 2952
+    },
+    {
+      "path": "artifacts/dx11-native/interface-final-regression-logs/native-execution-debug-model-Release.txt",
+      "sha256": "1c2f46f23fe2160b82482c99bb97f582cfb6fd119bab3c232b8a94842c830468",
+      "bytes": 2236
+    },
+    {
+      "path": "artifacts/dx11-native/interface-layout-string-failure.cpp",
+      "sha256": "f1e8ba3d428320d9e46cc5b30763f9fd98ecfffe2c4555639fb4a3f4bd686a3b",
+      "bytes": 18293
+    },
+    {
+      "path": "artifacts/dx11-native/interface-layout-string-failure.log",
+      "sha256": "9884f81fc32da89aae90035d5af02bf878ccf7592c057dfb71a0831c26d0f767",
+      "bytes": 115
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-alias.txt",
+      "sha256": "4288b77152d87c0e296c51cdb9b24527fd6bc779fad9a1e8c3cb90cb2d63b02f",
+      "bytes": 9174
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/0/result.json",
+      "sha256": "e2fce6088a611fd78a18f497f589b62b3fde4a50d4f5cfd0c050db4936e026c2",
+      "bytes": 3267
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/0/shader.asm",
+      "sha256": "8befb1e52dab28f30e81ce26c65d10d6ae78b21653d4f424436fdb74c395dff4",
+      "bytes": 3509
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/0/shader.dxbc",
+      "sha256": "f500e3cc6cf22550004523920db2b252055e6a0f2478ab4b849c0e999f9e06b9",
+      "bytes": 2020
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/0/shader.hlsl",
+      "sha256": "70aa1ac36c0aec27546deac1c05958b746e0372a304ae289fd48a581c7fded26",
+      "bytes": 530
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/32902/result.json",
+      "sha256": "5e029c66d70700b26322acef8c38889f884b05f80e6715964a2f0fc0c481d105",
+      "bytes": 3271
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/32902/shader.asm",
+      "sha256": "8befb1e52dab28f30e81ce26c65d10d6ae78b21653d4f424436fdb74c395dff4",
+      "bytes": 3509
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/32902/shader.dxbc",
+      "sha256": "47e6a3c90535061788ff7a72d1c4118bbd7d69c713e16d3d7e91b69e28d9ff21",
+      "bytes": 2020
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/32902/shader.hlsl",
+      "sha256": "70aa1ac36c0aec27546deac1c05958b746e0372a304ae289fd48a581c7fded26",
+      "bytes": 530
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/4318/result.json",
+      "sha256": "c389898073bfca255d0ffd5f369af4a2aa7b496af7a8cf7d8b138d7b3e8951d4",
+      "bytes": 3270
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/4318/shader.asm",
+      "sha256": "8befb1e52dab28f30e81ce26c65d10d6ae78b21653d4f424436fdb74c395dff4",
+      "bytes": 3509
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/4318/shader.dxbc",
+      "sha256": "22800df65bdfc483ef93b81d35c85f21982535a6fdbcf12a7fa195c9cfd3b1de",
+      "bytes": 2020
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/4318/shader.hlsl",
+      "sha256": "70aa1ac36c0aec27546deac1c05958b746e0372a304ae289fd48a581c7fded26",
+      "bytes": 530
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-0.gpa_frame",
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357",
+      "bytes": 24946
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-0.jsonl",
+      "sha256": "e9e7579f880c8e5e184ab6fa9c8df734aa2b28016cb5ca5a4eb7cf00a1092d30",
+      "bytes": 105992
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-1.gpa_frame",
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80",
+      "bytes": 24942
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-0-1.jsonl",
+      "sha256": "26ccb912c540572b8722f45eeacbec3a504577b687279111b51b767164c2ddaf",
+      "bytes": 105993
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-0.gpa_frame",
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357",
+      "bytes": 24946
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-0.jsonl",
+      "sha256": "7cca694a9493f249fa4be43b59f9b9e37674f85e7ea0e588a8dec35fc3131d9b",
+      "bytes": 105995
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-1.gpa_frame",
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80",
+      "bytes": 24942
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-32902-1.jsonl",
+      "sha256": "7f65f4075a059609a6b76994df1d395bec91b3d3d2d8f9a7762156d801f1896c",
+      "bytes": 105996
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-0.gpa_frame",
+      "sha256": "337fa25ec14d7625333a04a25e1c2cd08fe445808d45239ae927834a1fb1a357",
+      "bytes": 24946
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-0.jsonl",
+      "sha256": "755c77639a99820371ffe43f91e7a458e34a0ab8a174d2bfc53bbea06bd9dfd9",
+      "bytes": 105994
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-1.gpa_frame",
+      "sha256": "40c79c5c930a82ecab0ba75e5d5607b32d2c11b9baf7222a7327091f093d5e80",
+      "bytes": 24942
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/capture-4318-1.jsonl",
+      "sha256": "e0df6c071d53154431a6581fe401eeb7b276ac699a2f38df0236ee95ea88937a",
+      "bytes": 105995
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/class-alias-0.gpa_frame",
+      "sha256": "06fcc585cd920d03286701ce67ca8fe98e0cc5574881e067f954c17e836b37be",
+      "bytes": 25148
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/class-alias-1.gpa_frame",
+      "sha256": "06fcc585cd920d03286701ce67ca8fe98e0cc5574881e067f954c17e836b37be",
+      "bytes": 25148
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/empty-function-table.gpa_frame",
+      "sha256": "66474f0f05afa8b980e75dac8cdc09fae8ed5372f20848a510a008071ad5ea70",
+      "bytes": 50775
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array/result.json",
+      "sha256": "3e5b8319680d3f7358ca69f1b9af9906079e0f37103ea654843d8d1cd9131e87",
+      "bytes": 5068
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array/shader.dxbc",
+      "sha256": "427ca991a80eafaaaa51dc1af1fe184fe6c9cac6e8eeb1e88b1b5bb5eda617d1",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array/shader.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array-native-0.json",
+      "sha256": "ec11faddd131cf3ac6b0962e6b048ee41c8969f2797278d82fdef64a3df35bc8",
+      "bytes": 1828
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array-native-1.json",
+      "sha256": "beeeb65b43eb329966fc4bdae3cd955cd62810bbfaac9e66eec4397bfaf2fdb5",
+      "bytes": 1840
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array-native-2.json",
+      "sha256": "a643307303cb09d0efd84618918ada169ca500af74140cd46649bab32733eeef",
+      "bytes": 1818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-multi-array-native-3.json",
+      "sha256": "c601a82060b0d56ac358a4ad48d81bbf67a7aa0119ee22a385e3b42f130c5c56",
+      "bytes": 1827
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array/result.json",
+      "sha256": "7c8df67248e7c5795fbefff5a6c95c3bf9f3c5447498c2294b4566c49c296e13",
+      "bytes": 3396
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array/shader.dxbc",
+      "sha256": "6fd9baa60a4d4115e7cd5552eaa4991dbc3a8f36ee50a3d5a62426c54838293a",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array/shader.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array-native-0.json",
+      "sha256": "8c179ecc0848fee5cd83b7312575b0491a588dd4a361f2e74d9a5202684240f8",
+      "bytes": 1080
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array-native-1.json",
+      "sha256": "bb73e8b04a96c978c714e15463f1a192940a5fb36e8d18c8bee1897ff82f95c3",
+      "bytes": 1077
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array-native-2.json",
+      "sha256": "1a4a22ee22e824136204364a6dac38ce5413b64e97d37a0c9346a2b6b5f3a81e",
+      "bytes": 1075
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-array-native-3.json",
+      "sha256": "95f4eeeb8dbc6e57de7bddaf25012de2c2dc01c3c1dd2aa498a4e1866b417505",
+      "bytes": 1072
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array/result.json",
+      "sha256": "536af23f5f3d2c628ce949c88134efb03a022e9506f4834aaa406040d26c2118",
+      "bytes": 5207
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array/shader.dxbc",
+      "sha256": "6e8b00d92ae3cb4d598b943016dfa7091671f6805c40dc9d719cd5f02f554676",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array/shader.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array-native-0.json",
+      "sha256": "0713d76d89bde249036742ada106e7568f48e6733261e5dbcccf4fb653782a6a",
+      "bytes": 1845
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array-native-1.json",
+      "sha256": "4fdce433a976d5a611f6358ad36891f8bc4548a7b2f2f72e7516323b660c7af0",
+      "bytes": 1845
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array-native-2.json",
+      "sha256": "1e5df2b5c46ee49bb362170e7d439a17acc21a42552993899cdbbe964e0b9ab4",
+      "bytes": 1835
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-0-wide-multi-array-native-3.json",
+      "sha256": "e2b8c904a6f4ccbc4a27b7b6c988cf46265a1586b54dc7f52511067a60aa0df4",
+      "bytes": 1835
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array/result.json",
+      "sha256": "3a601368ebe45e40ed0e803bedfc813c2ee47fe82f2d02287f5441ef5a61e6bd",
+      "bytes": 5065
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array/shader.dxbc",
+      "sha256": "487c43ead5bcba1f2e75b9949b01137e4b134f59b63fa600b16086f7abc39da5",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array/shader.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array-native-0.json",
+      "sha256": "2a6bf0b0215b62ff6f0ba5ca331e24c0135947d3c616398d39380b19020e4656",
+      "bytes": 1833
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array-native-1.json",
+      "sha256": "255def5b001ef8699e3e36f05fea16d35866bba9721674195bb037ad555af3e7",
+      "bytes": 1841
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array-native-2.json",
+      "sha256": "e4328b4e9d9c3f098ba72ed8b60a59b7866f5c476e90ee7a6538fc716ad1e8af",
+      "bytes": 1823
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-multi-array-native-3.json",
+      "sha256": "058d31303e880df8ae9d7525ab3295c5fc7a9a835dbf359a3d106b7685f5993e",
+      "bytes": 1828
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array/result.json",
+      "sha256": "6ad05d3fa349e3010aa41334c868ff5d1c414b3a75891704f1cf53a07c558686",
+      "bytes": 3400
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array/shader.dxbc",
+      "sha256": "872c4b8837017e31f81d582272a33f0a13086b3727176012b41f69b9d74ef101",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array/shader.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array-native-0.json",
+      "sha256": "1dbe68d74ff6d51935ef112e05d144afd37841edae1b36eb4e8f72275bee950d",
+      "bytes": 1084
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array-native-1.json",
+      "sha256": "830ca0057908fb8c94ec7aa4e20be5c8ac7d9c5ebb60c0c1c87c5c3acd14ac15",
+      "bytes": 1081
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array-native-2.json",
+      "sha256": "03249e4ae542d9fd47467643f5efcfe544260cb7124a3ffb3e5cc355a963dcdc",
+      "bytes": 1079
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-array-native-3.json",
+      "sha256": "96f2d1a9e67c8160a5f2107ee7dfcb78542ba3a9dfc02ba93c333bb8d8ac949a",
+      "bytes": 1076
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array/result.json",
+      "sha256": "9740ec1210080b54c0f3bed794d2881871507f3cd42ac6ada58073b5c79a44e1",
+      "bytes": 5203
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array/shader.dxbc",
+      "sha256": "287b5478dea48096c2106059fe13fab4007350354e079a497dbd5c16f7d2ec95",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array/shader.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array-native-0.json",
+      "sha256": "fb10d50e036c84efeabb1da3108ae181d3cf61733f357184e53eb06fc0b9018b",
+      "bytes": 1846
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array-native-1.json",
+      "sha256": "a094b3cfb1cb59b16433623ffb64055e5ac9ef84af7b8ead5c62e0fb7bc11e38",
+      "bytes": 1850
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array-native-2.json",
+      "sha256": "ca541f9fe12783622ff211285193a7fec5b514c1ec3e9f254efd82b7d3c91417",
+      "bytes": 1836
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-32902-wide-multi-array-native-3.json",
+      "sha256": "7cd67b07fdcfbe34dcdcf13ae1f1c0f2e34712f7a497fbf1f5b56ca1e43ad7df",
+      "bytes": 1839
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array/result.json",
+      "sha256": "d38066b9ce6c6b7401805cd11615d5d0713c3674ac75c61bb7e3404ffa0d37a4",
+      "bytes": 5069
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array/shader.dxbc",
+      "sha256": "945382e48f281631361d567750ebbc7374961de2889797e6f6c4a8b459a03d42",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array/shader.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array-native-0.json",
+      "sha256": "0b6c5fcadaf22625add5bb7fd785dac958ac1201f42d9a69826ddd3c73e32c16",
+      "bytes": 1832
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array-native-1.json",
+      "sha256": "f18fbc457e0d1dc82c247a9b790786b4000256db552ad1af977f523e8225a6ba",
+      "bytes": 1842
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array-native-2.json",
+      "sha256": "85024d3504198d617c2c3b91f69a03e7d9456e8e871663a9b90bb68872f2ba92",
+      "bytes": 1822
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-multi-array-native-3.json",
+      "sha256": "df029fd47cbb38a75d726e3da88a45cd9b361d6fcea1bb1f8dd3ba2cb704831e",
+      "bytes": 1830
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array/result.json",
+      "sha256": "47b65b22453a08071307d6999e1358e1d024c519e04427b16506d37e9856abcf",
+      "bytes": 3400
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array/shader.dxbc",
+      "sha256": "d60840f54a91cd6688c6fca58627b09687656df6736b865aa1581bbe54f6dee9",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array/shader.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array-native-0.json",
+      "sha256": "76a107a561a38d4f0a727d840c71bb0c1a9e564b1175b06b107f9aebfaaa57d4",
+      "bytes": 1084
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array-native-1.json",
+      "sha256": "241dbb7082ce1899134c7f8fa074eed78f43381d92786e1be8512028d38a0481",
+      "bytes": 1081
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array-native-2.json",
+      "sha256": "7327dbbfc5efe4b15fbe7b859590509fe6fe15eb3057537366359235eaaab110",
+      "bytes": 1079
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-array-native-3.json",
+      "sha256": "946b06537600588af13f4dfbb0937069ec888db3cfb280911d67363456a1fb78",
+      "bytes": 1076
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array/result.json",
+      "sha256": "75be4bff420628b1052d75fd6ef33672b68ba4d01b340ed7b34ff0c2a553b9cb",
+      "bytes": 5211
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array/shader.dxbc",
+      "sha256": "2fb30a1c90873238131bbedbe272802b6b722ac693f2d51596b13db9a49cc0da",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array/shader.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array-native-0.json",
+      "sha256": "abf965b5708b366c46b4e76beeb77a3292b0f75e6c4266decd05afebc3be3563",
+      "bytes": 1849
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array-native-1.json",
+      "sha256": "fb1cae8ef10c26ac1b0d4fbbbdad46396b14800e0135d29b107ab3dcf398d98e",
+      "bytes": 1849
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array-native-2.json",
+      "sha256": "a9b68b4cb2c6b81a05161ad70d8b74c3ad7b963c70c6be08570466772252203b",
+      "bytes": 1839
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/layout-4318-wide-multi-array-native-3.json",
+      "sha256": "84fade480bb6c5028680d46907d8ec249490279da3b72416842c50d900edf76a",
+      "bytes": 1839
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-0-0.json",
+      "sha256": "b95cbaf136848fa50d202000284b7d3c67437d5199153b94cb1c045f41362fca",
+      "bytes": 893
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-0-1.json",
+      "sha256": "f0e463e2459b2ef5d46a7a2ef08583c397879afa9eba0548470af7eafc0919a1",
+      "bytes": 890
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-0-2.json",
+      "sha256": "ebedd387de723f158b599c9ea4bd982b5e0e829d75674b3d0781a58f4abf46ba",
+      "bytes": 888
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-0-3.json",
+      "sha256": "3b0e3455100e912ce0f074a49caf641ab90c7778786c1157d8706f588f93517c",
+      "bytes": 885
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-32902-0.json",
+      "sha256": "54f5f79adfae8ff79c9da30dc47021bbc0877a4c2567c9b7c17650fd0839b508",
+      "bytes": 897
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-32902-1.json",
+      "sha256": "0c0e34e1cd8cb85b8297a7e3016fd82db947c79f015403286b72a3cb770aca82",
+      "bytes": 894
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-32902-2.json",
+      "sha256": "a69702fa0dfaa04187721fa062e9bba1eba26abf3d91638a71b58a359122df10",
+      "bytes": 892
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-32902-3.json",
+      "sha256": "bca9d488d9803524e23709cecb6aa00a0fb37d1a8beffdcec5d6855021931db3",
+      "bytes": 889
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-4318-0.json",
+      "sha256": "1214859be1821dfe307ff9f87367276379ef7365b277b54fdbfd7c1b5446a656",
+      "bytes": 896
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-4318-1.json",
+      "sha256": "f6c9d48b63810dd30f2371feac4a889c0317ee19e4a84404042aa6dfacc27c48",
+      "bytes": 893
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-4318-2.json",
+      "sha256": "504e9bccb9115f0abc4c8bcfda8c8a11f84bf217e35479f06ecc1d216d24efe9",
+      "bytes": 891
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final/native-4318-3.json",
+      "sha256": "f362472b625dc03f7af6bb275b10f804e0654a3db86957104cbd5573d0b86d40",
+      "bytes": 888
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final.txt",
+      "sha256": "e7ea745963dcbd774044c1423474f076ca0262d7f5c939ac41c9af02280e46b3",
+      "bytes": 8756
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug/result.json",
+      "sha256": "a7d1360e766f33190f97c0aa876e6697c02a4f480eaa672140b3b0b841a4ea66",
+      "bytes": 1442
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug/shader.dxbc",
+      "sha256": "edb079b67173ba78e1ae04ddd477fff169c154da6bc29f747c100f84a2cad56b",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug/shader.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain/result.json",
+      "sha256": "fc7aa3b143fbb3436482b09bf0050ade11321cee8184f2956be8add13bf0f739",
+      "bytes": 1454
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain/shader.dxbc",
+      "sha256": "59289629dc02597cff6b95d8161f46f71222c786a051a917684318bfff9f7197",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain/shader.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-final/4318-single-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug/fixture.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug/result.json",
+      "sha256": "233831c0e58311fca26f8106465827a21cb57667856324678f83e11b7888117c",
+      "bytes": 5069
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain/fixture.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain/result.json",
+      "sha256": "ce28a91bf8e1ffe583f0e520aecdd097a0996eeed4c8c7ed5bc9b0cac8ab7290",
+      "bytes": 5081
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug/fixture.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug/result.json",
+      "sha256": "bc1666cc1cc3ab36364d8323a74cd53dab2dfea1192491a018939ff14cef9224",
+      "bytes": 1481
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain/fixture.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain/result.json",
+      "sha256": "70421a4df24ed5bf83df3961d79b9ab214541932b29231cace593cb951d3dcec",
+      "bytes": 1493
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-single-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug/fixture.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug/result.json",
+      "sha256": "4f75eba6b556a4cde3d38bffd15bf96d0eae75fc231b788f73c5866da9bbbec7",
+      "bytes": 3397
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain/fixture.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain/result.json",
+      "sha256": "319368bcbfa539437ca0c097bff9bbdb4a1588f40e855c202788feb351141d65",
+      "bytes": 3409
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug/fixture.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug/result.json",
+      "sha256": "02059de7bfba0ed25934a54d8930ae5a305a994f72faa6859b9443fe554f08c6",
+      "bytes": 5208
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain/fixture.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain/result.json",
+      "sha256": "d1ef5ff000db640bb5c649d6a8c2bf3cecbf2d4e6d3c07bf6c76a709b1337aab",
+      "bytes": 5220
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/0-wide-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug/fixture.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug/result.json",
+      "sha256": "a27c6f6d14ed76971faeead0bff7c170722952054ecb525d9ec9842c6e6a02a8",
+      "bytes": 5066
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain/fixture.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain/result.json",
+      "sha256": "8f5e58e5fcbeec475824ad3128e9e24f0e53b4bee1bfe6f963b76aae2bc5b282",
+      "bytes": 5078
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug/fixture.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug/result.json",
+      "sha256": "e845bc2b827b80d3b727621b6edddf6777522cc578e2d16e4d368b30052856b6",
+      "bytes": 1550
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain/fixture.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain/result.json",
+      "sha256": "cb391343e67e4923a37ac8f9a9dd9bce42643e5eb65f722a634caf53c5f3948b",
+      "bytes": 1562
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-single-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug/fixture.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug/result.json",
+      "sha256": "2bca0dfc407d1c2e13e3770b4486d95e821fb06d66ac26204dc00fd35312c25a",
+      "bytes": 3401
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain/fixture.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain/result.json",
+      "sha256": "d5d57f6e9868b85c87729e53ce6c7145121b262382056b310783c2f1a37795ff",
+      "bytes": 3413
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug/fixture.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug/result.json",
+      "sha256": "2f2404e5354013ace581896cac7e25d6d742427384960907cb8b29e8c11fbdcb",
+      "bytes": 5204
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain/fixture.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain/result.json",
+      "sha256": "32e4e3bdc83f7fa71220c4b43fba4d13250165c7c36fc4b1e867c336e848f740",
+      "bytes": 5216
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/32902-wide-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug/result.json",
+      "sha256": "d38066b9ce6c6b7401805cd11615d5d0713c3674ac75c61bb7e3404ffa0d37a4",
+      "bytes": 5069
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug/shader.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain/fixture.hlsl",
+      "sha256": "a8684fbb0cf68416f4774407be543832bd5289cba998d2bac7a4113c5ff2237a",
+      "bytes": 539
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain/result.json",
+      "sha256": "ed5fbe60e34ad903ba1c645352b66c5a5d82d3115425f73ebbdcbaa0b7eadde5",
+      "bytes": 5082
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain/shader.asm",
+      "sha256": "621d12e50842a87459a56ed983a5c7fd87f749047fd603222864e3183377f83e",
+      "bytes": 3818
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain/shader.dxbc",
+      "sha256": "21753ea149544e271455ddd60ab5d6199c3b7a9d50e5225da21d7f6aff82dd77",
+      "bytes": 2196
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug/result.json",
+      "sha256": "77f8f131093245df20e32f7dc23db009085eb62fc2209c9f8f875fbecd5470a5",
+      "bytes": 1483
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug/shader.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain/fixture.hlsl",
+      "sha256": "4e915883db6c617d3e69d500f877b1b5fc39addddc7879d0fe6839bff08e8f70",
+      "bytes": 349
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain/result.json",
+      "sha256": "d0a2d0a9f4e4f129c0994828836d62011478e2df3d3282c816b40ae5ce0f0f0d",
+      "bytes": 1496
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain/shader.asm",
+      "sha256": "58effc6d2143d258217b21c38d04b29e5d8c8508e92f736b1a065cb6a23f1b08",
+      "bytes": 2870
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain/shader.dxbc",
+      "sha256": "fe41140e1d95b044858f356b9b0d8024b3231b85a053fe8243b4267cb11db5f4",
+      "bytes": 1512
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-single-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug/result.json",
+      "sha256": "47b65b22453a08071307d6999e1358e1d024c519e04427b16506d37e9856abcf",
+      "bytes": 3400
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug/shader.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain/fixture.hlsl",
+      "sha256": "407a5406deb623f7999cbb70fde82b871dc94b96ad7df5e5e4d30e57cce8e151",
+      "bytes": 604
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain/result.json",
+      "sha256": "14727e40d8b196a5df83dd44c7993ef950b10d0377585a940c713b8b1a44280f",
+      "bytes": 3413
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain/shader.asm",
+      "sha256": "d9ebd61f44adf0273305fffa2d6bcd41dd07ddcca086580511a6b26bcdf20d53",
+      "bytes": 3789
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain/shader.dxbc",
+      "sha256": "139cb8122dde2fee80671b6386e6f00029a76e9a7ce4e24930d5cbf8c44b5d8d",
+      "bytes": 2284
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug/result.json",
+      "sha256": "75be4bff420628b1052d75fd6ef33672b68ba4d01b340ed7b34ff0c2a553b9cb",
+      "bytes": 5211
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug/shader.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-debug.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain/fixture.hlsl",
+      "sha256": "6362ec232b911aad0691f6bbad01722e0c52ec8cc066feec6165f6ce8d2bf02c",
+      "bytes": 613
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain/result.json",
+      "sha256": "b1f485be7acdc771463ba88e9fa63eb52c7aea8cf0f4e18fc76008835b52c5d9",
+      "bytes": 5224
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain/shader.asm",
+      "sha256": "f16f94ab808097d0dd75257b8f1ba16aa6a8d3008d160f1d956acd0d6da45264",
+      "bytes": 4098
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain/shader.dxbc",
+      "sha256": "682f1d13b4aecb24452662626863dac8ba8fa473ef6b99fd8d60d4dcd1512b4b",
+      "bytes": 2460
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain.stderr.txt",
+      "sha256": "74869420c40ca9c87d6a8a3524f3e28c61aa2c4ece5e88028821d2ff7376c7fe",
+      "bytes": 63
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/4318-wide-multi-array-plain.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-debug-controls-shared/matrix.json",
+      "sha256": "e60625f87db6bfc7ed09f2c0fb2d77b28138df62654423eae7dfe6f2f31b4e5d",
+      "bytes": 24909
+    },
+    {
+      "path": "build/vs2022/Release/FloraDxbcInterfaceProbe.exe",
+      "sha256": "dd18399edd062ac0c74c3721bbff118ef0895d1a87ac6d747c5dcff4277c3def",
+      "bytes": 186880
+    },
+    {
+      "path": "tools/native/dxbc_interface_probe.cpp",
+      "sha256": "2c749d8a6082fee0a210969b1a9049e6d03758f56f13e90ac780f3d131a48d01",
+      "bytes": 19792
+    },
+    {
+      "path": "tools/probe_dxbc_interface_debug_controls.py",
+      "sha256": "8ba70fd75faafc2dfc8ad10872414693b378430ec9bbd05a8e617551c15a152e",
+      "bytes": 4957
+    },
+    {
+      "path": "tools/validate_native_interface_layouts.py",
+      "sha256": "4545e9c8a756dbcce2d9f18338da869916fdf3622d661df470fd572be4e68940",
+      "bytes": 7054
+    }
+  ]
+}
