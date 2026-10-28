@@ -3,6 +3,7 @@
 #include "NativePixel.h"
 #include "NativePixelCandidates.h"
 #include "NativePixelGeometryReplay.h"
+#include "NativePixelIdentity.h"
 #include "NativePixelInvocation.h"
 #include "NativePixelMergerSnapshot.h"
 #include "NativePixelOutputs.h"
@@ -530,6 +531,47 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             : Json(nullptr);
     original["geometry_passing_samples"] = bridgePassing;
     original["geometry_passing_samples_match"] = original.at("passing_samples") == bridgePassing;
+    Json identity{{"requested", limits.observePrimitiveIdentity}, {"status", "not_requested"}};
+    Json association{{"scope", "system_id_equality_only"},
+                     {"status", "not_observed"},
+                     {"matching_primitive_ordinals", Json::array()},
+                     {"unknown_identity_ordinals", Json::array()},
+                     {"original_fragment_eligibility", nullptr}};
+    if (limits.observePrimitiveIdentity) {
+        if (target.view.at("slot").is_null()) {
+            identity["status"] = "not_applicable";
+            identity["reason"] = "selected_depth_target";
+        } else if (original.at("shaders")[4].at("resource") == 0) {
+            identity["status"] = "not_applicable";
+            identity["reason"] = "no_pixel_shader";
+        } else {
+            identity = observeNativePixelIdentity(
+                r, event, target.view.at("slot").get<uint32_t>(),
+                [&](Replay &privateReplay) {
+                    const auto pixel = snapshot(privateReplay);
+                    return NativePixelPredicateStorage{pixel.at("typed_format").get<uint32_t>(),
+                                                       pixel.at("bytes").get<std::vector<uint8_t>>()};
+                },
+                limits.maxBytes, limits.timeoutMs, bounded);
+            identity["requested"] = true;
+            if (identity.at("status") == "verified_conditional_replay") {
+                const auto observed = identity.at("system_primitive_id");
+                for (auto &row : records) {
+                    const auto id = row.at("original_primitive_id");
+                    row["system_id_matches_verified_predicate"] =
+                        id.is_null() ? Json(nullptr) : Json(id == observed);
+                    if (id.is_null())
+                        association["unknown_identity_ordinals"].push_back(row.at("primitive_ordinal"));
+                    else if (id == observed)
+                        association["matching_primitive_ordinals"].push_back(row.at("primitive_ordinal"));
+                }
+                const auto matches = association.at("matching_primitive_ordinals").size();
+                association["status"] = matches == 0   ? "no_matching_candidate"
+                                        : matches == 1 ? "one_matching_candidate"
+                                                       : "ambiguous_candidates";
+            }
+        }
+    }
     const auto restored = snapshot(r);
     if (!equal(before, restored))
         throw std::runtime_error("Private pixel history changed original storage");
@@ -558,6 +600,8 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         {"candidate_passes", candidateReports},
         {"geometry_replay", replay},
         {"original_draw_observation", original},
+        {"primitive_identity_observation", identity},
+        {"primitive_identity_association", association},
         {"shader_evaluation",
          {{"requested", limits.evaluateShaderOutputs},
           {"invocations", shaderInvocations},

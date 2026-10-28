@@ -116,17 +116,17 @@ def main():
     parser.add_argument('--real', type=Path)
     args = parser.parse_args()
     paths = sorted(args.directory.glob('*.json'))
-    require(len(paths) == 27, 'Complete adapter and mode matrix')
+    require(len(paths) in (27,30), 'Complete adapter and mode matrix')
     passes, negative, files, seen = 0, 0, [], set()
     for path in paths:
         r = json.loads(path.read_text(encoding='utf-8'))
         require(r['status'] == 'ok' and r['original_storage_restored'] is True and
                 r['original_fragment_eligibility'] is None, 'Owned observation scope')
         mode, vendor = r['mode'], r['vendor_request']
-        require(mode in ('added', 'existing', 'discard', 'early-discard', 'integer', 'sample', 'upper-gs', 'added-gs', 'packed'), 'Owned mode')
+        require(mode in ('added', 'existing', 'discard', 'early-discard', 'integer', 'sample', 'upper-gs', 'added-gs', 'duplicate-gs', 'packed'), 'Owned mode')
         require(vendor in (0, 4318, 32902) and (vendor, mode) not in seen, 'Unique adapter/mode')
         seen.add((vendor, mode))
-        expected = 0xfffffffe if mode.endswith('gs') else 1 if 'discard' in mode else 2
+        expected = 7 if mode == 'duplicate-gs' else 0xfffffffe if mode.endswith('gs') else 1 if 'discard' in mode else 2
         require(r['expected_system_primitive_id'] == expected and len(r['observations']) == 34,
                 'Authored expected identity and all predicates')
         source = Path(str(path) + '.original.dxbc').read_bytes()
@@ -173,6 +173,10 @@ def main():
                 raise ValueError('Accepted changed shader: ' + key)
             passes += 1
         files.append({'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+    modes = {'added', 'existing', 'discard', 'early-discard', 'integer', 'sample', 'upper-gs', 'added-gs', 'packed'}
+    if len(paths) == 30:
+        modes.add('duplicate-gs')
+    require(seen == {(vendor,mode) for vendor in (0,4318,32902) for mode in modes}, 'Exact adapter/mode coverage')
     real = sorted(args.real.glob('*/report.json')) if args.real else []
     if args.real:
         require(len(real) == 9, 'Complete real capture matrix')

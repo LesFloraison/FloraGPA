@@ -1,5 +1,7 @@
 #include "BlendCapture.h"
+#include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
+#include "application/NativePixelIdentity.h"
 #include <QDir>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -34,6 +36,8 @@ void save(const Json &report, Bytes original, const std::vector<std::vector<uint
             throw std::runtime_error("Cannot write primitive mask shader evidence");
     };
     binary(".original.dxbc", original);
+    binary(".reference.dxbc",
+           instrumentPixelCompletion(original, 0, {0x3f800001, 0x40000001, 0x40400001}).bytecode);
     for (size_t i = 0; i < shaders.size(); ++i)
         binary(QString(".%1.dxbc").arg(i), shaders[i]);
 }
@@ -46,7 +50,7 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (const auto *mode : {"added", "existing", "discard", "early-discard", "integer", "sample",
-                                     "upper-gs", "added-gs", "packed"})
+                                     "upper-gs", "added-gs", "duplicate-gs", "packed"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void draw() {
@@ -61,10 +65,12 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                     put(c.bytes, size_t(entry.offset) + 24, 9u);
             if (gs) {
                 const auto code = compileClassProgram(
-                    "struct V{float4 p:SV_Position;};struct O{float4 p:SV_Position;uint id:SV_PrimitiveID;};"
-                    "[maxvertexcount(3)]void main(triangle V v[3],uint id:SV_PrimitiveID,inout "
-                    "TriangleStream<O> s){"
-                    "[unroll]for(uint i=0;i<3;i++){O o;o.p=v[i].p;o.id=id|0xfffffffcu;s.Append(o);}}",
+                    std::string("struct V{float4 p:SV_Position;};struct O{float4 p:SV_Position;uint "
+                                "id:SV_PrimitiveID;};"
+                                "[maxvertexcount(3)]void main(triangle V v[3],uint id:SV_PrimitiveID,inout "
+                                "TriangleStream<O> s){"
+                                "[unroll]for(uint i=0;i<3;i++){O o;o.p=v[i].p;o.id=") +
+                        (mode == "duplicate-gs" ? "7u" : "id|0xfffffffcu") + ";s.Append(o);}}",
                     "gs_5_0");
                 c.add(60, 5, 0x91, statePack(Id(0), Id(0), Id(0), Id(0), Id(0), Id(0), Id(61)));
                 auto raw = statePack(uint64_t(code.size()));
@@ -91,7 +97,7 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
             source += integer ? "uint4 main(" : "float4 main(";
             if (gs)
                 source += "float4 p:SV_Position";
-            if (mode == "upper-gs")
+            if (gs && mode != "added-gs")
                 source += ",";
             if (mode != "added" && mode != "added-gs")
                 source += "uint id:SV_PrimitiveID";
@@ -105,7 +111,7 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
             source += integer              ? "return uint4(id,5,6,7);}"
                       : mode == "added"    ? "return float4(.25,.5,.75,.5);}"
                       : mode == "added-gs" ? "return float4(p.xy,.75,.5);}"
-                      : mode == "upper-gs" ? "return float4(id,p.xy,.5);}"
+                      : gs                 ? "return float4(id,p.xy,.5);}"
                       : mode == "packed"   ? "return float4(id,front,0,.5);}"
                       : samples > 1        ? "return float4(id,sample,0,.5);}"
                                            : "return float4(id,0,0,.5);}";
@@ -135,7 +141,10 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
             std::vector<std::array<uint32_t, 4>> before;
             for (uint32_t sample = 0; sample < samples; ++sample)
                 before.push_back(pixel(r, sample, samples, format));
-            const uint32_t last = gs ? 0xfffffffeu : mode.contains("discard") ? 1u : 2u;
+            const uint32_t last = mode == "duplicate-gs"     ? 7u
+                                  : gs                       ? 0xfffffffeu
+                                  : mode.contains("discard") ? 1u
+                                                             : 2u;
             Json rows = Json::array();
             std::vector<std::vector<uint8_t>> shaders;
             for (uint32_t bit = 0; bit < 34; ++bit) {
@@ -169,6 +178,78 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                 shaders.push_back(std::move(rewritten.bytecode));
                 rows.push_back(std::move(report));
             }
+            Json histories = Json::array();
+            for (uint32_t sample = 0; sample < samples; ++sample) {
+                NativeHistorySelection selection;
+                selection.resource = 1000;
+                selection.sample = sample;
+                NativePixelDrawHistoryLimits limits;
+                limits.observePrimitiveIdentity = true;
+                auto history = collectNativePixelDrawHistory(r, 100, selection, limits);
+                const auto &identity = history.at("primitive_identity_observation");
+                QCOMPARE(identity.at("status"), Json("verified_conditional_replay"));
+                QCOMPARE(identity.at("system_primitive_id"), Json(last));
+                QCOMPARE(identity.at("pass_count"), Json(36));
+                QCOMPARE(history.at("primitive_identity_association").at("matching_primitive_ordinals"),
+                         mode == "duplicate-gs" ? Json::array({0, 1, 2})
+                                                : Json::array({mode.contains("discard") ? 1 : 2}));
+                QCOMPARE(history.at("primitive_identity_association").at("status"),
+                         Json(mode == "duplicate-gs" ? "ambiguous_candidates" : "one_matching_candidate"));
+                QCOMPARE(pixel(r, sample, samples, format), before[sample]);
+                histories.push_back(std::move(history));
+            }
+            Json recovery = nullptr;
+            if (mode == "added") {
+                const auto reader = [&](Replay &p) {
+                    return NativePixelPredicateStorage{format, p.readTexture(1000)};
+                };
+                unsigned reads = 0;
+                QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                         observeNativePixelIdentity(
+                                             r, 100, 0,
+                                             [&](Replay &p) {
+                                                 ++reads;
+                                                 return reader(p);
+                                             },
+                                             256ull * 1024 * 1024, 30000, [&] { return reads >= 5; }));
+                QCOMPARE(pixel(r, 0, 1, format), before[0]);
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         observeNativePixelIdentity(r, 100, 0, [&](Replay &p) {
+                                             auto value = reader(p);
+                                             value.format = 4;
+                                             return value;
+                                         }));
+                QCOMPARE(pixel(r, 0, 1, format), before[0]);
+                auto retried = observeNativePixelIdentity(r, 100, 0, reader);
+                QCOMPARE(retried.at("system_primitive_id"), Json(last));
+                QCOMPARE(pixel(r, 0, 1, format), before[0]);
+                unsigned faultReads = 0;
+                auto injected = observeNativePixelIdentity(r, 100, 0, [&](Replay &p) {
+                    auto value = reader(p);
+                    if (++faultReads == 68)
+                        std::fill(value.bytes.begin(), value.bytes.begin() + 12, uint8_t(0));
+                    return value;
+                });
+                QCOMPARE(injected.at("status"), Json("inconsistent"));
+                QVERIFY(injected.at("system_primitive_id").is_null());
+                QCOMPARE(injected.at("candidate_system_id"), Json(last));
+                QCOMPARE(pixel(r, 0, 1, format), before[0]);
+                o.blendEdits[100].sampleMask = 0;
+                Replay masked(f, o);
+                masked.run();
+                auto absent = observeNativePixelIdentity(masked, 100, 0, reader);
+                QCOMPARE(absent.at("status"), Json("no_color_completion"));
+                QCOMPARE(absent.at("pass_count"), Json(1));
+                QVERIFY(absent.at("system_primitive_id").is_null());
+                QCOMPARE(pixel(masked, 0, 1, format), before[0]);
+                recovery = {{"cancelled_after_reads", reads},
+                            {"wrong_format_rejected", true},
+                            {"retry", retried},
+                            {"injected_equal_readback_zero", true},
+                            {"fault_injection", injected},
+                            {"masked", absent},
+                            {"storage_restored", true}};
+            }
             save({{"schema", 1},
                   {"status", "ok"},
                   {"vendor_request", vendor},
@@ -177,6 +258,8 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                   {"reference", expected},
                   {"samples", samples},
                   {"observations", rows},
+                  {"histories", histories},
+                  {"identity_recovery", recovery},
                   {"original_storage_restored", true},
                   {"original_fragment_eligibility", nullptr}},
                  original, shaders);
@@ -201,6 +284,71 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,
                                  instrumentPixelPrimitiveMask(existing, 0, {1, 1}, 256ull * 1024 * 1024, {},
                                                               PixelPrimitiveInput{31, 0}));
+    }
+    void predicateDecode() {
+        struct Case {
+            uint32_t format;
+            std::vector<uint8_t> bytes;
+            Json expected;
+        };
+        std::vector<Case> cases{
+            {2, statePack(1.f, 2.f, 3.f, .5f), true},
+            {2, statePack(0.f, 0.f, 0.f, 1.f), false},
+            {2, statePack(0.f, 1.f, 0.f, 1.f), nullptr},
+            {2, statePack(0x7fc00001u, 0x3f800000u, 0x3f800000u, 0u), nullptr},
+            {2, statePack(-1.f, 2.f, 3.f, .5f), nullptr},
+            {3, statePack(1u, 2u, 3u, 7u), true},
+            {4, statePack(1, 2, 3, 7), true},
+            {4, statePack(-1, 2, 3, 7), nullptr},
+            {10, statePack(uint16_t(0x3c00), uint16_t(0x4000), uint16_t(0x4200), uint16_t(0x3800)), true},
+            {11, statePack(uint16_t(1), uint16_t(2), uint16_t(3), uint16_t(65535)), true},
+            {12, statePack(uint16_t(1), uint16_t(2), uint16_t(3), uint16_t(7)), true},
+            {13, statePack(uint16_t(1), uint16_t(2), uint16_t(3), uint16_t(32767)), true},
+            {14, statePack(uint16_t(1), uint16_t(2), uint16_t(3), uint16_t(7)), true},
+            {16, statePack(1.f, 2.f), true},
+            {17, statePack(1u, 2u), true},
+            {24, statePack(1u | (2u << 10) | (3u << 20) | (3u << 30)), true},
+            {24, statePack(3u << 30), false},
+            {25, statePack(1u | (2u << 10) | (3u << 20) | (3u << 30)), true},
+            {26, statePack(0x3c0u | (0x3c0u << 11) | (0x1e0u << 22)), true},
+            {28, {1, 2, 3, 255}, true},
+            {28, {0, 0, 0, 255}, false},
+            {29, {1, 2, 3, 255}, true},
+            {30, {1, 2, 3, 255}, true},
+            {31, {1, 2, 3, 127}, true},
+            {32, {1, 2, 3, 127}, true},
+            {41, statePack(1.f), true},
+            {42, statePack(1u), true},
+            {43, statePack(-1), nullptr},
+            {49, {1, 2}, true},
+            {50, {1, 2}, true},
+            {61, {1}, true},
+            {62, {1}, true},
+            {63, {255}, nullptr},
+            {64, {1}, true},
+            {65, {255}, nullptr},
+            {87, {1, 2, 3, 255}, true},
+            {88, {0, 0, 0, 255}, false},
+            {91, {1, 2, 3, 255}, true},
+            {1, std::vector<uint8_t>(16), nullptr}};
+        Json evidence = Json::array();
+        for (const auto &item : cases) {
+            const auto decoded = decodeNativePixelPredicate({item.format, item.bytes});
+            QCOMPARE(decoded.at("rgb_predicate"), item.expected);
+            evidence.push_back(decoded);
+            const auto zero =
+                decodeNativePixelPredicate({item.format, std::vector<uint8_t>(item.bytes.size())});
+            QCOMPARE(zero.at("rgb_predicate"),
+                     item.format == 1 || item.format == 65 ? Json(nullptr) : Json(false));
+            evidence.push_back(zero);
+        }
+        const auto root = qEnvironmentVariable("FLORA_PIXEL_PRIMITIVE_MASK_EVIDENCE");
+        if (!root.isEmpty()) {
+            QFile file(root + ".decode.json");
+            const auto text = evidence.dump(2);
+            QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+            QCOMPARE(file.write(text.data(), qint64(text.size())), qint64(text.size()));
+        }
     }
 };
 QTEST_GUILESS_MAIN(DxbcPixelPrimitiveMaskTests)

@@ -39,7 +39,7 @@ def instructions(code):
     return words[0], rows
 
 
-def shader_identity(r):
+def shader_identity(r, marker=(0x3f800000, 0x40000000, 0x40400000)):
     require(r['schema'] == 1 and r['backend'] == 'native-pixel-completion/1' and
             r['kind'] == 'native_pixel_completion_shader', 'Completion shader version')
     require(r['original_fragment_eligibility'] is None and r['alpha_preserved'] is True and
@@ -47,11 +47,11 @@ def shader_identity(r):
     require(all(r[k] == 0 for k in ('extra_uav_slots', 'extra_input_registers', 'extra_temps')), 'Added resources')
     require(0 <= r['target'] < 8 and r['component_type'] in (1, 2, 3) and
             r['marker_returns'] > 0 and 0 < r['original_output_mask'] <= 15, 'Marker output identity')
-    require(r['marker_bits'] == [0x3f800000, 0x40000000, 0x40400000], 'Marker payload')
+    require(r['marker_bits'] == list(marker), 'Marker payload')
 
 
-def shader_bytes(r, source, marked):
-    shader_identity(r)
+def shader_bytes(r, source, marked, marker=(0x3f800000, 0x40000000, 0x40400000)):
+    shader_identity(r, marker)
     require(hashlib.sha256(source).hexdigest() == r['source_sha256'] and
             hashlib.sha256(marked).hexdigest() == r['shader_sha256'], 'Shader hashes')
     a, b = chunks(source), chunks(marked)

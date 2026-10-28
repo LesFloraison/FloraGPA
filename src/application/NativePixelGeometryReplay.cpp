@@ -55,7 +55,8 @@ class NativePixelGeometryReplay {
           deadline(std::chrono::steady_clock::now() + std::chrono::milliseconds(selection.timeoutMs)) {}
     Json original(const std::function<void(Replay &, bool)> &observe,
                   std::optional<uint32_t> completionTarget = {},
-                  std::optional<PixelPrimitiveMask> primitiveMask = {}) {
+                  std::optional<PixelPrimitiveMask> primitiveMask = {},
+                  std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000}) {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
             throw std::runtime_error("Private original draw requires a completed before-event replay");
@@ -141,8 +142,7 @@ class NativePixelGeometryReplay {
                                 ? instrumentPixelPrimitiveMask(shader(state.stages[4].shader), target,
                                                                *primitiveMask, request.maxBytes - cloneBytes,
                                                                scoped, producer)
-                                : instrumentPixelCompletion(shader(state.stages[4].shader), target,
-                                                            {0x3f800000, 0x40000000, 0x40400000},
+                                : instrumentPixelCompletion(shader(state.stages[4].shader), target, marker,
                                                             request.maxBytes - cloneBytes, scoped);
                         if (marked.bytecode.size() > request.maxBytes - cloneBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
@@ -481,10 +481,11 @@ Json replayNativeOriginalDraw(Replay &r, Id event, const std::function<void(Repl
 }
 Json replayNativePixelCompletion(Replay &r, Id event, uint32_t target,
                                  const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
-                                 uint32_t timeoutMs, const CancelCheck &cancelled) {
+                                 uint32_t timeoutMs, const CancelCheck &cancelled,
+                                 std::array<uint32_t, 3> marker) {
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
-        .original(observe, target);
+        .original(observe, target, {}, marker);
 }
 Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
                                     const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,

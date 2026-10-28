@@ -11,6 +11,9 @@ struct NativePixelDrawHistoryLimits {
     // storage. Comparison with the private GPU checkpoint remains explicit.
     bool evaluateOutputMerger = false;
     uint64_t maxShaderBytes = 256ull * 1024 * 1024, maxShaderSteps = 1000000;
+    // Additional complete-draw predicates associate a witnessed system ID with
+    // candidate IDs. Equality alone does not qualify an original invocation.
+    bool observePrimitiveIdentity = false;
 };
 // Internal selected-texel checkpoints over a full private original-PS draw.
 // Records remain private primitive storage observations, not original fragments.

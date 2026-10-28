@@ -24,10 +24,10 @@ nlohmann::json replayNativeOriginalDraw(Replay &, Id event,
 // existing private RTV. That RTV is cleared and its blending/writes overridden;
 // alpha-to-coverage, depth/stencil, sample masks and original UAV slots remain.
 // Observers see private storage after diagnostic setup and after GPU completion.
-nlohmann::json replayNativePixelCompletion(Replay &, Id event, uint32_t target,
-                                           const std::function<void(Replay &, bool after)> &observe = {},
-                                           uint64_t maxBytes = 256ull * 1024 * 1024,
-                                           uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
+nlohmann::json replayNativePixelCompletion(
+    Replay &, Id event, uint32_t target, const std::function<void(Replay &, bool after)> &observe = {},
+    uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {},
+    std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000});
 // Observes a predicate on the returning fragment's actual SV_PrimitiveID.
 // This is a system identity, not an inferred primitive ordinal or instance ID.
 nlohmann::json replayNativePixelPrimitiveMask(Replay &, Id event, uint32_t target, PixelPrimitiveMask,
