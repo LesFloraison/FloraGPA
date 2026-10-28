@@ -18,6 +18,9 @@ struct NativePixelDrawHistoryLimits {
     // Repeated complete draws test each distinct candidate system ID with MAX
     // color reduction. Presence does not identify a unique original fragment.
     bool observePrimitivePresence = false;
+    // Counterfactual full draws disable individual output tests. Differences
+    // are observations, not original-fragment failure attribution.
+    bool observePrimitiveTests = false;
 };
 // Runs at a private before-primitive checkpoint with measured quad inputs.
 // Consumers must copy mutable snapshot storage before executing a trace.

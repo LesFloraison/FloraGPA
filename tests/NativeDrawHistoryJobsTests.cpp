@@ -54,7 +54,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         for (const auto &patch :
              {Json{{"gpa_event", nullptr}}, Json{{"history_scope", "events"}}, Json{{"shader_outputs", 1}},
               Json{{"output_merger", "true"}}, Json{{"primitive_identity", nullptr}},
-              Json{{"primitive_presence", 1}}, Json{{"max_steps", 5}}}) {
+              Json{{"primitive_presence", 1}}, Json{{"primitive_tests", 1}}, Json{{"primitive_tests", true}},
+              Json{{"max_steps", 5}}}) {
             auto invalid = valid;
             invalid.update(patch);
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", invalid));
@@ -62,8 +63,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         auto missing = valid;
         missing.erase("gpa_event");
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", missing));
-        for (const auto key :
-             {"shader_outputs", "output_merger", "primitive_identity", "primitive_presence"}) {
+        for (const auto key : {"shader_outputs", "output_merger", "primitive_identity", "primitive_presence",
+                               "primitive_tests"}) {
             auto events = Json{{"resource", 1000}, {"history_scope", "events"}, {key, false}};
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", events));
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("texture", events));
@@ -73,7 +74,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode : {"storage", "shader", "merger", "identity", "presence", "all-msaa"})
+            for (const auto *mode :
+                 {"storage", "shader", "merger", "identity", "presence", "tests", "all-msaa"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void isolatedDraw() {
@@ -104,8 +106,10 @@ class NativeDrawHistoryJobsTests final : public QObject {
                 options["output_merger"] = true;
             if (mode == "identity" || msaa)
                 options["primitive_identity"] = true;
-            if (mode == "presence" || msaa)
+            if (mode == "presence" || mode == "tests" || msaa)
                 options["primitive_presence"] = true;
+            if (mode == "tests" || msaa)
+                options["primitive_tests"] = true;
             if (msaa)
                 options["sample"] = 2;
             const auto output = dir.filePath("result");
@@ -130,14 +134,20 @@ class NativeDrawHistoryJobsTests final : public QObject {
             QCOMPARE(data.at("primitive_identity_observation").at("requested"),
                      Json(mode == "identity" || msaa));
             QCOMPARE(data.at("primitive_presence_observation").at("requested"),
-                     Json(mode == "presence" || msaa));
-            if (mode == "presence" || msaa) {
+                     Json(mode == "presence" || mode == "tests" || msaa));
+            if (mode == "presence" || mode == "tests" || msaa) {
                 const auto &presence = data.at("primitive_presence_observation");
                 QCOMPARE(presence.at("status"), Json("observed"));
                 QCOMPARE(presence.at("observations").size(), size_t(3));
                 for (const auto &observed : presence.at("observations")) {
                     QCOMPARE(observed.at("status"), Json("repeat_agreement"));
                     QCOMPARE(observed.at("color_completion_observed"), Json(true));
+                    QCOMPARE(observed.at("test_variants").size(), size_t(mode == "tests" || msaa ? 5 : 0));
+                    for (const auto &variant : observed.at("test_variants")) {
+                        QCOMPARE(variant.at("color_completion_observed"), Json(true));
+                        QCOMPARE(variant.at("differs_from_preserved_tests"), Json(false));
+                        QVERIFY(variant.at("failure_reason").is_null());
+                    }
                 }
             }
             if (mode == "identity" || msaa) {
@@ -197,7 +207,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe",
                       {"analyze", capture, "history", "--history-scope", "private-draw", "--gpa-event", "100",
                        "--resource", "1000", "--warp", "--output-merger", "--primitive-identity",
-                       "--primitive-presence", "--max-steps", "100000", "--out", dir.filePath("cli")});
+                       "--primitive-presence", "--primitive-tests", "--max-steps", "100000", "--out",
+                       dir.filePath("cli")});
         QVERIFY(process.waitForFinished(30000));
         QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
                  process.readAllStandardError().constData());

@@ -10,16 +10,40 @@ from validate_native_pixel_primitive_mask import shader
 from validate_native_pixel_geometry_replay import FRAME_HASHES
 
 MODES = ('overlap', 'discard-first', 'discard-middle', 'discard-last', 'early-discard',
-         'sample', 'sample-mask', 'alpha-zero', 'write-mask', 'mrt-eight', 'unorm', 'srgb', 'depth', 'stencil', 'duplicate-gs')
+         'sample', 'sample-mask', 'alpha-zero', 'write-mask', 'mrt-eight', 'unorm', 'srgb', 'depth', 'stencil', 'depth-stencil', 'duplicate-gs')
 
 
-def common(row, vendor):
+TEST_MODES = ('disable_depth', 'disable_stencil', 'disable_depth_stencil', 'disable_alpha_to_coverage', 'all_samples')
+TEST_FIXTURES = ('overlap', 'discard-middle', 'early-discard', 'depth', 'stencil', 'depth-stencil', 'sample-mask', 'alpha-zero')
+
+
+def pipeline_test(row, mode):
+    state = row['pipeline_test_state']
+    require(state['mode'] == mode and state['scope'] == 'complete_private_draw_counterfactual' and
+            state['failure_reason'] is None and isinstance(state['depth_view_bound'], bool), 'Counterfactual scope')
+    expected = copy.deepcopy(state['depth_stencil_before'])
+    if mode in ('disable_depth', 'disable_depth_stencil'):
+        expected['depth_enabled'] = False
+    if mode in ('disable_stencil', 'disable_depth_stencil'):
+        expected['stencil_enabled'] = False
+    require(state['depth_stencil_after'] == expected, 'Only the requested depth/stencil enables change')
+    require(state['sample_mask_after'] == (0xffffffff if mode == 'all_samples' else state['sample_mask_before']) and
+            state['alpha_to_coverage_after'] is (False if mode == 'disable_alpha_to_coverage' else state['alpha_to_coverage_before']),
+            'Only the requested coverage state changes')
+    require(row['completion_target']['sample_mask'] == state['sample_mask_after'] and
+            row['completion_target']['alpha_to_coverage'] is state['alpha_to_coverage_after'], 'Effective coverage state')
+
+
+def common(row, vendor, mode='preserve'):
     require(row['schema'] == 1 and row['kind'] == 'native_pixel_primitive_presence_observation' and
             row['backend'] == 'native-pixel-primitive-presence/1' and
-            row['scope'] == 'original_ps_body_with_private_primitive_presence', 'Observation contract')
+            row['scope'] == ('original_ps_body_with_private_primitive_presence' if mode == 'preserve' else
+                             'original_ps_body_with_counterfactual_primitive_presence'), 'Observation contract')
     require(row['original_fragment_eligibility'] is None and row['original_gpu_schedule'] is False and
             row['diagnostic_shader_replacements'] is True and row['extra_uav_slots'] == 0 and
             row['count_domain'] == 'entire_bound_output' and row['enabled'] is True, 'Unproved scope')
+    if mode != 'preserve' or 'pipeline_test_state' in row:
+        pipeline_test(row, mode)
     target = row['completion_target']
     require(target['cleared_to_zero'] is True and target['rgb_reduction'] == 'maximum' and
             target['alpha_reduction'] == 'replace' and target['logic_disabled'] is True and
@@ -56,8 +80,32 @@ def owned(row):
                         not (mode == 'discard-last' and identity == 2) and
                         not (mode == 'sample' and identity == 1 and sample == 2) and
                         not (mode == 'sample-mask' and sample != 1) and mode != 'alpha-zero' and
-                        not (mode in ('depth', 'stencil') and identity != 0))
+                        not (mode in ('depth', 'stencil', 'depth-stencil') and identity != 0))
             require(predicate(before) is False and predicate(after) is expected, 'Authored primitive presence')
+        variants = item.get('test_variants', [])
+        if variants:
+            require(mode in TEST_FIXTURES and len(variants) == 5, 'Owned counterfactual matrix')
+            for test_mode, test in zip(TEST_MODES, variants):
+                common(test['observation'], vendor, test_mode)
+                require(test['observation']['shaders'] == obs['shaders'] and
+                        test['observation']['parameters'] == obs['parameters'] and
+                        test['observation']['raster_state'] == obs['raster_state'] and
+                        test['observation']['completion_shader'] == obs['completion_shader'], 'Original executable and draw retained')
+                before_state = obs['pipeline_test_state']
+                after_state = test['observation']['pipeline_test_state']
+                for key in ('depth_stencil_before', 'sample_mask_before', 'alpha_to_coverage_before', 'stencil_reference', 'depth_view_bound'):
+                    require(before_state[key] == after_state[key], 'Fresh captured test state')
+                require(len(test['before']) == len(test['after']) == samples, 'All counterfactual samples')
+                for sample, (initial, final) in enumerate(zip(test['before'], test['after'])):
+                    expected = (identity < 3 and
+                        not (mode in ('discard-middle', 'early-discard') and identity == 1) and
+                        not (mode in ('depth', 'depth-stencil') and identity != 0 and test_mode not in ('disable_depth', 'disable_depth_stencil')) and
+                        not (mode in ('stencil', 'depth-stencil') and identity != 0 and test_mode not in ('disable_stencil', 'disable_depth_stencil')) and
+                        not (mode == 'sample-mask' and sample != 1 and test_mode != 'all_samples') and
+                        not (mode == 'alpha-zero' and test_mode != 'disable_alpha_to_coverage'))
+                    require(predicate(initial) is False and predicate(final) is expected, 'Authored counterfactual result')
+                if mode in ('depth', 'stencil', 'depth-stencil'):
+                    require(test['depth_stencil'] == row['reference_counterfactual_depth'][test_mode], 'Independent counterfactual depth/stencil evolution')
     if row.get('history') is not None:
         from validate_native_pixel_draw_history import validate
         validate(row['history'], vendor)
@@ -71,7 +119,7 @@ def history_presence(history):
         require(root['reason'] in ('selected_depth_target', 'no_pixel_shader') and root['observations'] == [],
                 'Unavailable color presence')
         return 0
-    require(root['status'] == 'observed' and root['pass_count'] == len(root['observations']) * 2,
+    require(root['status'] == 'observed' and root['pass_count'] == len(root['observations']) * (12 if root.get('test_variants_requested', False) else 2),
             'Presence repetitions')
     ids, references = set(), set()
     vendor = 0 if history['adapter']['warp'] else history['adapter']['vendor']
@@ -100,6 +148,30 @@ def history_presence(history):
         agreed = values[0] is not None and values[0] == values[1]
         require(item['status'] == ('repeat_agreement' if agreed else 'unverified') and
                 item['color_completion_observed'] is (values[0] if agreed else None), 'Repeated observations')
+        variants = item.get('test_variants', [])
+        require(len(variants) == (5 if root.get('test_variants_requested', False) else 0), 'Requested test variants')
+        for mode, variant in zip(TEST_MODES, variants):
+            require(variant['mode'] == mode and variant['failure_reason'] is None and len(variant['passes']) == 2,
+                    'Counterfactual repetitions and unknown attribution')
+            observed = []
+            for value in variant['passes']:
+                obs = value['observation']
+                common(obs, vendor, mode)
+                baseline = item['passes'][0]['observation']
+                for key in ('frame_sha256', 'event', 'adapter', 'shaders', 'parameters', 'raster_state', 'completion_shader'):
+                    require(obs[key] == baseline[key], 'Counterfactual context: ' + key)
+                for key in ('depth_stencil_before', 'sample_mask_before', 'alpha_to_coverage_before', 'stencil_reference', 'depth_view_bound'):
+                    require(obs['pipeline_test_state'][key] == baseline['pipeline_test_state'][key], 'Counterfactual initial state: ' + key)
+                require(predicate(value['before']) is False, 'Counterfactual zero clear')
+                require(value['after']['typed_format'] == history['selection']['subresource']['format'], 'Counterfactual typed selection')
+                observed.append(predicate(value['after']))
+            agreement = observed[0] is not None and observed[0] == observed[1]
+            expected = observed[0] if agreement else None
+            require(variant['status'] == ('repeat_agreement' if agreement else 'unverified') and
+                    variant['color_completion_observed'] is expected, 'Counterfactual agreement')
+            base = item['color_completion_observed']
+            require(variant['differs_from_preserved_tests'] is (None if base is None or expected is None else base != expected),
+                    'Counterfactual comparison is not a failure cause')
     for row in history['records']:
         require((row['primitive_ordinal'] in references) is (row['original_primitive_id'] is not None),
                 'All known candidate IDs observed')
@@ -111,22 +183,29 @@ def history_presence(history):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('directory', type=Path)
+    parser.add_argument('--with-tests', action='store_true', help='Require complete output-test counterfactual evidence')
     parser.add_argument('--real', type=Path)
     parser.add_argument('--history-real', type=Path, help='Also verify complete CLI jobs against the ordinary-replay probes')
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
     paths = sorted(args.directory.glob('*.json'))
     require({p.stem for p in paths} == {f'{vendor}-{mode}' for vendor in (0, 4318, 32902)
-                                      for mode in (*MODES, 'recovery')}, 'Complete owned matrix')
+                                      for mode in (*(MODES if args.with_tests else tuple(m for m in MODES if m != 'depth-stencil')), 'recovery')}, 'Complete owned matrix')
     controls, count, real = 0, 0, []
     for path in paths:
         row = json.loads(path.read_text(encoding='utf-8'))
         if row['mode'] == 'recovery':
+            if args.with_tests:
+                require(row['override_failures_restored'] == 10 and row['invalid_override_rejected'] is True, 'Override recovery matrix')
             require(row['observer_failures_restored'] == 2 and row['cancelled_restored'] is True and
                     row['budget_restored'] is True and row['unsupported_format_restored'] is True and
                     predicate(row['retry']) is True, 'Recovery evidence')
             continue
         owned(row)
+        if args.with_tests:
+            require(all(len(p.get('test_variants', [])) == (5 if row['mode'] in TEST_FIXTURES else 0) for p in row['passes']), 'Required counterfactual matrix')
+            if row['mode'] in TEST_FIXTURES:
+                require(row['history']['primitive_presence_observation']['test_variants_requested'] is True, 'Required history counterfactuals')
         count += 1
         for mutate in (
             lambda r: r['passes'][0]['observation'].update(original_fragment_eligibility=True),
@@ -143,6 +222,25 @@ def main():
                 controls += 1
             else:
                 raise ValueError('Corrupted accumulated predicate accepted')
+        if args.with_tests and row['mode'] in TEST_FIXTURES:
+            mutations = (
+                lambda r: r['passes'][0]['test_variants'][0]['observation']['pipeline_test_state']['depth_stencil_after'].update(depth_enabled=True),
+                lambda r: r['passes'][0]['test_variants'][0]['observation']['pipeline_test_state'].update(failure_reason='depth_failed'),
+                lambda r: r['passes'][0]['test_variants'][0]['observation']['pipeline_test_state'].update(sample_mask_after=0),
+                lambda r: r['history']['primitive_presence_observation']['observations'][0]['test_variants'].pop(),
+                lambda r: r['history']['primitive_presence_observation']['observations'][0]['test_variants'][0].update(differs_from_preserved_tests=None),
+                lambda r: r['history']['primitive_presence_observation']['observations'][0]['test_variants'][0]['passes'][1]['observation'].update(frame_sha256='changed'),
+                lambda r: r['history']['primitive_presence_observation']['observations'][0]['test_variants'][0].update(failure_reason='depth_failed'),
+                lambda r: r['history']['primitive_presence_observation']['observations'][0]['test_variants'][0]['passes'][1]['after'].update(rgb_predicate=None))
+            for mutate in mutations:
+                changed = copy.deepcopy(row)
+                mutate(changed)
+                try:
+                    owned(changed)
+                except (ValueError, KeyError, AssertionError, IndexError):
+                    controls += 1
+                else:
+                    raise ValueError('Corrupted counterfactual evidence accepted')
         if row.get('history') is not None:
             for mutate in (
                 lambda h: h['records'][0].update(system_id_presence_observation=999),

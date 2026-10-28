@@ -51,6 +51,8 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption(
             {"primitive-presence", "Observe candidate system ID presence across complete private draws"});
         parser.addOption(
+            {"primitive-tests", "Compare private full draws with individual output tests disabled"});
+        parser.addOption(
             {"debug-scope", "Pixel debug: private-primitive; original invocation remains unknown", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
                                "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
@@ -81,7 +83,7 @@ int nativeAnalyzeCli(QStringList arguments) {
             if (key == "out" || key == "experiment" || key == "timeout")
                 continue;
             if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
-                key == "primitive-identity" || key == "primitive-presence")
+                key == "primitive-identity" || key == "primitive-presence" || key == "primitive-tests")
                 options[field] = true;
             else if (key == "stage" || key == "history-scope" || key == "debug-scope")
                 options[field] = parser.value(key).toStdString();

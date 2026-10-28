@@ -178,6 +178,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         limits.timeoutMs > 60000 || !limits.maxBytes ||
         (limits.evaluateShaderOutputs && (!limits.maxShaderBytes || !limits.maxShaderSteps)) ||
         (limits.evaluateOutputMerger && !limits.evaluateShaderOutputs) ||
+        (limits.observePrimitiveTests && !limits.observePrimitivePresence) ||
         (observeInvocation && !limits.evaluateShaderOutputs))
         throw std::invalid_argument("Invalid private pixel history limits");
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
@@ -579,6 +580,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         }
     }
     Json presence{{"requested", limits.observePrimitivePresence},
+                  {"test_variants_requested", limits.observePrimitiveTests},
                   {"status", "not_requested"},
                   {"scope", "system_id_color_completion_in_repeated_private_draws"},
                   {"original_fragment_eligibility", nullptr},
@@ -597,43 +599,64 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                     continue;
                 const auto id = row.at("original_primitive_id").get<uint32_t>();
                 if (!observed.contains(id)) {
-                    Json passes = Json::array();
-                    for (unsigned repeat = 0; repeat < 2; ++repeat) {
-                        Json initial, final;
-                        const auto observation = replayNativePixelPrimitivePresence(
-                            r, event, target.view.at("slot").get<uint32_t>(), {UINT32_MAX, id},
-                            [&](Replay &privateReplay, bool after) {
-                                const auto pixel = snapshot(privateReplay);
-                                (after ? final : initial) = decodeNativePixelPredicate(
-                                    {pixel.at("typed_format").get<uint32_t>(),
-                                     pixel.at("bytes").get<std::vector<uint8_t>>()});
-                            },
-                            limits.maxBytes, limits.timeoutMs, bounded);
-                        if (observation.at("frame_sha256") != original.at("frame_sha256") ||
-                            observation.at("adapter") != original.at("adapter") ||
-                            observation.at("shaders") != original.at("shaders") ||
-                            initial.at("typed_format") != target.view.at("format") ||
-                            final.at("typed_format") != target.view.at("format") ||
-                            initial.at("rgb_predicate") != false)
-                            throw std::runtime_error("Private primitive presence context or clear mismatch");
-                        Json pass{{"before", initial}, {"after", final}, {"observation", observation}};
-                        const auto bytes = pass.dump().size();
-                        if (bytes > limits.maxBytes - retained)
-                            throw std::runtime_error(
-                                "Private primitive presence retained payload budget exceeded");
-                        retained += bytes;
-                        passes.push_back(std::move(pass));
+                    auto pair = [&](NativePixelTestOverride mode) -> Json {
+                        Json passes = Json::array();
+                        for (unsigned repeat = 0; repeat < 2; ++repeat) {
+                            Json initial, final;
+                            const auto observation = replayNativePixelPrimitivePresence(
+                                r, event, target.view.at("slot").get<uint32_t>(), {UINT32_MAX, id},
+                                [&](Replay &privateReplay, bool after) {
+                                    const auto pixel = snapshot(privateReplay);
+                                    (after ? final : initial) = decodeNativePixelPredicate(
+                                        {pixel.at("typed_format").get<uint32_t>(),
+                                         pixel.at("bytes").get<std::vector<uint8_t>>()});
+                                },
+                                limits.maxBytes, limits.timeoutMs, bounded, mode);
+                            if (observation.at("frame_sha256") != original.at("frame_sha256") ||
+                                observation.at("adapter") != original.at("adapter") ||
+                                observation.at("shaders") != original.at("shaders") ||
+                                initial.at("typed_format") != target.view.at("format") ||
+                                final.at("typed_format") != target.view.at("format") ||
+                                initial.at("rgb_predicate") != false)
+                                throw std::runtime_error(
+                                    "Private primitive presence context or clear mismatch");
+                            Json pass{{"before", initial}, {"after", final}, {"observation", observation}};
+                            const auto bytes = pass.dump().size();
+                            if (bytes > limits.maxBytes - retained)
+                                throw std::runtime_error(
+                                    "Private primitive presence retained payload budget exceeded");
+                            retained += bytes;
+                            passes.push_back(std::move(pass));
+                        }
+                        const auto first = passes[0].at("after").at("rgb_predicate");
+                        const auto second = passes[1].at("after").at("rgb_predicate");
+                        const bool verified = !first.is_null() && first == second;
+                        return {{"status", verified ? "repeat_agreement" : "unverified"},
+                                {"color_completion_observed", verified ? first : Json(nullptr)},
+                                {"passes", std::move(passes)}};
+                    };
+                    auto entry = pair(NativePixelTestOverride::Preserve);
+                    entry["system_primitive_id"] = id;
+                    entry["matching_primitive_ordinals"] = Json::array();
+                    entry["test_variants"] = Json::array();
+                    if (limits.observePrimitiveTests) {
+                        for (auto mode :
+                             {NativePixelTestOverride::DisableDepth, NativePixelTestOverride::DisableStencil,
+                              NativePixelTestOverride::DisableDepthStencil,
+                              NativePixelTestOverride::DisableAlphaToCoverage,
+                              NativePixelTestOverride::AllSamples}) {
+                            auto variant = pair(mode);
+                            variant["mode"] = nativePixelTestOverrideName(mode);
+                            variant["failure_reason"] = nullptr;
+                            const auto base = entry.at("color_completion_observed");
+                            const auto value = variant.at("color_completion_observed");
+                            variant["differs_from_preserved_tests"] =
+                                base.is_null() || value.is_null() ? Json(nullptr) : Json(base != value);
+                            entry["test_variants"].push_back(std::move(variant));
+                        }
                     }
-                    const auto first = passes[0].at("after").at("rgb_predicate");
-                    const auto second = passes[1].at("after").at("rgb_predicate");
-                    const bool verified = !first.is_null() && first == second;
                     observed[id] = presence.at("observations").size();
-                    presence["observations"].push_back(
-                        {{"system_primitive_id", id},
-                         {"status", verified ? "repeat_agreement" : "unverified"},
-                         {"color_completion_observed", verified ? first : Json(nullptr)},
-                         {"matching_primitive_ordinals", Json::array()},
-                         {"passes", std::move(passes)}});
+                    presence["observations"].push_back(std::move(entry));
                 }
                 const auto index = observed.at(id);
                 row["system_id_presence_observation"] = index;
@@ -642,7 +665,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             }
             presence["status"] = "observed";
             presence["retained_payload_bytes"] = retained;
-            presence["pass_count"] = observed.size() * 2;
+            presence["pass_count"] = observed.size() * (limits.observePrimitiveTests ? 12 : 2);
         }
     }
     const auto restored = snapshot(r);

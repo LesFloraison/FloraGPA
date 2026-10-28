@@ -13,6 +13,41 @@
 #include <d3d11sdklayers.h>
 namespace flora {
 using Json = nlohmann::json;
+const char *nativePixelTestOverrideName(NativePixelTestOverride mode) {
+    switch (mode) {
+    case NativePixelTestOverride::Preserve:
+        return "preserve";
+    case NativePixelTestOverride::DisableDepth:
+        return "disable_depth";
+    case NativePixelTestOverride::DisableStencil:
+        return "disable_stencil";
+    case NativePixelTestOverride::DisableDepthStencil:
+        return "disable_depth_stencil";
+    case NativePixelTestOverride::DisableAlphaToCoverage:
+        return "disable_alpha_to_coverage";
+    case NativePixelTestOverride::AllSamples:
+        return "all_samples";
+    }
+    throw std::invalid_argument("Unknown private pixel test override");
+}
+namespace {
+Json depthIdentity(const D3D11_DEPTH_STENCIL_DESC &d) {
+    auto face = [](const D3D11_DEPTH_STENCILOP_DESC &f) -> Json {
+        return {{"fail", uint32_t(f.StencilFailOp)},
+                {"depth_fail", uint32_t(f.StencilDepthFailOp)},
+                {"pass", uint32_t(f.StencilPassOp)},
+                {"function", uint32_t(f.StencilFunc)}};
+    };
+    return {{"depth_enabled", d.DepthEnable != FALSE},
+            {"depth_write_mask", uint32_t(d.DepthWriteMask)},
+            {"depth_function", uint32_t(d.DepthFunc)},
+            {"stencil_enabled", d.StencilEnable != FALSE},
+            {"stencil_read_mask", d.StencilReadMask},
+            {"stencil_write_mask", d.StencilWriteMask},
+            {"front", face(d.FrontFace)},
+            {"back", face(d.BackFace)}};
+}
+} // namespace
 class NativePixelGeometryReplay {
     Replay &r;
     Id id;
@@ -57,8 +92,12 @@ class NativePixelGeometryReplay {
                   std::optional<uint32_t> completionTarget = {},
                   std::optional<PixelPrimitiveMask> primitiveMask = {},
                   std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000},
-                  bool accumulatePredicate = false) {
+                  bool accumulatePredicate = false,
+                  NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve) {
         checkDeadline();
+        const auto overrideName = nativePixelTestOverrideName(testOverride);
+        if (testOverride != NativePixelTestOverride::Preserve && !accumulatePredicate)
+            throw std::invalid_argument("Pixel test overrides require accumulated primitive presence");
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
             throw std::runtime_error("Private original draw requires a completed before-event replay");
         const auto event = r.frame_.event(id);
@@ -116,6 +155,7 @@ class NativePixelGeometryReplay {
                 [&] {
                     Com<ID3D11PixelShader> completionShader;
                     Com<ID3D11BlendState1> completionBlend;
+                    Com<ID3D11DepthStencilState> testDepthState;
                     if (completionTarget) {
                         const auto target = *completionTarget;
                         if (!state.stages[4].shader)
@@ -175,6 +215,52 @@ class NativePixelGeometryReplay {
                                 blend = decodeBlend(
                                     Bytes(reinterpret_cast<const uint8_t *>(&base), sizeof base), false);
                             }
+                        }
+                        if (accumulatePredicate) {
+                            Com<ID3D11DepthStencilState> currentDepth;
+                            UINT reference = 0;
+                            context->OMGetDepthStencilState(&currentDepth, &reference);
+                            D3D11_DEPTH_STENCIL_DESC depth{};
+                            depth.DepthEnable = TRUE;
+                            depth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+                            depth.DepthFunc = D3D11_COMPARISON_LESS;
+                            depth.StencilReadMask = depth.StencilWriteMask = 255;
+                            depth.FrontFace =
+                                depth.BackFace = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
+                                                  D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS};
+                            if (currentDepth)
+                                currentDepth->GetDesc(&depth);
+                            auto &test = report["pipeline_test_state"];
+                            test = {{"mode", overrideName},
+                                    {"scope", "complete_private_draw_counterfactual"},
+                                    {"failure_reason", nullptr},
+                                    {"depth_stencil_before", depthIdentity(depth)},
+                                    {"stencil_reference", reference},
+                                    {"sample_mask_before", mask},
+                                    {"alpha_to_coverage_before", blend.AlphaToCoverageEnable != FALSE}};
+                            Com<ID3D11DepthStencilView> depthView;
+                            context->OMGetRenderTargets(0, nullptr, &depthView);
+                            test["depth_view_bound"] = bool(depthView);
+                            if (testOverride == NativePixelTestOverride::DisableDepth ||
+                                testOverride == NativePixelTestOverride::DisableDepthStencil)
+                                depth.DepthEnable = FALSE;
+                            if (testOverride == NativePixelTestOverride::DisableStencil ||
+                                testOverride == NativePixelTestOverride::DisableDepthStencil)
+                                depth.StencilEnable = FALSE;
+                            if (testOverride == NativePixelTestOverride::DisableDepth ||
+                                testOverride == NativePixelTestOverride::DisableStencil ||
+                                testOverride == NativePixelTestOverride::DisableDepthStencil) {
+                                check(r.device_->CreateDepthStencilState(&depth, &testDepthState),
+                                      "Create private counterfactual depth state");
+                                context->OMSetDepthStencilState(testDepthState.Get(), reference);
+                            }
+                            if (testOverride == NativePixelTestOverride::DisableAlphaToCoverage)
+                                blend.AlphaToCoverageEnable = FALSE;
+                            if (testOverride == NativePixelTestOverride::AllSamples)
+                                mask = UINT32_MAX;
+                            test["depth_stencil_after"] = depthIdentity(depth);
+                            test["sample_mask_after"] = mask;
+                            test["alpha_to_coverage_after"] = blend.AlphaToCoverageEnable != FALSE;
                         }
                         if (!blend.IndependentBlendEnable) {
                             const auto shared = blend.RenderTarget[0];
@@ -250,6 +336,8 @@ class NativePixelGeometryReplay {
                             report["kind"] = "native_pixel_primitive_presence_observation";
                             report["backend"] = "native-pixel-primitive-presence/1";
                             report["scope"] = "original_ps_body_with_private_primitive_presence";
+                            if (testOverride != NativePixelTestOverride::Preserve)
+                                report["scope"] = "original_ps_body_with_counterfactual_primitive_presence";
                             report["completion_target"]["rgb_reduction"] = "maximum";
                             report["completion_target"]["alpha_reduction"] = "replace";
                             report["completion_target"]["logic_disabled"] = true;
@@ -526,10 +614,11 @@ Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelP
 }
 Json replayNativePixelPrimitivePresence(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
                                         const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
-                                        uint32_t timeoutMs, const CancelCheck &cancelled) {
+                                        uint32_t timeoutMs, const CancelCheck &cancelled,
+                                        NativePixelTestOverride testOverride) {
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
-        .original(observe, target, selection, {0x3f800000, 0x40000000, 0x40400000}, true);
+        .original(observe, target, selection, {0x3f800000, 0x40000000, 0x40400000}, true, testOverride);
 }
 Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRange &range,
                                const std::function<void(Replay &, uint64_t)> &observe,

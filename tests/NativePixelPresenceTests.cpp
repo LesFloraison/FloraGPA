@@ -61,6 +61,27 @@ class NativePixelPresenceTests final : public QObject {
                                              }));
                 QCOMPARE(replay.readTexture(1000), before);
             }
+            for (auto mode :
+                 {NativePixelTestOverride::DisableDepth, NativePixelTestOverride::DisableStencil,
+                  NativePixelTestOverride::DisableDepthStencil,
+                  NativePixelTestOverride::DisableAlphaToCoverage, NativePixelTestOverride::AllSamples}) {
+                for (bool completed : {false, true}) {
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                             replayNativePixelPrimitivePresence(
+                                                 replay, 100, 0, {UINT32_MAX, 0},
+                                                 [&](Replay &, bool after) {
+                                                     if (after == completed)
+                                                         throw std::runtime_error(
+                                                             "Injected test override failure");
+                                                 },
+                                                 256ull * 1024 * 1024, 30000, {}, mode));
+                    QCOMPARE(replay.readTexture(1000), before);
+                }
+            }
+            QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+                                     replayNativePixelPrimitivePresence(replay, 100, 0, {UINT32_MAX, 0}, {},
+                                                                        256ull * 1024 * 1024, 30000, {},
+                                                                        NativePixelTestOverride(99)));
             bool cancel = false;
             QVERIFY_THROWS_EXCEPTION(std::exception,
                                      replayNativePixelPrimitivePresence(
@@ -93,6 +114,8 @@ class NativePixelPresenceTests final : public QObject {
             save({{"mode", "recovery"},
                   {"vendor", vendor},
                   {"observer_failures_restored", 2},
+                  {"override_failures_restored", 10},
+                  {"invalid_override_rejected", true},
                   {"cancelled_restored", true},
                   {"budget_restored", true},
                   {"unsupported_format_restored", true},
@@ -105,9 +128,10 @@ class NativePixelPresenceTests final : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode : {"overlap", "discard-first", "discard-middle", "discard-last",
-                                     "early-discard", "sample", "sample-mask", "alpha-zero", "write-mask",
-                                     "mrt-eight", "unorm", "srgb", "depth", "stencil", "duplicate-gs"})
+            for (const auto *mode :
+                 {"overlap", "discard-first", "discard-middle", "discard-last", "early-discard", "sample",
+                  "sample-mask", "alpha-zero", "write-mask", "mrt-eight", "unorm", "srgb", "depth", "stencil",
+                  "depth-stencil", "duplicate-gs"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void draw() {
@@ -131,7 +155,8 @@ class NativePixelPresenceTests final : public QObject {
                 c.add(1001, 9, 1, statePack(4u, 0x40208020u));
                 c.add(1002, 5, 0x8d, statePack(Id(0), Id(0), Id(1000), format, 4u, 0u, 0u, 0u));
             }
-            const bool depth = mode == "depth", stencil = mode == "stencil";
+            const bool depth = mode == "depth" || mode == "depth-stencil",
+                       stencil = mode == "stencil" || mode == "depth-stencil";
             if (depth || stencil) {
                 c.add(720, 5, 0x85,
                       statePack(Id(0), Id(0), 1u, 1u, 1u, 1u, 45u, 1u, 0u, 0u, 64u, 0u, 0u, Id(0)));
@@ -255,6 +280,29 @@ class NativePixelPresenceTests final : public QObject {
             for (uint32_t sample = 0; sample < samples; ++sample)
                 original.push_back(pixel(replay, resource, samples, sample, format).bytes);
             const auto originalDepth = depth || stencil ? replay.readTexture(720) : std::vector<uint8_t>();
+            const std::array testModes{
+                NativePixelTestOverride::DisableDepth, NativePixelTestOverride::DisableStencil,
+                NativePixelTestOverride::DisableDepthStencil, NativePixelTestOverride::DisableAlphaToCoverage,
+                NativePixelTestOverride::AllSamples};
+            const bool testVariants = depth || stencil || mode == "sample-mask" || mode == "alpha-zero" ||
+                                      mode == "discard-middle" || mode == "early-discard" ||
+                                      mode == "overlap";
+            std::map<std::string, std::vector<uint8_t>> counterfactualDepth;
+            if (depth || stencil)
+                for (auto testMode : testModes) {
+                    auto edited = options;
+                    edited.before = false;
+                    auto &ds = *edited.depthStencilEdits[100].descriptor;
+                    if (testMode == NativePixelTestOverride::DisableDepth ||
+                        testMode == NativePixelTestOverride::DisableDepthStencil)
+                        ds.DepthEnable = FALSE;
+                    if (testMode == NativePixelTestOverride::DisableStencil ||
+                        testMode == NativePixelTestOverride::DisableDepthStencil)
+                        ds.StencilEnable = FALSE;
+                    Replay ordinary(frame, edited);
+                    ordinary.run();
+                    counterfactualDepth[nativePixelTestOverrideName(testMode)] = ordinary.readTexture(720);
+                }
             Json passes = Json::array();
             for (uint32_t identity = 0; identity < 4; ++identity) {
                 const uint32_t systemId = mode == "duplicate-gs" && identity == 0 ? 7 : identity;
@@ -303,6 +351,54 @@ class NativePixelPresenceTests final : public QObject {
                                   {"observation", report},
                                   {"other_targets", others},
                                   {"depth_stencil", observedDepth}});
+                auto &variants = passes.back()["test_variants"] = Json::array();
+                if (testVariants)
+                    for (auto testMode : testModes) {
+                        Json initial = Json::array(), final = Json::array();
+                        std::vector<uint8_t> testDepth;
+                        const auto diagnostic = replayNativePixelPrimitivePresence(
+                            replay, 100, selected, {UINT32_MAX, systemId},
+                            [&](Replay &privateReplay, bool completed) {
+                                for (uint32_t sample = 0; sample < samples; ++sample)
+                                    (completed ? final : initial)
+                                        .push_back(decodeNativePixelPredicate(
+                                            pixel(privateReplay, resource, samples, sample, format)));
+                                if (completed && (depth || stencil))
+                                    testDepth = privateReplay.readTexture(720);
+                            },
+                            256ull * 1024 * 1024, 30000, {}, testMode);
+                        const bool noDepth = testMode == NativePixelTestOverride::DisableDepth ||
+                                             testMode == NativePixelTestOverride::DisableDepthStencil;
+                        const bool noStencil = testMode == NativePixelTestOverride::DisableStencil ||
+                                               testMode == NativePixelTestOverride::DisableDepthStencil;
+                        for (uint32_t sample = 0; sample < samples; ++sample) {
+                            const bool expected =
+                                identity < 3 &&
+                                !((mode == "discard-middle" || mode == "early-discard") && identity == 1) &&
+                                !(depth && !noDepth && identity != 0) &&
+                                !(stencil && !noStencil && identity != 0) &&
+                                !(mode == "sample-mask" && sample != 1 &&
+                                  testMode != NativePixelTestOverride::AllSamples) &&
+                                !(mode == "alpha-zero" &&
+                                  testMode != NativePixelTestOverride::DisableAlphaToCoverage);
+                            QCOMPARE(initial[sample].at("rgb_predicate"), Json(false));
+                            QCOMPARE(final[sample].at("rgb_predicate"), Json(expected));
+                            QCOMPARE(pixel(replay, resource, samples, sample, format).bytes,
+                                     original[sample]);
+                        }
+                        if (depth || stencil) {
+                            QCOMPARE(testDepth,
+                                     counterfactualDepth.at(nativePixelTestOverrideName(testMode)));
+                            QCOMPARE(replay.readTexture(720), originalDepth);
+                        }
+                        QVERIFY(diagnostic.at("pipeline_test_state").at("failure_reason").is_null());
+                        QCOMPARE(diagnostic.at("pipeline_test_state").at("mode"),
+                                 Json(nativePixelTestOverrideName(testMode)));
+                        variants.push_back({{"before", initial},
+                                            {"after", final},
+                                            {"observation", diagnostic},
+                                            {"depth_stencil", testDepth}});
+                    }
             }
             // A later zero really does erase the old nonaccumulating observation.
             if (mode == "overlap") {
@@ -314,16 +410,17 @@ class NativePixelPresenceTests final : public QObject {
                 QCOMPARE(last.at("rgb_predicate"), Json(false));
             }
             Json history;
-            if (mode == "overlap" || mode == "discard-middle" || mode == "duplicate-gs") {
+            if (testVariants || mode == "duplicate-gs") {
                 NativePixelDrawHistoryLimits limits;
                 limits.observePrimitivePresence = true;
+                limits.observePrimitiveTests = testVariants;
                 NativeHistorySelection selection;
                 selection.resource = resource;
                 history = collectNativePixelDrawHistory(replay, 100, selection, limits);
                 const auto &presence = history.at("primitive_presence_observation");
                 QCOMPARE(presence.at("status"), Json("observed"));
                 QCOMPARE(presence.at("observations").size(), size_t(mode == "duplicate-gs" ? 1 : 3));
-                QCOMPARE(presence.at("pass_count"), Json(mode == "duplicate-gs" ? 2 : 6));
+                QCOMPARE(presence.at("pass_count"), Json(mode == "duplicate-gs" ? 2 : 36));
                 if (mode == "duplicate-gs")
                     QCOMPARE(presence.at("observations")[0].at("matching_primitive_ordinals"),
                              Json({0, 1, 2}));
@@ -332,7 +429,10 @@ class NativePixelPresenceTests final : public QObject {
                                                .at(row.at("system_id_presence_observation").get<size_t>());
                     QCOMPARE(observed.at("system_primitive_id"), row.at("original_primitive_id"));
                     QCOMPARE(observed.at("color_completion_observed"),
-                             Json(mode != "discard-middle" || row.at("original_primitive_id") != 1));
+                             Json(!((mode == "discard-middle" || mode == "early-discard") &&
+                                    row.at("original_primitive_id") == 1) &&
+                                  !((depth || stencil) && row.at("original_primitive_id") != 0) &&
+                                  mode != "alpha-zero" && mode != "sample-mask"));
                     QVERIFY(row.at("original_fragment_eligibility").is_null());
                 }
             }
@@ -347,6 +447,7 @@ class NativePixelPresenceTests final : public QObject {
                   {"restored_storage", restored},
                   {"reference_other_targets", referenceOther},
                   {"reference_depth_stencil", referenceDepth},
+                  {"reference_counterfactual_depth", counterfactualDepth},
                   {"initial_depth_stencil", originalDepth},
                   {"restored_depth_stencil",
                    depth || stencil ? replay.readTexture(720) : std::vector<uint8_t>()},

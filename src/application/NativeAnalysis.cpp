@@ -97,7 +97,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"history",
          {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
           "max_bytes", "max_records", "gpa_event", "shader_outputs", "output_merger", "primitive_identity",
-          "max_steps", "primitive_presence"}},
+          "max_steps", "primitive_presence", "primitive_tests"}},
         {"debug-vertex",
          {"gpa_event", "instance", "vertex", "index", "max_bytes", "max_steps", "max_trace_bytes"}},
         {"debug-pixel",
@@ -127,7 +127,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
                 if (value != "private-primitive")
                     throw std::invalid_argument("Native pixel debug scope must be private-primitive");
             } else if (key == "shader_outputs" || key == "output_merger" || key == "primitive_identity" ||
-                       key == "primitive_presence") {
+                       key == "primitive_presence" || key == "primitive_tests") {
                 if (!value.is_boolean())
                     throw std::invalid_argument("Expected boolean analysis option: " + key);
             } else if (key == "stage") {
@@ -176,10 +176,12 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             throw std::invalid_argument("Private draw history requires a GPA event");
         if (!draw)
             for (const auto key : {"gpa_event", "shader_outputs", "output_merger", "primitive_identity",
-                                   "primitive_presence", "max_steps"})
+                                   "primitive_presence", "primitive_tests", "max_steps"})
                 if (options.contains(key))
                     throw std::invalid_argument("Analysis option requires private-draw scope: " +
                                                 std::string(key));
+        if (options.value("primitive_tests", false) && !options.value("primitive_presence", false))
+            throw std::invalid_argument("Primitive tests require primitive presence");
         if (options.contains("max_steps") && !options.value("shader_outputs", false) &&
             !options.value("output_merger", false))
             throw std::invalid_argument("History max_steps requires shader outputs or output merger");
@@ -405,6 +407,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                     selection.value("shader_outputs", false) || limits.evaluateOutputMerger;
                 limits.observePrimitiveIdentity = selection.value("primitive_identity", false);
                 limits.observePrimitivePresence = selection.value("primitive_presence", false);
+                limits.observePrimitiveTests = selection.value("primitive_tests", false);
                 data = collectNativePixelDrawHistory(replay, options.until, inspect, limits, cancelled);
             } else
                 data = collectNativeEventHistory(replay, inspect, cancelled);

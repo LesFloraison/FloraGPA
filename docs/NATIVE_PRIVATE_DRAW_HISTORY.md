@@ -29,6 +29,7 @@ Optional analysis:
 | `--output-merger` | Include shader evaluation and compare the selected-sample merger result with private GPU storage |
 | `--primitive-identity` | Observe conditional system IDs through repeated complete original-PS draws and retain all matching candidate ordinals |
 | `--primitive-presence` | Test every distinct candidate system ID twice using accumulated color predicates on complete private draws |
+| `--primitive-tests` | With `--primitive-presence`, repeat full draws with depth, stencil, both depth/stencil, alpha-to-coverage, or the sample mask disabled independently |
 | `--experiment project.json` | Apply the saved experiment before analysis; its digest and effective settings participate in result identity |
 | `--max-bytes N` | Bound individual readback/replay payload and shader retention budgets; this is not a total process-memory limit |
 | `--max-records N` | Bound retained candidate records; overflow fails instead of truncating history |
@@ -48,6 +49,15 @@ selected-pixel readbacks. It shares the history deadline and retains reports wit
 the payload limit. A depth-only selection or missing PS is reported as not
 applicable; unsupported color formats fail explicitly. This diagnostic does not
 change the supported formats of ordinary storage observations.
+
+Test variants require presence observation and add ten complete draws per distinct
+candidate ID, for twelve total presence draws and twenty-four texel readbacks.
+Each variant starts from the same before-event storage and retains two repetitions,
+the actual initial/effective test state, and a nullable comparison with preserved
+tests. The variants share the existing deadline and payload limits. They can change
+depth/stencil writes and interactions between primitives. A changed color predicate
+is therefore counterfactual evidence, not an original fragment's failure reason.
+No test is identified as a cause merely because disabling it changes the result.
 
 ## Interpretation
 

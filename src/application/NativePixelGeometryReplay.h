@@ -2,6 +2,15 @@
 #include "DxbcPixelCompletion.h"
 #include "PostTransform.h"
 namespace flora {
+enum class NativePixelTestOverride {
+    Preserve,
+    DisableDepth,
+    DisableStencil,
+    DisableDepthStencil,
+    DisableAlphaToCoverage,
+    AllSamples
+};
+const char *nativePixelTestOverrideName(NativePixelTestOverride);
 namespace dxbc_exec {
 struct PixelRasterState;
 }
@@ -37,11 +46,15 @@ nlohmann::json replayNativePixelPrimitiveMask(Replay &, Id event, uint32_t targe
 // Accumulates a predicate with RGB MAX on a blendable existing private RTV.
 // Later nonmatching returns cannot erase an earlier matching color completion.
 // Alpha is replaced as before; this does not count or order original fragments.
+// Optional test overrides apply to the complete draw on fresh private outputs.
+// Disabling depth/stencil also changes writes and interactions between primitives;
+// differences are counterfactual observations, not original failure attribution.
 nlohmann::json
 replayNativePixelPrimitivePresence(Replay &, Id event, uint32_t target, PixelPrimitiveMask,
                                    const std::function<void(Replay &, bool after)> &observe = {},
                                    uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
-                                   const CancelCheck &cancelled = {});
+                                   const CancelCheck &cancelled = {},
+                                   NativePixelTestOverride = NativePixelTestOverride::Preserve);
 // Internal before-event diagnostic. It captures final geometry and runs the
 // unmodified bound PS on private original outputs, preserving rasterization,
 // depth/stencil, blend, sample-mask, predicate and PS resource/class bindings.
