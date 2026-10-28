@@ -15,6 +15,9 @@ struct NativePixelDrawHistoryLimits {
     // Additional complete-draw predicates associate a witnessed system ID with
     // candidate IDs. Equality alone does not qualify an original invocation.
     bool observePrimitiveIdentity = false;
+    // Repeated complete draws test each distinct candidate system ID with MAX
+    // color reduction. Presence does not identify a unique original fragment.
+    bool observePrimitivePresence = false;
 };
 // Runs at a private before-primitive checkpoint with measured quad inputs.
 // Consumers must copy mutable snapshot storage before executing a trace.

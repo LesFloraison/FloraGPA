@@ -10,9 +10,9 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     try {
         const auto args = app.arguments();
-        if (args.size() != 9 && args.size() != 11)
+        if (args.size() != 9 && args.size() != 11 && !(args.size() == 12 && args[11] == "--presence"))
             throw std::runtime_error("Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
-                                     "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE]");
+                                     "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE [--presence]]");
         auto number = [&](int i) {
             bool ok = false;
             const auto value = args[i].toULongLong(&ok, 0);
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
         const auto slot = uint32_t(number(3)), x = uint32_t(number(4)), y = uint32_t(number(5));
         const auto sample = uint32_t(number(6)), vendor = uint32_t(number(7));
         const std::optional<PixelPrimitiveMask> primitive =
-            args.size() == 11 ? std::optional<PixelPrimitiveMask>{{uint32_t(number(9)), uint32_t(number(10))}}
+            args.size() >= 11 ? std::optional<PixelPrimitiveMask>{{uint32_t(number(9)), uint32_t(number(10))}}
                               : std::nullopt;
         if (slot >= 8 || sample)
             throw std::runtime_error("Completion probe currently selects non-MSAA sample zero");
@@ -90,10 +90,13 @@ int main(int argc, char **argv) {
         const auto before = pixel(replay);
         std::vector<uint8_t> cleared, marked, original;
         const auto observer = [&](Replay &r, bool after) { (after ? marked : cleared) = pixel(r); };
-        auto report = primitive ? replayNativePixelPrimitiveMask(replay, event, slot, *primitive, observer,
-                                                                 256ull * 1024 * 1024, 60000, cancel)
-                                : replayNativePixelCompletion(replay, event, slot, observer,
-                                                              256ull * 1024 * 1024, 60000, cancel);
+        auto report = args.size() == 12
+                          ? replayNativePixelPrimitivePresence(replay, event, slot, *primitive, observer,
+                                                               256ull * 1024 * 1024, 60000, cancel)
+                      : primitive ? replayNativePixelPrimitiveMask(replay, event, slot, *primitive, observer,
+                                                                   256ull * 1024 * 1024, 60000, cancel)
+                                  : replayNativePixelCompletion(replay, event, slot, observer,
+                                                                256ull * 1024 * 1024, 60000, cancel);
         const auto restored = pixel(replay);
         auto originalReport = replayNativeOriginalDraw(
             replay, event,
@@ -117,9 +120,11 @@ int main(int argc, char **argv) {
                 PixelPrimitiveInput{report.at("completion_shader").at("input_register").get<uint32_t>(),
                                     report.at("completion_shader").at("input_component").get<uint32_t>()};
         const auto rewritten =
-            primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
-                                                     producer)
-                      : instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
+            args.size() == 12 ? instrumentPixelPrimitivePresence(source, slot, *primitive,
+                                                                 256ull * 1024 * 1024, cancel, producer)
+            : primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
+                                                       producer)
+                        : instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
         if (rewritten.identity != report.at("completion_shader"))
             throw std::runtime_error("Completion probe shader identity differs");
         save("original.dxbc", source);

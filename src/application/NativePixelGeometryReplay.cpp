@@ -56,7 +56,8 @@ class NativePixelGeometryReplay {
     Json original(const std::function<void(Replay &, bool)> &observe,
                   std::optional<uint32_t> completionTarget = {},
                   std::optional<PixelPrimitiveMask> primitiveMask = {},
-                  std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000}) {
+                  std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000},
+                  bool accumulatePredicate = false) {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
             throw std::runtime_error("Private original draw requires a completed before-event replay");
@@ -66,6 +67,8 @@ class NativePixelGeometryReplay {
             throw std::invalid_argument("Invalid private original draw request");
         if (completionTarget && *completionTarget >= 8)
             throw std::invalid_argument("Invalid private pixel completion target");
+        if (accumulatePredicate && (!completionTarget || !primitiveMask))
+            throw std::invalid_argument("Pixel presence requires a target and primitive predicate");
         const auto state = r.prepareState(event);
         const CancelCheck scoped = [&] {
             checkDeadline();
@@ -138,7 +141,10 @@ class NativePixelGeometryReplay {
                                 throw std::runtime_error("Bound GS does not provide a primitive identity");
                         }
                         const auto marked =
-                            primitiveMask
+                            accumulatePredicate ? instrumentPixelPrimitivePresence(
+                                                      shader(state.stages[4].shader), target, *primitiveMask,
+                                                      request.maxBytes - cloneBytes, scoped, producer)
+                            : primitiveMask
                                 ? instrumentPixelPrimitiveMask(shader(state.stages[4].shader), target,
                                                                *primitiveMask, request.maxBytes - cloneBytes,
                                                                scoped, producer)
@@ -177,6 +183,22 @@ class NativePixelGeometryReplay {
                         }
                         blend.IndependentBlendEnable = TRUE;
                         blend.RenderTarget[target] = defaultBlend().RenderTarget[target];
+                        if (accumulatePredicate) {
+                            D3D11_RENDER_TARGET_VIEW_DESC desc{};
+                            views[target]->GetDesc(&desc);
+                            UINT support = 0;
+                            check(r.device_->CheckFormatSupport(desc.Format, &support),
+                                  "Check private predicate blend format");
+                            if (!(support & D3D11_FORMAT_SUPPORT_BLENDABLE))
+                                throw std::runtime_error("Private pixel presence requires a blendable RTV");
+                            auto &selected = blend.RenderTarget[target];
+                            selected.BlendEnable = TRUE;
+                            selected.SrcBlend = selected.DestBlend = D3D11_BLEND_ONE;
+                            selected.BlendOp = D3D11_BLEND_OP_MAX;
+                            selected.SrcBlendAlpha = D3D11_BLEND_ONE;
+                            selected.DestBlendAlpha = D3D11_BLEND_ZERO;
+                            selected.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+                        }
                         Com<ID3D11Device1> extendedDevice;
                         check(r.device_.As(&extendedDevice), "Get private completion device");
                         check(extendedDevice->CreateBlendState1(&blend, &completionBlend),
@@ -220,10 +242,18 @@ class NativePixelGeometryReplay {
                             {"slot", target},
                             {"format", uint32_t(desc.Format)},
                             {"cleared_to_zero", true},
-                            {"blend_and_logic_disabled", true},
+                            {"blend_and_logic_disabled", !accumulatePredicate},
                             {"write_mask", 15},
                             {"alpha_to_coverage", blend.AlphaToCoverageEnable != FALSE},
                             {"sample_mask", mask}};
+                        if (accumulatePredicate) {
+                            report["kind"] = "native_pixel_primitive_presence_observation";
+                            report["backend"] = "native-pixel-primitive-presence/1";
+                            report["scope"] = "original_ps_body_with_private_primitive_presence";
+                            report["completion_target"]["rgb_reduction"] = "maximum";
+                            report["completion_target"]["alpha_reduction"] = "replace";
+                            report["completion_target"]["logic_disabled"] = true;
+                        }
                     }
                     if (observe)
                         observe(r, false);
@@ -493,6 +523,13 @@ Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelP
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
         .original(observe, target, selection);
+}
+Json replayNativePixelPrimitivePresence(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
+                                        const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                        uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, target, selection, {0x3f800000, 0x40000000, 0x40400000}, true);
 }
 Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRange &range,
                                const std::function<void(Replay &, uint64_t)> &observe,

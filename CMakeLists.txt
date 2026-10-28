@@ -390,6 +390,11 @@ if(BUILD_TESTING)
   add_executable(FloraDxbcPixelInputsTests tests/DxbcPixelInputsTests.cpp)
   add_executable(FloraDxbcPixelCompletionTests tests/DxbcPixelCompletionTests.cpp)
   add_executable(FloraDxbcPixelPrimitiveMaskTests tests/DxbcPixelPrimitiveMaskTests.cpp)
+  add_executable(FloraNativePixelPresenceTests tests/NativePixelPresenceTests.cpp)
+  target_link_libraries(FloraNativePixelPresenceTests PRIVATE FloraExperiment Qt6::Test)
+  add_test(NAME native_pixel_presence COMMAND FloraNativePixelPresenceTests -o "${CMAKE_BINARY_DIR}/native-pixel-presence-$<CONFIG>.txt,txt")
+  set_tests_properties(native_pixel_presence PROPERTIES RUN_SERIAL TRUE TIMEOUT 180
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   target_link_libraries(FloraDxbcPixelPrimitiveMaskTests PRIVATE FloraExperiment Qt6::Test)
   add_test(NAME dxbc_pixel_primitive_mask COMMAND FloraDxbcPixelPrimitiveMaskTests -o "${CMAKE_BINARY_DIR}/dxbc-pixel-primitive-mask-$<CONFIG>.txt,txt")
   set_tests_properties(dxbc_pixel_primitive_mask PROPERTIES RUN_SERIAL TRUE TIMEOUT 300

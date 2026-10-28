@@ -28,6 +28,7 @@ Optional analysis:
 | `--shader-outputs` | Evaluate the original PS with the independent C++ DXBC executor, measured private quad inputs and before-primitive resource snapshots |
 | `--output-merger` | Include shader evaluation and compare the selected-sample merger result with private GPU storage |
 | `--primitive-identity` | Observe conditional system IDs through repeated complete original-PS draws and retain all matching candidate ordinals |
+| `--primitive-presence` | Test every distinct candidate system ID twice using accumulated color predicates on complete private draws |
 | `--experiment project.json` | Apply the saved experiment before analysis; its digest and effective settings participate in result identity |
 | `--max-bytes N` | Bound individual readback/replay payload and shader retention budgets; this is not a total process-memory limit |
 | `--max-records N` | Bound retained candidate records; overflow fails instead of truncating history |
@@ -40,6 +41,13 @@ exhaust the internal deadline even with a longer Worker timeout. Cancellation,
 timeout or failure does not publish a successful `result.json`; retry with a
 fresh output directory. Unsupported diagnostic inputs or shader instructions
 fail explicitly. There is no fallback backend.
+
+Presence observation requires a floating-point PS output and a blendable selected
+RTV. Each distinct known candidate system ID adds two complete draws and four
+selected-pixel readbacks. It shares the history deadline and retains reports within
+the payload limit. A depth-only selection or missing PS is reported as not
+applicable; unsupported color formats fail explicitly. This diagnostic does not
+change the supported formats of ordinary storage observations.
 
 ## Interpretation
 
@@ -55,6 +63,17 @@ equality can associate one or more candidates; duplicate IDs remain ambiguous.
 A successful identity predicate does not establish original quad identity,
 execution order, helper invocation or instance. Read the scope and validity
 fields before consuming these observations.
+
+`primitive_presence_observation` uses RGB maximum accumulation, so a later
+nonmatching return cannot erase an earlier positive marker. Repeated agreement
+sets `color_completion_observed`; disagreement or uninterpretable storage leaves
+it null. Each record references the observation for its system ID. Duplicate IDs
+retain every matching ordinal, and unknown IDs remain unknown. A false result
+does not identify a particular depth/stencil/discard failure. A true result does
+not identify a unique original fragment, order, instance or original write: the
+selected color output's blend and write mask were deliberately changed. Shader
+alpha, original depth/stencil processing and the other target descriptors remain
+in use. See [the presence study](research/DX11_NATIVE_PIXEL_PRESENCE.md).
 
 `--history-scope events` continues to provide event snapshots for CPU writes,
 clears, copies, resolves and draw/dispatch effects. Draw-only options are rejected

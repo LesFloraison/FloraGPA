@@ -29,4 +29,11 @@ PixelCompletionShader instrumentPixelPrimitiveMask(Bytes original, uint32_t targ
                                                    uint64_t maxBytes = 256ull * 1024 * 1024,
                                                    const CancelCheck &cancelled = {},
                                                    std::optional<PixelPrimitiveInput> producer = {});
+// The same predicate executable with a distinct transport contract: clear the
+// private blendable target, MAX RGB and replace alpha. Requires a float output.
+PixelCompletionShader instrumentPixelPrimitivePresence(Bytes original, uint32_t target,
+                                                       PixelPrimitiveMask selection,
+                                                       uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                       const CancelCheck &cancelled = {},
+                                                       std::optional<PixelPrimitiveInput> producer = {});
 } // namespace flora

@@ -42,7 +42,11 @@ def validate(r, vendor):
     if r.get('primitive_identity_observation', {}).get('requested') is True:
         from validate_native_pixel_identity import validate_history_identity
         identity_reads = validate_history_identity(r)
-    require(r['readback_count'] == len(replay['batches']) + 3 + original_reads + identity_reads, 'checkpoint read count')
+    presence_reads = 0
+    if r.get('primitive_presence_observation', {}).get('requested') is True:
+        from validate_native_pixel_presence import history_presence
+        presence_reads = history_presence(r)
+    require(r['readback_count'] == len(replay['batches']) + 3 + original_reads + identity_reads + presence_reads, 'checkpoint read count')
     require(r['observed_storage_restored'] is True and same(r['before'], r['restored']), 'restored storage')
     require(r['original_storage_restored'] is (True if r['before']['exact_storage_bits'] else None), 'restoration precision')
     require(r['unattributed_changes'] == [], 'accepted cases have no unexplained storage transitions')

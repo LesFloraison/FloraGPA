@@ -171,4 +171,19 @@ PixelCompletionShader instrumentPixelPrimitiveMask(Bytes original, uint32_t targ
                             {"nonmatching_rgb_zero", true}});
     return result;
 }
+PixelCompletionShader instrumentPixelPrimitivePresence(Bytes original, uint32_t target,
+                                                       PixelPrimitiveMask selection, uint64_t maxBytes,
+                                                       const CancelCheck &cancelled,
+                                                       std::optional<PixelPrimitiveInput> producer) {
+    auto result = instrumentPixelPrimitiveMask(original, target, selection, maxBytes, cancelled, producer);
+    if (result.identity.at("component_type") != 3)
+        throw std::runtime_error("Private primitive presence requires a floating-point shader output");
+    result.identity.update({{"kind", "native_pixel_primitive_presence_shader"},
+                            {"backend", "native-pixel-primitive-presence-shader/1"},
+                            {"requires_private_unblended_target", false},
+                            {"requires_private_max_rgb_target", true},
+                            {"requires_zero_initial_rgb", true},
+                            {"requires_alpha_replace", true}});
+    return result;
+}
 } // namespace flora

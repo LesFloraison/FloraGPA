@@ -41,6 +41,8 @@ def validate(job, result, vendor):
             data['merger_evaluation']['requested'] is options.get('output_merger', False) and
             data['primitive_identity_observation']['requested'] is options.get('primitive_identity', False),
             'Requested diagnostic options')
+    require(data.get('primitive_presence_observation', {}).get('requested', False) is options.get('primitive_presence', False),
+            'Requested primitive presence')
     storage(data, vendor)
     if outputs:
         shader(data, vendor)
@@ -75,8 +77,11 @@ def main():
     parser.add_argument('--real', type=Path)
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--with-presence', action='store_true', help='Require the extended six-mode owned matrix')
     args = parser.parse_args()
     modes = ('storage', 'shader', 'merger', 'identity', 'all-msaa')
+    if args.with_presence:
+        modes += ('presence',)
     expected = {f'{vendor}-{mode}' for vendor in (0, 4318, 32902) for mode in modes}
     paths = sorted(p for p in args.directory.iterdir() if p.is_dir())
     require({p.name for p in paths} == expected, 'Complete owned job matrix')

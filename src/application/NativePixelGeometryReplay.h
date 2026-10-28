@@ -34,6 +34,14 @@ nlohmann::json replayNativePixelPrimitiveMask(Replay &, Id event, uint32_t targe
                                               const std::function<void(Replay &, bool after)> &observe = {},
                                               uint64_t maxBytes = 256ull * 1024 * 1024,
                                               uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
+// Accumulates a predicate with RGB MAX on a blendable existing private RTV.
+// Later nonmatching returns cannot erase an earlier matching color completion.
+// Alpha is replaced as before; this does not count or order original fragments.
+nlohmann::json
+replayNativePixelPrimitivePresence(Replay &, Id event, uint32_t target, PixelPrimitiveMask,
+                                   const std::function<void(Replay &, bool after)> &observe = {},
+                                   uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
+                                   const CancelCheck &cancelled = {});
 // Internal before-event diagnostic. It captures final geometry and runs the
 // unmodified bound PS on private original outputs, preserving rasterization,
 // depth/stencil, blend, sample-mask, predicate and PS resource/class bindings.

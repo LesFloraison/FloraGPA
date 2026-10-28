@@ -97,7 +97,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"history",
          {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
           "max_bytes", "max_records", "gpa_event", "shader_outputs", "output_merger", "primitive_identity",
-          "max_steps"}},
+          "max_steps", "primitive_presence"}},
         {"debug-vertex",
          {"gpa_event", "instance", "vertex", "index", "max_bytes", "max_steps", "max_trace_bytes"}},
         {"debug-pixel",
@@ -126,7 +126,8 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             } else if (key == "debug_scope") {
                 if (value != "private-primitive")
                     throw std::invalid_argument("Native pixel debug scope must be private-primitive");
-            } else if (key == "shader_outputs" || key == "output_merger" || key == "primitive_identity") {
+            } else if (key == "shader_outputs" || key == "output_merger" || key == "primitive_identity" ||
+                       key == "primitive_presence") {
                 if (!value.is_boolean())
                     throw std::invalid_argument("Expected boolean analysis option: " + key);
             } else if (key == "stage") {
@@ -174,8 +175,8 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         if (draw && !options.contains("gpa_event"))
             throw std::invalid_argument("Private draw history requires a GPA event");
         if (!draw)
-            for (const auto key :
-                 {"gpa_event", "shader_outputs", "output_merger", "primitive_identity", "max_steps"})
+            for (const auto key : {"gpa_event", "shader_outputs", "output_merger", "primitive_identity",
+                                   "primitive_presence", "max_steps"})
                 if (options.contains(key))
                     throw std::invalid_argument("Analysis option requires private-draw scope: " +
                                                 std::string(key));
@@ -403,6 +404,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                 limits.evaluateShaderOutputs =
                     selection.value("shader_outputs", false) || limits.evaluateOutputMerger;
                 limits.observePrimitiveIdentity = selection.value("primitive_identity", false);
+                limits.observePrimitivePresence = selection.value("primitive_presence", false);
                 data = collectNativePixelDrawHistory(replay, options.until, inspect, limits, cancelled);
             } else
                 data = collectNativeEventHistory(replay, inspect, cancelled);
