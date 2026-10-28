@@ -42,7 +42,8 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
         D desc{};
         std::memcpy(&desc, input.resource.desc.data(), sizeof desc);
         Com<T> texture;
-        check((device->*method)(&desc, initial.data(), &texture), "Create independent precision texture");
+        shaderCheck((device->*method)(&desc, initial.data(), &texture),
+                    "Create independent precision texture");
         resource = texture;
     };
     if (input.resource.type == 0x84)
@@ -54,7 +55,31 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
     D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
     std::memcpy(&desc, view.nativeDescriptor.data(), sizeof desc);
     Com<ID3D11ShaderResourceView> srv;
-    check(device->CreateShaderResourceView(resource.Get(), &desc, &srv), "Create independent precision SRV");
+    if (view.planeSlice) {
+        Com<ID3D11Device3> extended;
+        check(device->QueryInterface(IID_PPV_ARGS(&extended)), "Get independent planar view device");
+        D3D11_SHADER_RESOURCE_VIEW_DESC1 selected{};
+        selected.Format = desc.Format;
+        selected.ViewDimension = desc.ViewDimension;
+        if (desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+            selected.Texture2D = {desc.Texture2D.MostDetailedMip, desc.Texture2D.MipLevels, *view.planeSlice};
+        else if (desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2DARRAY)
+            selected.Texture2DArray = {desc.Texture2DArray.MostDetailedMip, desc.Texture2DArray.MipLevels,
+                                       desc.Texture2DArray.FirstArraySlice, desc.Texture2DArray.ArraySize,
+                                       *view.planeSlice};
+        else
+            throw std::runtime_error("Invalid independent planar view dimension");
+        Com<ID3D11ShaderResourceView1> actual;
+        check(extended->CreateShaderResourceView1(resource.Get(), &selected, &actual),
+              "Create independent plane SRV");
+        D3D11_SHADER_RESOURCE_VIEW_DESC1 observed{};
+        actual->GetDesc1(&observed);
+        if (std::memcmp(&selected, &observed, sizeof selected))
+            throw std::runtime_error("Independent plane view descriptor changed");
+        srv = actual;
+    } else
+        check(device->CreateShaderResourceView(resource.Get(), &desc, &srv),
+              "Create independent precision SRV");
     if (input.resource.desc.back() & D3D11_RESOURCE_MISC_RESOURCE_CLAMP)
         context->SetResourceMinLOD(resource.Get(), input.minLod);
     D3D11_BUFFER_DESC bd{

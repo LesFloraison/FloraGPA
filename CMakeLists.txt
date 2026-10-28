@@ -473,6 +473,11 @@ if(BUILD_TESTING)
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   add_executable(FloraDxbcSampleLevelTests tests/DxbcSampleLevelTests.cpp)
   add_executable(FloraDxbcGatherTests tests/DxbcGatherTests.cpp)
+  add_executable(FloraDxbcPlanarTests tests/DxbcPlanarTests.cpp)
+  target_link_libraries(FloraDxbcPlanarTests PRIVATE FloraExperiment Qt6::Test)
+  add_test(NAME dxbc_planar COMMAND FloraDxbcPlanarTests -o "${CMAKE_BINARY_DIR}/dxbc-planar-$<CONFIG>.txt,txt")
+  set_tests_properties(dxbc_planar PROPERTIES RUN_SERIAL TRUE TIMEOUT 900
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   target_link_libraries(FloraDxbcGatherTests PRIVATE FloraExperiment Qt6::Test)
   add_test(NAME dxbc_gather COMMAND FloraDxbcGatherTests -o "${CMAKE_BINARY_DIR}/dxbc-gather-$<CONFIG>.txt,txt")
   set_tests_properties(dxbc_gather PROPERTIES RUN_SERIAL TRUE TIMEOUT 900

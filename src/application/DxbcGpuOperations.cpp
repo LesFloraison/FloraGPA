@@ -831,9 +831,9 @@ struct GpuOperations::State {
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
         if ((stage != 0 && stage != 1 && stage != 5) || !view.resource || input.storage.bytes.empty() ||
-            input.storage.bytes.size() > 256ull * 1024 * 1024 || view.nativeDescriptor.size() != 6 ||
-            (view.planeSlice && *view.planeSlice))
+            input.storage.bytes.size() > 256ull * 1024 * 1024 || view.nativeDescriptor.size() != 6)
             throw std::runtime_error("Invalid or unsupported native texture load request");
+        textureInputPlane(input.resource, view, view.firstMip, view.firstLayer);
         const UINT resultCount = batch ? UINT(batch->size()) : 1;
         if (batch && (stage != 5 || !sampler || !resultCount || resultCount > 1024))
             throw std::runtime_error("Invalid GPU sampling batch");
@@ -1242,7 +1242,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/24"}};
+            {"backend", "dxbc-gpu/25"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1564,9 +1564,15 @@ Value GpuOperations::textureDimensions(const TextureMetadata &input, const Textu
     if ((!uav && kind != 7) || dimension < 2 || dimension > 10 || mode > 2 ||
         view.nativeDescriptor.size() != (uav ? 5u : 6u))
         throw std::runtime_error("Invalid native resource query");
+    const auto returnType = TextureInputs::loadReturnType(view.format);
+    if (!returnType)
+        throw std::runtime_error("Native resource query requires a known view return type");
+    if (!uav)
+        textureInputPlane(input.resource, view, view.firstMip, view.firstLayer);
     Words key = input.resource.desc;
     key.insert(key.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
-    key.insert(key.end(), {kind, dimension, mip, mode, std::bit_cast<uint32_t>(input.minLod)});
+    key.insert(key.end(), {kind, dimension, mip, mode, std::bit_cast<uint32_t>(input.minLod),
+                           view.planeSlice.value_or(UINT32_MAX)});
     if (auto found = s.textureDimensionResults.find(key); found != s.textureDimensionResults.end())
         return found->second;
     const auto layout = textureSubresources(input.resource);
@@ -1617,7 +1623,7 @@ Value GpuOperations::textureDimensions(const TextureMetadata &input, const Textu
              {row(89, {{0x208e46, 0, 1}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
               row((uav ? 156u : 88u) | (dimension << 11) |
                       ((dimension == 4 || dimension == 9) ? info.samples << 16 : 0u),
-                  {dest(kind, 0), {0x4444}}),
+                  {dest(kind, 0), {returnType * 0x1111}}),
               row(158, {dest(30, 1), {16}}),
               row(61 | (mode << 11), {dest(0, 0), {0x20800a, 0, 0}, source(kind, 0)}),
               row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}), row(62, {})}});

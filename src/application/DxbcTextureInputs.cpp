@@ -56,6 +56,21 @@ std::optional<LoadFormat> loadFormat(uint32_t format) {
     return found == formats.end() ? std::nullopt : std::optional(found->second);
 }
 } // namespace
+std::optional<TexturePlane> textureInputPlane(const Resource &resource, const TextureInputView &view,
+                                              uint32_t mip, uint32_t layer) {
+    const auto info = textureInfo(resource);
+    if (info.format < 103 || info.format > 105) {
+        if (view.planeSlice && *view.planeSlice)
+            throw std::runtime_error("Unsupported plane selection for a non-planar texture");
+        return {};
+    }
+    if (info.dimension != 3 || info.samples != 1 || info.mips != 1 || (info.width & 1) || (info.height & 1) ||
+        (view.dimension != 4 && view.dimension != 5) || view.nativeDescriptor.size() != 6 ||
+        (view.planeSlice && *view.planeSlice > 1))
+        throw std::runtime_error("Invalid native planar SRV metadata");
+    const auto plane = view.planeSlice ? (*view.planeSlice ? "uv" : "y") : "auto";
+    return texturePlane(resource, mip, layer, plane, view.format);
+}
 uint32_t TextureInputs::loadReturnType(uint32_t format) {
     const auto description = loadFormat(format);
     return description ? description->returnType : 0;
@@ -137,10 +152,19 @@ TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Regi
              : view.firstLayer != 0 || view.layerCount != (cube ? 6u : 1u)) ||
         (texture.minLod != 0 && !(texture.resource.desc.back() & 0x80)))
         throw std::runtime_error("Native sampling descriptor and snapshot metadata disagree");
+    const auto plane = textureInputPlane(texture.resource, view, view.firstMip, view.firstLayer);
     // Filtering may combine multiple mips, faces and anisotropic taps. Until a
     // dependency footprint is observed, never mark partially unknown storage known.
-    if (!std::all_of(texture.storage.valid.begin(), texture.storage.valid.end(),
-                     [](auto v) { return v == 1; }))
+    if (plane) {
+        for (uint32_t layer = view.firstLayer; layer < view.firstLayer + view.layerCount; ++layer) {
+            const auto selectedPlane = textureInputPlane(texture.resource, view, view.firstMip, layer);
+            if (!std::all_of(texture.storage.valid.begin() + selectedPlane->offset,
+                             texture.storage.valid.begin() + selectedPlane->offset + selectedPlane->size,
+                             [](auto value) { return value == 1; }))
+                return Value{};
+        }
+    } else if (!std::all_of(texture.storage.valid.begin(), texture.storage.valid.end(),
+                            [](auto value) { return value == 1; }))
         return Value{};
     return std::nullopt;
 }
@@ -443,11 +467,13 @@ Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dime
         return result;
     }
     const auto &sub = layout.at(size_t((view.firstLayer + layer) * info.mips + mip));
-    if (x >= sub.width || y >= sub.height || z >= sub.depth) {
+    const auto plane = textureInputPlane(texture.resource, view, uint32_t(mip), view.firstLayer + layer);
+    if (x >= (plane ? plane->width : sub.width) || y >= (plane ? plane->height : sub.height) ||
+        z >= sub.depth) {
         result.valid = uint8_t(mask);
         return result;
     }
-    const auto start = sub.offset + uint64_t(z) * sub.slicePitch +
+    const auto start = (plane ? plane->offset : sub.offset) + uint64_t(z) * sub.slicePitch +
                        uint64_t(y / format->height) * sub.rowPitch +
                        uint64_t(x / format->width) * format->bytes;
     if (start > texture.storage.bytes.size() || format->bytes > texture.storage.bytes.size() - start)

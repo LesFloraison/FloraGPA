@@ -95,8 +95,11 @@ Value TextureInputs::dimensions(const Register &binding, uint32_t dimension, con
             view.layerCount > info.layers - view.firstLayer || !std::isfinite(description.minLod) ||
             description.minLod < 0 || description.minLod > info.mips)
             throw std::runtime_error("Invalid native texture metadata for resource information");
-        if ((info.format >= 103 && info.format <= 105) || (view.planeSlice && *view.planeSlice))
-            throw std::runtime_error("Planar resource information requires plane dimensions");
+        if (uav && ((info.format >= 103 && info.format <= 105) || (view.planeSlice && *view.planeSlice)))
+            throw std::runtime_error("Planar UAV resource information requires plane dimensions");
+        const auto plane =
+            uav ? std::optional<TexturePlane>{}
+                : textureInputPlane(description.resource, view, view.firstMip, view.firstLayer);
         const auto &d = view.nativeDescriptor;
         auto count = [](uint32_t raw, uint32_t first, uint32_t total) {
             return raw == UINT32_MAX ? total - first : raw;
@@ -134,9 +137,11 @@ Value TextureInputs::dimensions(const Register &binding, uint32_t dimension, con
             result.valid &= uint8_t(~sizes);
         else if (mip.bits[0] < view.mipCount) {
             const auto level = view.firstMip + mip.bits[0];
-            result.bits[0] = std::max(1u, info.width >> level);
+            result.bits[0] = plane ? plane->width : std::max(1u, info.width >> level);
             if (sizes & 2)
-                result.bits[1] = dimension == 7 ? view.layerCount : std::max(1u, info.height >> level);
+                result.bits[1] = dimension == 7 ? view.layerCount
+                                 : plane        ? plane->height
+                                                : std::max(1u, info.height >> level);
             if (sizes & 4)
                 result.bits[2] = dimension == 5 ? std::max(1u, info.depth >> level) : view.layerCount;
             if (!uav && (level < std::floor(description.minLod) ||

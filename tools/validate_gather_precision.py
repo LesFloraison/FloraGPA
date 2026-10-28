@@ -23,7 +23,7 @@ def validate(report):
             and opcode in (109, 126, 127, 128) and precision in (1, 2)
             and (not programmable or dimension in (3, 8)), 'Supported gather precision configuration')
     helper = report['helper']
-    require(helper['backend'] == 'dxbc-gpu/24' and helper['warp'] == (vendor == 0)
+    require(helper['backend'] == 'dxbc-gpu/25' and helper['warp'] == (vendor == 0)
             and helper['vendor_id'] == (5140 if vendor == 0 else vendor), 'Selected GPU identity')
     expected_rows = set(itertools.product(range(8), range(1 if stage == 5 else 2)))
     rows = report['records']

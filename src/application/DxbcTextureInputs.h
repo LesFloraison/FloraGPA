@@ -1,6 +1,6 @@
 #pragma once
 #include "DxbcExecution.h"
-#include "core/TextureEdits.h"
+#include "core/TextureStorage.h"
 
 namespace flora::dxbc_exec {
 struct TextureMetadata {
@@ -35,6 +35,9 @@ struct TextureInputView {
     std::shared_ptr<const Samples> samples;
     std::shared_ptr<const SampleQueryInput> queries;
 };
+// Resolve a planar SRV's actual dimensions and byte range; validate explicit plane identity.
+std::optional<TexturePlane> textureInputPlane(const Resource &, const TextureInputView &, uint32_t mip,
+                                              uint32_t layer);
 struct SamplerInput {
     uint64_t object = 0; // Effective GPA identity before a scoped descriptor experiment.
     bool experimental = false;
