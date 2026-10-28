@@ -898,9 +898,8 @@ struct Lane::State {
                  std::all_of(args[4].select.begin(), args[4].select.end(),
                              [&](auto component) { return component == args[4].select[0]; }))))))
             fail("Invalid DXBC explicit sampling operands");
-        if (implicit && (p.stage != 0 || resource.indices.size() != 1 || resource.indices[0].relative ||
-                         sampler.indices.size() != 1 || sampler.indices[0].relative))
-            fail("Implicit sampling requires pixel stage and static texture and sampler bindings");
+        if (implicit && (p.stage != 0 || resource.indices.size() != 1 || sampler.indices.size() != 1))
+            fail("Implicit sampling requires pixel stage and one-dimensional resource bindings");
         if (comparison && std::any_of(resource.select.begin(), resource.select.end(),
                                       [](auto component) { return component != 0; }))
             fail("Comparison sampling requires a replicated red resource selection");

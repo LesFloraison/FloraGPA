@@ -58,20 +58,28 @@ Words row(uint32_t opcode, std::initializer_list<Words> args = {}) {
     return result;
 }
 
-Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, uint32_t swizzle = 0xe4) {
+Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, uint32_t swizzle = 0xe4,
+                    bool indexed = false) {
     const Words address = modifier ? Words{0x80101e46, 1 | (modifier << 6), 0} : Words{0x101e46, 0};
-    Words sample =
-        row(opcode, {{0x102002 | (mask << 4), 0}, address, {0x107006 | (swizzle << 4), 0}, {0x106000, 0}});
+    const Words resource =
+        indexed ? Words{0x00d07006 | (swizzle << 4), 0, 0x10100a, 1} : Words{0x107006 | (swizzle << 4), 0};
+    const Words sampler = indexed ? Words{0x00d06000, 0, 0x10101a, 1} : Words{0x106000, 0};
+    Words sample = row(opcode, {{0x102002 | (mask << 4), 0}, address, resource, sampler});
     if (opcode != 69) {
         sample.insert(sample.end(), {0x10102a, 0});
         sample[0] = (sample[0] & 0xffffff) | (uint32_t(sample.size()) << 24);
+    }
+    if (indexed) {
+        sample.insert(sample.begin() + 1, {0x800000c2, 3u | (0x5555u << 6)});
+        sample[0] = (sample[0] & 0xffffff) | (uint32_t(sample.size()) << 24) | 0x80000000u;
     }
     return Program(
         makeDxbc({{0x58454853,
                    writeDxbcProgram({{0x50, 0},
                                      {row(88 | (3 << 11), {{0x1070f2, 0}, {0x5555}}),
                                       row(90 | (opcode == 70 ? 0x800 : 0), {{0x106000, 0}}),
-                                      row(98 | (2 << 11), {{0x1010f2, 0}}), row(101, {{0x1020f2, 0}}),
+                                      row(98 | (2 << 11), {{0x1010f2, 0}}),
+                                      row(98 | (1 << 11), {{0x101032, 1}}), row(101, {{0x1020f2, 0}}),
                                       row(54, {{0x1020f2, 0}, {0x4002, 7, 8, 9, 10}}), sample, row(62)}})}}));
 }
 std::shared_ptr<TextureInputs> textures(const Json &item) {
@@ -402,6 +410,48 @@ class DxbcPixelSamplingTests final : public QObject {
                 QCOMPARE(value, Value::known({expected, expected, expected, expected}));
             }
         }
+    }
+    void indexedSampling_data() { semantics_data(); }
+    void indexedSampling() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, opcode);
+        auto input = operands(vendor, opcode);
+        auto &storage = *input[0].textures;
+        storage.views[{7, {3}}] = storage.views.at({7, {0}});
+        storage.views.erase({7, {0}});
+        storage.samplers[{6, {5}}] = storage.samplers.at({6, {0}});
+        storage.samplers.erase({6, {0}});
+        for (auto &lane : input)
+            lane.registers[{1, {1}}] = Value::known({3, 5, 0, 0});
+        // The independent original shader explicitly returns the sampled red component in xxxx.
+        const auto code = instruction(opcode, 15, 0, 0, true);
+        for (auto coverage : {uint8_t(15), uint8_t(1)}) {
+            PixelQuad quad(code, input, coverage);
+            execute(quad);
+            QCOMPARE(quad.samplingBatches(), uint64_t(1));
+            QCOMPARE(quad.activeMask(), coverage);
+            for (unsigned lane = 0; lane < 4; ++lane)
+                QCOMPARE(
+                    quad.lane(lane).value({2, {0}}),
+                    Value::known(reference(vendor, opcode)["output"][lane].get<std::array<uint32_t, 4>>()));
+        }
+        auto divergent = input;
+        divergent[1].registers[{1, {1}}].bits[0] = 4;
+        PixelQuad mismatch(code, divergent);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(mismatch));
+        auto unknown = input;
+        unknown[2].registers[{1, {1}}].valid = 1;
+        PixelQuad missing(code, unknown);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(missing));
+        qInfo().noquote() << QString::fromStdString(Json{
+            {"indexed_sampling", true},
+            {"vendor", vendor},
+            {"opcode", opcode},
+            {"texture_slot", 3},
+            {"sampler_slot", 5},
+            {"coverage", {15, 1}},
+            {"reference", reference(vendor, opcode)},
+            {"helper", helpers.at(vendor)->identity()}}.dump());
     }
     void cancellation_data() { semantics_data(); }
     void cancellation() {

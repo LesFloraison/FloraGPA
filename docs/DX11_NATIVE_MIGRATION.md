@@ -1383,3 +1383,21 @@ Intel Gather failures. GUI, CLI and Worker builds pass. See the
 [buffer/query evidence](research/DX11_NATIVE_INTERFACE_BUFFERS.md) for retained
 failures, bounded subprocess controls and reproduction. Full class/debug parity
 and removal acceptance remain open.
+
+### Captured class-resource workflow and relative pixel sampling
+
+Eighteen synthetic GPA workflows now qualify raw/structured/typed class buffers
+through Worker analysis, instruction-level debug sessions, experiment edits and
+the public CLI. Their 54 traces and 18 exported archives pass independent
+artifact, identity and buffer-journal validation. Old results are rejected after
+the experiment changes.
+
+Uniform pixel quads now accept relative SRV/sampler operands for implicit sample,
+comparison sample and biased sample. Existing dynamic rendezvous and binding
+agreement checks remain enforced. Nine relocated sampling rows and existing
+semantic/cancellation checks pass (30 Qt passes total). See the
+[workflow and sampling evidence](research/DX11_NATIVE_CLASS_WORKFLOW.md).
+Original class dispatch differences, source-level class parity, divergent
+resource selection, real-game qualification and final removal acceptance remain
+open. These tests do not waive the previously recorded 67 original class-buffer
+comparison failures.
