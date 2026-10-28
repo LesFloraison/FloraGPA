@@ -7,6 +7,7 @@
 #include "NativeComputeDebug.h"
 #include "NativeCounters.h"
 #include "NativeHistory.h"
+#include "NativePixelDrawHistory.h"
 #include "NativeVertexDebug.h"
 #include "PostTransform.h"
 #include "TextureInspector.h"
@@ -94,7 +95,8 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"counters", {"gpa_event", "start_event", "end_event"}},
         {"history",
          {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
-          "max_bytes", "max_records"}},
+          "max_bytes", "max_records", "gpa_event", "shader_outputs", "output_merger", "primitive_identity",
+          "max_steps"}},
         {"debug-vertex",
          {"gpa_event", "instance", "vertex", "index", "max_bytes", "max_steps", "max_trace_bytes"}},
         {"debug-pixel", {"gpa_event", "x", "y", "sample"}},
@@ -116,8 +118,11 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             if (!selected->second.contains(key))
                 throw std::invalid_argument("Unsupported " + action + " option: " + key);
             if (key == "history_scope") {
-                if (value != "events")
-                    throw std::invalid_argument("Native history currently requires explicit events scope");
+                if (value != "events" && value != "private-draw")
+                    throw std::invalid_argument("Native history requires events or private-draw scope");
+            } else if (key == "shader_outputs" || key == "output_merger" || key == "primitive_identity") {
+                if (!value.is_boolean())
+                    throw std::invalid_argument("Expected boolean analysis option: " + key);
             } else if (key == "stage") {
                 if (value != "vs" && value != "vs-index" && value != "vs-inputs" && value != "ds" &&
                     value != "gs" && value != "hs" && value != "final")
@@ -146,6 +151,20 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         throw std::invalid_argument(action + " requires a GPA event");
     if ((action == "texture" || action == "history") && !options.contains("resource"))
         throw std::invalid_argument(action + " requires a GPA resource");
+    if (action == "history") {
+        const bool draw = options.value("history_scope", std::string()) == "private-draw";
+        if (draw && !options.contains("gpa_event"))
+            throw std::invalid_argument("Private draw history requires a GPA event");
+        if (!draw)
+            for (const auto key :
+                 {"gpa_event", "shader_outputs", "output_merger", "primitive_identity", "max_steps"})
+                if (options.contains(key))
+                    throw std::invalid_argument("Analysis option requires private-draw scope: " +
+                                                std::string(key));
+        if (options.contains("max_steps") && !options.value("shader_outputs", false) &&
+            !options.value("output_merger", false))
+            throw std::invalid_argument("History max_steps requires shader outputs or output merger");
+    }
     if (action == "counters") {
         const bool single = options.contains("gpa_event");
         const bool range = options.contains("start_event") && options.contains("end_event");
@@ -209,8 +228,10 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     for (const auto key : {"gpa_event", "start_event", "end_event"})
         if (selection.contains(key) && frame.entry(selection.at(key).get<Id>()).category != 7)
             throw std::invalid_argument("Analysis event does not identify a GPA API command");
-    options.before =
-        request.action == "mesh" || request.action == "debug-thread" || request.action == "debug-vertex";
+    const bool privateDraw = request.action == "history" && selection.at("history_scope") == "private-draw";
+    options.before = request.action == "mesh" || request.action == "debug-thread" ||
+                     request.action == "debug-vertex" || privateDraw;
+    options.prepareBeforeDraw = privateDraw;
     const bool allCounters = request.action == "counters" && !selection.contains("gpa_event") &&
                              !selection.contains("start_event");
     if (request.action == "counters" && !allCounters) {
@@ -281,8 +302,9 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
         if (job.contains("expected_adapter") && job.at("expected_adapter") != context.at("adapter"))
             throw std::runtime_error("Actual analysis adapter differs from the requested context");
         // Unpositioned texture inspection means capture-initial data, matching the existing inspector.
-        if (!allCounters && request.action != "history" && request.action != "debug-thread" &&
-            request.action != "debug-vertex" && (request.action != "texture" || options.until))
+        if (!allCounters && (request.action != "history" || privateDraw) &&
+            request.action != "debug-thread" && request.action != "debug-vertex" &&
+            (request.action != "texture" || options.until))
             replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); });
         if (request.action == "debug-vertex") {
             dxbc_exec::VertexTraceOptions inspect;
@@ -331,7 +353,18 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
             inspect.maxRecords = selection.value("max_records", inspect.maxRecords);
             if (selection.contains("typed_format"))
                 inspect.typedFormat = selection.at("typed_format").get<uint32_t>();
-            data = collectNativeEventHistory(replay, inspect, cancelled);
+            if (privateDraw) {
+                NativePixelDrawHistoryLimits limits;
+                limits.maxBytes = selection.value("max_bytes", limits.maxBytes);
+                limits.maxShaderBytes = selection.value("max_bytes", limits.maxShaderBytes);
+                limits.maxShaderSteps = selection.value("max_steps", limits.maxShaderSteps);
+                limits.evaluateOutputMerger = selection.value("output_merger", false);
+                limits.evaluateShaderOutputs =
+                    selection.value("shader_outputs", false) || limits.evaluateOutputMerger;
+                limits.observePrimitiveIdentity = selection.value("primitive_identity", false);
+                data = collectNativePixelDrawHistory(replay, options.until, inspect, limits, cancelled);
+            } else
+                data = collectNativeEventHistory(replay, inspect, cancelled);
             save(directory.filePath("history.json"), data);
         } else if (request.action == "texture") {
             TextureInspectionOptions inspect;

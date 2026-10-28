@@ -144,12 +144,15 @@ FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-index --in
 FloraGPA.Cli analyze frame.gpa_frame mesh --gpa-event 1000 --stage vs-inputs --instance 0 --out mesh-inputs
 FloraGPA.Cli analyze frame.gpa_frame debug-thread --gpa-event 893 --group 0 0 0 --thread 0 0 0 --out compute-debug
 FloraGPA.Cli analyze frame.gpa_frame debug-vertex --gpa-event 876 --vertex 0 --instance 0 --out vertex-debug
+FloraGPA.Cli analyze frame.gpa_frame history --history-scope private-draw --gpa-event 113 --resource 80 --x 799 --y 480 --output-merger --primitive-identity --out draw-history
 ```
 
 The native entry point never recaptures to RDC or selects an external replay
 backend. Event history requires `--history-scope events`; `debug-thread` uses the
 native compute job described in `DX11_NATIVE_COMPUTE_DEBUG.md`. `debug-vertex`
 uses the observed draw inputs described in `DX11_NATIVE_VERTEX_DEBUG.md`.
+Private draw observations use `--history-scope private-draw`; their explicit
+scope, options and limits are described in [Native private draw history](NATIVE_PRIVATE_DRAW_HISTORY.md).
 Complete fragment history and PS debug actions still fail explicitly until implemented.
 During this stage the legacy command is still present for baseline comparison;
 its final retirement and GUI cutover remain separate gates.

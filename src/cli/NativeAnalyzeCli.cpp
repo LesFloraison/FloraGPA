@@ -28,7 +28,7 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addPositionalArgument("capture", "DX11 .gpa_frame file");
         parser.addPositionalArgument(
             "action",
-            "inventory | events | texture | mesh | counters | history --history-scope events "
+            "inventory | events | texture | mesh | counters | history --history-scope events/private-draw "
             "| debug-vertex | debug-thread (fragment history and full debugger parity remain pending)");
         parser.addOption({"out", "New or empty output directory", "path"});
         parser.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -43,7 +43,10 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption(
             {"index", "Override the per-vertex attribute index after all draw offsets", "integer"});
         parser.addOption(
-            {"history-scope", "Event snapshots: events; fragment history remains pending", "scope"});
+            {"history-scope", "events or private-draw; original fragment history remains pending", "scope"});
+        parser.addOption({"shader-outputs", "Evaluate private draw shader outputs"});
+        parser.addOption({"output-merger", "Evaluate private draw shader outputs and output merger"});
+        parser.addOption({"primitive-identity", "Observe conditional system IDs in private draw history"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
                                "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
                                "max-records", "max-steps", "max-trace-bytes"})
@@ -72,7 +75,8 @@ int nativeAnalyzeCli(QStringList arguments) {
             const auto field = QString(key).replace('-', '_').toStdString();
             if (key == "out" || key == "experiment" || key == "timeout")
                 continue;
-            if (key == "warp" || key == "debug-device")
+            if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
+                key == "primitive-identity")
                 options[field] = true;
             else if (key == "stage" || key == "history-scope")
                 options[field] = parser.value(key).toStdString();

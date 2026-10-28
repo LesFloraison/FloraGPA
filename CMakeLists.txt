@@ -559,6 +559,12 @@ if(BUILD_TESTING)
   set_tests_properties(dxbc_format PROPERTIES TIMEOUT 60
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   add_executable(FloraNativeAnalysisTests tests/NativeAnalysisTests.cpp)
+  add_executable(FloraNativeDrawHistoryJobsTests tests/NativeDrawHistoryJobsTests.cpp)
+  target_link_libraries(FloraNativeDrawHistoryJobsTests PRIVATE FloraExperiment Qt6::Test)
+  add_dependencies(FloraNativeDrawHistoryJobsTests FloraGPA.Worker FloraGPA.Cli)
+  add_test(NAME native_draw_history_jobs COMMAND FloraNativeDrawHistoryJobsTests -o "${CMAKE_BINARY_DIR}/native-draw-history-jobs-$<CONFIG>.txt,txt")
+  set_tests_properties(native_draw_history_jobs PROPERTIES RUN_SERIAL TRUE TIMEOUT 180
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   add_executable(FloraNativeComputeDebugTests tests/NativeComputeDebugTests.cpp)
   target_link_libraries(FloraNativeComputeDebugTests PRIVATE FloraExperiment Qt6::Test)
   add_dependencies(FloraNativeComputeDebugTests FloraGPA.Worker FloraGPA.Cli)
