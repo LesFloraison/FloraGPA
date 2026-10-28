@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "scope": "original_shader_debug_availability_property",
+  "passed": true,
+  "guarded_cases": 9,
+  "negative_controls": [
+    {
+      "change": "binary",
+      "reason": "Pinned report identity"
+    },
+    {
+      "change": "scope",
+      "reason": "Bounded research scope"
+    },
+    {
+      "change": "getter",
+      "reason": "Presenter metadata identity"
+    },
+    {
+      "change": "property",
+      "reason": "Named property and dispatch selection"
+    },
+    {
+      "change": "method",
+      "reason": "Named property and dispatch selection"
+    },
+    {
+      "change": "missing",
+      "reason": "Complete guarded matrix"
+    },
+    {
+      "change": "duplicate",
+      "reason": "Unique guarded case"
+    },
+    {
+      "change": "return",
+      "reason": "Constant getter and dispatch contract"
+    },
+    {
+      "change": "property_index",
+      "reason": "Constant getter and dispatch contract"
+    },
+    {
+      "change": "call_kind",
+      "reason": "Constant getter and dispatch contract"
+    },
+    {
+      "change": "guard",
+      "reason": "Exact guarded output"
+    },
+    {
+      "change": "written_byte",
+      "reason": "Exact guarded output"
+    }
+  ],
+  "debugger_engine_recovered": false,
+  "full_debugger_parity": false,
+  "renderdoc_removed": false,
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/probe/availability.json",
+      "bytes": 12350,
+      "sha256": "44bd35c4c0624acc64b83f58c77992a0c309e810227d51202eb353bf9d62bb66"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/probe/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/probe/run.json",
+      "bytes": 544,
+      "sha256": "e0759deef68faf1210186bbd3dfeb03fce7214e1e59c9c7d36874fc1fbba0a06"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/binary.json",
+      "bytes": 211,
+      "sha256": "ec96977bc4c4afddc6b59b8b35f349591464e3ea40a502bd0388a807b05afb95"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/evidence-sha256.json",
+      "bytes": 654,
+      "sha256": "a551284c60416069447e5771bb64e94c49ff41f9d013cf16f3376e9573348476"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/presenter-dispatch.log",
+      "bytes": 3809,
+      "sha256": "645608fac84834ff2f017f1089602f90c471fff38c526ad4d6f9405b5138786c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/presenter-dispatch.txt",
+      "bytes": 87767,
+      "sha256": "2f9af7d4388c0c10301cfb6120cf562cdda9a0c3cc0d878d710f345a4a4e69fa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/presenter-metadata.log",
+      "bytes": 3809,
+      "sha256": "bbed46a6b44c0a889ed8f435528a533768443255b30bd26e4fe49bbabb6777ec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/debugger-availability-final/static/presenter-metadata.txt",
+      "bytes": 3950,
+      "sha256": "077b9373942f9ef5b989012e2956529a9d211f1cd51366f78c945d2c4fd2348f"
+    }
+  ],
+  "sources": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_original_debug_availability.py",
+      "bytes": 7159,
+      "sha256": "77bace16f2b0e5fd760f38f5e3138973e98cd03ea424cdb1ea17b0d1409bcb99"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_debug_availability.py",
+      "bytes": 7090,
+      "sha256": "67fa61577c9e9b650e416680546ab04cb66cb0af339412ee439427575f83df31"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/ghidra/Invoke-DebuggerAvailabilityResearch.ps1",
+      "bytes": 2424,
+      "sha256": "f393dad97e103fcbc7bcafb9a2120c28a92da09ce9446451dad9d919c6564e27"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/ghidra/ExportFunctionEvidence.java",
+      "bytes": 2676,
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/ghidra/ExportAddressEvidence.java",
+      "bytes": 2682,
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    }
+  ]
+}
