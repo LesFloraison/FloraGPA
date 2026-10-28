@@ -1141,3 +1141,15 @@ deliberate equality-readback failure retain unknown or unverified results where
 appropriate. See `research/DX11_NATIVE_PIXEL_IDENTITY_JOINS.md` for exact scope,
 performance, reproduction and evidence. Original invocation qualification,
 complete history/debugger parity and P1/P7/P8 gates remain open.
+
+## Private draw history CLI and Worker continuation
+
+`analyze history --history-scope private-draw` now exposes the native storage,
+shader, merger and conditional-identity observations through the existing isolated
+Worker and context/artifact validation. Explicit options preserve the difference
+between private replay observations and original fragment records. The new suite
+and analysis/event-history regressions pass 157 Qt checks. Fifteen owned jobs and
+nine real CLI jobs pass independent validation, with 90 corrupted results rejected.
+See `research/DX11_NATIVE_DRAW_HISTORY_JOBS.md` for exact scope, measured time and
+peak memory, module-snapshot limits and reproduction. Complete fragment/debugger
+parity, GUI cutover and P1/P7/P8 acceptance remain open.

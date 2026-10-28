@@ -1,0 +1,854 @@
+{
+  "schema": 1,
+  "scope": "private_draw_history_native_cli_worker",
+  "implementation_commit": "3f880fdd7802e7c0d75a808504425161b0cbe169",
+  "complete_pixel_history": false,
+  "public_pixel_debug_complete": false,
+  "renderdoc_removed": false,
+  "qt_checks": 157,
+  "owned_jobs": 15,
+  "real_jobs": 9,
+  "negative_controls": 90,
+  "module_audit_scope": "worker_loaded_modules_at_completion",
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-analysis-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-analysis.txt",
+      "bytes": 2952,
+      "sha256": "1cafee6632d20740714769db117e0ef93d2516ee912157fcb97b61944b4946a1"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraGPA.Cli.exe",
+      "bytes": 5995520,
+      "sha256": "f9f4810360cc17fde9f17421429c6a5b95602eb60e4869a342b61cf33349ba71"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraGPA.exe",
+      "bytes": 5110272,
+      "sha256": "88eeae73105e35e20e9eb959ecd905a06b2b66c30e6b193f7d0534b94408e0ff"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraGPA.Worker.exe",
+      "bytes": 5995520,
+      "sha256": "f9f4810360cc17fde9f17421429c6a5b95602eb60e4869a342b61cf33349ba71"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1515520,
+      "sha256": "e1fd708c95acdd4dae82ee6849c0573912eb6b3d057f0f69a3d4fc0cb14fdad9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraNativeDrawHistoryJobsTests.exe",
+      "bytes": 1230336,
+      "sha256": "dd3680f7afa27e7c61a09d2d8a98fad88018f1c1ce06b74dc8520897eee0f0c7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-binaries/FloraNativeHistoryTests.exe",
+      "bytes": 1881088,
+      "sha256": "8a43af92b2c0f1981806ddd38174c19c5df7489cfc7a3afa6f485f401a3fc341"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-build.txt",
+      "bytes": 7271,
+      "sha256": "d6c164aa5688dc38bc2ad44bdb64e1638f92559083cda71d2671c9f0e9ba4b11"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-drivers.json",
+      "bytes": 362,
+      "sha256": "0d773077810c4fdabbb094a8e99a8dec28bfde039fcbc37b70b68119b6a40b66"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-events-console.txt",
+      "bytes": 6750,
+      "sha256": "b43e4827f72301ca976fc4943f46019a7a23ddd8d06c6d3c9c8db2ad7aff7782"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-events.txt",
+      "bytes": 5715,
+      "sha256": "f2a9a7b0a853956893374ecbe97376f2fb6e6cc01c8fdc0fa89daf977d00214d"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-evidence-builder.py",
+      "bytes": 2585,
+      "sha256": "5cb22f61cb01d5457f841407907d7edc198a3fe3bb6b960deda5f72a52346238"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-final-validation.json",
+      "bytes": 5049,
+      "sha256": "4e78e00d7429b404fc9dfcfa85e9e3114c20742d1758a0a30e546ee97fb504e9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-all-msaa/history.json",
+      "bytes": 364285,
+      "sha256": "2238289f3ab9ab0c24cf2d0cd2a53d3534c088491551898bb8c727add20d2686"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-all-msaa/job.json",
+      "bytes": 916,
+      "sha256": "823982f38a1680216dee3b455f29eef9c7171b9010d4657e105f519b2f5ced7d"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-all-msaa/result.json",
+      "bytes": 397290,
+      "sha256": "b79ea58c6991d39c7f3cb7931b4361074f565a7752edffaa457983993ccc65a0"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-all-msaa/verified.json",
+      "bytes": 339,
+      "sha256": "886fd4ffd77ca1b64c6f0f708153e2b4bfbd56f564a0954bb1652867444711ef"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-all-msaa/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-identity/history.json",
+      "bytes": 289633,
+      "sha256": "5af6ffc91cd42132c6943e20db32f9e608e5222e589efb5935f2879ac253a206"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-identity/job.json",
+      "bytes": 872,
+      "sha256": "e06c74ec0d245a0ad54a447016150d4555a7e3f9f2abf48798bcbeafae9eec86"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-identity/result.json",
+      "bytes": 317706,
+      "sha256": "90b31ec134b71c41249dc7ab959e880a91ba618a56f42403cec1611cdc2f8657"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-identity/verified.json",
+      "bytes": 339,
+      "sha256": "ea6ccf6aaa69d3b49e2251649b43445a9dbf528b9d84becc1d3ca2219ce89c92"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-merger/history.json",
+      "bytes": 105590,
+      "sha256": "194fbac5be2c0b238e8f40b96204dca20a06bf25c43b11c3624b5a7f6dfd95da"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-merger/job.json",
+      "bytes": 867,
+      "sha256": "9215eb50b482e4671d2856356c7719b3d98c94e90973ca438d63b88b58e9f1e8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-merger/result.json",
+      "bytes": 119766,
+      "sha256": "540c1d8ca9af05881480291dda8ed7fa60d742a3a717dcef2b3cc15c62ffda95"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-merger/verified.json",
+      "bytes": 337,
+      "sha256": "ebb0b8719f331984c087d76c53308f03b4594a0a4e7888dc193a8e3707f94482"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-shader/history.json",
+      "bytes": 82459,
+      "sha256": "514261fd6052cbcef005b854a7bdfb3f6e8048676ecd081f7df19c3c285b0890"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-shader/job.json",
+      "bytes": 868,
+      "sha256": "c22a727d96c9b5755deacc4e5cba42b95dfb19639e459a89a6bec3b565ebdf37"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-shader/result.json",
+      "bytes": 94835,
+      "sha256": "75555ad17873cf715be12531afc21b17e0a5b71b3b39cb0fac5589c126a43407"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-shader/verified.json",
+      "bytes": 337,
+      "sha256": "b974d142abaf191a51aaf011f2e0b165dbfb6fbf1a5a5a105f5b450644dc85e2"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-storage/history.json",
+      "bytes": 42480,
+      "sha256": "1763ff5aef7b2787d88a3490371522dd20702a179c64ff96ef9498420dbddbaa"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-storage/job.json",
+      "bytes": 840,
+      "sha256": "78ca93966254c67ee392b6994c92258315a9b1af561341d5c90cbdac05c5004d"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-storage/result.json",
+      "bytes": 52714,
+      "sha256": "760d8117e903c45011fd0f0bef969fc227c851f6b2e8321c3a7c4314f21a918f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-storage/verified.json",
+      "bytes": 338,
+      "sha256": "4ef498fc43130994410add0f7770b6afc1d312122426c47e55244af1c9b2bbe9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/0-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-all-msaa/history.json",
+      "bytes": 364485,
+      "sha256": "5698e965d80f38cd91fbc3fbcd67e85da0c069dff693fba10cee84973c64e86e"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-all-msaa/job.json",
+      "bytes": 923,
+      "sha256": "e5ae52be0ca9005aa80883d846e08295cedb0e495e2438dd5a88b1f98562ebf1"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-all-msaa/result.json",
+      "bytes": 397907,
+      "sha256": "67eba72d6431c26fd7d669bc78e57b59bda0c2d36f41099e92b202163517f94f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-all-msaa/verified.json",
+      "bytes": 343,
+      "sha256": "c0443581f24b4c6d7bfa9aa8490ab3037d1a226cf884c7c0ef9d29911d7e253d"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-all-msaa/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-identity/history.json",
+      "bytes": 289798,
+      "sha256": "92710cd6c3d2e4e8841a49a972efaea351f5f419a0d18a7fd82ea670e518017f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-identity/job.json",
+      "bytes": 879,
+      "sha256": "66f56160e88e27c82658fcd8c90872c1f06ed870f51c7de083d27146d89b1d23"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-identity/result.json",
+      "bytes": 318286,
+      "sha256": "1cadf81877547ac65af8415f6acfe1c49876e1533b62541da7677eef4965f190"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-identity/verified.json",
+      "bytes": 343,
+      "sha256": "14ddeb1fd0206b8214b3619bd696f7ab5200042eecc7353d473210767e2df967"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-merger/history.json",
+      "bytes": 105636,
+      "sha256": "0b32b08f5c59fdb1b833ed26522545f050c7963f1abdcdc406edab7bd50f4a63"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-merger/job.json",
+      "bytes": 874,
+      "sha256": "d3f393d301496606211b3213e388fe88d3912fc05afe4642882c400449b884e3"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-merger/result.json",
+      "bytes": 120227,
+      "sha256": "a128bbdd2c42b1b68b5f859d5f59198cbe9c938390a2b09746c3d36009547cd8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-merger/verified.json",
+      "bytes": 341,
+      "sha256": "4648516d23601a8a125979b253e3949dfa08270af225d18817218fd9f688e250"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-shader/history.json",
+      "bytes": 82496,
+      "sha256": "4c625757b634dd6e2dfeca45f6de2bf1045068514df3dd37ec1b5793e6e19da1"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-shader/job.json",
+      "bytes": 875,
+      "sha256": "727a776d50ddd39c539bbcd73be710921a2678caaa6da5a7b118cf2db89bcbb8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-shader/result.json",
+      "bytes": 95287,
+      "sha256": "94757aad6c309b6b5f879b2a1928aeaf18cbbcf93850b3b3140d9126be949666"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-shader/verified.json",
+      "bytes": 341,
+      "sha256": "35dbe7ab151c0a2216e3c471a5a1f728e50aaa882690761df9a0f1660b1754c9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-storage/history.json",
+      "bytes": 42496,
+      "sha256": "ee5f796ad7145666e8940b69549087919c2b4c10226343067f877cbf1aad9a52"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-storage/job.json",
+      "bytes": 847,
+      "sha256": "dc47bc66aa470ecbcf9e85ec138594ccd0270dc3d8c199a138827235bcda512c"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-storage/result.json",
+      "bytes": 53145,
+      "sha256": "cb47f426c0802463dd0480074715193ad840ce34c8bc194d99ec39642197b1fb"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-storage/verified.json",
+      "bytes": 342,
+      "sha256": "b3ee1777a17e69177180627347b965a9e4d7119028b88ccc77d2d6831a33b156"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/32902-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-all-msaa/history.json",
+      "bytes": 364398,
+      "sha256": "aced5323e191dd7288f74d02cbb416c94e7154c8714f6b8768eb8e8f96868495"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-all-msaa/job.json",
+      "bytes": 922,
+      "sha256": "7693907da87110eb47fb5c151de2ddff68adf89af2185090750d2b40fd48cc5b"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-all-msaa/result.json",
+      "bytes": 398161,
+      "sha256": "f4465ce239ea9fca2cb25a828cac88f057548608a9acb9180260f60d0861344c"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-all-msaa/verified.json",
+      "bytes": 342,
+      "sha256": "21eac67e2561ff45357fc14cdda91c799146140b0a15c4304dbde2eee5d65252"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-all-msaa/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-identity/history.json",
+      "bytes": 289719,
+      "sha256": "9eab491ff99d1dec678037c8243e7f3ca4cc1ef02a5313334b7256a74822d4dc"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-identity/job.json",
+      "bytes": 878,
+      "sha256": "4c1f47688e745b5a963a1258aad58bf778a6ae4e539e8d20825a9484b1834e86"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-identity/result.json",
+      "bytes": 318549,
+      "sha256": "dc33eeadbb5ebfb7f115b4ca8e007d6e16412ca6a2b885aea25b3a1669edbbe5"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-identity/verified.json",
+      "bytes": 342,
+      "sha256": "92fb287cb1d43dc3dbf4746a0cb3e86b76784cc77bf38dfd51a84633562aaa43"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-merger/history.json",
+      "bytes": 105622,
+      "sha256": "f650f7a04c6ccf7b0b0d9f9165332d4af9b376a1713425b25fa4fb32a693c18a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-merger/job.json",
+      "bytes": 873,
+      "sha256": "f4f94af8e08815666e08a875bdf5b7b382f97b5a9dc8e4b7fc2d94ee0d5316c8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-merger/result.json",
+      "bytes": 120555,
+      "sha256": "0bad503eb21e60513daf8851769c266a4e4274ec291de20da656567b65e7fab4"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-merger/verified.json",
+      "bytes": 340,
+      "sha256": "e5b64abe4370b6c6afd744d5434fac5ac91c23c84d66d84e84da766026bc8189"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-shader/history.json",
+      "bytes": 82485,
+      "sha256": "339bd7d41f489ae416df9b7ee92853c1cce1d71931e6924bce885858a4887cf5"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-shader/job.json",
+      "bytes": 874,
+      "sha256": "1895044fc11dac957d3b2a977f4e22132a4327b0f92da95833dec98c83959ba2"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-shader/result.json",
+      "bytes": 95618,
+      "sha256": "34ec7c8d995dfe68809ba217eb5842c9eb451cff114ddd260b32f6d56726119c"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-shader/verified.json",
+      "bytes": 340,
+      "sha256": "b697857f5d8cdb226be49fb380257e3a261fe07d55eb8e8bad2cd93937bf4762"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-storage/history.json",
+      "bytes": 42491,
+      "sha256": "717f71051cbe8354bb226b1617ac9008fedf6c318b65302bbd0734708908a79f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-storage/job.json",
+      "bytes": 846,
+      "sha256": "5d4983e5d81bfdd2b7dae9099af1675cf73b740a5c14799f8aaec1c1480b7f66"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-storage/result.json",
+      "bytes": 53482,
+      "sha256": "51165b5d061910a96806a2615b19bfdcbd0b53dd476faeccfe99c235cde971c7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-storage/verified.json",
+      "bytes": 341,
+      "sha256": "aff2cfb417fec2a4add0487d3022aa90786bf2c40a43f60fb53863081d01758a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned/4318-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned-validation.json",
+      "bytes": 3217,
+      "sha256": "50fd2cb42d8a036c29ae3c1d2d1e300572ee3789e6d6560bf9c794e4e9dde42c"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-owned.txt",
+      "bytes": 1556,
+      "sha256": "cc8e2d070ed9a93b5c5266a6ca42700e3dd00518bcfc68863d499081b35f0b5a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-0/history.json",
+      "bytes": 1140989,
+      "sha256": "3ac953b92a4757509fa48b7c031b227c54971613fc5988d763b76961218cd331"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-0/job.json",
+      "bytes": 803,
+      "sha256": "e2fc4ea67551f104d8170eb8464c01d6d4456f5fa15f1d0dff50fb3e45f5e0c7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-0/result.json",
+      "bytes": 1219968,
+      "sha256": "7b8724813203e69b698621dbdddfdf5f91eaec6d19e730c4ef3733c7ef7037f7"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-0/worker.log",
+      "bytes": 16448,
+      "sha256": "c4b74ca90d0c5f340cd790725c3696481e5d9533751724d4e4d10fc0c1ba39a8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-32902/history.json",
+      "bytes": 1141422,
+      "sha256": "d8b0d30d8709ffdb586ef479f018a5605c3aa0e33cd2cc2fdffcd646d094d656"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-32902/job.json",
+      "bytes": 814,
+      "sha256": "8619a89ad0de9e2cf0ffc0fc0f0821a5139af9126fa71a2b99e78e8f46dd583a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-32902/result.json",
+      "bytes": 1220817,
+      "sha256": "1f8840cbd181a1f1b33db001e17c028dfa2f17648728e7966cb0eec28a2311c2"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-32902/worker.log",
+      "bytes": 16448,
+      "sha256": "c4b74ca90d0c5f340cd790725c3696481e5d9533751724d4e4d10fc0c1ba39a8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-4318/history.json",
+      "bytes": 1141412,
+      "sha256": "7b7d87e332ef7b373de0a56e235e8d1466ca4b691ef2a152d1c373ed2b1da0bc"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-4318/job.json",
+      "bytes": 812,
+      "sha256": "d0857c8a1f1c6861892cd3d8f49665d174a0d0f615767e19438ffa8bc246416c"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-4318/result.json",
+      "bytes": 1221148,
+      "sha256": "ae99e45ce65d83b32c5a8a597136be11ea61f91280d21d0d92166f89b28b755d"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/bf1-4318/worker.log",
+      "bytes": 16448,
+      "sha256": "c4b74ca90d0c5f340cd790725c3696481e5d9533751724d4e4d10fc0c1ba39a8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-0/history.json",
+      "bytes": 330207,
+      "sha256": "daf147fd0d615bc41d9d9f40dd7cb57adcc993bac605949eb0a6dfbc3a6caa28"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-0/job.json",
+      "bytes": 809,
+      "sha256": "e0b44c247b17a7274e3b9cf6bdd29251f216bbc439d4cc3060e1611dc20177cd"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-0/result.json",
+      "bytes": 356884,
+      "sha256": "e0c0a596ef2862b9e8841e21130a87b20c3fdd3e01867794ac2cdb53f8764c8e"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-0/worker.log",
+      "bytes": 9758,
+      "sha256": "cdd8b6c6022f2f050c5053c033da961220f6ee77811226ccffd9eb986f2ff075"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-32902/history.json",
+      "bytes": 330393,
+      "sha256": "2fc2b57c563abd8e0453804d33bf84a0478248e9f3c3153c485e18075a757b25"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-32902/job.json",
+      "bytes": 820,
+      "sha256": "5cebe1e3e6a7eaaba38f91ab27729e2b3f89f4591d8a873ffccc71eb5e32d966"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-32902/result.json",
+      "bytes": 357485,
+      "sha256": "4f3005190993101f5233c3a8731933a24285aab8b4ed38f66d8d7200ef9a725b"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-32902/worker.log",
+      "bytes": 9758,
+      "sha256": "cdd8b6c6022f2f050c5053c033da961220f6ee77811226ccffd9eb986f2ff075"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-4318/history.json",
+      "bytes": 330346,
+      "sha256": "f882fd1fc95aabf3dbf64e7f1adf3f2adaf1632b18df4acab42c551f352d1bb2"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-4318/job.json",
+      "bytes": 818,
+      "sha256": "fa1c26bacb55124ca43eb14e23f49bf840ddfd2640c97c518f9a0a1c97c86044"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-4318/result.json",
+      "bytes": 357779,
+      "sha256": "ebd6ec73cdb4af666e83c830de79d276da448b8e309274c22ee39a450384d828"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/gf2-4318/worker.log",
+      "bytes": 9758,
+      "sha256": "cdd8b6c6022f2f050c5053c033da961220f6ee77811226ccffd9eb986f2ff075"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-0/history.json",
+      "bytes": 349257,
+      "sha256": "3c633f64a3c5ee278d284a6dd6289a7b03e1b3abe7f7515fa488feddd38d8165"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-0/job.json",
+      "bytes": 816,
+      "sha256": "b66209fe6165c979f921a04b05eb9a18921c78979a5d8cef512ff87771bd8bb4"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-0/result.json",
+      "bytes": 376929,
+      "sha256": "8566b875ea45bfa514f64ac1147a7116d5f8dd1df8c7d8be537f1873e37fdaef"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-0/worker.log",
+      "bytes": 10209,
+      "sha256": "83c2d46c3e573f1986b40a931a05ffea99c7d244798f72c0feedf1b8d1ca873f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-32902/history.json",
+      "bytes": 349485,
+      "sha256": "bda498f1ca08384e991417c51f87f7dc09ae8585c63863c7a63a2f27068b3ffe"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-32902/job.json",
+      "bytes": 827,
+      "sha256": "a5df32244db08d9e9a688cac6e1e4cbe7cbdb88b62ea5295f93c5cc432176338"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-32902/result.json",
+      "bytes": 377572,
+      "sha256": "35bd8a263dd8ba594e6a9292df5e8bca419a617c978c5cc16f31948447d6bd9b"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-32902/worker.log",
+      "bytes": 10209,
+      "sha256": "83c2d46c3e573f1986b40a931a05ffea99c7d244798f72c0feedf1b8d1ca873f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-4318/history.json",
+      "bytes": 349361,
+      "sha256": "820631c81a6f4b9b5948fa32d7766456bd3b70c9576efb1f80de3745e03304f6"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-4318/job.json",
+      "bytes": 825,
+      "sha256": "871f14fd0d3170f15419ebd09d39dcace44e73a703431fa63d2047d38e18f700"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-4318/result.json",
+      "bytes": 377789,
+      "sha256": "fd3d82def61726a5944fb7192c5bf9120a0882512607cc5d32535aff3d158f28"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real/helldivers-4318/worker.log",
+      "bytes": 10209,
+      "sha256": "83c2d46c3e573f1986b40a931a05ffea99c7d244798f72c0feedf1b8d1ca873f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-bf1-0.txt",
+      "bytes": 88,
+      "sha256": "5d35c619c349696b9ef644f7b9f8c4ea758610215a90e4efc7f3ee97f8c0cec4"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-bf1-32902.txt",
+      "bytes": 92,
+      "sha256": "854d47f17cc04968563b677b65aa7074a715f80ef48e650e172a98d4d28f42f9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-bf1-4318.txt",
+      "bytes": 91,
+      "sha256": "b44b131ce97cf52347b7faa139ecaf078d561b802738a94560f5b432034641d8"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-gf2-0.txt",
+      "bytes": 88,
+      "sha256": "950b244443b256f97b8527d502367354abd46538eda7ff96281a3f32bcd1148f"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-gf2-32902.txt",
+      "bytes": 92,
+      "sha256": "2521cf54f6f5f0d9ad61d95c9814d60049c8ee5a1be901f8704d135da85afcbf"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-gf2-4318.txt",
+      "bytes": 91,
+      "sha256": "07a2fffee286589f87f683d3c997cdb2c5c2dfb2105ab8ac30f2e4adfc5b4fbd"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-helldivers-0.txt",
+      "bytes": 95,
+      "sha256": "78805dbce3cd523b1d76bf474e1952a5b07f3039ed155d27e820b3a9bfa3857a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-helldivers-32902.txt",
+      "bytes": 99,
+      "sha256": "d1d9f3443f2eb204d54d8540fc0e8f94e33836e59a46af75fa825d395f0e8de3"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-helldivers-4318.txt",
+      "bytes": 98,
+      "sha256": "07d7a448c33461ea53806c564a9b2e9f4c794f04e3337bc488205c8f1bc6ead9"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-real-runs.json",
+      "bytes": 7613,
+      "sha256": "cbd6f11e7ad62204cfb52e5db53266cf212ad309924554e1801600fe8b758e1a"
+    },
+    {
+      "path": "artifacts/dx11-native/draw-history-jobs-run-real.py",
+      "bytes": 1947,
+      "sha256": "d02d53e848a44b3c235c4b763fc2761e67556be8a2da71e9060476ffcbdcab01"
+    }
+  ],
+  "references": [
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/bf1-0/report.json",
+      "bytes": 1141231,
+      "sha256": "238dfc551e9996365940d147456c2ccd35722030ad72e0a5f51cc89220f3cea5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/bf1-32902/report.json",
+      "bytes": 1141665,
+      "sha256": "c61b2293bdb6137d977f4c7c670b580badbf15a51974f4449a0748aec9d1f6a7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/bf1-4318/report.json",
+      "bytes": 1141655,
+      "sha256": "2d60958fda0ea5de2e3aade0e74032f19ab353f2dc233aa8d1c9afcfd4ead010"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/gf2-0/report.json",
+      "bytes": 330449,
+      "sha256": "602662427fbde3ba9b4700ade2b16d5c43f8723db6214ac833a5306b4b3f0e1b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/gf2-32902/report.json",
+      "bytes": 330635,
+      "sha256": "8f2d935eedc25939b096c0d859afad38c3229d2bd7615b71e5a0af079e2a350f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/gf2-4318/report.json",
+      "bytes": 330588,
+      "sha256": "bc93f9f5b71732ab9bc2ace4aeb43ac647c91b0e1d31980a6435321079b1fe49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/helldivers-0/report.json",
+      "bytes": 349499,
+      "sha256": "41dee8ae3b8500cc2fa986093beeaf8700f55f69ff13e44ea1fa563303ffd56e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/helldivers-32902/report.json",
+      "bytes": 349728,
+      "sha256": "bf5f3eac090bea1295fa2f6ff92edbbbb641118641b56f3c17866523e651ea58"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-identity-real/helldivers-4318/report.json",
+      "bytes": 349604,
+      "sha256": "3c8fb8f4d3b1ddb8859decdc74dcf5da0242351571dece0fd38e7cd9e74e18d8"
+    }
+  ],
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 130159,
+      "sha256": "ac7605fb49deb456daf264a7bb0d14ba1a66dcfdf324bee46e844b4a28d99c08"
+    },
+    {
+      "path": "src/application/NativeAnalysis.cpp",
+      "bytes": 24325,
+      "sha256": "f72dba42dacb5332636f56f3231d0e1d0e8093b00ca085a13cbcb0c61bf4aa9b"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 960,
+      "sha256": "9a17ec8f78d946de642b430ad61b739f05e2bc0d0b9d47001318250f9ac19a79"
+    },
+    {
+      "path": "src/application/NativeAnalysisJobs.cpp",
+      "bytes": 9406,
+      "sha256": "a5a705b49a216b51d4bb950c237ee0faba334a2c0bc115bc76d7f890480ce7b4"
+    },
+    {
+      "path": "src/cli/NativeAnalyzeCli.cpp",
+      "bytes": 6047,
+      "sha256": "910c1bbea01c667673106b00b020acec9577eb71099f79c7a90fdf5acb4e1574"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 36714,
+      "sha256": "24c378296db71398ee845289a529aa08f8406a4be00a8f58a72dc2564d3dec1f"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.h",
+      "bytes": 1397,
+      "sha256": "77486317b91e1bcbfdab60e133f53341529b4bed6a11946ef86760af14b4d262"
+    },
+    {
+      "path": "src/application/NativePixelIdentity.cpp",
+      "bytes": 7438,
+      "sha256": "f6f5ca97b479f74bea02b5a37bb746c23ffbd44a4d991e0e148000c6ecba67be"
+    },
+    {
+      "path": "src/application/NativePixelIdentity.h",
+      "bytes": 1116,
+      "sha256": "dcca17f107a1abf0a89751c042d180b43af8d0a333ec666331f1695f58575911"
+    },
+    {
+      "path": "tests/NativeDrawHistoryJobsTests.cpp",
+      "bytes": 10852,
+      "sha256": "8f038befe5be7b9d94b81603891a335b5ac9392ed23c884cb8e23afa78709619"
+    },
+    {
+      "path": "tests/NativeAnalysisTests.cpp",
+      "bytes": 31795,
+      "sha256": "270952b75b6f9cbd87e16534c7db0c7e942d78297d9f35921a76529b91caa168"
+    },
+    {
+      "path": "tests/NativeHistoryTests.cpp",
+      "bytes": 32527,
+      "sha256": "a651ed0b1cfe9a8c298c9de981272bf264e48f7f1bcd3a89bf7577c6d666419c"
+    },
+    {
+      "path": "tests/BlendCapture.h",
+      "bytes": 7163,
+      "sha256": "a14ed04d940be7b09cbc35a8380cf661a8dabc54330434029e3657f9c1c3a87b"
+    },
+    {
+      "path": "tests/ClassCapture.h",
+      "bytes": 5232,
+      "sha256": "5b1974cc3ac316f9b07bd157f937440867858b079a3732f0f0fd016641df438d"
+    },
+    {
+      "path": "tools/validate_native_draw_history_jobs.py",
+      "bytes": 8494,
+      "sha256": "420e32ca4e24fa6aaefa8b263092eba13b546eaa60c1d67c819c76e723fb05c9"
+    },
+    {
+      "path": "tools/validate_native_pixel_draw_history.py",
+      "bytes": 11953,
+      "sha256": "5dcd637062638254df63b59e0e9d48683ed002b2c4d4294e3a0b8d0b25678b6c"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_shader.py",
+      "bytes": 11373,
+      "sha256": "b65e3d6e33ef9bca39fd122801b339a434ee3c8f5c919f821ded91c903b3ae9a"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_merger.py",
+      "bytes": 13478,
+      "sha256": "fec02a10c389dcb2915d8b2509ef904da665d3036986f3c9a48d95f46c33836a"
+    },
+    {
+      "path": "tools/validate_native_pixel_identity.py",
+      "bytes": 13241,
+      "sha256": "a6a16151a90646bfdabce0e7f7017d19ac4afb009b07dc5a1b7c65e59a58f1da"
+    }
+  ]
+}
