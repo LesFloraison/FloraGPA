@@ -1237,3 +1237,27 @@ covers 180 fixtures and 7,200 direct GPU comparisons on WARP, NVIDIA and Intel,
 rejecting 54 corrupted reports. See `research/DX11_NATIVE_TEXTURE_PRECISION.md`
 for the retained development failures and exact scope. Minimum-precision MS/UAV
 loads, full debugger/history parity and P1/P7/P8 remain open.
+
+## Original debugger availability continuation
+
+Pinned Ghidra metadata and actual dispatch instructions associate the original
+`ShadersPresenter::isShaderDebuggerAvailable` property with a constant false
+getter in GPA 25.1. Nine guarded reads through both the original getter and Qt
+dispatcher pass; independent validation rejects twelve corrupted reports. The
+request-forwarding path reaches the previously identified builder, but this
+does not recover the host `+0x3c0` implementation or prove whole-program engine
+absence. See `research/DX11_DEBUGGER_AVAILABILITY.md`. Product code does not load
+the original module, and P1 remains open.
+
+## Native texture gather continuation
+
+VS/PS/CS now execute `gather4`, `gather4_c`, `gather4_po` and `gather4_po_c`
+through the independent executor and explicitly selected GPU. Source channels,
+result swizzles, offsets, view/resource selection, partial writes and unknown
+validity are preserved. The helper identity advances to `dxbc-gpu/23`.
+Eleven serial suites pass 4,093 checks without failures or skips. Independent
+validation covers 324 configurations, 2,808 direct GPU comparisons, 108 explicit
+unsupported-format contracts and 36 journal round trips, with 99 corrupted
+reports rejected. See `research/DX11_NATIVE_GATHER.md` for retained development
+failures and bounded scope. Minimum-precision gather, feedback/status variants,
+captured invocation qualification, full P1/P5/P6 parity and P7/P8 remain open.

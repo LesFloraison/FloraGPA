@@ -1,0 +1,3103 @@
+{
+  "schema": 1,
+  "scope": "native_texture_gather",
+  "passed": true,
+  "fixtures": 324,
+  "direct_gpu_comparisons": 2808,
+  "unsupported_format_contracts": 108,
+  "negative_controls": [
+    {
+      "case": [
+        0,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        0,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        32902,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        0,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        1,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "support",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "diagnostic",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        109,
+        3
+      ],
+      "change": "accepted",
+      "reason": "Explicit unsupported format contract"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "bits",
+      "reason": "Direct GPU result"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "validity",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "unknown",
+      "reason": "Gather validity and partial writes"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "backend",
+      "reason": "Explicit helper identity"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "missing",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "opcode",
+      "reason": "Original opcode"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "component",
+      "reason": "Complete gather matrix"
+    },
+    {
+      "case": [
+        4318,
+        5,
+        3,
+        128,
+        41
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    }
+  ],
+  "full_debugger_parity": false,
+  "renderdoc_removed": false,
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-109-2.json",
+      "bytes": 28302,
+      "sha256": "7fb6ada548a0072c3036b00a3ea8a6ae712e97f772fbfd7fccef0290ec9b8ebf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-109-28.json",
+      "bytes": 28321,
+      "sha256": "caea3d4bfeada55e3f778e0dd0ce910e8c5e7ebfca66456032728a9c649f99df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-109-3.json",
+      "bytes": 2743,
+      "sha256": "a8f4b6eaddfd1cc0e0d55f798a70945d88a24334ee8a093e006e5d19d0e2881e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-109-31.json",
+      "bytes": 28321,
+      "sha256": "34370d1b2d35e0f3726bfc6f7a8f83243bba37903a2affd6cce833a6aedd5148"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-109-4.json",
+      "bytes": 2743,
+      "sha256": "ba279f32c95bdc0e20a9177874a796db237ba2aaef8efe488c9936471572f5f0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-10-126-2.json",
+      "bytes": 7433,
+      "sha256": "3b849d6a2eade8a7917ee057f53f135600eeb8b9241c60f3743801bcc727633a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-109-2.json",
+      "bytes": 28084,
+      "sha256": "fa835979daf232b665451623a7272139b926c541b5212637504271d79f8bbd6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-109-28.json",
+      "bytes": 28104,
+      "sha256": "5b8dd786a819ba1d9fdb9f87a208a2fdd9bc53012ebe411958863d80d87bf86b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-109-3.json",
+      "bytes": 2742,
+      "sha256": "3d5b4f695021999f992ee4db213de61b05695eb7ff4e3ed2b9f156990c93b239"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-109-31.json",
+      "bytes": 28104,
+      "sha256": "6de59370a81bfcacb7d572313564069c3b93699234203dfa1fa1121399d69035"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-109-4.json",
+      "bytes": 2742,
+      "sha256": "bf0e92f2db08eac519a32b7d5dc643305035f22f6f16a31cc89799437dc6b456"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-126-2.json",
+      "bytes": 7314,
+      "sha256": "9b110aeb1b31fe6255174ecf9b10aa3c3ae0fe65f31ccddf24fd9fb9eb56c716"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-127-2.json",
+      "bytes": 28468,
+      "sha256": "538358c3575aa2baac9d0cd7d3996133f99f68032b581894336d91b16bfcb181"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-127-28.json",
+      "bytes": 28488,
+      "sha256": "908f26d4ebdf333ea69d00b6d9a73e972f1e540da946622f2ace17df3907a96a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-127-3.json",
+      "bytes": 2766,
+      "sha256": "326a176875210d264130aa39318d035f9e8b4273dfcc31320f0eab41dc83fb1f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-127-31.json",
+      "bytes": 28488,
+      "sha256": "71db7900511596d689211c933adc90b4024bc336cef28a4d10bf0bf3ed862e29"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-127-4.json",
+      "bytes": 2766,
+      "sha256": "818a0793d0ccc905278f1a05ecdcd68c8678a3348cee77c575ddeba03fcb9d0a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-3-128-2.json",
+      "bytes": 7446,
+      "sha256": "518c91137255e4795af4b3a335f4883d58c26900a3f412187e7ea3607a0c9e9b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-109-2.json",
+      "bytes": 28283,
+      "sha256": "a706950292dcbc6265618ee1711fb2018df04b95d3403226e39352e6bf136ace"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-109-28.json",
+      "bytes": 28284,
+      "sha256": "fbd0974f1e4410c98db7aed7d9e804e6c3c48617d126bace94dcac10273cecff"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-109-3.json",
+      "bytes": 2742,
+      "sha256": "55ba0d0cf40ca9905e059d0eb13ce52ed9c6e8865d4fb84c1293c9015849ab9b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-109-31.json",
+      "bytes": 28284,
+      "sha256": "9ecfceafec51db4aa6f63600a552d3e4696ee2ddeeabea2b98baadad07372ae3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-109-4.json",
+      "bytes": 2742,
+      "sha256": "f6a29c8bdcce171f569e2e5df67e5b7c0fabcf5d395b9471af50a561fcd15a97"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-6-126-2.json",
+      "bytes": 7387,
+      "sha256": "12e849211aa2128458f62b8d1aa8ad5562ca690bfa28b4ba4bc0f8a71d678dca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-109-2.json",
+      "bytes": 28139,
+      "sha256": "853bda3485194fa716191dac3eff29bddf91206ccad748d0b6b2044184df2214"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-109-28.json",
+      "bytes": 28140,
+      "sha256": "9ea610c38133377e9bbb74f28e5f991cbfed3f52fee22afa1c1da8e640c68738"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-109-3.json",
+      "bytes": 2742,
+      "sha256": "afd064f4bd9bb9ef553ec98a40da7ea603d532e8fa35a601a82778aa7e36356f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-109-31.json",
+      "bytes": 28140,
+      "sha256": "acd10c55932746090f21806e7af0953bf1a66be076c6126ae16ea5878dbbeb14"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-109-4.json",
+      "bytes": 2742,
+      "sha256": "a11f6b30050c3512c3e06cae9daebd66714e1b23f4b4f9ee30a892eac9edbb11"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-126-2.json",
+      "bytes": 7342,
+      "sha256": "65e0b88ce08cc7d08ecb3068c8867eec648d9b6b6d0554ca21223ab4daeb0352"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-127-2.json",
+      "bytes": 28523,
+      "sha256": "c8f639b3e7ed741467b259bc9dd6b130d3fb7499a93b8cd533eaa0a0469c7e42"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-127-28.json",
+      "bytes": 28524,
+      "sha256": "0512dc945d3eda5024828d4460988be3386c71843af51659f4f805b38dec4c9b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-127-3.json",
+      "bytes": 2766,
+      "sha256": "8f5a74f83fafc4ee5d789e26cea768b538b765f19fc262128ca659f138a3f2fe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-127-31.json",
+      "bytes": 28524,
+      "sha256": "cd9c89d9ecb1acaecb32de2c62bbb2d9cad43a6f1d62ced0e4306b2e08204da1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-127-4.json",
+      "bytes": 2766,
+      "sha256": "5a63e5fc3e2f0eb7b820102d184abc83e3e8d006620a58ca0d6b02743382b7b7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-0-8-128-2.json",
+      "bytes": 7438,
+      "sha256": "56d804eeadb75445c2f1641c2aa0942251fa2e63d4d27ef3e6ca0ce0fa5bd4a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-109-2.json",
+      "bytes": 28302,
+      "sha256": "fa2e8e036725940b6dbb4853f3e0c3de622d64595bd254b2b3aeb89773e5d1af"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-109-28.json",
+      "bytes": 28321,
+      "sha256": "25fdb7d9b96dd66162834a93be58b20cbc4c317f6c34090d365989e15bc79ba6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-109-3.json",
+      "bytes": 2744,
+      "sha256": "b788f3335851b57d0b5f546c93e5f59bb4a083664dbbf22fb22524ea03ec2215"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-109-31.json",
+      "bytes": 28321,
+      "sha256": "6d14b7676592317d613e28d77514b389f1433edc2dfe6a6995da8bda8599d08b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-109-4.json",
+      "bytes": 2744,
+      "sha256": "4ade8e24b8efec663e6e197c2a14a9025d4bf97b3d558466f971cd9c165d1750"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-10-126-2.json",
+      "bytes": 7433,
+      "sha256": "d55d998ea59d9057d52e201157b0a19b376e6032c16823456eeb800d629502a6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-109-2.json",
+      "bytes": 28084,
+      "sha256": "3ea71eac05651928b27071c183dc0f5639c8d49eda8cb8a69f3b58235aaa98df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-109-28.json",
+      "bytes": 28104,
+      "sha256": "d706c33109281a7431542410d309543d853db66929fc4cfeff73ce0c2c529f82"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-109-3.json",
+      "bytes": 2743,
+      "sha256": "072cc8b282c46178c663683c3649048712f9650393750e371d2c14155d25ab27"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-109-31.json",
+      "bytes": 28104,
+      "sha256": "b78a2bf98f82febc923b5171aeeff9f719e0b69cbb579fa723fdb2d2774e5f99"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-109-4.json",
+      "bytes": 2743,
+      "sha256": "c78c477590eaa483469a9ddb3cd9c8a72da38d31f90c5319214f2aff2a8b081e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-126-2.json",
+      "bytes": 7314,
+      "sha256": "3fe1d4292a3d87465d8ad90c9898ca455016d35399c8e463829b2948725c84ba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-127-2.json",
+      "bytes": 28468,
+      "sha256": "28193ed7eea804437eedfaba82446b1edbe039009d41322d90189c765c1f7c85"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-127-28.json",
+      "bytes": 28488,
+      "sha256": "45adb6f006610a3851fb0cccb200c67893890a195aa2b9bae14f8e3656ba2cbb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-127-3.json",
+      "bytes": 2767,
+      "sha256": "9982b44ff15c7af6f6769a972b5efe35a178d82db1cfbc527865f6b92684509f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-127-31.json",
+      "bytes": 28488,
+      "sha256": "6c643c3dc13934422ae747d3f64abb259a0c0db052b6007ad2adaa684cc5b246"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-127-4.json",
+      "bytes": 2767,
+      "sha256": "14f8658eb0e1e000d7140a032df2055f46b78e581558c60521f8baedd05832e1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-3-128-2.json",
+      "bytes": 7446,
+      "sha256": "ca88682b504315e0a37094b9fd5d2a0f6c8c0f765ac87b9a403cec9ba707262e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-109-2.json",
+      "bytes": 28283,
+      "sha256": "4ad266e3f2f9dd910eccba8f132cb2fdff73239d6fc3856f955eb234c71fb63b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-109-28.json",
+      "bytes": 28284,
+      "sha256": "d6f4dcb1839761b2d2e7ff968d5d6c1929340137aa93f6506d369c801ba014f4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-109-3.json",
+      "bytes": 2743,
+      "sha256": "d3c6d34137353b010e9b84243aa305576f3edcab0ea9194c185b5b3a5ac77acc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-109-31.json",
+      "bytes": 28284,
+      "sha256": "7b17e24c1446198b256766e8eadb40b004f744470769e45a07b270e559c9ff70"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-109-4.json",
+      "bytes": 2743,
+      "sha256": "f90b5eb17824df96a6f496af262d896096dacf2f489683e80559622b7a2a5cdd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-6-126-2.json",
+      "bytes": 7387,
+      "sha256": "7324580720c828a73ab35b6725d1feaf8403881417f6cf2b41387662120406cf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-109-2.json",
+      "bytes": 28139,
+      "sha256": "57ab3345bce6aa79cc123338a5d27cc5bba925765327a69f9592943c5b87fb30"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-109-28.json",
+      "bytes": 28140,
+      "sha256": "d4460cc2a3674e070eb645f7f01b8670919289b03a00ce178cecc0c263521d2a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-109-3.json",
+      "bytes": 2743,
+      "sha256": "828cd77ad8f45720b3c088fe45b7f0a3ac6279e0dd1f89220bab9761d672a040"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-109-31.json",
+      "bytes": 28140,
+      "sha256": "8a3be1da71b0721313bf88b5a8cc2c2638d37794146e1f2648ef36a4c9ac0a0c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-109-4.json",
+      "bytes": 2743,
+      "sha256": "ff7768ee8556f4408261c5b2a3a0c19de3f65485ac978db5db2d576080f349b1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-126-2.json",
+      "bytes": 7342,
+      "sha256": "17c46ba789d3150c0ec15af82ce4cfeceab660dbab01ef5d847434237947cee0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-127-2.json",
+      "bytes": 28523,
+      "sha256": "1b895fa9c9ba8a3b65107872a0527277856aa49e96cfaca43dd6e24f9415ccbf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-127-28.json",
+      "bytes": 28524,
+      "sha256": "6ce5820a29a4c4883c6d16d8b05dae2399cc634cecc211f95ba4badd37a58ce2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-127-3.json",
+      "bytes": 2767,
+      "sha256": "a341c4833598233433be254f6d23470134a3eccee2900f8ee104682009b847c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-127-31.json",
+      "bytes": 28524,
+      "sha256": "e2099de72f518c09151487c91b9d3c457bdddb562d9d0133f3dd4aa182b9e666"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-127-4.json",
+      "bytes": 2767,
+      "sha256": "f3c0761befba3c5f97bc55673483860b1b16647f9385e015ff76079e7d6fad14"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-1-8-128-2.json",
+      "bytes": 7438,
+      "sha256": "61af2aa9519796fbe22c297cb1162b7c1185685586fb59159d67c8dd3adb7d6e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-109-2.json",
+      "bytes": 28302,
+      "sha256": "076dde8cfcf0d6730912a154ece6f76c180464d9ae331b753430887d67c12dec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-109-28.json",
+      "bytes": 28321,
+      "sha256": "67b65db2e3561f26280cf8ef98110997fbb85e1b7b091adaeaff4d95effd90dc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-109-3.json",
+      "bytes": 2749,
+      "sha256": "e60f6de0620430780f6955722d7d9976d16fc1e31255e071c6cb28a837431ef0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-109-31.json",
+      "bytes": 28321,
+      "sha256": "3aea27a659a346e9b4cd6aa196297030b0146df28ebd28fd0a1f588c72fd241a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-109-4.json",
+      "bytes": 2749,
+      "sha256": "e8dbf41ce6cce79e137bd28a555768b8d24796619840aab6292428f2ddd38659"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-10-126-2.json",
+      "bytes": 7433,
+      "sha256": "1f3222580e3120f24c390a5abe4a2896da43f4da5e0de0e806de0a74cfcf68a5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-109-2.json",
+      "bytes": 28084,
+      "sha256": "63b8e2c3076b2a92303d1420771e2d08ecc88c0d0d1e3761714fba5b541f7b0f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-109-28.json",
+      "bytes": 28104,
+      "sha256": "f99c0e072778f3c91e53ab72114fc0cd2f25a04d364317b65a7645ac58815dd4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-109-3.json",
+      "bytes": 2748,
+      "sha256": "afb2c4cbe38005d9902f9b9368824dc95cf36b1829ad1415091f145cf6ba525b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-109-31.json",
+      "bytes": 28104,
+      "sha256": "8830edd4551773663cd856061cd8ff430fe4d1f90998a8ab5f9e927fef0c88f6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-109-4.json",
+      "bytes": 2748,
+      "sha256": "f10989a68201cbd4af8d38153d6953906712e25f091ae041f48ac20f47c6e49b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-126-2.json",
+      "bytes": 7314,
+      "sha256": "2c6955d58be43db46b9ccb5990de7ac1d5720d2c81501f519a87f4e79b15c294"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-127-2.json",
+      "bytes": 28468,
+      "sha256": "9e23ea87107a9ef2932712462088aed01ae1a0b3c39fba4f6638d9c28d40eb90"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-127-28.json",
+      "bytes": 28488,
+      "sha256": "860b1fd6784d7ac82ecacee376556f40efefc498c18951d26ad3557035c33a31"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-127-3.json",
+      "bytes": 2772,
+      "sha256": "3c0bf77c4c2bddb09fa72d55aacab33b06d11184d8e3d95e79364b63cfd6e170"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-127-31.json",
+      "bytes": 28488,
+      "sha256": "031521c69b988ee78b783abe202151cb582482f9a9eb8c8588dde3e8d2dfddb8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-127-4.json",
+      "bytes": 2772,
+      "sha256": "a55823d13a5f44f148d17e2b0edaa779fc6358e0c9910ac9b6569746f0e51e93"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-3-128-2.json",
+      "bytes": 7446,
+      "sha256": "46e28c01bbd99bd6e870bd4b7afc3080d466c4e125eceb4195fbc9374992f459"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-109-2.json",
+      "bytes": 28283,
+      "sha256": "98b46f0ff353dc9cd737d00a70b20ef5afeddc84178051b596ba6340720a98da"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-109-28.json",
+      "bytes": 28284,
+      "sha256": "225520ba4bebd817c486f67434ac343e68be6162d260d8733f0907787e90a5aa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-109-3.json",
+      "bytes": 2748,
+      "sha256": "56125ee2bd3e74f1791b165bb71d5b2f1f30e062620b9b6b74ac2cc5501ef6bf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-109-31.json",
+      "bytes": 28284,
+      "sha256": "1b91270d701253bb8d92e005e953914e67b6abff2d7a78049e3c62608b46f735"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-109-4.json",
+      "bytes": 2748,
+      "sha256": "cb5da3276293d1ae9a7ff5b30961c842d95092bb6ad5f1d3cfdbff03a53cb99c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-6-126-2.json",
+      "bytes": 7387,
+      "sha256": "2e5837978d41d5eb35f3396a92c1e033f4b84590a6f8061261fd2231e266acb7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-109-2.json",
+      "bytes": 28139,
+      "sha256": "e1994c944cbb45fc370ca16f1bc3980d8c2dca380cd618b77076e658072061aa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-109-28.json",
+      "bytes": 28140,
+      "sha256": "43de395534c5522e4406451e7f38968591e2f3a52e630736d496ab36101e82b7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-109-3.json",
+      "bytes": 2748,
+      "sha256": "f15a8ff00725c1f4eb5de39fcce7ed9a076ca8865e1f2539c37a17ea9a8da2c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-109-31.json",
+      "bytes": 28140,
+      "sha256": "aae7e10ec5f337ea52c9a46bd9c23b748900bf136e39cc770af4b084477837c9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-109-4.json",
+      "bytes": 2748,
+      "sha256": "9829535af441c086d55eefe873a4b32a8581259b86d77ce579548d8cdb3f9564"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-126-2.json",
+      "bytes": 7342,
+      "sha256": "53c15bad2c92d1a0dfb2cf16414b40261595a1bb2a34c9319b97ee6cc1f5ea6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-127-2.json",
+      "bytes": 28523,
+      "sha256": "5311a164cf74542a601df55f1b19bf99f6afb455f29c6174e79fbfa5b3b46bf9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-127-28.json",
+      "bytes": 28524,
+      "sha256": "b69d0b0752074d762856ea9eca9e58fdf2862aa6544d87295c685c892491490f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-127-3.json",
+      "bytes": 2772,
+      "sha256": "dcde4d44b83c09b24fa839a3055f7dceaa2a8f3dc13d30613c334bcf784c6da1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-127-31.json",
+      "bytes": 28524,
+      "sha256": "0f0d694f620f46be198faa955217a7b999c90cb32dba7d0d6bb74d77ca5e8d90"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-127-4.json",
+      "bytes": 2772,
+      "sha256": "7b7f5b356d6e9e261ba5572431759939b61ccbf308778a7356617fef34e80747"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/0-5-8-128-2.json",
+      "bytes": 7438,
+      "sha256": "709ecf622639783369181533ad5f0ab82640359eae50b4f455f1571c98c5d5d5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-109-2.json",
+      "bytes": 28310,
+      "sha256": "64fa341913f09cad798551041d240352b457e0b42fc8b1fd0972bf677b8363d3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-109-28.json",
+      "bytes": 28329,
+      "sha256": "5c08841d67965b78b524a75488c8f33f92cf9579cad3dc297076a624e1cb2259"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-109-3.json",
+      "bytes": 2751,
+      "sha256": "4dfbbfd211f2830129c1dc9c2b8d990482e11b7fd8ec472b95a6484a6485efc3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-109-31.json",
+      "bytes": 28329,
+      "sha256": "9822833229b1576d31745f009bfcce4183237d925d47baa8f722fc65783ff999"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-109-4.json",
+      "bytes": 2751,
+      "sha256": "b850265d7c2eb75148d36b1ff12a16c788ed14cad0142dffa9b38f7785fde098"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-10-126-2.json",
+      "bytes": 7441,
+      "sha256": "f0f5a50d19da16d046f6f80a904002ee28f4083fc5e59c245dca38d481d188b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-109-2.json",
+      "bytes": 28092,
+      "sha256": "64a5d1698388a16f3b3e9f9611d617f635f5a1bbf9e73c9989cb760b7a58fb56"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-109-28.json",
+      "bytes": 28112,
+      "sha256": "cbef99867b3d8f392cf07e9fd5ac48a9be9348735ba27bd3925e287241904075"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-109-3.json",
+      "bytes": 2750,
+      "sha256": "d978a3af3568dfe42d37dd8ce472966c4b0c28fe61444fbb67d1b544b3d7d964"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-109-31.json",
+      "bytes": 28112,
+      "sha256": "72f57103b09176e76a2c521d8cc0f89913652f4f581e82ba1d39c246bcb4e2bb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-109-4.json",
+      "bytes": 2750,
+      "sha256": "5fcb7c3952f8f70b9206f1b9e1c575e8aa13d2d060573d2e92ff98d763cd5246"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-126-2.json",
+      "bytes": 7322,
+      "sha256": "8cba4d8b8b251b180c9179b90f6f45c4d56056876c6966e13679af02fa264d6a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-127-2.json",
+      "bytes": 28476,
+      "sha256": "78f01763eb6d272a870badab8ddd65dc31bfda4d93ba9ba480e8e47a19a6b1a5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-127-28.json",
+      "bytes": 28496,
+      "sha256": "62bd2814437480be6eb800ef7742b9436a192b1c71d64daeabe471c724de2bb8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-127-3.json",
+      "bytes": 2774,
+      "sha256": "01c3150af2356f44ee692ef36b59250cc400cb06442d9d0bf4b7be8526c089c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-127-31.json",
+      "bytes": 28496,
+      "sha256": "b1eb178f2620c79bc9815f1c07f3082e4f3dcd2e2c9ffcfa5d9ade163ae0d3dd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-127-4.json",
+      "bytes": 2774,
+      "sha256": "22bc7ea2740dcd684af7c2019c72bf7ba83fc49984e788049fe922882fc56de2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-3-128-2.json",
+      "bytes": 7454,
+      "sha256": "b7a95bea98d0a51a3fc6ae3472cff70d2e445a4a751c3a11c87b4a33134b5268"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-109-2.json",
+      "bytes": 28291,
+      "sha256": "930de663173ef435d3077fdadf329b822393e6b61e1ebf6ddf7c0dcbc68408ae"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-109-28.json",
+      "bytes": 28292,
+      "sha256": "c9c2ce4a68d603165b5a29ae56650a88c4812168a60210ce7ab73df0513f733d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-109-3.json",
+      "bytes": 2750,
+      "sha256": "853489ff01853fb7aba33d9f22f5971ba995985b10eac3f0bb49192de0352b62"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-109-31.json",
+      "bytes": 28292,
+      "sha256": "65ef20494bbe4284d5a19bb6c5f61756035e191ca521180709d67ab1c0b2b80b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-109-4.json",
+      "bytes": 2750,
+      "sha256": "72b94fdc9336940a5d75d077b303c22cbbffdddc018ae258d486ea497f1f7412"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-6-126-2.json",
+      "bytes": 7395,
+      "sha256": "4b2b534d70a682e7c71a8efe9ad134400776627a9b5500ecf6a3f4ec78b3a938"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-109-2.json",
+      "bytes": 28147,
+      "sha256": "9a533bb527521fe136a3567b7b9e27e60a82689f8e1afaf25f1767e19dbf9cc1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-109-28.json",
+      "bytes": 28148,
+      "sha256": "c2cd747c5e8b5bbed4121ac43ae71a0d258e317efa066b8c1d7d85a29ad64ca7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-109-3.json",
+      "bytes": 2750,
+      "sha256": "12e768facd11281773142f3d536fcfc4970c10baa50bc4ba7ce7b46f4cb6de16"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-109-31.json",
+      "bytes": 28148,
+      "sha256": "3796869fc2fea867cfc2e8f98777b389ee07d257f0a12255ffe3d31dc40a210e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-109-4.json",
+      "bytes": 2750,
+      "sha256": "4e3ccec54bce97ab896f285207ebfadcc77f1824947f68b247479081f0927ad2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-126-2.json",
+      "bytes": 7350,
+      "sha256": "b6d9b500eeb06948ed5c8985d506a0e226a07273c315192801147b1cb4123639"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-127-2.json",
+      "bytes": 28531,
+      "sha256": "3a6e2b5de44774e2ca7aacc51a711173d164911bd5b30b7284d92f290dddacfe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-127-28.json",
+      "bytes": 28532,
+      "sha256": "257ac33d6a98710cc7ecd6a7a67e9f2c1caca3442de486338c9d514717a724c2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-127-3.json",
+      "bytes": 2774,
+      "sha256": "65bdcdbe385d0da39080cd36dde96fbb8050533949fcefacccc40234da320f45"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-127-31.json",
+      "bytes": 28532,
+      "sha256": "51af0cf309ea99a3dfcc7ae9b807db619e8c55437f87b040b93e4ed4b931bc84"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-127-4.json",
+      "bytes": 2774,
+      "sha256": "1b636507eb8fd7db50cc7ef376254a8eb02c4255f332d7b2ee6a07d3b3196046"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-0-8-128-2.json",
+      "bytes": 7446,
+      "sha256": "1b91ecbf44325b458d22a5aaed01cf5cb922743e52a87f8b0c51433a20ac694a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-109-2.json",
+      "bytes": 28310,
+      "sha256": "e38ea68be3a08663c13236ecfb03b72e3278d47d10a639c584ef6b3fb9378757"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-109-28.json",
+      "bytes": 28329,
+      "sha256": "9492bcf3f5368687342407b04c61421b59b2e74eadc7832d1afb9db885f677a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-109-3.json",
+      "bytes": 2752,
+      "sha256": "0a5d4b98fd39b68afb80dc35779595088a24940987a93d0a62ba70ff593f7cdc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-109-31.json",
+      "bytes": 28329,
+      "sha256": "dd786bebd60e70be7c8eb2a743bd524d95500e492f7899e9d6a7b73d88cf3610"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-109-4.json",
+      "bytes": 2752,
+      "sha256": "978d6a16c052232d75e2c8754df8942aa20563448af1549f756c1efdf1e4ba11"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-10-126-2.json",
+      "bytes": 7441,
+      "sha256": "c634a9bd2f328252f5304ec3d6f5599a9c5700ebea563dc796b81f09666e40fb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-109-2.json",
+      "bytes": 28092,
+      "sha256": "c59cd4fb01dc5229717a10ed7d8ef3342022708457c6eb31f87ffdfd90d59598"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-109-28.json",
+      "bytes": 28112,
+      "sha256": "f40db96d00c58e68a6d771fdaa2f9943ebf890624944370a12fcd998c4da71ba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-109-3.json",
+      "bytes": 2751,
+      "sha256": "73577215c7418e1f2b8ad177d4b58dbe440ca288d42f2141483f2549eb3e2f3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-109-31.json",
+      "bytes": 28112,
+      "sha256": "92d1576d00f4099208822123b125888a48009cc6930fa2ed1fe7919e86192ef4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-109-4.json",
+      "bytes": 2751,
+      "sha256": "a2c17be19b8d958906be531ee50efe4b27c9d78a08afd6a1eb951477fd02e3ba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-126-2.json",
+      "bytes": 7322,
+      "sha256": "31fb1218dd9ea22a041ee5dbb37c0cbe19b9d929393140b2edb5b0c597a753f2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-127-2.json",
+      "bytes": 28476,
+      "sha256": "e191a3ec228cc4b480eb9d1ade5d3d3b9aeb35ab98f55aacef3a69300556db2a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-127-28.json",
+      "bytes": 28496,
+      "sha256": "94537a9f5cbfe41a81f8bcf2dc512801b5fe7f3e8fe9ae0a6749c11facd20141"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-127-3.json",
+      "bytes": 2775,
+      "sha256": "51e58815a100012a50130c88c1bc36b031ed7257cef5595c05ab11ceb2201240"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-127-31.json",
+      "bytes": 28496,
+      "sha256": "f55f71a08c7dc4d3a3f5b64b8209e694b01ee0b9ca14837346d57459393ee592"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-127-4.json",
+      "bytes": 2775,
+      "sha256": "8b32e07e8005721daed41e7cf0d39c9f4afb258a60a2b9b0a4461217e92158c5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-3-128-2.json",
+      "bytes": 7454,
+      "sha256": "81f2f569142c3fe0d07225726d6a47b779d548b26b0713277d5c821561e4894f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-109-2.json",
+      "bytes": 28291,
+      "sha256": "5fe118bc1e0be2846b7d257a60e3fb744cec30f9214e22e88df9e6cde3a3cb6c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-109-28.json",
+      "bytes": 28292,
+      "sha256": "141630709bf0d10c018e81be6fa85f46b09028941d7a57da582c579f8ebe6bb3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-109-3.json",
+      "bytes": 2751,
+      "sha256": "b5260dac003a2f696beca7cf713ee95a53afb474c9f1da2915545a12b036dc0d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-109-31.json",
+      "bytes": 28292,
+      "sha256": "2fa9edf7d816db0d54a351d81c76d50da1c1292b5127975a87fe24f7e184c120"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-109-4.json",
+      "bytes": 2751,
+      "sha256": "9e375f631a58b15014c5c5a97a132a56ef4d3d990a2c8fe077783a75d7a3e8c0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-6-126-2.json",
+      "bytes": 7395,
+      "sha256": "e3b6ba433ec0ad2d967861d39de4d212071ce4ddd2c664f45a74f2bb817e5e42"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-109-2.json",
+      "bytes": 28147,
+      "sha256": "3decb5921931f02ce9cef6ff03f203003147ceb6d4392579bc727fc1c23afc0f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-109-28.json",
+      "bytes": 28148,
+      "sha256": "d48a3ff31712befebf855aa7a189ada19f95f8cd1bce7bc4146711f68dd0e84a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-109-3.json",
+      "bytes": 2751,
+      "sha256": "d957a8c6253d8500cbd1e9e8108fe99c44266b6a4982f40115de569f07f253cb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-109-31.json",
+      "bytes": 28148,
+      "sha256": "6069f6cfcf4bdf499722c9962e22f364be281789b828f7e5adc82feb4086b4ee"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-109-4.json",
+      "bytes": 2751,
+      "sha256": "6de6de41d1248466e3a96f3d09ec7e248c811abd9e6dc0a1e588bc541c240776"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-126-2.json",
+      "bytes": 7350,
+      "sha256": "da9f3b2594099162b02224e1da478071760b9389153590960b7b870c7aaf2355"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-127-2.json",
+      "bytes": 28531,
+      "sha256": "01082988900687a59164d1652e77bbf932c4cfdb7369af38904ecc7f985eb5e6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-127-28.json",
+      "bytes": 28532,
+      "sha256": "7dc2ff0dad0be6d463668eeab8c51c152e4c3742317f967799d69ca6b9bee7d5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-127-3.json",
+      "bytes": 2775,
+      "sha256": "a9c029aa02362b736f131ffb48a71d9d4b75d916e6295670434aae45e694c09e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-127-31.json",
+      "bytes": 28532,
+      "sha256": "f4ba9e540af0be554c17a64b8d533d895275c36b7628865fb4cfb888c5ac428e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-127-4.json",
+      "bytes": 2775,
+      "sha256": "e42e27284f5cdbe84428a8957fd8057877d149b87b0de11b93b8955800bcbd5d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-1-8-128-2.json",
+      "bytes": 7446,
+      "sha256": "815624a871917b50f76e3e44f88db983f39bc51d35e73e3a74c6c80e0a74b7e7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-109-2.json",
+      "bytes": 28310,
+      "sha256": "51949adf49fe12df23a7a1574757945105e6fedd51010aba4651f0f15d0856c0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-109-28.json",
+      "bytes": 28329,
+      "sha256": "7808dd9e0883971bce7b46abf7bbe906aac2a168c94a9f50a1b33e4856e91580"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-109-3.json",
+      "bytes": 2757,
+      "sha256": "cef4a09c7128eb7b9856f3eb4fb1172e50e6db6484b87c9ecd7d187370855436"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-109-31.json",
+      "bytes": 28329,
+      "sha256": "8585feb9bb41a921455f24f9e6f737eb2415f9d7767e62f28c13b9c7907bdb15"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-109-4.json",
+      "bytes": 2757,
+      "sha256": "c47307a4a55515d791c6d1ade78a974e84cba877348285e489e53030ecbbc7dd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-10-126-2.json",
+      "bytes": 7441,
+      "sha256": "17fb1bd5171440854e2470c33742c558a375ce97432fbfe9018e14cc7fea51b8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-109-2.json",
+      "bytes": 28092,
+      "sha256": "085660909da7793d0f180927812a92a1a4a68110e9eb80313cdfad1178197557"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-109-28.json",
+      "bytes": 28112,
+      "sha256": "8ef2880435b7c264472f8dc2a6e34f3e9203e79409f5ebed7e639946e585c00c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-109-3.json",
+      "bytes": 2756,
+      "sha256": "7e17b99aa6978658346cd8dbf39d2882bce29505512e7feaff41fce2bdfcc153"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-109-31.json",
+      "bytes": 28112,
+      "sha256": "8a9a4c5da763a22aa5fb0f50773af83914a4de98f80147f8d97ff4f2a360de7d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-109-4.json",
+      "bytes": 2756,
+      "sha256": "fd91dae429553fefbfa8b6383d8860cfdcf0a680422eef662e72d098a5a7c1b9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-126-2.json",
+      "bytes": 7322,
+      "sha256": "223f1162a420739e8f533195b5dff3365ed2f0e29bf2c36cc0a605aadf98e914"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-127-2.json",
+      "bytes": 28476,
+      "sha256": "d3be4168b249b8b42d8dc9adc41c25270336692f5e68d15c25ffe765e21be57d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-127-28.json",
+      "bytes": 28496,
+      "sha256": "b10425d0a46f3df345de386a36e7ae889e56157c999637f4f0c373025f428dfa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-127-3.json",
+      "bytes": 2780,
+      "sha256": "6d1f35c3c928a0a54eac00e1b7662d65af2fe800ccc73def6ba2c6a59ca515aa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-127-31.json",
+      "bytes": 28496,
+      "sha256": "fa77279b8fb5927a20754c456bd765f872d3120639e7850e099cf8cfb80f9aca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-127-4.json",
+      "bytes": 2780,
+      "sha256": "aee27c66e3c29257a6dfb8ce3981f49194e0b541fbddedf8db525cedc296184a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-3-128-2.json",
+      "bytes": 7454,
+      "sha256": "19dda46f9c4f06dc4d78dc7f577352be18695045649930ff0e3d086aec24944d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-109-2.json",
+      "bytes": 28291,
+      "sha256": "3fd74d998c15f4237b566c639ee9e17267577837f90282e8fe190dfdc1796e1f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-109-28.json",
+      "bytes": 28292,
+      "sha256": "041ad3f7af96191fd338fa2e13026b9fd53ff07a636d3621b38356a1884e8cd6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-109-3.json",
+      "bytes": 2756,
+      "sha256": "1432bfefbfefef05693a07abc3f7ea302f7fed4647bf616072661218d23378dc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-109-31.json",
+      "bytes": 28292,
+      "sha256": "f126cdd08a104725d4cb8d4c9fdb1a4a2dbfb098370147d4022f7270047124ce"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-109-4.json",
+      "bytes": 2756,
+      "sha256": "e8e733ac481a752e156b977b5efcec29cc040c6afc2f4634e0795f05a643af1b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-6-126-2.json",
+      "bytes": 7395,
+      "sha256": "b9b0295711ae5ff8de7b58ebe2481efa430e2dcd821d8de63b7558a9c9c1fa1f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-109-2.json",
+      "bytes": 28147,
+      "sha256": "8a8ff79302988ee78efa042bedeb7ceddf9cca15a0456804a4ed71ae3b5aaa10"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-109-28.json",
+      "bytes": 28148,
+      "sha256": "68eaf5cb16d16198205e8e306126a771d210d6799b024cf533b904b258c28bdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-109-3.json",
+      "bytes": 2756,
+      "sha256": "64d31eca66bb5dc3a843d4f7f46a0dfb9b1777b3b37cc110fcb2f6258b0ec159"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-109-31.json",
+      "bytes": 28148,
+      "sha256": "128bea0075d8deb1c4b0877b74064c93583308e9e011ce804870440fd055c742"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-109-4.json",
+      "bytes": 2756,
+      "sha256": "e2602542efde05e53c650985d138da147715b98dc39844f3ba1827066ad9e13e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-126-2.json",
+      "bytes": 7350,
+      "sha256": "dd6d1bf5b74c22cb1811034587adbaf53472c931be64ee800237fb42262cdbe9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-127-2.json",
+      "bytes": 28531,
+      "sha256": "b5c303a24f9d38717599a926c4d457fb6e687b7a9f4883a308b194151bed8336"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-127-28.json",
+      "bytes": 28532,
+      "sha256": "8c551b8039229ef0d142cf80d5ee855c5c7c00c360e85353bbed7898533c3dcd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-127-3.json",
+      "bytes": 2780,
+      "sha256": "2d6dcbb14982f61183e4d04685caeaf6aabd0060cf52aa70bdce5675512621b9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-127-31.json",
+      "bytes": 28532,
+      "sha256": "47413a9906d07c71c737a88b22e93bc63e5ddd2b7119ea198b629bf262b1740a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-127-4.json",
+      "bytes": 2780,
+      "sha256": "2a8bb7ea83cb035d19567f5cf8f00654a644cb20d5a218e99c090b8a13ebc5b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/32902-5-8-128-2.json",
+      "bytes": 7446,
+      "sha256": "53c49c504d5e16880c1c59c96072a296a70996adddf1b09c64c95074a988a815"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-109-2.json",
+      "bytes": 28308,
+      "sha256": "6544fc84cd240dec459c05b32d6fb43fd7c7b7e215f0b939bba618919424c89a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-109-28.json",
+      "bytes": 28327,
+      "sha256": "5df5d93c96bc1b067f29b7c8349b798e9b107d53b3749352c3ffe619585fbe88"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-109-3.json",
+      "bytes": 2749,
+      "sha256": "c6eacc7c4d618aa66bae82a0f0d5661718609f052f9a2b633240381ff63bbebf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-109-31.json",
+      "bytes": 28327,
+      "sha256": "40c76403c7f9e9f2b32e47d01161f96f0cf66c853402dad22d05dc0abb4bbe8c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-109-4.json",
+      "bytes": 2749,
+      "sha256": "fb550b0f178b1ae3633d4495e6c8c6dc63d699208d366150ff896e6a6fdec7a1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-10-126-2.json",
+      "bytes": 7439,
+      "sha256": "a1343175472bada232b168d56ea4f1d89958792eeade577c8bc6c79dd4cac36a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-109-2.json",
+      "bytes": 28090,
+      "sha256": "d7f8bdead8ec610675356162cecac2a3ed0ee94c2bb1aabf6e234a8e3df1e241"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-109-28.json",
+      "bytes": 28110,
+      "sha256": "195498a5297bc23fe4134ab7da6aa8d9eb00071db1fa7b41f0b74b675cf99971"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-109-3.json",
+      "bytes": 2748,
+      "sha256": "2a47e3b19b9080ad28e4cff75c1d7cd55a627de1c96d97e0279d3f096a4bf870"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-109-31.json",
+      "bytes": 28110,
+      "sha256": "b1fe6e7e990eea011457ff363ebf9c338cdc8d6ea256b656e5315adebf05c1f5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-109-4.json",
+      "bytes": 2748,
+      "sha256": "2b6f4b9fe6ad8faec40386af749b40fb0a81ee73196de97a368b5b2e15dcfd18"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-126-2.json",
+      "bytes": 7320,
+      "sha256": "907deeb6c676d7cfe59765261656f19508a7bc297e890bcd1a3294db493c6267"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-127-2.json",
+      "bytes": 28474,
+      "sha256": "9d2c8821dcf883518531182814cfaa8589dd939ae1cd1ea7bac555df94dad9ce"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-127-28.json",
+      "bytes": 28494,
+      "sha256": "73393aa18402668c9a973a36579f7ff40093923655c49a647430ad32bf3c67cc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-127-3.json",
+      "bytes": 2772,
+      "sha256": "6cb0c514f07706064a85244917618da8f23d30e504e07a4831e4ac3a0527c10b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-127-31.json",
+      "bytes": 28494,
+      "sha256": "fac3df2f24b9b61ef74317224c540172e852727cb0746ebcb41a3dbfa310962f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-127-4.json",
+      "bytes": 2772,
+      "sha256": "f13de281299555a3abd07676ad5d4c199311811c01ac437e48e43fecb5692e03"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-3-128-2.json",
+      "bytes": 7452,
+      "sha256": "1c5b1f94726432e58d1880b5b3e40fadc62bf7a98928c7ddc4290ee8715021ec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-109-2.json",
+      "bytes": 28289,
+      "sha256": "d36f08b1eb3f8293e3f9b5eefa06d3336b91a8c94bba4630bc205f29cdb7a7d1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-109-28.json",
+      "bytes": 28290,
+      "sha256": "1cabfe1572a42339353e986ad78f16610ce06f19007b591368f0693241e8deff"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-109-3.json",
+      "bytes": 2748,
+      "sha256": "c1c6183d7d12d89680a21c7894534778619e55e2d90dadf760283f4e99422f84"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-109-31.json",
+      "bytes": 28290,
+      "sha256": "44e56af959938a6e5437a2cab6ba35f2ca42da0c6b4e08f8789fee5b7eea9616"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-109-4.json",
+      "bytes": 2748,
+      "sha256": "60821afd88d264bbf18a9bfecff6f89c1f86311716b0ce541479a8f4a51c60d2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-6-126-2.json",
+      "bytes": 7393,
+      "sha256": "f4bfff7678fb7013a13f8a358066319e6f4af3af122f6942c70c351677e63d57"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-109-2.json",
+      "bytes": 28145,
+      "sha256": "97909d94adc8e37a173c8235daea62fd6ac14bf8fccca2c6f196cf002e69f9c0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-109-28.json",
+      "bytes": 28146,
+      "sha256": "161d3979a64dbfc9a535c67db99724bc0bf097082e1082dc73948bc56ccab5c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-109-3.json",
+      "bytes": 2748,
+      "sha256": "95180a65e9f0aca1e869c8af8f59518d0434dee943fb023e1e5be027c4d82293"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-109-31.json",
+      "bytes": 28146,
+      "sha256": "51471a4398d6f3d12645b4524ea90eb732c9df51fa92cf99a68f4a4b6af1f6a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-109-4.json",
+      "bytes": 2748,
+      "sha256": "bab59bf3c28c36c1547e05fb2ecf5d8f3da1034b07bead18c79f19fc2e0170ae"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-126-2.json",
+      "bytes": 7348,
+      "sha256": "9d36498a2fdb70675bda429a5cc67b355f37590c96270b4d1834d496d9ce8fa6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-127-2.json",
+      "bytes": 28529,
+      "sha256": "662c4fabf8a516112f21359a3f492540f2cc4e95fa3814b42d5b0a943c8942ac"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-127-28.json",
+      "bytes": 28530,
+      "sha256": "2d04e94c191ca725a7f79a93b9127bd359f25b8d27e818e29d51cb29af92f53d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-127-3.json",
+      "bytes": 2772,
+      "sha256": "ecadc222ff6557b75ec3dbf29ecd861c7a879fcc3575b7a1f669c7cf4ce933a0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-127-31.json",
+      "bytes": 28530,
+      "sha256": "20a0eecbcbdc3f3a989d5ae072bb79d0eebbaca4eae793db8daf274effb821c2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-127-4.json",
+      "bytes": 2772,
+      "sha256": "f62e31ed08f347cc87b1976ae29d703c6fe0565e90fae9f3f9d8c38c8ace4830"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-0-8-128-2.json",
+      "bytes": 7444,
+      "sha256": "54cfe63584025578e6c104152d2dd8fe7cdabdd27f4f6a8074204cec1fcc255f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-109-2.json",
+      "bytes": 28308,
+      "sha256": "951558cdc24e4db9f8092a7db60c495ff76bfe6337db1f4232e8a5fc9e7ad661"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-109-28.json",
+      "bytes": 28327,
+      "sha256": "c37873fc4f87ff0196040937919722d0da54b32b28a56ba002342ce00c2d2e07"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-109-3.json",
+      "bytes": 2750,
+      "sha256": "546bdce1166b6564c474239d0f53afc23c74acb25e2583e754dbe8e7de5931a3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-109-31.json",
+      "bytes": 28327,
+      "sha256": "9a98c7905fcd85cea8ee1140566f3e933ff4bf33f36af20cce12f2f354a272c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-109-4.json",
+      "bytes": 2750,
+      "sha256": "c3e4f56d97526b36b3f7938b36e4b0e1339e1998414d87538a09ad57375799ba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-10-126-2.json",
+      "bytes": 7439,
+      "sha256": "7c4c93c367120549df280ed5a5baadd8871ca123e9885528c2138df2f3e2ea0f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-109-2.json",
+      "bytes": 28090,
+      "sha256": "89ec6aea119528ede95974213d7b2b681882c422ebff8e81252f3caeaaaba279"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-109-28.json",
+      "bytes": 28110,
+      "sha256": "08d3708146011ffad9f5c0824f9f9db8714039b811e27a57c5f3ac1e8cfc25df"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-109-3.json",
+      "bytes": 2749,
+      "sha256": "7bbe3445ab77054be82fbd77d7166ec2aedee1445084c4464479ccb024eec314"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-109-31.json",
+      "bytes": 28110,
+      "sha256": "0f29aecfd2116be4cd4ed104fea6d54108609bb593928d2280171e1cb02655b6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-109-4.json",
+      "bytes": 2749,
+      "sha256": "625867746d47b933263bfcee0690975c3f75c3067ef3be0e82bcdfbe6fdc6193"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-126-2.json",
+      "bytes": 7320,
+      "sha256": "67277abea22597247f4c140f96ec5217906a6e5e9f473e845327cd48b9bbf2bf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-127-2.json",
+      "bytes": 28474,
+      "sha256": "0b6eb6c8ec9ae8b7ac7cc841de32494d22aa4305f9d2fac1354150a76f2cc593"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-127-28.json",
+      "bytes": 28494,
+      "sha256": "e195ac9065ed1896bd6ff4595921d39b34da55696bc1a65379f3e501ebbe7477"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-127-3.json",
+      "bytes": 2773,
+      "sha256": "4dee182e225f5175aa6d62c399e019c8698d5946c3dbb38d51871e3bb14da361"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-127-31.json",
+      "bytes": 28494,
+      "sha256": "49e5aef510d3ef19f8ef3f712614b407134c9757758a6a22024eac3dda35fe44"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-127-4.json",
+      "bytes": 2773,
+      "sha256": "ad2f41cc14d1679e9d71b2eadca634bba126c5ec5f80bfe6850d0a4c199d5690"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-3-128-2.json",
+      "bytes": 7452,
+      "sha256": "3aa81765a68fef6a39ece92dcd414e42f1291802e94c9f30119249e8750518a1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-109-2.json",
+      "bytes": 28289,
+      "sha256": "356b284044f049aac00ff1fa60b430beabca3d3e8be8003261c3b159d633120c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-109-28.json",
+      "bytes": 28290,
+      "sha256": "32d826fa3de5ffc4d3c848784aa017d6c8a12e299c90a36f7bba3eaad1688152"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-109-3.json",
+      "bytes": 2749,
+      "sha256": "b043281850b7aa623c216576604952d372a3e29878563a7c66c77868ddaeb092"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-109-31.json",
+      "bytes": 28290,
+      "sha256": "835415c4f58afa4b2b81946d5ad039d34013aa855147f0bc52045a4cd8f8287d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-109-4.json",
+      "bytes": 2749,
+      "sha256": "01cf013303c42f54bcc2722e7ce5482cd1ef8f06ffc1c257af25ecd7c453ff6e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-6-126-2.json",
+      "bytes": 7393,
+      "sha256": "61057a39d68d99082b794729c6bdd594493292cfc928c5874eb7907ea4417507"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-109-2.json",
+      "bytes": 28145,
+      "sha256": "4e5cda2238a472c14cce61456ba326d5a418d29f09463342353a9e48518edc06"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-109-28.json",
+      "bytes": 28146,
+      "sha256": "10141c8c665b57c3340eec6a1f64b31b0b5cccf41cf573c9f0d20c47c4d225cf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-109-3.json",
+      "bytes": 2749,
+      "sha256": "a3bac43821dc836c7afd1a32d46db7d9e3e040167196211e02504ccaf6bd99d0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-109-31.json",
+      "bytes": 28146,
+      "sha256": "0ca0fb029d20127bb64d8fa399362cfffb8f789909349aead73c078d46246feb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-109-4.json",
+      "bytes": 2749,
+      "sha256": "7e74583d4ca92e7df13747047dce69f545af135da4f80f860897b0d7bbac8251"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-126-2.json",
+      "bytes": 7348,
+      "sha256": "26612e094ced441bd8e505b9c1d8392de7a41e35e2acf0330d708edbfea88128"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-127-2.json",
+      "bytes": 28529,
+      "sha256": "b7765cb124e5772bbb12561b45f8839ad424cff77f08721909fcc83842999dca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-127-28.json",
+      "bytes": 28530,
+      "sha256": "a58f47ea2865db56b5ac8ebae79a49d43798bdd6923d4a198b62cc6ea8dd85a5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-127-3.json",
+      "bytes": 2773,
+      "sha256": "e2f9ef52d1cb0c3d8620a5e14f9f8a8b3ba43fbb1cfd0abe918e8cf1e6a78df3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-127-31.json",
+      "bytes": 28530,
+      "sha256": "921cc6a69f99b47927b9d61d3f7d7b2f67828420c8a8b22799d44ee5c5da6d1a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-127-4.json",
+      "bytes": 2773,
+      "sha256": "d629febc832bc3533830d303e508779ba03381994bcea2b0c9aece316575f72f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-1-8-128-2.json",
+      "bytes": 7444,
+      "sha256": "186a9117a82bc2267df26b39e2046e7390f4354c971d4c5ae61cfbf5284a361b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-109-2.json",
+      "bytes": 28308,
+      "sha256": "6586030eb1ae8d1269f40785b605fe8c9a66b2657069f4d4cd62c52e310cd5bb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-109-28.json",
+      "bytes": 28327,
+      "sha256": "67ac4360fc87abf2eb17088dd28c2912bd6d7a75e193336d09a15dd0fea0cbb9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-109-3.json",
+      "bytes": 2755,
+      "sha256": "1c7457125134b515922a9e4a7a722b874531ccd8433ea0556bc2d805cddf8843"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-109-31.json",
+      "bytes": 28327,
+      "sha256": "a527165c208f33704fadd307135ef108019d0749f85128e2d950ad1514943362"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-109-4.json",
+      "bytes": 2755,
+      "sha256": "00ecc02fd10ac978a02028459f0afb7162d32d78cd502f7fccd4cfe444eb2add"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-10-126-2.json",
+      "bytes": 7439,
+      "sha256": "ab7cddb08a443e46868fe273da04db05c989c1321e6f1f0c7b01c4ad74831bb5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-109-2.json",
+      "bytes": 28090,
+      "sha256": "e5661fc83fbe7427ca8a903536e9ead30d8fa4b8b00fb3aa6ab9e4c1bd5168be"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-109-28.json",
+      "bytes": 28110,
+      "sha256": "3fa2f21796f51b8b48b0d46b39d45ee2a05f9038d92d503a4f11578064f25a2e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-109-3.json",
+      "bytes": 2754,
+      "sha256": "66f70c7357bde42f897b7db1ab44e5b09c78f64ea66f08371f1acfb8018abdde"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-109-31.json",
+      "bytes": 28110,
+      "sha256": "da07158f9ec746fcda56547702a4dd7c99e71f64670b524dbeaf23de0ba6c64e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-109-4.json",
+      "bytes": 2754,
+      "sha256": "863dd9dd22a18647d7a09f28262fb5606c6646b26032a4e4cee9a292a6110b73"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-126-2.json",
+      "bytes": 7320,
+      "sha256": "497c6aa5829c0302723149f709e475e39e698be2fd92c5e2e5260c154f01b14f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-127-2.json",
+      "bytes": 28474,
+      "sha256": "9372494d280afb20c4642990b8f4da0647bba982346bf483dcf39e9d32cd6be1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-127-28.json",
+      "bytes": 28494,
+      "sha256": "6a2d57a8bac6a85fbe603727b0306f85e1ee7e60a0cf993e512436260f37b9a5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-127-3.json",
+      "bytes": 2778,
+      "sha256": "48602350cea7ef9dd6c0ae63e1b2c0faea066920117ffd04422d6b96e2f7fc3e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-127-31.json",
+      "bytes": 28494,
+      "sha256": "756800a33af88f9db3e71944b1b2d800cef149b615339237979ca3259c281858"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-127-4.json",
+      "bytes": 2778,
+      "sha256": "c9ae4913344f55cd3207e6bd75a51a130dd8e9b000a50be34e18a2bc6f31484a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-3-128-2.json",
+      "bytes": 7452,
+      "sha256": "828c8607220265aff7f5fc79607be959ee935d68ae9df7783225766cb76308b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-109-2.json",
+      "bytes": 28289,
+      "sha256": "a2db6a98e6bee309eeed03942000d90a6e5dd634ffc40ec4727235a86f88a74a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-109-28.json",
+      "bytes": 28290,
+      "sha256": "aa5c3af3bf0fbbe6fc3340bd7746cdaad8a81c2873eaba7f4e2c8911da2db584"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-109-3.json",
+      "bytes": 2754,
+      "sha256": "98a20e805c6655682968a389eb3b828fa18c57dd8c576e14cbf600bbdb94efcf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-109-31.json",
+      "bytes": 28290,
+      "sha256": "88ea023a2ede4656162215e1b3acc06015f4d4d67decfcaba95ce1932141ad5e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-109-4.json",
+      "bytes": 2754,
+      "sha256": "70bb7c5c4a217beecba5c7c75022c9f4bcc03cf8cbf5ad3477dadbedaea631b1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-6-126-2.json",
+      "bytes": 7393,
+      "sha256": "8be64b0add44aba063c92ebf5af6678e1e638f518ec88f5b5b3c53aad5ab9379"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-109-2.json",
+      "bytes": 28145,
+      "sha256": "dee2bab892cb13c9459727e06c454b9f39a916b06b7a0805e0dc3ca7ccb5a73f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-109-28.json",
+      "bytes": 28146,
+      "sha256": "e772706adee5c8f9e815e580f70ddbf74270b2cd17bb07a46278c2b909a13cf0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-109-3.json",
+      "bytes": 2754,
+      "sha256": "f49245908bbe9ba6f9a66daa05a1aa48b77829de6db245b9d72a669238843675"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-109-31.json",
+      "bytes": 28146,
+      "sha256": "affb5ee13a7440dc2b7e1b4f94fa473b4c3a5cce080f5bc5fd4b07106b1edb4c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-109-4.json",
+      "bytes": 2754,
+      "sha256": "7b4a9aa97015ce2e437ae3616d2135431198d1633b862c2adac03c6bda08a317"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-126-2.json",
+      "bytes": 7348,
+      "sha256": "f94109847e201550308347991ed480507ca9e001a1a96ab0c109927438866862"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-127-2.json",
+      "bytes": 28529,
+      "sha256": "b674a45c97da016f91a95e3ca283301f4edc1982d8062925e0a38d370a0f718f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-127-28.json",
+      "bytes": 28530,
+      "sha256": "400f8f462a3b9a50438e13843812630c21f63a53c02fafd5e541e926228f1182"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-127-3.json",
+      "bytes": 2778,
+      "sha256": "119e8a85949042903f0ca0b317d7df822b99bebd63180b906cae94cf26551aa7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-127-31.json",
+      "bytes": 28530,
+      "sha256": "cbdeb81bb682d5ba25419e4c5bd0400c50c00f0e3cd5e107c29041e581dd99d9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-127-4.json",
+      "bytes": 2778,
+      "sha256": "35b1261c934c87bdcd286e461f85c5bf5f8f3852824790ac74978774d5c925b1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-final/4318-5-8-128-2.json",
+      "bytes": 7444,
+      "sha256": "cfa5b66ac6f1949d3b35a329085ba5a5651f46fadfa710aaa9f971bebc745f12"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-gather-Release.txt",
+      "bytes": 19510,
+      "sha256": "fc851e4f75aada612290ed19bda984aa03acd08682dc82d28f2db8999bddccfd"
+    }
+  ],
+  "sources": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/CMakeLists.txt",
+      "bytes": 131749,
+      "sha256": "67a25a4336ec5b61ae464050a27dfc099af1172c108caa6da792d6a5b2a7872c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcExecution.cpp",
+      "bytes": 98450,
+      "sha256": "0ed49339a27464ad1a37888bc987129fb8e617bb3163042caf062d3d1c33cf71"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcGpuOperations.cpp",
+      "bytes": 113810,
+      "sha256": "88276c3de7e8e08586f7728b9ab3fc179fe6075fe0d1e4d312ac85b192a6dc02"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcGpuOperations.h",
+      "bytes": 5868,
+      "sha256": "54a566789f938b6b088c1f14e1ed3b11236725b28b816da1fda0dd92f1ae4452"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcTextureInputs.cpp",
+      "bytes": 28984,
+      "sha256": "5f5d89416fe70dfe1ad42f3e35aed79a9cf3892b0bfa9a0921cc6535c1c1f40f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcTextureInputs.h",
+      "bytes": 6972,
+      "sha256": "47e0511aa2f3e7ad298a1e56fe3ec1bec524f1dc170bba882065d12c417021a7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tests/DxbcGatherTests.cpp",
+      "bytes": 23966,
+      "sha256": "5689c40a494a70c2f837850026262de48865de1f3329844a59a422c1cdf3e03d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tests/TextureOperationOracle.h",
+      "bytes": 10058,
+      "sha256": "1ca14fdd05e9e7efd71ffa8166db41ea6a2dd0ecf76fe14194eb87b3003d89de"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tests/DxbcTextureLoadTests.cpp",
+      "bytes": 39147,
+      "sha256": "6f5c634c35896132aad10174e058f8da50bb8ce511f1296745f0a9280ff737c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_gather.py",
+      "bytes": 10330,
+      "sha256": "dac956b1ce8c858e7e280066ca21542c10fc738a62fdad827c647bf7b79ea4ae"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_texture_precision.py",
+      "bytes": 8704,
+      "sha256": "a65ce13dae7d2a8d926e1c53c8387564a46a38a0d2fe580e7fa52192de6bc8cf"
+    }
+  ],
+  "regression": {
+    "suites": [
+      {
+        "suite": "dxbc-pixel-sampling",
+        "passed": 186,
+        "elapsed_ms": 475613,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-pixel-sampling-Release.txt",
+          "bytes": 82936,
+          "sha256": "deed3d52b28c06bbc8d67513c3971677a1ce71554c3a0d3e33733011cd4abb53"
+        }
+      },
+      {
+        "suite": "dxbc-sample-comparison",
+        "passed": 190,
+        "elapsed_ms": 122101,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-sample-comparison-Release.txt",
+          "bytes": 77861,
+          "sha256": "9f883dca0da46507db38a21d9dfef45d00915309f7b6e84ddd0e6462a64eefb6"
+        }
+      },
+      {
+        "suite": "dxbc-sample-grad",
+        "passed": 262,
+        "elapsed_ms": 72536,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-sample-grad-Release.txt",
+          "bytes": 135975,
+          "sha256": "b8554d5d6ea380b86aa99435733f42e34f8ca16f268faa881523686b2e2472b9"
+        }
+      },
+      {
+        "suite": "dxbc-gather",
+        "passed": 327,
+        "elapsed_ms": 45178,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-gather-Release.txt",
+          "bytes": 19510,
+          "sha256": "fc851e4f75aada612290ed19bda984aa03acd08682dc82d28f2db8999bddccfd"
+        }
+      },
+      {
+        "suite": "dxbc-sample-level",
+        "passed": 156,
+        "elapsed_ms": 67634,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-sample-level-Release.txt",
+          "bytes": 91793,
+          "sha256": "c9122003be6d21997a9e15f0d82832e53155204125bb7b88d30960548aab2ce0"
+        }
+      },
+      {
+        "suite": "dxbc-texture-load",
+        "passed": 1625,
+        "elapsed_ms": 299786,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-texture-load-Release.txt",
+          "bytes": 887518,
+          "sha256": "394ebe0ed55ed830ae056a3a625ad8945ddde99e7632029c9ac323a29e55dc41"
+        }
+      },
+      {
+        "suite": "dxbc-execution-trace-reader",
+        "passed": 64,
+        "elapsed_ms": 241,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-execution-trace-reader-Release.txt",
+          "bytes": 4509,
+          "sha256": "bce6652a16653fd95a7899c31996192f8799110603afaeceb9af96304f998883"
+        }
+      },
+      {
+        "suite": "dxbc-execution-trace",
+        "passed": 21,
+        "elapsed_ms": 725,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-execution-trace-Release.txt",
+          "bytes": 2781,
+          "sha256": "772af2138d588dabb8b761c180b9df6e3d79761a6c34337a1f1d1f2475dac812"
+        }
+      },
+      {
+        "suite": "dxbc-execution",
+        "passed": 1175,
+        "elapsed_ms": 106207,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/dxbc-execution-Release.txt",
+          "bytes": 688512,
+          "sha256": "c318f444ce32ffa454aa8f6c857ad8bb6c04a9f1e712817ddbbed06ead3e8af3"
+        }
+      },
+      {
+        "suite": "native-pixel-debug",
+        "passed": 22,
+        "elapsed_ms": 18942,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/native-pixel-debug-Release.txt",
+          "bytes": 1523,
+          "sha256": "6d2c84bb10f7eca2a9d9865a2242bac6268fa7494bf7c6c6843578d35736e616"
+        }
+      },
+      {
+        "suite": "native-compute-debug",
+        "passed": 65,
+        "elapsed_ms": 10891,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression-logs/native-compute-debug-Release.txt",
+          "bytes": 4168,
+          "sha256": "150f851b0a9cb9eb21e2120b65fd9f2555996ea5c00cc165aba7a8fc5ec55666"
+        }
+      }
+    ],
+    "passed": 4093,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 1220.71,
+    "console": {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-regression.log",
+      "bytes": 1418,
+      "sha256": "359c97d4f22251041637bb8bf640798c44ff73106a8d995856459d3cf27ab575"
+    }
+  },
+  "binaries": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.exe",
+      "bytes": 5127680,
+      "sha256": "aefcb4563da76f6c9525760d56d7596a712618731ad17a213daea9ed58b2886f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 6053376,
+      "sha256": "3857365007831d5060478b73ce1034924fdf7fff5d60355d3567019f20ca0424"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 6053376,
+      "sha256": "3857365007831d5060478b73ce1034924fdf7fff5d60355d3567019f20ca0424"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcGatherTests.exe",
+      "bytes": 952832,
+      "sha256": "004fc28a4deaae82d3d0bc3d90d6d7d8fc30aa724bdafac5859cab0b439b17a2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcTextureLoadTests.exe",
+      "bytes": 1674240,
+      "sha256": "4f019fc266a682b97e5a62851cf3b1e19b64395c5b4dbe30d153d22a26b18d5c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 639488,
+      "sha256": "d627af8e8005cf1eeb5d9a4ecc3aa7411d6534bda490b1e31c68917acd35daf0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 606720,
+      "sha256": "29dba48a1403107c7276249572700de5677be7dcc18cc6d404b19e5c6163dc00"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleLevelTests.exe",
+      "bytes": 1684480,
+      "sha256": "f0fc7b3574f0f72b96a683954e1cf49e2fc4ebfbf4c9a1402ac4935e491f108a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleGradTests.exe",
+      "bytes": 1730048,
+      "sha256": "43f739ed414edf43c151d99ae9074b56da214e30dc31bd0f025f0c988648fa8c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleComparisonTests.exe",
+      "bytes": 598528,
+      "sha256": "b4f32c68113fe4666cf8bcca47b01c694289cd0b8ea87b79e5cdc1e5ecd2175d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1882112,
+      "sha256": "0da6b652bf91b1ede41069b48fa03cadd3552b44a2289d10e83b97f5882ab5e6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTraceReaderTests.exe",
+      "bytes": 880128,
+      "sha256": "88567e2c7d67766254258bf2f6c83fd65cbe23567220379e3f3fd15e574f0a12"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraNativePixelDebugTests.exe",
+      "bytes": 1977344,
+      "sha256": "99f0a692a71731291a17c5a64f4d233720cebc2a049ab4aa629c07cea94a3ec2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraNativeComputeDebugTests.exe",
+      "bytes": 2962944,
+      "sha256": "582acf3671dd3e407492c75160b0a218b34d018071786faba0a204f79ca5f11f"
+    }
+  ],
+  "development_evidence": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-final.log",
+      "bytes": 17093,
+      "sha256": "e94d64025d2d1739a793af918d507d837fed999e84080b36bb257c60549cbd83"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-fixed.log",
+      "bytes": 1520,
+      "sha256": "e01a3427297bb0df97fb475360b8d691d3de694e1b9091d4c94bf2219e187846"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-format-control.log",
+      "bytes": 980,
+      "sha256": "4df15a3d55ef85d9a739c37cca9274dd49424338e283f651111a22c5096d017d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-formats.log",
+      "bytes": 980,
+      "sha256": "4df15a3d55ef85d9a739c37cca9274dd49424338e283f651111a22c5096d017d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-initial.log",
+      "bytes": 12628,
+      "sha256": "b66c38de265889a4d6eefacbb496356816342680323a77fe0717478dc668733a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-selection.log",
+      "bytes": 1980,
+      "sha256": "bc0763f32d50c6416693f32bc7c5cd5a80c97f951a7b401f1fe8a0fef39bc20c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-tests.log",
+      "bytes": 1980,
+      "sha256": "bf6ee57c2bd1dfbf6f77b14739e1480ce837feef3d1a00b591d96dd9f2f3d623"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-trace.log",
+      "bytes": 980,
+      "sha256": "4df15a3d55ef85d9a739c37cca9274dd49424338e283f651111a22c5096d017d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-build-validation.log",
+      "bytes": 980,
+      "sha256": "4df15a3d55ef85d9a739c37cca9274dd49424338e283f651111a22c5096d017d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-controlled-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-controlled-validation.json",
+      "bytes": 92688,
+      "sha256": "a0192d929e7d1c9f28deabdd6c8ba53af26f8457da236a65fdeda5ed037f4638"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-controlled.txt",
+      "bytes": 19510,
+      "sha256": "3cc70f01e2cf1b8d0053efd881335fe2ca3de2080ca078d2c37e8aaecb4f08b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-formats-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-formats.txt",
+      "bytes": 23687,
+      "sha256": "d5c3c54138251bfa9db85fb44bdad64ecbcc66f54e021868c2662b3a9fba6037"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-initial-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-initial.txt",
+      "bytes": 612,
+      "sha256": "c9a03b5cca64e26eca25c4c77006d969666df2f2eb361728b43cbc19cc2a83bd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-integer-validation-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-integer-validation.txt",
+      "bytes": 1805,
+      "sha256": "060957125313d3e9aa83924168cfb84c9b8e095a12389ed2ef640c8ff6a605eb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-matrix-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-matrix.txt",
+      "bytes": 27882,
+      "sha256": "d4cd87532c95e2334708ab343893e4f5d96c0a516e947d904df65b7a8e74ec68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-trace-check-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-trace-check-fixed-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-trace-check-fixed.txt",
+      "bytes": 561,
+      "sha256": "ba4e2112947acc6f675326600792c9735ed26615856d2f29e99c09053ae7275d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gather-trace-check.txt",
+      "bytes": 903,
+      "sha256": "7580f7b9c34e5a1d8f9cdc8f70e4314d1a741d0e4ab8b39498158f5dbea47558"
+    }
+  ],
+  "journal_roundtrips": 36
+}
