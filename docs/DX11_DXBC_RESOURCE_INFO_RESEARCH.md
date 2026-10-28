@@ -144,3 +144,11 @@ operations, MSAA pixel access, planar queries and complete captured invocation
 selection remain open. Query format coverage beyond R32_UINT and native VS/PS
 stage comparisons need separate evidence. Full shader parity, GUI cutover and standalone RenderDoc
 removal still require their own acceptance evidence.
+
+## Later planar query validation
+
+The [planar SRV increment](research/DX11_NATIVE_PLANAR_SRV.md) adds validated
+Y/UV dimensions for NV12, P010 and P016 SRVs, including UNORM/UINT views and
+direct original VS/PS/CS comparisons. Its GPU query declaration uses the actual
+view return class. The historical R32_UINT evidence above is unchanged; planar
+UAV queries and complete shader-debugging parity still need separate validation.

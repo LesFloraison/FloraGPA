@@ -1275,3 +1275,23 @@ corruption rejections. See `research/DX11_NATIVE_GATHER_PRECISION.md` for the
 retained mixed-precision transport failure and its independent correction.
 Integer gather format coverage, feedback/status operations, original fragment
 qualification, full P1/P5/P6 parity and P7/P8 acceptance remain open.
+
+### Native planar SRV execution
+
+The native executor now resolves NV12/P010/P016 Y and UV views for load,
+explicit sampling, gather and resource-information paths. Plane dimensions,
+byte offsets and unknown-byte propagation retain the selected typed view.
+The GPU dimensions helper now declares the view's actual return class, fixing
+its validation failure on UNORM resources. Backend identity is `dxbc-gpu/25`.
+
+The new matrix passes 219 checks, including 2,304 direct original-shader
+comparisons across VS/PS/CS, 24 NV12 GPA frame round trips and 24 independently
+verified NVIDIA P016 rejection contracts. The validator rejects 632 corrupted
+reports. No capability rejection is counted as a shader comparison or skip.
+See [the planar SRV report](research/DX11_NATIVE_PLANAR_SRV.md) for retained
+development failures, precise coverage and reproduction instructions. Legacy
+P010/P016 incomplete chroma, planar UAV execution, original-pixel qualification
+and full dependency removal remain outside this completed increment.
+Twelve existing suites also pass 4,831 checks without failures or skips; the
+new and existing suites total 5,050 successful checks. GUI, CLI and Worker
+builds pass. These focused results do not close the standalone release gate.
