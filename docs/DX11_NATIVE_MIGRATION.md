@@ -1182,3 +1182,17 @@ confirms both IDs 162 and 2044, adding the earlier completion missed by the old
 last-value observation. See `research/DX11_NATIVE_PIXEL_PRESENCE.md` for exact
 limits, retained fixture failures, ordinary-replay comparisons and performance.
 Full fragment reconstruction, debugger parity and P1/P7/P8 remain open.
+
+## Complete-draw output-test continuation
+
+Private presence now accepts `--primitive-tests` to compare repeated whole draws
+with depth, stencil, both depth/stencil, alpha-to-coverage or sample masking
+changed explicitly. Actual before/effective states and raw results are retained;
+differences do not assign original fragment failure reasons. The combined
+owned depth/stencil case demonstrates why a single bypass cannot identify a sole
+cause. Seven suites pass 567 checks, and 48 owned GPU cases, three recovery cases,
+21 owned Worker jobs and nine real jobs pass independent validation. Validators
+reject 768 corruptions. BF1 IDs 441, 578, 2460 and 3935 appear after depth bypass
+on all three adapters, while original fragment eligibility remains unknown.
+See `research/DX11_NATIVE_PIXEL_TEST_VARIANTS.md` for scope, measurements and
+reproduction. Full P1/P5/P6 parity and P7/P8 removal/release gates remain open.
