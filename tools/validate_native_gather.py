@@ -20,7 +20,7 @@ def validate(report):
             opcode in (109, 126, 127, 128) and (not programmable or dimension in (3, 8)) and
             fmt in ((41,) if comparison else (2, 3, 4, 28, 31)), 'Gather configuration')
     helper = report['helper']
-    require(helper['backend'] == 'dxbc-gpu/23' and helper['warp'] == (vendor == 0) and
+    require(helper['backend'] == 'dxbc-gpu/24' and helper['warp'] == (vendor == 0) and
             helper['vendor_id'] == (5140 if vendor == 0 else vendor) and
             helper['completion_wait'] in ('fence-event/1', 'native-poll/1'), 'Explicit helper identity')
     records = report['records']

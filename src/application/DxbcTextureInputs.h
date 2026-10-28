@@ -51,6 +51,11 @@ struct PixelSamplingInvocation {
 struct GatherOperation {
     uint32_t opcode = 109, component = 0;
     Value offset = Value::known({}), reference = Value::known({});
+    // Destination, coordinates, programmable offset and comparison reference.
+    std::array<uint32_t, 4> precision{};
+    std::array<uint32_t, 3> modifiers{};
+    std::array<bool, 3> literal{};
+    bool refactoringAllowed = false, outputDestination = false;
 };
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;

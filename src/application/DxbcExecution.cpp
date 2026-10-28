@@ -411,7 +411,19 @@ Program::Program(Bytes dxbc) {
                 data->stage == 5 && (op == 166 || op == 168) &&
                 (args.back().kind == 0 || args.back().kind == 3) && !args.back().modifier &&
                 std::all_of(args.begin(), args.end() - 1, [](const Operand &arg) { return !arg.precision; });
+            const bool precisionGather = [&] {
+                if (op != 109 && op != 126 && op != 127 && op != 128)
+                    return false;
+                const bool programmable = op == 127 || op == 128;
+                const bool comparison = op == 126 || op == 128;
+                return args[1].precision <= 2 && !args[programmable ? 3 : 2].precision &&
+                       !args[programmable ? 4 : 3].precision &&
+                       (!programmable || !args[2].precision || args[2].precision == 4 ||
+                        args[2].precision == 5) &&
+                       (!comparison || args.back().precision <= 2);
+            }();
             if (!precisionArithmetic(op) && !precisionSampling && !precisionLoad && !precisionStore &&
+                !precisionGather &&
                 std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
                 throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
                                          " at word " + std::to_string(data->instructions.back().wordOffset) +
@@ -1148,8 +1160,20 @@ Step Lane::step() {
         GatherOperation operation;
         operation.opcode = op;
         operation.component = sampler.select[0];
+        operation.precision[0] = destination.precision;
+        operation.refactoringAllowed = p.refactoringAllowed;
+        operation.outputDestination = destination.kind == 2;
+        const auto gatherSource = [&](const Operand &operand, unsigned index) {
+            auto unmodified = operand;
+            unmodified.modifier = 0;
+            operation.precision[index + 1] = operand.precision;
+            operation.modifiers[index] = operand.modifier;
+            operation.literal[index] = operand.kind == 4;
+            return s.source(unmodified, index == 1);
+        };
+        const auto address = gatherSource(args[1], 0);
         if (programmable)
-            operation.offset = s.source(args[2], true);
+            operation.offset = gatherSource(args[2], 1);
         if (comparison) {
             const auto &reference = args.back();
             if (reference.components != 1 &&
@@ -1158,13 +1182,13 @@ Step Lane::step() {
                    (reference.mode == 1 && std::all_of(reference.select.begin(), reference.select.end(),
                                                        [&](auto c) { return c == reference.select[0]; })))))
                 fail("Gather comparison reference requires a scalar selection");
-            operation.reference = s.source(reference, false);
+            operation.reference = gatherSource(reference, 2);
         }
         Value value;
         if (s.inputs.textures)
-            value = s.inputs.textures->gatherTexture(
-                p.stage, binding, samplerBinding, dimension, returns, s.source(args[1], false), operation,
-                resource.select, destination.mask, offsets, s.inputs.gpu.get(), result.memoryGpuAssisted);
+            value = s.inputs.textures->gatherTexture(p.stage, binding, samplerBinding, dimension, returns,
+                                                     address, operation, resource.select, destination.mask,
+                                                     offsets, s.inputs.gpu.get(), result.memoryGpuAssisted);
         const auto target = s.address(destination);
         if (s.inBounds(target)) {
             const auto before = s.value(target);

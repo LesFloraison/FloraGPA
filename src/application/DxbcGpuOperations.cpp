@@ -141,19 +141,30 @@ Words typedPixelUavKernel(uint32_t dimension, uint32_t returns, bool store, cons
     return result;
 }
 Words gatherKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
-                   const std::array<int32_t, 3> &offset, const GatherOperation &operation) {
+                   const std::array<int32_t, 3> &offset, const Value &address,
+                   const GatherOperation &operation) {
     const bool compute = stage == 5;
+    const bool minimum = std::any_of(operation.precision.begin(), operation.precision.end(),
+                                     [](auto value) { return value != 0; });
+    const bool preserveOutput = !compute && operation.outputDestination;
     const bool comparison = operation.opcode == 126 || operation.opcode == 128;
     const bool programmable = operation.opcode == 127 || operation.opcode == 128;
     std::vector<Words> rows{row(89, {{0x208e46, 0, 3}}), row(88 | dimension << 11, {dest(7, 0), {returns}}),
                             row(90 | (comparison ? 0x800 : 0), {{0x106000, 0}})};
     if (compute) {
-        rows.push_back(row(104, {{1}}));
+        rows.push_back(row(104, {{minimum ? 2u : 1u}}));
         rows.push_back(row(155, {{1, 1, 1}}));
         rows.push_back(row(158, {dest(30, 0), {16}}));
-    } else
-        rows.push_back(row(101, {dest(2, 0)}));
-    const auto target = compute ? 0u : 2u;
+    } else {
+        rows.push_back(row(101, {withPrecision(dest(2, 0), preserveOutput ? operation.precision[0] : 0)}));
+        if (minimum && !preserveOutput)
+            rows.push_back(row(104, {{1}}));
+    }
+    if (minimum || operation.refactoringAllowed)
+        rows.insert(
+            rows.begin(),
+            row(106 | (minimum ? 1u << 16 : 0u) | (operation.refactoringAllowed ? 1u << 11 : 0u), {}));
+    const auto target = compute || (minimum && !preserveOutput) ? 0u : 2u;
     rows.push_back(row(54, {dest(target, 0), immediate(0)}));
     uint32_t control = 1u | 0x80000000u;
     for (unsigned c = 0; c < 3; ++c)
@@ -163,18 +174,35 @@ Words gatherKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_
     const auto append = [&](const Words &operand) {
         instruction.insert(instruction.end(), operand.begin(), operand.end());
     };
-    append(dest(target, 0, mask));
-    append({0x208e46, 0, 0});
+    const auto sourceOperand = [&](unsigned index, const Value &value) {
+        Words operand = operation.literal[index]
+                            ? index == 2
+                                  ? immediate(value.bits[0])
+                                  : Words{0x4002, value.bits[0], value.bits[1], value.bits[2], value.bits[3]}
+                        : index == 2 ? Words{0x20800a, 0, index}
+                                     : Words{0x208e46, 0, index};
+        const auto precision = operation.precision[index + 1], modifier = operation.modifiers[index];
+        if (precision || modifier) {
+            operand[0] |= 0x80000000u;
+            operand.insert(operand.begin() + 1, 1u | precision << 14 | modifier << 6);
+        }
+        return operand;
+    };
+    append(withPrecision(dest(target, 0, mask), operation.precision[0]));
+    append(sourceOperand(0, address));
     if (programmable)
-        append({0x208e46, 0, 1});
+        append(sourceOperand(1, operation.offset));
     append(source(7, 0, swizzle));
     append({0x10600a | operation.component << 4, 0});
     if (comparison)
-        append({0x20800a, 0, 2});
+        append(sourceOperand(2, operation.reference));
     instruction[0] |= uint32_t(instruction.size()) << 24;
     rows.push_back(std::move(instruction));
+    if (minimum && !preserveOutput)
+        rows.push_back(row(54, {dest(compute ? 0u : 2u, compute ? 1u : 0u),
+                                withPrecision(source(0, 0), operation.precision[0])}));
     if (compute)
-        rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, 0)}));
+        rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, minimum ? 1 : 0)}));
     rows.push_back(row(62, {}));
     const auto bytes = writeDxbcProgram({{stage << 16 | 0x50, 0}, rows});
     Words result(bytes.size() / 4);
@@ -882,7 +910,7 @@ struct GpuOperations::State {
                 return {result.begin(), result.end()};
             }
             const auto words =
-                gather  ? gatherKernel(stage, dimension, returns, mask, swizzle, offset, *gather)
+                gather  ? gatherKernel(stage, dimension, returns, mask, swizzle, offset, address, *gather)
                 : batch ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize)
                         : textureKernel(stage, dimension, returns, mask, swizzle, offset, sampler != nullptr,
                                         ddy.has_value(), comparison, {precision[0], precision[1]},
@@ -1214,7 +1242,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/23"}};
+            {"backend", "dxbc-gpu/24"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1691,8 +1719,9 @@ Value GpuOperations::gatherTexture(uint32_t stage, const TextureInput &input, co
         selection |= swizzle[c] << (2 * c);
     return state_
         ->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler, {}, {},
-                  {}, nullptr, operation.opcode == 126 || operation.opcode == 128, nullptr, 0, {}, false,
-                  false, false, &operation)
+                  {}, nullptr, operation.opcode == 126 || operation.opcode == 128, nullptr, 0,
+                  {operation.precision[0], 0, 0}, operation.refactoringAllowed, operation.outputDestination,
+                  false, &operation)
         .front();
 }
 Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,

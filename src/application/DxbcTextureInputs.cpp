@@ -157,6 +157,14 @@ Value TextureInputs::gatherTexture(uint32_t stage, const Register &binding, cons
         (programmable && dimension != 3 && dimension != 8) || operation.component > 3 ||
         (comparison && operation.component) || offset[2] || (programmable && (offset[0] || offset[1])))
         throw std::runtime_error("Invalid native gather operation");
+    if (operation.precision[0] == 3 || operation.precision[0] > 5 || operation.precision[1] > 2 ||
+        (operation.precision[2] && operation.precision[2] != 4 && operation.precision[2] != 5) ||
+        operation.precision[3] > 2 || (stage == 5 && operation.outputDestination) ||
+        std::any_of(operation.modifiers.begin(), operation.modifiers.end(),
+                    [](auto value) { return value > 3; }) ||
+        (!programmable && (operation.precision[2] || operation.modifiers[1] || operation.literal[1])) ||
+        (!comparison && (operation.precision[3] || operation.modifiers[2] || operation.literal[2])))
+        throw std::runtime_error("Invalid native gather precision or source controls");
     if (const auto resolved = prepareSample(stage, binding, sampler, dimension, returns, address,
                                             operation.reference, swizzle, mask, offset, {}, comparison, true))
         return *resolved;
