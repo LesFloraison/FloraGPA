@@ -1,5 +1,6 @@
 #include "BlendCapture.h"
 #include "DepthStencilCapture.h"
+#include "HullCapture.h"
 #include "StreamCapture.h"
 #include "application/NativePixelDrawHistory.h"
 #include "application/NativePixelGeometryReplay.h"
@@ -12,6 +13,10 @@ using namespace flora::testing;
 using Json = nlohmann::json;
 namespace {
 void verifyMergerJoin(const Json &report) {
+    const auto &original = report.at("original_draw_observation");
+    QCOMPARE(original.at("geometry_observed_value_matches"), Json(true));
+    QCOMPARE(original.at("geometry_passing_samples_match"), Json(true));
+    QVERIFY(original.at("original_fragment_eligibility").is_null());
     QCOMPARE(report.at("merger_evaluation").at("requested"), Json(true));
     QCOMPARE(report.at("merger_evaluation").at("invocations"),
              report.at("shader_evaluation").at("invocations"));
@@ -781,6 +786,15 @@ class NativePixelGeometryReplayTests final : public QObject {
         Replay r(f, before);
         r.run();
         const auto originalColor = r.readTexture(20), originalDepth = r.readTexture(720);
+        std::vector<uint8_t> originalDrawColor, originalDrawDepth;
+        auto originalDraw = replayNativeOriginalDraw(r, 1000, [&](Replay &p, bool after) {
+            if (after) {
+                originalDrawColor = p.readTexture(20);
+                originalDrawDepth = p.readTexture(720);
+            }
+        });
+        QCOMPARE(r.readTexture(20), originalColor);
+        QCOMPARE(r.readTexture(720), originalDepth);
         std::vector<std::vector<uint8_t>> colors, depths;
         auto report =
             replayNativePixelGeometry(r, 1000, {0, 2, {1}}, [&](Replay &privateReplay, uint64_t completed) {
@@ -808,6 +822,17 @@ class NativePixelGeometryReplayTests final : public QObject {
             QCOMPARE(colors[completed], reference.readTexture(20));
             QCOMPARE(depths[completed], reference.readTexture(720));
             QVERIFY(reference.measurementResult());
+            if (completed == 2) {
+                QCOMPARE(originalDrawColor, reference.readTexture(20));
+                QCOMPARE(originalDrawDepth, reference.readTexture(720));
+                QCOMPARE(originalDraw.at("passing_samples"), Json(reference.measurementResult()->occlusion));
+                const auto &stats = reference.measurementResult()->pipeline;
+                const auto &q = originalDraw.at("pipeline_statistics");
+                QCOMPARE(q.at("ia_vertices"), Json(stats.IAVertices));
+                QCOMPARE(q.at("ia_primitives"), Json(stats.IAPrimitives));
+                QCOMPARE(q.at("vs_invocations"), Json(stats.VSInvocations));
+                QCOMPARE(q.at("ps_invocations"), Json(stats.PSInvocations));
+            }
             uint64_t cumulative = 0;
             for (uint32_t i = 0; i < completed; ++i)
                 cumulative += report.at("batches")[i].at("passing_samples").get<uint64_t>();
@@ -822,6 +847,7 @@ class NativePixelGeometryReplayTests final : public QObject {
         QVERIFY(report.at("original_fragment_eligibility").is_null());
         QCOMPARE(report.at("extra_uav_slots"), Json(0));
         report["reference_prefixes"] = references;
+        report["original_draw_observation"] = originalDraw;
         report["status"] = "ok";
         evidence(report);
     }
@@ -856,6 +882,12 @@ class NativePixelGeometryReplayTests final : public QObject {
         std::vector<uint8_t> actual;
         auto report = replayNativePixelGeometry(r, 100, {0, 1}, [&](Replay &p, uint64_t n) {
             if (n)
+                actual = samples(p);
+        });
+        QCOMPARE(actual, expected);
+        QCOMPARE(samples(r), original);
+        report["original_draw_observation"] = replayNativeOriginalDraw(r, 100, [&](Replay &p, bool after) {
+            if (after)
                 actual = samples(p);
         });
         QCOMPARE(actual, expected);
@@ -933,6 +965,23 @@ class NativePixelGeometryReplayTests final : public QObject {
             QCOMPARE(r.readCounter(12), originalCounter);
             QCOMPARE(actualCounter, originalCounter + 1);
         }
+        report["original_draw_observation"] = replayNativeOriginalDraw(r, event, [&](Replay &p, bool after) {
+            if (!after)
+                return;
+            actual = p.readTexture(20);
+            if (counter) {
+                actualBuffer = p.readBuffer(10);
+                actualCounter = p.readCounter(12);
+            }
+        });
+        QCOMPARE(actual, expected);
+        QCOMPARE(r.readTexture(20), original);
+        if (counter) {
+            QCOMPARE(actualBuffer, expectedBuffer);
+            QCOMPARE(actualCounter, expectedCounter);
+            QCOMPARE(r.readBuffer(10), originalBuffer);
+            QCOMPARE(r.readCounter(12), originalCounter);
+        }
         // Re-execute the original draw on the restored native bindings.
         context(r)->Draw(3, 0);
         QCOMPARE(r.readTexture(20), expected);
@@ -969,6 +1018,13 @@ class NativePixelGeometryReplayTests final : public QObject {
         r.run();
         const auto initial = r.readBuffer(70);
         auto report = replayNativePixelGeometry(r, 150, {0, 1});
+        QCOMPARE(r.readBuffer(70), initial);
+        std::vector<uint8_t> privateSo;
+        report["original_draw_observation"] = replayNativeOriginalDraw(r, 150, [&](Replay &p, bool after) {
+            if (after)
+                privateSo = p.readBuffer(70);
+        });
+        QCOMPARE(privateSo, expected);
         QCOMPARE(r.readBuffer(70), initial);
         context(r)->Draw(1, 0);
         QCOMPARE(r.readBuffer(70), expected);
@@ -1043,9 +1099,184 @@ class NativePixelGeometryReplayTests final : public QObject {
         QCOMPARE(depth, expectedDepth);
         QCOMPARE(r.readTexture(20), beforeColor);
         QCOMPARE(r.readTexture(720), beforeDepth);
+        report["original_draw_observation"] = replayNativeOriginalDraw(r, 1000, [&](Replay &p, bool after) {
+            if (after) {
+                color = p.readTexture(20);
+                depth = p.readTexture(720);
+            }
+        });
+        QCOMPARE(color, expectedColor);
+        QCOMPARE(depth, expectedDepth);
+        QCOMPARE(r.readTexture(20), beforeColor);
+        QCOMPARE(r.readTexture(720), beforeDepth);
         report["status"] = "ok";
         report["output_sha256"] = sha256(color);
         report["depth_sha256"] = sha256(depth);
+        evidence(report);
+    }
+    void originalCommands_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("command");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t command : {0x37u, 0x39u, 0x3au, 0x3bu, 0x3cu, 0x3du})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(command))) << vendor << command;
+    }
+    void originalCommands() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, command);
+        auto c = blendCapture();
+        std::erase_if(c.entries, [](const auto &e) { return e.category == 3 || e.category == 7; });
+        auto buffer = [&](Id id, uint32_t bind, uint32_t misc, const std::vector<uint32_t> &words) {
+            c.add(id, 5, 0x83,
+                  statePack(Id(0), Id(0), uint32_t(words.size() * 4), 0u, bind, 0u, misc, 0u, id + 1));
+            auto raw = statePack(uint32_t(words.size() * 4));
+            for (auto word : words)
+                append(raw, word);
+            c.add(id + 1, 9, 1, raw);
+        };
+        State s{};
+        s.topology = 4;
+        s.sampleMask = UINT32_MAX;
+        s.omStart = 8;
+        s.rtCount = 1;
+        s.rtv[0] = 1002;
+        s.viewports = 50;
+        s.rasterizer = 52;
+        s.stages[0].shader = 10;
+        s.stages[4].shader = 12;
+        const bool indexed = command == 0x39 || command == 0x3a || command == 0x3b;
+        const bool instanced = command >= 0x3a;
+        if (indexed) {
+            buffer(30, D3D11_BIND_INDEX_BUFFER, 0, {999, 999, 2, 3, 4});
+            s.ib = 30;
+            s.ibFormat = 42;
+            s.ibOffset = 4;
+        }
+        c.add(90, 3, 3, snapshot(s));
+        std::vector<uint32_t> args =
+            indexed ? std::vector<uint32_t>{3, 1, uint32_t(-2)} : std::vector<uint32_t>{3, 3};
+        if (instanced) {
+            args.insert(args.begin() + 1, 2);
+            args.push_back(5);
+        }
+        auto raw = statePack(Id(90), Id(0), Id(1));
+        if (command == 0x3b || command == 0x3d) {
+            args.insert(args.begin(), 0xabcdef01);
+            buffer(40, 0, D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS, args);
+            append(raw, Id(40));
+            append(raw, 4u);
+        } else
+            for (auto value : args)
+                append(raw, value);
+        c.add(100, 7, uint16_t(command), raw);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 100);
+        o.shaders[10] = compileClassProgram("float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;"
+                                            "return float4(i==2?3:-1,i==1?3:-1,0,1);}",
+                                            "vs_5_0");
+        o.measurement = ReplayOptions::Measurement{100, 100, true};
+        Replay reference(f, o);
+        reference.run();
+        const auto expected = reference.readTexture(1000);
+        o.measurement.reset();
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readTexture(1000);
+        std::vector<uint8_t> actual;
+        auto report = replayNativeOriginalDraw(r, 100, [&](Replay &p, bool after) {
+            if (after)
+                actual = p.readTexture(1000);
+        });
+        QCOMPARE(actual, expected);
+        QCOMPARE(r.readTexture(1000), initial);
+        QCOMPARE(report.at("passing_samples"), Json(instanced ? 2 : 1));
+        QCOMPARE(report.at("passing_samples"), Json(reference.measurementResult()->occlusion));
+        QCOMPARE(report.at("pipeline_statistics").at("ia_vertices"), Json(instanced ? 6 : 3));
+        QCOMPARE(report.at("pipeline_statistics").at("ia_primitives"), Json(instanced ? 2 : 1));
+        QCOMPARE(report.at("command_type"), Json(command));
+        report["status"] = "ok";
+        report["output_sha256"] = sha256(actual);
+        report["reference_sha256"] = sha256(expected);
+        evidence(report);
+    }
+    void originalStages_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<bool>("hull");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (bool hull : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(hull))) << vendor << hull;
+    }
+    void originalStages() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(bool, hull);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("frame.gpa_frame");
+        auto capture = hull ? hullCapture() : streamCapture();
+        if (hull) {
+            std::erase_if(capture.entries, [](const auto &e) { return e.id == 12; });
+            capture.uav(12, 10, D3D11_BUFFER_UAV_FLAG_APPEND);
+            capture.add(195, 7, 0x32, statePack(Id(0), Id(1), Id(21), uint8_t(1), 0.f, 0.f, 0.f, 0.f));
+        }
+        capture.save(path);
+        Frame f(path.toStdWString());
+        auto o = options(vendor, 200);
+        if (hull)
+            o.shaders[7002] = compileClassProgram(
+                "struct V{float4 p:SV_Position;};struct C{float e[3]:SV_TessFactor;"
+                "float i:SV_InsideTessFactor;uint tag:ATTR;};AppendStructuredBuffer<uint> dst:register(u1);"
+                "C patch(InputPatch<V,3> p,uint pid:SV_PrimitiveID){C c;"
+                "c.e[0]=c.e[1]=c.e[2]=c.i=1;c.tag=42;dst.Append(123);return c;}"
+                "[domain(\"tri\")][partitioning(\"integer\")][outputtopology(\"triangle_cw\")]"
+                "[outputcontrolpoints(3)][patchconstantfunc(\"patch\")]"
+                "V main(InputPatch<V,3> p,uint id:SV_OutputControlPointID){return p[id];}",
+                "hs_5_0");
+        o.measurement = ReplayOptions::Measurement{200, 200, true};
+        Replay reference(f, o);
+        reference.run();
+        const Id buffer = hull ? 10 : 70;
+        const auto expected = reference.readBuffer(buffer);
+        const auto expectedColor = reference.readTexture(20);
+        const auto counter = hull ? reference.readCounter(12) : 0;
+        o.measurement.reset();
+        o.before = o.prepareBeforeDraw = true;
+        Replay r(f, o);
+        r.run();
+        const auto initial = r.readBuffer(buffer), color = r.readTexture(20);
+        const auto initialCounter = hull ? r.readCounter(12) : 0;
+        std::vector<uint8_t> actual, actualColor;
+        uint32_t actualCounter = 0;
+        auto report = replayNativeOriginalDraw(r, 200, [&](Replay &p, bool after) {
+            if (after) {
+                actual = p.readBuffer(buffer);
+                actualColor = p.readTexture(20);
+                if (hull)
+                    actualCounter = p.readCounter(12);
+            }
+        });
+        QCOMPARE(actual, expected);
+        QCOMPARE(actualColor, expectedColor);
+        QCOMPARE(actualCounter, counter);
+        QCOMPARE(r.readBuffer(buffer), initial);
+        QCOMPARE(r.readTexture(20), color);
+        if (hull) {
+            QCOMPARE(r.readCounter(12), initialCounter);
+            QVERIFY(counter > initialCounter);
+            QCOMPARE(report.at("pipeline_statistics").at("hs_invocations"),
+                     Json(reference.measurementResult()->pipeline.HSInvocations));
+            QCOMPARE(report.at("pipeline_statistics").at("ds_invocations"),
+                     Json(reference.measurementResult()->pipeline.DSInvocations));
+        } else {
+            QCOMPARE(report.at("command_type"), Json(0x38));
+            QVERIFY(!report.at("indirect").is_null());
+        }
+        QCOMPARE(report.at("passing_samples"), Json(reference.measurementResult()->occlusion));
+        report["status"] = "ok";
+        report["output_sha256"] = sha256(actual);
+        report["reference_sha256"] = sha256(expected);
         evidence(report);
     }
     void recovery_data() { devices(); }
@@ -1060,6 +1291,33 @@ class NativePixelGeometryReplayTests final : public QObject {
         Replay r(f, o);
         r.run();
         const auto initial = r.readTexture(1000);
+        for (bool after : {false, true}) {
+            bool cancelOriginal = false;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     replayNativeOriginalDraw(
+                                         r, 100, [&](Replay &, bool done) { cancelOriginal = done == after; },
+                                         256ull * 1024 * 1024, 30000, [&] { return cancelOriginal; }));
+            QCOMPARE(r.readTexture(1000), initial);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     replayNativeOriginalDraw(r, 100, [&](Replay &, bool done) {
+                                         if (done == after)
+                                             throw std::runtime_error("Original draw observer failure");
+                                     }));
+            QCOMPARE(r.readTexture(1000), initial);
+        }
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayNativeOriginalDraw(r, 100, {}, 1));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, replayNativeOriginalDraw(r, 100, {}, 0));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, replayNativeOriginalDraw(r, 100, {}, 1024, 60001));
+        try {
+            replayNativeOriginalDraw(
+                r, 100, [](Replay &, bool) { QTest::qSleep(30); }, 256ull * 1024 * 1024, 20);
+            QFAIL("Expired original draw deadline was accepted");
+        } catch (const OperationCancelled &) {
+            QFAIL("Original draw deadline was reported as cancellation");
+        } catch (const std::runtime_error &error) {
+            QCOMPARE(std::string(error.what()), std::string("Native pixel geometry replay deadline"));
+        }
+        QCOMPARE(r.readTexture(1000), initial);
         bool cancelled = false;
         QVERIFY_THROWS_EXCEPTION(OperationCancelled,
                                  replayNativePixelGeometry(
@@ -1097,6 +1355,13 @@ class NativePixelGeometryReplayTests final : public QObject {
         Replay reference(f, o);
         reference.run();
         QCOMPARE(result, reference.readTexture(1000));
+        report["original_draw_observation"] = replayNativeOriginalDraw(r, 100, [&](Replay &p, bool after) {
+            if (after)
+                result = p.readTexture(1000);
+        });
+        QCOMPARE(result, reference.readTexture(1000));
+        QCOMPARE(r.readTexture(1000), initial);
+        report["original_draw_recovered_failures"] = 8;
         report["status"] = "ok";
         report["recovered_failures"] = 9;
         evidence(report);

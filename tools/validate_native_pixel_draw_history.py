@@ -33,7 +33,12 @@ def validate(r, vendor):
     common(replay, vendor)
     require(r['event'] == replay['event'] and r['frame_sha256'] == replay['frame_sha256'] and
             r['adapter'] == replay['adapter'], 'joined execution identity')
-    require(r['readback_count'] == len(replay['batches']) + 3, 'checkpoint read count')
+    original_reads = 0
+    if 'original_draw_observation' in r:
+        from validate_native_original_draw import validate as original_draw
+        original_draw(r)
+        original_reads = 2
+    require(r['readback_count'] == len(replay['batches']) + 3 + original_reads, 'checkpoint read count')
     require(r['observed_storage_restored'] is True and same(r['before'], r['restored']), 'restored storage')
     require(r['original_storage_restored'] is (True if r['before']['exact_storage_bits'] else None), 'restoration precision')
     require(r['unattributed_changes'] == [], 'accepted cases have no unexplained storage transitions')

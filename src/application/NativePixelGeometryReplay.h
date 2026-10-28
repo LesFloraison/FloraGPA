@@ -12,6 +12,13 @@ struct NativePixelGeometryRange {
     uint64_t maxBytes = 256ull * 1024 * 1024;
     uint32_t timeoutMs = 30000;
 };
+// Executes the original draw once with all original shader stages and bindings
+// on private writable resources. Observers run before and after GPU completion.
+// This measures a new replay, not the capture's original GPU scheduling.
+nlohmann::json replayNativeOriginalDraw(Replay &, Id event,
+                                        const std::function<void(Replay &, bool after)> &observe = {},
+                                        uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
+                                        const CancelCheck &cancelled = {});
 // Internal before-event diagnostic. It captures final geometry and runs the
 // unmodified bound PS on private original outputs, preserving rasterization,
 // depth/stencil, blend, sample-mask, predicate and PS resource/class bindings.

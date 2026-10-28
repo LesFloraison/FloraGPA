@@ -1,4 +1,5 @@
 #include "NativePixelGeometryReplay.h"
+#include "DrawParameters.h"
 #include "DxbcGpuCompletion.h"
 #include "DxbcPixelGeometry.h"
 #include "DxbcPixelRaster.h"
@@ -48,6 +49,130 @@ class NativePixelGeometryReplay {
                               const CancelCheck &cancel, const NativePixelCheckpointPlanner *plan = nullptr)
         : r(replay), id(event), request(selection), planner(plan), observer(observe), cancelled(cancel),
           deadline(std::chrono::steady_clock::now() + std::chrono::milliseconds(selection.timeoutMs)) {}
+    Json original(const std::function<void(Replay &, bool)> &observe) {
+        checkDeadline();
+        if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
+            throw std::runtime_error("Private original draw requires a completed before-event replay");
+        const auto event = r.frame_.event(id);
+        if (event.type < 0x37 || event.type > 0x3d || !request.maxBytes || !request.timeoutMs ||
+            request.timeoutMs > 60000)
+            throw std::invalid_argument("Invalid private original draw request");
+        const auto state = r.prepareState(event);
+        const CancelCheck scoped = [&] {
+            checkDeadline();
+            return false;
+        };
+        Json report;
+        r.inspectEventInputs(id, [&] {
+            r.bind(state, false);
+            r.applyGraphicsEdits(event, state);
+            const auto cloneBytes = r.privateOutputPayloadBytes(state, true, scoped);
+            if (cloneBytes > request.maxBytes)
+                throw std::runtime_error("Private original draw output payload budget exceeded");
+            const auto parameters = resolveDrawParameters(r, event);
+            const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
+            Json shaders = Json::array();
+            for (unsigned stage = 0; stage < 5; ++stage) {
+                const auto resource = state.stages[stage].shader;
+                shaders.push_back(
+                    {{"stage", stage},
+                     {"resource", resource},
+                     {"sha256", resource ? Json(sha256(shader(resource), scoped)) : Json(nullptr)}});
+            }
+            const bool enabled = !r.options_.suppressDraws && !r.options_.disabled.contains(id);
+            report = {{"schema", 1},
+                      {"kind", "native_original_draw_observation"},
+                      {"backend", "native-original-draw/1"},
+                      {"event", id},
+                      {"scope", "original_draw_on_private_outputs"},
+                      {"frame_sha256", r.frame_.sha256(scoped)},
+                      {"enabled", enabled},
+                      {"command_type", event.type},
+                      {"parameters", parameters.parameters},
+                      {"indirect", parameters.indirect},
+                      {"shaders", shaders},
+                      {"raster_state", dxbc_exec::pixelRasterIdentity(raster)},
+                      {"private_output_payload_bytes", cloneBytes},
+                      {"payload_limit", request.maxBytes},
+                      {"original_fragment_eligibility", nullptr},
+                      {"original_gpu_schedule", false},
+                      {"diagnostic_shader_replacements", false},
+                      {"extra_uav_slots", 0},
+                      {"count_domain", "entire_bound_output"}};
+            r.withPrivateOutputs(
+                event, state,
+                [&] {
+                    if (observe)
+                        observe(r, false);
+                    checkDeadline();
+                    auto *context = r.context_.Get();
+                    Com<ID3D11Query> occlusion, statistics;
+                    const D3D11_QUERY_DESC oq{D3D11_QUERY_OCCLUSION, 0},
+                        sq{D3D11_QUERY_PIPELINE_STATISTICS, 0};
+                    check(r.device_->CreateQuery(&oq, &occlusion), "Create original draw occlusion query");
+                    check(r.device_->CreateQuery(&sq, &statistics), "Create original draw statistics query");
+                    context->Begin(occlusion.Get());
+                    context->Begin(statistics.Get());
+                    if (enabled) {
+                        const auto &a = event.args;
+                        switch (event.type) {
+                        case 0x37:
+                            context->Draw(a[0], a[1]);
+                            break;
+                        case 0x38:
+                            context->Draw(parameters.direct.args[0], 0);
+                            break;
+                        case 0x39:
+                            context->DrawIndexed(a[0], a[1], int32_t(a[2]));
+                            break;
+                        case 0x3a:
+                            context->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
+                            break;
+                        case 0x3b:
+                            context->DrawIndexedInstancedIndirect(r.get<ID3D11Buffer>(event.argumentBuffer),
+                                                                  a[0]);
+                            break;
+                        case 0x3c:
+                            context->DrawInstanced(a[0], a[1], a[2], a[3]);
+                            break;
+                        case 0x3d:
+                            context->DrawInstancedIndirect(r.get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                            break;
+                        }
+                    }
+                    context->End(statistics.Get());
+                    context->End(occlusion.Get());
+                    dxbc_exec::GpuCompletion completion(r.device_.Get(), context, scoped, request.timeoutMs);
+                    completion.submit();
+                    uint64_t passing = 0;
+                    D3D11_QUERY_DATA_PIPELINE_STATISTICS counts{};
+                    completion.query(occlusion.Get(), &passing, sizeof passing);
+                    completion.query(statistics.Get(), &counts, sizeof counts);
+                    report["passing_samples"] = passing;
+                    report["pipeline_statistics"] = {
+                        {"ia_vertices", counts.IAVertices},       {"ia_primitives", counts.IAPrimitives},
+                        {"vs_invocations", counts.VSInvocations}, {"hs_invocations", counts.HSInvocations},
+                        {"ds_invocations", counts.DSInvocations}, {"gs_invocations", counts.GSInvocations},
+                        {"gs_primitives", counts.GSPrimitives},   {"clip_invocations", counts.CInvocations},
+                        {"clip_primitives", counts.CPrimitives},  {"ps_invocations", counts.PSInvocations},
+                        {"cs_invocations", counts.CSInvocations}};
+                    if (observe)
+                        observe(r, true);
+                    checkDeadline();
+                    validate();
+                },
+                true, scoped);
+            checkDeadline();
+            const auto adapter = r.adapterDescription();
+            report["adapter"] = {{"vendor", adapter.VendorId},
+                                 {"device", adapter.DeviceId},
+                                 {"luid_low", adapter.AdapterLuid.LowPart},
+                                 {"luid_high", adapter.AdapterLuid.HighPart},
+                                 {"warp", r.options_.warp}};
+            report["debug_validation"] = r.options_.debug ? "no_errors" : "not_requested";
+        });
+        return report;
+    }
     Json run() {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
@@ -225,6 +350,12 @@ class NativePixelGeometryReplay {
         return report;
     }
 };
+Json replayNativeOriginalDraw(Replay &r, Id event, const std::function<void(Replay &, bool)> &observe,
+                              uint64_t maxBytes, uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe);
+}
 Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRange &range,
                                const std::function<void(Replay &, uint64_t)> &observe,
                                const CancelCheck &cancelled) {

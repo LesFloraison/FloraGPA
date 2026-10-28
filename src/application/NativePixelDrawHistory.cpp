@@ -505,6 +505,31 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         limits.maxBytes, limits.timeoutMs, bounded);
     if (completed != total || records.size() != candidates.size() || !shaderInputs.empty())
         throw std::runtime_error("Incomplete private pixel checkpoint join");
+    Json originalBefore, originalAfter;
+    auto original = replayNativeOriginalDraw(
+        r, event,
+        [&](Replay &privateReplay, bool done) {
+            (done ? originalAfter : originalBefore) = snapshot(privateReplay);
+        },
+        limits.maxBytes, limits.timeoutMs, bounded);
+    if (!equal(before, originalBefore))
+        throw std::runtime_error("Original draw observation started from different pixel storage");
+    uint64_t bridgePassing = 0;
+    for (const auto &batch : replay.at("batches")) {
+        const auto passing = batch.at("passing_samples").get<uint64_t>();
+        if (passing > UINT64_MAX - bridgePassing)
+            throw std::runtime_error("Geometry replay sample count overflow");
+        bridgePassing += passing;
+    }
+    original["before"] = originalBefore;
+    original["after"] = originalAfter;
+    original["geometry_observed_value_matches"] = equal(after, originalAfter);
+    original["geometry_exact_storage_matches"] =
+        after.at("exact_storage_bits") == true && originalAfter.at("exact_storage_bits") == true
+            ? original.at("geometry_observed_value_matches")
+            : Json(nullptr);
+    original["geometry_passing_samples"] = bridgePassing;
+    original["geometry_passing_samples_match"] = original.at("passing_samples") == bridgePassing;
     const auto restored = snapshot(r);
     if (!equal(before, restored))
         throw std::runtime_error("Private pixel history changed original storage");
@@ -532,6 +557,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         {"unattributed_changes", unattributed},
         {"candidate_passes", candidateReports},
         {"geometry_replay", replay},
+        {"original_draw_observation", original},
         {"shader_evaluation",
          {{"requested", limits.evaluateShaderOutputs},
           {"invocations", shaderInvocations},

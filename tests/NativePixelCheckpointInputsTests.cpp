@@ -399,6 +399,60 @@ class NativePixelCheckpointInputsTests final : public QObject {
             QCOMPARE(native, expected);
             QVERIFY(out.at("input_provenance").at("coverage_only").get<bool>());
         }
+        // A single draw does not serialize atomic allocation by primitive order.
+        auto words = [&](const std::vector<uint8_t> &bytes) {
+            require(bytes.size() == 16, "Original atomic output size");
+            std::array<uint32_t, 4> result{};
+            std::memcpy(result.data(), bytes.data(), 16);
+            require((mode == "append" ? result[0] == 7 : result[0] < 3) && result[1] == 11 &&
+                        result[2] == 17 && result[3] == 23,
+                    "Original atomic output constraints");
+            return result;
+        };
+        const auto observed =
+            words(report.at("original_draw_observation").at("after").at("bytes").get<std::vector<uint8_t>>());
+        o.before = o.prepareBeforeDraw = false;
+        o.measurement = ReplayOptions::Measurement{200, 200, true};
+        Replay reference(f, o);
+        reference.run();
+        const auto referenceWords = words(reference.readTexture(20));
+        const std::array<uint32_t, 4> expectedWords =
+            mode == "counter"  ? std::array<uint32_t, 4>{11, 12, 13, 0}
+            : mode == "append" ? std::array<uint32_t, 4>{7, 7, 7, 0}
+                               : std::array<uint32_t, 4>{3, 0, 0, 0};
+        std::vector<uint8_t> expectedStorage(original.size());
+        QVERIFY(expectedStorage.size() <= sizeof expectedWords);
+        std::memcpy(expectedStorage.data(), expectedWords.data(), expectedStorage.size());
+        QCOMPARE(storage(reference, mode), expectedStorage);
+        QCOMPARE(reference.measurementResult()->occlusion, uint64_t(3));
+        std::vector<uint8_t> observedStorage;
+        std::array<uint32_t, 4> repeatWords{};
+        uint32_t observedCounter = 0;
+        auto repeat = replayNativeOriginalDraw(r, 200, [&](Replay &p, bool after) {
+            if (after) {
+                observedStorage = storage(p, mode);
+                repeatWords = words(p.readTexture(20));
+                if (counted)
+                    observedCounter = p.readCounter(12);
+            }
+        });
+        QCOMPARE(observedStorage, expectedStorage);
+        QCOMPARE(repeat.at("passing_samples"), Json(3));
+        if (counted) {
+            QCOMPARE(observedCounter, 3u);
+            QCOMPARE(reference.readCounter(12), 3u);
+        }
+        report["original_draw_atomic_reference"] = {
+            {"schema", 1},
+            {"allocation_order_assumed", false},
+            {"observed_color", observed},
+            {"reference_color", referenceWords},
+            {"repeat_color", repeatWords},
+            {"reference_storage", storage(reference, mode)},
+            {"repeat_storage", observedStorage},
+            {"reference_passing_samples", reference.measurementResult()->occlusion},
+            {"counter", counted ? Json(observedCounter) : Json(nullptr)},
+            {"repeat", repeat}};
         QCOMPARE(storage(r, mode), original);
         QCOMPARE(r.readTexture(20), color);
         QCOMPARE(bindings(r), bound);
