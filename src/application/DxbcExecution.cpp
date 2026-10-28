@@ -299,6 +299,16 @@ struct ProgramData {
     std::vector<std::vector<Operand>> operands;
     std::vector<uint32_t> jump, breakTarget, continueTarget;
     std::map<uint32_t, uint32_t> labels;
+    struct Interface {
+        uint32_t elements, callSites;
+        bool dynamic;
+        std::set<uint32_t> tables;
+    };
+    std::set<uint32_t> functionBodies;
+    std::map<uint32_t, uint32_t> functionLabels;
+    std::map<uint32_t, std::vector<uint32_t>> functionTables;
+    std::map<uint32_t, Interface> interfaces;
+    uint32_t interfaceSlots = 0;
     std::map<uint32_t, std::pair<uint32_t, uint32_t>> arrays;
     std::map<uint32_t, std::map<uint32_t, uint32_t>> cases;
     std::map<uint32_t, uint32_t> defaults;
@@ -430,6 +440,28 @@ Program::Program(Bytes dxbc) {
                                          " is not implemented");
             if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
+        } else if (op == 144) {
+            if (version != 0x50 || words.size() != 2 || (words[0] & 0xffffff) != op ||
+                !data->functionBodies.insert(words[1]).second)
+                fail("Invalid DXBC function body declaration");
+        } else if (op == 145) {
+            if (version != 0x50 || words.size() < 3 || (words[0] & 0xffffff) != op ||
+                words[2] != words.size() - 3 ||
+                !data->functionTables.emplace(words[1], Words(words.begin() + 3, words.end())).second)
+                fail("Invalid DXBC function table declaration");
+        } else if (op == 146) {
+            if (version != 0x50 || words.size() < 4 || (words[0] & 0xfff7ff) != op)
+                fail("Invalid DXBC interface declaration");
+            const auto elements = words[3] >> 16, choices = words[3] & 0xffff;
+            if (!elements || words[1] != data->interfaceSlots || elements > 253 - data->interfaceSlots ||
+                choices != words.size() - 4 || !choices || words[2] > 4096)
+                fail("Invalid DXBC interface array range");
+            ProgramData::Interface declaration{elements, words[2], (words[0] & 0x800) != 0, {}};
+            for (size_t i = 4; i < words.size(); ++i)
+                if (!declaration.tables.insert(words[i]).second)
+                    fail("Duplicate DXBC interface function table");
+            data->interfaces.emplace(words[1], std::move(declaration));
+            data->interfaceSlots += elements;
         } else if (op == 90) {
             size_t pos = 1;
             const auto arg = operand(words, pos);
@@ -580,9 +612,12 @@ Program::Program(Bytes dxbc) {
             }
         } else if (op == 44) {
             const auto &arg = data->operands[i][0];
-            if (!blocks.empty() || arg.kind != 10 || arg.indices.size() != 1 || arg.indices[0].relative ||
+            auto &labels = arg.kind == 17 ? data->functionLabels : data->labels;
+            if (!blocks.empty() || (arg.kind != 10 && arg.kind != 17) || arg.components || arg.modifier ||
+                arg.precision || arg.indices.size() != 1 || arg.indices[0].relative ||
                 arg.indices[0].base > UINT32_MAX ||
-                !data->labels.emplace(uint32_t(arg.indices[0].base), i).second)
+                (arg.kind == 17 && !data->functionBodies.contains(uint32_t(arg.indices[0].base))) ||
+                !labels.emplace(uint32_t(arg.indices[0].base), i).second)
                 fail("Invalid DXBC label");
         }
         if ((op == 2 || op == 3) && data->breakTarget[i] == absent)
@@ -598,9 +633,85 @@ Program::Program(Bytes dxbc) {
         if (data->continueTarget[i] != absent)
             data->continueTarget[i] = owners.at(data->continueTarget[i]);
     }
-    // Validate static labels and reject recursion using the existing project-owned
-    // call graph. Execution retains its own visible return-address stack.
-    checkpoint::subroutines(code->instructions, data->first);
+    // Include every possible interface target in recursion validation. Execution
+    // resolves the selected table and retains a visible return-address stack.
+    if (data->interfaces.empty() && std::any_of(data->instructions.begin(), data->instructions.end(),
+                                                [](const auto &inst) { return inst.opcode == 120; }))
+        fail("DXBC interface call has no interface declaration");
+    if (data->functionBodies.empty() && data->functionTables.empty() && data->interfaces.empty())
+        checkpoint::subroutines(code->instructions, data->first);
+    else {
+        for (auto body : data->functionBodies)
+            if (!data->functionLabels.contains(body))
+                fail("Declared DXBC function body has no label");
+        for (const auto &[table, bodies] : data->functionTables)
+            for (auto body : bodies)
+                if (!data->functionBodies.contains(body))
+                    fail("DXBC function table references an absent body");
+        for (const auto &[base, declared] : data->interfaces)
+            for (auto table : declared.tables)
+                if (!data->functionTables.contains(table) ||
+                    data->functionTables.at(table).size() != declared.callSites)
+                    fail("DXBC interface function table size mismatch");
+        constexpr uint64_t main = UINT64_MAX;
+        uint64_t owner = main;
+        std::map<uint64_t, std::set<uint64_t>> edges{{main, {}}};
+        for (uint32_t i = data->first; i < size; ++i) {
+            const auto op = data->instructions[i].opcode;
+            const auto &args = data->operands[i];
+            if (op == 44) {
+                if (i == data->first || data->instructions[i - 1].opcode != 62)
+                    fail("DXBC function label must follow a return");
+                owner = uint64_t(args[0].kind) << 32 | args[0].indices[0].base;
+                edges[owner];
+            } else if (op == 4 || op == 5) {
+                const auto &target = args.back();
+                if (target.kind != 10 || target.indices.size() != 1 || target.indices[0].relative ||
+                    target.indices[0].base > UINT32_MAX ||
+                    !data->labels.contains(uint32_t(target.indices[0].base)))
+                    fail("Invalid static DXBC call target");
+                edges[owner].insert(uint64_t(10) << 32 | target.indices[0].base);
+            } else if (op == 120) {
+                const auto &target = args.at(0);
+                if (target.kind != 19 || target.components || target.modifier || target.precision ||
+                    target.indices.size() != 2 || target.indices[0].relative ||
+                    target.indices[0].base > UINT32_MAX ||
+                    !data->interfaces.contains(uint32_t(target.indices[0].base)) ||
+                    (data->instructions[i].words[0] & 0xffffff) != 120)
+                    fail("Invalid DXBC interface call operand");
+                const auto &declared = data->interfaces.at(uint32_t(target.indices[0].base));
+                const auto callSite = data->instructions[i].words[1];
+                if (callSite >= declared.callSites || (target.indices[1].relative && !declared.dynamic) ||
+                    (!target.indices[1].relative && target.indices[1].base >= declared.elements))
+                    fail("DXBC interface call exceeds its declaration");
+                for (auto table : declared.tables)
+                    edges[owner].insert(uint64_t(17) << 32 | data->functionTables.at(table).at(callSite));
+            }
+        }
+        std::set<uint64_t> complete, active;
+        for (const auto &[root, unused] : edges) {
+            if (complete.contains(root))
+                continue;
+            std::vector<std::pair<uint64_t, bool>> work{{root, false}};
+            while (!work.empty()) {
+                const auto [node, exit] = work.back();
+                work.pop_back();
+                if (exit) {
+                    active.erase(node);
+                    complete.insert(node);
+                } else {
+                    if (active.contains(node))
+                        fail("Recursive DXBC interface calls are invalid");
+                    if (complete.contains(node))
+                        continue;
+                    active.insert(node);
+                    work.emplace_back(node, true);
+                    for (auto target : edges.at(node))
+                        work.emplace_back(target, false);
+                }
+            }
+        }
+    }
     data_ = std::move(data);
 }
 const std::vector<Instruction> &Program::instructions() const { return data_->instructions; }
@@ -977,6 +1088,23 @@ Step Lane::step() {
             if (found != p.cases.at(s.pc).end())
                 next = found->second;
         }
+    } else if (op == 120) {
+        const auto target = s.address(args.at(0));
+        const auto &declared = p.interfaces.at(target.indices[0]);
+        if (target.indices[1] >= declared.elements)
+            fail("DXBC interface array index is out of range");
+        const auto slot = target.indices[0] + target.indices[1];
+        const auto binding = s.inputs.interfaceTables.find(slot);
+        if (binding == s.inputs.interfaceTables.end())
+            fail("DXBC interface slot is unresolved");
+        if (!declared.tables.contains(binding->second))
+            fail("DXBC interface table is incompatible with its slot");
+        if (calls.size() >= 32)
+            fail("DXBC call stack budget exceeded");
+        calls.push_back(next);
+        callLoopDepths.push_back(loops.size());
+        const auto body = p.functionTables.at(binding->second).at(instruction.words[1]);
+        next = p.functionLabels.at(body);
     } else if (op == 4 || op == 5) {
         if (op == 4 || condition(0)) {
             if (calls.size() >= 32)

@@ -2,6 +2,7 @@
 #include "DrawParameters.h"
 #include "DxbcCheckpointModel.h"
 #include "DxbcGpuOperations.h"
+#include "DxbcInterfaceBindings.h"
 #include "DxbcTypedBuffer.h"
 #include "DxbcVertexInputs.h"
 #include "core/UavCounters.h"
@@ -383,8 +384,8 @@ class Snapshot {
         Objects<ID3D11ClassInstance, 256> classes;
         UINT count = 256;
         (context->*getter)(&value, classes.data(), &count);
-        if (count)
-            throw std::runtime_error("DXBC input snapshot requires resolved shader class execution");
+        if (count > classes.values.size())
+            throw std::runtime_error("DXBC class binding count exceeds snapshot storage");
         result.shader = objectId(value.Get(), type);
         if (!result.shader)
             throw std::runtime_error("No shader bound at the selected DXBC input stage");
@@ -395,6 +396,53 @@ class Snapshot {
             const auto bytes = replay.frame().shader(replay.frame().resource(result.shader).data);
             result.bytecode.assign(bytes.begin(), bytes.end());
         }
+        std::vector<InterfaceClassInstance> observed;
+        const auto &frame = replay.frame();
+        std::vector<Id> classIds;
+        if (count) {
+            const auto event = frame.event(result.event);
+            const auto effective = pipelineBindingsAt(frame, result.event, frame.state(event.state),
+                                                      replay.options().pipelineSetters);
+            const auto &stage = effective.stages[result.stage];
+            if (stage.shader != result.shader || stage.classCount != count)
+                throw std::runtime_error("DXBC class bindings disagree with the effective GPA pipeline");
+            classIds.assign(stage.classes.begin(), stage.classes.begin() + count);
+        }
+        for (UINT slot = 0; slot < count; ++slot) {
+            auto *instance = classes.values[slot];
+            if (!instance)
+                throw std::runtime_error("Bound DXBC interface slot has no class instance");
+            const auto id = classIds[slot];
+            frame.payload(id, 5, 0x98);
+            const auto found = objects.find(id);
+            if (found == objects.end() || identity(instance).Get() != identity(found->second.Get()).Get())
+                throw std::runtime_error("DXBC class instance disagrees with its GPA binding identity");
+            D3D11_CLASS_INSTANCE_DESC description{};
+            instance->GetDesc(&description);
+            auto name = [&](bool typeName) {
+                using Getter = void (STDMETHODCALLTYPE ID3D11ClassInstance::*)(LPSTR, SIZE_T *);
+                const Getter get =
+                    typeName ? &ID3D11ClassInstance::GetTypeName : &ID3D11ClassInstance::GetInstanceName;
+                SIZE_T size = 0;
+                (instance->*get)(nullptr, &size);
+                if (size > 4096)
+                    throw std::runtime_error("DXBC class name exceeds snapshot budget");
+                std::vector<char> text(size + 1);
+                (instance->*get)(text.data(), &size);
+                return std::string(text.data());
+            };
+            observed.push_back(
+                {id,
+                 {description.InstanceId, description.InstanceIndex, description.TypeId,
+                  description.ConstantBuffer, description.BaseConstantBufferOffset, description.BaseTexture,
+                  description.BaseSampler, uint32_t(description.Created)},
+                 name(false),
+                 name(true)});
+        }
+        auto bindings = resolveInterfaceBindings(result.bytecode, observed);
+        result.inputs.interfaceTables = std::move(bindings.tables);
+        result.inputs.registers.insert(bindings.registers.begin(), bindings.registers.end());
+        result.classBindings = std::move(bindings.identity);
     }
     void constants(ID3D11DeviceContext *context) {
         using Getter = void (STDMETHODCALLTYPE ID3D11DeviceContext::*)(UINT, UINT, ID3D11Buffer **);

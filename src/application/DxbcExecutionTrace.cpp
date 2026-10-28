@@ -197,6 +197,7 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
                 {"execution_model", Group::executionModel},
                 {"captured_gpu_schedule", false},
                 {"input_source", InputSnapshot::source},
+                {"class_bindings", snapshot.classBindings},
                 {"resource_observation", snapshot.resourceObservation},
                 {"frame_sha256", snapshot.frameSha256},
                 {"shader_sha256", shaderHash},

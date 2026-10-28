@@ -101,6 +101,9 @@ struct Inputs {
     std::shared_ptr<GpuOperations> gpu;
     std::shared_ptr<Memory> sharedMemory;
     std::shared_ptr<TextureInputs> textures;
+    // Runtime-resolved function table for each declared interface array element.
+    // Absence means unresolved binding, never table zero.
+    std::map<uint32_t, uint32_t> interfaceTables;
 };
 struct Change {
     Register destination;

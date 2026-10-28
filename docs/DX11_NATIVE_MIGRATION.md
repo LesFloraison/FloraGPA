@@ -1295,3 +1295,22 @@ and full dependency removal remain outside this completed increment.
 Twelve existing suites also pass 4,831 checks without failures or skips; the
 new and existing suites total 5,050 successful checks. GUI, CLI and Worker
 builds pass. These focused results do not close the standalone release gate.
+
+### Native class-interface execution under validation
+
+The independent executor now resolves named/created class bindings from the
+original shader metadata and effective GPA pipeline, executes function tables,
+preserves call-stack boundaries and displays raw `this[]` registers. Empty
+optimized function tables are accepted. The input provenance identity advances
+to `independent-replay-resource-inputs/8`; no private GPA library is involved.
+
+The expanded suite reports 40 passing checks and 22 failed original GPU
+comparisons, with no skips. Native arithmetic agrees with the authored integer
+contract and WARP across the 36 expanded layout configurations, but NVIDIA/Intel
+original outputs have unresolved differences. Reusing identical DXBC with and
+without the debug layer does not remove them. Existing regression suites pass
+1,842 checks; the combined CTest run remains failed because interface comparisons
+remain exact. See [the layout and control evidence](research/DX11_NATIVE_INTERFACE_LAYOUTS.md).
+This is partial P6 implementation, not a parity exemption or authorization for P7
+dependency deletion. Class texture/sampler members, general VS/PS and source
+debugging coverage, original fragment qualification and P1/P5/P8 gates remain open.

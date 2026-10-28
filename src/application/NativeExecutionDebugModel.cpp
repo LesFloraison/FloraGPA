@@ -23,6 +23,8 @@ std::string registerName(const dxbc_exec::Register &r) {
         return "x" + std::to_string(i[0]) + "[" + std::to_string(i[1]) + "]";
     if (r.kind == 8 && i.size() == 2)
         return "cb" + std::to_string(i[0]) + "[" + std::to_string(i[1]) + "]";
+    if (r.kind == 29 && i.size() == 1)
+        return "this[" + std::to_string(i[0]) + "]";
     if (i.empty()) {
         if (r.kind == 32)
             return "vThreadID";
