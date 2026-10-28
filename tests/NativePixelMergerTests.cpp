@@ -127,6 +127,7 @@ Json run(testing::Capture &capture, uint32_t vendor, Id event, Id color, Id dept
     observed.state.coverageMask = state.coverageMask;
     observed.state.rasterDepthBits = state.rasterDepthBits;
     observed.state.frontFace = state.frontFace;
+    observed.state.measureTests = true;
     auto result = mergeNativePixelOutput(before.nativeDevice(), options.warp, observed.state, outputs, 0);
     result["binding_snapshot"] = observed.identity;
     result["fixture_depth_stencil_descriptor"] = depthDescriptor(state.depthStencil);
@@ -526,6 +527,20 @@ class NativePixelMergerTests final : public QObject {
             }
             const auto result = run(capture, vendor, 100, 1000 + 4 * slot, 0, state, options);
             QCOMPARE(result.at("scope"), Json("private_single_sample_output_merger"));
+            const auto &tests = result.at("test_observations");
+            QCOMPARE(tests.at("target_writes"), Json(false));
+            QCOMPARE(tests.at("samples").size(), size_t(1));
+            const auto &sample = tests.at("samples").at(0);
+            QCOMPARE(sample.at("depth").at("passed"), Json(true));
+            QCOMPARE(sample.at("stencil").at("passed"), Json(true));
+            if (mode == "write-mask" && value == 0) {
+                QCOMPARE(result.at("color_before"), result.at("color_after"));
+                QCOMPARE(sample.at("combined").at("passing_samples"), Json(1));
+            }
+            if (mode == "shader" && value == 0) {
+                QCOMPARE(tests.at("shader_discarded"), Json(true));
+                QCOMPARE(sample.at("combined").at("passed"), Json(false));
+            }
         } catch (const std::exception &e) {
             QFAIL(e.what());
         }
@@ -633,7 +648,37 @@ class NativePixelMergerTests final : public QObject {
                                 "ps_5_0")
                         .bytecode;
             }
-            run(capture, vendor, 1000, 20, 720, state, options);
+            const auto result = run(capture, vendor, 1000, 20, 720, state, options);
+            const auto compare = [](uint32_t function, double left, double right) {
+                switch (function) {
+                case 1:
+                    return false;
+                case 2:
+                    return left < right;
+                case 3:
+                    return left == right;
+                case 4:
+                    return left <= right;
+                case 5:
+                    return left > right;
+                case 6:
+                    return left != right;
+                case 7:
+                    return left >= right;
+                case 8:
+                    return true;
+                default:
+                    throw std::runtime_error("Invalid fixture comparison");
+                }
+            };
+            const auto z = mode == "shader-depth" ? (value == 2 ? .25 : .75) : 0.;
+            const auto stencil =
+                !state.depthStencil.StencilEnable ||
+                compare(face.StencilFunc, state.stencilRef & state.depthStencil.StencilReadMask,
+                        0x53 & state.depthStencil.StencilReadMask);
+            const auto &sample = result.at("test_observations").at("samples").at(0);
+            QCOMPARE(sample.at("depth").at("passed"), Json(compare(state.depthStencil.DepthFunc, z, .5)));
+            QCOMPARE(sample.at("stencil").at("passed"), Json(stencil));
         } catch (const std::exception &e) {
             QFAIL(e.what());
         }
@@ -996,6 +1041,17 @@ class NativePixelMergerTests final : public QObject {
         const auto a = attempt(s, outputs);
         const auto b = attempt(s, outputs);
         QCOMPARE(a.at("color_after"), b.at("color_after"));
+        QCOMPARE(replay.observeTextureStorage(1000, 1024).bytes, s.color);
+        auto measured = s;
+        measured.measureTests = true;
+        checks = 0;
+        QVERIFY_EXCEPTION_THROWN(mergeNativePixelOutput(replay.nativeDevice(), true, measured, outputs, 0,
+                                                        [&] { return ++checks >= 5; }),
+                                 OperationCancelled);
+        QVERIFY(checks >= 5);
+        const auto measuredRetry = attempt(measured, outputs);
+        QCOMPARE(measuredRetry.at("color_after"), a.at("color_after"));
+        QCOMPARE(measuredRetry.at("test_observations").at("samples").size(), size_t(1));
         QCOMPARE(replay.observeTextureStorage(1000, 1024).bytes, s.color);
         auto multisample = s;
         multisample.samples.Count = 2;

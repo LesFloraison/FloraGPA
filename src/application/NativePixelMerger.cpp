@@ -374,6 +374,90 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     Com<ID3D11Query> query;
     const D3D11_QUERY_DESC queryDesc{D3D11_QUERY_OCCLUSION, 0};
     check(device->CreateQuery(&queryDesc, &query), "Create private merger query");
+    Json testObservations;
+    if (s.measureTests) {
+        // All probes read the initial storage. No color, depth or stencil writes
+        // are permitted, including stencil fail/depth-fail operations.
+        auto diagnosticBlend = s.blend;
+        for (auto &rt : diagnosticBlend.RenderTarget)
+            rt.RenderTargetWriteMask = 0;
+        Com<ID3D11BlendState1> combinedBlend, independentBlend;
+        check(device1->CreateBlendState1(&diagnosticBlend, &combinedBlend), "Create merger test blend");
+        diagnosticBlend.AlphaToCoverageEnable = FALSE;
+        check(device1->CreateBlendState1(&diagnosticBlend, &independentBlend),
+              "Create independent merger test blend");
+        auto diagnosticDepth = s.depthStencil;
+        diagnosticDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        diagnosticDepth.StencilWriteMask = 0;
+        std::array<Com<ID3D11DepthStencilState>, 4> testStates;
+        for (unsigned mode = 0; mode < testStates.size(); ++mode) {
+            auto desc = diagnosticDepth;
+            if (mode == 0 || mode == 2)
+                desc.StencilEnable = FALSE;
+            if (mode == 1 || mode == 2)
+                desc.DepthEnable = FALSE;
+            check(device->CreateDepthStencilState(&desc, &testStates[mode]), "Create merger test depth");
+        }
+        // Ignore shader discard and SV_Coverage for independent fixed-function
+        // tests. Keep the original output alpha and supplied depth unchanged.
+        const auto diagnosticCode =
+            compileHlsl("cbuffer C:register(b0){uint4 values[8];uint4 control;}struct O{" + fields +
+                            "float depth:SV_Depth;};O main(){O o;" + assignments +
+                            "o.depth=asfloat(control.x);return o;}",
+                        "ps_5_0")
+                .bytecode;
+        Com<ID3D11PixelShader> diagnosticPixel;
+        check(device->CreatePixelShader(diagnosticCode.data(), diagnosticCode.size(), nullptr,
+                                        &diagnosticPixel),
+              "Create independent merger test shader");
+        std::vector<std::array<Com<ID3D11Query>, 4>> testQueries(s.samples.Count);
+        for (uint32_t sample = 0; sample < s.samples.Count; ++sample)
+            for (unsigned mode = 0; mode < 4; ++mode) {
+                checkCancellation(cancelled);
+                auto &q = testQueries[sample][mode];
+                check(device->CreateQuery(&queryDesc, &q), "Create sample merger test query");
+                context->PSSetShader(mode == 3 ? pixel.Get() : diagnosticPixel.Get(), nullptr, 0);
+                context->OMSetDepthStencilState(testStates[mode].Get(), s.stencilRef);
+                context->OMSetBlendState(
+                    mode < 2 ? independentBlend.Get() : combinedBlend.Get(), s.blendFactor.data(),
+                    (1u << sample) & (mode == 3 ? s.sampleMask & s.coverageMask : UINT32_MAX));
+                context->Begin(q.Get());
+                context->Draw(3, 0);
+                context->End(q.Get());
+            }
+        dxbc_exec::GpuCompletion tests(device.Get(), context.Get(), cancelled, s.timeoutMs);
+        tests.submit();
+        testObservations = {{"schema", 1},
+                            {"scope", "private_late_tests_at_initial_storage"},
+                            {"depth_enabled", bool(depth && s.depthStencil.DepthEnable)},
+                            {"stencil_enabled", bool(depth && s.depthStencil.StencilEnable)},
+                            {"alpha_to_coverage_enabled", bool(s.blend.AlphaToCoverageEnable)},
+                            {"shader_active", lane.at("shader_active")},
+                            {"shader_discarded", lane.at("discarded")},
+                            {"initially_covered", lane.at("initially_covered")},
+                            {"shader_coverage_mask", constants[33]},
+                            {"target_writes", false},
+                            {"draws", s.samples.Count * 4},
+                            {"samples", Json::array()}};
+        const std::array<const char *, 4> names{"depth", "stencil", "alpha_to_coverage", "combined"};
+        for (uint32_t sample = 0; sample < s.samples.Count; ++sample) {
+            Json row{{"sample", sample},
+                     {"raster_covered", bool(s.coverageMask & (1u << sample))},
+                     {"sample_enabled", bool(s.sampleMask & (1u << sample))},
+                     {"shader_covered", bool(constants[33] & (1u << sample))}};
+            for (unsigned mode = 0; mode < 4; ++mode) {
+                uint64_t count = 0;
+                tests.query(testQueries[sample][mode].Get(), &count, sizeof count);
+                if (count > 1)
+                    throw std::runtime_error("Private merger test exceeded one storage sample");
+                row[names[mode]] = {{"passing_samples", count}, {"passed", count == 1}};
+            }
+            testObservations["samples"].push_back(std::move(row));
+        }
+        context->PSSetShader(pixel.Get(), nullptr, 0);
+        context->OMSetDepthStencilState(depthState.Get(), s.stencilRef);
+        context->OMSetBlendState(blendState.Get(), s.blendFactor.data(), s.sampleMask & s.coverageMask);
+    }
     checkCancellation(cancelled);
     context->Begin(query.Get());
     context->Draw(3, 0);
@@ -386,6 +470,13 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
     completion.submit();
     uint64_t passing = 0;
     completion.query(query.Get(), &passing, sizeof(passing));
+    if (s.measureTests) {
+        uint64_t sum = 0;
+        for (const auto &sample : testObservations.at("samples"))
+            sum += sample.at("combined").at("passing_samples").get<uint64_t>();
+        if (sum != passing)
+            throw std::runtime_error("Independent sample tests disagree with the combined merger query");
+    }
     std::array<std::vector<uint8_t>, 2> after;
     for (unsigned i = 0; i < 2; ++i)
         if (textures[i]) {
@@ -456,6 +547,7 @@ Json mergeNativePixelOutput(ID3D11Device *reference, bool warp, const NativePixe
             {"depth_view_flags", s.depthViewFlags},
             {"raster_depth_bits", s.rasterDepthBits ? Json(*s.rasterDepthBits) : Json(nullptr)},
             {"passing_samples", passing},
+            {"test_observations", testObservations},
             {"count_semantics", "d3d11_occlusion_query"},
             {"debug_validation", debug ? "no_errors" : "not_requested"}};
 }

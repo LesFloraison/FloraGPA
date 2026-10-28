@@ -23,6 +23,9 @@ struct NativePixelMergerState {
     std::optional<uint32_t> rasterDepthBits;
     uint32_t timeoutMs = 5000;
     bool frontFace = true;
+    // Measure each storage sample's independent late depth, stencil and alpha
+    // tests without writing targets. Does not establish original early tests.
+    bool measureTests = false;
     NativePixelMergerState();
 };
 // Applies one private shader lane to one color/depth cell, preserving samples.

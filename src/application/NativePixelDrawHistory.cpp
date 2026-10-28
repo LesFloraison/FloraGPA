@@ -459,6 +459,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                         // Only the selected storage sample is predicted. Other
                         // samples can belong to distinct shader invocations.
                         state.sampleMask &= 1u << s.sample;
+                        state.measureTests = true;
                         auto merged =
                             mergeNativePixelOutput(privateReplay.nativeDevice(), privateReplay.options().warp,
                                                    state, output, lane, bounded);
