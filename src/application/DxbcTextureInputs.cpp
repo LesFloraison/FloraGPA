@@ -60,13 +60,12 @@ uint32_t TextureInputs::loadReturnType(uint32_t format) {
     const auto description = loadFormat(format);
     return description ? description->returnType : 0;
 }
-std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register &binding,
-                                                  const Register &samplerBinding, uint32_t dimension,
-                                                  uint32_t returns, const Value &address,
-                                                  const Value &lodOrDdx,
-                                                  const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                                  const std::array<int32_t, 3> &offset,
-                                                  const std::optional<Value> &ddy, bool comparison) const {
+std::optional<Value>
+TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Register &samplerBinding,
+                             uint32_t dimension, uint32_t returns, const Value &address,
+                             const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                             const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
+                             bool comparison, bool gather) const {
     const uint32_t native = dimension == 2    ? 2
                             : dimension == 3  ? 4
                             : dimension == 5  ? 8
@@ -79,8 +78,9 @@ std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register
         (stage != 0 && stage != 1 && stage != 5) || (comparison && (dimension == 5 || ddy)))
         throw std::runtime_error("Invalid native explicit sampling request");
     for (unsigned c = 0; c < 4; ++c)
-        if (swizzle[c] > 3 || (comparison && swizzle[c] != 0) || ((returns >> (4 * c)) & 15) < 1 ||
-            (((returns >> (4 * c)) & 15) > 2 && ((returns >> (4 * c)) & 15) != 5))
+        if (swizzle[c] > 3 || (comparison && !gather && swizzle[c] != 0) || ((returns >> (4 * c)) & 15) < 1 ||
+            (((returns >> (4 * c)) & 15) > (gather && !comparison ? 5u : 2u) &&
+             ((returns >> (4 * c)) & 15) != 5))
             throw std::runtime_error("Invalid explicit sampling return class or swizzle");
     for (unsigned c = 0; c < 3; ++c)
         if (offset[c] < -8 || offset[c] > 7 || (offset[c] && (dimension == 6 || dimension == 10)))
@@ -117,7 +117,9 @@ std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register
     const auto info = textureInfo(texture.resource);
     const auto layout = textureSubresources(texture.resource);
     const bool cube = dimension == 6 || dimension == 10;
-    if (texture.resource.id != *view.resource || loadReturnType(view.format) != 5 || info.samples != 1 ||
+    const auto returnType = loadReturnType(view.format);
+    if (texture.resource.id != *view.resource ||
+        (gather && !comparison ? returnType < 3 || returnType > 5 : returnType != 5) || info.samples != 1 ||
         texture.storage.bytes.size() != layout.back().offset + layout.back().size ||
         texture.storage.valid.size() != texture.storage.bytes.size() || !view.mipCount || !view.layerCount ||
         view.firstMip >= info.mips || view.mipCount > info.mips - view.firstMip ||
@@ -141,6 +143,39 @@ std::optional<Value> TextureInputs::prepareSample(uint32_t stage, const Register
                      [](auto v) { return v == 1; }))
         return Value{};
     return std::nullopt;
+}
+Value TextureInputs::gatherTexture(uint32_t stage, const Register &binding, const Register &sampler,
+                                   uint32_t dimension, uint32_t returns, const Value &address,
+                                   const GatherOperation &operation, const std::array<uint32_t, 4> &swizzle,
+                                   uint32_t mask, const std::array<int32_t, 3> &offset, GpuOperations *gpu,
+                                   bool &assisted) const {
+    assisted = false;
+    const bool comparison = operation.opcode == 126 || operation.opcode == 128;
+    const bool programmable = operation.opcode == 127 || operation.opcode == 128;
+    if ((operation.opcode != 109 && operation.opcode != 126 && !programmable) ||
+        (dimension != 3 && dimension != 6 && dimension != 8 && dimension != 10) ||
+        (programmable && dimension != 3 && dimension != 8) || operation.component > 3 ||
+        (comparison && operation.component) || offset[2] || (programmable && (offset[0] || offset[1])))
+        throw std::runtime_error("Invalid native gather operation");
+    if (const auto resolved = prepareSample(stage, binding, sampler, dimension, returns, address,
+                                            operation.reference, swizzle, mask, offset, {}, comparison, true))
+        return *resolved;
+    if (programmable && (operation.offset.valid & 3) != 3)
+        return {};
+    if (!gpu)
+        throw std::runtime_error("Native gather requires the selected adapter GPU assist");
+    const auto &view = views.at(binding);
+    const auto type = loadReturnType(view.format);
+    for (unsigned c = 0; c < 4; ++c) {
+        const auto declared = (returns >> (4 * c)) & 15;
+        if (declared != type && !(type == 5 && (declared == 1 || declared == 2)))
+            throw std::runtime_error("Gather declaration and view return class disagree");
+    }
+    auto value = gpu->gatherTexture(stage, resources.at(*view.resource), view, samplers.at(sampler),
+                                    dimension, returns, address, operation, swizzle, mask, offset);
+    value.valid = uint8_t(mask);
+    assisted = true;
+    return value;
 }
 std::array<Value, 4> TextureInputs::samplePixelQuad(
     uint32_t opcode, const Register &binding, const Register &samplerBinding, uint32_t dimension,

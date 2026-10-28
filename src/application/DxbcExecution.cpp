@@ -358,6 +358,8 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
+            if ((op == 109 && version < 0x41) || ((op == 126 || op == 127 || op == 128) && version != 0x50))
+                fail("Gather instruction requires its shader model capability");
             if (doubleOperation(op)) {
                 if (version != 0x50 || !(globalFlags & (1u << 12)) ||
                     (op >= 210 && !(globalFlags & (1u << 17))))
@@ -1096,6 +1098,82 @@ Step Lane::step() {
                     after.bits[c] = value.bits[resource.select[c]];
                     after.valid = uint8_t((after.valid & ~(1u << c)) |
                                           (((value.valid >> resource.select[c]) & 1u) << c));
+                }
+            result.changes.push_back({target, before, after});
+        }
+    } else if (op == 109 || op == 126 || op == 127 || op == 128) {
+        const bool programmable = op == 127 || op == 128;
+        const bool comparison = op == 126 || op == 128;
+        const auto &destination = args[0], &resource = args[programmable ? 3 : 2],
+                   &sampler = args[programmable ? 4 : 3];
+        if ((p.stage != 0 && p.stage != 1 && p.stage != 5) || (instruction.words[0] & 0x00fff800u) ||
+            destination.modifier || destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
+            resource.modifier || resource.components != 2 || (resource.mode != 1 && resource.mode != 2) ||
+            sampler.kind != 6 || sampler.modifier || sampler.components != 2 || sampler.mode != 2 ||
+            (comparison && sampler.select[0]))
+            fail("Invalid DXBC gather operands or stage");
+        const auto binding = s.address(resource), samplerBinding = s.address(sampler);
+        const auto declared = p.typedResources.find(binding);
+        const auto samplerDeclaration = p.samplers.find(samplerBinding);
+        if (declared == p.typedResources.end() || samplerDeclaration == p.samplers.end() ||
+            samplerDeclaration->second != (comparison ? 1u : 0u))
+            fail("Gather requires matching texture and sampler declarations");
+        const auto [dimension, returns] = declared->second;
+        if ((dimension != 3 && dimension != 6 && dimension != 8 && dimension != 10) ||
+            (programmable && dimension != 3 && dimension != 8))
+            fail("Invalid DXBC gather texture dimension");
+        std::array<int32_t, 3> offsets{};
+        std::set<uint32_t> extensions;
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
+            const auto token = instruction.words.at(pos), kind = token & 63;
+            if (!extensions.insert(kind).second)
+                fail("Duplicate DXBC gather extension");
+            if (kind == 1) {
+                if (token & 0x7fe001c0)
+                    fail("Invalid DXBC gather offset extension");
+                for (unsigned c = 0; c < 3; ++c)
+                    offsets[c] = (int32_t((token >> (9 + c * 4)) & 15) ^ 8) - 8;
+            } else if (kind == 2) {
+                if (((token >> 6) & 31) != dimension || (token & 0x7ffff800))
+                    fail("Gather dimension extension disagrees with declaration");
+            } else if (kind == 3) {
+                if (((token >> 6) & 0xffff) != returns || (token & 0x7fc00000))
+                    fail("Gather return extension disagrees with declaration");
+            } else
+                fail("Unsupported DXBC gather extension");
+        }
+        if (offsets[2] || ((programmable || dimension == 6 || dimension == 10) && (offsets[0] || offsets[1])))
+            fail("Invalid gather immediate offset for this opcode or dimension");
+        GatherOperation operation;
+        operation.opcode = op;
+        operation.component = sampler.select[0];
+        if (programmable)
+            operation.offset = s.source(args[2], true);
+        if (comparison) {
+            const auto &reference = args.back();
+            if (reference.components != 1 &&
+                !(reference.components == 2 &&
+                  (reference.mode == 2 ||
+                   (reference.mode == 1 && std::all_of(reference.select.begin(), reference.select.end(),
+                                                       [&](auto c) { return c == reference.select[0]; })))))
+                fail("Gather comparison reference requires a scalar selection");
+            operation.reference = s.source(reference, false);
+        }
+        Value value;
+        if (s.inputs.textures)
+            value = s.inputs.textures->gatherTexture(
+                p.stage, binding, samplerBinding, dimension, returns, s.source(args[1], false), operation,
+                resource.select, destination.mask, offsets, s.inputs.gpu.get(), result.memoryGpuAssisted);
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned c = 0; c < 4; ++c)
+                if ((destination.mask & (1u << c)) &&
+                    (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                    after.bits[c] = value.bits[c];
+                    after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                 }
             result.changes.push_back({target, before, after});
         }

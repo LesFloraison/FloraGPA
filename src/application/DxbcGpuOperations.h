@@ -39,6 +39,11 @@ class GpuOperations {
                         const Value &address, const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle,
                         uint32_t mask, const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
                         bool comparison);
+    Value gatherTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
+                        const struct SamplerInput &, uint32_t dimension, uint32_t returns,
+                        const Value &address, const struct GatherOperation &,
+                        const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                        const std::array<int32_t, 3> &offset);
     std::vector<Value> sampleGradBatch(const struct TextureInput &, const struct TextureInputView &,
                                        const struct SamplerInput &, uint32_t dimension, uint32_t returns,
                                        const std::array<uint32_t, 3> &groupSize,

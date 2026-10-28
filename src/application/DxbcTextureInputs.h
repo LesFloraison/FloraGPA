@@ -48,6 +48,10 @@ struct SamplingInvocation {
 struct PixelSamplingInvocation {
     Value address, parameter;
 };
+struct GatherOperation {
+    uint32_t opcode = 109, component = 0;
+    Value offset = Value::known({}), reference = Value::known({});
+};
 struct TextureInputs {
     std::map<uint64_t, TextureMetadata> metadata;
     std::map<uint64_t, TextureInput> resources;
@@ -63,6 +67,10 @@ struct TextureInputs {
                                          const std::array<int32_t, 3> &offset, GpuOperations *,
                                          bool &assisted, const std::array<uint32_t, 3> &precision = {}) const;
     std::shared_ptr<const SampleQueryInput> rasterizerQueries;
+    Value gatherTexture(uint32_t stage, const Register &, const Register &, uint32_t dimension,
+                        uint32_t returns, const Value &address, const GatherOperation &,
+                        const std::array<uint32_t, 4> &swizzle, uint32_t mask,
+                        const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted) const;
     Value sampleTexture(uint32_t stage, const Register &resource, const Register &sampler, uint32_t dimension,
                         uint32_t returns, const Value &address, const Value &lodOrDdx,
                         const std::array<uint32_t, 4> &swizzle, uint32_t mask,
@@ -103,6 +111,6 @@ struct TextureInputs {
                                        uint32_t returns, const Value &address, const Value &lodOrDdx,
                                        const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                                        const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
-                                       bool comparison = false) const;
+                                       bool comparison = false, bool gather = false) const;
 };
 } // namespace flora::dxbc_exec
