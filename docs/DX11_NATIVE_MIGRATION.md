@@ -1196,3 +1196,17 @@ reject 768 corruptions. BF1 IDs 441, 578, 2460 and 3935 appear after depth bypas
 on all three adapters, while original fragment eligibility remains unknown.
 See `research/DX11_NATIVE_PIXEL_TEST_VARIANTS.md` for scope, measurements and
 reproduction. Full P1/P5/P6 parity and P7/P8 removal/release gates remain open.
+
+## Debugger module-route continuation
+
+Pinned Ghidra exports and original-code probes identify parser, logging and metrics
+extension routes separately from the unresolved debugger object. The player has
+separate executable-directory and containing-module-directory helpers. In the
+Python-hosted probe those paths differ, and relative parser loading initially
+fails; explicit verified preloading permits the wrapper/layout probe to complete.
+This bounds earlier null-engine observations and directs the next experiment toward
+an isolated host with original executable-relative module resolution. Twelve
+Ghidra exports, six wrapper lifecycles, six resolver cases and two directory cases
+pass validation, with 48 corruptions rejected. See
+`research/DX11_DEBUGGER_MODULE_ROUTES.md`. No debugger-engine recovery or product
+parity/removal gate is claimed by these research-only results.

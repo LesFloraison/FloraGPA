@@ -1,0 +1,444 @@
+{
+  "schema": 1,
+  "scope": "gpa_module_loader_and_parser_binding_routes",
+  "engine_recovered": false,
+  "shader_executed": false,
+  "renderdoc_removed": false,
+  "binary_sha256": {
+    "dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "ShaderParse.dll": "7a5d68d32f72f3abfb6346126058ff0eec6e9dba0e31d244142c01f026596c82"
+  },
+  "constructor_cases": 6,
+  "resolver_cases": 6,
+  "directory_cases": 2,
+  "ghidra_exports": 12,
+  "negative_controls": 48,
+  "elapsed_ms": 94,
+  "parser_exports": {
+    "Assemble": "0x7690",
+    "GetAsmParseError": "0x7870",
+    "Release": "0x7860"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/callers.log",
+      "bytes": 4294,
+      "sha256": "64f4eed2fc797a6a354ce3a222f81393a96efb2650b3d5730ad0f3456b1c1be7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/cleanup.log",
+      "bytes": 4122,
+      "sha256": "7581b25df89964a919ff8fbcc0e99c0bfcfe89b7669d5c857f9edac7ad1516ed"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/directory-selection.log",
+      "bytes": 3788,
+      "sha256": "5c7ed310c54a4cef6e6a74ab9e4d1909cc209ec0b7f10e88387f83f2595f5dc2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/directory-selection.txt",
+      "bytes": 27813,
+      "sha256": "daf49b2ff5bd0323f8413655e01ea52373e30bca0b9a841f6365cdb04f82872d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/endpoint-strings.txt",
+      "bytes": 7501,
+      "sha256": "f506a18963d88e73f97b0228a251dfba6db76c07b80ee42f9ddd6c6f60f96bd2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/extension-symbols.txt",
+      "bytes": 21265,
+      "sha256": "9be4fa28bb7a5d46fc1946d0650d1ee8e4960dc4f4e11c40a87c5a46f309ba2f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/extension-table.txt",
+      "bytes": 1992,
+      "sha256": "4c9a8290e665a528546f3229de0e9185479650b49eee2ec0c9e1cfe4042baf41"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/holder-cleanup.txt",
+      "bytes": 3092,
+      "sha256": "91404fbada01ca31530e7515a6a2ea3dc7198f087643b5eb2df2781d45b05d86"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/lifetime.log",
+      "bytes": 4078,
+      "sha256": "94239539f6ed4ffdac4918d933bf7d4e3824047b763bb8e95dd21fc84c1fe3b0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/loader-callers.txt",
+      "bytes": 360697,
+      "sha256": "43ac9bfd449c104b2d9e06d7637a86db672ff882df945f23b7620d9c94d02ad9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/loader-symbols.log",
+      "bytes": 3774,
+      "sha256": "8c54bd165a7749a2842ceb88c93ee15236e397d7f048359cbae940abaf5f8649"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/loader-symbols.txt",
+      "bytes": 711,
+      "sha256": "e0017b9b0afc3a2fe6bce6e428b4eb03a0ed187a7693ad783655fc28ccff45fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/loaders.txt",
+      "bytes": 58953,
+      "sha256": "db387c2594018f45420a915d1ca72e317b2bc29b5d5a012f08ae96be723a5be0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/module-lifetime.txt",
+      "bytes": 4260,
+      "sha256": "c1b995d63cc4d0ea86cb49e043b85ca23df1b6a2d709c46bfc8ca94174df0343"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-complete/probe.json",
+      "bytes": 17144,
+      "sha256": "6526b235202203cfd6190eb851000d23e143e0b281b93b326500bd5d88d2781d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-complete/process.json",
+      "bytes": 416,
+      "sha256": "66e6e605c9b8117ef0086e186dda688b8098f41d5694b6d7d01ac4a180ce7fc5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-complete/process.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-final/probe.json",
+      "bytes": 15543,
+      "sha256": "12c8e2833f697a09f20b92ad9462cd9b7505ead89e5ee454eef328113a778aae"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-final/process.json",
+      "bytes": 416,
+      "sha256": "008bd30b4529de1744aa2dec45f1641d29189937868a34f47574ff1d0c503f4d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-final/process.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-initial/process.json",
+      "bytes": 418,
+      "sha256": "e50bcbc15693d68a4f15c78f876de8b730996c27cc3a65ff1ff386571114e076"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/probe-initial/process.log",
+      "bytes": 468,
+      "sha256": "7c3e059b9752fd91c40521cea8fefa62ca1bdabbca9afb98167e1aef0264c5e7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/procedure-symbols.txt",
+      "bytes": 1526,
+      "sha256": "bbb5cdfa69a96eeb008796a013868642eb6b4a6e4fad0f6eb47529f3eab69ecc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/resolvers.txt",
+      "bytes": 89855,
+      "sha256": "f4f28b22f75edc2815a5adc8e7bf6b24aee8fa6d7bf7b35dcffc319d11565341"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/routes.log",
+      "bytes": 4344,
+      "sha256": "058bfca0477cffbbf12518d155d73039e959a3f7fba461f30f80cd1c6d3a616f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/singleton-types.txt",
+      "bytes": 2000,
+      "sha256": "a2a986131d6d7e5c1ea34a41bcd8bc209cb1a6eff56c97b5bd209fc195059475"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/support-symbols.txt",
+      "bytes": 9220,
+      "sha256": "9ba7996b0602afa94d4e925a65accc6e53cd6b9325e4f383ee29a560f0ba7050"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/types.log",
+      "bytes": 4067,
+      "sha256": "23b8c8cd91ea42c36cfc0b334dd0063ba7b567f02b3acf4a4826d67c172f41cd"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/binary.json",
+      "bytes": 191,
+      "sha256": "e67068273991ced5b4cd3516913008d1d516bc410343dffcb5e27dae206bdad1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/endpoint-strings.log",
+      "bytes": 3849,
+      "sha256": "75ef15aef7e7b511aacbf305e127af6d433224a5d9c73171698ea8453227d741"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/endpoint-strings.txt",
+      "bytes": 7501,
+      "sha256": "f506a18963d88e73f97b0228a251dfba6db76c07b80ee42f9ddd6c6f60f96bd2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/evidence-sha256.json",
+      "bytes": 2940,
+      "sha256": "83113150b9099ea45e12bd1257defcd1aa1b1f47deb431dc228a05aa08e7d3eb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/extension-symbols.log",
+      "bytes": 3783,
+      "sha256": "80fee80e542cb57cdf06d7785c339d71574e94c04b6625e41d30a3766ae41e14"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/extension-symbols.txt",
+      "bytes": 21265,
+      "sha256": "9be4fa28bb7a5d46fc1946d0650d1ee8e4960dc4f4e11c40a87c5a46f309ba2f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/extension-table.log",
+      "bytes": 3782,
+      "sha256": "f7d8a77a90c130d6d9249b0f3dc226b022d2a329a178482596d8160db59dd022"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/extension-table.txt",
+      "bytes": 1992,
+      "sha256": "4c9a8290e665a528546f3229de0e9185479650b49eee2ec0c9e1cfe4042baf41"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/holder-cleanup.log",
+      "bytes": 3782,
+      "sha256": "2f90dd67b3ec60237bf3443a9be096706bd5e1556af5e439f7a7d15b080079a9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/holder-cleanup.txt",
+      "bytes": 3092,
+      "sha256": "91404fbada01ca31530e7515a6a2ea3dc7198f087643b5eb2df2781d45b05d86"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loader-callers.log",
+      "bytes": 3900,
+      "sha256": "3cf3f2605757c85ae82f6c917b5cbd4ea5991a1f6ba820908c8cae9dc38c9cbd"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loader-callers.txt",
+      "bytes": 299168,
+      "sha256": "1bbcc00b76f09e7e54b31a6af98bc2c4c322d34268ac9a0cab47110a59a9ede3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loader-symbols.log",
+      "bytes": 3782,
+      "sha256": "5207c5c9b3c7947d600221f82db5ae1ac426610f92c452ce8a61b59eb05b04ad"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loader-symbols.txt",
+      "bytes": 711,
+      "sha256": "e0017b9b0afc3a2fe6bce6e428b4eb03a0ed187a7693ad783655fc28ccff45fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loaders.log",
+      "bytes": 3786,
+      "sha256": "9df9bf7fd0f00762a3ec5f8ef0764e957b663f90b3c61f55d9670255c8d77b49"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/loaders.txt",
+      "bytes": 58953,
+      "sha256": "db387c2594018f45420a915d1ca72e317b2bc29b5d5a012f08ae96be723a5be0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/module-lifetime.log",
+      "bytes": 3805,
+      "sha256": "b1c87f40b682758cf97b3b724fc850f30311d8fb47ec037fc3234b05b61137fd"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/module-lifetime.txt",
+      "bytes": 4260,
+      "sha256": "c1b995d63cc4d0ea86cb49e043b85ca23df1b6a2d709c46bfc8ca94174df0343"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/procedure-symbols.log",
+      "bytes": 3788,
+      "sha256": "e331e648853f215f6c39b924cbb7e9b86684107e9bd23e6c9edabe77c6ffc1d5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/procedure-symbols.txt",
+      "bytes": 1526,
+      "sha256": "bbb5cdfa69a96eeb008796a013868642eb6b4a6e4fad0f6eb47529f3eab69ecc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/resolvers.log",
+      "bytes": 3871,
+      "sha256": "13f2c760dba000d2df72b9066006feab06b05453b412301f9bd17220e43aa262"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/resolvers.txt",
+      "bytes": 89855,
+      "sha256": "f4f28b22f75edc2815a5adc8e7bf6b24aee8fa6d7bf7b35dcffc319d11565341"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/singleton-types.log",
+      "bytes": 3793,
+      "sha256": "7bdfa31b3d153502dd38c798ce239b79668cd0cb86c24e26280ddeedf03d7175"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified/singleton-types.txt",
+      "bytes": 2000,
+      "sha256": "a2a986131d6d7e5c1ea34a41bcd8bc209cb1a6eff56c97b5bd209fc195059475"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/binary.json",
+      "bytes": 191,
+      "sha256": "9de4b31df1fa3241c0cce598e58c220cabc36a75aedd619c9de90c7e8240b7de"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/directory-selection.log",
+      "bytes": 3803,
+      "sha256": "a9f8dce2dd33865cd5f29bf803141064fd023a8e26bb00a2e198ebd20a6dac09"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/directory-selection.txt",
+      "bytes": 27813,
+      "sha256": "daf49b2ff5bd0323f8413655e01ea52373e30bca0b9a841f6365cdb04f82872d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/endpoint-strings.log",
+      "bytes": 3855,
+      "sha256": "5978719c0126031cc9d5434b8eea9665a7786dfba96138cfb34a5bd92e0ea78e"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/endpoint-strings.txt",
+      "bytes": 7501,
+      "sha256": "f506a18963d88e73f97b0228a251dfba6db76c07b80ee42f9ddd6c6f60f96bd2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/evidence-sha256.json",
+      "bytes": 3206,
+      "sha256": "5089c785f62c160fb9a7e310c56c97fc6008038c69c9ef4eb9b194e198f51b92"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/extension-symbols.log",
+      "bytes": 3789,
+      "sha256": "2961fcbd2224597d6ff654897d9358a046acfc0dbfba77d9bbf912fd7b1bd036"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/extension-symbols.txt",
+      "bytes": 21265,
+      "sha256": "9be4fa28bb7a5d46fc1946d0650d1ee8e4960dc4f4e11c40a87c5a46f309ba2f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/extension-table.log",
+      "bytes": 3788,
+      "sha256": "254dc4c0a711f0d8314e6cdeb116946611e42962194840df037dcee4424dcbec"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/extension-table.txt",
+      "bytes": 1992,
+      "sha256": "4c9a8290e665a528546f3229de0e9185479650b49eee2ec0c9e1cfe4042baf41"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/holder-cleanup.log",
+      "bytes": 3788,
+      "sha256": "106a513edc03e145a0c2943464204abbe029857bde0394a545a7e9e45e1cb688"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/holder-cleanup.txt",
+      "bytes": 3092,
+      "sha256": "91404fbada01ca31530e7515a6a2ea3dc7198f087643b5eb2df2781d45b05d86"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loader-callers.log",
+      "bytes": 3906,
+      "sha256": "1c45b077bd1386a0461b39f1455c7f258e365629985c8473af0c67be8f0ad546"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loader-callers.txt",
+      "bytes": 299168,
+      "sha256": "1bbcc00b76f09e7e54b31a6af98bc2c4c322d34268ac9a0cab47110a59a9ede3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loader-symbols.log",
+      "bytes": 3788,
+      "sha256": "ade2301e9e12f1097925cb8e88678a094bcfc4ea2497cd26698c818121d6658f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loader-symbols.txt",
+      "bytes": 711,
+      "sha256": "e0017b9b0afc3a2fe6bce6e428b4eb03a0ed187a7693ad783655fc28ccff45fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loaders.log",
+      "bytes": 3792,
+      "sha256": "0d2e57e605d785fc7856b10aca22fc9398c04c267d6ed7431d6c6b0315799b30"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/loaders.txt",
+      "bytes": 58953,
+      "sha256": "db387c2594018f45420a915d1ca72e317b2bc29b5d5a012f08ae96be723a5be0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/module-lifetime.log",
+      "bytes": 3811,
+      "sha256": "87922c1fa897f72769b0db98bbe9cfb3e5990dfd7a0769e30b6a32e36278c9bc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/module-lifetime.txt",
+      "bytes": 4260,
+      "sha256": "c1b995d63cc4d0ea86cb49e043b85ca23df1b6a2d709c46bfc8ca94174df0343"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/procedure-symbols.log",
+      "bytes": 3794,
+      "sha256": "2756a95cd990f1eb83ca2642075a6c56b55ef5a635788c40e43dea65e0cc038d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/procedure-symbols.txt",
+      "bytes": 1526,
+      "sha256": "bbb5cdfa69a96eeb008796a013868642eb6b4a6e4fad0f6eb47529f3eab69ecc"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/resolvers.log",
+      "bytes": 3877,
+      "sha256": "07b8cc4a2f47d1c20466c36de6ba692b00782ea42d33a1c385d48425e6d40808"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/resolvers.txt",
+      "bytes": 89855,
+      "sha256": "f4f28b22f75edc2815a5adc8e7bf6b24aee8fa6d7bf7b35dcffc319d11565341"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/singleton-types.log",
+      "bytes": 3799,
+      "sha256": "f8e8849ee13500dfcbf56d294eeb80bc16e2a1b0d7b3f93cd4851c7f815c4251"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-module-routes/verified-final/singleton-types.txt",
+      "bytes": 2000,
+      "sha256": "a2a986131d6d7e5c1ea34a41bcd8bc209cb1a6eff56c97b5bd209fc195059475"
+    },
+    {
+      "path": "tools/ghidra/ExportAddressEvidence.java",
+      "bytes": 2682,
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "bytes": 2676,
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportSymbolEvidence.java",
+      "bytes": 2383,
+      "sha256": "f3b81eae0e8e622ea92cbfe5fc7138f5aaa7127a45d63f856d4777054ea95012"
+    },
+    {
+      "path": "tools/ghidra/Invoke-ModuleRouteResearch.ps1",
+      "bytes": 3478,
+      "sha256": "034559fc36335612ded33258b495630585b78f109ac2103424d8b969705d7aa0"
+    },
+    {
+      "path": "tools/probe_original_module_routes.py",
+      "bytes": 10329,
+      "sha256": "add8d6c0e5ba74b6afcdad963c75409c250d901dc7b88bc855822586a8fdc7ff"
+    },
+    {
+      "path": "tools/validate_module_route_research.py",
+      "bytes": 12314,
+      "sha256": "47e31bf4c0ce1d5fffd1754dfb258f99fd7c8f1c32d1414a8680fa74db8dffa1"
+    }
+  ]
+}
