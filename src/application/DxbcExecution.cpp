@@ -3,6 +3,7 @@
 #include "DxbcGpuOperations.h"
 #include "DxbcOperandArities.h"
 #include "DxbcTextureInputs.h"
+#include "DxbcTypedBuffer.h"
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -368,6 +369,8 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
+            if (op == 121 && version != 0x50)
+                fail("Buffer information requires shader model 5.0");
             if ((op == 109 && version < 0x41) || ((op == 126 || op == 127 || op == 128) && version != 0x50))
                 fail("Gather instruction requires its shader model capability");
             if (doubleOperation(op)) {
@@ -809,35 +812,60 @@ struct Lane::State {
         }
         return result;
     }
-    std::pair<uint32_t, uint32_t> textureDeclaration(const Operand &resource) const {
+    struct ResourceShape {
+        uint32_t dimension, returns, stride;
+    };
+    ResourceShape resourceShape(const Operand &resource) const {
         const auto binding = address(resource);
-        if (resource.kind == 7 && resource.indices.size() == 1 && resource.indices[0].relative) {
-            if (binding.indices[0] >= 128)
-                fail("DXBC indexed texture binding exceeds the slot limit");
-            // Indexed instructions carry their own type. A class can relocate the
-            // resource to a slot with no static declaration or a different type.
-            std::optional<uint32_t> dimension, returns;
-            const auto &words = program->instructions.at(pc).words;
-            for (size_t pos = 1; words.at(pos - 1) >> 31; ++pos) {
-                const auto token = words.at(pos), kind = token & 63;
-                if (kind == 2) {
-                    if (dimension || (token & 0x7ffff800))
-                        fail("Invalid indexed texture dimension extension");
-                    dimension = (token >> 6) & 31;
-                } else if (kind == 3) {
-                    if (returns || (token & 0x7fc00000))
-                        fail("Invalid indexed texture return extension");
-                    returns = (token >> 6) & 0xffff;
-                }
+        const bool indexed =
+            resource.kind == 7 && resource.indices.size() == 1 && resource.indices[0].relative;
+        std::optional<ResourceShape> declared;
+        if (const auto found = program->typedResources.find(binding); found != program->typedResources.end())
+            declared = ResourceShape{found->second.first, found->second.second, 0};
+        else if (const auto buffer = program->bufferStrides.find(binding);
+                 buffer != program->bufferStrides.end())
+            declared = ResourceShape{buffer->second ? 12u : 11u, 0x6666, buffer->second};
+        std::optional<uint32_t> dimension, returns;
+        uint32_t stride = 0;
+        const auto &words = program->instructions.at(pc).words;
+        for (size_t pos = 1; words.at(pos - 1) >> 31; ++pos) {
+            const auto token = words.at(pos), kind = token & 63;
+            if (kind == 2) {
+                if (dimension || (token & 0x7f800000))
+                    fail("Invalid resource dimension extension");
+                dimension = (token >> 6) & 31;
+                stride = (token >> 11) & 4095;
+                if (*dimension == 12 ? (!stride || stride > 2048 || (stride & 3)) : stride != 0)
+                    fail("Invalid resource structure stride extension");
+            } else if (kind == 3) {
+                if (returns || (token & 0x7fc00000))
+                    fail("Invalid resource return extension");
+                returns = (token >> 6) & 0xffff;
             }
-            if (!dimension || !returns)
-                fail("Indexed texture execution requires instruction type extensions");
-            return {*dimension, *returns};
         }
-        const auto found = program->typedResources.find(binding);
-        if (found == program->typedResources.end())
-            fail("Native typed execution requires a resource declaration");
-        return found->second;
+        if (indexed) {
+            if (binding.indices[0] >= 128 || !dimension || !returns)
+                fail("Indexed resource requires a bounded slot and complete type extensions");
+            declared = ResourceShape{*dimension, *returns, stride};
+        }
+        if (!declared)
+            fail("Native execution requires a resource declaration");
+        if ((dimension && (*dimension != declared->dimension || stride != declared->stride)) ||
+            (returns && *returns != declared->returns))
+            fail("Resource instruction type disagrees with its declaration");
+        return *declared;
+    }
+    std::pair<uint32_t, uint32_t> textureDeclaration(const Operand &resource) const {
+        const auto type = resourceShape(resource);
+        if (type.dimension < 1 || type.dimension > 10)
+            fail("Invalid typed resource dimension");
+        return {type.dimension, type.returns};
+    }
+    uint32_t bufferStride(const Operand &resource) const {
+        const auto type = resourceShape(resource);
+        if ((type.dimension != 11 && type.dimension != 12) || type.returns != 0x6666)
+            fail("Invalid raw or structured buffer instruction type");
+        return type.stride;
     }
     void validateSampler(const Operand &sampler, bool comparison) const {
         const auto binding = address(sampler);
@@ -1228,6 +1256,59 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
+    } else if (op == 121) {
+        const auto &destination = args[0], &resource = args[1];
+        if ((instruction.words[0] & 0x00fff800) || destination.modifier || destination.precision ||
+            destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.modifier ||
+            resource.precision || resource.components != 2 || (resource.mode != 1 && resource.mode != 2) ||
+            (resource.kind != 7 && resource.kind != 30) || resource.indices.size() != 1)
+            fail("Invalid DXBC buffer information operands");
+        const auto type = s.resourceShape(resource);
+        if ((type.dimension != 1 && type.dimension != 11 && type.dimension != 12) ||
+            (type.dimension != 1 && type.returns != 0x6666))
+            fail("Buffer information requires a buffer resource type");
+        for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos)
+            if (const auto kind = instruction.words.at(pos) & 63; kind != 2 && kind != 3)
+                fail("Unsupported buffer information extension");
+        Value value;
+        const auto binding = s.address(resource);
+        if (s.inputs.memory) {
+            const auto found = s.inputs.memory->views_.find(binding);
+            if (found != s.inputs.memory->views_.end()) {
+                const auto &view = found->second;
+                uint64_t count = 0;
+                if (view.resource) {
+                    uint32_t unit = 1;
+                    if (type.dimension == 1) {
+                        const auto format = typedBufferFormat(view.format);
+                        if (!format || view.stride)
+                            fail("Typed buffer information requires an observed typed view");
+                        unit = format->bytes;
+                    } else if (view.format || view.stride != type.stride)
+                        fail("Buffer information declaration disagrees with observed stride");
+                    else if (type.dimension == 12)
+                        unit = type.stride;
+                    count = view.size / unit;
+                }
+                if (count > UINT32_MAX)
+                    fail("Buffer information count exceeds uint32");
+                value = Value::known({uint32_t(count), uint32_t(count), uint32_t(count), uint32_t(count)});
+            }
+        }
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned component = 0; component < 4; ++component)
+                if ((destination.mask & (1u << component)) &&
+                    (target.kind != 3 || component < p.arrays.at(target.indices[0]).second)) {
+                    after.bits[component] = value.bits[component];
+                    after.valid =
+                        uint8_t((after.valid & ~(1u << component)) | (value.valid & (1u << component)));
+                }
+            result.changes.push_back({target, before, after});
+        }
     } else if (op == 61) {
         const auto &destination = args[0], &level = args[1], &resource = args[2];
         const auto mode = (instruction.words[0] >> 11) & 3;
@@ -1235,15 +1316,13 @@ Step Lane::step() {
             destination.components != 2 || destination.mode != 0 ||
             (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || level.modifier ||
             (level.components != 1 && !(level.components == 2 && level.mode == 2)) || resource.modifier ||
-            (resource.kind != 7 && resource.kind != 30) || resource.indices.size() != 1 ||
-            resource.indices[0].relative)
+            (resource.kind != 7 && resource.kind != 30) || resource.indices.size() != 1)
             fail("Invalid DXBC resource information operands");
         const auto binding = s.address(resource);
-        const auto declaration = p.typedResources.find(binding);
-        if (declaration == p.typedResources.end() || declaration->second.first < 2 ||
-            declaration->second.first > 10 ||
-            (resource.kind == 30 && (declaration->second.first == 4 || declaration->second.first == 6 ||
-                                     declaration->second.first >= 9)))
+        const auto declaration = s.textureDeclaration(resource);
+        if (declaration.first < 2 || declaration.first > 10 ||
+            (resource.kind == 30 &&
+             (declaration.first == 4 || declaration.first == 6 || declaration.first >= 9)))
             fail("Invalid DXBC resource information declaration");
         std::set<uint32_t> extensions;
         for (size_t pos = 1; instruction.words.at(pos - 1) >> 31; ++pos) {
@@ -1251,18 +1330,18 @@ Step Lane::step() {
             if (!extensions.insert(kind).second)
                 fail("Duplicate DXBC resource information extension");
             if (kind == 2) {
-                if (((token >> 6) & 31) != declaration->second.first || (token & 0x7ffff800))
+                if (((token >> 6) & 31) != declaration.first || (token & 0x7ffff800))
                     fail("Resource information dimension extension disagrees with its declaration");
             } else if (kind == 3) {
-                if (((token >> 6) & 0xffff) != declaration->second.second || (token & 0x7fc00000))
+                if (((token >> 6) & 0xffff) != declaration.second || (token & 0x7fc00000))
                     fail("Resource information return extension disagrees with its declaration");
             } else
                 fail("Unsupported DXBC resource information extension");
         }
         const auto value =
             s.inputs.textures
-                ? s.inputs.textures->dimensions(binding, declaration->second.first, s.source(level, true),
-                                                mode, s.inputs.gpu.get(), result.memoryGpuAssisted)
+                ? s.inputs.textures->dimensions(binding, declaration.first, s.source(level, true), mode,
+                                                s.inputs.gpu.get(), result.memoryGpuAssisted)
                 : Value{};
         const auto target = s.address(destination);
         if (s.inBounds(target)) {
@@ -1507,13 +1586,12 @@ Step Lane::step() {
             fail("Unsupported DXBC memory operand");
         const auto memory = resource.kind == 31 ? s.inputs.sharedMemory : s.inputs.memory;
         const auto binding = s.address(resource);
-        const auto declaration = p.bufferStrides.find(binding);
-        if (declaration == p.bufferStrides.end() || structured != bool(declaration->second))
+        const auto stride = s.bufferStride(resource);
+        if (structured != bool(stride))
             fail("DXBC memory instruction disagrees with its declaration");
         if (memory) {
             const auto view = memory->views_.find(binding);
-            if (view != memory->views_.end() && view->second.resource &&
-                view->second.stride != declaration->second)
+            if (view != memory->views_.end() && view->second.resource && view->second.stride != stride)
                 fail("DXBC buffer declaration disagrees with captured stride");
             if (binding.kind == 31 && view != memory->views_.end() && view->second.resource &&
                 view->second.size != p.shared.at(binding.indices[0]).bytes)

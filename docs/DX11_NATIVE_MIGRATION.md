@@ -1367,3 +1367,19 @@ suite retains the same 22 failures. See [the resource execution and control
 evidence](research/DX11_NATIVE_INTERFACE_RESOURCES.md). Captured class-resource
 qualification, full stage/source parity and complete dependency removal remain
 open; neither the new comparison suite nor the combined CTest run is green.
+
+### Native class buffer loads and resource queries
+
+The executor now supports `bufinfo`, relative raw/structured loads and
+class-selected texture dimensions. Query results use the observed view range,
+preserve unknown bindings and respect destination masks. Snapshot identity is
+`independent-replay-resource-inputs/10`.
+
+All 96 native results match 96 direct GPU controls. Original class dispatch has
+29 matches, 35 numeric differences and 32 WARP crashes; the new suite remains
+failed with 67 cases requiring resolution. Existing dimension, group and memory
+regressions pass 1,059 cases, while the resource suite retains its same seven
+Intel Gather failures. GUI, CLI and Worker builds pass. See the
+[buffer/query evidence](research/DX11_NATIVE_INTERFACE_BUFFERS.md) for retained
+failures, bounded subprocess controls and reproduction. Full class/debug parity
+and removal acceptance remain open.

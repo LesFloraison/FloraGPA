@@ -335,6 +335,77 @@ class DxbcMemoryTests final : public QObject {
         QCOMPARE(raw.memory->buffers().at(1).bytes, initial.bytes);
         QVERIFY(failing.registers().empty());
     }
+    void bufferInformation() {
+        using Buffers = std::map<uint64_t, Buffer>;
+        using Views = std::map<Register, BufferView>;
+        for (const auto stage : {0u, 1u, 5u})
+            for (const auto kind : {7u, 30u})
+                for (const auto dimension : {1u, 11u, 12u})
+                    for (const auto state : {0u, 1u, 2u, 3u}) {
+                        const auto stride = dimension == 12 ? 16u : 0u;
+                        Words declaration;
+                        if (dimension == 1)
+                            declaration = op((kind == 7 ? 88u : 156u) | (1u << 11), {reg(kind, 0), {0x4444}});
+                        else if (dimension == 11)
+                            declaration = op(kind == 7 ? 161u : 157u, {reg(kind, 0)});
+                        else
+                            declaration = op(kind == 7 ? 162u : 158u, {reg(kind, 0), {stride}});
+                        const auto bytecode = makeDxbc(
+                            {{0x58454853,
+                              writeDxbcProgram(
+                                  {{(stage << 16) | 0x50, 0},
+                                   {op(104, {{1}}), declaration, op(54, {reg(0, 0), {0x4002, 7, 8, 9, 10}}),
+                                    op(121, {reg(0, 0, 5), source(kind, 0, 0x1b)}), op(62)}})}});
+                        const Program code(bytecode);
+                        Inputs inputs;
+                        auto storage = Buffer::known(bytes(128, 13));
+                        // Query validity comes from the view, even when contents are unknown.
+                        std::fill(storage.valid.begin(), storage.valid.end(), 0);
+                        Views views;
+                        if (state == 0)
+                            views[{kind, {0}}] = {1, 32, 48, stride, {}, dimension == 1 ? 2u : 0u};
+                        else if (state == 1)
+                            views[{kind, {0}}] = {};
+                        if (state != 3)
+                            inputs.memory = std::make_shared<Memory>(Buffers{{1, storage}}, views);
+                        Lane lane(code, inputs);
+                        execute(lane);
+                        const auto value = lane.value({0, {0}});
+                        const auto count = state == 0 ? (dimension == 11 ? 48u : 3u) : 0u;
+                        QCOMPARE(value.bits, (std::array<uint32_t, 4>{count, 8, count, 10}));
+                        QCOMPARE(value.valid, state < 2 ? uint8_t(15) : uint8_t(10));
+                        if (inputs.memory) {
+                            QCOMPARE(inputs.memory->buffers().at(1).bytes, storage.bytes);
+                            QCOMPARE(inputs.memory->buffers().at(1).valid, storage.valid);
+                        }
+                    }
+    }
+    void rejectBufferInformation() {
+        const auto query = [](uint32_t version, uint32_t flags, Words resource) {
+            return makeDxbc(
+                {{0x58454853, writeDxbcProgram({{0x50000 | version, 0},
+                                                {op(104, {{1}}), op(161, {reg(7, 0)}),
+                                                 op(121 | flags, {reg(0, 0), resource}), op(62)}})}});
+        };
+        QVERIFY_THROWS_EXCEPTION(std::exception, Program(query(0x40, 0, source(7, 0))));
+        for (const auto flags : {0x800u, 0x2000u}) {
+            QVERIFY_THROWS_EXCEPTION(std::exception, ([&] {
+                                         const Program code(query(0x50, flags, source(7, 0)));
+                                         Lane lane(code, {});
+                                         lane.step();
+                                     }()));
+        }
+        // A relative SRV cannot borrow the static declaration at its resolved slot.
+        try {
+            const auto indexed = program({op(161, {reg(7, 0)}), op(54, {reg(0, 0), imm(0)}),
+                                          op(121, {reg(0, 1), {0x00d07006, 0, 0x0010000a, 0}}), op(62)});
+            Lane lane(indexed, {});
+            lane.step();
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, lane.step());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void validationAndBudgets() {
         const auto initial = Buffer::known(bytes(64, 31));
         using Buffers = std::map<uint64_t, Buffer>;
