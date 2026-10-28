@@ -1168,3 +1168,17 @@ See `research/DX11_NATIVE_PIXEL_DEBUG_JOBS.md` for retained failures, expensive
 large-journal audits, performance measurements and reproduction. This does not
 close original fragment selection, complete history/debugger parity, GPA engine
 recovery or P7/P8 dependency-removal acceptance.
+
+## Accumulated system-ID presence continuation
+
+Private history now supports `--primitive-presence`: repeated complete original
+PS draws accumulate RGB predicates so later nonmatching returns do not erase
+earlier color completions. Distinct system IDs are observed twice and associated
+with every matching candidate ordinal; duplicate GS IDs retain ambiguity and
+original fragment eligibility remains unknown. Six suites pass 304 Qt checks.
+The validators cover 45 owned GPU cases, three recovery cases, 18 owned jobs,
+15 real probes and nine real jobs, rejecting 432 corruptions. BF1 independently
+confirms both IDs 162 and 2044, adding the earlier completion missed by the old
+last-value observation. See `research/DX11_NATIVE_PIXEL_PRESENCE.md` for exact
+limits, retained fixture failures, ordinary-replay comparisons and performance.
+Full fragment reconstruction, debugger parity and P1/P7/P8 remain open.

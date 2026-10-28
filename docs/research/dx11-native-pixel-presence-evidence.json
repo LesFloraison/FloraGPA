@@ -1,0 +1,3015 @@
+{
+  "schema": 1,
+  "implementation_commit": "b40f6698da2d8d98ed8e62972e46855e60270179",
+  "scope": "accumulated_system_id_presence_in_complete_private_draws",
+  "complete_fragment_history": false,
+  "renderdoc_removed": false,
+  "standalone_release_accepted": false,
+  "qt_checks": 304,
+  "suites": [
+    {
+      "name": "FloraNativePixelPresenceTests",
+      "passed": 50,
+      "elapsed_ms": 8234,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelPresenceTests.txt",
+        "bytes": 3153,
+        "sha256": "9c32ed1dcb224ef93aa90b41141fb81f4320e69c1f8272c55fc7af14ddc66071"
+      }
+    },
+    {
+      "name": "FloraNativeDrawHistoryJobsTests",
+      "passed": 23,
+      "elapsed_ms": 14994,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeDrawHistoryJobsTests.txt",
+        "bytes": 1752,
+        "sha256": "f0b68931269c651cdf586e50419b9aa9afaff4be5ed746a33ada76b4d98381c4"
+      }
+    },
+    {
+      "name": "FloraNativeAnalysisTests",
+      "passed": 46,
+      "elapsed_ms": 17871,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeAnalysisTests.txt",
+        "bytes": 2952,
+        "sha256": "7e0619facd9fb1d5d65a77616fd6ce92564968645f0e3e967cf58489f19124ae"
+      }
+    },
+    {
+      "name": "FloraNativePixelDebugTests",
+      "passed": 22,
+      "elapsed_ms": 19951,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelDebugTests.txt",
+        "bytes": 1523,
+        "sha256": "b7f4ecd7761ebcbaa899e65853cd9d6c1b58e301568fe6fca7eb9d1c9b9d28e8"
+      }
+    },
+    {
+      "name": "FloraDxbcPixelPrimitiveMaskTests",
+      "passed": 34,
+      "elapsed_ms": 16001,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelPrimitiveMaskTests.txt",
+        "bytes": 2303,
+        "sha256": "0fa67d0fc95ae92847d8d53b8ab7528dbf36a04f4fa0a3ae64e1b7c3f0bb8cbf"
+      }
+    },
+    {
+      "name": "FloraDxbcPixelCompletionTests",
+      "passed": 129,
+      "elapsed_ms": 20378,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelCompletionTests.txt",
+        "bytes": 7838,
+        "sha256": "cf3a9bd627ca0dc3e167b204f20240374a4cc3567bc722d92eb84c466d58f29d"
+      }
+    }
+  ],
+  "owned_cases": 45,
+  "recovery_cases": 3,
+  "owned_jobs": 18,
+  "real_probes": 15,
+  "real_history_jobs": 9,
+  "negative_controls": 432,
+  "module_audit_scope": "worker_loaded_modules_at_completion",
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/make-pixel-presence-ledger.py",
+      "bytes": 3762,
+      "sha256": "60a9d65bb9aea2c3f5c1c3e96eb91a939a286eaa567695ed9d76f92e7672616a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-acceptance.json",
+      "bytes": 6608,
+      "sha256": "2ea565ee39953021caf81ce41d6c2ebce44da11bf48810e807c1bc5637325622"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-alpha-zero.json",
+      "bytes": 52407,
+      "sha256": "87eec6c9df65ef8606de94e0d9a1c7e1f5b6529ebac18aef6fcd881f61729e03"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-depth.json",
+      "bytes": 28473,
+      "sha256": "4b9f956700b3cb36cadb7cadf6349eae37c31118074bd790277b6ea83b164e8d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-discard-first.json",
+      "bytes": 28234,
+      "sha256": "d511ae9d7ff86553b581c63b9855102286f34126fd2685ce3fe3a5f1c64400d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-discard-last.json",
+      "bytes": 28233,
+      "sha256": "23fa51fc54c718078bf872290b8047cc5183293eb4c8514ac5a5a9e1b2d42a38"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-discard-middle.json",
+      "bytes": 127501,
+      "sha256": "b129daf2c70ffaab94140b954f707d78f1b73477344713e00e0b4b73ce9fddbe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-duplicate-gs.json",
+      "bytes": 86321,
+      "sha256": "5f2ff2d6f36d606cdd8889cbb3139c6b9b6cd1ae9303deedbdb8f01c9dd0b21d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-early-discard.json",
+      "bytes": 28230,
+      "sha256": "4b9ddd06633ea85c18d80e73317c6a6e6f376de9d50c113d95b1448574c61a78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-mrt-eight.json",
+      "bytes": 35963,
+      "sha256": "e84e6098fae8748ef0f8c75a122a403cd921e048ab17d2ee95fa473384e97c72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-overlap.json",
+      "bytes": 127655,
+      "sha256": "e1b8d084833db14c221b27ad06c555fcf550b6269959b67af1b583d73f61005f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-recovery.json",
+      "bytes": 927,
+      "sha256": "bbcb27bdcdc5ef5a797a3f9593e848ec0bc43f026d099cb2593082ea1e89cdf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-sample-mask.json",
+      "bytes": 52500,
+      "sha256": "418da6025046a9dbae2bf819217347cf8b525bbb29564d6b0e5ec1191549092c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-sample.json",
+      "bytes": 52999,
+      "sha256": "2fc902a5c9f0a0d0021c4f56698bde6b6ebb54a3f2f8602c6b4f809819e54bdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-srgb.json",
+      "bytes": 26554,
+      "sha256": "d3d71ed5ecc92a434dd90f1bcc352eb0803eb35ca63bbc28ca366b6f425126cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-stencil.json",
+      "bytes": 28480,
+      "sha256": "ca8ecec86c7b215e9a192a05163818dac2989a2b9954c6cd47905d29a79a02f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-unorm.json",
+      "bytes": 26563,
+      "sha256": "90dde83ad7ec00f682851e97a81521fcc6c664d8caa2d70106cd7f04163e3efc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/0-write-mask.json",
+      "bytes": 28283,
+      "sha256": "85f6b40f38270bfec7caa1a2ee16281c852cda29cfb9e0afbb835245a9301b00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-alpha-zero.json",
+      "bytes": 52427,
+      "sha256": "d8e543328972b260483098407dc558f30daf9f7ac6934d5b17f3ad24cc3fb4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-depth.json",
+      "bytes": 28489,
+      "sha256": "356df330c4066f5f16d061a04c0161a3205464f8e324a318bff374ff61bb35ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-discard-first.json",
+      "bytes": 28254,
+      "sha256": "52508485005bb63b3a394db1de73fe33395d449b15b190db0a1449129f34c1f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-discard-last.json",
+      "bytes": 28253,
+      "sha256": "ce21c6eeb5aeaf0e97c439616d3a1fdacbfcc96606e773794e60327b58a12673"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-discard-middle.json",
+      "bytes": 127561,
+      "sha256": "5a2805e510cdc35d43b6bb329d661189c9c84db4146454d0c8f6b60a7eb76b5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-duplicate-gs.json",
+      "bytes": 86365,
+      "sha256": "72927a38f8028d569762d725620c60ed3f4495462e275f0626218e3217244e29"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-early-discard.json",
+      "bytes": 28254,
+      "sha256": "da61fdf01a438a8b28e30fc56189c2e8146931ad617d558803d2e63944dd4112"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-mrt-eight.json",
+      "bytes": 35987,
+      "sha256": "2c2914f1950c303aedcd927fe8f10c31c2cc5a73a226fb9dfdf9fe573a22f8ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-overlap.json",
+      "bytes": 127715,
+      "sha256": "3d249266f6573f61bfd21b9926fedfe3205effa5b8078515d9d80738d85bd487"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-recovery.json",
+      "bytes": 931,
+      "sha256": "ac8f3144f0923e597998b052ee59125248d9808473db43fea20b250c61acba6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-sample-mask.json",
+      "bytes": 52520,
+      "sha256": "ab58d12613485e116307eed02ff127579f46a2ececae90a06afd4ed726a4f3c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-sample.json",
+      "bytes": 53019,
+      "sha256": "b0bf1d7ea048ee96df56ee2f0f7fbcc30d59bc9837a0df95226dd031bccbd515"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-srgb.json",
+      "bytes": 26574,
+      "sha256": "f1909245cc7e17f689d987fd6591ba04ec17f99dfa2fc7ee6b6db5cbe99c6966"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-stencil.json",
+      "bytes": 28496,
+      "sha256": "8008cad27903f648186e85f908ff355a8b01d288b36034ea7f7bb7842f3753b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-unorm.json",
+      "bytes": 26583,
+      "sha256": "b253a26ea33cb827c42a79594e0d0c6297096edf8811a88fb7249aca2faeb8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/32902-write-mask.json",
+      "bytes": 28303,
+      "sha256": "7d06d88a84672dc1b9b3e13f1d63e3d1c4d85cb7da5219a1e9ad6e6d521d636f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-alpha-zero.json",
+      "bytes": 52422,
+      "sha256": "8a139e489b6c826d10bde931b452711a2ecac2bc8de87e9ab4be6087917c32d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-depth.json",
+      "bytes": 28484,
+      "sha256": "a232d6854637e1d9dc49ccd8d59b61031cde0087b127ed500da154bf59abee7b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-discard-first.json",
+      "bytes": 28245,
+      "sha256": "93efb693db473eec9d371dc6df4ba0882a11d829466466b6cfaee640da357bbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-discard-last.json",
+      "bytes": 28244,
+      "sha256": "9924de7d11e21ad44a64b1b61eb805a13aeead348a01a9a12cdb3a83df2809a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-discard-middle.json",
+      "bytes": 127535,
+      "sha256": "eab78e4a8031a3a4314281961fc03789c7bc38d3fc70b198cad640b975e47a1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-duplicate-gs.json",
+      "bytes": 86347,
+      "sha256": "aac206fd11d14fdc5de088127d57e6e29cf21308b6b642f60453565ec23c3387"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-early-discard.json",
+      "bytes": 28245,
+      "sha256": "81de12516870a71da6f8d54db50e48eea0edcac0ab912b2742f400bc1f7dcb46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-mrt-eight.json",
+      "bytes": 35974,
+      "sha256": "82dbcd287d4d8dad56f267d364ad2972549646c4cde9a9c3e52f802687ee4908"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-overlap.json",
+      "bytes": 127689,
+      "sha256": "13703ee53c5fa4188914d54fa4560c48e6193765c75257ec3e65017fb2c31c43"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-recovery.json",
+      "bytes": 930,
+      "sha256": "2b6469c1a89c07b6d6bdf9235d847219f1aabc29cd349450443328a5e94afd18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-sample-mask.json",
+      "bytes": 52511,
+      "sha256": "bb41cfd19ec10e8efb4019d95adc2e619eb3c20871a5ac1a975c393bd15aaab7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-sample.json",
+      "bytes": 53014,
+      "sha256": "0147c962de2e0317733eb17d3d19a8132f3316acee0c20f3dcf492afdcb8797f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-srgb.json",
+      "bytes": 26565,
+      "sha256": "44a35d08cc5baed3d408cbd88f69215608ca668c510e5a1983dd924c07903c4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-stencil.json",
+      "bytes": 28491,
+      "sha256": "13715bc3ff4b7d6cf64ae64568ebd5d88fc2641ea1566053038e19b0c0509221"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-unorm.json",
+      "bytes": 26574,
+      "sha256": "25588f1984474c5a7eb4ea5d397f67d2b89e523bef45fc8b423529de00f4f870"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted/4318-write-mask.json",
+      "bytes": 28294,
+      "sha256": "fce44c7bdea63a84d797e11b5061dfe542ac6155e5c584ba9fa0a7d133ddc899"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeAnalysisTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeAnalysisTests.txt",
+      "bytes": 2952,
+      "sha256": "7e0619facd9fb1d5d65a77616fd6ce92564968645f0e3e967cf58489f19124ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeDrawHistoryJobsTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativeDrawHistoryJobsTests.txt",
+      "bytes": 1752,
+      "sha256": "f0b68931269c651cdf586e50419b9aa9afaff4be5ed746a33ada76b4d98381c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelDebugTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelDebugTests.txt",
+      "bytes": 1523,
+      "sha256": "b7f4ecd7761ebcbaa899e65853cd9d6c1b58e301568fe6fca7eb9d1c9b9d28e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelPresenceTests-console.txt",
+      "bytes": 62307,
+      "sha256": "57e875603736f15c8ec5079804694c6feb0f55f3c0310475a62c99a4ab2316c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-accepted-FloraNativePixelPresenceTests.txt",
+      "bytes": 3153,
+      "sha256": "9c32ed1dcb224ef93aa90b41141fb81f4320e69c1f8272c55fc7af14ddc66071"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraDxbcPixelCompletionTests.exe",
+      "bytes": 1510912,
+      "sha256": "e3d8bf08d15374967a6fe0f449e2681c96b8ce976c86d5bcc3cba6549f11f38a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraDxbcPixelPrimitiveMaskTests.exe",
+      "bytes": 2313728,
+      "sha256": "139f2b5a48fada3d98e0e0e86149663a712da251540d0ceb6d15debfc683bbeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraGPA.Cli.exe",
+      "bytes": 6027264,
+      "sha256": "82a0790ffa98efa40ba881cda380d11b4b2f4b39f3516532d13622c5ff4f7463"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraGPA.exe",
+      "bytes": 5127168,
+      "sha256": "5fb531f3a696d86e744fdcd472c1b14d2a29e78ac082e3e55deeca1c3115b75b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraGPA.Worker.exe",
+      "bytes": 6027264,
+      "sha256": "82a0790ffa98efa40ba881cda380d11b4b2f4b39f3516532d13622c5ff4f7463"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1517568,
+      "sha256": "75423e98b1fc6f589b28125a97f8c429a2bb28b302e88f7361921f8df6fd71d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraNativeDrawHistoryJobsTests.exe",
+      "bytes": 1234944,
+      "sha256": "65518f775e8d6391d5ed4e981874e173e5b59284adc49b58915d38c2edb23b1c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraNativePixelCompletionProbe.exe",
+      "bytes": 1347584,
+      "sha256": "1706d74ee70942e95cb3bd5f67ec73721748acd3b58ac24c6562adf3027da162"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraNativePixelDebugTests.exe",
+      "bytes": 1976832,
+      "sha256": "0aeef8927b013d646889f6f2c6762adda91c33156b828ccc53c1bc3aadd6bb77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-binaries/FloraNativePixelPresenceTests.exe",
+      "bytes": 2316288,
+      "sha256": "3272920d6cd29a8f79f67d952a873ffe25bed2c89dae217bb63a7f393dd73fa6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-build.txt",
+      "bytes": 3886,
+      "sha256": "2885d7a8c567b0b5935a7f6524b26c19a1e1b76e84bb56c2fe9ed5331c2c33c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-contract-build.txt",
+      "bytes": 5847,
+      "sha256": "b9afe9b05106a6397d9db4f14f485f340cca589c60747329494512608a8276ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-drivers.json",
+      "bytes": 362,
+      "sha256": "0d773077810c4fdabbb094a8e99a8dec28bfde039fcbc37b70b68119b6a40b66"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-evidence-build.txt",
+      "bytes": 1016,
+      "sha256": "e037fc05d07952d1e0b661fdfb996736d9bd013f69df97774657f9e006ce156f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-alpha-zero.json",
+      "bytes": 52388,
+      "sha256": "004be6e4b766b954f587b0a80a59016195b5157f4d45852ec4daa187030ac4f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-depth.json",
+      "bytes": 28454,
+      "sha256": "a39c0d87858f77700953eb47dd2bbdf764143d57eedcec7fc79a9849e9978657"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-discard-first.json",
+      "bytes": 28215,
+      "sha256": "22b49d813f3a72353d184f717da61c50dd5a8bd486bd234e7ce2622de6a64d64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-discard-last.json",
+      "bytes": 28214,
+      "sha256": "2f35d409dffa3b16c791b9b4e4523645b5f4893b344fa6e3ff7e66a2dfa97f20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-discard-middle.json",
+      "bytes": 28216,
+      "sha256": "a4bc76da8cbbb3f30727c1e2167b64420911fcece70907177988ec11a97c86e3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-early-discard.json",
+      "bytes": 28211,
+      "sha256": "33b7bfea853a72de16a10919de61385718abe848f4c145a2de36ac7559060dde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-mrt-eight.json",
+      "bytes": 35944,
+      "sha256": "08c6d381459b390e09265f79186e17258570256d97d7cd09b7face73d21f6e47"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-overlap.json",
+      "bytes": 28261,
+      "sha256": "5abf8ee18125743808f024d2efe0831b62a6a5e2a59e1a2d49a2612e10ee7f70"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-recovery.json",
+      "bytes": 927,
+      "sha256": "bbcb27bdcdc5ef5a797a3f9593e848ec0bc43f026d099cb2593082ea1e89cdf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-sample-mask.json",
+      "bytes": 52481,
+      "sha256": "c4c8482e36ee38e3b692ff35b031f74f45c66b11078560dc9d4055c6e2328cb0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-sample.json",
+      "bytes": 52980,
+      "sha256": "6194a0e8837cabc93d16edc6cee80c1fceefcb43c08357fd3d71bbc982b4689b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-srgb.json",
+      "bytes": 26535,
+      "sha256": "69b98b48d0242742177c205cbd5b3fd00d50ceaee564e1116bb1f78b7e4822c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-stencil.json",
+      "bytes": 28461,
+      "sha256": "51c0360db2943617cd7a869f850292f027b84b74c001a4a23d6e0a32413c44bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-unorm.json",
+      "bytes": 26544,
+      "sha256": "efdfcbc7218e8ade66a5a02865772b0b93a5bf39abf96db2f65c25d870f7fafa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/0-write-mask.json",
+      "bytes": 28264,
+      "sha256": "1381323e3e888c1167ad0c42657c69ff0be104ea50f2034a2030724a090b3815"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-alpha-zero.json",
+      "bytes": 52408,
+      "sha256": "2ffe47f5eeefb178d5d5b58835109e8e45fddbe146793377ddd41d3ba431e052"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-depth.json",
+      "bytes": 28470,
+      "sha256": "409c8aee5c31440f436221e6cdec645bdab60bf23f336a8a553796a28bfa469f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-discard-first.json",
+      "bytes": 28235,
+      "sha256": "5d7d6e4cc57536c0077b1ad81653eac69efe35dfb6741f6e2acf98b591222028"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-discard-last.json",
+      "bytes": 28234,
+      "sha256": "3dcdc7adbcc3210003a8790b952e7075c371b8409d5938ba8e086ba23049c8af"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-discard-middle.json",
+      "bytes": 28236,
+      "sha256": "cacaa004b70e6dda78f258f0a073ec996014f7c11c9162e56ea9eb4c42d21afd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-early-discard.json",
+      "bytes": 28235,
+      "sha256": "ca48ecf82443d4b214563aeee6866f07ae27386658fa19de1e773b4a4b657577"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-mrt-eight.json",
+      "bytes": 35968,
+      "sha256": "0af05f01ee02130f9c7f1f75b6d90e04f556fbcd02588c1e6383e0bae1580aa5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-overlap.json",
+      "bytes": 28281,
+      "sha256": "ee41f03bc724ee80a7f001036d138a76003a457a14f1ceca9c0d16751e4a7caf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-recovery.json",
+      "bytes": 931,
+      "sha256": "ac8f3144f0923e597998b052ee59125248d9808473db43fea20b250c61acba6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-sample-mask.json",
+      "bytes": 52501,
+      "sha256": "c29536f44baa04ee0421ea973cc968c4e8455183107e384f966723ab1274b15d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-sample.json",
+      "bytes": 53000,
+      "sha256": "fc965929eaafe23b09464ad1bd750a6679570ee9df1a87ef8690e85f5f80bd72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-srgb.json",
+      "bytes": 26555,
+      "sha256": "bf361ef67a40eed360d5aeb4ef97cb4b879b4d63fffd94f1320b892fff6f8cff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-stencil.json",
+      "bytes": 28477,
+      "sha256": "9a705195cfb97029dd9f9fae7b930fea845cd34c49d39c336a5d272310db9a67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-unorm.json",
+      "bytes": 26564,
+      "sha256": "d5899f8b7dc399db80e7af7c55023139aba6f3ccc7efc6edd2a19f0123eb2476"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/32902-write-mask.json",
+      "bytes": 28284,
+      "sha256": "b96257ec2f2faeb4d0d92d774a26c1d52f926f4718b9808fcc74874e1a397099"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-alpha-zero.json",
+      "bytes": 52403,
+      "sha256": "78e7c83534e577c604229865e630eb6b2552c91e010b05809a2a02e443b51ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-depth.json",
+      "bytes": 28465,
+      "sha256": "c5a6c2f2701804ce2f9a4dc8a1a2910027d17e956bd0d2f93d0328e01f2c417d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-discard-first.json",
+      "bytes": 28226,
+      "sha256": "d94695b064f9968a1680c2c85fe618c08bba727ed4d77205672ebf18cd4da3d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-discard-last.json",
+      "bytes": 28225,
+      "sha256": "8f2ea4c0322bbcd4cb2333cc44bda58e07d6d6c0b26c8d2200a4b42e676e1ad1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-discard-middle.json",
+      "bytes": 28227,
+      "sha256": "4f52bd696a494f10c7ff34edaa7b8c4767587d655b9933c9b5f91339401ece84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-early-discard.json",
+      "bytes": 28226,
+      "sha256": "30e99d8581b8baf6c7c612fc6d0c3874356405bc5d9ca886dd4e61c7849c6ca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-mrt-eight.json",
+      "bytes": 35955,
+      "sha256": "4cc7071846f4de21401f3ebf600f26ed1df4b385d22e863ebda01e8d5aa348a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-overlap.json",
+      "bytes": 28272,
+      "sha256": "9eb112aa866b6195b7c96163e86448d578550f17519c0826f32b4987d0bdc548"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-recovery.json",
+      "bytes": 930,
+      "sha256": "2b6469c1a89c07b6d6bdf9235d847219f1aabc29cd349450443328a5e94afd18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-sample-mask.json",
+      "bytes": 52492,
+      "sha256": "6fc75c18d3143c092d7ab4ad3e215ce55e815f60ae311ff0c1271488dcf4b33e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-sample.json",
+      "bytes": 52995,
+      "sha256": "2eadb17558a07d18ea57f21b55c1923c0ef19b6e81d0ed0c7660cf0d93c1ae37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-srgb.json",
+      "bytes": 26546,
+      "sha256": "253cb1fe9e62fd13e59bfd0e6616760536f72e8b7b5b0cce9ed87d84e55a98c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-stencil.json",
+      "bytes": 28472,
+      "sha256": "ac9d85f281f6d1edf2c6d415344418036d625b358a04e5d399448d224af44136"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-unorm.json",
+      "bytes": 26555,
+      "sha256": "d6619d4e186522d285892baa09876e423597649ec6d2f83c075205a0e2b2634d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final/4318-write-mask.json",
+      "bytes": 28275,
+      "sha256": "16e8685fe5fd04a9384b4989cf46693e6f75a37fdf6808748668d553d92fc93b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-acceptance.json",
+      "bytes": 6608,
+      "sha256": "e6bf58e97e10fb8c552fefbe20938c10b8be42a98ad553c4880713297d9ee8bc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-build.txt",
+      "bytes": 5608,
+      "sha256": "e6948ae169ec25850cfd53528bf5afd19812c14cf9f83f698f4d4b4db836850e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelCompletionTests-console.txt",
+      "bytes": 59829,
+      "sha256": "55180b3376fb1ebf959e8fb74b798beabc6c20b3c21b8b97abe8254bb0b74f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelCompletionTests.txt",
+      "bytes": 7838,
+      "sha256": "cf3a9bd627ca0dc3e167b204f20240374a4cc3567bc722d92eb84c466d58f29d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelPrimitiveMaskTests-console.txt",
+      "bytes": 579600,
+      "sha256": "95bd15310ebdacfd8b8a5de439f1aeb362f6144d1832b46962e5f50ca08e0aaf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraDxbcPixelPrimitiveMaskTests.txt",
+      "bytes": 2303,
+      "sha256": "0fa67d0fc95ae92847d8d53b8ab7528dbf36a04f4fa0a3ae64e1b7c3f0bb8cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraNativePixelPresenceTests-console.txt",
+      "bytes": 44919,
+      "sha256": "85027de73f5e1f5b515ef0a605c5ac8cb82e3646eb028fd6cb3033634fa72cce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-final-FloraNativePixelPresenceTests.txt",
+      "bytes": 2975,
+      "sha256": "aabbf404d4eb101c1fd1005209d2dd2bab7a760ca613ee1a15ae09899c35a879"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraDxbcPixelCompletionTests-console.txt",
+      "bytes": 59829,
+      "sha256": "55180b3376fb1ebf959e8fb74b798beabc6c20b3c21b8b97abe8254bb0b74f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraDxbcPixelCompletionTests.txt",
+      "bytes": 7838,
+      "sha256": "dbc54e28fd8231bd773b969d80cf5a5ff0fd7abd90e1240dfb86ce982756b738"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraDxbcPixelPrimitiveMaskTests-console.txt",
+      "bytes": 579600,
+      "sha256": "95bd15310ebdacfd8b8a5de439f1aeb362f6144d1832b46962e5f50ca08e0aaf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraDxbcPixelPrimitiveMaskTests.txt",
+      "bytes": 2303,
+      "sha256": "1a7a976d8379bcf29ed3676a1fc1bdbb4bd0f94875f8774c3b044cc9c4b16d97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraNativePixelPresenceTests-console.txt",
+      "bytes": 44919,
+      "sha256": "85027de73f5e1f5b515ef0a605c5ac8cb82e3646eb028fd6cb3033634fa72cce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-FloraNativePixelPresenceTests.txt",
+      "bytes": 2975,
+      "sha256": "8c0ce248a98c9afbe193ec98c720f0d95eaf55527578f3c147f972a144bf476a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-gs-fixture-build.txt",
+      "bytes": 1016,
+      "sha256": "e037fc05d07952d1e0b661fdfb996736d9bd013f69df97774657f9e006ce156f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-alpha-zero.json",
+      "bytes": 52407,
+      "sha256": "87eec6c9df65ef8606de94e0d9a1c7e1f5b6529ebac18aef6fcd881f61729e03"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-depth.json",
+      "bytes": 28473,
+      "sha256": "4b9f956700b3cb36cadb7cadf6349eae37c31118074bd790277b6ea83b164e8d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-discard-first.json",
+      "bytes": 28234,
+      "sha256": "d511ae9d7ff86553b581c63b9855102286f34126fd2685ce3fe3a5f1c64400d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-discard-last.json",
+      "bytes": 28233,
+      "sha256": "23fa51fc54c718078bf872290b8047cc5183293eb4c8514ac5a5a9e1b2d42a38"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-discard-middle.json",
+      "bytes": 127501,
+      "sha256": "b129daf2c70ffaab94140b954f707d78f1b73477344713e00e0b4b73ce9fddbe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-early-discard.json",
+      "bytes": 28230,
+      "sha256": "4b9ddd06633ea85c18d80e73317c6a6e6f376de9d50c113d95b1448574c61a78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-mrt-eight.json",
+      "bytes": 35963,
+      "sha256": "e84e6098fae8748ef0f8c75a122a403cd921e048ab17d2ee95fa473384e97c72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-overlap.json",
+      "bytes": 127655,
+      "sha256": "e1b8d084833db14c221b27ad06c555fcf550b6269959b67af1b583d73f61005f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-recovery.json",
+      "bytes": 927,
+      "sha256": "bbcb27bdcdc5ef5a797a3f9593e848ec0bc43f026d099cb2593082ea1e89cdf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-sample-mask.json",
+      "bytes": 52500,
+      "sha256": "418da6025046a9dbae2bf819217347cf8b525bbb29564d6b0e5ec1191549092c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-sample.json",
+      "bytes": 52999,
+      "sha256": "2fc902a5c9f0a0d0021c4f56698bde6b6ebb54a3f2f8602c6b4f809819e54bdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-srgb.json",
+      "bytes": 26554,
+      "sha256": "d3d71ed5ecc92a434dd90f1bcc352eb0803eb35ca63bbc28ca366b6f425126cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-stencil.json",
+      "bytes": 28480,
+      "sha256": "ca8ecec86c7b215e9a192a05163818dac2989a2b9954c6cd47905d29a79a02f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-unorm.json",
+      "bytes": 26563,
+      "sha256": "90dde83ad7ec00f682851e97a81521fcc6c664d8caa2d70106cd7f04163e3efc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/0-write-mask.json",
+      "bytes": 28283,
+      "sha256": "85f6b40f38270bfec7caa1a2ee16281c852cda29cfb9e0afbb835245a9301b00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-alpha-zero.json",
+      "bytes": 52427,
+      "sha256": "d8e543328972b260483098407dc558f30daf9f7ac6934d5b17f3ad24cc3fb4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-depth.json",
+      "bytes": 28489,
+      "sha256": "356df330c4066f5f16d061a04c0161a3205464f8e324a318bff374ff61bb35ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-discard-first.json",
+      "bytes": 28254,
+      "sha256": "52508485005bb63b3a394db1de73fe33395d449b15b190db0a1449129f34c1f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-discard-last.json",
+      "bytes": 28253,
+      "sha256": "ce21c6eeb5aeaf0e97c439616d3a1fdacbfcc96606e773794e60327b58a12673"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-discard-middle.json",
+      "bytes": 127561,
+      "sha256": "5a2805e510cdc35d43b6bb329d661189c9c84db4146454d0c8f6b60a7eb76b5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-early-discard.json",
+      "bytes": 28254,
+      "sha256": "da61fdf01a438a8b28e30fc56189c2e8146931ad617d558803d2e63944dd4112"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-mrt-eight.json",
+      "bytes": 35987,
+      "sha256": "2c2914f1950c303aedcd927fe8f10c31c2cc5a73a226fb9dfdf9fe573a22f8ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-overlap.json",
+      "bytes": 127715,
+      "sha256": "3d249266f6573f61bfd21b9926fedfe3205effa5b8078515d9d80738d85bd487"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-recovery.json",
+      "bytes": 931,
+      "sha256": "ac8f3144f0923e597998b052ee59125248d9808473db43fea20b250c61acba6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-sample-mask.json",
+      "bytes": 52520,
+      "sha256": "ab58d12613485e116307eed02ff127579f46a2ececae90a06afd4ed726a4f3c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-sample.json",
+      "bytes": 53019,
+      "sha256": "b0bf1d7ea048ee96df56ee2f0f7fbcc30d59bc9837a0df95226dd031bccbd515"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-srgb.json",
+      "bytes": 26574,
+      "sha256": "f1909245cc7e17f689d987fd6591ba04ec17f99dfa2fc7ee6b6db5cbe99c6966"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-stencil.json",
+      "bytes": 28496,
+      "sha256": "8008cad27903f648186e85f908ff355a8b01d288b36034ea7f7bb7842f3753b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-unorm.json",
+      "bytes": 26583,
+      "sha256": "b253a26ea33cb827c42a79594e0d0c6297096edf8811a88fb7249aca2faeb8cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/32902-write-mask.json",
+      "bytes": 28303,
+      "sha256": "7d06d88a84672dc1b9b3e13f1d63e3d1c4d85cb7da5219a1e9ad6e6d521d636f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-alpha-zero.json",
+      "bytes": 52422,
+      "sha256": "8a139e489b6c826d10bde931b452711a2ecac2bc8de87e9ab4be6087917c32d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-depth.json",
+      "bytes": 28484,
+      "sha256": "a232d6854637e1d9dc49ccd8d59b61031cde0087b127ed500da154bf59abee7b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-discard-first.json",
+      "bytes": 28245,
+      "sha256": "93efb693db473eec9d371dc6df4ba0882a11d829466466b6cfaee640da357bbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-discard-last.json",
+      "bytes": 28244,
+      "sha256": "9924de7d11e21ad44a64b1b61eb805a13aeead348a01a9a12cdb3a83df2809a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-discard-middle.json",
+      "bytes": 127535,
+      "sha256": "eab78e4a8031a3a4314281961fc03789c7bc38d3fc70b198cad640b975e47a1e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-early-discard.json",
+      "bytes": 28245,
+      "sha256": "81de12516870a71da6f8d54db50e48eea0edcac0ab912b2742f400bc1f7dcb46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-mrt-eight.json",
+      "bytes": 35974,
+      "sha256": "82dbcd287d4d8dad56f267d364ad2972549646c4cde9a9c3e52f802687ee4908"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-overlap.json",
+      "bytes": 127689,
+      "sha256": "13703ee53c5fa4188914d54fa4560c48e6193765c75257ec3e65017fb2c31c43"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-recovery.json",
+      "bytes": 930,
+      "sha256": "2b6469c1a89c07b6d6bdf9235d847219f1aabc29cd349450443328a5e94afd18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-sample-mask.json",
+      "bytes": 52511,
+      "sha256": "bb41cfd19ec10e8efb4019d95adc2e619eb3c20871a5ac1a975c393bd15aaab7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-sample.json",
+      "bytes": 53014,
+      "sha256": "0147c962de2e0317733eb17d3d19a8132f3316acee0c20f3dcf492afdcb8797f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-srgb.json",
+      "bytes": 26565,
+      "sha256": "44a35d08cc5baed3d408cbd88f69215608ca668c510e5a1983dd924c07903c4e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-stencil.json",
+      "bytes": 28491,
+      "sha256": "13715bc3ff4b7d6cf64ae64568ebd5d88fc2641ea1566053038e19b0c0509221"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-unorm.json",
+      "bytes": 26574,
+      "sha256": "25588f1984474c5a7eb4ea5d397f67d2b89e523bef45fc8b423529de00f4f870"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history/4318-write-mask.json",
+      "bytes": 28294,
+      "sha256": "fce44c7bdea63a84d797e11b5061dfe542ac6155e5c584ba9fa0a7d133ddc899"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-build.txt",
+      "bytes": 6076,
+      "sha256": "9fe12bd1b53c5373a9789aab58ad60a7bcaf52e26cfee33426fd9fb98cc33cfd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-0/history.json",
+      "bytes": 274072,
+      "sha256": "7bb8d7dfcd4590a5d5e25cdbeee19472f91ad51c2a15bc04f38eb143a4edfee0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-0/job.json",
+      "bytes": 718,
+      "sha256": "14ea73e94c7255f1d994da717f880daba1bf3790cc1b41a9fee9b4cd25a04886"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-0/result.json",
+      "bytes": 297520,
+      "sha256": "0a756cb4fbf36329f2f424d1f585344f50c6a5da9c6ab544f2e6d603b58ee507"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-0/worker.log",
+      "bytes": 11984,
+      "sha256": "0bad165485d3609dbf7d32fe04064eee7776a1fe1f9d264c08bccc411f6b19b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-32902/history.json",
+      "bytes": 274149,
+      "sha256": "e2f29ae7976b133d1b27d988748632a051347f73815fb207f1bea46d1700db88"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-32902/job.json",
+      "bytes": 729,
+      "sha256": "716886688baf6891c5adce9eb29c61527fe5b30a1a068a67489bde87f10a134a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-32902/result.json",
+      "bytes": 298012,
+      "sha256": "bdee63929e4fb787f612c224277acf83daebf50ec554185ad32b2441aaa2def9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-32902/worker.log",
+      "bytes": 11984,
+      "sha256": "0bad165485d3609dbf7d32fe04064eee7776a1fe1f9d264c08bccc411f6b19b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-4318/history.json",
+      "bytes": 274190,
+      "sha256": "ee5a60444ce07f992e0ddff02874bae94ad5278b0ebd20110c2b5c121847567f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-4318/job.json",
+      "bytes": 727,
+      "sha256": "4089d33808a95881bf26a92fd1596d78446562c1a7316f14f0c0c8f00d656c95"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-4318/result.json",
+      "bytes": 298394,
+      "sha256": "09d4f69931c9dbf2f0f54853a2e43d06073a3af954a9e49ecc8c2af479da92ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/bf1-4318/worker.log",
+      "bytes": 11984,
+      "sha256": "0bad165485d3609dbf7d32fe04064eee7776a1fe1f9d264c08bccc411f6b19b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-0/history.json",
+      "bytes": 55200,
+      "sha256": "cd330a283e413780654762fa5ded5696e51038ed4e406695f3afa7660911ceba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-0/job.json",
+      "bytes": 724,
+      "sha256": "4d72bfac4a89372ed63869248e66598292d3111b47230a5ddc6005fc465fb8b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-0/result.json",
+      "bytes": 63307,
+      "sha256": "2e46a51ba4721970426e79db236d84d04ad742ef8e3c2be3f70cd2e6f4893737"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-0/worker.log",
+      "bytes": 1394,
+      "sha256": "dc2f7a593e156bfb4c9ba660b6c32adac653e26654508d5deec45e79d77fabd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-32902/history.json",
+      "bytes": 55224,
+      "sha256": "5844bffcd8729156885f375c71d41bb9fa49dcc28c83e395a45f16c64007c4d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-32902/job.json",
+      "bytes": 735,
+      "sha256": "b396987b33a5d64cbaf9a81f299bb16dda29916730a537d8e6c4671f54b32749"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-32902/result.json",
+      "bytes": 63746,
+      "sha256": "fa5c1df6a64713f2851de254f40f9e61e3a203cebdaad562de8c01e16f13ebc3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-32902/worker.log",
+      "bytes": 1394,
+      "sha256": "dc2f7a593e156bfb4c9ba660b6c32adac653e26654508d5deec45e79d77fabd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-4318/history.json",
+      "bytes": 55218,
+      "sha256": "75020cb1187eaf32f78a098875e62728a8eb81ecd66a363598f71f6c67a6b17b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-4318/job.json",
+      "bytes": 733,
+      "sha256": "32a131804180a4207a365fb7894adad156f3e6248034857f91c1dd2a7c649c7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-4318/result.json",
+      "bytes": 64081,
+      "sha256": "162fead127bdacc1f1c801231fd1c75394f6c5c920a81c4022f6787b9424c8d6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/gf2-4318/worker.log",
+      "bytes": 1394,
+      "sha256": "dc2f7a593e156bfb4c9ba660b6c32adac653e26654508d5deec45e79d77fabd7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-0/history.json",
+      "bytes": 56681,
+      "sha256": "251340402314b934ba4b303f159bb033974bfe741dfb2d233d9d4fb47ae82208"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-0/job.json",
+      "bytes": 731,
+      "sha256": "304bc1379390111938dd73caebf6ac348fa1b786466582b1549547d0a6f2849b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-0/result.json",
+      "bytes": 64866,
+      "sha256": "f7e5090e86a58d0c0db2bd44e563a189a0b08cbb0be463f48bd7a8c1e9bb6c7f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-0/worker.log",
+      "bytes": 1743,
+      "sha256": "8ebfa14d1cd469b7086027bd023ea99ee1d3d36573dff056f9e6dc337dcd8ca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-32902/history.json",
+      "bytes": 56710,
+      "sha256": "4f8fd5a6cc1f6145f1600f8b3fc8285e37206f64f102193b30ed357371e032c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-32902/job.json",
+      "bytes": 742,
+      "sha256": "84c6c7a695b691dd0007617cb94bb8b9ee9cadac3aacbb068f7e1576eca8a0d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-32902/result.json",
+      "bytes": 65310,
+      "sha256": "9a4716fca09d5ebb89d95bb23bf6ce0d7baf49bc0260fbb85bf5b24be53ff653"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-32902/worker.log",
+      "bytes": 1743,
+      "sha256": "8ebfa14d1cd469b7086027bd023ea99ee1d3d36573dff056f9e6dc337dcd8ca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-4318/history.json",
+      "bytes": 56696,
+      "sha256": "3567697a801d7ab988c28bcd3e8e842d1093f6bbcf9230674b2714bfba62c96f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-4318/job.json",
+      "bytes": 740,
+      "sha256": "584c100db78807dcb82522ad636b06e660e2fae821b8773e528216c2b6c2407e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-4318/result.json",
+      "bytes": 65637,
+      "sha256": "4701cbad9434a67872a81ddee526657d6baa2fa5273f48dade81fa11a78613ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real/helldivers-4318/worker.log",
+      "bytes": 1743,
+      "sha256": "8ebfa14d1cd469b7086027bd023ea99ee1d3d36573dff056f9e6dc337dcd8ca6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-bf1-0-console.txt",
+      "bytes": 93,
+      "sha256": "0e973efdf2f1f3e43ca75faf22d87b3d01278b9ba7e0c6570f01749c84859bac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-bf1-32902-console.txt",
+      "bytes": 97,
+      "sha256": "acc9c675928c391d84b5c8e41df943b205618f510ed390b37cbe1c083559c9aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-bf1-4318-console.txt",
+      "bytes": 96,
+      "sha256": "6ce0c3ac911e3db3b33a6245c07dc56d5798eb3941eedcbd1c0f9f42484c2d4b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-gf2-0-console.txt",
+      "bytes": 93,
+      "sha256": "093d4ae66d8bf43a1db6f0f4c8f9a79410a1c523c4173b1030c2da5b8256c469"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-gf2-32902-console.txt",
+      "bytes": 97,
+      "sha256": "a05a756d0119f6f4e7b49e2d26e5568aefe457840cd2b49602ffd8ce4b651ddf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-gf2-4318-console.txt",
+      "bytes": 96,
+      "sha256": "4498f08fd4c0ca063b1c1780d6e2d9097f2ee8f7bccf8ee46a1663ed047eeceb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-helldivers-0-console.txt",
+      "bytes": 100,
+      "sha256": "d819c2776293310f5c2be3b1de9b2242e8f9307baf090573b95df2f43bd3e510"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-helldivers-32902-console.txt",
+      "bytes": 104,
+      "sha256": "32983c0b05e86a814092d32ba5895aa022bc2586ce27d8492b1174156f5091e8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-history-real-helldivers-4318-console.txt",
+      "bytes": 103,
+      "sha256": "1cc7d5f39c428ba0fc453a1f56a6410d08dc5e3b9b1fdf958ca21826ac8eeca1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-integrated-FloraNativePixelPresenceTests-console.txt",
+      "bytes": 58239,
+      "sha256": "55d4e6e04ee8c1e82f4a8f24109bfed6ff0a0a56df65fe125213b80f2231f3e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-integrated-FloraNativePixelPresenceTests.txt",
+      "bytes": 3579,
+      "sha256": "c76fba3736ea7e4fa29f1eb5b8f1445cf975e1e7c0a2c36ba69bedf03f203956"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-integrated-validation.json",
+      "bytes": 2968,
+      "sha256": "6fa4948c764fa1e7b867df144f21a1ddd1177e1d29d8c417e0dfb4e5f0fac3e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-integration-build.txt",
+      "bytes": 7584,
+      "sha256": "87848f1c62976a69b960c3710e998908ff6db88eacd8218c73076891eeab6084"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-all-msaa/history.json",
+      "bytes": 414236,
+      "sha256": "749a5a8fd7e2f4c77870d62e19e937db4c3335684736a66ca674076df8add13d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-all-msaa/job.json",
+      "bytes": 948,
+      "sha256": "2003a415ddee71f609c7bb45798fc27de74ddb98640cc18498623029910d62a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-all-msaa/result.json",
+      "bytes": 450373,
+      "sha256": "34dd2a08f212870eb44befcd1305bcdfed3f5802d12df0179fa93921cffcb851"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-all-msaa/verified.json",
+      "bytes": 339,
+      "sha256": "886fd4ffd77ca1b64c6f0f708153e2b4bfbd56f564a0954bb1652867444711ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-all-msaa/worker.log",
+      "bytes": 9453,
+      "sha256": "e842dd79cabf26101bde80930e0a62fdf2fbc26720406e43d7baa8bac925ff5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-identity/history.json",
+      "bytes": 289866,
+      "sha256": "65983604d0b6b02ad55e9c80d0203467ec36b9985a7597fffe426808510b2011"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-identity/job.json",
+      "bytes": 872,
+      "sha256": "4a77e6284378976ae32a482d8baf33e64b52c096c80416fa02896b0b6c5b7439"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-identity/result.json",
+      "bytes": 317953,
+      "sha256": "0a528f431b0738525765f36556fd0af595ecbfda3973599e57cd3914583e588e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-identity/verified.json",
+      "bytes": 339,
+      "sha256": "ea6ccf6aaa69d3b49e2251649b43445a9dbf528b9d84becc1d3ca2219ce89c92"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-merger/history.json",
+      "bytes": 105823,
+      "sha256": "7be9c4085987f6a455d77b9800bff39b60de5180139a35d5791a7a8a40f1f7c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-merger/job.json",
+      "bytes": 867,
+      "sha256": "1edd2102e60fb2a612cbeba81d13ef2dde7230c6c6bfb119dd03922a41e1c6f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-merger/result.json",
+      "bytes": 120013,
+      "sha256": "b4b708585a9f099753dd71720be99c01525d3914757abe67127c66bdaea69923"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-merger/verified.json",
+      "bytes": 337,
+      "sha256": "ebb0b8719f331984c087d76c53308f03b4594a0a4e7888dc193a8e3707f94482"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-presence/history.json",
+      "bytes": 92426,
+      "sha256": "af3b2fb2d3b93b12381e726ca8ae46a042cd129dd14132815c5212a5641e6fac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-presence/job.json",
+      "bytes": 872,
+      "sha256": "5b7fb62bd2afca854cae106fbd3c6fdd44fc9e8ce60e40d76c01547e008c7dc7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-presence/result.json",
+      "bytes": 105792,
+      "sha256": "4cd26c9bfbd27a766b7240427e2c162eaaf398cc24bc40e3c96a032f67ac7f67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-presence/verified.json",
+      "bytes": 339,
+      "sha256": "3dc8ecbf702fc579f43cf34f2f423c8d6c2ab00a38ae3e7a02212b2b7093bc22"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-presence/worker.log",
+      "bytes": 2001,
+      "sha256": "9249a2d01c41d425241bb0163117a5720a48d0e1a4001948555b77ea5202aeb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-shader/history.json",
+      "bytes": 82692,
+      "sha256": "3d942919cc5dc818fbb92e46357091d61f96d9debb08a83f65ad17b906e77fdc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-shader/job.json",
+      "bytes": 868,
+      "sha256": "bfceed0e2f06fdeca4b4a2d6a28ec268f2e4f9958d2f664661ac352e243dae7d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-shader/result.json",
+      "bytes": 95082,
+      "sha256": "d57247a28644847988327084501b2ac4e3fbe0485b488693036f3d4e5c48faba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-shader/verified.json",
+      "bytes": 337,
+      "sha256": "b974d142abaf191a51aaf011f2e0b165dbfb6fbf1a5a5a105f5b450644dc85e2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-storage/history.json",
+      "bytes": 42713,
+      "sha256": "18b0196549babcad1be15792d90d05d16a4e3bf72b9687c0470ceaeb3b5bb789"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-storage/job.json",
+      "bytes": 840,
+      "sha256": "d4d0cfd6773830cbd0c67b7d6e6dad3a04d3e541c41b75745d199ea030276e60"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-storage/result.json",
+      "bytes": 52961,
+      "sha256": "6de25f289aabe08ee061d3bcde4a3f93af662e3546fac0cfbe51204cab225b1d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-storage/verified.json",
+      "bytes": 338,
+      "sha256": "4ef498fc43130994410add0f7770b6afc1d312122426c47e55244af1c9b2bbe9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/0-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-all-msaa/history.json",
+      "bytes": 414460,
+      "sha256": "f87ba299840879fcddd357fe8376488694e98619cd1a9d9c269957396573c4fa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-all-msaa/job.json",
+      "bytes": 955,
+      "sha256": "c89a5b0414b7ae96322445181b7895a1c58fbff900bf335c3952772b0ef2dac6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-all-msaa/result.json",
+      "bytes": 451014,
+      "sha256": "5bd0e45eb8b5b2705c2daa53b4c1d94b4a97d5e1352e7bb2f0414f6c86b6f59e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-all-msaa/verified.json",
+      "bytes": 343,
+      "sha256": "c0443581f24b4c6d7bfa9aa8490ab3037d1a226cf884c7c0ef9d29911d7e253d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-all-msaa/worker.log",
+      "bytes": 9453,
+      "sha256": "e842dd79cabf26101bde80930e0a62fdf2fbc26720406e43d7baa8bac925ff5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-identity/history.json",
+      "bytes": 290030,
+      "sha256": "a8669a97898ba0c932bc21d8e32a78b80241fe3eb3897b2fc3b258b40ebdc636"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-identity/job.json",
+      "bytes": 879,
+      "sha256": "73832454662d3eb4f1612a5c6395c7945cec06131a3f1e3ff4cd6572c5a0e312"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-identity/result.json",
+      "bytes": 318532,
+      "sha256": "790477c03a6ffb3376828c9e4e8fcba84084f46ce03e3f3c3cc3c1d4d95fac8d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-identity/verified.json",
+      "bytes": 343,
+      "sha256": "14ddeb1fd0206b8214b3619bd696f7ab5200042eecc7353d473210767e2df967"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-merger/history.json",
+      "bytes": 105869,
+      "sha256": "15661edfc57fa3834118190738d161eb16e90f264d37576c40ab76534503d075"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-merger/job.json",
+      "bytes": 874,
+      "sha256": "19c66b52f6c7bfd62d5ef7ce4634a2366aee56342d19aa78d9f343a31aace25a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-merger/result.json",
+      "bytes": 120474,
+      "sha256": "c8740ac24976c21f5dac410eb243585d20776d0072845e04c46124f9e70a55ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-merger/verified.json",
+      "bytes": 341,
+      "sha256": "4648516d23601a8a125979b253e3949dfa08270af225d18817218fd9f688e250"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-presence/history.json",
+      "bytes": 92466,
+      "sha256": "6941f198ba02d68b8b0042bafe22696307caffe2b0cb59059ce33db68f5b9d0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-presence/job.json",
+      "bytes": 879,
+      "sha256": "45ed80a3179d1a7423dcb5e298711c41297a4be5ed1d9c1fda457008b5e73ee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-presence/result.json",
+      "bytes": 106247,
+      "sha256": "f69fe2a371417ee5df64291cf86771ef7ce9902907f99c082b9e763a7d51ccf0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-presence/verified.json",
+      "bytes": 343,
+      "sha256": "ee7538ae3f8bce17febb210d2bda689c35a11704fbdc400bfc3f42504c9a60e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-presence/worker.log",
+      "bytes": 2001,
+      "sha256": "9249a2d01c41d425241bb0163117a5720a48d0e1a4001948555b77ea5202aeb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-shader/history.json",
+      "bytes": 82729,
+      "sha256": "f4fe59b149198194aaf37967861eb60f49407baf3e4fcfeacf3b0724a811e96f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-shader/job.json",
+      "bytes": 875,
+      "sha256": "c3f7615ffb22eab06a5889b13769ff484d17112f23338eab3a6f5d7964812580"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-shader/result.json",
+      "bytes": 95534,
+      "sha256": "5820d629f14fa2458c3d50e92e2e211d08f37474832045b0ab6ab305edced401"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-shader/verified.json",
+      "bytes": 341,
+      "sha256": "35dbe7ab151c0a2216e3c471a5a1f728e50aaa882690761df9a0f1660b1754c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-storage/history.json",
+      "bytes": 42729,
+      "sha256": "466d6271212bba2205274f3a09d437865cccada54693f666122cb69d5549cff3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-storage/job.json",
+      "bytes": 847,
+      "sha256": "e7ae78a298e11c852c9774b22c107ac340a69ed77e25b8be9da16270596875d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-storage/result.json",
+      "bytes": 53392,
+      "sha256": "d30beab9c9f5b05569980db62c92969698dfc1c91174f715641905a08495563d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-storage/verified.json",
+      "bytes": 342,
+      "sha256": "b3ee1777a17e69177180627347b965a9e4d7119028b88ccc77d2d6831a33b156"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/32902-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-all-msaa/history.json",
+      "bytes": 414361,
+      "sha256": "2ab8740aa7233c968d1ed89ad045d4cb375dbd31bf092109bb2b0fec2e308474"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-all-msaa/job.json",
+      "bytes": 954,
+      "sha256": "ddd54851802457cb26a457566febec90d4ef4dc29ebecb5924cf832371e75028"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-all-msaa/result.json",
+      "bytes": 451256,
+      "sha256": "997694747333935135348120f69774c24968f2eb1ca8a9d35454bfa71d764e28"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-all-msaa/verified.json",
+      "bytes": 342,
+      "sha256": "21eac67e2561ff45357fc14cdda91c799146140b0a15c4304dbde2eee5d65252"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-all-msaa/worker.log",
+      "bytes": 9453,
+      "sha256": "e842dd79cabf26101bde80930e0a62fdf2fbc26720406e43d7baa8bac925ff5a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-identity/history.json",
+      "bytes": 289952,
+      "sha256": "5f6c204e6f0e2fd1328c255941656581453262d54c5f2be1132748b15d98e1c3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-identity/job.json",
+      "bytes": 878,
+      "sha256": "29c6c4d02a906a12a971bf1396564e8f84a8eb8608afe55e49a8638c0606a792"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-identity/result.json",
+      "bytes": 318796,
+      "sha256": "373d295587814a2e905e0711a1659f9e01f8fbf6e56e5735ed60c2363786970e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-identity/verified.json",
+      "bytes": 342,
+      "sha256": "92fb287cb1d43dc3dbf4746a0cb3e86b76784cc77bf38dfd51a84633562aaa43"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-identity/worker.log",
+      "bytes": 8211,
+      "sha256": "cedd59de5773e8c6c06fa7b251f4d0ea714453baff2acbaaa8575c0a12987b65"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-merger/history.json",
+      "bytes": 105855,
+      "sha256": "1c16c7c414a05cbaa449fdc95f2fc644fd4ffddf8f003cafb816f91385406194"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-merger/job.json",
+      "bytes": 873,
+      "sha256": "0266c819d7370903283785559eb37c1f37dfd9d0f20a751a63208b55c3edf110"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-merger/result.json",
+      "bytes": 120802,
+      "sha256": "da6fdcf5d4a4fe2fba9e8b045d3454c9a2e3f6b2ab73505681604238a02fbef1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-merger/verified.json",
+      "bytes": 340,
+      "sha256": "e5b64abe4370b6c6afd744d5434fac5ac91c23c84d66d84e84da766026bc8189"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-merger/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-presence/history.json",
+      "bytes": 92449,
+      "sha256": "dd78297a98e37caf7ba699bea163ed67ac920baf4173dc61507a657890748349"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-presence/job.json",
+      "bytes": 878,
+      "sha256": "7b846f739d44b1dd6869f2a6a896c15d679feda4c50234f8d42bcc6843a0563b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-presence/result.json",
+      "bytes": 106572,
+      "sha256": "bde6b466930866af0bf24b0575c8aad3c5767402ae73e4ff6188c86eaa60774f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-presence/verified.json",
+      "bytes": 342,
+      "sha256": "b781035af6a38c78db70d1f38fb5be983bc4642327a6471370101752b289c37d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-presence/worker.log",
+      "bytes": 2001,
+      "sha256": "9249a2d01c41d425241bb0163117a5720a48d0e1a4001948555b77ea5202aeb8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-shader/history.json",
+      "bytes": 82718,
+      "sha256": "70d89491b0601f804244e29d7f2c22fffc90f6bda5994bda4d2da1e5aa4be2a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-shader/job.json",
+      "bytes": 874,
+      "sha256": "b8519bb976bd9089356e5445921425aca3faef16e2af81045d82a29fb058b55c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-shader/result.json",
+      "bytes": 95865,
+      "sha256": "08dc54b6eb84cc42eedcd66ba397daf13354f2a42ac0915614f7b89ec271421e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-shader/verified.json",
+      "bytes": 340,
+      "sha256": "b697857f5d8cdb226be49fb380257e3a261fe07d55eb8e8bad2cd93937bf4762"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-shader/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-storage/history.json",
+      "bytes": 42724,
+      "sha256": "7c11fbe5a6f865700607bf047b50bc8d3907fa93bb1e67134af648a4f1936b05"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-storage/job.json",
+      "bytes": 846,
+      "sha256": "754a1a2e9591f7b48d7aea1d4510ea644ba670a6cdae6f8eb97c35e68bf24864"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-storage/result.json",
+      "bytes": 53729,
+      "sha256": "b89a1f39bce5f38a5749bfcd10fedb6e4d989cf2c26c712a67651efd2c524fbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-storage/verified.json",
+      "bytes": 341,
+      "sha256": "aff2cfb417fec2a4add0487d3022aa90786bf2c40a43f60fb53863081d01758a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-accepted/4318-storage/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-build.txt",
+      "bytes": 5929,
+      "sha256": "8b47535a7f0b167b392a10e2dde9bf817b01df1386a94b74cdeead8001e52b0c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-jobs-validation.json",
+      "bytes": 3829,
+      "sha256": "31bf243e879566c40585e71dbdc4117e54c7b4d8d914f305b19c8a85f5054272"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-alpha-zero.json",
+      "bytes": 50060,
+      "sha256": "653dc08bd8785aeee3905ae4d271abb71b9608a98b10b7bbef4b445411e97afa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-depth.json",
+      "bytes": 26811,
+      "sha256": "ee5d031a17964bb3861ecfbf3b342ab686819f1266addbbdf5c96e1feed57da9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-discard-first.json",
+      "bytes": 26871,
+      "sha256": "6c3f4c1faef0e665d6d905de5845589f49edbe3a3e08610506adc66ab4b69b77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-discard-last.json",
+      "bytes": 26870,
+      "sha256": "238e7201b86ba7bdb931783f029f9803805c85758326df31f19fced38b59b9b3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-discard-middle.json",
+      "bytes": 26872,
+      "sha256": "dfc70aff3aa0762e24e1dc1917a199345671d5b4e6b736dda0c48aaad535ff74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-early-discard.json",
+      "bytes": 26867,
+      "sha256": "f2fdab86bfbcbf72660442b854bd7fc5fda6eea1c40d1051e0e5b1707c6df406"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-mrt-eight.json",
+      "bytes": 26923,
+      "sha256": "2678bc9001e902d1b2f50eff0b7b5e214c3e7ea4bf8c809517c4592c1694103b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-overlap.json",
+      "bytes": 26917,
+      "sha256": "a9a66e6ce546ccf9990fa2ccfae6dc28323bd96b3151ad32f47adc6ea7c8e7f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-sample-mask.json",
+      "bytes": 50153,
+      "sha256": "6e84128f05ebbb84cc8b23f16a651f245b0cb33d6d32580b4dd2972b23a2d2a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-sample.json",
+      "bytes": 50652,
+      "sha256": "f283f17f00bb47712d55bac79820883fd181738ed47443594eb0dbb5473bdca0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-srgb.json",
+      "bytes": 25413,
+      "sha256": "ffaa114387ef6536e07b846444982e632ff27b44f52a95a0079f52c75141d2cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-stencil.json",
+      "bytes": 26813,
+      "sha256": "90f2c2ea51376027d2adf4a067fdacfc7ff8424a7ce808062afe1a14b031814c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-unorm.json",
+      "bytes": 25422,
+      "sha256": "e0a217ae6b5aa22ab773d2354241cd78fd9d94299148d8c6e769ea3c1b1cd8e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/0-write-mask.json",
+      "bytes": 26920,
+      "sha256": "2571cbe08230fba17f5117ef2bcd0f10deb9c60aed224a1842e4bb1a9944f981"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-alpha-zero.json",
+      "bytes": 50080,
+      "sha256": "48dd611df6d14b2f6746d316e266bcbf081139af72facb087f2812cf5044c517"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-depth.json",
+      "bytes": 26827,
+      "sha256": "9bd107ccbcc7cc52e1c74a457d55e4c0928e837d0d6c42464b1166b5085eac90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-discard-first.json",
+      "bytes": 26891,
+      "sha256": "4354dd46673a99edf0c89024097879af71d53cb8bafd33e1fd6212949a9092d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-discard-last.json",
+      "bytes": 26890,
+      "sha256": "3b470cbba07bdbd2ebf37f6dfe81315e0e1a4928bf3e6f3a5055669ad48abd94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-discard-middle.json",
+      "bytes": 26892,
+      "sha256": "0225664b02994279b89a4d2e62d3f1e3c9889d3d525b7abb607a3503dd2340d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-early-discard.json",
+      "bytes": 26891,
+      "sha256": "94a2cae3db5e297f932b12653d7b260969704145a9b231c0c3db2aff1072e78e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-mrt-eight.json",
+      "bytes": 26947,
+      "sha256": "9f9e7bf4631e27cad0ec31648448bef962f2f45f942ee97e6d84bae1f8d3c5d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-overlap.json",
+      "bytes": 26937,
+      "sha256": "1a29b58efe39cadedad0419ead80ecb636a4cce20fda714fc775ef198c5fb7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-sample-mask.json",
+      "bytes": 50173,
+      "sha256": "243b11fac3d97c51dcf6a926301286b410f236965560ec945571a1f548fba2e0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-sample.json",
+      "bytes": 50672,
+      "sha256": "f50ed2ee24d7897ce2262b23609a309f90c5534dee9b340dcedfe613b45b77f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-srgb.json",
+      "bytes": 25433,
+      "sha256": "ecb39991d54ec9a6425304b690fcb945fd9f6e1a64ac3f81ee12d8be33dcc346"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-stencil.json",
+      "bytes": 26829,
+      "sha256": "04cd78a5bf5be65f1ac0527ece48c77350ba7d0ecb471ab9a84ebd3541469261"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-unorm.json",
+      "bytes": 25442,
+      "sha256": "94eefe2aa3e27516fc5ee9caac6c5e77cd0b4a2094b43d3b77df6349418f8cf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/32902-write-mask.json",
+      "bytes": 26940,
+      "sha256": "277b79215fdffeecb711e747068795e5192bc4eef2b7270810b87a345c0ce4d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-alpha-zero.json",
+      "bytes": 50075,
+      "sha256": "cce21949c71041126bfd9b488cd3a7ef5b0b61067c9a48181b5e86a7f382f317"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-depth.json",
+      "bytes": 26822,
+      "sha256": "39edff178718203f994b8ae80ef6b2a8e00de41abdb6db44c5dd9129969941d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-discard-first.json",
+      "bytes": 26882,
+      "sha256": "0fd39bb1884e0580ff90c9650ffa0a66c6e0e1623bcf322b9a1916bf394969b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-discard-last.json",
+      "bytes": 26881,
+      "sha256": "74dc261cf240ed20508005f2e61ae917330d1e2225cc855c23daf377300ac38c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-discard-middle.json",
+      "bytes": 26883,
+      "sha256": "bef679e890b9bc880c80f4d44e4e0a6477d3fa8a9600e8bbc80f50db46acfa50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-early-discard.json",
+      "bytes": 26882,
+      "sha256": "e81c0944398e64e5b641e9836e784785b58d0911766ba32601d69fba050c2ce4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-mrt-eight.json",
+      "bytes": 26934,
+      "sha256": "66dc2ea93ad403fcb31d73f51974eaa44a598330447471c9baf59c7557ff2712"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-overlap.json",
+      "bytes": 26928,
+      "sha256": "ecc0c8f5145d814174389a3a8630ea6faa7d8813f1133ae1c6307cd953084372"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-sample-mask.json",
+      "bytes": 50164,
+      "sha256": "754b5a8db5abd6ab54542158492b1c88083285e4741a686ad87001ab53c3c1f4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-sample.json",
+      "bytes": 50667,
+      "sha256": "812b6fe52326a2ae3477712906b4b21eb42ea41e6360c992ec798e8bb1e4eb00"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-srgb.json",
+      "bytes": 25424,
+      "sha256": "e3b3157d30df879b9500a76e29a7001bd24142af5f29fc7782360ebae18a8c85"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-stencil.json",
+      "bytes": 26824,
+      "sha256": "06491c72368554381661ca86054bcc5c5588301136b46a3665f6c665bff4aae8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-unorm.json",
+      "bytes": 25433,
+      "sha256": "2185760a3b06ee53606d98d19e672494a8efae925da95491f8c7cf0726437f5e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned/4318-write-mask.json",
+      "bytes": 26931,
+      "sha256": "30125d61204de3525529f90e16af0f04c4b9a39e9a865ccbe6210eb12b3a6a77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned-console.txt",
+      "bytes": 41193,
+      "sha256": "289e604eb8b60dcac04f596a281655aba4dc1c69ca85ea7c970be449a324c1c6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned-validation.json",
+      "bytes": 175,
+      "sha256": "8e9c7e9b350bc4c6a2abab1b3b40689f76187786ce099cb6a347d3724a2c863e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-owned.txt",
+      "bytes": 2797,
+      "sha256": "19412564574c80a292f8a0eb0954af676334a64b689f2d83b09bc76da54bfa9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/before.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "6499cd10613e6aab160b4832223f11c0dd1b24cab1873b961bdadf9cb27601f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/original-draw.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/report.json",
+      "bytes": 9143,
+      "sha256": "15185184f8c78882da58caccc25436707f39bb2b9c7139bc37d6c8c86ee0fc07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-0/restored.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/before.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "6499cd10613e6aab160b4832223f11c0dd1b24cab1873b961bdadf9cb27601f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/original-draw.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/report.json",
+      "bytes": 9151,
+      "sha256": "5c8ca1993db66ef231947d2fa7fdfe131a552f7f625055d4ea2f59433e0dabf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-32902/restored.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/before.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "6499cd10613e6aab160b4832223f11c0dd1b24cab1873b961bdadf9cb27601f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/original-draw.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/report.json",
+      "bytes": 9149,
+      "sha256": "ec43e72aab1f51801101848330e99dc50f925377a32a36404f91a42e675b1aeb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-4318/restored.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/before.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "05acba3cffc97e3d0667279218de2d7a7edaa2b911c88e068fb6eefc33439d78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/original-draw.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/report.json",
+      "bytes": 9142,
+      "sha256": "3c0bcb5b94bf21ee9f840fd996d3366d9f89713d9777ff3ebf9ee3dc4b65fbde"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-0/restored.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/before.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "05acba3cffc97e3d0667279218de2d7a7edaa2b911c88e068fb6eefc33439d78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/original-draw.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/report.json",
+      "bytes": 9150,
+      "sha256": "51c93bb176de5217a22c75bc8177cd2219a02c0786c251d53a3d6407bfe0e599"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-32902/restored.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/before.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/marked.bin",
+      "bytes": 4,
+      "sha256": "30781bd8ec01344350f014c55fd2ad2425c81d890b723cbcbfec5a2449d36ed1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "05acba3cffc97e3d0667279218de2d7a7edaa2b911c88e068fb6eefc33439d78"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/original-draw.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/report.json",
+      "bytes": 9148,
+      "sha256": "0e4e15360c6223aed42dfe60fbc58b9fa25b299d52fe92fca371141b628ec1d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-earlier-4318/restored.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/before.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/marked.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "fb035d07b13b0b1df00821276c457c976feb7db7d626b21078ec8d25fbd2b957"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/original-draw.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/report.json",
+      "bytes": 9141,
+      "sha256": "07d09d648f34461fa3bccebc0a0a602d2162a2e16bdc2c6d6d8ca3dacea92a76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-0/restored.bin",
+      "bytes": 4,
+      "sha256": "fbfb227d5071320d73432281e2646758d7ca8f02f3a9d13464df48dffb7029c7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/before.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/marked.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "fb035d07b13b0b1df00821276c457c976feb7db7d626b21078ec8d25fbd2b957"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/original-draw.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/report.json",
+      "bytes": 9149,
+      "sha256": "5f6e8772d316d38eda19b45f1b611b89464abb14232b8def134b45c6a37c7fd8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-32902/restored.bin",
+      "bytes": 4,
+      "sha256": "9f814f5687b1221868a0dbbaa78176ec851fb7174741007c0827875c2caefb9a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/before.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/marked.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/marked.dxbc",
+      "bytes": 7736,
+      "sha256": "fb035d07b13b0b1df00821276c457c976feb7db7d626b21078ec8d25fbd2b957"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/original-draw.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/original.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/report.json",
+      "bytes": 9147,
+      "sha256": "73c68de6b4608c0ae0f2beed6b866c92ef059e4a80a081f7f04ffd3cc936e59a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/bf1-first-4318/restored.bin",
+      "bytes": 4,
+      "sha256": "979000a1c1bde4b42017e2accac7b79154f03896b2fd269434a1f84f68497eca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/before.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/marked.bin",
+      "bytes": 4,
+      "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/marked.dxbc",
+      "bytes": 1356,
+      "sha256": "803ce8fef612b0960e6e762bc17c90f5b9bbc0306c10a9642bd44d43f106d7d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/original-draw.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/original.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/report.json",
+      "bytes": 7033,
+      "sha256": "d35538e3d2210d5ae04e7dcec80e240d39cf88166158ead78d02e9c8944dfefa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-0/restored.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/before.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/marked.bin",
+      "bytes": 4,
+      "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/marked.dxbc",
+      "bytes": 1356,
+      "sha256": "803ce8fef612b0960e6e762bc17c90f5b9bbc0306c10a9642bd44d43f106d7d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/original-draw.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/original.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/report.json",
+      "bytes": 7041,
+      "sha256": "1ec3f2c61d138c00e84a2ac7eeb8ddeeeb90d2f09276a20fb81bf9b38ec95eae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-32902/restored.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/before.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/marked.bin",
+      "bytes": 4,
+      "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/marked.dxbc",
+      "bytes": 1356,
+      "sha256": "803ce8fef612b0960e6e762bc17c90f5b9bbc0306c10a9642bd44d43f106d7d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/original-draw.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/original.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/report.json",
+      "bytes": 7039,
+      "sha256": "efb6f138c42a67da405c6d047f92a6a7d2f85717c5a4528b78f338b619c12be5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/gf2-4318/restored.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/before.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/marked.bin",
+      "bytes": 4,
+      "sha256": "6fc6f4524161c3ae0d316812d7088e3fcd372023edaea2d7821093be40ae1060"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/marked.dxbc",
+      "bytes": 26432,
+      "sha256": "b3b792b9f342e2a4899170586848a3887a65995cfec9ffa96a05cf9798d494a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/original-draw.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/original.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/report.json",
+      "bytes": 7162,
+      "sha256": "c90442457c43c31282f913bbc52b92286dccc6691e352b773be1611a92ba4bbd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-0/restored.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/before.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/marked.bin",
+      "bytes": 4,
+      "sha256": "6fc6f4524161c3ae0d316812d7088e3fcd372023edaea2d7821093be40ae1060"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/marked.dxbc",
+      "bytes": 26432,
+      "sha256": "b3b792b9f342e2a4899170586848a3887a65995cfec9ffa96a05cf9798d494a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/original-draw.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/original.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/report.json",
+      "bytes": 7173,
+      "sha256": "25e7db4a18fd81af2fb670ad8f4a0c7324b012466dcafe15ab774b883938e5b5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-32902/restored.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/before.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/cleared.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/marked.bin",
+      "bytes": 4,
+      "sha256": "6fc6f4524161c3ae0d316812d7088e3fcd372023edaea2d7821093be40ae1060"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/marked.dxbc",
+      "bytes": 26432,
+      "sha256": "b3b792b9f342e2a4899170586848a3887a65995cfec9ffa96a05cf9798d494a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/original-draw.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/original.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/report.json",
+      "bytes": 7166,
+      "sha256": "486058f4b8479010c5a2c3627c96db2cc44beea2d5576526d8038d5ca974e87c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real/helldivers-4318/restored.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-0-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-32902-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-4318-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-earlier-0-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-earlier-32902-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-earlier-4318-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-first-0-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-first-32902-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-bf1-first-4318-console.txt",
+      "bytes": 10762,
+      "sha256": "289c87df009c0ec1e431f7f5765e4a6b07288168a7244f51eed793c3ff21e134"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-gf2-0-console.txt",
+      "bytes": 656,
+      "sha256": "157566c10d4ff06ae48d7d5c96106f6f41c3c3f8e9ac05ca77b0ae052ac9081c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-gf2-32902-console.txt",
+      "bytes": 656,
+      "sha256": "157566c10d4ff06ae48d7d5c96106f6f41c3c3f8e9ac05ca77b0ae052ac9081c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-gf2-4318-console.txt",
+      "bytes": 656,
+      "sha256": "157566c10d4ff06ae48d7d5c96106f6f41c3c3f8e9ac05ca77b0ae052ac9081c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-helldivers-0-console.txt",
+      "bytes": 664,
+      "sha256": "e460de27b719daeba0bff1e2a107e7da234cd4153baaa0ab40f3ab46fd4b6375"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-helldivers-32902-console.txt",
+      "bytes": 664,
+      "sha256": "e460de27b719daeba0bff1e2a107e7da234cd4153baaa0ab40f3ab46fd4b6375"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-helldivers-4318-console.txt",
+      "bytes": 664,
+      "sha256": "e460de27b719daeba0bff1e2a107e7da234cd4153baaa0ab40f3ab46fd4b6375"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-real-timing.json",
+      "bytes": 969,
+      "sha256": "e1e2de62e9d56a5afba13dca4a98cdca5199e6093b3e9d6206afa9c19fefdb88"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-validation.json",
+      "bytes": 2945,
+      "sha256": "b48a5eca4236b1b53dac34560ffe98cc4460cd2c76b13badd60e377f9d819fba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-alpha-zero.json",
+      "bytes": 51772,
+      "sha256": "2e1991ba1bcb3dbf1c1c3dbccd33c57f88e55e5a923d09e3b3a4e5ab42ae86cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-depth.json",
+      "bytes": 27838,
+      "sha256": "aef5d344115986faf19e62e9a001cccf0680d060f5db4650f3ab8348a762154a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-discard-first.json",
+      "bytes": 27599,
+      "sha256": "6643bc06bdaf840bb338f966c340602354d576f8d42ea409f68403e82aba4e8f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-discard-last.json",
+      "bytes": 27598,
+      "sha256": "7199f0f57b730707a18677cc73c1e969109f856b3279a8a3143ae25ca379b65c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-discard-middle.json",
+      "bytes": 27600,
+      "sha256": "2514467b6dcc6017d4217bfc539e9fd4d8dd0501112d1988df1809f57b3c9f06"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-early-discard.json",
+      "bytes": 27595,
+      "sha256": "293cfdfd325a268e95d6c45f37d95bbadc89558960eed4096015ff64e1620039"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-mrt-eight.json",
+      "bytes": 35328,
+      "sha256": "48383c39440cc2e55924859f9aedd0b3916d5ca1cf96b816266fa952c6e9b77c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-overlap.json",
+      "bytes": 27645,
+      "sha256": "b8bf2640ac3021adfa45039d26e93e70600a36b887cc1114624332e4705184ff"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-recovery.json",
+      "bytes": 927,
+      "sha256": "bbcb27bdcdc5ef5a797a3f9593e848ec0bc43f026d099cb2593082ea1e89cdf6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-sample-mask.json",
+      "bytes": 51865,
+      "sha256": "96f0d122c34c111ce58f4550ee91ca5eaf4c7421204deb67e5342fd541eda36b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-sample.json",
+      "bytes": 52364,
+      "sha256": "d6b01a45a1fa0430834fd2d4b6c69403d32aa027030b300016d45d2c5a206187"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-srgb.json",
+      "bytes": 25919,
+      "sha256": "e6d1ac13b5acfc94abae1e62c65e1988fda580dfc603e0451ae7bb170386b81d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-stencil.json",
+      "bytes": 27845,
+      "sha256": "47b351b3d188de4ccbf97c6399b3e65e326c78d01ee4c8706fbb23f492d9e3ec"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-unorm.json",
+      "bytes": 25928,
+      "sha256": "42f9617e1d3d26b308661384598e3433d2707dd91632efd5887feb80205f2b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/0-write-mask.json",
+      "bytes": 27648,
+      "sha256": "1d536367d0bda684e3324f60902669fb30c15eed12b1d63ecd33b37781267874"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-alpha-zero.json",
+      "bytes": 51792,
+      "sha256": "c15609446ceb850aa82ad3b141fc5eafbdc379f00c0677cb59396b9848d2d995"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-depth.json",
+      "bytes": 27854,
+      "sha256": "b619a93d43a23c4ecf176219544e96104bf0a476dc02a1b7e7ca4f9c683a45e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-discard-first.json",
+      "bytes": 27619,
+      "sha256": "398220724b375b7bdb75b097e61132810f6775a2dae76b93dc2e4d5be9df26f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-discard-last.json",
+      "bytes": 27618,
+      "sha256": "7a55cc937fca53a3dfc5d5bd3c0552f4d0bad2b36051cb6d8531932c61ef0a67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-discard-middle.json",
+      "bytes": 27620,
+      "sha256": "85122c580cb916bf2089dda0e4f6e0910d257383069d3c61e6392389afb59b84"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-early-discard.json",
+      "bytes": 27619,
+      "sha256": "2cf976215c5ce2e3b771b191be2498932e3861dfadf213e8483b7a2d85e7bcce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-mrt-eight.json",
+      "bytes": 35352,
+      "sha256": "9026ecdb71778a441bc61cf7586c560ee76043dceb8ff0c8175b3fcee64f400e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-overlap.json",
+      "bytes": 27665,
+      "sha256": "de44f229b1f7664d99c40c6e5f338fb86b48aebab6e7d9a95cbbdd8239538cd2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-recovery.json",
+      "bytes": 931,
+      "sha256": "ac8f3144f0923e597998b052ee59125248d9808473db43fea20b250c61acba6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-sample-mask.json",
+      "bytes": 51885,
+      "sha256": "1268fe0037bef6e6579691dc0693de1f419c3f2bf16a6487a7c04812c1982c0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-sample.json",
+      "bytes": 52384,
+      "sha256": "38aee49c4dde4d7de10fede912f79b5ddd33b4764b64be748fc9e9c6a5984c4a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-srgb.json",
+      "bytes": 25939,
+      "sha256": "7f6a836b540e48b4234edd6f3f006fddb84cdbf0477efc6d5681c882f6236ba8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-stencil.json",
+      "bytes": 27861,
+      "sha256": "822775bab0f5cb76aeb7b4a9b0bdeead7c075a86c4d26a58113bab96e856c02a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-unorm.json",
+      "bytes": 25948,
+      "sha256": "5e310e95df0970f560941a8e4f8fca3eb812271f033b1b38a8d5d6e833ee1db0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/32902-write-mask.json",
+      "bytes": 27668,
+      "sha256": "0ffc4fcf3064576a2a4e96b99c62713f3c21032f895f479a984f867a86257a42"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-alpha-zero.json",
+      "bytes": 51787,
+      "sha256": "8031393883986a7734e18a590b864e84914addba261e84cf072ebe4a3848ec6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-depth.json",
+      "bytes": 27849,
+      "sha256": "f6ef9c341839e4ab880564351aaca32fdb1a288535b898cf3426ad46d15491c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-discard-first.json",
+      "bytes": 27610,
+      "sha256": "dd2334dc138ad9f3baad8c8c246193913ce2491eff801d5de1003d825337fa2a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-discard-last.json",
+      "bytes": 27609,
+      "sha256": "f33ac42e052618c1fc895d6ae8aa8e441dc24f9b23f5b60b0b5fe0c07f07e2fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-discard-middle.json",
+      "bytes": 27611,
+      "sha256": "9dc93b7ba552fde0813d07bf4f42b0d86209ce5b221fcf166d8b1db5f11e43ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-early-discard.json",
+      "bytes": 27610,
+      "sha256": "5a422d8a15d77a4617e1cd1ae9650c542a5208978ced1c9359499cfeca769238"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-mrt-eight.json",
+      "bytes": 35339,
+      "sha256": "a84638b8e03f4821e07e7c37734c80eb235b36fc3da3e9d5e9a46f2e63449756"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-overlap.json",
+      "bytes": 27656,
+      "sha256": "79f3dfbecd51821389757b805eaf11438fa2b25edc8398e671f7bfde85d86529"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-recovery.json",
+      "bytes": 930,
+      "sha256": "2b6469c1a89c07b6d6bdf9235d847219f1aabc29cd349450443328a5e94afd18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-sample-mask.json",
+      "bytes": 51876,
+      "sha256": "10fe06c35e503d736a3e038883a0d56dbe0818a11ca28e1967a816dbf3349b95"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-sample.json",
+      "bytes": 52379,
+      "sha256": "e05d82904d14036f1c1e88ad32da5d84acb92af3815b213f515bb51df9f5cc97"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-srgb.json",
+      "bytes": 25930,
+      "sha256": "885736c67fb4da4d31195af27b5ff7d89c297957e5271c7228a4ef609ed31d04"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-stencil.json",
+      "bytes": 27856,
+      "sha256": "c2c696c4129e035ea8f17eceeb141c68bf99da573ca144e26fa8fce667491006"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-unorm.json",
+      "bytes": 25939,
+      "sha256": "fd12427e2c111aa4f2b77e5bf3e030f35686a1a71b1619ac5ca1c15364efcb1c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-presence-verified/4318-write-mask.json",
+      "bytes": 27659,
+      "sha256": "61d99f90a032e7bc52cc2f93bb625cb010b3df89e6a2b624d1d8d72880b0db98"
+    },
+    {
+      "path": "artifacts/dx11-native/run-pixel-presence-history.ps1",
+      "bytes": 1242,
+      "sha256": "a4b4628acf00d043f38aa1ab9a8e85e9d7d4d0101f8b9ec28af3277cc6039399"
+    },
+    {
+      "path": "artifacts/dx11-native/run-pixel-presence-real.ps1",
+      "bytes": 1494,
+      "sha256": "4de3c6a5fa4de689c78266fcf72200a6d65a96c18bd85a462a2169126b243a76"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 131226,
+      "sha256": "14abbb8f51f22c2b69a25ebceb65ec0cf02d373441115401de2abc647f16a107"
+    },
+    {
+      "path": "docs/NATIVE_PRIVATE_DRAW_HISTORY.md",
+      "bytes": 5595,
+      "sha256": "0b8cd53a21cc56e50679e76788cfcf774da156b88c0cb8337e7d49d525381c9c"
+    },
+    {
+      "path": "docs/research/DX11_NATIVE_PIXEL_PRESENCE.md",
+      "bytes": 9089,
+      "sha256": "28a4deccb92e5845e5f39826058737cb56d24e68ff500f0b3adc91d6d8c497ed"
+    },
+    {
+      "path": "src/application/DxbcPixelCompletion.h",
+      "bytes": 2329,
+      "sha256": "df66defc39ef9755e7bf9ccddf9a028127452357019e0552df0ad72bba468f0c"
+    },
+    {
+      "path": "src/application/DxbcPixelPrimitiveMask.cpp",
+      "bytes": 9904,
+      "sha256": "a8a3a28cbcade91253a9a80561c6745e9e871a585841547acd557a36a2fdb5f7"
+    },
+    {
+      "path": "src/application/NativeAnalysis.cpp",
+      "bytes": 27142,
+      "sha256": "68569f6d2960eef5928d922a4ad944da2ace8d99ac1337499cdc160643e1b076"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 41435,
+      "sha256": "40ee1a44e33e7ac0804078637ac119058da43e6840e433ea8dd57268c6d690d1"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.h",
+      "bytes": 2095,
+      "sha256": "e03a1d0e1eda0dbf2edae023f01b958110c9552478827f9c86937c48ee5e2808"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.cpp",
+      "bytes": 33848,
+      "sha256": "fd9cf3b5976f5bd39a008f9e40c80834aa5cf9075fe4a189c0e3dbf5221457fb"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.h",
+      "bytes": 4620,
+      "sha256": "cc283a9d7b8baab78bc9e54aaacb9f60e780c1fa7ec0ea69047dcdee96cdbaac"
+    },
+    {
+      "path": "src/cli/NativeAnalyzeCli.cpp",
+      "bytes": 6445,
+      "sha256": "25bc2a07f08d58b87058b69e5fbc2132458ffe46db562d73a04ecfb01b261870"
+    },
+    {
+      "path": "tests/NativeDrawHistoryJobsTests.cpp",
+      "bytes": 11701,
+      "sha256": "ffced267c20b0ea1f6c8c2a2b4b1553b7e9729740d09a83b3991564c8c3a25a8"
+    },
+    {
+      "path": "tests/NativePixelPresenceTests.cpp",
+      "bytes": 19823,
+      "sha256": "be7d764f6420b00cefc8890eb27cd5ea791863812007a06c25eb0f77e66c073a"
+    },
+    {
+      "path": "tools/probe_native_pixel_completion.cpp",
+      "bytes": 9072,
+      "sha256": "a8c4ec35f334afaeeb3fb06f4d05d2c0f28b6050425a07d8f27d3189a22b8d39"
+    },
+    {
+      "path": "tools/validate_native_draw_history_jobs.py",
+      "bytes": 8839,
+      "sha256": "cf8f17e9c423f7cc30957358b4618e8b9e46d88ac9ddc8f54ac14537189ef93a"
+    },
+    {
+      "path": "tools/validate_native_original_draw.py",
+      "bytes": 10000,
+      "sha256": "7c536cb23127c94383ba3a2f93d0281e7d90cfa54d88f7604d33e62f85631c1f"
+    },
+    {
+      "path": "tools/validate_native_pixel_completion.py",
+      "bytes": 14491,
+      "sha256": "2e1d150a47e28396112313a76e3adf8bad640b75c14c6f2d13f9790191ed0370"
+    },
+    {
+      "path": "tools/validate_native_pixel_draw_history.py",
+      "bytes": 12183,
+      "sha256": "f0f4c10d3cf196bd50e6dd88206616882ac15481b36f079c60e8aa15d99e2427"
+    },
+    {
+      "path": "tools/validate_native_pixel_geometry_replay.py",
+      "bytes": 9168,
+      "sha256": "f603c03d48c2c2cc7516b7ab708d346ccd4016f6e99dbb7d0b351aee55e6b1c5"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_merger.py",
+      "bytes": 13478,
+      "sha256": "fec02a10c389dcb2915d8b2509ef904da665d3036986f3c9a48d95f46c33836a"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_shader.py",
+      "bytes": 11373,
+      "sha256": "b65e3d6e33ef9bca39fd122801b339a434ee3c8f5c919f821ded91c903b3ae9a"
+    },
+    {
+      "path": "tools/validate_native_pixel_identity.py",
+      "bytes": 13241,
+      "sha256": "a6a16151a90646bfdabce0e7f7017d19ac4afb009b07dc5a1b7c65e59a58f1da"
+    },
+    {
+      "path": "tools/validate_native_pixel_presence.py",
+      "bytes": 16434,
+      "sha256": "8299a236df29eb5371fc0dfa09f870b670a5cd2bcdbf85d6d7eb142dbbb59c2d"
+    },
+    {
+      "path": "tools/validate_native_pixel_primitive_mask.py",
+      "bytes": 12492,
+      "sha256": "88ab9f2ecf4db892e349bbc4df98c1b4d6f7b3b5fd258f8f07504d10613952d3"
+    }
+  ]
+}
