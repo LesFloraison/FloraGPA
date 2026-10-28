@@ -119,6 +119,7 @@ struct TextureInputs {
                                        uint32_t returns, const Value &address, const Value &lodOrDdx,
                                        const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                                        const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
-                                       bool comparison = false, bool gather = false) const;
+                                       bool comparison = false, bool gather = false,
+                                       bool dimensionsOnly = false) const;
 };
 } // namespace flora::dxbc_exec

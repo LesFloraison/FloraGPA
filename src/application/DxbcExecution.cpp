@@ -369,6 +369,8 @@ Program::Program(Bytes dxbc) {
                 ++pos;
             for (unsigned i = 0; i < found->second; ++i)
                 args.push_back(operand(words, pos));
+            if (op == 108 && (version < 0x41 || data->stage != 0))
+                fail("LOD requires pixel shader model 4.1 or later");
             if (op == 121 && version != 0x50)
                 fail("Buffer information requires shader model 5.0");
             if ((op == 109 && version < 0x41) || ((op == 126 || op == 127 || op == 128) && version != 0x50))
@@ -884,14 +886,16 @@ struct Lane::State {
         const auto &args = p.operands.at(pc);
         const auto op = instruction.opcode;
         const bool comparison = op == 70 || op == 71;
-        const bool implicit = op == 69 || op == 70 || op == 74;
+        const bool implicit = op == 69 || op == 70 || op == 74 || op == 108;
+        if (op == 108 && (instruction.words[0] & 0x00fff800u))
+            fail("Invalid LOD instruction controls");
         if (instruction.words[0] & 0x2000)
             fail("Unexpected saturation on a DXBC sampling instruction");
         const auto &destination = args[0], &resource = args[2], &sampler = args[3];
         if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
             (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
             resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
-            (op != 69 && op != 73 && args[4].components != 1 &&
+            (op != 69 && op != 73 && op != 108 && args[4].components != 1 &&
              !(args[4].components == 2 &&
                (args[4].mode == 2 ||
                 (args[4].mode == 1 &&
@@ -913,6 +917,8 @@ struct Lane::State {
             if (!extensions.insert(kind).second)
                 fail("Duplicate explicit sampling extension");
             if (kind == 1) {
+                if (op == 108)
+                    fail("LOD does not accept sampling offsets");
                 if (token & 0x7fe001c0)
                     fail("Invalid explicit sampling offset extension");
                 for (unsigned c = 0; c < 3; ++c)
@@ -931,12 +937,12 @@ struct Lane::State {
                 dimension,
                 returns,
                 source(args[1], false),
-                op == 69 ? Value::known({}) : source(args[4], false),
+                (op == 69 || op == 108) ? Value::known({}) : source(args[4], false),
                 op == 73 ? std::optional<Value>(source(args[5], false)) : std::nullopt,
                 resource.select,
                 destination.mask,
                 offsets,
-                {destination.precision, args[1].precision, op == 69 ? 0u : args[4].precision}};
+                {destination.precision, args[1].precision, (op == 69 || op == 108) ? 0u : args[4].precision}};
     }
 };
 bool Lane::samplingBoundary() const {
@@ -1439,8 +1445,8 @@ Step Lane::step() {
                 }
             result.changes.push_back({target, before, after});
         }
-    } else if (op >= 69 && op <= 74) {
-        if ((op == 69 || op == 70 || op == 74) && (!s.quad || !s.pendingSampling))
+    } else if ((op >= 69 && op <= 74) || op == 108) {
+        if ((op == 69 || op == 70 || op == 74 || op == 108) && (!s.quad || !s.pendingSampling))
             fail("Implicit sampling requires a coherent pixel quad");
         const auto request = s.sampling();
         const auto &destination = args[0];
@@ -2027,7 +2033,8 @@ PixelQuadStep PixelQuad::step() {
             if (lane.pendingDerivative || lane.pendingSampling) {
                 if (pending == 4)
                     pending = i;
-            } else if (op == 11 || op == 12 || (op >= 122 && op <= 125) || op == 69 || op == 70 || op == 74) {
+            } else if (op == 11 || op == 12 || (op >= 122 && op <= 125) || op == 69 || op == 70 || op == 74 ||
+                       op == 108) {
                 if (boundary == 4)
                     boundary = i;
             } else if (ordinary == 4)
@@ -2047,7 +2054,7 @@ PixelQuadStep PixelQuad::step() {
                         fail("Pixel lanes did not reach the same dynamic quad instruction");
                 }
                 const auto opcode = first.program->instructions.at(first.pc).opcode;
-                if (opcode == 69 || opcode == 70 || opcode == 74) {
+                if (opcode == 69 || opcode == 70 || opcode == 74 || opcode == 108) {
                     const auto request = first.sampling();
                     std::array<PixelSamplingInvocation, 4> invocations;
                     for (unsigned i = 0; i < 4; ++i) {

@@ -715,19 +715,27 @@ struct GpuOperations::State {
         source += "cbuffer Inputs:register(b0){uint4 addresses[4];uint4 parameters[4];}"
                   "uint4 main(float4 p:SV_Position):SV_Target0{uint i=uint(p.x)+2*uint(p.y);"
                   "float4 address=asfloat(addresses[i]);float parameter=asfloat(parameters[i].x);";
-        source += "float4 sampled=image.";
-        source += opcode == 70 ? "SampleCmp" : opcode == 74 ? "SampleBias" : "Sample";
-        source += "(state,address." + coordinates;
-        if (opcode != 69)
-            source += ",parameter";
-        if (dimension != 6 && dimension != 10) {
-            const auto offsetDimensions = dimension == 2 || dimension == 7 ? 1u : dimension == 5 ? 3u : 2u;
-            source += offsetDimensions == 1 ? ",int(" : ",int" + std::to_string(offsetDimensions) + "(";
-            for (unsigned c = 0; c < offsetDimensions; ++c)
-                source += (c ? "," : "") + std::to_string(offset[c]);
-            source += ")";
+        if (opcode == 108) {
+            source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,address." + coordinates +
+                      "),image.CalculateLevelOfDetailUnclamped(state,address." + coordinates +
+                      "),0,0);float4 result=0;";
+        } else {
+            source += "float4 sampled=image.";
+            source += opcode == 70 ? "SampleCmp" : opcode == 74 ? "SampleBias" : "Sample";
+            source += "(state,address." + coordinates;
+            if (opcode != 69)
+                source += ",parameter";
+            if (dimension != 6 && dimension != 10) {
+                const auto offsetDimensions = dimension == 2 || dimension == 7 ? 1u
+                                              : dimension == 5                 ? 3u
+                                                                               : 2u;
+                source += offsetDimensions == 1 ? ",int(" : ",int" + std::to_string(offsetDimensions) + "(";
+                for (unsigned c = 0; c < offsetDimensions; ++c)
+                    source += (c ? "," : "") + std::to_string(offset[c]);
+                source += ")";
+            }
+            source += opcode == 70 ? ").xxxx;float4 result=0;" : ");float4 result=0;";
         }
-        source += opcode == 70 ? ").xxxx;float4 result=0;" : ");float4 result=0;";
         for (unsigned c = 0; c < 4; ++c)
             if (mask & (1u << c))
                 source +=
@@ -837,8 +845,9 @@ struct GpuOperations::State {
         const UINT resultCount = batch ? UINT(batch->size()) : 1;
         if (batch && (stage != 5 || !sampler || !resultCount || resultCount > 1024))
             throw std::runtime_error("Invalid GPU sampling batch");
-        if (pixelBatch && (stage != 0 || !sampler || batch ||
-                           (pixelOpcode != 69 && pixelOpcode != 70 && pixelOpcode != 74)))
+        if (pixelBatch &&
+            (stage != 0 || !sampler || batch ||
+             (pixelOpcode != 69 && pixelOpcode != 70 && pixelOpcode != 74 && pixelOpcode != 108)))
             throw std::runtime_error("Invalid implicit pixel sampling batch");
         try {
             auto r = input.resource;
@@ -1242,7 +1251,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/25"}};
+            {"backend", "dxbc-gpu/26"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {

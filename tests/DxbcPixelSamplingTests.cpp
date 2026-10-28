@@ -59,13 +59,13 @@ Words row(uint32_t opcode, std::initializer_list<Words> args = {}) {
 }
 
 Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, uint32_t swizzle = 0xe4,
-                    bool indexed = false) {
+                    bool indexed = false, uint32_t version = 0x50, uint32_t stage = 0) {
     const Words address = modifier ? Words{0x80101e46, 1 | (modifier << 6), 0} : Words{0x101e46, 0};
     const Words resource =
         indexed ? Words{0x00d07006 | (swizzle << 4), 0, 0x10100a, 1} : Words{0x107006 | (swizzle << 4), 0};
     const Words sampler = indexed ? Words{0x00d06000, 0, 0x10101a, 1} : Words{0x106000, 0};
     Words sample = row(opcode, {{0x102002 | (mask << 4), 0}, address, resource, sampler});
-    if (opcode != 69) {
+    if (opcode != 69 && opcode != 108) {
         sample.insert(sample.end(), {0x10102a, 0});
         sample[0] = (sample[0] & 0xffffff) | (uint32_t(sample.size()) << 24);
     }
@@ -75,7 +75,7 @@ Program instruction(uint32_t opcode, unsigned mask = 15, unsigned modifier = 0, 
     }
     return Program(
         makeDxbc({{0x58454853,
-                   writeDxbcProgram({{0x50, 0},
+                   writeDxbcProgram({{(stage << 16) | version, 0},
                                      {row(88 | (3 << 11), {{0x1070f2, 0}, {0x5555}}),
                                       row(90 | (opcode == 70 ? 0x800 : 0), {{0x106000, 0}}),
                                       row(98 | (2 << 11), {{0x1010f2, 0}}),
@@ -147,6 +147,91 @@ class DxbcPixelSamplingTests final : public QObject {
         return input;
     }
   private slots:
+    void originalLod_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (auto vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void originalLod() {
+        QFETCH(uint32_t, vendor);
+        try {
+            const auto directory = evidence.filePath(QString("lod-%1").arg(vendor));
+            QProcess probe;
+            probe.start(QCoreApplication::applicationDirPath() + "/FloraPixelSamplingProbe.exe",
+                        {directory, QString::number(vendor), "lod"});
+            if (!probe.waitForFinished(60000)) {
+                probe.kill();
+                probe.waitForFinished(5000);
+                QFAIL("Independent LOD probe timed out");
+            }
+            QVERIFY2(probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0,
+                     probe.readAllStandardError().constData());
+            auto report = Json::parse(read(directory + "/results.json"));
+            QCOMPARE(report.at("unexpected_validation_errors"), Json(0));
+            QCOMPARE(report.at("cases").size(), size_t(448));
+            std::map<std::string, std::unique_ptr<Program>> code;
+            uint64_t components = 0;
+            for (auto &item : report["cases"]) {
+                const auto name = item.at("shader").get<std::string>();
+                if (!code.contains(name)) {
+                    code[name] =
+                        std::make_unique<Program>(read(directory + "/" + QString::fromStdString(name)));
+                    QVERIFY(std::any_of(code.at(name)->instructions().begin(),
+                                        code.at(name)->instructions().end(),
+                                        [](const auto &i) { return i.opcode == 108; }));
+                }
+                const auto storage = textures(item);
+                std::array<Inputs, 4> input;
+                for (unsigned lane = 0; lane < 4; ++lane) {
+                    input[lane].textures = storage;
+                    input[lane].gpu = helpers.at(vendor);
+                    for (const auto &bits : item["inputs"])
+                        input[lane].constantBuffers[0].push_back(
+                            Value::known(bits.get<std::array<uint32_t, 4>>()));
+                    input[lane].constantBuffers[0].push_back(
+                        Value::known({item["discarded"].get<unsigned>(), 0, 0, 0}));
+                    input[lane].registers[{1, {0}}] =
+                        Value::known({std::bit_cast<uint32_t>(float(lane % 2) + .5f),
+                                      std::bit_cast<uint32_t>(float(lane / 2) + .5f), 0, 0x3f800000});
+                }
+                // LOD uses dimensions and sampler state; unknown texel bytes cannot affect it.
+                std::fill(storage->resources.at(1).storage.valid.begin(),
+                          storage->resources.at(1).storage.valid.end(), 0);
+                PixelQuad quad(*code.at(name), input, item["coverage"].get<uint8_t>());
+                execute(quad);
+                QCOMPARE(quad.activeMask(),
+                         uint8_t(item["coverage"].get<unsigned>() & ~item["discarded"].get<unsigned>()));
+                item["native"] = Json::array();
+                for (unsigned lane = 0; lane < 4; ++lane) {
+                    if (!(quad.activeMask() & (1u << lane))) {
+                        item["native"].push_back(nullptr);
+                        continue;
+                    }
+                    const auto value = quad.lane(lane).value({2, {0}});
+                    item["native"].push_back({{"bits", value.bits}, {"valid", value.valid}});
+                    QCOMPARE(value.valid, uint8_t(15));
+                    if (value.bits != item["output"][lane].get<std::array<uint32_t, 4>>())
+                        qInfo().noquote() << QString::fromStdString(item.dump());
+                    QCOMPARE(value.bits, (item["output"][lane].get<std::array<uint32_t, 4>>()));
+                    components += 4;
+                }
+            }
+            report["native_helper"] = helpers.at(vendor)->identity();
+            report["compared_components"] = components;
+            QFile output(directory + "/native-results.json");
+            QVERIFY(output.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+            const auto bytes = QByteArray::fromStdString(report.dump(2));
+            QCOMPARE(output.write(bytes), bytes.size());
+            qInfo().noquote() << QString::fromStdString(Json{
+                {"lod", true},
+                {"vendor", vendor},
+                {"cases", report["cases"].size()},
+                {"components", components},
+                {"unknown_texel_contents", true}}.dump());
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void initTestCase() {
         if (qEnvironmentVariableIsSet("FLORA_KEEP_PIXEL_SAMPLING_EVIDENCE")) {
             evidence.setAutoRemove(false);
@@ -453,7 +538,64 @@ class DxbcPixelSamplingTests final : public QObject {
             {"reference", reference(vendor, opcode)},
             {"helper", helpers.at(vendor)->identity()}}.dump());
     }
-    void cancellation_data() { semantics_data(); }
+    void lodBoundaries_data() { originalLod_data(); }
+    void lodBoundaries() {
+        QFETCH(uint32_t, vendor);
+        const auto input = operands(vendor, 69);
+        PixelQuad reference(instruction(108), input);
+        execute(reference);
+        PixelQuad masked(instruction(108, 5, 0, 0x1b), input);
+        execute(masked);
+        PixelQuad sm41(instruction(108, 15, 0, 0xe4, false, 0x41), input);
+        execute(sm41);
+        for (unsigned lane = 0; lane < 4; ++lane) {
+            const auto expected = reference.lane(lane).value({2, {0}});
+            QCOMPARE(expected.valid, uint8_t(15));
+            QCOMPARE(masked.lane(lane).value({2, {0}}),
+                     (Value::known({expected.bits[3], 8, expected.bits[1], 10})));
+            QCOMPARE(sm41.lane(lane).value({2, {0}}), expected);
+        }
+        auto relocated = operands(vendor, 69);
+        auto &storage = *relocated[0].textures;
+        storage.views[{7, {3}}] = storage.views.at({7, {0}});
+        storage.views.erase({7, {0}});
+        storage.samplers[{6, {5}}] = storage.samplers.at({6, {0}});
+        storage.samplers.erase({6, {0}});
+        for (auto &lane : relocated)
+            lane.registers[{1, {1}}] = Value::known({3, 5, 0, 0});
+        PixelQuad indexed(instruction(108, 15, 0, 0xe4, true), relocated, 1);
+        execute(indexed);
+        for (unsigned lane = 0; lane < 4; ++lane)
+            QCOMPARE(indexed.lane(lane).value({2, {0}}), reference.lane(lane).value({2, {0}}));
+        auto unknown = operands(vendor, 69);
+        unknown[1].registers[{1, {0}}].valid = 14;
+        PixelQuad coordinates(instruction(108), unknown);
+        execute(coordinates);
+        for (unsigned lane = 0; lane < 4; ++lane)
+            QCOMPARE(coordinates.lane(lane).value({2, {0}}).valid, uint8_t(0));
+        auto unbound = operands(vendor, 69);
+        unbound[0].textures->views[{7, {0}}] = {};
+        PixelQuad nullView(instruction(108), unbound);
+        execute(nullView);
+        for (unsigned lane = 0; lane < 4; ++lane)
+            QCOMPARE(nullView.lane(lane).value({2, {0}}), Value::known({}));
+        unbound[0].textures->views.clear();
+        PixelQuad missing(instruction(108), unbound);
+        execute(missing);
+        for (unsigned lane = 0; lane < 4; ++lane)
+            QCOMPARE(missing.lane(lane).value({2, {0}}).valid, uint8_t(0));
+        QVERIFY_THROWS_EXCEPTION(std::exception, instruction(108, 15, 0, 0xe4, false, 0x40));
+        for (auto stage : {1u, 5u})
+            QVERIFY_THROWS_EXCEPTION(std::exception, instruction(108, 15, 0, 0xe4, false, 0x50, stage));
+        Lane alone(instruction(108), input[0]);
+        alone.step();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, alone.step());
+    }
+    void cancellation_data() {
+        semantics_data();
+        for (auto vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString("%1-108").arg(vendor))) << vendor << 108u;
+    }
     void cancellation() {
         QFETCH(uint32_t, vendor);
         QFETCH(uint32_t, opcode);
@@ -461,7 +603,7 @@ class DxbcPixelSamplingTests final : public QObject {
         unsigned checks = 0;
         auto gpu = std::make_shared<GpuOperations>(devices.at(vendor).Get(), vendor == 0,
                                                    [&] { return armed && ++checks == 3; });
-        auto input = operands(vendor, opcode);
+        auto input = operands(vendor, opcode == 108 ? 69u : opcode);
         for (auto &lane : input)
             lane.gpu = gpu;
         PixelQuad quad(instruction(opcode, 15, 0, opcode == 70 ? 0 : 0xe4), input);
@@ -473,7 +615,8 @@ class DxbcPixelSamplingTests final : public QObject {
         armed = false;
         PixelQuad poisoned(instruction(opcode, 15, 0, opcode == 70 ? 0 : 0xe4), input);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(poisoned));
-        PixelQuad retry(instruction(opcode, 15, 0, opcode == 70 ? 0 : 0xe4), operands(vendor, opcode));
+        PixelQuad retry(instruction(opcode, 15, 0, opcode == 70 ? 0 : 0xe4),
+                        operands(vendor, opcode == 108 ? 69u : opcode));
         execute(retry);
         QCOMPARE(retry.lane(0).value({2, {0}}).valid, uint8_t(15));
     }

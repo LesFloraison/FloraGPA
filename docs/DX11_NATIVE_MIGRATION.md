@@ -1401,3 +1401,18 @@ Original class dispatch differences, source-level class parity, divergent
 resource selection, real-game qualification and final removal acceptance remain
 open. These tests do not waive the previously recorded 67 original class-buffer
 comparison failures.
+
+### Native pixel LOD queries
+
+Opcode 108 now executes through the coherent pixel quad and selected-adapter
+hardware helper. Query validity depends on the resource/view and sampler
+metadata and coordinate inputs, not texel byte validity. Masks, swizzles,
+relative bindings, stage/model limits and cancellation recovery are checked.
+The GPU helper identity is `dxbc-gpu/26`.
+
+The [LOD evidence](research/DX11_NATIVE_LOD.md) records 1,344 original Texture2D
+cases and 10,416 exact component comparisons across three adapters. The final
+186-pass run also covers 9,408 existing implicit-sampling cases without changing
+their expected values or undefined-case rejections. Other LOD shapes/formats,
+minimum precision and captured-game workflows remain unqualified. All full
+debugger, history, removal and independent release gates remain in force.

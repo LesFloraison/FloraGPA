@@ -80,7 +80,7 @@ TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Regi
                              uint32_t dimension, uint32_t returns, const Value &address,
                              const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                              const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
-                             bool comparison, bool gather) const {
+                             bool comparison, bool gather, bool dimensionsOnly) const {
     const uint32_t native = dimension == 2    ? 2
                             : dimension == 3  ? 4
                             : dimension == 5  ? 8
@@ -153,6 +153,8 @@ TextureInputs::prepareSample(uint32_t stage, const Register &binding, const Regi
         (texture.minLod != 0 && !(texture.resource.desc.back() & 0x80)))
         throw std::runtime_error("Native sampling descriptor and snapshot metadata disagree");
     const auto plane = textureInputPlane(texture.resource, view, view.firstMip, view.firstLayer);
+    if (dimensionsOnly)
+        return std::nullopt;
     // Filtering may combine multiple mips, faces and anisotropic taps. Until a
     // dependency footprint is observed, never mark partially unknown storage known.
     if (plane) {
@@ -215,10 +217,11 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
     const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
     GpuOperations *gpu, bool &assisted, const std::array<uint32_t, 3> &precision) const {
     assisted = false;
-    if (opcode != 69 && opcode != 70 && opcode != 74)
+    if (opcode != 69 && opcode != 70 && opcode != 74 && opcode != 108)
         throw std::runtime_error("Invalid implicit pixel sampling opcode");
     if (std::any_of(precision.begin(), precision.end(), [](auto p) { return p > 2; }) ||
-        (opcode == 69 && precision[2]))
+        ((opcode == 69 || opcode == 108) && precision[2]) ||
+        (opcode == 108 && std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; })))
         throw std::runtime_error("Invalid implicit sampling floating-point precision");
     const uint32_t addressMask = dimension == 2                     ? 1
                                  : dimension == 3 || dimension == 7 ? 3
@@ -241,11 +244,11 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
     const auto &representative = unknown == invocations.end() ? invocations[0] : *unknown;
     if (const auto resolved =
             prepareSample(0, binding, samplerBinding, dimension, returns, representative.address,
-                          Value::known({}), swizzle, mask, offset, {}, opcode == 70))
+                          Value::known({}), swizzle, mask, offset, {}, opcode == 70, false, opcode == 108))
         return {*resolved, *resolved, *resolved, *resolved};
     auto batch = invocations;
     for (auto &lane : batch)
-        if (opcode == 69 || !(lane.parameter.valid & 1))
+        if (opcode == 69 || opcode == 108 || !(lane.parameter.valid & 1))
             lane.parameter = Value::known({});
     if (!gpu)
         throw std::runtime_error("Implicit pixel sampling requires the selected adapter GPU assist");
@@ -254,7 +257,8 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
         gpu->samplePixelQuad(opcode, resources.at(*view.resource), view, samplers.at(samplerBinding),
                              dimension, returns, batch, swizzle, mask, offset, precision);
     for (unsigned i = 0; i < 4; ++i)
-        result[i].valid = opcode == 69 || (invocations[i].parameter.valid & 1) ? uint8_t(mask) : 0;
+        result[i].valid =
+            opcode == 69 || opcode == 108 || (invocations[i].parameter.valid & 1) ? uint8_t(mask) : 0;
     assisted = true;
     return result;
 }

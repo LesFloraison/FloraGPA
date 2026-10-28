@@ -66,7 +66,8 @@ struct Configuration {
 } // namespace
 int wmain(int argc, wchar_t **argv) {
     if (argc != 3 && argc != 4) {
-        std::cerr << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [PRECISION_SCENARIO_1_TO_6]\n";
+        std::cerr
+            << "NEW_OUTPUT_DIRECTORY VENDOR_DECIMAL_OR_ZERO_FOR_WARP [PRECISION_SCENARIO_1_TO_6_OR_LOD]\n";
         return 2;
     }
     try {
@@ -74,8 +75,9 @@ int wmain(int argc, wchar_t **argv) {
         if (!std::filesystem::create_directory(directory))
             throw std::runtime_error("Output directory must be new");
         const uint32_t vendor = std::stoul(argv[2]);
-        const uint32_t precision = argc == 4 ? std::stoul(argv[3]) : 0;
-        if (precision > 6 || (argc == 4 && precision == 0))
+        const bool lod = argc == 4 && std::wstring(argv[3]) == L"lod";
+        const uint32_t precision = argc == 4 && !lod ? std::stoul(argv[3]) : 0;
+        if (precision > 6 || (argc == 4 && !lod && precision == 0))
             throw std::runtime_error("Invalid minimum precision scenario");
         ComPtr<IDXGIAdapter1> selected;
         if (vendor) {
@@ -182,8 +184,9 @@ int wmain(int argc, wchar_t **argv) {
              {0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef},
              {0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef},
              {0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef}}};
-        for (const std::string operation : {"sample", "sample_b", "sample_c"})
-            for (unsigned offset = 0; offset < 2; ++offset)
+        for (const std::string operation : lod ? std::vector<std::string>{"lod"}
+                                               : std::vector<std::string>{"sample", "sample_b", "sample_c"})
+            for (unsigned offset = 0; offset < (lod ? 1u : 2u); ++offset)
                 for (const std::string flow : {"uniform", "discard", "reconverge", "loop"}) {
                     const bool comparison = operation == "sample_c";
                     const std::string reduced = precision >= 5 ? "min10float" : "min16float";
@@ -208,14 +211,19 @@ int wmain(int argc, wchar_t **argv) {
                             reduced + "2 coordinates=" + reduced + "2(v.xy)*" + reduced + "2(1.0007,0.9991);";
                     if (parameterPrecision)
                         source += reduced + " parameter=" + reduced + "(v.z)*" + reduced + "(1.0007);";
-                    source += (destinationPrecision ? reduced : "float") + "4 sampled=image.";
-                    source += comparison                ? "SampleCmp(state,"
-                              : operation == "sample_b" ? "SampleBias(state,"
-                                                        : "Sample(state,";
-                    source += addressPrecision ? "coordinates" : "v.xy";
-                    if (comparison || operation == "sample_b")
-                        source += parameterPrecision ? ",parameter" : ",v.z";
-                    source += offset ? ",int2(-1,1)).xxxx;" : ").xxxx;";
+                    if (lod) {
+                        source += "float4 sampled=float4(image.CalculateLevelOfDetail(state,v.xy),"
+                                  "image.CalculateLevelOfDetailUnclamped(state,v.xy),0,0);";
+                    } else {
+                        source += (destinationPrecision ? reduced : "float") + "4 sampled=image.";
+                        source += comparison                ? "SampleCmp(state,"
+                                  : operation == "sample_b" ? "SampleBias(state,"
+                                                            : "Sample(state,";
+                        source += addressPrecision ? "coordinates" : "v.xy";
+                        if (comparison || operation == "sample_b")
+                            source += parameterPrecision ? ",parameter" : ",v.z";
+                        source += offset ? ",int2(-1,1)).xxxx;" : ").xxxx;";
+                    }
                     if (destinationPrecision)
                         source += "sampled *= " + reduced + "(1.0007);";
                     source += "return asuint(float4(sampled));}";
