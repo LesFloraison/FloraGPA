@@ -94,7 +94,9 @@ struct TextureInputs {
     void apply(const std::vector<MemoryChange> &, bool forward = true);
     Value load(uint32_t stage, const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                const std::array<uint32_t, 4> &swizzle, uint32_t mask, const std::array<int32_t, 3> &offset,
-               GpuOperations *, bool &assisted) const;
+               GpuOperations *, bool &assisted, const std::array<uint32_t, 2> &precision = {},
+               bool refactoringAllowed = false, bool outputDestination = false,
+               bool literalAddress = false) const;
 
   private:
     std::optional<Value> prepareSample(uint32_t stage, const Register &, const Register &, uint32_t dimension,

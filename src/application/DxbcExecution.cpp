@@ -388,14 +388,22 @@ Program::Program(Bytes dxbc) {
                 std::all_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision <= 2; });
             const bool precisionLoad = [&] {
                 if ((op != 45 && !(op == 163 && data->stage == 5)) ||
-                    (args[0].kind != 0 && args[0].kind != 3 && !(args[0].kind == 2 && !args[0].precision)) ||
-                    args[2].precision || args[2].indices.size() != 1 || args[2].indices[0].relative ||
+                    (args[0].kind != 0 && args[0].kind != 3 && args[0].kind != 2) || args[2].precision ||
+                    args[2].indices.size() != 1 || args[2].indices[0].relative ||
                     args[2].indices[0].base > UINT32_MAX ||
                     (args[1].precision && args[1].precision != 4 && args[1].precision != 5))
                     return false;
                 const auto resource =
                     data->typedResources.find({args[2].kind, {uint32_t(args[2].indices[0].base)}});
-                return resource != data->typedResources.end() && resource->second.first == 1;
+                if (resource == data->typedResources.end())
+                    return false;
+                const auto dimension = resource->second.first;
+                if (dimension == 1)
+                    return args[0].kind != 2 || !args[0].precision;
+                return op == 45 &&
+                       (dimension == 2 || dimension == 3 || dimension == 5 || dimension == 7 ||
+                        dimension == 8) &&
+                       (args[0].kind != 2 || data->stage != 5);
             }();
             const bool precisionStore =
                 data->stage == 5 && (op == 166 || op == 168) &&
@@ -1215,9 +1223,11 @@ Step Lane::step() {
                         ? s.inputs.textures->loadUav(binding, dimension, declaration->second.second, address,
                                                      resource.select, destination.mask, s.inputs.gpu.get(),
                                                      result.memoryGpuAssisted, p.stage)
-                        : s.inputs.textures->load(p.stage, binding, dimension, declaration->second.second,
-                                                  address, resource.select, destination.mask, offsets,
-                                                  s.inputs.gpu.get(), result.memoryGpuAssisted);
+                        : s.inputs.textures->load(
+                              p.stage, binding, dimension, declaration->second.second, address,
+                              resource.select, destination.mask, offsets, s.inputs.gpu.get(),
+                              result.memoryGpuAssisted, {destination.precision, args[1].precision},
+                              p.refactoringAllowed, destination.kind == 2, args[1].kind == 4);
             }
             if (s.inBounds(target)) {
                 const auto before = s.value(target);

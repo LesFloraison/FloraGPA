@@ -326,7 +326,9 @@ Value TextureInputs::loadMultisample(const Register &binding, uint32_t dimension
 }
 Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dimension, uint32_t returns,
                           const Value &address, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                          const std::array<int32_t, 3> &offset, GpuOperations *gpu, bool &assisted) const {
+                          const std::array<int32_t, 3> &offset, GpuOperations *gpu, bool &assisted,
+                          const std::array<uint32_t, 2> &precision, bool refactoringAllowed,
+                          bool outputDestination, bool literalAddress) const {
     const uint32_t native = dimension == 2   ? 2
                             : dimension == 3 ? 4
                             : dimension == 5 ? 8
@@ -379,15 +381,20 @@ Value TextureInputs::load(uint32_t stage, const Register &binding, uint32_t dime
              : view.firstLayer != 0 || view.layerCount != 1) ||
         (texture.minLod != 0 && !(texture.resource.desc.back() & 0x80)))
         throw std::runtime_error("Native texture load descriptor and snapshot metadata disagree");
-    auto result = gpu->loadTexture(stage, texture, view, dimension, returns, address, swizzle, mask, offset);
+    auto effectiveAddress = address;
+    auto result = gpu->loadTexture(stage, texture, view, dimension, returns, effectiveAddress, swizzle, mask,
+                                   offset, precision, refactoringAllowed, outputDestination, literalAddress);
     assisted = true;
-    const auto mip = uint64_t(view.firstMip) + address.bits[3];
-    const auto layer = dimension == 7 ? address.bits[1] : dimension == 8 ? address.bits[2] : 0;
-    const auto x = address.bits[0] + uint32_t(offset[0]);
-    const auto y =
-        dimension == 3 || dimension == 5 || dimension == 8 ? address.bits[1] + uint32_t(offset[1]) : 0;
-    const auto z = dimension == 5 ? address.bits[2] + uint32_t(offset[2]) : 0;
-    if (address.bits[3] >= view.mipCount || layer >= view.layerCount ||
+    const auto mip = uint64_t(view.firstMip) + effectiveAddress.bits[3];
+    const auto layer = dimension == 7   ? effectiveAddress.bits[1]
+                       : dimension == 8 ? effectiveAddress.bits[2]
+                                        : 0;
+    const auto x = effectiveAddress.bits[0] + uint32_t(offset[0]);
+    const auto y = dimension == 3 || dimension == 5 || dimension == 8
+                       ? effectiveAddress.bits[1] + uint32_t(offset[1])
+                       : 0;
+    const auto z = dimension == 5 ? effectiveAddress.bits[2] + uint32_t(offset[2]) : 0;
+    if (effectiveAddress.bits[3] >= view.mipCount || layer >= view.layerCount ||
         texture.minLod > view.firstMip + view.mipCount - 1 || mip < std::floor(texture.minLod)) {
         result.valid = uint8_t(mask);
         return result;

@@ -142,7 +142,14 @@ Words typedPixelUavKernel(uint32_t dimension, uint32_t returns, bool store, cons
 }
 Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
                     const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false,
-                    bool comparison = false) {
+                    bool comparison = false, const std::array<uint32_t, 2> &precision = {},
+                    bool refactoringAllowed = false, bool outputDestination = false,
+                    const std::optional<std::array<uint32_t, 4>> &literalAddress = {}) {
+    const bool minimum = precision[0] || precision[1];
+    const bool preserveOutput = stage != 5 && outputDestination;
+    const Words coordinate = literalAddress ? Words{0x4002, (*literalAddress)[0], (*literalAddress)[1],
+                                                    (*literalAddress)[2], (*literalAddress)[3]}
+                                            : Words{0x208e46, 0, 0};
     std::vector<Words> rows{row(89, {{0x208e46, 0,
                                       gradient   ? 3u
                                       : sampling ? 2u
@@ -152,12 +159,18 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
         rows.push_back(row(90 | (comparison ? 0x800 : 0), {{0x106000, 0}}));
     const bool compute = stage == 5;
     if (compute) {
-        rows.push_back(row(104, {{1}}));
+        rows.push_back(row(104, {{minimum ? 2u : 1u}}));
         rows.push_back(row(155, {{1, 1, 1}}));
         rows.push_back(row(158, {dest(30, 0), {16}}));
-    } else
-        rows.push_back(row(101, {dest(2, 0)}));
-    const auto target = compute ? 0u : 2u;
+    } else {
+        rows.push_back(row(101, {withPrecision(dest(2, 0), preserveOutput ? precision[0] : 0)}));
+        if (minimum && !preserveOutput)
+            rows.push_back(row(104, {{1}}));
+    }
+    if (minimum || refactoringAllowed)
+        rows.insert(rows.begin(),
+                    row(106 | (minimum ? 1u << 16 : 0u) | (refactoringAllowed ? 1u << 11 : 0u), {}));
+    const auto target = compute || (minimum && !preserveOutput) ? 0u : 2u;
     rows.push_back(row(54, {dest(target, 0), immediate(0)}));
     uint32_t control = 1;
     for (unsigned c = 0; c < 3; ++c) {
@@ -180,11 +193,22 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
                                                                  source(7, 0, swizzle),
                                                                  {0x106000, 0},
                                                                  {0x20800a, 0, 1}}));
-    else
+    else if (minimum)
         rows.push_back(row(45 | 0x80000000,
-                           {{control}, dest(target, 0, mask), {0x208e46, 0, 0}, source(7, 0, swizzle)}));
+                           {{control | 0x80000000u, 2u | (dimension << 6) | 0x80000000u, 3u | (returns << 6)},
+                            withPrecision(dest(target, 0, mask), precision[0]),
+                            withPrecision(coordinate, precision[1]),
+                            source(7, 0, swizzle)}));
+    else
+        rows.push_back(row(45 | 0x80000000, {{control},
+                                             withPrecision(dest(target, 0, mask), precision[0]),
+                                             withPrecision(coordinate, precision[1]),
+                                             source(7, 0, swizzle)}));
+    if (minimum && !preserveOutput)
+        rows.push_back(
+            row(54, {dest(compute ? 0u : 2u, compute ? 1u : 0u), withPrecision(source(0, 0), precision[0])}));
     if (compute)
-        rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, 0)}));
+        rows.push_back(row(168, {dest(30, 0), immediate(0), immediate(0), source(0, minimum ? 1u : 0u)}));
     rows.push_back(row(62, {}));
     const auto bytes = writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows});
     Words result(bytes.size() / 4);
@@ -722,16 +746,16 @@ struct GpuOperations::State {
         return pixelSamplingShaders.emplace(std::move(key), std::make_pair(std::move(words), binary))
             .first->second;
     }
-    std::vector<Value> texture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
-                               uint32_t dimension, uint32_t returns, const Value &address, uint32_t swizzle,
-                               uint32_t mask, const std::array<int32_t, 3> &offset,
-                               const SamplerInput *sampler = nullptr, const Value &lodOrDdx = {},
-                               const std::optional<Value> &ddy = {},
-                               const std::array<uint32_t, 3> &groupSize = {},
-                               const std::vector<SamplingInvocation> *batch = nullptr,
-                               bool comparison = false,
-                               const std::array<PixelSamplingInvocation, 4> *pixelBatch = nullptr,
-                               uint32_t pixelOpcode = 0, const std::array<uint32_t, 3> &precision = {}) {
+    std::vector<Value>
+    texture(uint32_t stage, const TextureInput &input, const TextureInputView &view, uint32_t dimension,
+            uint32_t returns, const Value &address, uint32_t swizzle, uint32_t mask,
+            const std::array<int32_t, 3> &offset, const SamplerInput *sampler = nullptr,
+            const Value &lodOrDdx = {}, const std::optional<Value> &ddy = {},
+            const std::array<uint32_t, 3> &groupSize = {},
+            const std::vector<SamplingInvocation> *batch = nullptr, bool comparison = false,
+            const std::array<PixelSamplingInvocation, 4> *pixelBatch = nullptr, uint32_t pixelOpcode = 0,
+            const std::array<uint32_t, 3> &precision = {}, bool refactoringAllowed = false,
+            bool outputDestination = false, bool literalAddress = false) {
         checkCancellation(cancelled);
         if (failed)
             throw std::runtime_error("Recreate the native GPU assist after a failed operation");
@@ -812,22 +836,26 @@ struct GpuOperations::State {
                 const auto result = pixels(words, values, srv.Get(), nativeSampler.Get(), binary);
                 return {result.begin(), result.end()};
             }
-            const auto words = batch
-                                   ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize)
-                                   : textureKernel(stage, dimension, returns, mask, swizzle, offset,
-                                                   sampler != nullptr, ddy.has_value(), comparison);
+            const auto words =
+                batch ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize)
+                      : textureKernel(stage, dimension, returns, mask, swizzle, offset, sampler != nullptr,
+                                      ddy.has_value(), comparison, {precision[0], precision[1]},
+                                      refactoringAllowed, outputDestination,
+                                      literalAddress ? std::make_optional(address.bits) : std::nullopt);
             std::vector<std::array<uint32_t, 4>> values{address.bits};
             if (sampler)
                 values.push_back(lodOrDdx.bits);
             if (ddy)
                 values.push_back(ddy->bits);
             if (stage == 0)
-                return {pixel(words, values, srv.Get(), nativeSampler.Get())};
+                return {pixel(words, values, srv.Get(), nativeSampler.Get(),
+                              outputDestination ? precision[0] : 0)};
             if (stage == 1) {
                 std::vector<Value> constants;
                 for (const auto &value : values)
                     constants.push_back(Value::known(value));
-                return {vertex(words, constants, srv.Get(), nativeSampler.Get())};
+                return {vertex(words, constants, srv.Get(), nativeSampler.Get(),
+                               outputDestination ? precision[0] : 0)};
             }
             auto found = shaders.find(words);
             if (found == shaders.end()) {
@@ -1138,7 +1166,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/21"}};
+            {"backend", "dxbc-gpu/22"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1576,13 +1604,34 @@ Value GpuOperations::textureDimensions(const TextureMetadata &input, const Textu
     }
 }
 Value GpuOperations::loadTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
-                                 uint32_t dimension, uint32_t returns, const Value &address,
+                                 uint32_t dimension, uint32_t returns, Value &address,
                                  const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                                 const std::array<int32_t, 3> &offset) {
+                                 const std::array<int32_t, 3> &offset,
+                                 const std::array<uint32_t, 2> &precision, bool refactoringAllowed,
+                                 bool outputDestination, bool literalAddress) {
+    if ((precision[0] != 0 && precision[0] != 1 && precision[0] != 2 && precision[0] != 4 &&
+         precision[0] != 5) ||
+        (precision[1] != 0 && precision[1] != 4 && precision[1] != 5) || (outputDestination && stage == 5))
+        throw std::runtime_error("Invalid native texture load precision or output stage");
+    const auto originalAddress = address;
+    if (precision[1]) {
+        const Words coordinate =
+            literalAddress ? Words{0x4002, address.bits[0], address.bits[1], address.bits[2], address.bits[3]}
+                           : source(0, 1);
+        Instruction conversion{54, 0, false, row(54, {dest(0, 0), withPrecision(coordinate, precision[1])})};
+        address.bits =
+            instruction(stage, conversion, {{0, {0}}}, {15}, {address}, {Value{}}, refactoringAllowed)
+                .at(0)
+                .bits;
+    }
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
-    return state_->texture(stage, input, view, dimension, returns, address, selection, mask, offset).front();
+    return state_
+        ->texture(stage, input, view, dimension, returns, originalAddress, selection, mask, offset, nullptr,
+                  {}, {}, {}, nullptr, false, nullptr, 0, {precision[0], precision[1], 0}, refactoringAllowed,
+                  outputDestination, literalAddress)
+        .front();
 }
 Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
                                    const SamplerInput &sampler, uint32_t dimension, uint32_t returns,

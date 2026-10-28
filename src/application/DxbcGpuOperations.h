@@ -30,9 +30,10 @@ class GpuOperations {
     Value textureDimensions(const struct TextureMetadata &, const struct TextureInputView &, uint32_t kind,
                             uint32_t dimension, uint32_t mip, uint32_t mode);
     Value loadTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
-                      uint32_t dimension, uint32_t returns, const Value &address,
+                      uint32_t dimension, uint32_t returns, Value &address,
                       const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                      const std::array<int32_t, 3> &offset);
+                      const std::array<int32_t, 3> &offset, const std::array<uint32_t, 2> &precision,
+                      bool refactoringAllowed, bool outputDestination, bool literalAddress);
     Value sampleTexture(uint32_t stage, const struct TextureInput &, const struct TextureInputView &,
                         const struct SamplerInput &, uint32_t dimension, uint32_t returns,
                         const Value &address, const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle,

@@ -4,6 +4,9 @@
 #include "application/DxbcTypedBuffer.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
 #include <d3d11sdklayers.h>
@@ -75,10 +78,379 @@ void validation(Replay &replay) {
             throw std::runtime_error(message->pDescription);
     }
 }
+std::array<uint32_t, 4> nativeLoad(ID3D11Device *device, Bytes code, uint32_t stage,
+                                   const TextureInput &input, const TextureInputView &view,
+                                   const std::array<uint32_t, 4> &address, uint32_t outputPrecision) {
+    Com<ID3D11DeviceContext> context;
+    auto shaderCheck = [&](HRESULT status, const char *message) {
+        if (FAILED(status)) {
+            qInfo() << "Original shader stage" << stage << "output precision" << outputPrecision;
+            Com<ID3D11InfoQueue> queue;
+            if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&queue))))
+                for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+                    SIZE_T size = 0;
+                    queue->GetMessage(i, nullptr, &size);
+                    std::vector<uint8_t> bytes(size);
+                    auto *entry = reinterpret_cast<D3D11_MESSAGE *>(bytes.data());
+                    if (SUCCEEDED(queue->GetMessage(i, entry, &size)))
+                        qInfo().noquote() << entry->pDescription;
+                }
+        }
+        check(status, message);
+    };
+    device->GetImmediateContext(&context);
+    context->ClearState();
+    const auto subs = textureSubresources(input.resource);
+    std::vector<D3D11_SUBRESOURCE_DATA> initial;
+    for (const auto &sub : subs)
+        initial.push_back(
+            {input.storage.bytes.data() + sub.offset, UINT(sub.rowPitch), UINT(sub.slicePitch)});
+    Com<ID3D11Resource> resource;
+    auto create = [&]<class T, class D>(auto method) {
+        D desc{};
+        std::memcpy(&desc, input.resource.desc.data(), sizeof desc);
+        Com<T> texture;
+        check((device->*method)(&desc, initial.data(), &texture), "Create independent precision texture");
+        resource = texture;
+    };
+    if (input.resource.type == 0x84)
+        create.operator()<ID3D11Texture1D, D3D11_TEXTURE1D_DESC>(&ID3D11Device::CreateTexture1D);
+    else if (input.resource.type == 0x85)
+        create.operator()<ID3D11Texture2D, D3D11_TEXTURE2D_DESC>(&ID3D11Device::CreateTexture2D);
+    else
+        create.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(&ID3D11Device::CreateTexture3D);
+    D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
+    std::memcpy(&desc, view.nativeDescriptor.data(), sizeof desc);
+    Com<ID3D11ShaderResourceView> srv;
+    check(device->CreateShaderResourceView(resource.Get(), &desc, &srv), "Create independent precision SRV");
+    D3D11_BUFFER_DESC bd{16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
+    const D3D11_SUBRESOURCE_DATA constants{address.data(), 0, 0};
+    Com<ID3D11Buffer> cb;
+    check(device->CreateBuffer(&bd, &constants, &cb), "Create independent precision constants");
+    auto *buffer = cb.Get();
+    auto *source = srv.Get();
+    Com<ID3D11Buffer> output;
+    Com<ID3D11Texture2D> target;
+    if (stage == 0) {
+        const auto vertex = compileHlsl("float4 main(uint id:SV_VertexID):SV_Position{"
+                                        "float2 p=float2((id<<1)&2,id&2);return float4(p*2-1,0,1);}",
+                                        "vs_5_0")
+                                .bytecode;
+        Com<ID3D11VertexShader> vs;
+        Com<ID3D11PixelShader> ps;
+        check(device->CreateVertexShader(vertex.data(), vertex.size(), nullptr, &vs), "Create oracle VS");
+        shaderCheck(device->CreatePixelShader(code.data(), code.size(), nullptr, &ps),
+                    "Create original precision PS");
+        D3D11_TEXTURE2D_DESC td{1,
+                                1,
+                                1,
+                                1,
+                                outputPrecision == 1 || outputPrecision == 2 ? DXGI_FORMAT_R32G32B32A32_FLOAT
+                                : outputPrecision == 4                       ? DXGI_FORMAT_R32G32B32A32_SINT
+                                                                             : DXGI_FORMAT_R32G32B32A32_UINT,
+                                {1, 0},
+                                D3D11_USAGE_DEFAULT,
+                                D3D11_BIND_RENDER_TARGET,
+                                0,
+                                0};
+        check(device->CreateTexture2D(&td, nullptr, &target), "Create independent precision target");
+        Com<ID3D11RenderTargetView> rtv;
+        check(device->CreateRenderTargetView(target.Get(), nullptr, &rtv), "Create oracle RTV");
+        auto *rt = rtv.Get();
+        const D3D11_VIEWPORT viewport{0, 0, 1, 1, 0, 1};
+        D3D11_RASTERIZER_DESC raster{};
+        raster.FillMode = D3D11_FILL_SOLID;
+        raster.CullMode = D3D11_CULL_NONE;
+        raster.DepthClipEnable = true;
+        Com<ID3D11RasterizerState> rs;
+        check(device->CreateRasterizerState(&raster, &rs), "Create oracle raster state");
+        context->VSSetShader(vs.Get(), nullptr, 0);
+        context->PSSetShader(ps.Get(), nullptr, 0);
+        context->PSSetConstantBuffers(2, 1, &buffer);
+        context->PSSetShaderResources(3, 1, &source);
+        context->RSSetState(rs.Get());
+        context->RSSetViewports(1, &viewport);
+        context->OMSetRenderTargets(1, &rt, nullptr);
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context->Draw(3, 0);
+    } else {
+        bd = {16,
+              D3D11_USAGE_DEFAULT,
+              UINT(stage == 1 ? D3D11_BIND_STREAM_OUTPUT : D3D11_BIND_UNORDERED_ACCESS),
+              0,
+              stage == 1 ? 0u : D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+              stage == 1 ? 0u : 16u};
+        check(device->CreateBuffer(&bd, nullptr, &output), "Create oracle output buffer");
+        if (stage == 1) {
+            Com<ID3D11VertexShader> vs;
+            Com<ID3D11GeometryShader> gs;
+            shaderCheck(device->CreateVertexShader(code.data(), code.size(), nullptr, &vs),
+                        "Create original precision VS");
+            const D3D11_SO_DECLARATION_ENTRY entry{0, "TEXCOORD", 0, 0, 4, 0};
+            const UINT stride = 16, offset = 0;
+            check(device->CreateGeometryShaderWithStreamOutput(code.data(), code.size(), &entry, 1, &stride,
+                                                               1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr,
+                                                               &gs),
+                  "Create oracle SO transport");
+            auto *out = output.Get();
+            context->VSSetShader(vs.Get(), nullptr, 0);
+            context->VSSetConstantBuffers(2, 1, &buffer);
+            context->VSSetShaderResources(3, 1, &source);
+            context->GSSetShader(gs.Get(), nullptr, 0);
+            context->SOSetTargets(1, &out, &offset);
+            context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+            context->Draw(1, 0);
+        } else {
+            Com<ID3D11ComputeShader> cs;
+            Com<ID3D11UnorderedAccessView> uav;
+            shaderCheck(device->CreateComputeShader(code.data(), code.size(), nullptr, &cs),
+                        "Create original precision CS");
+            check(device->CreateUnorderedAccessView(output.Get(), nullptr, &uav), "Create oracle output UAV");
+            auto *out = uav.Get();
+            context->CSSetShader(cs.Get(), nullptr, 0);
+            context->CSSetConstantBuffers(2, 1, &buffer);
+            context->CSSetShaderResources(3, 1, &source);
+            context->CSSetUnorderedAccessViews(3, 1, &out, nullptr);
+            context->Dispatch(1, 1, 1);
+        }
+    }
+    context->ClearState();
+    Com<ID3D11Resource> staging;
+    if (stage == 0) {
+        D3D11_TEXTURE2D_DESC td{};
+        target->GetDesc(&td);
+        td.Usage = D3D11_USAGE_STAGING;
+        td.BindFlags = 0;
+        td.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        Com<ID3D11Texture2D> copy;
+        check(device->CreateTexture2D(&td, nullptr, &copy), "Create oracle texture staging");
+        context->CopyResource(copy.Get(), target.Get());
+        staging = copy;
+    } else {
+        output->GetDesc(&bd);
+        bd.Usage = D3D11_USAGE_STAGING;
+        bd.BindFlags = bd.MiscFlags = bd.StructureByteStride = 0;
+        bd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        Com<ID3D11Buffer> copy;
+        check(device->CreateBuffer(&bd, nullptr, &copy), "Create oracle buffer staging");
+        context->CopyResource(copy.Get(), output.Get());
+        staging = copy;
+    }
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read independent precision output");
+    std::array<uint32_t, 4> result;
+    std::memcpy(result.data(), mapped.pData, 16);
+    context->Unmap(staging.Get(), 0);
+    return result;
+}
 } // namespace
 class DxbcTextureLoadTests final : public QObject {
     Q_OBJECT
   private slots:
+    void minimumPrecision_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("dimension");
+        QTest::addColumn<uint32_t>("stage");
+        QTest::addColumn<uint32_t>("precision");
+        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+            for (uint32_t dimension : {2u, 3u, 5u, 7u, 8u})
+                for (uint32_t stage : {0u, 1u, 5u})
+                    for (uint32_t precision : {1u, 2u, 4u, 5u})
+                        QTest::newRow(qPrintable(
+                            QString("%1-%2-%3-%4").arg(vendor).arg(dimension).arg(stage).arg(precision)))
+                            << vendor << dimension << stage << precision;
+    }
+    void minimumPrecision() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, dimension);
+        QFETCH(uint32_t, stage);
+        QFETCH(uint32_t, precision);
+        try {
+            QTemporaryDir temporary;
+            auto capture = testing::computeCapture(true);
+            const auto framePath = temporary.filePath("device.gpa_frame");
+            capture.save(framePath);
+            Frame frame(framePath.toStdWString());
+            Replay replay(frame, options(vendor));
+            auto gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), vendor == 0);
+            TextureInput texture;
+            const uint32_t format = precision < 4 ? 2 : precision == 4 ? 4 : 3;
+            const uint32_t returns = precision < 4 ? 5 : precision == 4 ? 3 : 4;
+            const uint32_t layers = dimension == 7 || dimension == 8 ? 2 : 1;
+            texture.resource.type = dimension == 2 || dimension == 7 ? 0x84 : dimension == 5 ? 0x86 : 0x85;
+            if (texture.resource.type == 0x84)
+                texture.resource.desc = {4, 2, layers, format, 0, 8, 0, 0};
+            else if (texture.resource.type == 0x85)
+                texture.resource.desc = {4, 4, 2, layers, format, 1, 0, 0, 8, 0, 0};
+            else
+                texture.resource.desc = {4, 4, 2, 2, format, 0, 8, 0, 0};
+            texture.subresources = textureSubresources(texture.resource);
+            const auto &last = texture.subresources.back();
+            texture.storage = Buffer::known(std::vector<uint8_t>(last.offset + last.size));
+            for (size_t i = 0; i < texture.storage.bytes.size() / 4; ++i) {
+                const uint32_t bits = precision < 4    ? 0x3f800101u + uint32_t(i * 193)
+                                      : precision == 4 ? uint32_t(-65553 - int32_t(i))
+                                                       : 65553u + uint32_t(i);
+                std::memcpy(texture.storage.bytes.data() + i * 4, &bits, 4);
+            }
+            TextureInputView view;
+            view.resource = 1;
+            view.format = format;
+            view.mipCount = 2;
+            view.layerCount = layers;
+            view.dimension = dimension == 2   ? 2
+                             : dimension == 3 ? 4
+                             : dimension == 5 ? 8
+                             : dimension == 7 ? 3
+                                              : 5;
+            view.nativeDescriptor = {format, view.dimension, 0, 2, 0, layers > 1 ? layers : 0};
+            Inputs inputs;
+            inputs.gpu = gpu;
+            inputs.textures = std::make_shared<TextureInputs>();
+            inputs.textures->resources[1] = texture;
+            inputs.textures->views[{7, {3}}] = view;
+            auto annotated = [](Words operand, uint32_t value) {
+                if (value) {
+                    operand[0] |= 0x80000000u;
+                    operand.insert(operand.begin() + 1, 1u | value << 14);
+                }
+                return operand;
+            };
+            nlohmann::json records = nlohmann::json::array();
+            for (uint32_t addressPrecision : {0u, 4u, 5u})
+                for (uint32_t mode = 0; mode < 4; ++mode)
+                    for (uint32_t direct = 0; direct < (stage == 5 ? 1u : 2u); ++direct)
+                        for (bool literalAddress : {false, true}) {
+                            const uint32_t mask = mode & 1 ? 9 : 15;
+                            const std::array<uint32_t, 4> address{mode == 1   ? 65537u
+                                                                  : mode == 3 ? UINT32_MAX
+                                                                              : 1u,
+                                                                  1, 1, mode == 2 ? 1u : 0u};
+                            inputs.constantBuffers[2] = {Value::known(address)};
+                            const std::array<uint32_t, 4> seed =
+                                precision < 4
+                                    ? std::array<uint32_t, 4>{0x3f000000, 0x3f800000, 0x3fc00000, 0x3fe00000}
+                                    : std::array<uint32_t, 4>{17, 23, 31, 47};
+                            const uint32_t targetKind = direct ? 2 : 0, targetIndex = direct ? 0 : 3;
+                            const auto destination = [&](uint32_t kind, uint32_t index,
+                                                         uint32_t selected = 15) {
+                                return Words{0x100002u | kind << 12 | selected << 4, index};
+                            };
+                            std::vector<Words> rows{
+                                op(106 | (1u << 16)), op(89, {{0x208e46, 2, 1}}),
+                                op(88 | dimension << 11, {{0x1070f2, 3}, {returns * 0x1111}}),
+                                op(104, {{4}})};
+                            if (stage == 5) {
+                                rows.push_back(op(155, {{1, 1, 1}}));
+                                rows.push_back(op(158, {{0x11e0f2, 3}, {16}}));
+                            } else
+                                rows.push_back(
+                                    op(101, {annotated(destination(2, 0), direct ? precision : 0)}));
+                            rows.push_back(op(54, {destination(targetKind, targetIndex),
+                                                   {0x4002, seed[0], seed[1], seed[2], seed[3]}}));
+                            rows.push_back(op(
+                                45 | 0x80000000u,
+                                {{2u | (dimension << 6) | 0x80000000u, 3u | ((returns * 0x1111) << 6)},
+                                 annotated(destination(targetKind, targetIndex, mask), precision),
+                                 annotated(literalAddress
+                                               ? Words{0x4002, address[0], address[1], address[2], address[3]}
+                                               : Words{0x208e46, 2, 0},
+                                           addressPrecision),
+                                 {0x1071b6, 3}}));
+                            if (!direct) {
+                                rows.push_back(op(54, {destination(stage == 5 ? 0 : 2, stage == 5 ? 2 : 0),
+                                                       {0x4002, seed[0], seed[1], seed[2], seed[3]}}));
+                                rows.push_back(
+                                    op(54, {destination(stage == 5 ? 0 : 2, stage == 5 ? 2 : 0, mask),
+                                            annotated({0x100e46, 3}, precision)}));
+                            }
+                            if (stage == 5)
+                                rows.push_back(
+                                    op(168, {{0x11e0f2, 3}, {0x4001, 0}, {0x4001, 0}, {0x100e46, 2}}));
+                            rows.push_back(op(62));
+                            const std::string type = direct ? precision == 1   ? "min16float"
+                                                              : precision == 2 ? "min10float"
+                                                              : precision == 4 ? "min16int"
+                                                                               : "min16uint"
+                                                            : "uint";
+                            const auto signature =
+                                compileHlsl(stage == 5 ? "[numthreads(1,1,1)]void main(){}"
+                                                       : type + "4 main():" +
+                                                             (stage == 0 ? "SV_Target0" : "TEXCOORD0") +
+                                                             "{return 0;}",
+                                            stage == 0   ? "ps_5_0"
+                                            : stage == 1 ? "vs_5_0"
+                                                         : "cs_5_0")
+                                    .bytecode;
+                            auto parts = readDxbcParts(signature);
+                            std::erase_if(parts, [](const auto &part) {
+                                return part.first == 0x52444853 || part.first == 0x58454853 ||
+                                       part.first == 0x54415453;
+                            });
+                            const auto programBytes = writeDxbcProgram({{stage << 16 | 0x50, 0}, rows});
+                            parts.emplace_back(0x58454853, programBytes);
+                            const auto code = makeDxbc(parts);
+                            const auto expected = nativeLoad(replay.nativeDevice(), code, stage, texture,
+                                                             view, address, direct ? precision : 0);
+                            const Program program(code);
+                            Lane lane(program, inputs);
+                            lane.step();
+                            const auto step = lane.step();
+                            QVERIFY(step.memoryGpuAssisted);
+                            QCOMPARE(step.changes.size(), size_t(1));
+                            QCOMPARE(step.changes[0].before, Value::known(seed));
+                            const auto actual = lane.value({targetKind, {targetIndex}});
+                            QCOMPARE(actual.bits, expected);
+                            QCOMPARE(actual.valid, uint8_t(15));
+                            auto &validity = inputs.textures->resources.at(1).storage.valid;
+                            std::fill(validity.begin(), validity.end(), 0);
+                            Lane unknown(program, inputs);
+                            unknown.step();
+                            unknown.step();
+                            bool zero = true;
+                            for (unsigned c = 0; c < 4; ++c)
+                                if (mask & (1u << c))
+                                    zero &= expected[c] == 0;
+                            const auto missing = unknown.value({targetKind, {targetIndex}});
+                            QCOMPARE(missing.bits, expected);
+                            QCOMPARE(missing.valid, uint8_t(zero ? 15 : 15 ^ mask));
+                            std::fill(validity.begin(), validity.end(), 1);
+                            records.push_back(
+                                {{"address_precision", addressPrecision},
+                                 {"literal_address", literalAddress},
+                                 {"mode", mode},
+                                 {"address", address},
+                                 {"output_destination", bool(direct)},
+                                 {"mask", mask},
+                                 {"expected", expected},
+                                 {"actual", actual.bits},
+                                 {"valid", actual.valid},
+                                 {"unknown_valid", missing.valid},
+                                 {"code", QByteArray(reinterpret_cast<const char *>(code.data()),
+                                                     qsizetype(code.size()))
+                                              .toHex()
+                                              .toStdString()}});
+                        }
+            QCOMPARE(inputs.textures->resources.at(1).storage.bytes, texture.storage.bytes);
+            validation(replay);
+            const nlohmann::json report{{"schema", 1},        {"probe", "minimum_precision_texture_load"},
+                                        {"vendor", vendor},   {"dimension", dimension},
+                                        {"stage", stage},     {"precision", precision},
+                                        {"format", format},   {"helper", gpu->identity()},
+                                        {"records", records}, {"passed", true}};
+            const auto root = qEnvironmentVariable("FLORA_TEXTURE_PRECISION_EVIDENCE");
+            if (!root.isEmpty()) {
+                QDir directory(root);
+                QVERIFY(directory.mkpath("."));
+                QFile file(directory.filePath(QString::fromLatin1(QTest::currentDataTag()) + ".json"));
+                QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                const auto text = report.dump(2) + "\n";
+                QCOMPARE(file.write(text.data(), qint64(text.size())), qint64(text.size()));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void hardware_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("dimension");
