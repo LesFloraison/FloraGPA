@@ -1339,3 +1339,14 @@ model/UI/checkpoint regressions pass 58, with no failures or skips. See [legacy
 source execution evidence](research/DX11_NATIVE_SDBG_EXECUTION.md). Other resource
 annotation forms, original subroutine source stacks, full PS selection and final
 dependency removal remain open.
+
+### Original debugger host accessors
+
+Seven reproducible Ghidra exports trace the singleton creation paths, raw host
+accessors and immediate consumers. A separate original-code probe passes 54
+guarded combinations and confirms that the alternate setter changes only host
+byte `+0xf8`. The pointer consumers reach a neighboring `+0x3b8` callback, query
+management and resource processing; they do not establish an engine at `+0x3c0`.
+See [the accessor evidence](research/DX11_DEBUGGER_HOST_ACCESSORS.md). P1 still
+requires the engine's nonzero assignment, constructor, vtable and module. This
+research increment changes no product routing or existing acceptance gates.

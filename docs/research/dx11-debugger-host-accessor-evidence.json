@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "scope": "original_host_accessor_call_edges",
+  "completed": true,
+  "engine_recovered": false,
+  "whole_program_alias_closure": false,
+  "cases": 54,
+  "verified_exports": 7,
+  "rejected_memory_corruptions": 12,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/accessors.log",
+      "bytes": 3817,
+      "sha256": "978824a64dc95784561fee5d4b27ffd8015ce13cb2a0b9581913f31f0792c59a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/accessors.txt",
+      "bytes": 3564,
+      "sha256": "c0da4fb26a973d7bdab41ed04e275ecf7d6be357be48339b16960492a3d5ae39"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/alternate.log",
+      "bytes": 3787,
+      "sha256": "9b147d2f10ce814442549190139204f5395b5d4332d6aa6a658b794c6192522d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/alternate.txt",
+      "bytes": 84727,
+      "sha256": "10cae5c949bf1c41e1868a0c31c7842740c804897fea74bf7d35eea88421a4b3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/callers.log",
+      "bytes": 3795,
+      "sha256": "eacf0c5fd3d6248f81d4ac5bb1cff95bf077ff8d7f205e9a571f402c4b02315d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/callers.txt",
+      "bytes": 15588,
+      "sha256": "edd1d0cddc3fe773940b6cb571ee1a2ecc2cc7db5e090acd11ba84123e44c51b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/consumers.log",
+      "bytes": 3787,
+      "sha256": "c0f0bd32026ee571339862eb80f302b59f00f21af4501a82da96f855e4657f55"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/consumers.txt",
+      "bytes": 23563,
+      "sha256": "89d718f7783c8b4b3b9182d679f2919f7c09e1a95fdbcdeea7bdc6bb5351b5f9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/global.log",
+      "bytes": 3763,
+      "sha256": "eaf3aac0c79c9e3a606fbaac4e092a75bd5c37039b052f0340f4c39ae7284dce"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/global.txt",
+      "bytes": 4114,
+      "sha256": "b1049434d04b3cc485f4c374a3b602d155c9c9acaa7e5e5c6c20fc4369dcde2a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/probe/accessors.json",
+      "bytes": 254642,
+      "sha256": "ffb522c07c9d4c07843c599883d759f670ffd5f49794983be904df7a871a7264"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/probe/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/probe/run.json",
+      "bytes": 495,
+      "sha256": "040467e1175efc8b5d2a6180df66e461f9fb7e9e23e1edfab593f70de42669ab"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/request.log",
+      "bytes": 3785,
+      "sha256": "9e03cfb701840e831d679360d6d2d9da0cb5cbc39d8a6fb3ad8a5a50d696d2d6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/request.txt",
+      "bytes": 21760,
+      "sha256": "7f43409ab459900ba89b4ded6fa611de5577a7de66ad39de2a6ffeef2f21849a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/accessors.log",
+      "bytes": 3832,
+      "sha256": "20f0126b03be060c89ff00674c8d78dc45899fe245e3c0463bdc3a3e11e5ec23"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/accessors.txt",
+      "bytes": 3564,
+      "sha256": "c0da4fb26a973d7bdab41ed04e275ecf7d6be357be48339b16960492a3d5ae39"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/alternate.log",
+      "bytes": 3802,
+      "sha256": "43e0179f4f93c0be85ac06fb8252f8faf6b0c22bcf62ff5a6f844afeff5c8a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/alternate.txt",
+      "bytes": 84709,
+      "sha256": "83979e382c3286a3c1a006260556c911a833f5e7895d005419be5e9a3490b0d3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/binary.json",
+      "bytes": 191,
+      "sha256": "c4466c070a3096f0b2e23d557092056db23fc7efd010a5cc93dbd4cf04177008"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/callers.log",
+      "bytes": 3810,
+      "sha256": "aad5e4d71129b3136655c5e119ffc2ec6ef80af48e856bfdf096c6a2733f5404"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/callers.txt",
+      "bytes": 15588,
+      "sha256": "edd1d0cddc3fe773940b6cb571ee1a2ecc2cc7db5e090acd11ba84123e44c51b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/consumers.log",
+      "bytes": 3802,
+      "sha256": "bb4a4744068f0d9915ec4c52c50b61498f584822f995ffd045a5a5f568f34a38"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/consumers.txt",
+      "bytes": 23563,
+      "sha256": "89d718f7783c8b4b3b9182d679f2919f7c09e1a95fdbcdeea7bdc6bb5351b5f9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/evidence-sha256.json",
+      "bytes": 1826,
+      "sha256": "41b8fbfc6ba75a5059493f2d4b032799f92f631497416cf3a5cab2245d126bf5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/global.log",
+      "bytes": 3778,
+      "sha256": "d07582d06f90a7a2dfd92b7c82d19696dc3ab80ec50aa3af045267d974730ff3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/global.txt",
+      "bytes": 4114,
+      "sha256": "b1049434d04b3cc485f4c374a3b602d155c9c9acaa7e5e5c6c20fc4369dcde2a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/request.log",
+      "bytes": 3800,
+      "sha256": "0a2ecfc5eff894e610b7751a08e9ba4a91f1506444f2ce4e2ef399f6d4465735"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/request.txt",
+      "bytes": 21760,
+      "sha256": "7f43409ab459900ba89b4ded6fa611de5577a7de66ad39de2a6ffeef2f21849a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/types.log",
+      "bytes": 3832,
+      "sha256": "e39a78f3997fce572c156ac5061dfe0d45d24410c6cd2d4b4c296125bb7f838b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-callers/verified-final/types.txt",
+      "bytes": 18967,
+      "sha256": "769195343832ebdd734decd8b47b231973c2b056bd92a4624eb117b090bb5cb2"
+    },
+    {
+      "path": "tools/probe_original_host_accessors.py",
+      "bytes": 5889,
+      "sha256": "365b863184aab41b0d029e5f3034cb6fa449af39ac0abe6171e7b63010541994"
+    },
+    {
+      "path": "tools/validate_host_accessor_research.py",
+      "bytes": 7669,
+      "sha256": "8e3f593b969887e98485f1bb549dcff523de7282f0c05200bcefa64ec436647f"
+    },
+    {
+      "path": "tools/ghidra/Invoke-HostAccessorResearch.ps1",
+      "bytes": 2965,
+      "sha256": "2d0a279807a4c020537ac90ff0838ed56754f9402cd49adca4dfa71c5d10338c"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "bytes": 2676,
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportAddressEvidence.java",
+      "bytes": 2682,
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    }
+  ]
+}
