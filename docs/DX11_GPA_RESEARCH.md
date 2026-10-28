@@ -61,6 +61,12 @@ query/SO implementations; they do not prove every original metric or identity ru
 
 ## Debugger host: current blocking gap
 
+The nonempty payload follow-up in
+[`research/DX11_DEBUGGER_RECORD_LAYOUT.md`](research/DX11_DEBUGGER_RECORD_LAYOUT.md)
+validates recursive and grouped record layouts, raw payload preservation and
+empty-container reuse behavior with the original codecs. It does not identify
+the engine or assign shader semantics to those fields.
+
 Debugger request vtable `0x183198` executes at `0x902b0`; enqueue is `0x93cb0`.
 Disassembly at `0x902e4` loads host from `[RDX+0x98]`; `0x902eb` loads the object
 from `[host+0x3c0]`. The null path returns success without invoking an engine.

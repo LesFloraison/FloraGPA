@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "scope": "original_debugger_nonempty_records",
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "nonempty_cases": 12,
+  "empty_reuse_cases": 12,
+  "rejected_corruptions": 228,
+  "original_binaries": [
+    {
+      "path": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+      "sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+    },
+    {
+      "path": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_playback.dll",
+      "sha256": "0a531905386af6c5f2c0357d4179cec208bb171a287b262f3c4a5539d483bf5e"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/debugger-records/diagnostic/child.log",
+      "bytes": 641,
+      "sha256": "46dd835c22f7c6f9b4e0b551ab990c6eaf59c53c5fed6ea82641c0452b0d8222"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/diagnostic/process.json",
+      "bytes": 454,
+      "sha256": "4d99d8fc778c63610b44f47b1a563b8b9a45785a707fae290690afca2abec4ed"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/diagnostic/records.json",
+      "bytes": 2844,
+      "sha256": "e0abd39a4de88df582794921fff992609627a8278cd1c6ecb06494c0ae729e38"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final/process.json",
+      "bytes": 449,
+      "sha256": "77abd2c6b1092d599d2263486e34e2473136f1be4c2514bfe1ad8cf7e6ce24b9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final/records.json",
+      "bytes": 343792,
+      "sha256": "b47a5b2b89249fa4e04bcc37d70eefd14a078b50432ee7933557c18fb8ef05a3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final-observed/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final-observed/process.json",
+      "bytes": 458,
+      "sha256": "42b196e61f8d5e70f0923468e37a064d20ea37d09d98df0f26f595a657adcd60"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/final-observed/records.json",
+      "bytes": 343792,
+      "sha256": "2ea2d3f9e2a188ef23686611794d369d8ba4760bda8ab3829e3745d211b1b456"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/runtime/child.log",
+      "bytes": 641,
+      "sha256": "0c748f8217790fc0e5316e28d53d488bfca2b7a6c760a0efaa2d5e35e6e204da"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/runtime/process.json",
+      "bytes": 451,
+      "sha256": "fb5c78d124c7b07342495c88481ca04ee7f092ede42a7eb1884e5513c1d42ac7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/runtime/records.json",
+      "bytes": 704,
+      "sha256": "42f733ea89af775269ddcdd309fd086b2789029f15aa5a4c5adc037290b0e1b7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/binaries.json",
+      "bytes": 411,
+      "sha256": "f615012229b7a3aeef0951a71442e568a4a80eaeac7a84db4f79a6aafb46b4de"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/dx11_playback.dll.log",
+      "bytes": 3835,
+      "sha256": "f462b1d4f2344bf614319b1c843f59813dc8814d04d7f4a1864a935cbe938528"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/dx11_playback.dll.txt",
+      "bytes": 36788,
+      "sha256": "312d62fdaf183899ad962ff86a70792d6e4effad62259ff3574a2e795a37a420"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/dx11_player.dll.log",
+      "bytes": 3831,
+      "sha256": "373b615b736c31c86f8817ea792698cf89098ddff842a97ccff83c882cd82870"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/dx11_player.dll.txt",
+      "bytes": 29551,
+      "sha256": "562c1cc81a2ce0fd415e445eff32ba79aa0b2d98c309e9da83f40c87d112431e"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static/evidence-sha256.json",
+      "bytes": 648,
+      "sha256": "dd3bc7674a728251e975e71ca902d60de940672dfda379efcb3ba83ac7e00c04"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/binaries.json",
+      "bytes": 411,
+      "sha256": "26dbe59d0a4748f8ef484cb2513166055064bedc3f9c521d9a50437ab94c45ea"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/dx11_playback.dll.log",
+      "bytes": 3852,
+      "sha256": "a938b05b11e88666ae205c21b9398a68c849c078e6d1ceeb1390d78666046089"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/dx11_playback.dll.txt",
+      "bytes": 38833,
+      "sha256": "c8a8485a3600778ad9a15ad77d806615fa6e79789a424029200a683ce7293df2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/dx11_player.dll.log",
+      "bytes": 3848,
+      "sha256": "5d501d3bfd4e5827db4adc9723b28cb17e662626d0acf4828169ca229d906d42"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/dx11_player.dll.txt",
+      "bytes": 31413,
+      "sha256": "46765a49a3cde5f680c884beeebdf3740f1c7e947e60cd0f6715fdff9c15adf9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/static-final/evidence-sha256.json",
+      "bytes": 648,
+      "sha256": "b0022d5b7c565d4218d46314577f26ecfc14d34cd376585de750f257527846c0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/verified/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/verified/process.json",
+      "bytes": 452,
+      "sha256": "b655f84d4e5ce752562cb0d8f532f9b30087fc144815884ab54fe1f02bd3e9d5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-records/verified/records.json",
+      "bytes": 343789,
+      "sha256": "37a7804a52a92611b05fb99b07ecd8f13df0c88001c17c25bce467ee86462b86"
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/probe_original_debugger_records.py",
+      "sha256": "5be5221e0b057f5a34316dcc819196ffad130ca71758b966379f995f7339c221"
+    },
+    {
+      "path": "tools/probe_original_debugger_wire.py",
+      "sha256": "185b1a35aae784922acf2dbe2404ea0088d2da8aed1201fc745065c2c0006edd"
+    },
+    {
+      "path": "tools/validate_debugger_records.py",
+      "sha256": "66764113d2b3c48ac5d69d32d0d0a2c5e2952e97b55692f5965a8dc03f5dcfb3"
+    },
+    {
+      "path": "tools/ghidra/Invoke-DebuggerRecordResearch.ps1",
+      "sha256": "ea1619d623202d582b1ee1e7c28b8c856bd1764ff66694af58bbda8791fe7f31"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    }
+  ]
+}
