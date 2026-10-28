@@ -1,0 +1,1804 @@
+{
+  "schema": 1,
+  "scope": "native_interface_resource_operations",
+  "evidence_complete": true,
+  "cases": 96,
+  "rejected_corruptions": 288,
+  "full_debug_parity": false,
+  "parity_passed": false,
+  "original_mismatches": [
+    {
+      "case": "32902-0-0-2-1",
+      "original": 1120403456,
+      "native": 1124859904
+    },
+    {
+      "case": "32902-0-1-2-0",
+      "original": 0,
+      "native": 1109393408
+    },
+    {
+      "case": "32902-0-1-2-1",
+      "original": 1120403456,
+      "native": 1124859904
+    },
+    {
+      "case": "32902-1-0-2-0",
+      "original": 0,
+      "native": 1119223808
+    },
+    {
+      "case": "32902-1-0-2-1",
+      "original": 1120403456,
+      "native": 1128202240
+    },
+    {
+      "case": "32902-1-1-2-0",
+      "original": 0,
+      "native": 1119223808
+    },
+    {
+      "case": "32902-1-1-2-1",
+      "original": 1120403456,
+      "native": 1128202240
+    }
+  ],
+  "unrelated_binding_control_cases": 12,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-0.json",
+      "bytes": 866,
+      "sha256": "6d502bf95c617519bf5f9a3f33f513a5b4984c51717946e5231d89ca9c2e2056"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "cdeab06f46e1469ba02f6f6659ea68888dfc2c46220f2a85d8ea9c3582f30758"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-1.json",
+      "bytes": 866,
+      "sha256": "643c28656f3bffbe372ee51660001d745d81d16366f9f89b060a49aa4dc8fc20"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "aeac443ebcaa2c1d9bac9fe9bca050d7f6d704857d9402deb312e6e6f8878c15"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-0.json",
+      "bytes": 866,
+      "sha256": "5ca4e322a08bfc0fa770c439f1a374d83599704440cd273dcd16136f20a82aef"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-1.json",
+      "bytes": 866,
+      "sha256": "2724a07c1bc35bc34bb01bfe3fb28ab72516e7c597212b0a341b7506e989b1de"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "2ea1bab09d9be3814646d69e2f566b907c78462d085eaf2c61c425d09960c8fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-0.json",
+      "bytes": 866,
+      "sha256": "74faca1d7ac5eeea89ec5cf7fa53702c9e4e32ff3fa128e7b5dd1f29f41963bf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-1.json",
+      "bytes": 866,
+      "sha256": "0181b96b01b6112544488cb5fb046c5bb55b7eca8ece762812df4697afbbc2a4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "2ea1bab09d9be3814646d69e2f566b907c78462d085eaf2c61c425d09960c8fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-0.json",
+      "bytes": 839,
+      "sha256": "8d11200fbdafbe48b1d685b59e9d425cd01854b3d8860d648458909d2180a8fe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-0.original.json",
+      "bytes": 130,
+      "sha256": "ef00565bf19847f1a16fe04808c61e84d483358ef37f087513331f17bfbb20f4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-1.json",
+      "bytes": 866,
+      "sha256": "e6aa811c3fdf99befebd315e45adade3b309a8322aaa29734561c2c6c8527582"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "d011b849a4b11f95d236f2af5a71a47b2cf3f985bff13e42a271df83be4a0cf5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-0.json",
+      "bytes": 862,
+      "sha256": "7d7bf10ecb73b4a685cb6721d24c09456cc686498498d6d97e851d45ecf0e40f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "9296f39a6c97683d8e15b3413f3d7de35812dd555beb3b83c6ff3ce4be9beea1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-1.json",
+      "bytes": 861,
+      "sha256": "a4845714178b355c9b9e151c4c47b8864d91b646f03c800d616091ff76f0c081"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "1d37a9e36922e3f231f30beb3508ad9b3f899df90e040d43c8bf176618171ef5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-0.json",
+      "bytes": 861,
+      "sha256": "3eea7a4c9d3f1eb1833254839a4bec2937a6787f5b3c43f240ea079ce49faa2c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-1.json",
+      "bytes": 860,
+      "sha256": "0890f0f27609ee0c58a021d27b65adf02a6a439f4a05f699180e0fae75bc4d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-0.json",
+      "bytes": 861,
+      "sha256": "3ac2419a54baafafdb5a4854bfaa597fa3132e4ffcd4ddbb29cdf781bab00da0"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-1.json",
+      "bytes": 860,
+      "sha256": "2ec382b11e57541084e3a48f898fe6ef4fc90ae8a8b43a256f19c6b9c58d439d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-0.json",
+      "bytes": 834,
+      "sha256": "05a057015078c3dc122d4fc9b0815b7c509f62e4cc97195060c4c4a7dbace3d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-0.original.json",
+      "bytes": 126,
+      "sha256": "217eeca4da7a68ee91b9e479911c11810e425120a983b94976ce8d212249013e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-1.json",
+      "bytes": 860,
+      "sha256": "5af92af236b509be44a9231e0c0459a2f884bed476f7df49c0eec87275b125f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-0-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "81a1bc4192bf1eb40e50095b2281846c18881e0855a6d15e5b2d87e164974ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-0.json",
+      "bytes": 866,
+      "sha256": "63b6fe6faa968825b011126c48654f5138749f5fe96e3b41f08fff2114e17a45"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "f2aba8b74325a51907e40c3cb25e1aae14b5fbc2676f20a121c34fd31c579547"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-1.json",
+      "bytes": 866,
+      "sha256": "46eaf7eef683fd723407c12c9b8efecf665b4a85cfed16b5c2237011bbf4b42a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "ef94cf8dff161d866064bf2d9bf458a19e09b0c5eae8b82464d680ffa06463ca"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-0.json",
+      "bytes": 866,
+      "sha256": "b72a861389a9beb2ef6572c9088809119fda6b05693499ea10392fd30c3ea584"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "566943da164d260424c637a67598d857542ab7df3e316b0f99e382be35773a96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-1.json",
+      "bytes": 866,
+      "sha256": "0bcb12ddbf9c22f76f30d0378a587fe4c56586966137854928ba16288da3fe33"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "0d96715e974c1c424048e926f5ca04ca47b952fc8d6e85391ad30df85aa9fcc3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-0.json",
+      "bytes": 866,
+      "sha256": "0ed9ceb7ab76396321896912bc5e2dccf6b563002a955f8322690edc8a314e3c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-0.original.json",
+      "bytes": 139,
+      "sha256": "566943da164d260424c637a67598d857542ab7df3e316b0f99e382be35773a96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-1.json",
+      "bytes": 866,
+      "sha256": "0f3b9c910298d8e23789d310613b36787ef76e7a522b45c90fd7a4babcdbbf09"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "0d96715e974c1c424048e926f5ca04ca47b952fc8d6e85391ad30df85aa9fcc3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-0.json",
+      "bytes": 866,
+      "sha256": "02ab11461513f75fe74453075c43ab6e402fee1111451dd7fd1bf406f0d0b1b9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-0.original.json",
+      "bytes": 139,
+      "sha256": "4ab56f0ae3e9fc6f2d8508d70d6f6174adb2af8202567508cdc3bcc53df53608"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-1.json",
+      "bytes": 866,
+      "sha256": "1bce28c0d3dce106cefae812729c107958c4302f5af2c4a39c8d3b0f0f23fc22"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "696a5b0d480241530b43facf995cc544385c2cac10cbb8821edda896e32543df"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-0.json",
+      "bytes": 862,
+      "sha256": "02d9c4eb59f08d8d64b56e8c13fe2fd2552dcf47a5b85a3e46644e4cd7989ab5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "5a5d81625bdbbda1af63b2faf5c634bb52e478ef16fc728fa573f79702017b21"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-1.json",
+      "bytes": 861,
+      "sha256": "ea1c994c09463896b7116da7fc907295cdca2e18f54745df3dbc9c4763a13aea"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "fccbe8377f4d3247dc696e643b3904631c73c6354df6454f5170496e043caa30"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-0.json",
+      "bytes": 861,
+      "sha256": "9a05c4c5c6c720b60eefad88b18502c9f81eb3d9eaa32ae0f05e0b9c3aba9756"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "f1f4f4d765869b975f26956ddd524f0948df317d49879ef10d710663cd185a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-1.json",
+      "bytes": 860,
+      "sha256": "de0091d8adc6451410978a4cff80a02a36d1f1557e136fd796a58446761820b2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "eb6ada7a134cf97268a1fabb72e8bc30f2b96f35b89cabbb5cdd86800aaa9e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-0.json",
+      "bytes": 861,
+      "sha256": "1246a1a4ab5da94b362ffd0b117fb4848952668c76e72fac043ef17915f83947"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "f1f4f4d765869b975f26956ddd524f0948df317d49879ef10d710663cd185a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-1.json",
+      "bytes": 860,
+      "sha256": "78731c4099b76bd0e835ff9476f845679b2ff375805cc8d23f62ccc1446b9f63"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "eb6ada7a134cf97268a1fabb72e8bc30f2b96f35b89cabbb5cdd86800aaa9e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-0.json",
+      "bytes": 861,
+      "sha256": "e048e23d8da3335f16da20e7a9c79acda00bc4a7e13c9c56dd05eaedfc6bdedb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-0.original.json",
+      "bytes": 135,
+      "sha256": "bbf735f9eccb394af8e56e537b891073a77be9119572db8769dd56fa9696b865"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-1.json",
+      "bytes": 860,
+      "sha256": "2b74e312577a86d8e3c2a817c7077626b4557bcc672c5caf4c95bbcbd2a2b3a1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/0-1-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "2c2067c9924d9ef9aa74ded48c6a6f4f94b3afb26b27d6c79796bfc151c87866"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-0.json",
+      "bytes": 874,
+      "sha256": "1add7620e86d443bb05ea7907b89e818e12461ee10485e6967c7007376ec03fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "cdeab06f46e1469ba02f6f6659ea68888dfc2c46220f2a85d8ea9c3582f30758"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-1.json",
+      "bytes": 874,
+      "sha256": "cb4f96ae7451bc07fdc1330ff7fa68134e9e3d44597283ff5142be5c93e13b77"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "aeac443ebcaa2c1d9bac9fe9bca050d7f6d704857d9402deb312e6e6f8878c15"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-0.json",
+      "bytes": 874,
+      "sha256": "135fea56c57eda85761a7699b1909ea1124d604d844e5c4052de544862cfec06"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-1.json",
+      "bytes": 874,
+      "sha256": "c8bb9cdd38baeeab94155b253cb730939f3ac0389a4c6bf81c4b5b9fcdb61278"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "2ea1bab09d9be3814646d69e2f566b907c78462d085eaf2c61c425d09960c8fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-0.json",
+      "bytes": 874,
+      "sha256": "f7eebc805248e7aa59c821190d3bcbe77e21298a85c27952ddaa37214f0c1507"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-1.json",
+      "bytes": 874,
+      "sha256": "3344f80c53ec4e545dfaa8fcc18772521877664f67c06e55476c92bd04516f5e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "d011b849a4b11f95d236f2af5a71a47b2cf3f985bff13e42a271df83be4a0cf5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-0.json",
+      "bytes": 847,
+      "sha256": "de9a7d9b56c15dbc63d2cbc2dc4d4039cc2623dd0ffde481a44b733617980c56"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-0.original.json",
+      "bytes": 130,
+      "sha256": "ef00565bf19847f1a16fe04808c61e84d483358ef37f087513331f17bfbb20f4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-1.json",
+      "bytes": 874,
+      "sha256": "846635ce40d41ef298813c2cd7110888feeb73e4432e4c86cc41ac004c4404bc"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "d011b849a4b11f95d236f2af5a71a47b2cf3f985bff13e42a271df83be4a0cf5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-0.json",
+      "bytes": 870,
+      "sha256": "d9a12e9a39ee0aa66910f859c07fef57940186e84cff7748e51653d6efb56187"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "9296f39a6c97683d8e15b3413f3d7de35812dd555beb3b83c6ff3ce4be9beea1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-1.json",
+      "bytes": 869,
+      "sha256": "42e6925ceab8a84739a4e895eb276e5221d650b8d6f55f1dcd48bf0dd70c0e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "1d37a9e36922e3f231f30beb3508ad9b3f899df90e040d43c8bf176618171ef5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-0.json",
+      "bytes": 869,
+      "sha256": "3e3109bb244ca3e40a934fd853efba5610f3156c14505258ba40d11c115bc4b7"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-1.json",
+      "bytes": 868,
+      "sha256": "5b33fd46bf264fe9de64f727d7744615121a94168750fafbe14e0db2c212dd11"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-0.json",
+      "bytes": 860,
+      "sha256": "3b6e70cadd63a970d55cf460b5746beb798c50ee972264dc51b4428bb199939b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-0.original.json",
+      "bytes": 126,
+      "sha256": "217eeca4da7a68ee91b9e479911c11810e425120a983b94976ce8d212249013e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-1.json",
+      "bytes": 868,
+      "sha256": "c38c80a1f1f8d861897fc89a8d54e842b8b7cd9103c08f43297372092ed62048"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "81a1bc4192bf1eb40e50095b2281846c18881e0855a6d15e5b2d87e164974ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-0.json",
+      "bytes": 842,
+      "sha256": "d0f0467501732ef26c34259422872f3b38133dde764ab2a6240602681d25dae1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-0.original.json",
+      "bytes": 126,
+      "sha256": "217eeca4da7a68ee91b9e479911c11810e425120a983b94976ce8d212249013e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-1.json",
+      "bytes": 868,
+      "sha256": "5475d71afe510c4b84f9c06870e66c9838b9e80479cd7ca5892af4824ac54c86"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-0-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "81a1bc4192bf1eb40e50095b2281846c18881e0855a6d15e5b2d87e164974ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-0.json",
+      "bytes": 874,
+      "sha256": "e6c9536a54b634ee578d13851e79daf5839a464da99bfb65e3eb6dd9824a7374"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "f2aba8b74325a51907e40c3cb25e1aae14b5fbc2676f20a121c34fd31c579547"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-1.json",
+      "bytes": 874,
+      "sha256": "adf86b53caaaecab185875e8199fbda8fa22eca76411a555696dda7f66a1cc05"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "ef94cf8dff161d866064bf2d9bf458a19e09b0c5eae8b82464d680ffa06463ca"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-0.json",
+      "bytes": 874,
+      "sha256": "6b2c57baa56dbe1fb4eecd562f8c4f2b579b3642fcdc242e698958fe62baf28a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "566943da164d260424c637a67598d857542ab7df3e316b0f99e382be35773a96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-1.json",
+      "bytes": 874,
+      "sha256": "54e7018e81c20d52e8b17b3a7e1254779d0b844918633095468d6f5c67a919c5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "0d96715e974c1c424048e926f5ca04ca47b952fc8d6e85391ad30df85aa9fcc3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-0.json",
+      "bytes": 865,
+      "sha256": "ac6dcdabdfaecef57bd3f94935a5aee90c71520acbbe215a06bd360f989741f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-0.original.json",
+      "bytes": 130,
+      "sha256": "92bdc1c1fcb962a6356119deaac50e0a8718f5066e00d6deb87a7310cd47cf42"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-1.json",
+      "bytes": 874,
+      "sha256": "49119e2f4962e72a102a5c289b0a82177c0e542c0d5a662814bc0ea75c59008c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "b1a58029199d14556eabaf6a8ca907f1e63a30b732a6995c76603b0d3c2f0448"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-0.json",
+      "bytes": 874,
+      "sha256": "8db5b8d4366d3592e57fc0adb30b84d57750b054fae1aa3c3a6d883a86e576ee"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-0.original.json",
+      "bytes": 139,
+      "sha256": "4ab56f0ae3e9fc6f2d8508d70d6f6174adb2af8202567508cdc3bcc53df53608"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-1.json",
+      "bytes": 874,
+      "sha256": "7bd5ff959adfa3901fad9b790b167ca21465c7f25829b4a7c171b14df6d02554"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "696a5b0d480241530b43facf995cc544385c2cac10cbb8821edda896e32543df"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-0.json",
+      "bytes": 870,
+      "sha256": "556d919bcd58292d7d785e0f1df208aa3301887ce3a814494110f7b61f6ba9fe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "5a5d81625bdbbda1af63b2faf5c634bb52e478ef16fc728fa573f79702017b21"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-1.json",
+      "bytes": 869,
+      "sha256": "b40f948e901e6de5334021cb378a0a7c406e4075e2b55edf3946c0dfe6be1623"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "fccbe8377f4d3247dc696e643b3904631c73c6354df6454f5170496e043caa30"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-0.json",
+      "bytes": 869,
+      "sha256": "aad772882a992fe0a4b1a6ea48a59b20dd5721b0ef51bd7e686f41555893123b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "f1f4f4d765869b975f26956ddd524f0948df317d49879ef10d710663cd185a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-1.json",
+      "bytes": 868,
+      "sha256": "ad40a1eab56dddba454177934c96c1a3fa045a9240068f35e4cad8866ad08c02"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "eb6ada7a134cf97268a1fabb72e8bc30f2b96f35b89cabbb5cdd86800aaa9e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-0.json",
+      "bytes": 860,
+      "sha256": "b308d76579e2571c75f78f2d487b3d67310c56deb6d424df01d3f9122f8aac77"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-0.original.json",
+      "bytes": 126,
+      "sha256": "499452af38fde2d98c69f84692c548061deeb09638b2e968a945973c849c46c2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-1.json",
+      "bytes": 868,
+      "sha256": "fa70fee4335003b1919874eca444fa8a58d002970d8c3289c30ec680b6f59996"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "d68942f7121f1a9317c65224e11d4081f8b53651a401651d1d9bf7d62f314cfd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-0.json",
+      "bytes": 869,
+      "sha256": "09ecc1449c9ee0ddd10f1909ddf31d38166b4955d86893ef735ff67785646ce6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-0.original.json",
+      "bytes": 135,
+      "sha256": "bbf735f9eccb394af8e56e537b891073a77be9119572db8769dd56fa9696b865"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-1.json",
+      "bytes": 868,
+      "sha256": "28537027ba081fe7fdc575eba68c8b30de445fe6b3963251e76951d8f53b5c4c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/32902-1-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "2c2067c9924d9ef9aa74ded48c6a6f4f94b3afb26b27d6c79796bfc151c87866"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-0.json",
+      "bytes": 872,
+      "sha256": "ac4d30e0e7e18ebe06ddc6c8e629fe2d09970d53e5bc7ed8eb7e531f9ad33d09"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "cdeab06f46e1469ba02f6f6659ea68888dfc2c46220f2a85d8ea9c3582f30758"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-1.json",
+      "bytes": 872,
+      "sha256": "52917949c190db0da05d43bbe9b7880be35de36c294733f4fa3ca7f0b0585e9e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "aeac443ebcaa2c1d9bac9fe9bca050d7f6d704857d9402deb312e6e6f8878c15"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-0.json",
+      "bytes": 872,
+      "sha256": "f53efaf75b2a4cfc17303682304116e0c67324a032670f4e313a097199dfca9f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-1.json",
+      "bytes": 872,
+      "sha256": "40378bc0ce7dec0b8304ad4afe89babd0672b6f81bb7c0b511eec0b22a95c85f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "2ea1bab09d9be3814646d69e2f566b907c78462d085eaf2c61c425d09960c8fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-0.json",
+      "bytes": 872,
+      "sha256": "79eaa82b575d76af33af815191eac7a8374717d9aa362263ae59d401e8aec4f7"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-0.original.json",
+      "bytes": 139,
+      "sha256": "e3a142d63165e85140e7ec1183f4126f09e45cb3e60514475f28dc1da7b1d893"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-1.json",
+      "bytes": 872,
+      "sha256": "9d33b276aa311084741a56b34fe05a56bf1650b56d9564aac8fc7755bcb3f6b5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "2ea1bab09d9be3814646d69e2f566b907c78462d085eaf2c61c425d09960c8fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-0.json",
+      "bytes": 845,
+      "sha256": "855663e890c8379f8cfe4608c212f3664d31087881f34e343f7252105cd70136"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-0.original.json",
+      "bytes": 130,
+      "sha256": "ef00565bf19847f1a16fe04808c61e84d483358ef37f087513331f17bfbb20f4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-1.json",
+      "bytes": 872,
+      "sha256": "b37eaa0f9145ea5309284419acb1795d9d6f9f1e4f86a384e7dde31f343a24e5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "d011b849a4b11f95d236f2af5a71a47b2cf3f985bff13e42a271df83be4a0cf5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-0.json",
+      "bytes": 868,
+      "sha256": "642d146b7815aa5911face055f71bb7467c786ca2f920b02de2e4eb2ebe58d21"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "9296f39a6c97683d8e15b3413f3d7de35812dd555beb3b83c6ff3ce4be9beea1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-1.json",
+      "bytes": 867,
+      "sha256": "8b928655d46213c7a87c52cc1f99eb16af126e3abeae3e2bc25d25dc9d5de680"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "1d37a9e36922e3f231f30beb3508ad9b3f899df90e040d43c8bf176618171ef5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-0.json",
+      "bytes": 867,
+      "sha256": "21805eb838e297bb1d481a160acdf10ff5273d4a3bf1009f5112dabf9c03296f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-1.json",
+      "bytes": 866,
+      "sha256": "50d182a36ebc80e1aef57d2057ade6e737d3041d3557a28130df570da2aa0855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-0.json",
+      "bytes": 867,
+      "sha256": "85a599c2b0eec8c9985315785abf33ffc6116fe103a85f114b74fe8e95feae0a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-1.json",
+      "bytes": 866,
+      "sha256": "d65f6aaa54ec9c8bba174c938f0d1e72608e90344f47c5db8bf8a32f2836fa11"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-0.json",
+      "bytes": 840,
+      "sha256": "e21feeeae918a16001e97f75f15bb73501c743fb13c25ee86b74ad91c4eaf6fe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-0.original.json",
+      "bytes": 126,
+      "sha256": "217eeca4da7a68ee91b9e479911c11810e425120a983b94976ce8d212249013e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-1.json",
+      "bytes": 866,
+      "sha256": "7928d18e53f907f0a5eafccee54189a8aa9db6f955c29c526b8baae71ddd606e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-0-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "81a1bc4192bf1eb40e50095b2281846c18881e0855a6d15e5b2d87e164974ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-0.json",
+      "bytes": 872,
+      "sha256": "d41196f9b3e5fac53ea411b86d86ac19044434308355a6815bb779d0326765ce"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-0.original.json",
+      "bytes": 139,
+      "sha256": "f2aba8b74325a51907e40c3cb25e1aae14b5fbc2676f20a121c34fd31c579547"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-1.json",
+      "bytes": 872,
+      "sha256": "7985f58b793b22ecd5758c26ce7288e8b79625d8aa3b9fe730aa91db23c5b90c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-0-1.original.json",
+      "bytes": 140,
+      "sha256": "ef94cf8dff161d866064bf2d9bf458a19e09b0c5eae8b82464d680ffa06463ca"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-0.json",
+      "bytes": 872,
+      "sha256": "77b17c1417c166a4fa2110337528578453ae2b7e1b69271acf339907bfdcb16b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-0.original.json",
+      "bytes": 139,
+      "sha256": "566943da164d260424c637a67598d857542ab7df3e316b0f99e382be35773a96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-1.json",
+      "bytes": 872,
+      "sha256": "98d787d426d406c32daa6962a217bbe0caeb97a320141b0001f3bd4416415655"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-1-1.original.json",
+      "bytes": 140,
+      "sha256": "0d96715e974c1c424048e926f5ca04ca47b952fc8d6e85391ad30df85aa9fcc3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-0.json",
+      "bytes": 872,
+      "sha256": "dfbd647690eb0d8facac7a4b32abd7d50b015129a1e6348b4e57fc03cb37296e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-0.original.json",
+      "bytes": 139,
+      "sha256": "566943da164d260424c637a67598d857542ab7df3e316b0f99e382be35773a96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-1.json",
+      "bytes": 872,
+      "sha256": "9a06dcfd1d7d3da0edda2eb3ae95bb1fa5113d92dd015a1929135a0fa9a3f52b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-2-1.original.json",
+      "bytes": 140,
+      "sha256": "0d96715e974c1c424048e926f5ca04ca47b952fc8d6e85391ad30df85aa9fcc3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-0.json",
+      "bytes": 872,
+      "sha256": "6da1ddb212de13c1a7c30704e4df410e29f7ef391e210ee05bdbe6c87689f570"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-0.original.json",
+      "bytes": 139,
+      "sha256": "4ab56f0ae3e9fc6f2d8508d70d6f6174adb2af8202567508cdc3bcc53df53608"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-1.json",
+      "bytes": 872,
+      "sha256": "44f35adfb289a0960c7dd110b5ce53c8f4730e79d69d396c80805047f18b0a81"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-0-3-1.original.json",
+      "bytes": 140,
+      "sha256": "696a5b0d480241530b43facf995cc544385c2cac10cbb8821edda896e32543df"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-0.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-0.json",
+      "bytes": 868,
+      "sha256": "f9e2fb09637fd86698f0fd54360808cc8d81429c5a1d8ac72ab2321f5bd1129a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-0.original.json",
+      "bytes": 135,
+      "sha256": "5a5d81625bdbbda1af63b2faf5c634bb52e478ef16fc728fa573f79702017b21"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-1.dxbc",
+      "bytes": 1464,
+      "sha256": "68def2a81579e5fc2f1473ef0e775d457b96f469c1b3e51a98e353df68dc71c4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-1.json",
+      "bytes": 867,
+      "sha256": "f6aabe360c6b6e6a48c0466d19adf7a4f1fd75989b7a80853a446c6d38dddbb9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-0-1.original.json",
+      "bytes": 135,
+      "sha256": "fccbe8377f4d3247dc696e643b3904631c73c6354df6454f5170496e043caa30"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-0.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-0.json",
+      "bytes": 867,
+      "sha256": "7f64a99153d3cc9131b614f5f35771286bfce84761600169898d64302564bf9d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-0.original.json",
+      "bytes": 135,
+      "sha256": "f1f4f4d765869b975f26956ddd524f0948df317d49879ef10d710663cd185a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-1.dxbc",
+      "bytes": 1736,
+      "sha256": "5d7bd52ebae41d1988f2ffc369f3b2760a6d839a5ad9f4d00b3f1de886d17fc2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-1.json",
+      "bytes": 866,
+      "sha256": "d8d4f6f9a4e94c60c987e2c1ca6686fe812f60bccf0c10e0b878fdde410ef9ad"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-1-1.original.json",
+      "bytes": 135,
+      "sha256": "eb6ada7a134cf97268a1fabb72e8bc30f2b96f35b89cabbb5cdd86800aaa9e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-0.json",
+      "bytes": 867,
+      "sha256": "391ad3a43cf818aa4930cc6bc383579231aac3b3ab3fd46333ce26d400910216"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "f1f4f4d765869b975f26956ddd524f0948df317d49879ef10d710663cd185a6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-1.json",
+      "bytes": 866,
+      "sha256": "cb1f95f7fa29449b32119fcc5ef7ec8631f96ce8be1684bec9fa2bdb85cf0316"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "eb6ada7a134cf97268a1fabb72e8bc30f2b96f35b89cabbb5cdd86800aaa9e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-0.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-0.json",
+      "bytes": 867,
+      "sha256": "0e7092307341a70d11a6169aed745f9d8e8657feb283a3617c52c79924c1dca5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-0.original.json",
+      "bytes": 135,
+      "sha256": "bbf735f9eccb394af8e56e537b891073a77be9119572db8769dd56fa9696b865"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-1.dxbc",
+      "bytes": 1736,
+      "sha256": "51efe065e5351b93b31510f359c2b701bc3b3876971b372d3201ad1ff52ace82"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-1.json",
+      "bytes": 866,
+      "sha256": "83cf57ff6d8dd71fa67eac607d918becf20811af475f5f773287ba1afbfb3ee7"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest/4318-1-1-3-1.original.json",
+      "bytes": 135,
+      "sha256": "2c2067c9924d9ef9aa74ded48c6a6f4f94b3afb26b27d6c79796bfc151c87866"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-ctest.txt",
+      "bytes": 7541,
+      "sha256": "c880d7a876b19df8d335b6511beb30e6026d2491dc575a088125ef8e1914485d"
+    },
+    {
+      "path": "tools/validate_native_interface_resources.py",
+      "bytes": 10102,
+      "sha256": "234887d20782f6dc36b1da5304db2eb7dc90d291d22ea90a3d375e46833602e1"
+    },
+    {
+      "path": "tests/DxbcInterfaceResourceTests.cpp",
+      "bytes": 17703,
+      "sha256": "b82d395d4ca68f58f97d58b39ab8b051e21a6690fdd4b1980f20d87ae8c39ec3"
+    },
+    {
+      "path": "src/application/DxbcInterfaceBindings.cpp",
+      "bytes": 7622,
+      "sha256": "a3e5a6ec5ea69b1d4b615b9fba3b612ae8570806fca24492177439fceabe30d9"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 106728,
+      "sha256": "68e7a13d449615680d27d3d60f24204f803278c7982f366bdeb28b36144ff308"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "bytes": 3353,
+      "sha256": "a8333fe0541e9c189c22c974ab70c5ae2bc5eb424a0c22188f55162e281a4617"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 132653,
+      "sha256": "f9ac99d38ed98d699c01d1f850fe74d6a2dba948d4c5faf6215c709452f836fb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binaries/FloraDxbcInterfaceResourceTests.exe",
+      "bytes": 540672,
+      "sha256": "9ee2c240319a4a73f1e3c66d0b6737466f04b2d4f10519e027b54670a224d643"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/control.json",
+      "bytes": 14868,
+      "sha256": "ab0a27b5fe1b023ecf453ff4894c6ba4c72c2842144930af8f2094e545f0ded8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-0.json",
+      "bytes": 860,
+      "sha256": "875c7155c79e8b993546b04619821138c834e499690807948200a04be8fc1fd1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-1.json",
+      "bytes": 859,
+      "sha256": "5e36b4c3ed8e848bcbf3b403081e9125b297c1048aff4cce5a26a693a894fc26"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/0-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-0.json",
+      "bytes": 868,
+      "sha256": "5900c1f99d183d3ed4d6a083874c7bebd53df28536b99340dc8800e1e43bc032"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "a6ef16d384e970f9aceba9401b68ae451def77cc4251e61075b7f3422c7387b6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-1.json",
+      "bytes": 867,
+      "sha256": "1879201198eef5882c55874165a99d22b9504f899d0c978e554856a95e156e86"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/32902-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "e26be41a7535276c548cba1281520efd261968b2bc1afd7e2bacb3de971680f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-0.json",
+      "bytes": 866,
+      "sha256": "38e863e1ee50fd31fbf397922bdc8be228386804ecb342b400f39f0f35a7f59e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-1.json",
+      "bytes": 865,
+      "sha256": "c4590063457c22a206b9160f03bb38e08b0bccc9f4815487146b95d638f5023d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy/4318-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/decoy.txt",
+      "bytes": 1181,
+      "sha256": "0afb83bb9be6ded0399f95fdc2807c5a59c17999380a96bb2c1c5a092ce101dc"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/runs.json",
+      "bytes": 1164,
+      "sha256": "7b4639161f3245ea6088e45c19741d069fa2b91e05a1d1f0ddc17f97e435ae1e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-0.json",
+      "bytes": 861,
+      "sha256": "3ac2419a54baafafdb5a4854bfaa597fa3132e4ffcd4ddbb29cdf781bab00da0"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-1.json",
+      "bytes": 860,
+      "sha256": "2ec382b11e57541084e3a48f898fe6ef4fc90ae8a8b43a256f19c6b9c58d439d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/0-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-0.json",
+      "bytes": 860,
+      "sha256": "3b6e70cadd63a970d55cf460b5746beb798c50ee972264dc51b4428bb199939b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-0.original.json",
+      "bytes": 126,
+      "sha256": "217eeca4da7a68ee91b9e479911c11810e425120a983b94976ce8d212249013e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-1.json",
+      "bytes": 868,
+      "sha256": "c38c80a1f1f8d861897fc89a8d54e842b8b7cd9103c08f43297372092ed62048"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/32902-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "81a1bc4192bf1eb40e50095b2281846c18881e0855a6d15e5b2d87e164974ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-0.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-0.json",
+      "bytes": 867,
+      "sha256": "85a599c2b0eec8c9985315785abf33ffc6116fe103a85f114b74fe8e95feae0a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-0.original.json",
+      "bytes": 135,
+      "sha256": "21d9cead5e9537141e98d7b37f5c2b0daeb60e3a70ba3df30b27cf4254ee5e8c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-1.dxbc",
+      "bytes": 1720,
+      "sha256": "8399285905c62f6e3842e273c1a3f48ee71b2a4fcc79429f5d7ef83f69e072f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-1.json",
+      "bytes": 866,
+      "sha256": "d65f6aaa54ec9c8bba174c938f0d1e72608e90344f47c5db8bf8a32f2836fa11"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound/4318-0-1-2-1.original.json",
+      "bytes": 135,
+      "sha256": "fb6ac17a1c7beb77f5e21a631278b01c955aaac1e883f0b7a0b4a6bac88fd629"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-binding-control/unbound.txt",
+      "bytes": 1172,
+      "sha256": "52d0db6be05e2d603cd435bee05106238ff1abfb6bb7c8f6b5c05df3dc0ba2ac"
+    },
+    {
+      "path": "tools/probe_interface_gather_binding.py",
+      "bytes": 3865,
+      "sha256": "9e5faa43dcc71a5bd76a26f49e5b308617dc89bfd111108b3d06a05891eda301"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-regressions.log",
+      "bytes": 1616,
+      "sha256": "ab4bb76a3dc330911a18c403834297041ea28c187915c69a5832a5ebf4070f80"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-comparison.txt",
+      "bytes": 77861,
+      "sha256": "e3f9ca4397d60f1959e93611305d3c4b25a82baf7068c7cad536bd83390a3bd4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-gather.txt",
+      "bytes": 32362,
+      "sha256": "0f25da5c2fd5ff37b5eef7a9679ccd2f9a4d6bff1d3c246f0378fef3b92adfdf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-level.txt",
+      "bytes": 91793,
+      "sha256": "07c7fea2fc97db7d9b754d337915fed8e7e0d0044de48e909083ca301d1b65ec"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-load.txt",
+      "bytes": 887518,
+      "sha256": "b0465b3acbfe1c7a1e5f9b53efe64edf41e14dadccd06c5d4535d237642d3a0f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-interfaces.txt",
+      "bytes": 8756,
+      "sha256": "bd3f1e717d10696afe20e0ea10e2704dd2b65df5c1099fba529d5c347a9a0a73"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-class-regression.json",
+      "bytes": 1342,
+      "sha256": "bb76ec0941a6ed506e8690b024136344516c7a328e439528dfd10d7aa495cb73"
+    },
+    {
+      "path": "artifacts/dx11-native/interfaces-bounded-final.txt",
+      "bytes": 8756,
+      "sha256": "e7ea745963dcbd774044c1423474f076ca0262d7f5c939ac41c9af02280e46b3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-run1.txt",
+      "bytes": 700,
+      "sha256": "860d8d7c22e085becce290edcc3025a6eff84f69c414b2aa92ea6f7da7c097bd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-run1/4318-0-0-0.dxbc",
+      "bytes": 1104,
+      "sha256": "c6f9fce3ac1c9fe449ba0d7f4c16313d754be40c70bbbb1ca8d468705459646b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-final.txt",
+      "bytes": 22494,
+      "sha256": "4dd12a961b9d66d9b9d42b7400198b1a55928df9e414e73d046c42a0d1b8a69d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-final-build.log",
+      "bytes": 10920,
+      "sha256": "60313cfdf0b257de7e1646682ced128ff85c1314372219fbc9ea092eb2253083"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-build.log",
+      "bytes": 72407,
+      "sha256": "a6784681c038472f6edc6d5ed43771f17a5e3eb02154f365ef0b21c0cb9a4288"
+    },
+    {
+      "path": "artifacts/dx11-native/class-resource-compiler.json",
+      "bytes": 198,
+      "sha256": "32a0c4c9376a29d620b08037813d70aaf0a2c3276006242c1a3fe91de4a38abf"
+    }
+  ]
+}
