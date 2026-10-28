@@ -178,7 +178,8 @@ Json sdbgVariables(Bytes raw) {
         Tables s(parts.at("SDBG"));
         const auto target = s.environment.at("hlslTarget").get<std::string>(),
                    stage = target.substr(0, target.find('_'));
-        if (stage != "gs" && stage != "ds" && stage != "hs") {
+        if (stage != "gs" && stage != "ds" && stage != "hs" && stage != "vs" && stage != "ps" &&
+            stage != "cs") {
             result["issues"].push_back("SDBG assignment values require a supported native stage trace");
             return result;
         }
@@ -277,6 +278,26 @@ Json sdbgVariables(Bytes raw) {
         }
         const auto program = readDxbcProgram(parts.at(parts.contains("SHEX") ? "SHEX" : "SHDR"));
         const auto &ops = program.instructions;
+        const std::map<std::string, uint32_t> stageKinds{{"ps", 0}, {"vs", 1}, {"gs", 2},
+                                                         {"hs", 3}, {"ds", 4}, {"cs", 5}};
+        if (program.header[0] >> 16 != stageKinds.at(stage))
+            fail("SDBG target disagrees with executable shader stage");
+        std::map<uint32_t, uint32_t> inputMasks, computeMasks;
+        if (stage == "vs" || stage == "ps" || stage == "cs")
+            for (const auto &op : ops) {
+                const auto opcode = op[0] & 2047;
+                if (opcode < 95 || opcode > 100 || op.size() < 2)
+                    continue;
+                const auto operand = op[1], kind = (operand >> 12) & 255;
+                if (stage == "cs" && opcode == 95 && op.size() == 2 &&
+                    (kind == 32 || kind == 33 || kind == 34 || kind == 36)) {
+                    const auto expected = kind == 36 ? (kind << 12) : (kind << 12 | 2);
+                    if ((operand & ~0xf0u) != expected || (kind == 36 && operand != expected))
+                        fail("Unsupported SDBG compute input declaration");
+                    computeMasks[kind] |= kind == 36 ? 1u : (operand >> 4) & 15;
+                } else if (kind == 1 && op.size() >= 3 && (operand & ~0xf0u) == 0x101002)
+                    inputMasks[op[2]] |= (operand >> 4) & 15;
+            }
         std::map<uint64_t, Words> byOffset;
         std::vector<uint64_t> offsets;
         uint64_t offset = 8;
@@ -361,9 +382,21 @@ Json sdbgVariables(Bytes raw) {
                 fail("SDBG instruction scope expansion limit");
             Json assignments = Json::array();
             const uint32_t nd = noDest.contains(opcode) ? 0 : twoDest.contains(opcode) ? 2 : 1;
-            if (row[2] != nd)
+            // The legacy compiler describes a structured UAV store as one
+            // assignment to the opaque resource variable, not a register write.
+            const bool resourceStore = opcode == 168 && row[2] == 1;
+            if (row[2] != nd && !resourceStore)
                 fail("SDBG output count differs from DXBC");
             const auto operands = instructionOperands(op).ranges;
+            if (resourceStore) {
+                if (operands.empty() || ((op.at(operands[0].first) >> 12) & 255) != 30)
+                    fail("SDBG structured resource assignment has no UAV");
+                for (uint32_t c = 0; c < 4; ++c) {
+                    const auto scalar = row[10 + 9 * c];
+                    if (scalar != none && (scalar >= scalars.size() || scalars[scalar][1] != 49))
+                        fail("SDBG structured resource assignment type mismatch");
+                }
+            }
             for (size_t j = 0; j < std::min<size_t>(nd, operands.size()); ++j) {
                 const auto [a, b] = operands[j];
                 Words operand(op.begin() + a, op.begin() + b),
@@ -537,7 +570,31 @@ Json sdbgVariables(Bytes raw) {
                 fail("SDBG input scalar bounds");
             Json item{{"scalar", v}, {"kind", "unavailable"}};
             if (kind == 0 && component < 4) {
-                if (bank != none && reg < 32) {
+                if (bank == none && (stage == "vs" || stage == "ps") && reg < 32 &&
+                    types.contains(scalars[v][1]) && (inputMasks[reg] >> component & 1)) {
+                    uint32_t matches = 0;
+                    for (const auto &entry : signature)
+                        if (entry.at("register") == reg &&
+                            (entry.at("used_mask").get<uint32_t>() >> component & 1))
+                            ++matches;
+                    if (matches == 1)
+                        item.update({{"kind", "register"},
+                                     {"register", "v" + std::to_string(reg)},
+                                     {"component", component}});
+                } else if (bank == none && stage == "cs" && types.contains(scalars[v][1])) {
+                    // Legacy compiler input identities are separate from ISA operand kinds.
+                    // Require a matching declaration before exposing an observed system input.
+                    const std::map<uint32_t, std::pair<uint32_t, const char *>> system{
+                        {0x3ffffffb, {32, "vThreadID"}},
+                        {0x3ffffff9, {33, "vThreadGroupID"}},
+                        {0x3ffffffa, {34, "vThreadIDInGroup"}},
+                        {0x3ffffff8, {36, "vThreadIDInGroupFlattened"}}};
+                    const auto found = system.find(reg);
+                    if (found != system.end() && (computeMasks[found->second.first] >> component & 1))
+                        item.update({{"kind", "register"},
+                                     {"register", found->second.second},
+                                     {"component", component}});
+                } else if (bank != none && reg < 32 && (stage == "gs" || stage == "hs" || stage == "ds")) {
                     if (stage == "gs")
                         item.update(
                             {{"kind", "register"},

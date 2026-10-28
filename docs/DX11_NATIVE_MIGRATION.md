@@ -1325,3 +1325,17 @@ observation validator rejects 30 corrupted traces. See [the focused baseline
 report](research/DX11_MAIN_CLASS_DEBUG_BASELINE.md). This separates job success
 from semantic coverage; it does not waive original GPU differences, establish
 general debug parity or close the detailed P0 matrix.
+
+### Legacy SDBG source values in native execution
+
+VS/PS/CS execution models now resolve supported original SDBG input and assignment
+records. Compute system inputs require matching declarations; VS/PS inputs require
+declaration and signature coverage. Opaque structured-UAV assignments remain
+resource observations rather than invented scalar values. Three direct source
+fixtures verify 91 selected boundaries, loops, watches, source breakpoints and
+reverse traversal. Three captured compute Worker workflows match 12 original GPU
+output words on WARP/NVIDIA/Intel. The new suite passes 9 cases and existing
+model/UI/checkpoint regressions pass 58, with no failures or skips. See [legacy
+source execution evidence](research/DX11_NATIVE_SDBG_EXECUTION.md). Other resource
+annotation forms, original subroutine source stacks, full PS selection and final
+dependency removal remain open.
