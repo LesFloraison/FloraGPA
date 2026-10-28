@@ -1210,3 +1210,17 @@ Ghidra exports, six wrapper lifecycles, six resolver cases and two directory cas
 pass validation, with 48 corruptions rejected. See
 `research/DX11_DEBUGGER_MODULE_ROUTES.md`. No debugger-engine recovery or product
 parity/removal gate is claimed by these research-only results.
+
+## Executable-directory environment continuation
+
+A research-only native launcher now controls the process executable directory
+while reusing the existing Python probes. Relative parser loading succeeds beside
+read-only GPA copies and fails under the ordinary Python host, confirming the
+previous loader finding without explicit parser preloading. Six environment
+reports, nine watcher calibrations and 23 complete original lifecycles validate;
+158 corrupted observations are rejected. The colocated, controlled Intel
+Helldivers case retains two 120-second timeouts at different replay boundaries.
+The complete lifecycle matrix therefore remains open. No live debugger object
+is observed, and neither shader-debug parity nor product/release acceptance is
+claimed. See `research/DX11_DEBUGGER_HOST_ENVIRONMENT.md` for exact scope, failed
+attempts, module observations and reproduction. P1/P5/P6 and P7/P8 remain open.

@@ -1,0 +1,1852 @@
+{
+  "schema": "FloraGPA host environment evidence 1",
+  "completed": true,
+  "engine_recovered": false,
+  "shader_debug_parity": false,
+  "renderdoc_removed": false,
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/runs.json",
+      "bytes": 52255,
+      "sha256": "5d58a1e8e1dcc43b404d92fb0375f1ae1eb452b80c4f49b7ab8ae67651353233"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/usage.log",
+      "bytes": 74,
+      "sha256": "5889536326ed47d7f55cfdaa3323f9765f13598ee211654d549573bfa69ad558"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/missing-runtime.log",
+      "bytes": 53,
+      "sha256": "c82198abbd2f3484801cffdc3ee25a653eadd955e12c83aca84db48e1b9dda5f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/wrong-runtime.log",
+      "bytes": 53,
+      "sha256": "51ee4ff2f603f5582dc2b6195002780764634c2a9f2fcd32715091fbb6fd530f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-0.log",
+      "bytes": 13,
+      "sha256": "88c5a9a324eb277251275c8dfd7085e832f64cb2869ae8ea234ed14236f32d6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-1.log",
+      "bytes": 12,
+      "sha256": "514eb3360296ba33da6fc5b9358010d084ffc75fa042bebe0d5ee8de0c236930"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-2.log",
+      "bytes": 13,
+      "sha256": "13542d7853a4d296056abbb7fb6f62a4513810e71148f5fbe764fd266cda3204"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-4318.log",
+      "bytes": 15,
+      "sha256": "a47c81c1436b0432b5b1398a63598012f461a38e64e98721a235ab56992f8d5a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-32902.log",
+      "bytes": 15,
+      "sha256": "7c407cccab97ae5ab1bbbf799663a2b516a6853a40078472b0c14881d946b928"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-4318.log",
+      "bytes": 15,
+      "sha256": "64965189b76b17e4da1366a34b045e6f4213d729cdd28b950ab966d1c74d2104"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-32902.log",
+      "bytes": 15,
+      "sha256": "fdb5ebad4bbd960c4763014624d81dfe1983d9c080caeefdcf408c855c094be5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-4318.log",
+      "bytes": 15,
+      "sha256": "01adf7efe73a0f6ceb7cb6c0756a1b1b18493a12d7b00e327e752613913103c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-32902.log",
+      "bytes": 15,
+      "sha256": "3e22a0feb8a5b32df08c438140ed001c471f85e7448999af9e256eb2f8bea149"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-4318.log",
+      "bytes": 15,
+      "sha256": "e20a5e96f135bb3ed205205efc2ea9f9135fcb18f7806fd2fd7eaafb4826011c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-32902.log",
+      "bytes": 15,
+      "sha256": "3e1a0bc6968cd41e8db97ff2e02a28f5377cf46425454276be3e324312ffaf55"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python.json",
+      "bytes": 10158,
+      "sha256": "cdbec3903b26fea8b63b563baf499d47fdf752c6bef1c4200c0f95d5f54b8970"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated.json",
+      "bytes": 10481,
+      "sha256": "c7862b88f16febe5d350eb86a552fad4c18058c0e1dc3707b05a0b4dfd8057d9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-0.json",
+      "bytes": 15890,
+      "sha256": "a45861c25a900dbc0d3244f949c846f02cb7a2582ef3025fb209163b1852e751"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-1.json",
+      "bytes": 15863,
+      "sha256": "0f46a536edbf1d18f1d0694563ad2eac130ec32b90d22d161db5bec90b62612d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/calibration-2.json",
+      "bytes": 16268,
+      "sha256": "6ae67dfc75a86630df6ac2f5d80f0e2c94ff5d86e9f0c8ecdb4518ebb63d0faa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-4318/watch.json",
+      "bytes": 19783,
+      "sha256": "17a94838dc5232673d168a089b200b6858a931661aa22ec3cebd31fd9a70a48c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-4318/dispatch.json",
+      "bytes": 44000,
+      "sha256": "7cff5c407aefc44e59f21dab9ff79656173869c967889efcb0c796daa15e1eac"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-32902/watch.json",
+      "bytes": 22789,
+      "sha256": "a5273d376ffaddf8b1c847b785f8db1b26a9a48ec7e6004625952843ee3f08cc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-controlled-32902/dispatch.json",
+      "bytes": 50810,
+      "sha256": "0de166ba7f0b5bfc01b87c1add4bc981424b334d3bd7eda7f71384102b77e113"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-4318/watch.json",
+      "bytes": 19937,
+      "sha256": "ca6fb310dca45ad147b104f91886ae9e76122edbca13c1461940abdc0725959a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-4318/dispatch.json",
+      "bytes": 43931,
+      "sha256": "09f6dcbc1402485b268e01c6bea17ade482d25f464a2d1c51d3e8954d13799fc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-32902/watch.json",
+      "bytes": 22800,
+      "sha256": "1fa0724fd26cb25e5c877de83d2ae42d878eed6d3cd3dfc171044719a17393d7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/python-original-32902/dispatch.json",
+      "bytes": 50741,
+      "sha256": "a758bfb9884e91d82df60df96d287128dcfe2f1ff97ec88d9ae09f3e33135b36"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-4318/watch.json",
+      "bytes": 19813,
+      "sha256": "6129a86584ecde24f62c78050f71fa1de74dd7c11300ea8d53384ed6b3bd3198"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-4318/dispatch.json",
+      "bytes": 43251,
+      "sha256": "1aaf21e7d6bee654b64966b79548e09aee2b8190c7ffbb31d31368a3aa422480"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-32902/watch.json",
+      "bytes": 22681,
+      "sha256": "72e6a15c43b7601898f723782d01cb720ed2516cbc5938a090ae2015ac2b983e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-controlled-32902/dispatch.json",
+      "bytes": 50061,
+      "sha256": "2e62788eb247c4f9800f501653b7365922011f84caa56ce1ae406da294687a41"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-4318/watch.json",
+      "bytes": 19815,
+      "sha256": "0731f09c363ad8f4033f2b8eb1e5d83538643da9452d2a7f2e8d59e0089f962b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-4318/dispatch.json",
+      "bytes": 43182,
+      "sha256": "f3fa6cfd43b40d0525ed7b0f22500cc73852293d52acc98e3d4ab23aed449a48"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-32902/watch.json",
+      "bytes": 22680,
+      "sha256": "ad03237e3021947777f735573d20e3ae831dba8ff4941b46b7e09a03f4377e53"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/colocated-original-32902/dispatch.json",
+      "bytes": 49992,
+      "sha256": "4a511730a88e0d21f6880fed3f62562504756fac1f8a0aba0686cbae7288658b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/runs.json",
+      "bytes": 52192,
+      "sha256": "b7154ea9b7ca5c231a9633a6bf61e2d8202b1c6f13ea023cd25f9d179f653207"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/usage.log",
+      "bytes": 74,
+      "sha256": "5889536326ed47d7f55cfdaa3323f9765f13598ee211654d549573bfa69ad558"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/missing-runtime.log",
+      "bytes": 53,
+      "sha256": "c82198abbd2f3484801cffdc3ee25a653eadd955e12c83aca84db48e1b9dda5f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/wrong-runtime.log",
+      "bytes": 53,
+      "sha256": "51ee4ff2f603f5582dc2b6195002780764634c2a9f2fcd32715091fbb6fd530f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-0.log",
+      "bytes": 13,
+      "sha256": "200a46eaacec5abfea91788bff30844e49fb98e4181bf455c2f9dc9cb7a61d58"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-1.log",
+      "bytes": 13,
+      "sha256": "200a46eaacec5abfea91788bff30844e49fb98e4181bf455c2f9dc9cb7a61d58"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-2.log",
+      "bytes": 13,
+      "sha256": "88c5a9a324eb277251275c8dfd7085e832f64cb2869ae8ea234ed14236f32d6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-4318.log",
+      "bytes": 16,
+      "sha256": "89e97c29b470c960fb8a993bc266bcfffa592dea5aa99ddcd0fa40e50909961c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-32902.log",
+      "bytes": 16,
+      "sha256": "eb6d168f480acba18f84af62a2e31698cc1e0c186afa19b35c7b0faae941c91c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-4318.log",
+      "bytes": 16,
+      "sha256": "f88af52ceb277da38539d651271d39cb8bc2e9b6589a3e9891a05f87a715851e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-32902.log",
+      "bytes": 16,
+      "sha256": "775ea969bb88223dbcf9dacc8da1a98806809a86d9be9a4116168ef02717465b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-4318.log",
+      "bytes": 16,
+      "sha256": "b2ad9a362686217c629286ba53f36054efff6fdc983fe7abe857a747d91b5bf8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-32902.log",
+      "bytes": 16,
+      "sha256": "8f9fa55c9d7066cc315037e39cc7310d6889e8c0dbea1b9769baaef265b4fcfd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-4318.log",
+      "bytes": 16,
+      "sha256": "e9f431455cde763f84e8bcc7193a756b5b4a6b79cd30af03b9465c415293b124"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-32902.log",
+      "bytes": 16,
+      "sha256": "119deddb4873970045b3546c37bb2283ed6552a9d065ebab1da3ae551d12afa4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python.json",
+      "bytes": 10158,
+      "sha256": "5e388014fa38402397a9728369640c84c639c161769716da4d4d26b2b4b5f152"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated.json",
+      "bytes": 10481,
+      "sha256": "00fe58e4081ffdc87c4dcc100cbb62539c77eb835a14aca6fd04c27cdd96d901"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-0.json",
+      "bytes": 15853,
+      "sha256": "14c9963e9400336d26d886ec3737cbfd404bc5c87c56e0bce5e269cc2cc32ae3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-1.json",
+      "bytes": 15922,
+      "sha256": "e29de2a77a61f82af92881dadefb9a1ad5fea31c50f67e4c6d1463666481f732"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/calibration-2.json",
+      "bytes": 16058,
+      "sha256": "0e6637b72085b2064dc0f236f42824fbebdde582a96e6e07ba15a68094775043"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-4318/watch.json",
+      "bytes": 19499,
+      "sha256": "8a667cd580dc69efaf9a5730dda2c76ea26ec7adbc316574c817860ec7406ed4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-4318/dispatch.json",
+      "bytes": 43326,
+      "sha256": "ec1a998f5d5ca6d4add157eed338e58810820f03a961cdd4dd73ac6ac092ebd6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-32902/watch.json",
+      "bytes": 20129,
+      "sha256": "ebf5db67958c722680cfb9d94f56f716121bb24b0b469725fdfda9e4a919b299"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-controlled-32902/dispatch.json",
+      "bytes": 44472,
+      "sha256": "364b1866b1f4161edf952c03c7fd00a1b4a893a3a143250dc84acba5a2704da6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-4318/watch.json",
+      "bytes": 19203,
+      "sha256": "0021ea05b85fa078d050f8ede2fa17949f507e2dbdaaed9b2c919f7c3a064813"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-4318/dispatch.json",
+      "bytes": 43257,
+      "sha256": "cd1a6c74c59886a2fbbafaa230c664d57f2e09f7e437246555819d0498b47f86"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-32902/watch.json",
+      "bytes": 19979,
+      "sha256": "5e3b917892f17ff4ea43df75c926ba38d700c186c135269a5b11124c884c159f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/python-original-32902/dispatch.json",
+      "bytes": 44403,
+      "sha256": "572b63e8c2c22b8ccf949e8c53b5430eea9171aa8ee4c41baed1aa6c27686a68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-4318/watch.json",
+      "bytes": 19231,
+      "sha256": "a6317253fdf707fbe9c9bc386f99377be7eb65b612fb058169ff07184e6a682f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-4318/dispatch.json",
+      "bytes": 42577,
+      "sha256": "272eb057708782974a30d4200d7db6eb5d44250a2d68e792376d5a87119e8ea6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-32902/watch.json",
+      "bytes": 19861,
+      "sha256": "25e547bae3c38392adca12d2a21fa90918b129e7a8977ba88272cca2ca1a9b59"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-controlled-32902/dispatch.json",
+      "bytes": 43723,
+      "sha256": "488e6080b9c7eb00594ed6584ff8840508d0d1979afc63c5e7e3a266e344bb52"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-4318/watch.json",
+      "bytes": 19381,
+      "sha256": "c87da0a7f3b85e40f8b05577724a5bf652e039d66df660baa3572f9cbc659716"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-4318/dispatch.json",
+      "bytes": 42508,
+      "sha256": "7bf31a92c24d3bb090fb015f5e3b05b2c30645e2efe9b1a5ce0d25f269d9dd81"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-32902/watch.json",
+      "bytes": 20010,
+      "sha256": "d54831e9580273550a929f7f4645008887dc07ffb92228e8e4bc04dfa30cb9d6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/colocated-original-32902/dispatch.json",
+      "bytes": 43654,
+      "sha256": "838341f8e56ebc7665ab2960d94d89a9f002a2a0841d93755c41962628ac3fec"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/runs.json",
+      "bytes": 50427,
+      "sha256": "49bffd1753926bbad16c6c875a586503cdda2d431d9fab4c4af80610809de110"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-recovery/runs.json",
+      "bytes": 1975,
+      "sha256": "24612519d22e5c6a3ad5663b0ef38931f37855e69c983305816762f2e3b37068"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/runs.json",
+      "bytes": 3058,
+      "sha256": "a07bed560211635269b85b058867a040aeec9f5f0eb6891d9327e6f5d3521c20"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/usage.log",
+      "bytes": 74,
+      "sha256": "5889536326ed47d7f55cfdaa3323f9765f13598ee211654d549573bfa69ad558"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/missing-runtime.log",
+      "bytes": 53,
+      "sha256": "c82198abbd2f3484801cffdc3ee25a653eadd955e12c83aca84db48e1b9dda5f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/wrong-runtime.log",
+      "bytes": 53,
+      "sha256": "51ee4ff2f603f5582dc2b6195002780764634c2a9f2fcd32715091fbb6fd530f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-0.log",
+      "bytes": 13,
+      "sha256": "88c5a9a324eb277251275c8dfd7085e832f64cb2869ae8ea234ed14236f32d6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-1.log",
+      "bytes": 13,
+      "sha256": "13542d7853a4d296056abbb7fb6f62a4513810e71148f5fbe764fd266cda3204"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-2.log",
+      "bytes": 13,
+      "sha256": "88c5a9a324eb277251275c8dfd7085e832f64cb2869ae8ea234ed14236f32d6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-4318.log",
+      "bytes": 16,
+      "sha256": "d5e5e4d04394d690c72f8d06c6c46c594c0c765bb66a49f6e7f04e90a95995ac"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-32902.log",
+      "bytes": 16,
+      "sha256": "30a669691068a47045b0f4f8d2d0aa15910c95af4b472cc31618d2316f04c8a9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-4318.log",
+      "bytes": 16,
+      "sha256": "515e1f90daa4bec2df6c506c63cd33671a4ae657ba75aa4a460f5c26c4ecfef7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-32902.log",
+      "bytes": 16,
+      "sha256": "d5bdb8cee0f4b9d0ff304fc51f88eabf9f379eee9f6d60ab2717f69478fc266d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-4318.log",
+      "bytes": 16,
+      "sha256": "b0f53b3727fe41ad57bcacc51ce716502a2c2910c87b1574fa885048390c9590"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-32902.log",
+      "bytes": 18,
+      "sha256": "d7df672faf3c18e5185df98f4b1a8abfb02e949326916dbfc619953d0eb6abb6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-32902/watch.json",
+      "bytes": 17693,
+      "sha256": "47fb3e17bd7e66cfea7ccc9452fd2d61806e280ab5b763e95e9ba011fbd8be8c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-32902/dispatch.json",
+      "bytes": 11146,
+      "sha256": "dfac601c2a7ab94940bfc130468ccedb8226e8f867ec29dba16b570b63bf1f21"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-recovery/colocated-controlled-32902.log",
+      "bytes": 18,
+      "sha256": "cf275146d824b75cf0953d9cc94016e1ddd586f7cf0719ab9bf3590860d7c866"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-recovery/colocated-controlled-32902/watch.json",
+      "bytes": 18639,
+      "sha256": "a9a6736800f935c675e038e1d42c780f9a5d0c523c1b3d22b94c9668d7e315d3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-recovery/colocated-controlled-32902/dispatch.json",
+      "bytes": 31794,
+      "sha256": "e139948a3c982d54bef931d14ae4115f195f4c635850e2a9384224138aab1f2b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-4318.log",
+      "bytes": 16,
+      "sha256": "55fa5850c0560734f1a4d1e7a94df20a8192777ac8f4dc8332262be6fd122c2e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-32902.log",
+      "bytes": 16,
+      "sha256": "a394d2b6d07ceba42d5d84d0c17103e49acd293f6fe753e9149eb68b450ca360"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python.json",
+      "bytes": 10193,
+      "sha256": "d5bd149b1c53963d4e85ea48ae26501e5593fbd1e3edd7fc79b162925bbbaad1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated.json",
+      "bytes": 10572,
+      "sha256": "dc31676965442eafc47e36c6d56294b145be90e3403319fe37e6f2453f3f611b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-0.json",
+      "bytes": 16075,
+      "sha256": "ce4c24b539a5d8e5136a4c22bf1fd3c9d38115b47d08e79620b5c103e627e94a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-1.json",
+      "bytes": 15883,
+      "sha256": "ef3219a19827875fd73472d2875747b7783f52860a973681ce71a53893425895"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/calibration-2.json",
+      "bytes": 15912,
+      "sha256": "fd1376d70bc7c7dd9ec5c454d9511260db7f26be9722994397e921f1f5d815f5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-4318/watch.json",
+      "bytes": 19560,
+      "sha256": "ce8d526427b58ae33fd0602a9787f430f0ae44743a375c2e71d688aff3817ba5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-4318/dispatch.json",
+      "bytes": 43432,
+      "sha256": "cd10710bd5a9f573483f3b01cdf4613c080090cb1c9ade0e5c7b0e48f62450f6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-32902/watch.json",
+      "bytes": 20192,
+      "sha256": "e9cbe675d7dc663a4195ef8ab8b57da710b6190adffea48bac72a3b8c0655b32"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-controlled-32902/dispatch.json",
+      "bytes": 44578,
+      "sha256": "55a16f6654d04b7e35c9b1367bfac97307b68d2521480b13981c211d34f5a7ef"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-4318/watch.json",
+      "bytes": 19415,
+      "sha256": "6786ccbef788c96bf30298a3f3fddbc1dbb4979955c99791c3d91f889175fe09"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-4318/dispatch.json",
+      "bytes": 43363,
+      "sha256": "a13c5c885df666436f4d2df1358d8b627426e6211e2c99e31ad24f9ceb1d94cd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-32902/watch.json",
+      "bytes": 20192,
+      "sha256": "eb6903d4df21db870ee249fc612669046d78898fa0301fa33e7f492c93d31f3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/python-original-32902/dispatch.json",
+      "bytes": 44509,
+      "sha256": "1f2562f7bf63f768d0568b0d90536fc75043e5c99c94ef339bed4eae53f47130"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-4318/watch.json",
+      "bytes": 19439,
+      "sha256": "978782d2f20c5002e6cc752c8bd2e5f3ccb3bab7dc23b33ff45968370436d347"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-4318/dispatch.json",
+      "bytes": 42732,
+      "sha256": "dbcfef07d3eba75444427f9793043f31de500088c404f7a0d5f1f8e4217455a8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-4318/watch.json",
+      "bytes": 19445,
+      "sha256": "33f1712478d88c2c69fd58727c7bfec3eb333a76ed3c7d1791ca5091ea2c5ba1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-4318/dispatch.json",
+      "bytes": 42663,
+      "sha256": "09e465037b3e9232edeba18e809ca369eb371f51ca3c4330425fa30b84dd9458"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-32902/watch.json",
+      "bytes": 19919,
+      "sha256": "0da0a606d0a411cd6b376723b47f78041ca764557d076cff9cdace712c6b835e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-remaining/colocated-original-32902/dispatch.json",
+      "bytes": 43809,
+      "sha256": "1d199a98f33543c304fa21066b49f88d3cf63b3bb4fb7fe95510fad25bae62c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_host_environment.py",
+      "bytes": 18895,
+      "sha256": "b74466829600567f671089635acc3a38a3667a596538f3465ef2e02f8a3b31af"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/summarize_debugger_gpu.py",
+      "bytes": 10722,
+      "sha256": "8563abc1ce23344ccf5cc6c9d68253a57eb83043bfa58da24ac52db3b5079442"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_module_route_research.py",
+      "bytes": 12314,
+      "sha256": "47e31bf4c0ce1d5fffd1754dfb258f99fd7c8f1c32d1414a8680fa74db8dffa1"
+    }
+  ],
+  "environments": [
+    {
+      "capture": "gf2",
+      "host": "python",
+      "parser_loaded": false,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "C:\\Users\\Flora\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\gf2\\modules\\"
+        }
+      ]
+    },
+    {
+      "capture": "gf2",
+      "host": "colocated",
+      "parser_loaded": true,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\gf2\\modules\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\gf2\\modules\\"
+        }
+      ]
+    },
+    {
+      "capture": "bf1",
+      "host": "python",
+      "parser_loaded": false,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "C:\\Users\\Flora\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\bf1\\modules\\"
+        }
+      ]
+    },
+    {
+      "capture": "bf1",
+      "host": "colocated",
+      "parser_loaded": true,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\bf1\\modules\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\bf1\\modules\\"
+        }
+      ]
+    },
+    {
+      "capture": "helldivers",
+      "host": "python",
+      "parser_loaded": false,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "C:\\Users\\Flora\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\helldivers\\modules\\"
+        }
+      ]
+    },
+    {
+      "capture": "helldivers",
+      "host": "colocated",
+      "parser_loaded": true,
+      "directories": [
+        {
+          "kind": "executable",
+          "getter_rva": "0xcea40",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\helldivers\\modules\\"
+        },
+        {
+          "kind": "module",
+          "getter_rva": "0xce640",
+          "value": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\host-environment-final\\helldivers\\modules\\"
+        }
+      ]
+    }
+  ],
+  "calibrations": [
+    {
+      "capture": "gf2",
+      "index": 0,
+      "field_writes": 36
+    },
+    {
+      "capture": "gf2",
+      "index": 1,
+      "field_writes": 36
+    },
+    {
+      "capture": "gf2",
+      "index": 2,
+      "field_writes": 36
+    },
+    {
+      "capture": "bf1",
+      "index": 0,
+      "field_writes": 36
+    },
+    {
+      "capture": "bf1",
+      "index": 1,
+      "field_writes": 36
+    },
+    {
+      "capture": "bf1",
+      "index": 2,
+      "field_writes": 36
+    },
+    {
+      "capture": "helldivers",
+      "index": 0,
+      "field_writes": 36
+    },
+    {
+      "capture": "helldivers",
+      "index": 1,
+      "field_writes": 36
+    },
+    {
+      "capture": "helldivers",
+      "index": 2,
+      "field_writes": 36
+    }
+  ],
+  "lifecycles": [
+    {
+      "capture": "gf2",
+      "name": "python-controlled-4318",
+      "event": 113,
+      "elapsed_ms": 3719,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "python-controlled-32902",
+      "event": 113,
+      "elapsed_ms": 5203,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "python-original-4318",
+      "event": 113,
+      "elapsed_ms": 3625,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "python-original-32902",
+      "event": 113,
+      "elapsed_ms": 5484,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "colocated-controlled-4318",
+      "event": 113,
+      "elapsed_ms": 3219,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "colocated-controlled-32902",
+      "event": 113,
+      "elapsed_ms": 4984,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "colocated-original-4318",
+      "event": 113,
+      "elapsed_ms": 3328,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "gf2",
+      "name": "colocated-original-32902",
+      "event": 113,
+      "elapsed_ms": 4985,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 1
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/gf2/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "python-controlled-4318",
+      "event": 876,
+      "elapsed_ms": 26141,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "python-controlled-32902",
+      "event": 876,
+      "elapsed_ms": 24390,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "python-original-4318",
+      "event": 876,
+      "elapsed_ms": 23250,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "python-original-32902",
+      "event": 876,
+      "elapsed_ms": 23563,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "colocated-controlled-4318",
+      "event": 876,
+      "elapsed_ms": 22782,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "colocated-controlled-32902",
+      "event": 876,
+      "elapsed_ms": 52109,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "colocated-original-4318",
+      "event": 876,
+      "elapsed_ms": 20985,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "bf1",
+      "name": "colocated-original-32902",
+      "event": 876,
+      "elapsed_ms": 26781,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 2
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/bf1/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "python-controlled-4318",
+      "event": 200,
+      "elapsed_ms": 19141,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "python-controlled-32902",
+      "event": 200,
+      "elapsed_ms": 19203,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "python-original-4318",
+      "event": 200,
+      "elapsed_ms": 18797,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "python-original-32902",
+      "event": 200,
+      "elapsed_ms": 16203,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "colocated-controlled-4318",
+      "event": 200,
+      "elapsed_ms": 15328,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "colocated-original-4318",
+      "event": 200,
+      "elapsed_ms": 19235,
+      "adapter": {
+        "vendor": 4318,
+        "device": 11352,
+        "luid": 69256,
+        "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    },
+    {
+      "capture": "helldivers",
+      "name": "colocated-original-32902",
+      "event": 200,
+      "elapsed_ms": 19844,
+      "adapter": {
+        "vendor": 32902,
+        "device": 32103,
+        "luid": 74756,
+        "name": "Intel(R) Graphics",
+        "context_event": 6
+      },
+      "gpa_modules": [
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/dx11_player.dll",
+        "//?/D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/modules/d3dcompiler_47.dll"
+      ],
+      "nonzero_live_field_writes": 0
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "gf2/python/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "gf2/python/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/python/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/python/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/python/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/python/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/python/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/python/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "gf2/python/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "gf2/python/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "gf2/python/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "gf2/colocated/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "gf2/colocated/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/colocated/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/colocated/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/colocated/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "gf2/colocated/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/colocated/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "gf2/colocated/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "gf2/colocated/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "gf2/colocated/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "gf2/colocated/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "gf2/python-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/python-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/python-controlled-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/python-controlled-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-controlled-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-controlled-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/python-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/python-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/python-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/python-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/python-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/colocated-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/colocated-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/colocated-controlled-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/colocated-controlled-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-controlled-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-controlled-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/colocated-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/colocated-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "gf2/colocated-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "gf2/colocated-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "gf2/colocated-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/python/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "bf1/python/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/python/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/python/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/python/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/python/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/python/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/python/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "bf1/python/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "bf1/python/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "bf1/python/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "bf1/colocated/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "bf1/colocated/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/colocated/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/colocated/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/colocated/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "bf1/colocated/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/colocated/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "bf1/colocated/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "bf1/colocated/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "bf1/colocated/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "bf1/colocated/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "bf1/python-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/python-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/python-controlled-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/python-controlled-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-controlled-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-controlled-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/python-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/python-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/python-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/python-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/python-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/colocated-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/colocated-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/colocated-controlled-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/colocated-controlled-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-controlled-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-controlled-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/colocated-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/colocated-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "bf1/colocated-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "bf1/colocated-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "bf1/colocated-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/python/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "helldivers/python/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/python/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/python/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/python/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/python/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/python/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/python/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "helldivers/python/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "helldivers/python/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "helldivers/python/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "helldivers/colocated/completed",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "helldivers/colocated/parser_preloaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/colocated/parser_loaded",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/colocated/parser_loaded_after_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/colocated/returned_self",
+      "reason": "Relative load outcome"
+    },
+    {
+      "name": "helldivers/colocated/released",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/colocated/second_release",
+      "reason": "Parser reference lifetime"
+    },
+    {
+      "name": "helldivers/colocated/engine_recovered",
+      "reason": "Incomplete or overstated environment scope"
+    },
+    {
+      "name": "helldivers/colocated/constructed/0",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "helldivers/colocated/constructed/80",
+      "reason": "Original constructor bytes or endpoint identity"
+    },
+    {
+      "name": "helldivers/colocated/cleaned/64",
+      "reason": "Original cleanup bytes"
+    },
+    {
+      "name": "helldivers/python-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/python-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/python-controlled-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/python-controlled-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-controlled-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-controlled-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/python-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/python-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/python-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/python-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/python-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/colocated-controlled-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/colocated-controlled-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-controlled-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-controlled-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/colocated-original-4318/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/colocated-original-4318/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-original-4318/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-original-4318/adapter",
+      "reason": "Actual replay adapter differs"
+    },
+    {
+      "name": "helldivers/colocated-original-32902/request_hits",
+      "reason": "Hardware-watch lifetime coverage"
+    },
+    {
+      "name": "helldivers/colocated-original-32902/field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-original-32902/nonzero_live_field_writes",
+      "reason": "Observed field-write phases"
+    },
+    {
+      "name": "helldivers/colocated-original-32902/adapter",
+      "reason": "Actual replay adapter differs"
+    }
+  ],
+  "retained_failures": [
+    {
+      "capture": "helldivers",
+      "name": "colocated-controlled-32902",
+      "report": {
+        "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers/colocated-controlled-32902/watch.json",
+        "bytes": 17693,
+        "sha256": "47fb3e17bd7e66cfea7ccc9452fd2d61806e280ab5b763e95e9ba011fbd8be8c"
+      },
+      "elapsed_ms": 120343,
+      "last_boundary": "opened",
+      "actual_replay_adapter_verified": false,
+      "observed_null_requests": 0,
+      "complete_lifecycle_inference": false
+    },
+    {
+      "capture": "helldivers",
+      "name": "colocated-controlled-32902",
+      "report": {
+        "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/host-environment-final/helldivers-recovery/colocated-controlled-32902/watch.json",
+        "bytes": 18639,
+        "sha256": "a9a6736800f935c675e038e1d42c780f9a5d0c523c1b3d22b94c9668d7e315d3"
+      },
+      "elapsed_ms": 120422,
+      "last_boundary": "after_observed_request",
+      "actual_replay_adapter_verified": true,
+      "observed_null_requests": 2,
+      "complete_lifecycle_inference": false
+    }
+  ],
+  "every_attempt_completed": false,
+  "complete_lifecycle_matrix": false
+}
