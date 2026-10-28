@@ -1084,3 +1084,18 @@ Two complementary validators reject 2,061 corrupted reports. See
 `research/DX11_NATIVE_PIXEL_MERGER_JOINS.md` for exact scope and reproduction.
 Original fragment eligibility, full sample-depth and early-depth semantics,
 public Pixel History/debugger parity and P7/P8 removal acceptance remain open.
+
+## Original draw observation continuation
+
+Private history now executes one complete original draw on isolated writable
+resources, preserving all effective graphics shaders and original command
+arguments. It separately compares selected storage and whole-output occlusion
+with the geometry checkpoints. The complete geometry suite and strengthened
+atomic integration pass 274 Qt checks; nine real selected pixels match ordinary
+GPU replay. The new validator checks 279 reports and rejects 2,073 corruptions.
+Four Intel atomic fixtures retain different final pixel indices between complete
+draws and serialized checkpoints, while independent storage/counter constraints
+pass. Equality of sample counts does not establish original invocation order.
+See `research/DX11_NATIVE_ORIGINAL_DRAW_OBSERVATION.md` for measured differences,
+reproduction, retained development failures and evidence hashes. Full fragment
+qualification, public debugger parity and P7/P8 acceptance remain open.

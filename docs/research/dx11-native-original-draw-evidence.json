@@ -1,0 +1,3167 @@
+{
+  "schema": 1,
+  "scope": "private_original_draw_observation",
+  "implementation_commit": "04d899e66171ea084d8898c40c0a606b0a7b6b59",
+  "complete_pixel_history": false,
+  "public_pixel_debug_complete": false,
+  "renderdoc_removed": false,
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-0-append.json",
+      "bytes": 108022,
+      "sha256": "77434c350fe79d977e6548f83eb7ca10c8d840db92ebabfddb05bb2841761840"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-0-counter.json",
+      "bytes": 108025,
+      "sha256": "3ca80293a0570d8fa1ae9a1cef3eb3b631034fe8b70e3b33d3efa24846a13eb5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-0-raw.json",
+      "bytes": 108018,
+      "sha256": "8277c72351cf79da8acbd0b8e6bc76b31b76b80cc37631b2b428d7adb6c485a8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-0-texture.json",
+      "bytes": 107803,
+      "sha256": "a2c809287459cda552cfc39b951f47f7b44ed7e3545a60745c91fb51a04ac1f9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-0-typed.json",
+      "bytes": 108020,
+      "sha256": "c8d7370213eee5a8c7182b7e9986005d22a408764f5ac07b893977b8dfa69bdb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-32902-append.json",
+      "bytes": 108072,
+      "sha256": "ee2ee1f86302d8e0219126ced91ea50475af2fff4922d1c48dcbd672d128cd95"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-32902-counter.json",
+      "bytes": 108077,
+      "sha256": "227ad9d926088671ffb955a9739c3aae7f7ca60bf303c80ab0cee166ca4262b3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-32902-raw.json",
+      "bytes": 108070,
+      "sha256": "d25ae441dc90a8d69fe6fb903e2bd5395cc73cd072401c43495be7c64590f485"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-32902-texture.json",
+      "bytes": 107855,
+      "sha256": "15869b8e376cdf545c628db767caf59e7fa13fa658b3c1b65b50601790adeb11"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-32902-typed.json",
+      "bytes": 108072,
+      "sha256": "74a85ef56055c0b1ba65daac560d17c2e071f4565cfa0fb0e50b29b6d83c9676"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-4318-append.json",
+      "bytes": 108056,
+      "sha256": "b8a70881a2b20fb3cd527fd6bcde9f4b4169ef729d8f9b3b7df46481f4e343b5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-4318-counter.json",
+      "bytes": 108059,
+      "sha256": "8f908c8e56d4afcd198bbc762348bd488b087944ed0d1e27bb731dd0027627ea"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-4318-raw.json",
+      "bytes": 108052,
+      "sha256": "fff24c09255fbfc4801df609c94fd397a9a089c661c904ccccd516b16e3ba15b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-4318-texture.json",
+      "bytes": 107837,
+      "sha256": "fe592ddb7edd6300214aa0ec05f749e8e2e34b6900fc252864537132eb917b82"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic/shaderHistory-4318-typed.json",
+      "bytes": 108054,
+      "sha256": "3fcb26be59173a0d39c073d324bb9e894bb52412204f4b3a5f7d07376a4bfb6e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic-console.txt",
+      "bytes": 15525,
+      "sha256": "8f354e1c8293598fb757e665a4a0750a6823b0c5da04eb680a8aef2b120fac6c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-atomic.txt",
+      "bytes": 1513,
+      "sha256": "a17974cf524f6d2332e1fa082d4b0cf2c48da335153ba090c1fca48d2f852732"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraGPA.Cli.exe",
+      "bytes": 5600256,
+      "sha256": "f4f3eb23d324dd20a79ff018ebf5add7e35179d9f03b7c961f41feb8354ecde1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraGPA.exe",
+      "bytes": 5105664,
+      "sha256": "f290b2420a3cbfb0bd7d4976baaca6ecbe6c8185162c73ae4656649c626bf737"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraGPA.Worker.exe",
+      "bytes": 5600256,
+      "sha256": "5f1e45b113ac3b0ca1b5c7ef6f1a1100a63415bf8ef96c5505c3c3838b942c95"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2600960,
+      "sha256": "87d5499fc91f0979329a76837d41adc4d5ed8429d5216930306d46fdc53f2674"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraNativePixelDrawHistoryProbe.exe",
+      "bytes": 2191872,
+      "sha256": "5ef013d2c67c503e8e7f79191f5f53df28dd67c66dfca894931bf922af46174e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-binaries/FloraNativePixelGeometryReplayTests.exe",
+      "bytes": 2424320,
+      "sha256": "c538c80df734760f3b24047c5510f08a3b404947f064ede130f0f39be1f0db97"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-build.txt",
+      "bytes": 7577,
+      "sha256": "ede42c87f2c5c0de2080289506a848148d871ecd3d13306207fa73b8d7ea58b2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-0-append.json",
+      "bytes": 104551,
+      "sha256": "8117b9deab30678c400447eb37350d575373f635064180f9c4643ba132298c21"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-0-counter.json",
+      "bytes": 104548,
+      "sha256": "e17cdb0ec2f4bf59b04b4a44022adf3c59dbde973bad5295c2201ff4581d22ac"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-0-raw.json",
+      "bytes": 104544,
+      "sha256": "20d95fe8bd35e10c8b0ad0474cd33ab33c100c6efd775ef4c26f676d0a092331"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-0-texture.json",
+      "bytes": 104545,
+      "sha256": "bf2180cc82da7995105ff7d43442961d62bda7cb74bff1163f69bd610db6a42c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-0-typed.json",
+      "bytes": 104546,
+      "sha256": "6eb317620d4ecb3aaa9baa82dc50e9ca9b2f701c649fffbbcf7a3cab5ed8b790"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-32902-append.json",
+      "bytes": 104597,
+      "sha256": "35eddb77a2a3135a93ac52d642e88928c5270f2e57825480cd95761a6e2c08bc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-32902-counter.json",
+      "bytes": 104596,
+      "sha256": "7bae44579ba48bd8ef36b1bcf055314230f534f1c46ef0094792ead1a8d57bc6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-32902-raw.json",
+      "bytes": 104592,
+      "sha256": "512365e88833c209d8bc355aac338bc92d7e57b846196a2ec3924d395eaec8c6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-32902-texture.json",
+      "bytes": 104593,
+      "sha256": "100dd51dba4f498f1e14a7612db0096579a8c84f571ccfa5f9b55143bdaf6208"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-32902-typed.json",
+      "bytes": 104594,
+      "sha256": "6d2f1d38fe7c1b4f512f85bd9cb1d5a56aa58ce763f610468a0744ae1e747c57"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-4318-append.json",
+      "bytes": 104583,
+      "sha256": "65cdf34fa3b33ca81043a16ad5c2abdf3fb404befa58b92e7d6bbf3f51f69130"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-4318-counter.json",
+      "bytes": 104580,
+      "sha256": "a8bd9f54fc6ad6d24e8b87d95c17385268bc6680e8e9b5c5ba3dc0fb144b6d8b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-4318-raw.json",
+      "bytes": 104576,
+      "sha256": "dceb6527fd40dd651c66d7d56dd499400553ec9ddfb9c0203bd2cdb8683bed42"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-4318-texture.json",
+      "bytes": 104577,
+      "sha256": "b4d5d3836d6fb0799e4953171c07700c7624be563148038b94ccd0538ca36aba"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint/shaderHistory-4318-typed.json",
+      "bytes": 104578,
+      "sha256": "bde8d8542e73d8f792294cae3588459e7cb938ac4cecd164c76f7996af231e7b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint-console.txt",
+      "bytes": 11385,
+      "sha256": "72908e04417a6bff02e2a1aa591284f53eb83b264e457a0c5827cde80d6b8fee"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-checkpoint.txt",
+      "bytes": 1513,
+      "sha256": "b5de08acde5955a769bf5647c098e7ed8aa1deb1ed9776c35f89a4d5f512000f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-drivers.json",
+      "bytes": 458,
+      "sha256": "80496171849ed261144ffcc89776aa76f719fc4adcac7e012e3c04342bacbbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-0-append.json",
+      "bytes": 13255,
+      "sha256": "67745a3e9bc7c2a02c857befbbb521b80db9b0587094a62122b397ce2982664d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-0-classes.json",
+      "bytes": 13255,
+      "sha256": "71528f9d143487b8848ef8851f02d9bceda0a411c3e5ff532591ab55ff70bf25"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-0-counter.json",
+      "bytes": 13255,
+      "sha256": "87bf69c70ffa3174b07023335863940407df888784caa028dadaf9a9e5b14e06"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-0-predicate_pass.json",
+      "bytes": 13255,
+      "sha256": "925095068f36c27f2291197dee81cdc98504baa89cb3bf6d0891811eddc269aa"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-0-predicate_skip.json",
+      "bytes": 9054,
+      "sha256": "fbbb76835bbb55379c278e57b8b9a132d5f5f8ebaf4e7e75739a13d4690d7430"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-32902-append.json",
+      "bytes": 13263,
+      "sha256": "b8a12efd9dcae07e9c5af98f4850e5825d95699c841ac10b31c1969580c679ad"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-32902-classes.json",
+      "bytes": 13263,
+      "sha256": "798c04283ff3a18b85e9a67e15118883e129c3dc558124d17735ad2c16b595ff"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-32902-counter.json",
+      "bytes": 13263,
+      "sha256": "0bbd6ddd972b5f27c90e4c7b2280ea02a5c4410f659a06d639d449256181f8cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-32902-predicate_pass.json",
+      "bytes": 13263,
+      "sha256": "100e8b094dc6df8bbd2fba63be295e7612f33b4c5fb6c1b0a064982c8e3a9686"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-32902-predicate_skip.json",
+      "bytes": 9062,
+      "sha256": "8dff2525309fabc3fde86c8d35e83f7944e7783f997cf1129cb3634e92e27d89"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-4318-append.json",
+      "bytes": 13261,
+      "sha256": "3abcd7a0c553e3ccf32cf55eef5dc203c2bea0f8b62e56c9e071235de946f5b8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-4318-classes.json",
+      "bytes": 13261,
+      "sha256": "ed50a782509afd92f7024fddd91d774b64698195cd112773cd5174df8310ff8c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-4318-counter.json",
+      "bytes": 13261,
+      "sha256": "62ff58861bf034a1d3c78ac36f147ba4c63fbbbaf272a501e78057df4f6cfe60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-4318-predicate_pass.json",
+      "bytes": 13261,
+      "sha256": "7f63ae74a3698540e904d7d832387ef6dee6df01bf4462555678868cdb2293c5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/bindings-4318-predicate_skip.json",
+      "bytes": 9060,
+      "sha256": "98501ea0700f75c6bb43f5948d02f7c4274ce75cc31acfaa11d09072842a0b0a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-blend.json",
+      "bytes": 13830,
+      "sha256": "18d901fe9e35cc5592d22750c0f2fbfe95e08b360fe415370c232e48db6828ac"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-color_mask.json",
+      "bytes": 13830,
+      "sha256": "a55d2250f44e26e7d3a60e97c8c92571dfa70c89e4b5f2f24dfa25c7ea1d88a0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-depth.json",
+      "bytes": 13830,
+      "sha256": "6eb6a27c94b8d2dd5981f6ff1590ef3fef5650d644dfa73ac4bff7b2a17f0598"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-depth_reject.json",
+      "bytes": 13830,
+      "sha256": "5692362a0545c6c86c576c0ee83970bb937fc082c1df437e392dbbf253c6e4af"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-discard.json",
+      "bytes": 14243,
+      "sha256": "a3115ea1050e02a7097cac0c0de3e5989d21fdba22a0e48a1295cccb015e5d60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-early_discard.json",
+      "bytes": 14243,
+      "sha256": "dd9c86975d995726ba5b47d7fa2a65334377fa2c99dbe9e1d2162f20a7ab0f9d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-inputs.json",
+      "bytes": 16635,
+      "sha256": "12a152a52f657a2bb332ea2918f2f10f9d364504176a359e5b3b452529eef8b6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-ordinary.json",
+      "bytes": 13830,
+      "sha256": "e9c5e2e23b140f73c39a3fe5d3e61bc4f5dfa0ebaad5f89e2a9769fcd83b6af4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-partial_position.json",
+      "bytes": 13830,
+      "sha256": "bb13046fbd993c603129e4e922ffea0f5c3aec4915522ab7d7f8c99f6e29c386"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-sample_mask.json",
+      "bytes": 13812,
+      "sha256": "5a8aa514c7694327c949ad8065a369724040fabcbddad5d9bb2cf8dd29ccb441"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-scissor.json",
+      "bytes": 13972,
+      "sha256": "d6566186b97b1de82e21f4cf30d2cd720772eae2c0f7bd3d9313025243d14bf6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-stencil.json",
+      "bytes": 13830,
+      "sha256": "fcfad12eab1dfb6d755174572510affd57f6d45efa570896deecf5102f95096f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-0-stencil_reject.json",
+      "bytes": 13830,
+      "sha256": "8b33e8482784131dc9d816c149b5df74cf7f437c5090467ad0daec6e538f125e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-blend.json",
+      "bytes": 13838,
+      "sha256": "5e99d6d4a8304bf905dee982d6a8193a346957a9333615f9fd958a5ef62d5fad"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-color_mask.json",
+      "bytes": 13838,
+      "sha256": "53223d46c3c8f29cb42d464f3b71b74f310411350108113189dbb54754ef355e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-depth.json",
+      "bytes": 13838,
+      "sha256": "a327d31863a416ad489daad5add15ec81e3357ea3435cea7ed48d4efcfee91bc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-depth_reject.json",
+      "bytes": 13838,
+      "sha256": "7cc5414a1066312196763110bf8c16ba7f52748b7692786b7afcfa77f064cc6c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-discard.json",
+      "bytes": 14251,
+      "sha256": "89e37b32515e1eb5b2beb13ec87e5457f78f61061923a903b3d7036b41bbdf35"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-early_discard.json",
+      "bytes": 14251,
+      "sha256": "ff3a72ea3705164f974eb1dc76528519edabbabfab4428684577b91650407d4b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-inputs.json",
+      "bytes": 16643,
+      "sha256": "0b5124ce5c237d71a15c8f9fdba846eb55de4eecda60bb1ce0d271c6fc0bfeda"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-ordinary.json",
+      "bytes": 13838,
+      "sha256": "adba7e1a92f6945226477b7f09164834d9fa59e90fddb9457043ef272c5d3689"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-partial_position.json",
+      "bytes": 13838,
+      "sha256": "761cd2518bbb61048c68783b524d201f7d83b8dfd015af9b885ef916bb135caa"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-sample_mask.json",
+      "bytes": 13820,
+      "sha256": "23f4b5ca25887078ddbfb441ab342724b0a257b273a6556afe4075efce1a372e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-scissor.json",
+      "bytes": 13980,
+      "sha256": "29c00f60d1fa51f63ebd1c56864b1e725f1722ea856824765c12fb8cf84435d8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-stencil.json",
+      "bytes": 13838,
+      "sha256": "fe5f4d398eea26510482337fd424d6432462de7206dcd1eee2539b40f86c47da"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-32902-stencil_reject.json",
+      "bytes": 13838,
+      "sha256": "8093a2d3c4741a47e6d8c27f0e5622272d4d2aeb2e1e0fc7b72291f4cbe24e4c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-blend.json",
+      "bytes": 13836,
+      "sha256": "7aecffead23f928b3af73b0bd10f283e36b73bfba57b076cffd49e8175b12d8d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-color_mask.json",
+      "bytes": 13836,
+      "sha256": "288eed89ec799e6b1459f8f73d3850d80dcd568fdaeb8b74d2cdf75704c83e3e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-depth.json",
+      "bytes": 13836,
+      "sha256": "f3c93c20ed10277be280b73491a023761d1e4b34a3924b0f343f88f697b67a4d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-depth_reject.json",
+      "bytes": 13836,
+      "sha256": "016b2fcc43dae69a1b7d61d7cf7a915d79a08baac03c661ea7fd20b371daf826"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-discard.json",
+      "bytes": 14249,
+      "sha256": "4c9856449f3914d17c70a14a3f390ade4d9fa77228111ae551930f1a1611cc9b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-early_discard.json",
+      "bytes": 14249,
+      "sha256": "0169db6feba9c66b957bb9c7671cce031dc74d9c9500ef03c81cf60e4540a3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-inputs.json",
+      "bytes": 16641,
+      "sha256": "a76a3b7e5851ed2df04681e7e3d7097f8ad67fdf2979f6b4c29a6ff76cc58c1f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-ordinary.json",
+      "bytes": 13836,
+      "sha256": "5f51c03b79760fd20ea8a9e328ca122b3f73cee42ecf144c07c340b9850eb118"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-partial_position.json",
+      "bytes": 13836,
+      "sha256": "7dae8d328ec7d33fc61fcfbd836a86d03cb3588dbfaed558ad6c99eba7fd983b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-sample_mask.json",
+      "bytes": 13818,
+      "sha256": "f49526bf716c0b197b3b836709a013c97afa405a12a6b9bb1fba0df5149c59fc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-scissor.json",
+      "bytes": 13978,
+      "sha256": "0f029768a09bc7dd30476e2c771ab9001fe741afa62eeb1d4ffaf15b9f18fcc0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-stencil.json",
+      "bytes": 13836,
+      "sha256": "6dfb1c532331950b97de7daa8ca9fd80dfa4ba7185719901539782353d5405b2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/checkpoints-4318-stencil_reject.json",
+      "bytes": 13836,
+      "sha256": "2fa517d95a7ae74c9aaa6d29a627568d5e9e43c54ded3b61366678d018e135f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-blend.json",
+      "bytes": 36283,
+      "sha256": "43425cf4f5bfedfc1257afc2818a747abdc9a4c9f8e8ef7a6d05cdf519263bd3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-clip.json",
+      "bytes": 30189,
+      "sha256": "9714b5652a2d499703bbc754cc7adeb0649984ae476415f63109c6dd858b2d11"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-cull.json",
+      "bytes": 30451,
+      "sha256": "75f073469cb1d8643885bd33f0397786f811eda673e09fc6c7b0cacc6f814797"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-depth.json",
+      "bytes": 36026,
+      "sha256": "498d7816cd63fb1cee6394077fc293479907886b6970e9164947cc0e50c865cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-depth_resource.json",
+      "bytes": 33528,
+      "sha256": "35eec39971b83894256af531d8d4ee7bf21a1fb4fdc75f0ad6a0d686914a0f3d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-discard.json",
+      "bytes": 36629,
+      "sha256": "4c671c6ed1e829f01c586668b9dbc4fd46c49c2f606fa840a05dc58a156f85b5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-early_discard.json",
+      "bytes": 36629,
+      "sha256": "96a174fc98dc1d50d60939b19d1d86399c05c31250ca523ac70a39272b2c2fa8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-mask.json",
+      "bytes": 36008,
+      "sha256": "af974aba00b99a931ee5bb00f4209ef1155380da26df259344c54e09c59603e0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-ordinary.json",
+      "bytes": 36038,
+      "sha256": "896aede4dba9b6f63ca3b4e8439db88e9de3d3ad4e486c7dfa27e299539f2de3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-scissor.json",
+      "bytes": 30451,
+      "sha256": "6cd62e124c9100ed0140f91c7d82d41a925cf06a2ea649787ebb30bf1e16c70c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-stencil.json",
+      "bytes": 36026,
+      "sha256": "498d7816cd63fb1cee6394077fc293479907886b6970e9164947cc0e50c865cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-0-unchanged.json",
+      "bytes": 36048,
+      "sha256": "0de232fda6074c82262e93b6a2290ef94fc43f7f6ddf020f2be0674570c730b5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-blend.json",
+      "bytes": 36299,
+      "sha256": "22d356fd0788b2fa85d31d0c04c4e81273c210fee60c3b22efd0c1de1303a7c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-clip.json",
+      "bytes": 30205,
+      "sha256": "24eed23bde4b261dd26f39838c196eeb8cb4797dfd0e21342552569a3cb4e196"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-cull.json",
+      "bytes": 30467,
+      "sha256": "848ad8e9103cc072cc667396ea38a2463ae93306d0862039b48c01664f98f4e8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-depth.json",
+      "bytes": 36042,
+      "sha256": "3e9df056f797a2b764ebc61313655115569072711f3a0c564a489bfe2e27ece7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-depth_resource.json",
+      "bytes": 33544,
+      "sha256": "c98a8db0321a561bc794bf1458c9b03fdea1b63fb9bfaf90dc7c07f77f6c6ff2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-discard.json",
+      "bytes": 36645,
+      "sha256": "f46413afa50f6d5da4fe6f18880a7b641a7d3178536b7f03bfe4756452658a06"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-early_discard.json",
+      "bytes": 36645,
+      "sha256": "24f8787e8df336bb50a2455c730d7733c3b92f8a3f6e27278388b1288eaf675e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-mask.json",
+      "bytes": 36024,
+      "sha256": "5f0e6585b8a02b2cf8fdb7bb940529aae567b514655b7c65e6d755062b034235"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-ordinary.json",
+      "bytes": 36054,
+      "sha256": "94372f224fd1014dac633037776af54ef02ac5994268cc7c8a9474776a8cbeb6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-scissor.json",
+      "bytes": 30467,
+      "sha256": "8f259823c6a89154b2e2e0e079871a6d94591d5ec7af3ff505ddda04d7c645d0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-stencil.json",
+      "bytes": 36042,
+      "sha256": "3e9df056f797a2b764ebc61313655115569072711f3a0c564a489bfe2e27ece7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-32902-unchanged.json",
+      "bytes": 36064,
+      "sha256": "aee2891dbfa217553f5c31f317900d88a679e606d2936cac36a120cf7737e793"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-blend.json",
+      "bytes": 36295,
+      "sha256": "afc2853a92fd53c6b75b5cf17da0777a9389b74f5102351e61e0d3f83fd63996"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-clip.json",
+      "bytes": 30201,
+      "sha256": "c131be602fc94b6bfc4ee819e97ff463d787abd544fb2859204412a4b6a5e76a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-cull.json",
+      "bytes": 30463,
+      "sha256": "26536cd085d8e21d0c4897f8ae95fd85985bc5b1037a0a2c092b5b053f67ba39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-depth.json",
+      "bytes": 36038,
+      "sha256": "b9aa15ca469f79ebfa7845d2c62441ed0a4faf47a5effb1e8a8266d7dd2ef638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-depth_resource.json",
+      "bytes": 33540,
+      "sha256": "8ba56bd96bc216c250eb80a20c3e31763496ac5f160623c7efb8bbb970ff7d53"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-discard.json",
+      "bytes": 36641,
+      "sha256": "75b3b3401f3035a7190c7f01dc2af3541c550f97932e2b5eee9fb9503e4e3705"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-early_discard.json",
+      "bytes": 36641,
+      "sha256": "9f19c0b31e8a87f8f6e1c5c3deb1825aacffad830ca91ce18bb75180e53f1497"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-mask.json",
+      "bytes": 36020,
+      "sha256": "42c7b18e6f7a27aaaa83781e0f501a89fbfbe2e8ebf21f26c9d7bc12aee7f705"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-ordinary.json",
+      "bytes": 36050,
+      "sha256": "5ddb23a949deeb6c8bb15356cdcdd12163277d7342470fb95f83d24a5a1f14ea"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-scissor.json",
+      "bytes": 30463,
+      "sha256": "d6aad7050ede540a437283e9df828add548a0f012d0384449a49166d04564c92"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-stencil.json",
+      "bytes": 36038,
+      "sha256": "b9aa15ca469f79ebfa7845d2c62441ed0a4faf47a5effb1e8a8266d7dd2ef638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistory-4318-unchanged.json",
+      "bytes": 36060,
+      "sha256": "b5e267b439fb9a1e7a322431d5d696b0a2e1e5a5d639a3308307484d89b998b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryForced-0.json",
+      "bytes": 67916,
+      "sha256": "67243a4ddbbd02ce637e256bd2edf1e477e9f3587889574684170947aca49d39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryForced-32902.json",
+      "bytes": 67946,
+      "sha256": "99b103d59586ad3e95f040fb908f07851c9a8490ec1bdf4cd18b2ed42c5c4a19"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryForced-4318.json",
+      "bytes": 67939,
+      "sha256": "f07d7f4521ee77acdc749cf4598d301358f05c158b06b207fb1222e97100c11b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-0-0-0.json",
+      "bytes": 29194,
+      "sha256": "85d25f3b9626376fbffdb176473cc8892a5735807ba8e5bbf1c3c17e6a90cf08"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-0-0-1.json",
+      "bytes": 29194,
+      "sha256": "b805204b28fb4f6c7736b348f4173bef30d8a32fee9f2dbccecf15410bc55328"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-0-1-0.json",
+      "bytes": 29192,
+      "sha256": "8eeb1f6659f0e624eed5e77ac84a60f74cc324dd8c0b0fcee6728c55af1f0656"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-0-1-1.json",
+      "bytes": 29192,
+      "sha256": "7552642865ac084281e8a8556af7aff5f1408ccd4780f11afe8651b684b1e4cf"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-32902-0-0.json",
+      "bytes": 29209,
+      "sha256": "53ac8f0e60134be0e4579fdfc6f64a5c88c64963304389fd3006ad7d0527aa9b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-32902-0-1.json",
+      "bytes": 29209,
+      "sha256": "34961c20d0d2299aeafbb08ce1d2aae50134a5ca336f3a43cb12ecce94e711e3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-32902-1-0.json",
+      "bytes": 29207,
+      "sha256": "887af44063df93c7612ba819534a123405d1b1dee8b1de33c963f62e5e470358"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-32902-1-1.json",
+      "bytes": 29207,
+      "sha256": "0c6df2eaeb505ff92810a7ea378d3a8d4888ac1163d247ab4e6e391f49d47a97"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-4318-0-0.json",
+      "bytes": 29205,
+      "sha256": "5e943b0e35e5cc52829dd15db4cd2b3b97b52a9a72689a57b10241b28f9a9fbd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-4318-0-1.json",
+      "bytes": 29205,
+      "sha256": "c2c4d540dc1b1a3a7f2d178f44b687f16046b9d5ad0a6cfb3e7ee3d2a05a43dc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-4318-1-0.json",
+      "bytes": 29203,
+      "sha256": "6b0f30996d294447c48bdb5eab5959421d0dd48c34513f820524ad86abb30ddf"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryLayers-4318-1-1.json",
+      "bytes": 29203,
+      "sha256": "5043f221c3f25c3ec5957b6211fc4ae4db3752f88f2e4346d3ef08919222d65e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-0-0.json",
+      "bytes": 34959,
+      "sha256": "3c668305c2d9c242bf083c2fcf5130da1c4c377ee52efd0f54de5adf021b4650"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-0-1.json",
+      "bytes": 34989,
+      "sha256": "0e4bf8ba0770642cb0b4cead0d4fe6e390c69b7981c76dd7b6a81e56020e63a4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-0-2.json",
+      "bytes": 34962,
+      "sha256": "ee3a13fa908677f2dd6b53344b1fad714af82305eefcff74c79fc09587346ccd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-0-3.json",
+      "bytes": 34989,
+      "sha256": "74c97ba25be5082b2ae4dd446b89336529cdf210de393643c004b3824033af82"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-32902-0.json",
+      "bytes": 34976,
+      "sha256": "6134681941779f4a03b4a8783164a7173578e195f03dd8f4a896fe9e2ebb5bf6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-32902-1.json",
+      "bytes": 35005,
+      "sha256": "403ad9ed31e1729ecdbdf48f0bfad935d8f0b225521a1dcb1f4999a3b78504ef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-32902-2.json",
+      "bytes": 34979,
+      "sha256": "9c6e7145309a0e475dbc994c5715a318fbc37fa2ed6467e156c1f8994eda1ce5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-32902-3.json",
+      "bytes": 35005,
+      "sha256": "8028e67a5515eb93690c851b972f07fdd1f3d4af24234fbec44b38c3a18e0261"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-4318-0.json",
+      "bytes": 34972,
+      "sha256": "be5dfe737aaffc6e671c92653943fcb94e4e0722e05801a1af1492d7c0173531"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-4318-1.json",
+      "bytes": 35001,
+      "sha256": "daff131695fdd94c4f8328286daf7a47b7c3f29c16f7019edfab7cdba4a285f4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-4318-2.json",
+      "bytes": 34975,
+      "sha256": "2c3f64838b3e05965a26173ae557906a6d39dd4879826f0a85b5c8624e060995"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryMsaa-4318-3.json",
+      "bytes": 35001,
+      "sha256": "aac24a0b7e4b5fbc74eac483b80e753c70a482358fdf3eb21f2cccb4569a5703"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryRecovery-0.json",
+      "bytes": 35773,
+      "sha256": "dccd43e97a7a2d3b76908e6f28376886a9f4cb6317015dbcd518b09dbced7221"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryRecovery-32902.json",
+      "bytes": 35789,
+      "sha256": "98d255a3d4739a0893c27beea3a196052561a3d9b7814b2a1de2ddf9eb0b0084"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/drawHistoryRecovery-4318.json",
+      "bytes": 35785,
+      "sha256": "5e76f193c577fe086e650b08fd6570e9ec0c7ec82b81df0eb16483b56b51e097"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-1-alpha.json",
+      "bytes": 80869,
+      "sha256": "b4fbaa6bf1ca6c85508a2b4d039a735a7225ed822032f6992a789d68e53c5f9d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-1-blend.json",
+      "bytes": 80911,
+      "sha256": "52d9f80bb799f40fae53be7c8cfe067f62dc7272d21311dadf8c529df0182773"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-1-dual.json",
+      "bytes": 84803,
+      "sha256": "1179aab65af0135cf8a1fae638057e784396f55bfbfd2fba37022fcd6ff3591a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-1-unchanged.json",
+      "bytes": 80897,
+      "sha256": "b973ba074c1b26930fa79326c1b62928571db381da65cef9fe3e76f1c2a9b4a6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-1-write-mask.json",
+      "bytes": 80860,
+      "sha256": "48309db68d8204030eabc3a6782906eda1d47e599c799d9d88aa34f75c7e1e54"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-4-alpha.json",
+      "bytes": 88579,
+      "sha256": "17719d03d1789d7c6153de28bbed0961d81182a585d0999e16723abaa19ecd63"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-4-blend.json",
+      "bytes": 88597,
+      "sha256": "126489c63fee3cc7b95c734acb7dee41026eb6f690c8d19d47239463fc4883e1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-4-dual.json",
+      "bytes": 92483,
+      "sha256": "a178394d38ad7a71fbc5068727e8a04edca4717a0983ab2ae4c632d1b8640769"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-4-unchanged.json",
+      "bytes": 88583,
+      "sha256": "4cf527cd54e9d1f97ac6a446aa37cc2561d22292bb515273565b902c1b53155d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-0-4-write-mask.json",
+      "bytes": 88540,
+      "sha256": "7ca4adc346a503c22331b360855ed9d2e5dcc7e84ebfa0276806709555d639bb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-1-alpha.json",
+      "bytes": 80931,
+      "sha256": "81fab9aef392d2d73aee29fa9fba5b931ed079e2ee8f4dc95722dda0704d5746"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-1-blend.json",
+      "bytes": 80947,
+      "sha256": "e45f6d619c6180f48a120630b827714c89aac41bf5ca2a3ce3acd951104ccf9e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-1-dual.json",
+      "bytes": 84839,
+      "sha256": "8c65b0535a1de143976b349974d07afc44b35afdc0993fda367ad8d27ff2bd2e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-1-unchanged.json",
+      "bytes": 80933,
+      "sha256": "b197fffea99a55fc61911005d55e3a0aec613ce910060e236434324f6e429258"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-1-write-mask.json",
+      "bytes": 80896,
+      "sha256": "88261b17f0c2d94ce195a8cbd1c120367e4161c81e1e1ca31645f47648b15df9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-4-alpha.json",
+      "bytes": 88610,
+      "sha256": "038fce2d9b12c64977565398b81d29ceff81f17af050d102ff9b5cf9b1926fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-4-blend.json",
+      "bytes": 88628,
+      "sha256": "5e0afda1627a23cc08c7f33edd7573246808cc0fc58073b96da667138030761d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-4-dual.json",
+      "bytes": 92514,
+      "sha256": "4865abace16a2b66baccaad47fc44f1a44dec0b61ebbf5921cd4a32a6b5963fb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-4-unchanged.json",
+      "bytes": 88614,
+      "sha256": "3f77bb22f85edee67a5de0288fd11aeb0e22f71117b65898b7cb25cdcb7a0f45"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-32902-4-write-mask.json",
+      "bytes": 88571,
+      "sha256": "0c61648bf56690382ebe3b599ff1f2b0a0b6dd0c9168aa8c5b9df7867b8926c0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-1-alpha.json",
+      "bytes": 80895,
+      "sha256": "0c8f8f05a3e65e918fbd7e147e696e4d5d096ae5599b29df33e2e268b67908ea"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-1-blend.json",
+      "bytes": 80937,
+      "sha256": "17a2e9e07eb8f615cad35e72cee8917de755a118b425c1fd9b74461ea44e7829"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-1-dual.json",
+      "bytes": 84829,
+      "sha256": "a7fc96c2cd92845fc64f97e7b5de877777b1ce40e34270f3ac3e396097da130b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-1-unchanged.json",
+      "bytes": 80923,
+      "sha256": "4a89b6eb1ab0e4ac0fd1cbbdc9208e48fd93f1355d7dcac08d5667eb9e710452"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-1-write-mask.json",
+      "bytes": 80886,
+      "sha256": "77c5698019257abe40e568cee56ed0f89ec5017c6b87fb9a464ef1362b553d39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-4-alpha.json",
+      "bytes": 88578,
+      "sha256": "4f187cea5a01cf08b566290789920737c6ec08efb6491ca9c4f4d8150d6c6ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-4-blend.json",
+      "bytes": 88618,
+      "sha256": "7f8e0d384d51926c070033cdcd2426b7ce0532a418ff59dbcfe96e261eed8571"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-4-dual.json",
+      "bytes": 92504,
+      "sha256": "85fa5a0703d1de68c2ab91123866b8b26fba469ab72c916063d42d6ce5424d4e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-4-unchanged.json",
+      "bytes": 88604,
+      "sha256": "c907bb1410c5077cc68bc1b214cb68637e4f0f4d29ff88eadbb6fb16bcc1325c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/mergerHistory-4318-4-write-mask.json",
+      "bytes": 88561,
+      "sha256": "aace1b98071a4ef6281d2332cffbe3947279249c79b058a5ec052c9a1f075ed7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/msaa-0.json",
+      "bytes": 13240,
+      "sha256": "6134d39066e12cf54da866c24a9b741714146c9e20c6be987ebb2097f04805f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/msaa-32902.json",
+      "bytes": 13248,
+      "sha256": "d0dcc461cdbea98d4c246d5728ce45ef505640320ad8e946a552218b9d0a01f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/msaa-4318.json",
+      "bytes": 13246,
+      "sha256": "7d735f86e0b2896fd24aa1b996315902dc1cf935ff5686088c26bcff68f0e9f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-55.json",
+      "bytes": 2508,
+      "sha256": "d9a3de1cfea5360a4c7d0fddf004bbd113d97a11ee4bfd5e2a8b34ed4a7e1fe2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-57.json",
+      "bytes": 2529,
+      "sha256": "6cc41df3a470675a4abb3d02b4b7f3736059efc82a01d342097beff00a1f4387"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-58.json",
+      "bytes": 2579,
+      "sha256": "075f9dc25885852595b5c2f890f7bd650bdc44edfebb3a59986cf884a12298b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-59.json",
+      "bytes": 2691,
+      "sha256": "1e171a47877156c6ffbb8d79c5f24813960e0d49438d1b6b56f9f15d98b89a41"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-60.json",
+      "bytes": 2558,
+      "sha256": "9ba8846f9e90c23d5bc7cd50f3f47db41db1762e8d87e6e9a9f1a84f943ecfcb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-0-61.json",
+      "bytes": 2662,
+      "sha256": "1a4c21a19a6f38fae0fce1bd65cb984e24b59dd06ed86abe27ec19868955cec2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-55.json",
+      "bytes": 2512,
+      "sha256": "2942f00f4c5d8a92d837bc8ee78b57cba4ecfa9a181763bf256e1aba733312c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-57.json",
+      "bytes": 2533,
+      "sha256": "ebff4020b1f765895574c946e4a07d9b58a94d20ccdf5e88364c69b51bdbd1f2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-58.json",
+      "bytes": 2583,
+      "sha256": "e5c51b6cfb7294149dcc80b5505bc46b0f75bdc970369f59b73171dff1cd259f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-59.json",
+      "bytes": 2695,
+      "sha256": "0239813f96ce2826c5142d4a1b2e5854673862fefb5cec791653474725b649ec"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-60.json",
+      "bytes": 2562,
+      "sha256": "21b02914a74418d32f6935f9fe96c21df47046484637bf60fc5a1ddf9431f30b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-32902-61.json",
+      "bytes": 2666,
+      "sha256": "b7362f281299b345fd0ac485a7e4f2b22ebda3b737463cba73534807f0d90921"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-55.json",
+      "bytes": 2511,
+      "sha256": "d076f5103da571d963a6c9a5838e48356ec378007fb594a5f5757e62631ecb3e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-57.json",
+      "bytes": 2532,
+      "sha256": "e8e8e093509c79d17dfcb98b7d5c102c04e011ba4616a07169c95e47b403d7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-58.json",
+      "bytes": 2582,
+      "sha256": "6176a0b8a78bfc0387519f9725be95db2b728a244922ffee75c16bf90e8fda39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-59.json",
+      "bytes": 2694,
+      "sha256": "6242a837ffc5167eded58df2e0c0becc69c2d812ef1c34533768a81bce5e78f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-60.json",
+      "bytes": 2561,
+      "sha256": "539e873181a7722ee1604f7afafea5befe9f0950e9270aa23cfa1c4960d47f27"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalCommands-4318-61.json",
+      "bytes": 2665,
+      "sha256": "c1f8e9664627f93d431a7eb2029509e429baae11fe0d8fd5d59b0f9eb834916c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-0-0.json",
+      "bytes": 2792,
+      "sha256": "7f5ac21b7aa478af0fb32634634a6b5f5ae7b09ab3b1ad85f0273977e3ed2fef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-0-1.json",
+      "bytes": 2631,
+      "sha256": "d39d70f707f8f3b44a9e3e14bed79e2e64b60215d1d3c0297dc87fb81a40d1b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-32902-0.json",
+      "bytes": 2796,
+      "sha256": "1899398cb2e2adb53b51622c3b5beb4ac82031819fe9e66ae40337475744314b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-32902-1.json",
+      "bytes": 2635,
+      "sha256": "08e876cb217f950a867c3504f5cb6c91c563f9a59995e436ff26f6b675216454"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-4318-0.json",
+      "bytes": 2795,
+      "sha256": "a3a76be706f79c97af67881f90aaa564f2cbfc7bcabfeed7099cc297b5342c54"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/originalStages-4318-1.json",
+      "bytes": 2634,
+      "sha256": "f9f853057644466b4b682200238d54edbe9702e64c8297f15f367caffc465d99"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/recovery-0.json",
+      "bytes": 13239,
+      "sha256": "e988d236d47a022eb2739f15323933be996ef739d18cfa9ed6e01c2dea5d5a15"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/recovery-32902.json",
+      "bytes": 13247,
+      "sha256": "805e40fcf74b9dc02248bd64abc7b3a78f18466baf222a8eca3cda0edfe5ba36"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/recovery-4318.json",
+      "bytes": 13245,
+      "sha256": "4fa6f9d02687d77be84624173328c2e3ac770f669781f7ec3572379ad0ffe5b0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-0-disabled.json",
+      "bytes": 9148,
+      "sha256": "d37267e3cf57e11c8b5b90e9fc12fed85dff4cea693ae77fd053194026c4f74e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-0-empty.json",
+      "bytes": 9145,
+      "sha256": "8aba6acd50a0ce47b21772d548f4258113188a25b405629d75aa23f7dcff54c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-0-null_ps.json",
+      "bytes": 13156,
+      "sha256": "1352e74d56d61ab7a8b863d5e52d0a26c887148e2d5d3155276a43796c7d35de"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-0-subset.json",
+      "bytes": 13761,
+      "sha256": "dc9a4947cc9d366ef46fb83daa56789afc5d4cf8e082b221e709d43556fabd60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-32902-disabled.json",
+      "bytes": 9156,
+      "sha256": "108398d9bd2d95ed75d3c18612ac0f3108b57982395a0fb28560c4ce5eeae47e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-32902-empty.json",
+      "bytes": 9153,
+      "sha256": "9d44ae92f5f0aa7c1f1ef4fd4c35ac90b2126ff7ec519fe80501d63236569b92"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-32902-null_ps.json",
+      "bytes": 13164,
+      "sha256": "e73e32c833164eefc8e6f444b3f77e79d49a664712bab42389f697b6ed2a4871"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-32902-subset.json",
+      "bytes": 13769,
+      "sha256": "fb3754cb635b8203724819bb431a4575e20dab99a69b7dbaf9d1c91ac79fcbd3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-4318-disabled.json",
+      "bytes": 9154,
+      "sha256": "0c087568090bb98bfd8504487414b43e524d144bba034605576a4e7851ca70fd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-4318-empty.json",
+      "bytes": 9151,
+      "sha256": "cf38e5c7e72554cd490942dfa91734772b936008635244646ea7dd2874344fa7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-4318-null_ps.json",
+      "bytes": 13162,
+      "sha256": "8388f7eb1bb82465b36082834a9aadd8ae73cc93f3409faa715dc9aa0bafa40b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/selections-4318-subset.json",
+      "bytes": 13767,
+      "sha256": "5dab39995d37797b36c81b273210ad3fa8245febb9114aeb5a0ba0559edc59be"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-constant-0.json",
+      "bytes": 56163,
+      "sha256": "92e5cb33cf50870fa2e67b7cac3bcd5faa79464c883ead151236f99e9449da57"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-constant-3.json",
+      "bytes": 60006,
+      "sha256": "456db608fb7d2632df1616a4336c7078270ed8adf02adaa082d56d4a185b0a87"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-coverage-0.json",
+      "bytes": 56135,
+      "sha256": "c29f1e82613afd3daffcaff2ded05921ecdefd4a7da0a18d02e2da45ab58db49"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-coverage-3.json",
+      "bytes": 59976,
+      "sha256": "bcd38e92ceb2a707f2a88140e604fcd3f66f6defa3665fa5c35658657178f145"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-derivative-0.json",
+      "bytes": 56136,
+      "sha256": "b65e4a6f61ad02bd821b91c4f350cc8e4eaded03ec4777d8911370d6cb31f01c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-derivative-3.json",
+      "bytes": 59978,
+      "sha256": "f8f5b4ae85bbdfce0d199ec8dc9694cc72e3b32f42001f07062c7e283a45f69d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-discard-0.json",
+      "bytes": 56147,
+      "sha256": "8836f727a4939dd6bc0303b1915d490168890d2ecf1b6e5426b56a90f9639187"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-discard-3.json",
+      "bytes": 59989,
+      "sha256": "4b8b37cc3e7892502db7cfe310b1d3b1c7803110df016902a8ea70475f6a53dc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-masked-0.json",
+      "bytes": 56121,
+      "sha256": "e202f9d545e30d0825e8ce776b3e8342365c2997d80a6798e7fb1043f8e8551c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-masked-3.json",
+      "bytes": 59963,
+      "sha256": "c4068e998b66ec460ec09c690847947e751060ed5560fc28108a12c1272d5518"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-sample-0.json",
+      "bytes": 56081,
+      "sha256": "9f201832bc874ef5e2ed9d0c0bc79b9bc222f50d7bd793ad12e9b02ee5cf0f14"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-sample-3.json",
+      "bytes": 59981,
+      "sha256": "462ac0176c0d8ba264848a1405560762016a3c1fe98bc66c24ded309aaa238e6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-varying-0.json",
+      "bytes": 56129,
+      "sha256": "94ad9cd0e7bb792ebea09eb8c9c7c3890c0fa1d3aa4853269465e0090b10b3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-0-varying-3.json",
+      "bytes": 59971,
+      "sha256": "a803e894b208e41a7dd379e861ce2033b2da35d37a89e559ef478c3dbeff108e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-constant-0.json",
+      "bytes": 56189,
+      "sha256": "22d66fd33a7070d190c10ce13345a935c4de55203ad0877a68185f7cb1ebdfe3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-constant-3.json",
+      "bytes": 60030,
+      "sha256": "8dfca928bff1e2cd8001720d541aec2da4669dde18a7dd093b7ba25cdfd0ae6d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-coverage-0.json",
+      "bytes": 56161,
+      "sha256": "e6bba1b25eb6389516eb8ccaa867cdb9ec4827a9b052305084ce8e20655004ee"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-coverage-3.json",
+      "bytes": 60005,
+      "sha256": "65783a0f4de32d8c6e4d6e8f70eccb586a9bce8606213c5ee36d17f94b2aa626"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-derivative-0.json",
+      "bytes": 56162,
+      "sha256": "545b3d6779a1c3af2bf53d1bae75ce1c3a17bf4aaefd795ad83f208db7d081e0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-derivative-3.json",
+      "bytes": 60002,
+      "sha256": "569cacfb4041d4313564966fc9a48382efcab9fff087aaa7837d6203e07be48c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-discard-0.json",
+      "bytes": 56173,
+      "sha256": "48e85117645354da2754747e858bcd0ad495d05cbd63a9c90a1c686ee5ab6fd0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-discard-3.json",
+      "bytes": 60013,
+      "sha256": "6c522d5ac515b78dc2aea70b0c7e51b9d6cc97b72ce3adea6fc735a2559bc881"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-masked-0.json",
+      "bytes": 56147,
+      "sha256": "bbec7538890c02cd0932d2c12e7ff279aeb9ba896f3a07d2602e95bf922fc048"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-masked-3.json",
+      "bytes": 59987,
+      "sha256": "5699c39a1dc866a30229a81fd514967475467ebf19875b05a5bb5e73ad9a08bc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-sample-0.json",
+      "bytes": 56107,
+      "sha256": "2b6cc29ab858566e2b02a4bc837675943a08ea86891a83a10fd07ba290fe5e85"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-sample-3.json",
+      "bytes": 60006,
+      "sha256": "2e1845eea046e85aa1d6e7f926ddbf33fe64e5ccaf5a17a069659a0245905e36"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-varying-0.json",
+      "bytes": 56155,
+      "sha256": "5b0059604235362592936b0d5ba0e7c174046b384210c781fe6dc46a42d60db3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-32902-varying-3.json",
+      "bytes": 59995,
+      "sha256": "87b2e00ed45c5d5ae6e891b307db9dfba63e949a456dcabfc4f9f482cc25fa4a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-constant-0.json",
+      "bytes": 56182,
+      "sha256": "81a2aba9056a4745746903be868a24972bbb1c850ed89005c054b43896cf0ec7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-constant-3.json",
+      "bytes": 60023,
+      "sha256": "d52095b209d851cd03448b5946f89b9e949d0b74664e6421481d0d541bc3be19"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-coverage-0.json",
+      "bytes": 56154,
+      "sha256": "afda4fac58b030d20d89defdc6fac786fc5ad0622b4e6d820e3b700cb21fed72"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-coverage-3.json",
+      "bytes": 59998,
+      "sha256": "e4d31244441ee7ade7d6135c75ed412ff913b24f5b27516bcb5341c4c701f5a2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-derivative-0.json",
+      "bytes": 56155,
+      "sha256": "c55c870193aca7f33deee1339915aa241f22a6ac8a2926966b6e64053d294945"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-derivative-3.json",
+      "bytes": 59995,
+      "sha256": "7fd8b410b35f31cb74e5095b12da187e4d28974bc2f5e41896ab38df6893e447"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-discard-0.json",
+      "bytes": 56166,
+      "sha256": "2d13497198fe41296cbebb235a3c0e5c49504a2702811fbde79614a88b444148"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-discard-3.json",
+      "bytes": 60006,
+      "sha256": "6169852d1ecf332524db19ecd5c43fef4c2377fb6f925cc61c82da1958704638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-masked-0.json",
+      "bytes": 56140,
+      "sha256": "07112d0a6f74997ff69b239c529258de634b95e0239c97b8fbc8261959680ce5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-masked-3.json",
+      "bytes": 59980,
+      "sha256": "8e7d1103ca6c0076290b467523cdd5b59889da1ad439a9211f8c72ee9572d542"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-sample-0.json",
+      "bytes": 56100,
+      "sha256": "ce57263a28941a1bc6173069dd26d236b02cc77970a3fba3e84964887ae662c6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-sample-3.json",
+      "bytes": 59998,
+      "sha256": "1de068dbf4916863f095751a4c690f6fc5f56b8389979452437c347f2dca1f85"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-varying-0.json",
+      "bytes": 56148,
+      "sha256": "b7803df5eee1d36243b017d27401317f37177b6b9b5b5662b250b9390a6f7cc8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistory-4318-varying-3.json",
+      "bytes": 59988,
+      "sha256": "177003c6db40da3b461e7128d8a9b04c0da2f70ffab91dd9811058e6d75cc272"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-0-depth_reject.json",
+      "bytes": 62220,
+      "sha256": "ab0a283483e7aa6eb29ca7d5c0bd9babc552a424d0f5d9ec68a70ebb92e6f9f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-0-forced.json",
+      "bytes": 118978,
+      "sha256": "ca2620a01c26cb27a2e8d6b91561baecad3d9233f0baf1d152f0a5ae74c3ff45"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-0-null_ps.json",
+      "bytes": 30944,
+      "sha256": "97c8c64ce9b79691e3fe8878aaa269a20f4ed7e0bb5e16d67d5aff3822724ad4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-0-stencil_reject.json",
+      "bytes": 62222,
+      "sha256": "ff7560f2d4ed17df06995d749718e66b7aefee2614127e0e08f96159c2ce62bb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-32902-depth_reject.json",
+      "bytes": 62250,
+      "sha256": "7954aef87b5c7fadc86ca381ba0df2185b67389d7224c1e3907f59df82df493e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-32902-forced.json",
+      "bytes": 119034,
+      "sha256": "a7265942911e1450e3bcc52c1eb449b1a1acf348876ee79366f1147d6abb6ef3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-32902-null_ps.json",
+      "bytes": 30960,
+      "sha256": "fe27b8146746923527d3bd1ffc12827bd473b234f657ae992ae8c22815eff5ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-32902-stencil_reject.json",
+      "bytes": 62252,
+      "sha256": "3c957679b95fee657dab9227b8246e11c9d49b9696ee340acfa0390a55b1cca5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-4318-depth_reject.json",
+      "bytes": 62242,
+      "sha256": "cf5bb0b416edb3911447f28936d35fc0fe452ddf2d3923cce0c23eb27acb8556"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-4318-forced.json",
+      "bytes": 119021,
+      "sha256": "9d10515abc00c7bd9540c2f24e8e183d631e98832639feb5b93dbf054f40c830"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-4318-null_ps.json",
+      "bytes": 30956,
+      "sha256": "22a3fa4cb36f07c5a6a20142528920793c88956266ce31201c6a1ed97164323c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryBoundaries-4318-stencil_reject.json",
+      "bytes": 62244,
+      "sha256": "02f8c7b81a4d6dd2cca8ddfa4fe1101efd3d85446009fed8e352ce70cfc24440"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryRecovery-0.json",
+      "bytes": 80679,
+      "sha256": "a92f18e67e3e2936801c66ac35dbd52297aec7d5fafa3dfb3fda9f96889f6928"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryRecovery-32902.json",
+      "bytes": 80715,
+      "sha256": "f10aea2c6ddb453277f661f5ea1dcb23e14b310618d626f95d721ebc079a6557"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/shaderHistoryRecovery-4318.json",
+      "bytes": 80705,
+      "sha256": "6759152a67c0d471013d94ee74bdcb7c886f628457286254c0199a15d3610557"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-0-0.json",
+      "bytes": 8325,
+      "sha256": "26dc1594f1d1c0ab2a604ae35b92615e108e12ed5bd272dd6a0d9aed0e698bc9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-0-1.json",
+      "bytes": 8325,
+      "sha256": "f59c31a349bcb147f3bb557a5ec2bdb0c31dc6414a7e321e105d95a82aab786f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-32902-0.json",
+      "bytes": 8333,
+      "sha256": "775b1ec33b0d6499a23541d4ed4fee7cbc117f24404b2263d4741a83cb954496"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-32902-1.json",
+      "bytes": 8333,
+      "sha256": "aed1df46a5b42d0eb8c920e2b3c645f2fa9b5a0de322f6df235fdbc819c47ab1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-4318-0.json",
+      "bytes": 8331,
+      "sha256": "f8e614c9a18f13e0cf35515cbf4b7c784d80fbbef2ff6bbc699674c2916fa7af"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final/streamOutput-4318-1.json",
+      "bytes": 8331,
+      "sha256": "94ee0f01de2a02ff252f864af336d5d27b0f36bede6bed06d67a53f8dc9bbf09"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final-console.txt",
+      "bytes": 246876,
+      "sha256": "cb1565ffa0bc9ca02da64514600dd5f2ba82e284320ed633b11150696c3204a7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final-validation.json",
+      "bytes": 131431,
+      "sha256": "de20847ef76ef90a7769cdbc79799de010391d358765ae6fc65cb146adf7f35e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-final.txt",
+      "bytes": 18047,
+      "sha256": "5fe8dc5f16e71c9b7341afa32725300c8f37cd67775b4a62ae9790af5fd40800"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-0-append.json",
+      "bytes": 13255,
+      "sha256": "67745a3e9bc7c2a02c857befbbb521b80db9b0587094a62122b397ce2982664d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-0-classes.json",
+      "bytes": 13255,
+      "sha256": "ce4f54e317d7640231f0e8878d00933c376970d37a2d44c70ffc554b403a86bb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-0-counter.json",
+      "bytes": 13255,
+      "sha256": "87bf69c70ffa3174b07023335863940407df888784caa028dadaf9a9e5b14e06"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-0-predicate_pass.json",
+      "bytes": 13255,
+      "sha256": "925095068f36c27f2291197dee81cdc98504baa89cb3bf6d0891811eddc269aa"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-0-predicate_skip.json",
+      "bytes": 9054,
+      "sha256": "fbbb76835bbb55379c278e57b8b9a132d5f5f8ebaf4e7e75739a13d4690d7430"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-32902-append.json",
+      "bytes": 13263,
+      "sha256": "b8a12efd9dcae07e9c5af98f4850e5825d95699c841ac10b31c1969580c679ad"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-32902-classes.json",
+      "bytes": 13263,
+      "sha256": "0f31031c77e26631bfdf08251390a3b8f47c5992f5af6e63b9179c546a56f1c3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-32902-counter.json",
+      "bytes": 13263,
+      "sha256": "0bbd6ddd972b5f27c90e4c7b2280ea02a5c4410f659a06d639d449256181f8cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-32902-predicate_pass.json",
+      "bytes": 13263,
+      "sha256": "100e8b094dc6df8bbd2fba63be295e7612f33b4c5fb6c1b0a064982c8e3a9686"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-32902-predicate_skip.json",
+      "bytes": 9062,
+      "sha256": "8dff2525309fabc3fde86c8d35e83f7944e7783f997cf1129cb3634e92e27d89"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-4318-append.json",
+      "bytes": 13261,
+      "sha256": "3abcd7a0c553e3ccf32cf55eef5dc203c2bea0f8b62e56c9e071235de946f5b8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-4318-classes.json",
+      "bytes": 13261,
+      "sha256": "80542e06a7abef364f0f2b4cc44c9f04e2cbf6d3c4e4fb7ce4845a4272f3c4a0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-4318-counter.json",
+      "bytes": 13261,
+      "sha256": "62ff58861bf034a1d3c78ac36f147ba4c63fbbbaf272a501e78057df4f6cfe60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-4318-predicate_pass.json",
+      "bytes": 13261,
+      "sha256": "7f63ae74a3698540e904d7d832387ef6dee6df01bf4462555678868cdb2293c5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/bindings-4318-predicate_skip.json",
+      "bytes": 9060,
+      "sha256": "98501ea0700f75c6bb43f5948d02f7c4274ce75cc31acfaa11d09072842a0b0a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-blend.json",
+      "bytes": 13830,
+      "sha256": "18d901fe9e35cc5592d22750c0f2fbfe95e08b360fe415370c232e48db6828ac"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-color_mask.json",
+      "bytes": 13830,
+      "sha256": "a55d2250f44e26e7d3a60e97c8c92571dfa70c89e4b5f2f24dfa25c7ea1d88a0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-depth.json",
+      "bytes": 13830,
+      "sha256": "6eb6a27c94b8d2dd5981f6ff1590ef3fef5650d644dfa73ac4bff7b2a17f0598"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-depth_reject.json",
+      "bytes": 13830,
+      "sha256": "5692362a0545c6c86c576c0ee83970bb937fc082c1df437e392dbbf253c6e4af"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-discard.json",
+      "bytes": 14243,
+      "sha256": "a3115ea1050e02a7097cac0c0de3e5989d21fdba22a0e48a1295cccb015e5d60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-early_discard.json",
+      "bytes": 14243,
+      "sha256": "dd9c86975d995726ba5b47d7fa2a65334377fa2c99dbe9e1d2162f20a7ab0f9d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-inputs.json",
+      "bytes": 16635,
+      "sha256": "12a152a52f657a2bb332ea2918f2f10f9d364504176a359e5b3b452529eef8b6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-ordinary.json",
+      "bytes": 13830,
+      "sha256": "e9c5e2e23b140f73c39a3fe5d3e61bc4f5dfa0ebaad5f89e2a9769fcd83b6af4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-partial_position.json",
+      "bytes": 13830,
+      "sha256": "bb13046fbd993c603129e4e922ffea0f5c3aec4915522ab7d7f8c99f6e29c386"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-sample_mask.json",
+      "bytes": 13812,
+      "sha256": "5a8aa514c7694327c949ad8065a369724040fabcbddad5d9bb2cf8dd29ccb441"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-scissor.json",
+      "bytes": 13972,
+      "sha256": "d6566186b97b1de82e21f4cf30d2cd720772eae2c0f7bd3d9313025243d14bf6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-stencil.json",
+      "bytes": 13830,
+      "sha256": "fcfad12eab1dfb6d755174572510affd57f6d45efa570896deecf5102f95096f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-0-stencil_reject.json",
+      "bytes": 13830,
+      "sha256": "8b33e8482784131dc9d816c149b5df74cf7f437c5090467ad0daec6e538f125e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-blend.json",
+      "bytes": 13838,
+      "sha256": "5e99d6d4a8304bf905dee982d6a8193a346957a9333615f9fd958a5ef62d5fad"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-color_mask.json",
+      "bytes": 13838,
+      "sha256": "53223d46c3c8f29cb42d464f3b71b74f310411350108113189dbb54754ef355e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-depth.json",
+      "bytes": 13838,
+      "sha256": "a327d31863a416ad489daad5add15ec81e3357ea3435cea7ed48d4efcfee91bc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-depth_reject.json",
+      "bytes": 13838,
+      "sha256": "7cc5414a1066312196763110bf8c16ba7f52748b7692786b7afcfa77f064cc6c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-discard.json",
+      "bytes": 14251,
+      "sha256": "89e37b32515e1eb5b2beb13ec87e5457f78f61061923a903b3d7036b41bbdf35"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-early_discard.json",
+      "bytes": 14251,
+      "sha256": "ff3a72ea3705164f974eb1dc76528519edabbabfab4428684577b91650407d4b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-inputs.json",
+      "bytes": 16643,
+      "sha256": "0b5124ce5c237d71a15c8f9fdba846eb55de4eecda60bb1ce0d271c6fc0bfeda"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-ordinary.json",
+      "bytes": 13838,
+      "sha256": "adba7e1a92f6945226477b7f09164834d9fa59e90fddb9457043ef272c5d3689"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-partial_position.json",
+      "bytes": 13838,
+      "sha256": "761cd2518bbb61048c68783b524d201f7d83b8dfd015af9b885ef916bb135caa"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-sample_mask.json",
+      "bytes": 13820,
+      "sha256": "23f4b5ca25887078ddbfb441ab342724b0a257b273a6556afe4075efce1a372e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-scissor.json",
+      "bytes": 13980,
+      "sha256": "29c00f60d1fa51f63ebd1c56864b1e725f1722ea856824765c12fb8cf84435d8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-stencil.json",
+      "bytes": 13838,
+      "sha256": "fe5f4d398eea26510482337fd424d6432462de7206dcd1eee2539b40f86c47da"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-32902-stencil_reject.json",
+      "bytes": 13838,
+      "sha256": "8093a2d3c4741a47e6d8c27f0e5622272d4d2aeb2e1e0fc7b72291f4cbe24e4c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-blend.json",
+      "bytes": 13836,
+      "sha256": "7aecffead23f928b3af73b0bd10f283e36b73bfba57b076cffd49e8175b12d8d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-color_mask.json",
+      "bytes": 13836,
+      "sha256": "288eed89ec799e6b1459f8f73d3850d80dcd568fdaeb8b74d2cdf75704c83e3e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-depth.json",
+      "bytes": 13836,
+      "sha256": "f3c93c20ed10277be280b73491a023761d1e4b34a3924b0f343f88f697b67a4d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-depth_reject.json",
+      "bytes": 13836,
+      "sha256": "016b2fcc43dae69a1b7d61d7cf7a915d79a08baac03c661ea7fd20b371daf826"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-discard.json",
+      "bytes": 14249,
+      "sha256": "4c9856449f3914d17c70a14a3f390ade4d9fa77228111ae551930f1a1611cc9b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-early_discard.json",
+      "bytes": 14249,
+      "sha256": "0169db6feba9c66b957bb9c7671cce031dc74d9c9500ef03c81cf60e4540a3cb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-inputs.json",
+      "bytes": 16641,
+      "sha256": "a76a3b7e5851ed2df04681e7e3d7097f8ad67fdf2979f6b4c29a6ff76cc58c1f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-ordinary.json",
+      "bytes": 13836,
+      "sha256": "5f51c03b79760fd20ea8a9e328ca122b3f73cee42ecf144c07c340b9850eb118"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-partial_position.json",
+      "bytes": 13836,
+      "sha256": "7dae8d328ec7d33fc61fcfbd836a86d03cb3588dbfaed558ad6c99eba7fd983b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-sample_mask.json",
+      "bytes": 13818,
+      "sha256": "f49526bf716c0b197b3b836709a013c97afa405a12a6b9bb1fba0df5149c59fc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-scissor.json",
+      "bytes": 13978,
+      "sha256": "0f029768a09bc7dd30476e2c771ab9001fe741afa62eeb1d4ffaf15b9f18fcc0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-stencil.json",
+      "bytes": 13836,
+      "sha256": "6dfb1c532331950b97de7daa8ca9fd80dfa4ba7185719901539782353d5405b2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/checkpoints-4318-stencil_reject.json",
+      "bytes": 13836,
+      "sha256": "2fa517d95a7ae74c9aaa6d29a627568d5e9e43c54ded3b61366678d018e135f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-blend.json",
+      "bytes": 36283,
+      "sha256": "43425cf4f5bfedfc1257afc2818a747abdc9a4c9f8e8ef7a6d05cdf519263bd3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-clip.json",
+      "bytes": 30189,
+      "sha256": "9714b5652a2d499703bbc754cc7adeb0649984ae476415f63109c6dd858b2d11"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-cull.json",
+      "bytes": 30451,
+      "sha256": "75f073469cb1d8643885bd33f0397786f811eda673e09fc6c7b0cacc6f814797"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-depth.json",
+      "bytes": 36026,
+      "sha256": "498d7816cd63fb1cee6394077fc293479907886b6970e9164947cc0e50c865cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-depth_resource.json",
+      "bytes": 33528,
+      "sha256": "35eec39971b83894256af531d8d4ee7bf21a1fb4fdc75f0ad6a0d686914a0f3d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-discard.json",
+      "bytes": 36629,
+      "sha256": "4c671c6ed1e829f01c586668b9dbc4fd46c49c2f606fa840a05dc58a156f85b5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-early_discard.json",
+      "bytes": 36629,
+      "sha256": "96a174fc98dc1d50d60939b19d1d86399c05c31250ca523ac70a39272b2c2fa8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-mask.json",
+      "bytes": 36008,
+      "sha256": "af974aba00b99a931ee5bb00f4209ef1155380da26df259344c54e09c59603e0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-ordinary.json",
+      "bytes": 36038,
+      "sha256": "896aede4dba9b6f63ca3b4e8439db88e9de3d3ad4e486c7dfa27e299539f2de3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-scissor.json",
+      "bytes": 30451,
+      "sha256": "6cd62e124c9100ed0140f91c7d82d41a925cf06a2ea649787ebb30bf1e16c70c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-stencil.json",
+      "bytes": 36026,
+      "sha256": "498d7816cd63fb1cee6394077fc293479907886b6970e9164947cc0e50c865cd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-0-unchanged.json",
+      "bytes": 36048,
+      "sha256": "0de232fda6074c82262e93b6a2290ef94fc43f7f6ddf020f2be0674570c730b5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-blend.json",
+      "bytes": 36299,
+      "sha256": "22d356fd0788b2fa85d31d0c04c4e81273c210fee60c3b22efd0c1de1303a7c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-clip.json",
+      "bytes": 30205,
+      "sha256": "24eed23bde4b261dd26f39838c196eeb8cb4797dfd0e21342552569a3cb4e196"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-cull.json",
+      "bytes": 30467,
+      "sha256": "848ad8e9103cc072cc667396ea38a2463ae93306d0862039b48c01664f98f4e8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-depth.json",
+      "bytes": 36042,
+      "sha256": "3e9df056f797a2b764ebc61313655115569072711f3a0c564a489bfe2e27ece7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-depth_resource.json",
+      "bytes": 33544,
+      "sha256": "c98a8db0321a561bc794bf1458c9b03fdea1b63fb9bfaf90dc7c07f77f6c6ff2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-discard.json",
+      "bytes": 36645,
+      "sha256": "f46413afa50f6d5da4fe6f18880a7b641a7d3178536b7f03bfe4756452658a06"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-early_discard.json",
+      "bytes": 36645,
+      "sha256": "24f8787e8df336bb50a2455c730d7733c3b92f8a3f6e27278388b1288eaf675e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-mask.json",
+      "bytes": 36024,
+      "sha256": "5f0e6585b8a02b2cf8fdb7bb940529aae567b514655b7c65e6d755062b034235"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-ordinary.json",
+      "bytes": 36054,
+      "sha256": "94372f224fd1014dac633037776af54ef02ac5994268cc7c8a9474776a8cbeb6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-scissor.json",
+      "bytes": 30467,
+      "sha256": "8f259823c6a89154b2e2e0e079871a6d94591d5ec7af3ff505ddda04d7c645d0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-stencil.json",
+      "bytes": 36042,
+      "sha256": "3e9df056f797a2b764ebc61313655115569072711f3a0c564a489bfe2e27ece7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-32902-unchanged.json",
+      "bytes": 36064,
+      "sha256": "aee2891dbfa217553f5c31f317900d88a679e606d2936cac36a120cf7737e793"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-blend.json",
+      "bytes": 36295,
+      "sha256": "afc2853a92fd53c6b75b5cf17da0777a9389b74f5102351e61e0d3f83fd63996"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-clip.json",
+      "bytes": 30201,
+      "sha256": "c131be602fc94b6bfc4ee819e97ff463d787abd544fb2859204412a4b6a5e76a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-cull.json",
+      "bytes": 30463,
+      "sha256": "26536cd085d8e21d0c4897f8ae95fd85985bc5b1037a0a2c092b5b053f67ba39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-depth.json",
+      "bytes": 36038,
+      "sha256": "b9aa15ca469f79ebfa7845d2c62441ed0a4faf47a5effb1e8a8266d7dd2ef638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-depth_resource.json",
+      "bytes": 33540,
+      "sha256": "8ba56bd96bc216c250eb80a20c3e31763496ac5f160623c7efb8bbb970ff7d53"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-discard.json",
+      "bytes": 36641,
+      "sha256": "75b3b3401f3035a7190c7f01dc2af3541c550f97932e2b5eee9fb9503e4e3705"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-early_discard.json",
+      "bytes": 36641,
+      "sha256": "9f19c0b31e8a87f8f6e1c5c3deb1825aacffad830ca91ce18bb75180e53f1497"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-mask.json",
+      "bytes": 36020,
+      "sha256": "42c7b18e6f7a27aaaa83781e0f501a89fbfbe2e8ebf21f26c9d7bc12aee7f705"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-ordinary.json",
+      "bytes": 36050,
+      "sha256": "5ddb23a949deeb6c8bb15356cdcdd12163277d7342470fb95f83d24a5a1f14ea"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-scissor.json",
+      "bytes": 30463,
+      "sha256": "d6aad7050ede540a437283e9df828add548a0f012d0384449a49166d04564c92"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-stencil.json",
+      "bytes": 36038,
+      "sha256": "b9aa15ca469f79ebfa7845d2c62441ed0a4faf47a5effb1e8a8266d7dd2ef638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistory-4318-unchanged.json",
+      "bytes": 36060,
+      "sha256": "b5e267b439fb9a1e7a322431d5d696b0a2e1e5a5d639a3308307484d89b998b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryForced-0.json",
+      "bytes": 67916,
+      "sha256": "67243a4ddbbd02ce637e256bd2edf1e477e9f3587889574684170947aca49d39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryForced-32902.json",
+      "bytes": 67946,
+      "sha256": "99b103d59586ad3e95f040fb908f07851c9a8490ec1bdf4cd18b2ed42c5c4a19"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryForced-4318.json",
+      "bytes": 67939,
+      "sha256": "f07d7f4521ee77acdc749cf4598d301358f05c158b06b207fb1222e97100c11b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-0-0-0.json",
+      "bytes": 29194,
+      "sha256": "85d25f3b9626376fbffdb176473cc8892a5735807ba8e5bbf1c3c17e6a90cf08"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-0-0-1.json",
+      "bytes": 29194,
+      "sha256": "b805204b28fb4f6c7736b348f4173bef30d8a32fee9f2dbccecf15410bc55328"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-0-1-0.json",
+      "bytes": 29192,
+      "sha256": "8eeb1f6659f0e624eed5e77ac84a60f74cc324dd8c0b0fcee6728c55af1f0656"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-0-1-1.json",
+      "bytes": 29192,
+      "sha256": "7552642865ac084281e8a8556af7aff5f1408ccd4780f11afe8651b684b1e4cf"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-32902-0-0.json",
+      "bytes": 29209,
+      "sha256": "53ac8f0e60134be0e4579fdfc6f64a5c88c64963304389fd3006ad7d0527aa9b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-32902-0-1.json",
+      "bytes": 29209,
+      "sha256": "34961c20d0d2299aeafbb08ce1d2aae50134a5ca336f3a43cb12ecce94e711e3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-32902-1-0.json",
+      "bytes": 29207,
+      "sha256": "887af44063df93c7612ba819534a123405d1b1dee8b1de33c963f62e5e470358"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-32902-1-1.json",
+      "bytes": 29207,
+      "sha256": "0c6df2eaeb505ff92810a7ea378d3a8d4888ac1163d247ab4e6e391f49d47a97"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-4318-0-0.json",
+      "bytes": 29205,
+      "sha256": "5e943b0e35e5cc52829dd15db4cd2b3b97b52a9a72689a57b10241b28f9a9fbd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-4318-0-1.json",
+      "bytes": 29205,
+      "sha256": "c2c4d540dc1b1a3a7f2d178f44b687f16046b9d5ad0a6cfb3e7ee3d2a05a43dc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-4318-1-0.json",
+      "bytes": 29203,
+      "sha256": "6b0f30996d294447c48bdb5eab5959421d0dd48c34513f820524ad86abb30ddf"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryLayers-4318-1-1.json",
+      "bytes": 29203,
+      "sha256": "5043f221c3f25c3ec5957b6211fc4ae4db3752f88f2e4346d3ef08919222d65e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-0-0.json",
+      "bytes": 34959,
+      "sha256": "3c668305c2d9c242bf083c2fcf5130da1c4c377ee52efd0f54de5adf021b4650"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-0-1.json",
+      "bytes": 34989,
+      "sha256": "0e4bf8ba0770642cb0b4cead0d4fe6e390c69b7981c76dd7b6a81e56020e63a4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-0-2.json",
+      "bytes": 34962,
+      "sha256": "ee3a13fa908677f2dd6b53344b1fad714af82305eefcff74c79fc09587346ccd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-0-3.json",
+      "bytes": 34989,
+      "sha256": "74c97ba25be5082b2ae4dd446b89336529cdf210de393643c004b3824033af82"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-32902-0.json",
+      "bytes": 34976,
+      "sha256": "6134681941779f4a03b4a8783164a7173578e195f03dd8f4a896fe9e2ebb5bf6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-32902-1.json",
+      "bytes": 35005,
+      "sha256": "403ad9ed31e1729ecdbdf48f0bfad935d8f0b225521a1dcb1f4999a3b78504ef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-32902-2.json",
+      "bytes": 34979,
+      "sha256": "9c6e7145309a0e475dbc994c5715a318fbc37fa2ed6467e156c1f8994eda1ce5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-32902-3.json",
+      "bytes": 35005,
+      "sha256": "8028e67a5515eb93690c851b972f07fdd1f3d4af24234fbec44b38c3a18e0261"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-4318-0.json",
+      "bytes": 34972,
+      "sha256": "be5dfe737aaffc6e671c92653943fcb94e4e0722e05801a1af1492d7c0173531"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-4318-1.json",
+      "bytes": 35001,
+      "sha256": "daff131695fdd94c4f8328286daf7a47b7c3f29c16f7019edfab7cdba4a285f4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-4318-2.json",
+      "bytes": 34975,
+      "sha256": "2c3f64838b3e05965a26173ae557906a6d39dd4879826f0a85b5c8624e060995"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryMsaa-4318-3.json",
+      "bytes": 35001,
+      "sha256": "aac24a0b7e4b5fbc74eac483b80e753c70a482358fdf3eb21f2cccb4569a5703"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryRecovery-0.json",
+      "bytes": 35773,
+      "sha256": "dccd43e97a7a2d3b76908e6f28376886a9f4cb6317015dbcd518b09dbced7221"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryRecovery-32902.json",
+      "bytes": 35789,
+      "sha256": "98d255a3d4739a0893c27beea3a196052561a3d9b7814b2a1de2ddf9eb0b0084"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/drawHistoryRecovery-4318.json",
+      "bytes": 35785,
+      "sha256": "5e76f193c577fe086e650b08fd6570e9ec0c7ec82b81df0eb16483b56b51e097"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-1-alpha.json",
+      "bytes": 80869,
+      "sha256": "b4fbaa6bf1ca6c85508a2b4d039a735a7225ed822032f6992a789d68e53c5f9d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-1-blend.json",
+      "bytes": 80911,
+      "sha256": "52d9f80bb799f40fae53be7c8cfe067f62dc7272d21311dadf8c529df0182773"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-1-dual.json",
+      "bytes": 84803,
+      "sha256": "1179aab65af0135cf8a1fae638057e784396f55bfbfd2fba37022fcd6ff3591a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-1-unchanged.json",
+      "bytes": 80897,
+      "sha256": "b973ba074c1b26930fa79326c1b62928571db381da65cef9fe3e76f1c2a9b4a6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-1-write-mask.json",
+      "bytes": 80860,
+      "sha256": "48309db68d8204030eabc3a6782906eda1d47e599c799d9d88aa34f75c7e1e54"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-4-alpha.json",
+      "bytes": 88579,
+      "sha256": "17719d03d1789d7c6153de28bbed0961d81182a585d0999e16723abaa19ecd63"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-4-blend.json",
+      "bytes": 88597,
+      "sha256": "126489c63fee3cc7b95c734acb7dee41026eb6f690c8d19d47239463fc4883e1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-4-dual.json",
+      "bytes": 92483,
+      "sha256": "a178394d38ad7a71fbc5068727e8a04edca4717a0983ab2ae4c632d1b8640769"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-4-unchanged.json",
+      "bytes": 88583,
+      "sha256": "4cf527cd54e9d1f97ac6a446aa37cc2561d22292bb515273565b902c1b53155d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-0-4-write-mask.json",
+      "bytes": 88540,
+      "sha256": "7ca4adc346a503c22331b360855ed9d2e5dcc7e84ebfa0276806709555d639bb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-1-alpha.json",
+      "bytes": 80931,
+      "sha256": "81fab9aef392d2d73aee29fa9fba5b931ed079e2ee8f4dc95722dda0704d5746"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-1-blend.json",
+      "bytes": 80947,
+      "sha256": "e45f6d619c6180f48a120630b827714c89aac41bf5ca2a3ce3acd951104ccf9e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-1-dual.json",
+      "bytes": 84839,
+      "sha256": "8c65b0535a1de143976b349974d07afc44b35afdc0993fda367ad8d27ff2bd2e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-1-unchanged.json",
+      "bytes": 80933,
+      "sha256": "b197fffea99a55fc61911005d55e3a0aec613ce910060e236434324f6e429258"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-1-write-mask.json",
+      "bytes": 80896,
+      "sha256": "88261b17f0c2d94ce195a8cbd1c120367e4161c81e1e1ca31645f47648b15df9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-4-alpha.json",
+      "bytes": 88610,
+      "sha256": "038fce2d9b12c64977565398b81d29ceff81f17af050d102ff9b5cf9b1926fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-4-blend.json",
+      "bytes": 88628,
+      "sha256": "5e0afda1627a23cc08c7f33edd7573246808cc0fc58073b96da667138030761d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-4-dual.json",
+      "bytes": 92514,
+      "sha256": "4865abace16a2b66baccaad47fc44f1a44dec0b61ebbf5921cd4a32a6b5963fb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-4-unchanged.json",
+      "bytes": 88614,
+      "sha256": "3f77bb22f85edee67a5de0288fd11aeb0e22f71117b65898b7cb25cdcb7a0f45"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-32902-4-write-mask.json",
+      "bytes": 88571,
+      "sha256": "0c61648bf56690382ebe3b599ff1f2b0a0b6dd0c9168aa8c5b9df7867b8926c0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-1-alpha.json",
+      "bytes": 80895,
+      "sha256": "0c8f8f05a3e65e918fbd7e147e696e4d5d096ae5599b29df33e2e268b67908ea"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-1-blend.json",
+      "bytes": 80937,
+      "sha256": "17a2e9e07eb8f615cad35e72cee8917de755a118b425c1fd9b74461ea44e7829"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-1-dual.json",
+      "bytes": 84829,
+      "sha256": "a7fc96c2cd92845fc64f97e7b5de877777b1ce40e34270f3ac3e396097da130b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-1-unchanged.json",
+      "bytes": 80923,
+      "sha256": "4a89b6eb1ab0e4ac0fd1cbbdc9208e48fd93f1355d7dcac08d5667eb9e710452"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-1-write-mask.json",
+      "bytes": 80886,
+      "sha256": "77c5698019257abe40e568cee56ed0f89ec5017c6b87fb9a464ef1362b553d39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-4-alpha.json",
+      "bytes": 88578,
+      "sha256": "4f187cea5a01cf08b566290789920737c6ec08efb6491ca9c4f4d8150d6c6ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-4-blend.json",
+      "bytes": 88618,
+      "sha256": "7f8e0d384d51926c070033cdcd2426b7ce0532a418ff59dbcfe96e261eed8571"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-4-dual.json",
+      "bytes": 92504,
+      "sha256": "85fa5a0703d1de68c2ab91123866b8b26fba469ab72c916063d42d6ce5424d4e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-4-unchanged.json",
+      "bytes": 88604,
+      "sha256": "c907bb1410c5077cc68bc1b214cb68637e4f0f4d29ff88eadbb6fb16bcc1325c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/mergerHistory-4318-4-write-mask.json",
+      "bytes": 88561,
+      "sha256": "aace1b98071a4ef6281d2332cffbe3947279249c79b058a5ec052c9a1f075ed7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/msaa-0.json",
+      "bytes": 13240,
+      "sha256": "6134d39066e12cf54da866c24a9b741714146c9e20c6be987ebb2097f04805f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/msaa-32902.json",
+      "bytes": 13248,
+      "sha256": "d0dcc461cdbea98d4c246d5728ce45ef505640320ad8e946a552218b9d0a01f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/msaa-4318.json",
+      "bytes": 13246,
+      "sha256": "7d735f86e0b2896fd24aa1b996315902dc1cf935ff5686088c26bcff68f0e9f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-55.json",
+      "bytes": 2508,
+      "sha256": "d9a3de1cfea5360a4c7d0fddf004bbd113d97a11ee4bfd5e2a8b34ed4a7e1fe2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-57.json",
+      "bytes": 2529,
+      "sha256": "6cc41df3a470675a4abb3d02b4b7f3736059efc82a01d342097beff00a1f4387"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-58.json",
+      "bytes": 2579,
+      "sha256": "075f9dc25885852595b5c2f890f7bd650bdc44edfebb3a59986cf884a12298b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-59.json",
+      "bytes": 2691,
+      "sha256": "1e171a47877156c6ffbb8d79c5f24813960e0d49438d1b6b56f9f15d98b89a41"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-60.json",
+      "bytes": 2558,
+      "sha256": "9ba8846f9e90c23d5bc7cd50f3f47db41db1762e8d87e6e9a9f1a84f943ecfcb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-0-61.json",
+      "bytes": 2662,
+      "sha256": "1a4c21a19a6f38fae0fce1bd65cb984e24b59dd06ed86abe27ec19868955cec2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-55.json",
+      "bytes": 2512,
+      "sha256": "2942f00f4c5d8a92d837bc8ee78b57cba4ecfa9a181763bf256e1aba733312c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-57.json",
+      "bytes": 2533,
+      "sha256": "ebff4020b1f765895574c946e4a07d9b58a94d20ccdf5e88364c69b51bdbd1f2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-58.json",
+      "bytes": 2583,
+      "sha256": "e5c51b6cfb7294149dcc80b5505bc46b0f75bdc970369f59b73171dff1cd259f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-59.json",
+      "bytes": 2695,
+      "sha256": "0239813f96ce2826c5142d4a1b2e5854673862fefb5cec791653474725b649ec"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-60.json",
+      "bytes": 2562,
+      "sha256": "21b02914a74418d32f6935f9fe96c21df47046484637bf60fc5a1ddf9431f30b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-32902-61.json",
+      "bytes": 2666,
+      "sha256": "b7362f281299b345fd0ac485a7e4f2b22ebda3b737463cba73534807f0d90921"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-55.json",
+      "bytes": 2511,
+      "sha256": "d076f5103da571d963a6c9a5838e48356ec378007fb594a5f5757e62631ecb3e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-57.json",
+      "bytes": 2532,
+      "sha256": "e8e8e093509c79d17dfcb98b7d5c102c04e011ba4616a07169c95e47b403d7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-58.json",
+      "bytes": 2582,
+      "sha256": "6176a0b8a78bfc0387519f9725be95db2b728a244922ffee75c16bf90e8fda39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-59.json",
+      "bytes": 2694,
+      "sha256": "6242a837ffc5167eded58df2e0c0becc69c2d812ef1c34533768a81bce5e78f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-60.json",
+      "bytes": 2561,
+      "sha256": "539e873181a7722ee1604f7afafea5befe9f0950e9270aa23cfa1c4960d47f27"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalCommands-4318-61.json",
+      "bytes": 2665,
+      "sha256": "c1f8e9664627f93d431a7eb2029509e429baae11fe0d8fd5d59b0f9eb834916c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/originalStages-0-0.json",
+      "bytes": 2792,
+      "sha256": "7f5ac21b7aa478af0fb32634634a6b5f5ae7b09ab3b1ad85f0273977e3ed2fef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-0-disabled.json",
+      "bytes": 9148,
+      "sha256": "d37267e3cf57e11c8b5b90e9fc12fed85dff4cea693ae77fd053194026c4f74e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-0-empty.json",
+      "bytes": 9145,
+      "sha256": "8aba6acd50a0ce47b21772d548f4258113188a25b405629d75aa23f7dcff54c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-0-null_ps.json",
+      "bytes": 13156,
+      "sha256": "1352e74d56d61ab7a8b863d5e52d0a26c887148e2d5d3155276a43796c7d35de"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-0-subset.json",
+      "bytes": 13761,
+      "sha256": "dc9a4947cc9d366ef46fb83daa56789afc5d4cf8e082b221e709d43556fabd60"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-32902-disabled.json",
+      "bytes": 9156,
+      "sha256": "108398d9bd2d95ed75d3c18612ac0f3108b57982395a0fb28560c4ce5eeae47e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-32902-empty.json",
+      "bytes": 9153,
+      "sha256": "9d44ae92f5f0aa7c1f1ef4fd4c35ac90b2126ff7ec519fe80501d63236569b92"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-32902-null_ps.json",
+      "bytes": 13164,
+      "sha256": "e73e32c833164eefc8e6f444b3f77e79d49a664712bab42389f697b6ed2a4871"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-32902-subset.json",
+      "bytes": 13769,
+      "sha256": "fb3754cb635b8203724819bb431a4575e20dab99a69b7dbaf9d1c91ac79fcbd3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-4318-disabled.json",
+      "bytes": 9154,
+      "sha256": "0c087568090bb98bfd8504487414b43e524d144bba034605576a4e7851ca70fd"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-4318-empty.json",
+      "bytes": 9151,
+      "sha256": "cf38e5c7e72554cd490942dfa91734772b936008635244646ea7dd2874344fa7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-4318-null_ps.json",
+      "bytes": 13162,
+      "sha256": "8388f7eb1bb82465b36082834a9aadd8ae73cc93f3409faa715dc9aa0bafa40b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/selections-4318-subset.json",
+      "bytes": 13767,
+      "sha256": "5dab39995d37797b36c81b273210ad3fa8245febb9114aeb5a0ba0559edc59be"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-constant-0.json",
+      "bytes": 56163,
+      "sha256": "92e5cb33cf50870fa2e67b7cac3bcd5faa79464c883ead151236f99e9449da57"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-constant-3.json",
+      "bytes": 60006,
+      "sha256": "456db608fb7d2632df1616a4336c7078270ed8adf02adaa082d56d4a185b0a87"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-coverage-0.json",
+      "bytes": 56135,
+      "sha256": "c29f1e82613afd3daffcaff2ded05921ecdefd4a7da0a18d02e2da45ab58db49"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-coverage-3.json",
+      "bytes": 59976,
+      "sha256": "bcd38e92ceb2a707f2a88140e604fcd3f66f6defa3665fa5c35658657178f145"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-derivative-0.json",
+      "bytes": 56136,
+      "sha256": "b65e4a6f61ad02bd821b91c4f350cc8e4eaded03ec4777d8911370d6cb31f01c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-derivative-3.json",
+      "bytes": 59978,
+      "sha256": "f8f5b4ae85bbdfce0d199ec8dc9694cc72e3b32f42001f07062c7e283a45f69d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-discard-0.json",
+      "bytes": 56147,
+      "sha256": "8836f727a4939dd6bc0303b1915d490168890d2ecf1b6e5426b56a90f9639187"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-discard-3.json",
+      "bytes": 59989,
+      "sha256": "4b8b37cc3e7892502db7cfe310b1d3b1c7803110df016902a8ea70475f6a53dc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-masked-0.json",
+      "bytes": 56121,
+      "sha256": "e202f9d545e30d0825e8ce776b3e8342365c2997d80a6798e7fb1043f8e8551c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-masked-3.json",
+      "bytes": 59963,
+      "sha256": "c4068e998b66ec460ec09c690847947e751060ed5560fc28108a12c1272d5518"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-sample-0.json",
+      "bytes": 56081,
+      "sha256": "9f201832bc874ef5e2ed9d0c0bc79b9bc222f50d7bd793ad12e9b02ee5cf0f14"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-sample-3.json",
+      "bytes": 59981,
+      "sha256": "462ac0176c0d8ba264848a1405560762016a3c1fe98bc66c24ded309aaa238e6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-varying-0.json",
+      "bytes": 56129,
+      "sha256": "94ad9cd0e7bb792ebea09eb8c9c7c3890c0fa1d3aa4853269465e0090b10b3e2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-0-varying-3.json",
+      "bytes": 59971,
+      "sha256": "a803e894b208e41a7dd379e861ce2033b2da35d37a89e559ef478c3dbeff108e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-constant-0.json",
+      "bytes": 56189,
+      "sha256": "22d66fd33a7070d190c10ce13345a935c4de55203ad0877a68185f7cb1ebdfe3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-constant-3.json",
+      "bytes": 60030,
+      "sha256": "8dfca928bff1e2cd8001720d541aec2da4669dde18a7dd093b7ba25cdfd0ae6d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-coverage-0.json",
+      "bytes": 56161,
+      "sha256": "e6bba1b25eb6389516eb8ccaa867cdb9ec4827a9b052305084ce8e20655004ee"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-coverage-3.json",
+      "bytes": 60005,
+      "sha256": "65783a0f4de32d8c6e4d6e8f70eccb586a9bce8606213c5ee36d17f94b2aa626"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-derivative-0.json",
+      "bytes": 56162,
+      "sha256": "545b3d6779a1c3af2bf53d1bae75ce1c3a17bf4aaefd795ad83f208db7d081e0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-derivative-3.json",
+      "bytes": 60002,
+      "sha256": "569cacfb4041d4313564966fc9a48382efcab9fff087aaa7837d6203e07be48c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-discard-0.json",
+      "bytes": 56173,
+      "sha256": "48e85117645354da2754747e858bcd0ad495d05cbd63a9c90a1c686ee5ab6fd0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-discard-3.json",
+      "bytes": 60013,
+      "sha256": "6c522d5ac515b78dc2aea70b0c7e51b9d6cc97b72ce3adea6fc735a2559bc881"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-masked-0.json",
+      "bytes": 56147,
+      "sha256": "bbec7538890c02cd0932d2c12e7ff279aeb9ba896f3a07d2602e95bf922fc048"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-masked-3.json",
+      "bytes": 59987,
+      "sha256": "5699c39a1dc866a30229a81fd514967475467ebf19875b05a5bb5e73ad9a08bc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-sample-0.json",
+      "bytes": 56107,
+      "sha256": "2b6cc29ab858566e2b02a4bc837675943a08ea86891a83a10fd07ba290fe5e85"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-sample-3.json",
+      "bytes": 60006,
+      "sha256": "2e1845eea046e85aa1d6e7f926ddbf33fe64e5ccaf5a17a069659a0245905e36"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-varying-0.json",
+      "bytes": 56155,
+      "sha256": "5b0059604235362592936b0d5ba0e7c174046b384210c781fe6dc46a42d60db3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-32902-varying-3.json",
+      "bytes": 59995,
+      "sha256": "87b2e00ed45c5d5ae6e891b307db9dfba63e949a456dcabfc4f9f482cc25fa4a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-constant-0.json",
+      "bytes": 56182,
+      "sha256": "81a2aba9056a4745746903be868a24972bbb1c850ed89005c054b43896cf0ec7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-constant-3.json",
+      "bytes": 60023,
+      "sha256": "d52095b209d851cd03448b5946f89b9e949d0b74664e6421481d0d541bc3be19"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-coverage-0.json",
+      "bytes": 56154,
+      "sha256": "afda4fac58b030d20d89defdc6fac786fc5ad0622b4e6d820e3b700cb21fed72"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-coverage-3.json",
+      "bytes": 59998,
+      "sha256": "e4d31244441ee7ade7d6135c75ed412ff913b24f5b27516bcb5341c4c701f5a2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-derivative-0.json",
+      "bytes": 56155,
+      "sha256": "c55c870193aca7f33deee1339915aa241f22a6ac8a2926966b6e64053d294945"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-derivative-3.json",
+      "bytes": 59995,
+      "sha256": "7fd8b410b35f31cb74e5095b12da187e4d28974bc2f5e41896ab38df6893e447"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-discard-0.json",
+      "bytes": 56166,
+      "sha256": "2d13497198fe41296cbebb235a3c0e5c49504a2702811fbde79614a88b444148"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-discard-3.json",
+      "bytes": 60006,
+      "sha256": "6169852d1ecf332524db19ecd5c43fef4c2377fb6f925cc61c82da1958704638"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-masked-0.json",
+      "bytes": 56140,
+      "sha256": "07112d0a6f74997ff69b239c529258de634b95e0239c97b8fbc8261959680ce5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-masked-3.json",
+      "bytes": 59980,
+      "sha256": "8e7d1103ca6c0076290b467523cdd5b59889da1ad439a9211f8c72ee9572d542"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-sample-0.json",
+      "bytes": 56100,
+      "sha256": "ce57263a28941a1bc6173069dd26d236b02cc77970a3fba3e84964887ae662c6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-sample-3.json",
+      "bytes": 59998,
+      "sha256": "1de068dbf4916863f095751a4c690f6fc5f56b8389979452437c347f2dca1f85"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-varying-0.json",
+      "bytes": 56148,
+      "sha256": "b7803df5eee1d36243b017d27401317f37177b6b9b5b5662b250b9390a6f7cc8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistory-4318-varying-3.json",
+      "bytes": 59988,
+      "sha256": "177003c6db40da3b461e7128d8a9b04c0da2f70ffab91dd9811058e6d75cc272"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-0-depth_reject.json",
+      "bytes": 62220,
+      "sha256": "ab0a283483e7aa6eb29ca7d5c0bd9babc552a424d0f5d9ec68a70ebb92e6f9f6"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-0-forced.json",
+      "bytes": 118978,
+      "sha256": "ca2620a01c26cb27a2e8d6b91561baecad3d9233f0baf1d152f0a5ae74c3ff45"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-0-null_ps.json",
+      "bytes": 30944,
+      "sha256": "97c8c64ce9b79691e3fe8878aaa269a20f4ed7e0bb5e16d67d5aff3822724ad4"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-0-stencil_reject.json",
+      "bytes": 62222,
+      "sha256": "ff7560f2d4ed17df06995d749718e66b7aefee2614127e0e08f96159c2ce62bb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-32902-depth_reject.json",
+      "bytes": 62250,
+      "sha256": "7954aef87b5c7fadc86ca381ba0df2185b67389d7224c1e3907f59df82df493e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-32902-forced.json",
+      "bytes": 119034,
+      "sha256": "a7265942911e1450e3bcc52c1eb449b1a1acf348876ee79366f1147d6abb6ef3"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-32902-null_ps.json",
+      "bytes": 30960,
+      "sha256": "fe27b8146746923527d3bd1ffc12827bd473b234f657ae992ae8c22815eff5ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-32902-stencil_reject.json",
+      "bytes": 62252,
+      "sha256": "3c957679b95fee657dab9227b8246e11c9d49b9696ee340acfa0390a55b1cca5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-4318-depth_reject.json",
+      "bytes": 62242,
+      "sha256": "cf5bb0b416edb3911447f28936d35fc0fe452ddf2d3923cce0c23eb27acb8556"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-4318-forced.json",
+      "bytes": 119021,
+      "sha256": "9d10515abc00c7bd9540c2f24e8e183d631e98832639feb5b93dbf054f40c830"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-4318-null_ps.json",
+      "bytes": 30956,
+      "sha256": "22a3fa4cb36f07c5a6a20142528920793c88956266ce31201c6a1ed97164323c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryBoundaries-4318-stencil_reject.json",
+      "bytes": 62244,
+      "sha256": "02f8c7b81a4d6dd2cca8ddfa4fe1101efd3d85446009fed8e352ce70cfc24440"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryRecovery-0.json",
+      "bytes": 80679,
+      "sha256": "a92f18e67e3e2936801c66ac35dbd52297aec7d5fafa3dfb3fda9f96889f6928"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryRecovery-32902.json",
+      "bytes": 80715,
+      "sha256": "f10aea2c6ddb453277f661f5ea1dcb23e14b310618d626f95d721ebc079a6557"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/shaderHistoryRecovery-4318.json",
+      "bytes": 80705,
+      "sha256": "6759152a67c0d471013d94ee74bdcb7c886f628457286254c0199a15d3610557"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-0-0.json",
+      "bytes": 8325,
+      "sha256": "26dc1594f1d1c0ab2a604ae35b92615e108e12ed5bd272dd6a0d9aed0e698bc9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-0-1.json",
+      "bytes": 8325,
+      "sha256": "f59c31a349bcb147f3bb557a5ec2bdb0c31dc6414a7e321e105d95a82aab786f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-32902-0.json",
+      "bytes": 8333,
+      "sha256": "775b1ec33b0d6499a23541d4ed4fee7cbc117f24404b2263d4741a83cb954496"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-32902-1.json",
+      "bytes": 8333,
+      "sha256": "aed1df46a5b42d0eb8c920e2b3c645f2fa9b5a0de322f6df235fdbc819c47ab1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-4318-0.json",
+      "bytes": 8331,
+      "sha256": "f8e614c9a18f13e0cf35515cbf4b7c784d80fbbef2ff6bbc699674c2916fa7af"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry/streamOutput-4318-1.json",
+      "bytes": 8331,
+      "sha256": "94ee0f01de2a02ff252f864af336d5d27b0f36bede6bed06d67a53f8dc9bbf09"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry-console.txt",
+      "bytes": 231954,
+      "sha256": "09ab5142c54c886abadcd64fd2ca2a702b5e963bf253e006665e7e26c539c2ad"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-geometry.txt",
+      "bytes": 17659,
+      "sha256": "5cffa7dc0fe98d2d96d569b335e309e298e149e6784dbbdd2e41d76d90c7d2a0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-joins-validated.json",
+      "bytes": 17311,
+      "sha256": "b2ae4d716cdbbe19f113644ff012cab6cf0b90fc0decf8135385e914d04b05a9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-joins-validation.json",
+      "bytes": 17311,
+      "sha256": "b2ae4d716cdbbe19f113644ff012cab6cf0b90fc0decf8135385e914d04b05a9"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-owned-validation.json",
+      "bytes": 127306,
+      "sha256": "1077b55e54401d62cfad3dcddbd047983b0106bdec09c697ef98535c849cd38e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-0/private.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-0/reference.bin",
+      "bytes": 4,
+      "sha256": "18ae32ba9d511d616235272c6f39fde64ceb16228399cfd4dfb9343cf3bb9fed"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-0/report.json",
+      "bytes": 838402,
+      "sha256": "1db24dbc64db31cd37ceddcbf965ba37cc61e19ed029fbfd4dc15bd2ec754f52"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-0-console.txt",
+      "bytes": 11506,
+      "sha256": "bde7f48cd9cb833faf1c9fd5ba24c28ab8b7f465bee818ab873c332856ea8aed"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-32902/private.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "899b429e8d612882e504f857c199e446b1150422af9ef49cd0e707078285a9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-32902/report.json",
+      "bytes": 838689,
+      "sha256": "9273b641da137ffaf8018f5a7d84d13857837de613c40e68d63bdb78293aff18"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-32902-console.txt",
+      "bytes": 11506,
+      "sha256": "bde7f48cd9cb833faf1c9fd5ba24c28ab8b7f465bee818ab873c332856ea8aed"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-4318/private.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "2fd80f9114b856e4067286996a731d57bbd1af6199212e4de4d626ff522cbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-4318/report.json",
+      "bytes": 838716,
+      "sha256": "c31d5bd00638a14f30bedd547f2f4b0df84f42f7bc783063257a600ad9f48930"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-bf1-4318-console.txt",
+      "bytes": 11506,
+      "sha256": "bde7f48cd9cb833faf1c9fd5ba24c28ab8b7f465bee818ab873c332856ea8aed"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-0/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-0/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-0/report.json",
+      "bytes": 89298,
+      "sha256": "154d4233554e3c843089aa4ffc7fdf0909107c16d36eb537bc05c5956e132aab"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-0-console.txt",
+      "bytes": 984,
+      "sha256": "0596f1aab7e646913f78ee47efff30c8fd1d0ad28d53814d92380b651e0aa540"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-32902/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-32902/report.json",
+      "bytes": 89337,
+      "sha256": "abc30d686bc1f68a20c396921aa57a8c94e0ac58cb047680b0a840fa50c6aaf1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-32902-console.txt",
+      "bytes": 984,
+      "sha256": "0596f1aab7e646913f78ee47efff30c8fd1d0ad28d53814d92380b651e0aa540"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-4318/private.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-4318/report.json",
+      "bytes": 89327,
+      "sha256": "8c2dd5c23fb1c06d74196fbb63a13cdcf3b0da4eb62037d96271f597e7003e96"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-gf2-4318-console.txt",
+      "bytes": 984,
+      "sha256": "0596f1aab7e646913f78ee47efff30c8fd1d0ad28d53814d92380b651e0aa540"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-0/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-0/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-0/report.json",
+      "bytes": 105470,
+      "sha256": "2907220ac1de4bd62cdb3d9ce7bde857993c2801b61d7e005ba19a3998ad34cc"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-0-console.txt",
+      "bytes": 1328,
+      "sha256": "dc167748f9148ad9263e0fa065b57bf657cb7e59fafd773d3f666edf51058919"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-32902/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-32902/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-32902/report.json",
+      "bytes": 105515,
+      "sha256": "89b3868d4d05afd6d574188d8c7a1240bc8d69f8f1625c919f0f59efce2351df"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-32902-console.txt",
+      "bytes": 1328,
+      "sha256": "dc167748f9148ad9263e0fa065b57bf657cb7e59fafd773d3f666edf51058919"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-4318/private.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-4318/reference.bin",
+      "bytes": 4,
+      "sha256": "1cb5ff2135c46be214e6ae71345b71ddad6d40b8b1928c014c3ed6f5849d50ca"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-4318/report.json",
+      "bytes": 105500,
+      "sha256": "4bedfb2bb19adc475b291c5848722e24e7eae5d1ebc675b8d81d517d01b89f0c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real/run-hd-4318-console.txt",
+      "bytes": 1328,
+      "sha256": "dc167748f9148ad9263e0fa065b57bf657cb7e59fafd773d3f666edf51058919"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-real-validation.json",
+      "bytes": 4424,
+      "sha256": "aefa54e268c086433470c3b93718c8564a300a13ec09d096f26e4b6223585f6d"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-55.json",
+      "bytes": 2508,
+      "sha256": "d9a3de1cfea5360a4c7d0fddf004bbd113d97a11ee4bfd5e2a8b34ed4a7e1fe2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-57.json",
+      "bytes": 2529,
+      "sha256": "6cc41df3a470675a4abb3d02b4b7f3736059efc82a01d342097beff00a1f4387"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-58.json",
+      "bytes": 2579,
+      "sha256": "075f9dc25885852595b5c2f890f7bd650bdc44edfebb3a59986cf884a12298b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-59.json",
+      "bytes": 2691,
+      "sha256": "1e171a47877156c6ffbb8d79c5f24813960e0d49438d1b6b56f9f15d98b89a41"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-60.json",
+      "bytes": 2558,
+      "sha256": "9ba8846f9e90c23d5bc7cd50f3f47db41db1762e8d87e6e9a9f1a84f943ecfcb"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-0-61.json",
+      "bytes": 2662,
+      "sha256": "1a4c21a19a6f38fae0fce1bd65cb984e24b59dd06ed86abe27ec19868955cec2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-55.json",
+      "bytes": 2512,
+      "sha256": "2942f00f4c5d8a92d837bc8ee78b57cba4ecfa9a181763bf256e1aba733312c2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-57.json",
+      "bytes": 2533,
+      "sha256": "ebff4020b1f765895574c946e4a07d9b58a94d20ccdf5e88364c69b51bdbd1f2"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-58.json",
+      "bytes": 2583,
+      "sha256": "e5c51b6cfb7294149dcc80b5505bc46b0f75bdc970369f59b73171dff1cd259f"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-59.json",
+      "bytes": 2695,
+      "sha256": "0239813f96ce2826c5142d4a1b2e5854673862fefb5cec791653474725b649ec"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-60.json",
+      "bytes": 2562,
+      "sha256": "21b02914a74418d32f6935f9fe96c21df47046484637bf60fc5a1ddf9431f30b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-32902-61.json",
+      "bytes": 2666,
+      "sha256": "b7362f281299b345fd0ac485a7e4f2b22ebda3b737463cba73534807f0d90921"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-55.json",
+      "bytes": 2511,
+      "sha256": "d076f5103da571d963a6c9a5838e48356ec378007fb594a5f5757e62631ecb3e"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-57.json",
+      "bytes": 2532,
+      "sha256": "e8e8e093509c79d17dfcb98b7d5c102c04e011ba4616a07169c95e47b403d7e7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-58.json",
+      "bytes": 2582,
+      "sha256": "6176a0b8a78bfc0387519f9725be95db2b728a244922ffee75c16bf90e8fda39"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-59.json",
+      "bytes": 2694,
+      "sha256": "6242a837ffc5167eded58df2e0c0becc69c2d812ef1c34533768a81bce5e78f8"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-60.json",
+      "bytes": 2561,
+      "sha256": "539e873181a7722ee1604f7afafea5befe9f0950e9270aa23cfa1c4960d47f27"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalCommands-4318-61.json",
+      "bytes": 2665,
+      "sha256": "c1f8e9664627f93d431a7eb2029509e429baae11fe0d8fd5d59b0f9eb834916c"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke/originalStages-0-0.json",
+      "bytes": 2792,
+      "sha256": "7f5ac21b7aa478af0fb32634634a6b5f5ae7b09ab3b1ad85f0273977e3ed2fef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-smoke.txt",
+      "bytes": 1834,
+      "sha256": "77117c2f08c838ebe3ef915d6b36ce448dcedd42cb36a50349a226828d9035b1"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-0-0.json",
+      "bytes": 2792,
+      "sha256": "7f5ac21b7aa478af0fb32634634a6b5f5ae7b09ab3b1ad85f0273977e3ed2fef"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-0-1.json",
+      "bytes": 2631,
+      "sha256": "d39d70f707f8f3b44a9e3e14bed79e2e64b60215d1d3c0297dc87fb81a40d1b7"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-32902-0.json",
+      "bytes": 2796,
+      "sha256": "1899398cb2e2adb53b51622c3b5beb4ac82031819fe9e66ae40337475744314b"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-32902-1.json",
+      "bytes": 2635,
+      "sha256": "08e876cb217f950a867c3504f5cb6c91c563f9a59995e436ff26f6b675216454"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-4318-0.json",
+      "bytes": 2795,
+      "sha256": "a3a76be706f79c97af67881f90aaa564f2cbfc7bcabfeed7099cc297b5342c54"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/originalStages-4318-1.json",
+      "bytes": 2634,
+      "sha256": "f9f853057644466b4b682200238d54edbe9702e64c8297f15f367caffc465d99"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/recovery-0.json",
+      "bytes": 13239,
+      "sha256": "e988d236d47a022eb2739f15323933be996ef739d18cfa9ed6e01c2dea5d5a15"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/recovery-32902.json",
+      "bytes": 13247,
+      "sha256": "805e40fcf74b9dc02248bd64abc7b3a78f18466baf222a8eca3cda0edfe5ba36"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages/recovery-4318.json",
+      "bytes": 13245,
+      "sha256": "4fa6f9d02687d77be84624173328c2e3ac770f669781f7ec3572379ad0ffe5b0"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages-console.txt",
+      "bytes": 17340,
+      "sha256": "70a9b4171c27c4cb18704c70a974077c2882814bafc0dbcc6e765a4ae8fe7843"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-stages.txt",
+      "bytes": 1010,
+      "sha256": "1d8c58f6eddb7ce13e85ed9d0df99933fc2aaf7f1d75672ca6cd256b3c11896a"
+    },
+    {
+      "path": "artifacts/dx11-native/original-draw-validated.json",
+      "bytes": 131431,
+      "sha256": "de20847ef76ef90a7769cdbc79799de010391d358765ae6fc65cb146adf7f35e"
+    }
+  ],
+  "local_source_files": [
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 34102,
+      "sha256": "d04efeac1a6c16f1c96c540a34a1c337aa098d747110b8f246c20a03ccf31456"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.cpp",
+      "bytes": 21585,
+      "sha256": "7a5c0e3099803eca0137456e27a97cdc56666fe0de3165dbed941eb208b283c4"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.h",
+      "bytes": 2750,
+      "sha256": "9fbccdcb26e050e3f06c1d81e74ecfc702d2c13b61ae2b62032de6f6fa4ecd11"
+    },
+    {
+      "path": "tests/NativePixelGeometryReplayTests.cpp",
+      "bytes": 67129,
+      "sha256": "37cfe1fbd7058b6bf6414aea7bc93ce78bc302f4f2a012b2a1b27c1e077ee61d"
+    },
+    {
+      "path": "tests/NativePixelCheckpointInputsTests.cpp",
+      "bytes": 55307,
+      "sha256": "54583bf5ad730062175223380e3a439373113864aea43f3362ed1418e01e69c7"
+    },
+    {
+      "path": "tools/validate_native_original_draw.py",
+      "bytes": 10000,
+      "sha256": "7c536cb23127c94383ba3a2f93d0281e7d90cfa54d88f7604d33e62f85631c1f"
+    },
+    {
+      "path": "tools/validate_native_pixel_draw_history.py",
+      "bytes": 11705,
+      "sha256": "c2937ff4ff9af916f6b280f1cfb8ce950eba77b896f2906bf86619fbbcb8978b"
+    },
+    {
+      "path": "tools/probe_native_pixel_draw_history.cpp",
+      "bytes": 4832,
+      "sha256": "086d966e53689b3145b3a02fc8ce10582f5939b6f138061dceb8a5ea917629b3"
+    },
+    {
+      "path": "src/replay/PrivateOutputs.cpp",
+      "bytes": 14612,
+      "sha256": "952ea204f6341772b9f54045ca39c64807223194446dc2e19c9258ff641b89a1"
+    },
+    {
+      "path": "src/application/DrawParameters.cpp",
+      "bytes": 2125,
+      "sha256": "c7fc6e187d1009c7021187409498824f8e2f7b61e2a65c4b08ded784a42531c3"
+    }
+  ]
+}
