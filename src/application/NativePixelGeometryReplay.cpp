@@ -1,9 +1,13 @@
 #include "NativePixelGeometryReplay.h"
 #include "DrawParameters.h"
 #include "DxbcGpuCompletion.h"
+#include "DxbcPixelCompletion.h"
 #include "DxbcPixelGeometry.h"
 #include "DxbcPixelRaster.h"
+#include "core/ClassLinkage.h"
 #include "core/StreamOutput.h"
+#include "replay/BlendState.h"
+#include "replay/Unpredicated.h"
 #include <algorithm>
 #include <chrono>
 #include <d3d11sdklayers.h>
@@ -49,7 +53,8 @@ class NativePixelGeometryReplay {
                               const CancelCheck &cancel, const NativePixelCheckpointPlanner *plan = nullptr)
         : r(replay), id(event), request(selection), planner(plan), observer(observe), cancelled(cancel),
           deadline(std::chrono::steady_clock::now() + std::chrono::milliseconds(selection.timeoutMs)) {}
-    Json original(const std::function<void(Replay &, bool)> &observe) {
+    Json original(const std::function<void(Replay &, bool)> &observe,
+                  std::optional<uint32_t> completionTarget = {}) {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
             throw std::runtime_error("Private original draw requires a completed before-event replay");
@@ -57,6 +62,8 @@ class NativePixelGeometryReplay {
         if (event.type < 0x37 || event.type > 0x3d || !request.maxBytes || !request.timeoutMs ||
             request.timeoutMs > 60000)
             throw std::invalid_argument("Invalid private original draw request");
+        if (completionTarget && *completionTarget >= 8)
+            throw std::invalid_argument("Invalid private pixel completion target");
         const auto state = r.prepareState(event);
         const CancelCheck scoped = [&] {
             checkDeadline();
@@ -102,6 +109,87 @@ class NativePixelGeometryReplay {
             r.withPrivateOutputs(
                 event, state,
                 [&] {
+                    Com<ID3D11PixelShader> completionShader;
+                    Com<ID3D11BlendState1> completionBlend;
+                    if (completionTarget) {
+                        const auto target = *completionTarget;
+                        if (!state.stages[4].shader)
+                            throw std::runtime_error("Private pixel completion requires a pixel shader");
+                        const auto marked = instrumentPixelCompletion(shader(state.stages[4].shader), target,
+                                                                      {0x3f800000, 0x40000000, 0x40400000},
+                                                                      request.maxBytes - cloneBytes, scoped);
+                        if (marked.bytecode.size() > request.maxBytes - cloneBytes)
+                            throw std::runtime_error("Private pixel completion shader budget exceeded");
+                        auto *context = r.context_.Get();
+                        std::array<ID3D11RenderTargetView *, 8> rawViews{};
+                        std::array<Com<ID3D11RenderTargetView>, 8> views;
+                        context->OMGetRenderTargets(8, rawViews.data(), nullptr);
+                        for (size_t i = 0; i < views.size(); ++i)
+                            views[i].Attach(rawViews[i]);
+                        if (!views[target])
+                            throw std::runtime_error("Private pixel completion target is not bound");
+                        auto blend = defaultBlend();
+                        std::array<float, 4> factor{};
+                        UINT mask = 0;
+                        Com<ID3D11BlendState> currentBlend;
+                        context->OMGetBlendState(&currentBlend, factor.data(), &mask);
+                        if (currentBlend) {
+                            Com<ID3D11BlendState1> extended;
+                            if (SUCCEEDED(currentBlend.As(&extended)))
+                                extended->GetDesc1(&blend);
+                            else {
+                                D3D11_BLEND_DESC base{};
+                                currentBlend->GetDesc(&base);
+                                blend = decodeBlend(
+                                    Bytes(reinterpret_cast<const uint8_t *>(&base), sizeof base), false);
+                            }
+                        }
+                        if (!blend.IndependentBlendEnable) {
+                            const auto shared = blend.RenderTarget[0];
+                            for (size_t i = 0; i < views.size(); ++i)
+                                blend.RenderTarget[i] = views[i] ? shared : defaultBlend().RenderTarget[i];
+                        }
+                        blend.IndependentBlendEnable = TRUE;
+                        blend.RenderTarget[target] = defaultBlend().RenderTarget[target];
+                        Com<ID3D11Device1> extendedDevice;
+                        check(r.device_.As(&extendedDevice), "Get private completion device");
+                        check(extendedDevice->CreateBlendState1(&blend, &completionBlend),
+                              "Create private completion blend state");
+                        auto linkage =
+                            r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, state.stages[4].shader));
+                        check(r.device_->CreatePixelShader(marked.bytecode.data(), marked.bytecode.size(),
+                                                           linkage, &completionShader),
+                              "Create private completion shader");
+                        std::array<ID3D11ClassInstance *, 256> rawClasses{};
+                        std::array<Com<ID3D11ClassInstance>, 256> classes;
+                        UINT classCount = UINT(rawClasses.size());
+                        Com<ID3D11PixelShader> originalShader;
+                        context->PSGetShader(&originalShader, rawClasses.data(), &classCount);
+                        for (UINT i = 0; i < classCount; ++i)
+                            classes[i].Attach(rawClasses[i]);
+                        context->PSSetShader(completionShader.Get(), rawClasses.data(), classCount);
+                        context->OMSetBlendState(completionBlend.Get(), factor.data(), mask);
+                        {
+                            Unpredicated clear(context);
+                            const float zero[4]{};
+                            context->ClearRenderTargetView(views[target].Get(), zero);
+                        }
+                        D3D11_RENDER_TARGET_VIEW_DESC desc{};
+                        views[target]->GetDesc(&desc);
+                        report["kind"] = "native_pixel_completion_observation";
+                        report["backend"] = "native-pixel-completion-observation/1";
+                        report["scope"] = "original_ps_body_on_private_completion_target";
+                        report["diagnostic_shader_replacements"] = true;
+                        report["completion_shader"] = marked.identity;
+                        report["completion_target"] = {
+                            {"slot", target},
+                            {"format", uint32_t(desc.Format)},
+                            {"cleared_to_zero", true},
+                            {"blend_and_logic_disabled", true},
+                            {"write_mask", 15},
+                            {"alpha_to_coverage", blend.AlphaToCoverageEnable != FALSE},
+                            {"sample_mask", mask}};
+                    }
                     if (observe)
                         observe(r, false);
                     checkDeadline();
@@ -355,6 +443,13 @@ Json replayNativeOriginalDraw(Replay &r, Id event, const std::function<void(Repl
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
         .original(observe);
+}
+Json replayNativePixelCompletion(Replay &r, Id event, uint32_t target,
+                                 const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                 uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, target);
 }
 Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRange &range,
                                const std::function<void(Replay &, uint64_t)> &observe,

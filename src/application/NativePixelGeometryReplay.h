@@ -19,6 +19,14 @@ nlohmann::json replayNativeOriginalDraw(Replay &, Id event,
                                         const std::function<void(Replay &, bool after)> &observe = {},
                                         uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
                                         const CancelCheck &cancelled = {});
+// Preserves the original PS body but marks its returning RGB output on one
+// existing private RTV. That RTV is cleared and its blending/writes overridden;
+// alpha-to-coverage, depth/stencil, sample masks and original UAV slots remain.
+// Observers see private storage after diagnostic setup and after GPU completion.
+nlohmann::json replayNativePixelCompletion(Replay &, Id event, uint32_t target,
+                                           const std::function<void(Replay &, bool after)> &observe = {},
+                                           uint64_t maxBytes = 256ull * 1024 * 1024,
+                                           uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
 // Internal before-event diagnostic. It captures final geometry and runs the
 // unmodified bound PS on private original outputs, preserving rasterization,
 // depth/stencil, blend, sample-mask, predicate and PS resource/class bindings.
