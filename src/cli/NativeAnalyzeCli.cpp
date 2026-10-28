@@ -29,7 +29,8 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addPositionalArgument(
             "action",
             "inventory | events | texture | mesh | counters | history --history-scope events/private-draw "
-            "| debug-vertex | debug-thread (fragment history and full debugger parity remain pending)");
+            "| debug-vertex | debug-thread | debug-pixel --debug-scope private-primitive "
+            "(fragment history and full debugger parity remain pending)");
         parser.addOption({"out", "New or empty output directory", "path"});
         parser.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
         parser.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
@@ -47,9 +48,11 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"shader-outputs", "Evaluate private draw shader outputs"});
         parser.addOption({"output-merger", "Evaluate private draw shader outputs and output merger"});
         parser.addOption({"primitive-identity", "Observe conditional system IDs in private draw history"});
+        parser.addOption(
+            {"debug-scope", "Pixel debug: private-primitive; original invocation remains unknown", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
                                "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
-                               "max-records", "max-steps", "max-trace-bytes"})
+                               "max-records", "max-steps", "max-trace-bytes", "primitive"})
             parser.addOption({key, "Native analysis selection", "integer"});
         if (!parser.parse(normalized))
             throw std::invalid_argument(parser.errorText().toStdString());
@@ -78,7 +81,7 @@ int nativeAnalyzeCli(QStringList arguments) {
             if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
                 key == "primitive-identity")
                 options[field] = true;
-            else if (key == "stage" || key == "history-scope")
+            else if (key == "stage" || key == "history-scope" || key == "debug-scope")
                 options[field] = parser.value(key).toStdString();
             else if (key == "group" || key == "thread") {
                 options[field] = Json::array();

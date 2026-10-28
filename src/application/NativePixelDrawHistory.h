@@ -1,4 +1,5 @@
 #pragma once
+#include "DxbcExecutionTrace.h"
 #include "NativeHistory.h"
 namespace flora {
 struct NativePixelDrawHistoryLimits {
@@ -15,10 +16,16 @@ struct NativePixelDrawHistoryLimits {
     // candidate IDs. Equality alone does not qualify an original invocation.
     bool observePrimitiveIdentity = false;
 };
+// Runs at a private before-primitive checkpoint with measured quad inputs.
+// Consumers must copy mutable snapshot storage before executing a trace.
+using NativePixelInvocationObserver =
+    std::function<void(uint64_t primitive, const dxbc_exec::InputSnapshot &,
+                       const dxbc_exec::PixelTraceOptions &, const std::vector<uint32_t> &samples)>;
 // Internal selected-texel checkpoints over a full private original-PS draw.
 // Records remain private primitive storage observations, not original fragments.
 // The selected texture must be bound as an RTV or DSV at this event.
 nlohmann::json collectNativePixelDrawHistory(Replay &, Id event, const NativeHistorySelection &,
                                              const NativePixelDrawHistoryLimits & = {},
-                                             const CancelCheck & = {});
+                                             const CancelCheck & = {},
+                                             const NativePixelInvocationObserver & = {});
 } // namespace flora

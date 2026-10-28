@@ -4,7 +4,7 @@
 #include <QTemporaryDir>
 
 namespace flora {
-// A verified, privately retained compute analysis. Ownership may be transferred
+// A verified, privately retained native execution analysis. Ownership may be transferred
 // after loading; model access is exclusive and must not occur concurrently.
 class NativeDebugSession final {
   public:

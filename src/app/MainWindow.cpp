@@ -1221,7 +1221,7 @@ void MainWindow::buildUi() {
         debugTabs->insertTab(i, stageOrder[i], label);
     }
     nativeDebug_ = new NativeExecutionDebugView;
-    debugTabs->addTab(nativeDebug_, "Native VS/CS");
+    debugTabs->addTab(nativeDebug_, "Native execution");
     connect(nativeDebug_, &NativeExecutionDebugView::readRequested, this, &MainWindow::readNativeDebug);
     connect(nativeDebug_, &NativeExecutionDebugView::cancelRequested, this, &MainWindow::cancel);
     connect(nativeDebug_, &NativeExecutionDebugView::error, this, &MainWindow::showError);

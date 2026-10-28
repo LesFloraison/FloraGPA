@@ -1,8 +1,10 @@
+#include "BlendCapture.h"
 #include "DepthStencilCapture.h"
 #include "NativeDebugFixture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
+#include "app/NativeAnalysisController.h"
 #include "app/NativeDebugControls.h"
 #include "app/NativeExecutionDebugView.h"
 #include <QAction>
@@ -30,6 +32,59 @@ std::shared_ptr<NativeDebugSession> session() {
 class NativeExecutionDebugUiTests final : public QObject {
     Q_OBJECT
   private slots:
+    void pixelSelectionAndWorker() {
+        QTemporaryDir dir;
+        const auto capture = dir.filePath("pixel.gpa_frame");
+        testing::blendCapture().save(capture);
+        NativeExecutionDebugView view;
+        view.setContext("pixel", 100);
+        auto stage = view.findChild<QComboBox *>("nativeDebugStage");
+        auto resource = view.findChild<QLineEdit *>("nativeDebugIndex");
+        auto primitive = view.findChild<QLineEdit *>("nativeDebugThread");
+        auto pixel = view.findChild<QLineEdit *>("nativeDebugGroup");
+        auto subresource = view.findChild<QLineEdit *>("nativeDebugPixelSubresource");
+        QVERIFY(stage && resource && primitive && pixel && subresource);
+        stage->setCurrentIndex(2);
+        QCOMPARE(view.action(), std::string("debug-pixel"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
+        resource->setText("1000");
+        QCOMPARE(view.request().at("debug_scope"), Json("private-primitive"));
+        auto request = view.request();
+        request["warp"] = true;
+        NativeAnalysisController controller;
+        QSignalSpy completed(&controller, &NativeAnalysisController::finished);
+        controller.start(capture, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                         "debug-pixel", request, nullptr);
+        QTRY_VERIFY_WITH_TIMEOUT(!completed.empty(), 30000);
+        const auto outcome = completed.takeFirst()[0].value<NativeAnalysisOutcome>();
+        QVERIFY2(outcome.debugSession != nullptr, qPrintable(outcome.error));
+        QVERIFY(view.finish(view.requestId(), outcome.debugSession));
+        QVERIFY(view.findChild<QLabel *>("nativeDebugSummary")->text().contains("eligibility unknown"));
+        const auto initial = view.model()->registerValues();
+        trigger(view, "nativeDebugNext");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        trigger(view, "nativeDebugPrevious");
+        QTRY_VERIFY_WITH_TIMEOUT(!view.operationActive(), 10000);
+        QCOMPARE(view.model()->registerValues(), initial);
+        const auto stale = view.requestId();
+        subresource->setText("1,0,0");
+        QVERIFY(view.requestId() != stale && !view.model());
+        QVERIFY(!view.finish(stale, outcome.debugSession));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), outcome.debugSession));
+        subresource->setText("0,0,0");
+        for (const auto *invalid : {"-1", "+1", "4294967296", " 1"}) {
+            primitive->setText(invalid);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.request());
+        }
+        primitive->setText("0");
+        resource->setText("4294967297");
+        QCOMPARE(view.request().at("resource"), Json(uint64_t(4294967297)));
+        pixel->setText("1,2,3");
+        QCOMPARE(view.request().at("sample"), Json(3));
+        stage->setCurrentIndex(1);
+        QCOMPARE(view.action(), std::string("debug-vertex"));
+        QVERIFY(!view.request().contains("resource"));
+    }
     void vertexSelectionAndNavigation() {
         NativeExecutionDebugView view;
         view.setContext("vertex", 19);
@@ -213,13 +268,16 @@ class NativeExecutionDebugUiTests final : public QObject {
     }
     void mainWindow_data() {
         QTest::addColumn<unsigned>("vendor");
-        QTest::addColumn<bool>("vertex");
-        QTest::newRow("warp") << 0u << false;
-        QTest::newRow("nvidia") << 0x10deu << false;
-        QTest::newRow("intel") << 0x8086u << false;
-        QTest::newRow("vertex-warp") << 0u << true;
-        QTest::newRow("vertex-nvidia") << 0x10deu << true;
-        QTest::newRow("vertex-intel") << 0x8086u << true;
+        QTest::addColumn<unsigned>("stage");
+        QTest::newRow("warp") << 0u << 0u;
+        QTest::newRow("nvidia") << 0x10deu << 0u;
+        QTest::newRow("intel") << 0x8086u << 0u;
+        QTest::newRow("vertex-warp") << 0u << 1u;
+        QTest::newRow("vertex-nvidia") << 0x10deu << 1u;
+        QTest::newRow("vertex-intel") << 0x8086u << 1u;
+        QTest::newRow("pixel-warp") << 0u << 2u;
+        QTest::newRow("pixel-nvidia") << 0x10deu << 2u;
+        QTest::newRow("pixel-intel") << 0x8086u << 2u;
     }
     void navigationInvalidation() {
         NativeExecutionDebugView view;
@@ -246,10 +304,13 @@ class NativeExecutionDebugUiTests final : public QObject {
     }
     void mainWindow() {
         QFETCH(unsigned, vendor);
-        QFETCH(bool, vertex);
+        QFETCH(unsigned, stage);
         QTemporaryDir directory;
         const auto capture = directory.filePath("frame.gpa_frame");
-        (vertex ? testing::depthStencilCapture() : testing::computeCapture(true)).save(capture);
+        (stage == 2   ? testing::blendCapture()
+         : stage == 1 ? testing::depthStencilCapture()
+                      : testing::computeCapture(true))
+            .save(capture);
         MainWindow window;
         QSignalSpy loaded(&window, &MainWindow::captureLoaded);
         window.openCapture(capture);
@@ -264,13 +325,16 @@ class NativeExecutionDebugUiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         auto view = window.findChild<NativeExecutionDebugView *>();
         QVERIFY(view);
-        view->findChild<QComboBox *>("nativeDebugStage")->setCurrentIndex(vertex ? 1 : 0);
+        view->findChild<QComboBox *>("nativeDebugStage")->setCurrentIndex(int(stage));
+        if (stage == 2)
+            view->findChild<QLineEdit *>("nativeDebugIndex")->setText("1000");
         auto tabs = window.findChild<QTabWidget *>("checkpointStageTabs");
+        QCOMPARE(tabs->tabText(tabs->indexOf(view)), QString("Native execution"));
         tabs->setCurrentWidget(view);
         auto api = window.findChild<QTableView *>("apiLog");
         bool selected = false;
         for (int i = 0; i < api->model()->rowCount(); ++i)
-            if (api->model()->index(i, 0).data(Qt::UserRole).toULongLong() == (vertex ? 1000 : 100)) {
+            if (api->model()->index(i, 0).data(Qt::UserRole).toULongLong() == (stage == 1 ? 1000 : 100)) {
                 api->setCurrentIndex(api->model()->index(i, 0));
                 selected = true;
                 break;

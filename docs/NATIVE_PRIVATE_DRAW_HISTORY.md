@@ -59,6 +59,7 @@ fields before consuming these observations.
 `--history-scope events` continues to provide event snapshots for CPU writes,
 clears, copies, resolves and draw/dispatch effects. Draw-only options are rejected
 in that scope rather than ignored. Calling `history` without an explicit scope
-and public `debug-pixel` remain gated until complete fragment/debugger parity is
-implemented. Existing GUI fragment-history/debug routing is not switched by
-this incremental CLI integration.
+and unscoped `debug-pixel` remain gated until complete fragment/debugger parity is
+implemented. Explicit [private primitive debugging](NATIVE_PRIVATE_PIXEL_DEBUG.md)
+is available through the CLI and Native Execution panel. Existing GUI fragment
+history and full pixel debugger routing remain available during migration.

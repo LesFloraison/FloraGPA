@@ -84,7 +84,7 @@ void NativeAnalysisController::start(const QString &capture, const QString &work
                     nativeReplayMesh(outcome.job, outcome.result, outcome.artifacts, cancelled));
                 outcome.artifacts.clear();
             }
-            if (action == "debug-thread" || action == "debug-vertex") {
+            if (action == "debug-thread" || action == "debug-vertex" || action == "debug-pixel") {
                 outcome.debugSession = std::make_shared<NativeDebugSession>(
                     outcome.job, outcome.result, outcome.artifacts, maximumBytes, cancelled);
                 // The session retains the shader and a locked private journal.

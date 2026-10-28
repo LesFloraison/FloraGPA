@@ -85,7 +85,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     layout->addWidget(select);
     stage_ = new QComboBox;
     stage_->setObjectName("nativeDebugStage");
-    stage_->addItems({"CS", "VS"});
+    stage_->addItems({"CS", "VS", "PS (private primitive)"});
     select->addWidget(stage_);
     auto firstLabel = new QLabel("Group ");
     select->addWidget(firstLabel);
@@ -107,15 +107,31 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     select->addWidget(index_);
     indexLabel->hide();
     index_->hide();
+    auto subresourceLabel = new QLabel(" Mip, layer, slice ");
+    select->addWidget(subresourceLabel);
+    pixelSubresource_ = new QLineEdit("0,0,0");
+    pixelSubresource_->setObjectName("nativeDebugPixelSubresource");
+    select->addWidget(pixelSubresource_);
+    subresourceLabel->hide();
+    pixelSubresource_->hide();
     connect(stage_, &QComboBox::currentIndexChanged, this,
-            [this, firstLabel, secondLabel, indexLabel](int index) {
-                firstLabel->setText(index ? "Input reference " : "Group ");
-                secondLabel->setText(index ? " Instance " : " Thread ");
-                group_->setText(index ? "0" : "0,0,0");
+            [this, firstLabel, secondLabel, indexLabel, subresourceLabel](int index) {
+                const bool pixel = index == 2;
+                firstLabel->setText(pixel ? "Pixel x, y, sample " : index ? "Input reference " : "Group ");
+                secondLabel->setText(pixel ? " Primitive ordinal " : index ? " Instance " : " Thread ");
+                indexLabel->setText(pixel ? " GPA resource " : " Actual index ");
+                group_->setText(index == 1 ? "0" : "0,0,0");
                 thread_->setText(index ? "0" : "0,0,0");
                 index_->clear();
+                index_->setPlaceholderText(pixel ? "Required" : "From draw");
+                index_->setToolTip(pixel ? "Bound RTV or DSV resource ID for private primitive analysis"
+                                         : "Override the per-vertex attribute index after all draw offsets; "
+                                           "system IDs remain selected from the draw");
                 indexLabel->setVisible(index != 0);
                 index_->setVisible(index != 0);
+                subresourceLabel->setVisible(pixel);
+                pixelSubresource_->setVisible(pixel);
+                pixelSubresource_->setText("0,0,0");
                 invalidate();
             });
     steps_ = new QToolBar;
@@ -248,6 +264,7 @@ NativeExecutionDebugView::NativeExecutionDebugView(QWidget *parent) : QWidget(pa
     connect(group_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(thread_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(index_, &QLineEdit::textChanged, this, [this] { invalidate(); });
+    connect(pixelSubresource_, &QLineEdit::textChanged, this, [this] { invalidate(); });
     connect(&operation_, &NativeDebugOperationController::finished, this,
             [this](const NativeDebugOperationOutcome &result) {
                 const bool current = operationRequest_ == requestId_ && bool(session_);
@@ -333,12 +350,40 @@ void NativeExecutionDebugView::updateActions() {
     group_->setEnabled(!occupied);
     thread_->setEnabled(!occupied);
     index_->setEnabled(!occupied);
+    pixelSubresource_->setEnabled(!occupied);
     stage_->setEnabled(!occupied);
 }
 std::string NativeExecutionDebugView::action() const {
-    return stage_->currentIndex() ? "debug-vertex" : "debug-thread";
+    return stage_->currentIndex() == 2 ? "debug-pixel"
+           : stage_->currentIndex()    ? "debug-vertex"
+                                       : "debug-thread";
 }
 NativeExecutionDebugView::Json NativeExecutionDebugView::request() const {
+    if (stage_->currentIndex() == 2) {
+        const auto location = triple(group_->text());
+        const auto subresource = triple(pixelSubresource_->text());
+        const auto scalar = [](const QString &text, uint64_t maximum) {
+            bool valid = false;
+            const auto value = text.toULongLong(&valid);
+            if (!valid || value > maximum || text != text.trimmed() || text.startsWith('+') ||
+                text.startsWith('-'))
+                throw std::runtime_error("Enter a valid unsigned primitive ordinal or GPA resource ID");
+            return value;
+        };
+        const auto resource = scalar(index_->text(), UINT64_MAX);
+        if (!resource)
+            throw std::runtime_error("Private pixel debugging requires a nonzero GPA resource ID");
+        return {{"gpa_event", event_},
+                {"debug_scope", "private-primitive"},
+                {"primitive", scalar(thread_->text(), UINT32_MAX)},
+                {"resource", resource},
+                {"x", location[0]},
+                {"y", location[1]},
+                {"sample", location[2]},
+                {"mip", subresource[0]},
+                {"layer", subresource[1]},
+                {"slice", subresource[2]}};
+    }
     if (stage_->currentIndex()) {
         const auto scalar = [](const QString &value) {
             bool valid = false;
@@ -372,7 +417,7 @@ bool NativeExecutionDebugView::finish(uint64_t id, std::shared_ptr<NativeDebugSe
     const auto selection = request();
     if (session->job().at("action") != action())
         throw std::runtime_error("Native debug stage changed");
-    if (stage_->currentIndex() &&
+    if (stage_->currentIndex() == 1 &&
         session->job().at("options").value("index", Json(nullptr)) != selection.value("index", Json(nullptr)))
         throw std::runtime_error("Native debug index override changed");
     for (const auto &[key, value] : selection.items())
@@ -433,6 +478,9 @@ void NativeExecutionDebugView::render() {
                                               state.at("instruction").get<uint64_t>())
                                               ? " · breakpoint"
                                               : ""));
+    if (session_->job().at("action") == "debug-pixel")
+        summary_->setText("Private primitive replay · original fragment eligibility unknown · " +
+                          summary_->text());
     registers_->clear();
     const auto &raw = snapshot_.at("registers");
     const auto &rows = snapshot_.at("register_rows");

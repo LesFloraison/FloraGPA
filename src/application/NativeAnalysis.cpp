@@ -7,6 +7,7 @@
 #include "NativeComputeDebug.h"
 #include "NativeCounters.h"
 #include "NativeHistory.h"
+#include "NativePixelDebug.h"
 #include "NativePixelDrawHistory.h"
 #include "NativeVertexDebug.h"
 #include "PostTransform.h"
@@ -99,7 +100,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
           "max_steps"}},
         {"debug-vertex",
          {"gpa_event", "instance", "vertex", "index", "max_bytes", "max_steps", "max_trace_bytes"}},
-        {"debug-pixel", {"gpa_event", "x", "y", "sample"}},
+        {"debug-pixel",
+         {"gpa_event", "x", "y", "sample", "resource", "mip", "layer", "slice", "typed_format", "primitive",
+          "debug_scope", "max_bytes", "max_steps", "max_trace_bytes"}},
         {"debug-thread", {"gpa_event", "group", "thread", "max_bytes", "max_steps", "max_trace_bytes"}}};
     const auto selected = fields.find(action);
     if (selected == fields.end())
@@ -120,6 +123,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
             if (key == "history_scope") {
                 if (value != "events" && value != "private-draw")
                     throw std::invalid_argument("Native history requires events or private-draw scope");
+            } else if (key == "debug_scope") {
+                if (value != "private-primitive")
+                    throw std::invalid_argument("Native pixel debug scope must be private-primitive");
             } else if (key == "shader_outputs" || key == "output_merger" || key == "primitive_identity") {
                 if (!value.is_boolean())
                     throw std::invalid_argument("Expected boolean analysis option: " + key);
@@ -151,6 +157,18 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         throw std::invalid_argument(action + " requires a GPA event");
     if ((action == "texture" || action == "history") && !options.contains("resource"))
         throw std::invalid_argument(action + " requires a GPA resource");
+    if (action == "debug-pixel") {
+        if (options.contains("debug_scope")) {
+            if (!options.contains("resource") || !options.contains("primitive"))
+                throw std::invalid_argument(
+                    "Private pixel debug requires a GPA resource and primitive ordinal");
+        } else
+            for (const auto key : {"resource", "mip", "layer", "slice", "typed_format", "primitive",
+                                   "max_bytes", "max_steps", "max_trace_bytes"})
+                if (options.contains(key))
+                    throw std::invalid_argument(
+                        "Pixel debug option requires explicit private-primitive scope");
+    }
     if (action == "history") {
         const bool draw = options.value("history_scope", std::string()) == "private-draw";
         if (draw && !options.contains("gpa_event"))
@@ -206,7 +224,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     const auto request = nativeAnalysisRequest(job.at("action"), job.at("options"));
     // Reserved actions fail explicitly until their parity gates pass. Never switch backend implicitly.
     if ((request.action == "history" && !request.options.contains("history_scope")) ||
-        request.action == "debug-pixel")
+        (request.action == "debug-pixel" && !request.options.contains("debug_scope")))
         throw std::runtime_error("Native " + request.action +
                                  " is not implemented; migration parity gate remains open");
     const auto &selection = request.options;
@@ -228,10 +246,12 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
     for (const auto key : {"gpa_event", "start_event", "end_event"})
         if (selection.contains(key) && frame.entry(selection.at(key).get<Id>()).category != 7)
             throw std::invalid_argument("Analysis event does not identify a GPA API command");
-    const bool privateDraw = request.action == "history" && selection.at("history_scope") == "private-draw";
+    const bool privatePixel = request.action == "debug-pixel";
+    const bool privateDraw =
+        privatePixel || (request.action == "history" && selection.at("history_scope") == "private-draw");
     options.before = request.action == "mesh" || request.action == "debug-thread" ||
                      request.action == "debug-vertex" || privateDraw;
-    options.prepareBeforeDraw = privateDraw;
+    options.prepareBeforeDraw = options.before;
     const bool allCounters = request.action == "counters" && !selection.contains("gpa_event") &&
                              !selection.contains("start_event");
     if (request.action == "counters" && !allCounters) {
@@ -306,7 +326,28 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
             request.action != "debug-thread" && request.action != "debug-vertex" &&
             (request.action != "texture" || options.until))
             replay.run([&](Id, size_t, size_t) { checkCancellation(cancelled); });
-        if (request.action == "debug-vertex") {
+        if (privatePixel) {
+            NativePixelDebugSelection inspect;
+            inspect.pixel.resource = selection.at("resource").get<Id>();
+            inspect.pixel.x = selection.value("x", 0u);
+            inspect.pixel.y = selection.value("y", 0u);
+            inspect.pixel.mip = selection.value("mip", 0u);
+            inspect.pixel.layer = selection.value("layer", 0u);
+            inspect.pixel.slice = selection.value("slice", 0u);
+            inspect.pixel.sample = selection.value("sample", 0u);
+            if (selection.contains("typed_format"))
+                inspect.pixel.typedFormat = selection.at("typed_format").get<uint32_t>();
+            inspect.primitive = selection.at("primitive").get<uint32_t>();
+            inspect.maxInputBytes = selection.value("max_bytes", inspect.maxInputBytes);
+            inspect.pixel.maxReadbackBytes = inspect.maxInputBytes;
+            inspect.maxTraceBytes = selection.value("max_trace_bytes", inspect.maxTraceBytes);
+            inspect.maxSteps = selection.value("max_steps", inspect.maxSteps);
+            data = debugNativePixel(replay, options.until, inspect, directory.filePath("trace.jsonl"),
+                                    directory.filePath("shader.dxbc"), cancelled);
+            data["trace_file"] = "trace.jsonl";
+            data["shader_file"] = "shader.dxbc";
+            save(directory.filePath("debug.json"), data);
+        } else if (request.action == "debug-vertex") {
             dxbc_exec::VertexTraceOptions inspect;
             inspect.selection = {selection.value("vertex", 0u), selection.value("instance", 0u)};
             inspect.maxSteps = selection.value("max_steps", inspect.maxSteps);

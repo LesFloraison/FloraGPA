@@ -172,11 +172,13 @@ bool equal(const Json &a, const Json &b) {
 } // namespace
 nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHistorySelection &s,
                                              const NativePixelDrawHistoryLimits &limits,
-                                             const CancelCheck &cancelled) {
+                                             const CancelCheck &cancelled,
+                                             const NativePixelInvocationObserver &observeInvocation) {
     if (!s.maxRecords || !limits.maxCandidates || limits.maxCandidates > 2048 || !limits.timeoutMs ||
         limits.timeoutMs > 60000 || !limits.maxBytes ||
         (limits.evaluateShaderOutputs && (!limits.maxShaderBytes || !limits.maxShaderSteps)) ||
-        (limits.evaluateOutputMerger && !limits.evaluateShaderOutputs))
+        (limits.evaluateOutputMerger && !limits.evaluateShaderOutputs) ||
+        (observeInvocation && !limits.evaluateShaderOutputs))
         throw std::invalid_argument("Invalid private pixel history limits");
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
     const CancelCheck bounded = [&] {
@@ -495,6 +497,10 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                         retainShader(joined.dump().size());
                         candidates.at(count)["private_output_mergers"].push_back(std::move(joined));
                         ++mergerInvocations;
+                    }
+                    if (observeInvocation) {
+                        observeInvocation(count, resources, invocation.inputs, invocation.samples);
+                        checkCancellation(bounded);
                     }
                     shaderRetained -= invocation.bytes;
                     retainShader(output.dump().size());
