@@ -1067,3 +1067,15 @@ disabled-stencil fields without weakening numerical or historical checks. See
 `research/DX11_NATIVE_PIXEL_MERGER_SNAPSHOTS.md` for retained failures, the
 interrupted run, precision limits and reproduction commands. Complete merger
 integration, original fragment eligibility and P7/P8 acceptance remain open.
+
+## Private shader and merger integration continuation
+
+Private history can now join observed output bindings, measured raster inputs
+and owned PS execution at each before-primitive checkpoint, then compare the
+selected-sample merger result with actual private GPU storage. The complete
+suites pass 868 checks; 102 owned and nine real reports validate, including 36
+real primitive predictions and 30 blend/same-value-write integration cases.
+Two complementary validators reject 2,061 corrupted reports. See
+`research/DX11_NATIVE_PIXEL_MERGER_JOINS.md` for exact scope and reproduction.
+Original fragment eligibility, full sample-depth and early-depth semantics,
+public Pixel History/debugger parity and P7/P8 removal acceptance remain open.
