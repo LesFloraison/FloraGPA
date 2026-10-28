@@ -1224,3 +1224,16 @@ The complete lifecycle matrix therefore remains open. No live debugger object
 is observed, and neither shader-debug parity nor product/release acceptance is
 claimed. See `research/DX11_DEBUGGER_HOST_ENVIRONMENT.md` for exact scope, failed
 attempts, module observations and reproduction. P1/P5/P6 and P7/P8 remain open.
+
+## Minimum-precision texture load continuation
+
+Native VS/PS/CS execution now supports minimum-precision non-MS SRV texture
+loads for all five existing load dimensions, preserving coordinate operand form,
+destination precision and unknown storage validity. The explicitly selected GPU
+executes both coordinate conversion and the original load inputs; no universal
+CPU truncation rule is assumed. The helper identity advances to `dxbc-gpu/22`.
+Ten suites pass 3,766 checks without failures or skips. Independent validation
+covers 180 fixtures and 7,200 direct GPU comparisons on WARP, NVIDIA and Intel,
+rejecting 54 corrupted reports. See `research/DX11_NATIVE_TEXTURE_PRECISION.md`
+for the retained development failures and exact scope. Minimum-precision MS/UAV
+loads, full debugger/history parity and P1/P7/P8 remain open.

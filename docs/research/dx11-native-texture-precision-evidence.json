@@ -1,0 +1,1793 @@
+{
+  "schema": 1,
+  "scope": "native_minimum_precision_texture_load",
+  "passed": true,
+  "fixtures": 180,
+  "direct_gpu_comparisons": 7200,
+  "full_debugger_parity": false,
+  "renderdoc_removed": false,
+  "negative_controls": [
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        0,
+        3,
+        0,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        0,
+        3,
+        1,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        0,
+        3,
+        5,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        0,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        1,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        32902,
+        3,
+        5,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        0,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        1,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "bits",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "validity",
+      "reason": "GPU register result"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "unknown",
+      "reason": "Unknown texel versus out-of-bounds validity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "backend",
+      "reason": "Selected helper identity"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "missing",
+      "reason": "Complete address/output matrix"
+    },
+    {
+      "case": [
+        4318,
+        3,
+        5,
+        1
+      ],
+      "change": "code",
+      "reason": "DXBC identity"
+    }
+  ],
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-0-1.json",
+      "bytes": 64262,
+      "sha256": "8865fb21392959b13e8052be1d3a7bfefad14872fe1bd23f19cf5ef408677014"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-0-2.json",
+      "bytes": 64262,
+      "sha256": "ba38afb409a71d980535d6336ae4aef67469ae4212d5e4525723949e9bed2238"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-0-4.json",
+      "bytes": 63494,
+      "sha256": "35a60b321d0cede857ce04b9603c36ce884aa8c4cdc52f2d40c7020573a22ff3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-0-5.json",
+      "bytes": 62534,
+      "sha256": "9286cc79e374c73d5d87a33069d56aa7128e8968403abc5b5826014ea3fc4c94"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-1-1.json",
+      "bytes": 64262,
+      "sha256": "0b55e9d4c547c3ce804d3fbc4f27cefac2955fd8cbdbbab94d4ea453df002e40"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-1-2.json",
+      "bytes": 64262,
+      "sha256": "11f333fb69d157f1288611304a9a617a9bf679f5030c5f6dadf76444d47118c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-1-4.json",
+      "bytes": 63494,
+      "sha256": "3e33d6c30e5c79695002d4d0410205c7343a08b154d09c9e99efa58883951dc2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-1-5.json",
+      "bytes": 62534,
+      "sha256": "7587fc4f1340b3d2e507a2eab8c79f1485313816844db0c8f941bf3397113f48"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-5-1.json",
+      "bytes": 33900,
+      "sha256": "6765d62cb1f3ac5c313bfc0d920246fecdaf5b508a02b134f96cf315e4f1114b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-5-2.json",
+      "bytes": 33900,
+      "sha256": "babfb25bb645a200ec254a4ccff9110ad7aa8f8353fde142471bcd940ef28672"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-5-4.json",
+      "bytes": 33516,
+      "sha256": "2295227d90d3631d4d081a71c0e4556185e883b012c693f846631a60cb8dc8ee"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-2-5-5.json",
+      "bytes": 33036,
+      "sha256": "d831ebd26ea3ef05ecba41ceefe8f68a58b6edd16a55b4afa52bb606ab80caf8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-0-1.json",
+      "bytes": 64262,
+      "sha256": "1c5e86ad4aebfa23558d0a0412646f9a323eec8b09d26eca1815d31f34a9b9dd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-0-2.json",
+      "bytes": 64262,
+      "sha256": "1739444eeb1de4118df8df60e6d5e9e46dace37a9ee20d0f98914845161b08ee"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-0-4.json",
+      "bytes": 63494,
+      "sha256": "5dc31316781f1b99f946054cd6aab64943b59c811d339c9e8ec2c5e148fb646e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-0-5.json",
+      "bytes": 62534,
+      "sha256": "aeedbe1cf961545f060e60bd53b0d6cde1a777f1ebc1d9da96571d0ca3c6f824"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-1-1.json",
+      "bytes": 64262,
+      "sha256": "3307f1a732434a38c01f1fb99ee6675a94ff83a34b2b890582a2051c44e8430d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-1-2.json",
+      "bytes": 64262,
+      "sha256": "ccd96ce8390edd08988ea6e6afd0a8bddfe02b508f149986abe2dd6e283a751b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-1-4.json",
+      "bytes": 63494,
+      "sha256": "8256798d9e2123974ec4e92cd05c5628f473437bf671323395d2353b5a12dfde"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-1-5.json",
+      "bytes": 62534,
+      "sha256": "c652550f0c69b2c8275d99091540df700ee1d953e89274b27b93e8f1dc015dfe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-5-1.json",
+      "bytes": 33900,
+      "sha256": "c84a0e1b3edd3f6c2b1bfec7733c0b83af40c0e22e092984780b5b48ecbb38f5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-5-2.json",
+      "bytes": 33900,
+      "sha256": "72a67ab0203d553421bfa0ea4d985282fed36875232aac980ff584d852acd3ff"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-5-4.json",
+      "bytes": 33516,
+      "sha256": "a8ee65bcc456dca6ebb9d48bac07222b53222300876b86130171c41a1275498b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-3-5-5.json",
+      "bytes": 33036,
+      "sha256": "699e3ca6cab9510f9abdb8542024a23cb91148a056f39af1cd5b7e07761ac6ae"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-0-1.json",
+      "bytes": 63410,
+      "sha256": "c5a7675260a875d89af4adad03f368d9292c1e7a25ce7e410a9033d441a693f1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-0-2.json",
+      "bytes": 63410,
+      "sha256": "3d3b26471f7ccdadc272ebd732c017ee5407e13b7f260afb12ad6c4821c83adb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-0-4.json",
+      "bytes": 62642,
+      "sha256": "0a3bdb4f7ba0ff94ded390dd808612bf8817457642093a635b628f9db851666a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-0-5.json",
+      "bytes": 62162,
+      "sha256": "00d190dc0e597b21df64b7579325e88aad115f009cd5f82580b6c977299d2314"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-1-1.json",
+      "bytes": 63410,
+      "sha256": "c7634ff4250efe4eea3cc94bf712a2857c94ff86b5ab1d854615a24017563901"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-1-2.json",
+      "bytes": 63410,
+      "sha256": "7eaf6e6decebc49fd428b64d23060494c354cffe1a47306a2e03c57b3d832a89"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-1-4.json",
+      "bytes": 62642,
+      "sha256": "a492185be6af87d4e2b4311cbef6368d1d94f9f80b1479f23e00a66917b0d2be"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-1-5.json",
+      "bytes": 62162,
+      "sha256": "04c161865fb4df45e86b81ae77768c00a83ab7fa370d7cc4907bfbb89e561030"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-5-1.json",
+      "bytes": 33474,
+      "sha256": "15cc402d18d8836ee2b4aebd07433f8e28ad9e4e8ff011da2f494312d57745ca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-5-2.json",
+      "bytes": 33474,
+      "sha256": "46db6147d36d337958a0876a9aa318fd4b9beb46b3552c07a20abdee7d3ca419"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-5-4.json",
+      "bytes": 33090,
+      "sha256": "86bf052eded7d017548fcc2483401ef3c782c54fe31d8c57987e748d8414c822"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-5-5-5.json",
+      "bytes": 32850,
+      "sha256": "dd041fabc91045068e45667bfb2cc8ba040dcc2f0a49d6b3dcbc109acdf87025"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-0-1.json",
+      "bytes": 64262,
+      "sha256": "fe1e14ac6527c3aac459d63b02f2244ab9dc56934fefb7a6923bf86815662709"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-0-2.json",
+      "bytes": 64262,
+      "sha256": "da0a6c251d9a71d19ebde3c855e37a8e1fcd3ccb78708870eea62196b0e62f8a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-0-4.json",
+      "bytes": 63494,
+      "sha256": "0ac9f2615b9211bad38eac8e9cfe28116ebdc654ce1b9edefb73144df2954b6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-0-5.json",
+      "bytes": 62534,
+      "sha256": "ef64022a2dfa7b703318c8285d3c4c01d16ec65bfd5d64f3ca33c6a8ddce5c43"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-1-1.json",
+      "bytes": 64262,
+      "sha256": "ff8f251a640804d18c4a9b7d5301e3171a799bf4559e8d23061e128347067b2d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-1-2.json",
+      "bytes": 64262,
+      "sha256": "596155a31f6b72cdaeb87fa2ea43abe0c9049838f5f12b37d9b8d4bd31747842"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-1-4.json",
+      "bytes": 63494,
+      "sha256": "0ae1e28bb566b8ba79acaa97ec13f812510cf0fa60447b63ad137ea27addab2f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-1-5.json",
+      "bytes": 62534,
+      "sha256": "117449a248247b7eafbdd9af1fd887a74ec1caa577434d87fef12f3cd60a2e7e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-5-1.json",
+      "bytes": 33900,
+      "sha256": "d945af3baea88f411af9c8fd9a31f7fc99c2951616b4aa288cbfb103c905bd21"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-5-2.json",
+      "bytes": 33900,
+      "sha256": "d9c45f9a5d39b18039aa05f2080ae53ad63d6f2c81eb78e115045cb6ee0b3d7c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-5-4.json",
+      "bytes": 33516,
+      "sha256": "8cc925362ab012e837d4ea04ac483ed59e8697e1062682eff090bf9a7d0beb00"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-7-5-5.json",
+      "bytes": 33036,
+      "sha256": "5c009330d6af88bcfd16fb7a04d8c6d37d39a7e5564e71922abe536facde5c53"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-0-1.json",
+      "bytes": 64262,
+      "sha256": "ea8b8105967ab3abb28150478cfeca150ff90611660e56313e177ef956441064"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-0-2.json",
+      "bytes": 64262,
+      "sha256": "b1592d0df7ea5d0c08b930ea6d6b15b825985abd7236ed1f97b4e16728631bb3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-0-4.json",
+      "bytes": 63494,
+      "sha256": "1efe33f7d7ca1dd9b698358d84efdd9cf8ed13f660e357854ffa6f209bf09cbd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-0-5.json",
+      "bytes": 62534,
+      "sha256": "ff2f7a62afaa713ba2c75342fc24b69b091cf3fc985dfcfce7f69b6f35394d44"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-1-1.json",
+      "bytes": 64262,
+      "sha256": "689ef6088c1a6e5c7848226f96dcf9b32e9ba6bdbe74dfcd8cc343f520383e7a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-1-2.json",
+      "bytes": 64262,
+      "sha256": "5e74aaaae7f60238cea03b4abbc801876a3bf5b86dfa948af4e20a73bed0151b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-1-4.json",
+      "bytes": 63494,
+      "sha256": "cb034f3847d0701dcbda982efa7332eef096acf529239584672c877f5479ada3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-1-5.json",
+      "bytes": 62534,
+      "sha256": "4ef85405acd6b12509333961649eb562a2a3ba20c3a1e6a20346365cfe0a22c8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-5-1.json",
+      "bytes": 33900,
+      "sha256": "82ec78802563512bbac0ae27c8bd6344586f931d04772c597a1339920fb6fac1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-5-2.json",
+      "bytes": 33900,
+      "sha256": "3389d2e0903cacadb11a1123c8a23b7ad2577cae8f9db4710d25d1bbbde22308"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-5-4.json",
+      "bytes": 33516,
+      "sha256": "1619d1259b3ac5f6ae13be9d2e2b5ce1dbf91e291db8522855711c3c645c967a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/0-8-5-5.json",
+      "bytes": 33036,
+      "sha256": "1bce6b1c6c0bc07992014a127c6939a5b159a059b27cb368d8c5aac0093ecf5d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-0-1.json",
+      "bytes": 64270,
+      "sha256": "fa6fb167f704bbdbe74d32f91a53afd15ad80f972d604ee2f9110069310894fe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-0-2.json",
+      "bytes": 64270,
+      "sha256": "7e658b1d95eec12992327c5bae8b5f903b3a21e88040dbce2b4eecfec50f0b5b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-0-4.json",
+      "bytes": 63502,
+      "sha256": "f034d4ab1195baffb437512f80a3c57fe73ffdbbbb1f82e7a2043201e8af8a65"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-0-5.json",
+      "bytes": 62542,
+      "sha256": "618f5c9e5b85c2a5af6d55189453c8f856e39741b92f19e84a0dd1e287e05121"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-1-1.json",
+      "bytes": 64270,
+      "sha256": "f130212007e30c684e87055116ea47370a06a98a8872c8ab95c42fdcc5cc60c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-1-2.json",
+      "bytes": 64270,
+      "sha256": "bf9e467e4f41c584c2aaa148db875f4ce97194d645214c3a65ae037770fac3d6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-1-4.json",
+      "bytes": 63502,
+      "sha256": "a061aeb965a1298648381350996573038e50f534037fdff99573a66d361dac61"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-1-5.json",
+      "bytes": 62542,
+      "sha256": "d4f28222692721a767ddff98566a39f0d4b049e0bcf5928b81288328205e2f4f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-5-1.json",
+      "bytes": 33908,
+      "sha256": "a69f2056777ca1650cbacd073c75601b2f912a721fe3dc332da1850698b5302f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-5-2.json",
+      "bytes": 33908,
+      "sha256": "4f310401e3bd0f1e33d70545e0eda8d03bbb9e16dbb6b7703c3565f10a7aa487"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-5-4.json",
+      "bytes": 33524,
+      "sha256": "bce6ab5bd4a8431346c43bf1cf89db91f3dbf3846a1f5ccaa4550cfe4d54ce57"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-2-5-5.json",
+      "bytes": 33044,
+      "sha256": "d9f48db3d41180c939661db5c8322205301c4553d66b42dc9890e91744c48c6c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-0-1.json",
+      "bytes": 64270,
+      "sha256": "adb6ccdd04c828984ce4412e642fbc37eee65da0dc5391fefe9356aa95c7979c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-0-2.json",
+      "bytes": 64270,
+      "sha256": "eb4ec1e665f2e49d7fff54241241afc966ad7b8d1a75d8d633638d827b8ccd88"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-0-4.json",
+      "bytes": 63502,
+      "sha256": "b7ae387c50d05c75a0653db31165deffe1a82c3dc7bd34dc6c4a7d2f6453e56e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-0-5.json",
+      "bytes": 62542,
+      "sha256": "835e5a1df52652f340ccdb2411a529dd76ef6b046f36554eca7d75c1520613b8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-1-1.json",
+      "bytes": 64270,
+      "sha256": "1ab8206f9da917239be48ac8eb7d5472afde493a689cc38d80aa4acc45809417"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-1-2.json",
+      "bytes": 64270,
+      "sha256": "f49620a2e26021338648799d78a5891ef05b304e786d97b9094258b704e84d15"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-1-4.json",
+      "bytes": 63502,
+      "sha256": "e75d62f98184f5018841cd08bed9590204f4302796ede4e0f2515bd5dccfca62"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-1-5.json",
+      "bytes": 62542,
+      "sha256": "4b7611f734370f0e7d90f98a433f2e69bc55dc1409e4d713e4e700b2a1a55741"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-5-1.json",
+      "bytes": 33908,
+      "sha256": "6b72fea898855ff7ec4fd6eef64428a95974c7c93ae8a6f7fc0ba6bd6dc4d376"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-5-2.json",
+      "bytes": 33908,
+      "sha256": "76636d023d9d002ff28e0bba5d8df17f47f61739bb60f831c314ca3310fca131"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-5-4.json",
+      "bytes": 33524,
+      "sha256": "25cc83cdabf35c86ff24b26799fb8146712a3c2ae50ee991f4e1b7550bd5fa10"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-3-5-5.json",
+      "bytes": 33044,
+      "sha256": "d80e048630d6aa6855a738537dc67ccd974fec6a1c1585a31bfc4a807cda065d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-0-1.json",
+      "bytes": 63418,
+      "sha256": "b373d83eb1fba28b7af8b0bac5924d7e268e0839493e7aff67d1c8a555098c08"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-0-2.json",
+      "bytes": 63418,
+      "sha256": "649c3565653613a80034a4bde5a53f87a0a7c4ac53f6031dd72234a8e5dd438f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-0-4.json",
+      "bytes": 62650,
+      "sha256": "1344fb803c2b4bd9aaa99016b3ecc70854b60e1a1ada5acd514975dc0cc4c49e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-0-5.json",
+      "bytes": 62170,
+      "sha256": "61efcd7200063062c18c3da5637ad519202acbd1255d7d8f5e760d6e78f3e95d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-1-1.json",
+      "bytes": 63418,
+      "sha256": "86219272ef697696f6bf7b2f659ce3c278504fdba18987b08d02f147dd52eebc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-1-2.json",
+      "bytes": 63418,
+      "sha256": "e8ab6200d672839f82093c34e33c28df0d3e76fc4a71f6c67d7dcdf2ece96d5c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-1-4.json",
+      "bytes": 62650,
+      "sha256": "5008897c6e1b584bc9a3ee22d9468627bd684f5739314510c34e0dfa03cd4e14"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-1-5.json",
+      "bytes": 62170,
+      "sha256": "2694ed3e87283ea2718fccd01e3d59fa19d3f7d3dba13f351d614817830182b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-5-1.json",
+      "bytes": 33482,
+      "sha256": "00629c1a563edaf30004d3659fdc52a30942b6ab4af5bfc59d22f6f68a030be1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-5-2.json",
+      "bytes": 33482,
+      "sha256": "6bce62cbbecaf8ee54ba0d2a7e9dcd02cc2489c95b65f161aa8a2b99ecb8f9f4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-5-4.json",
+      "bytes": 33098,
+      "sha256": "6d2f314a7a9526d0128fadbd8db769445460fe6065f523df83df944be7c08bb9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-5-5-5.json",
+      "bytes": 32858,
+      "sha256": "2b92b36dfa7644d308e43b7f192ca0c2fe6a2c05f90ccd74002348e90e1a86e9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-0-1.json",
+      "bytes": 64270,
+      "sha256": "41db37baa1b1e1a5f0c7d7fd359933119ff3b7eea4d647eef564c97284c3922f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-0-2.json",
+      "bytes": 64270,
+      "sha256": "c0a5e607f65a406849180b6ed94d82c60aaf7360e0225cb865495e00e48dc795"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-0-4.json",
+      "bytes": 63502,
+      "sha256": "2a4fe9e0ede3f786f117d144c8bcabe3d1a2cd89098622491cfe92f139c93d95"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-0-5.json",
+      "bytes": 62542,
+      "sha256": "b93761324d6f1b20d1238e47cf09744d9610b74eb221b98139a37eb560ceba64"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-1-1.json",
+      "bytes": 64270,
+      "sha256": "cc9acb8fc08c8daf18868c6667b0decc0a8be20277e2b15f2b044e8cc4d14360"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-1-2.json",
+      "bytes": 64270,
+      "sha256": "40505c66e7c56321cac69d098d06e9e95216cafd4485fbf52b6e95276c501821"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-1-4.json",
+      "bytes": 63502,
+      "sha256": "b060e718e7dff32f5a9c841ad82db2c81ea3725b5f563851934c33448e60b214"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-1-5.json",
+      "bytes": 62542,
+      "sha256": "93b022fa2e7929b3717cddb09bea9e989e77dfe7958e88a38ab875d79f86c700"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-5-1.json",
+      "bytes": 33908,
+      "sha256": "f1b24a8831a1c1190629fb60326e59e3876786f3e94489e8f1bfedb71f89a7dc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-5-2.json",
+      "bytes": 33908,
+      "sha256": "389adf8b18e5e8fa5f4046866644cf773215f9b4ae4afe7efd32ba43eb18df1d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-5-4.json",
+      "bytes": 33524,
+      "sha256": "eee4aaf8ea29b54cdff01eb5820e849d6cf2abc0029392e0fedb9fecca3a4f47"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-7-5-5.json",
+      "bytes": 33044,
+      "sha256": "ed5637a5f8017d9726d21bdb21ee2a9aeed17770502be3ed2b94c1a7a556cb9c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-0-1.json",
+      "bytes": 64270,
+      "sha256": "1b86f649da39f68512148e266f68c9657d5deda86e8d9ad4258d4ec0b72d046e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-0-2.json",
+      "bytes": 64270,
+      "sha256": "bec4d62231f6a97d1a30c7954d613c9655840f3a26d58dfb61f0a732d486768f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-0-4.json",
+      "bytes": 63502,
+      "sha256": "6b251bbe030506380ffd8b81613936e9891adc18a31ff52c9870fa98b7651079"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-0-5.json",
+      "bytes": 62542,
+      "sha256": "055ced84cf7ebe5cf0a8cc53355f21b4f36270f8a38cd7a8c2f980528d858dce"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-1-1.json",
+      "bytes": 64270,
+      "sha256": "e0248de24ba67df164bcf57cf36c841f929f4482107aa8c59e7e2b8d2f1f559b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-1-2.json",
+      "bytes": 64270,
+      "sha256": "50559f871e0ed5e99a6fe45c7cc08ba85f3d458ae59a6d1f69bd9fc70a343c76"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-1-4.json",
+      "bytes": 63502,
+      "sha256": "099cef94559d2f64b5526eb42cd50c045e03e8f62df6653a8e4a3ec694379f8a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-1-5.json",
+      "bytes": 62542,
+      "sha256": "d057a41ae37118b688b8870cb9d31f249c83f5035bb57f4dac14694771fe6504"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-5-1.json",
+      "bytes": 33908,
+      "sha256": "21243c5d9602ad3dd55ce15e06893f64e4c002b5cc9effe56f91c73286f33bd4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-5-2.json",
+      "bytes": 33908,
+      "sha256": "8e05d0b35579c3ea6024d31be19c9f9e882f26a4d19fb54d04303e05064c2824"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-5-4.json",
+      "bytes": 33524,
+      "sha256": "6bef1ed810bec9e78bad0a9f797bf431197ddfb813aea147410cda99aa791d14"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/32902-8-5-5.json",
+      "bytes": 33044,
+      "sha256": "29e3e1faf97889a1fa59c65f8ebebe4f81dbec72b5ebe14ecf0ff7abdb230437"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-0-1.json",
+      "bytes": 64268,
+      "sha256": "5395c1ff4b79d02e5837e1a0c4f28bd9ddf995279da40597b492bfe90a590bba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-0-2.json",
+      "bytes": 64268,
+      "sha256": "36690d07f5a22babd9b39b5b0556b6798177d949c8ae6a1275b16de4d433a862"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-0-4.json",
+      "bytes": 63500,
+      "sha256": "b97e5003093556fe42f42c72e59ef6873d2409c43fcb18e74efab28e768bc824"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-0-5.json",
+      "bytes": 62540,
+      "sha256": "d29ffbdbfbc3a27a9bee0fdb3399a3a775bfcf14d64bf2377bd8f45299a8b7b5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-1-1.json",
+      "bytes": 64268,
+      "sha256": "8b6c123b8f09cff8677aceba54d766d67fdc8636f66791a97764e333cf3edb05"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-1-2.json",
+      "bytes": 64268,
+      "sha256": "04eaa27f36437eb0862de66a0f990ce7542db915c45b1371582f349b295e751c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-1-4.json",
+      "bytes": 63500,
+      "sha256": "957c5ca2d41abdfcded1edda19976b503b067185eed6c259d10946a9d2eed981"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-1-5.json",
+      "bytes": 62540,
+      "sha256": "2cf17437ab36a58f16e27d14d36e789cd88ffcbb68a72bf1c6e00fa2536270a0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-5-1.json",
+      "bytes": 33906,
+      "sha256": "e5d9612ce5218bcf1254ff89430c50e36d63a2adb993c7ba21054c01721ab1c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-5-2.json",
+      "bytes": 33906,
+      "sha256": "be8d9fc0e77a23fca2e81ed53a8ea0f30e27653bf72eade502271bf886c31edb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-5-4.json",
+      "bytes": 33522,
+      "sha256": "b4e6f13f0cfc6b0286786a5a5272ad35ca709fe9d048a652d7ee1e77a8f7e47b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-2-5-5.json",
+      "bytes": 33042,
+      "sha256": "f7f5790b5131d668d2c9f322ba520ad0c3379d19b8db133adbd9148c5eaa2675"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-0-1.json",
+      "bytes": 64268,
+      "sha256": "bcb66bd040c51ca448c3dbd304dfae30ab962c5fba7ef1d347f57a8c1c192e51"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-0-2.json",
+      "bytes": 64268,
+      "sha256": "a2cdde1c1687e9d79598a0d5b07176d961efb30d947b2504b9f694d4e54dd3a4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-0-4.json",
+      "bytes": 63500,
+      "sha256": "a7f62580b1ed1b9ba480dcac7790e27da846989fb354227b08199fd29931ea83"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-0-5.json",
+      "bytes": 62540,
+      "sha256": "0bd5c0c7cb8a18db6689b57905e3bd533bfd0319f1acd079019c81aaa98a87dd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-1-1.json",
+      "bytes": 64268,
+      "sha256": "99a3c3a9a7ddbb7879c821af4e8e4b2a10ef46755b032e19d6cc299094389e03"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-1-2.json",
+      "bytes": 64268,
+      "sha256": "d02182f7bb978de5994d1d05e62c11dfcbc497e6b8d1921a065fd4b331d9c41d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-1-4.json",
+      "bytes": 63500,
+      "sha256": "cbcfd4af5edc6cf1fb350ccb6d0054064be6eb72c656fff5a14819b5b452a4fe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-1-5.json",
+      "bytes": 62540,
+      "sha256": "7bc73c21c955a6fb9729bf5597c79723f8933080732f9f4021f80e249a6cc306"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-5-1.json",
+      "bytes": 33906,
+      "sha256": "43aff00b16a93109d168b37a9b304b884dad364fa7f47ead150496e177741a8b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-5-2.json",
+      "bytes": 33906,
+      "sha256": "ecab8c3bb03416866aa910d9b8ba1d72506a7a36d0058ee601569446609f7fe5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-5-4.json",
+      "bytes": 33522,
+      "sha256": "f18f378cce0373a367c21b3a8e4fca3653c1162a50b41e0ad2693978a7ec9f2a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-3-5-5.json",
+      "bytes": 33042,
+      "sha256": "faca5faa02cd2ef90bbb8e4b9ff6a7f375e158c382f4f7077d9c313d6efd0a6e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-0-1.json",
+      "bytes": 63416,
+      "sha256": "df8585ae0030e6e76fe91864b7b1e4cedd8cba324658ceffee9f6b327e7004a9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-0-2.json",
+      "bytes": 63416,
+      "sha256": "d1148dfef6e18b7db090619125bf0151509ca3c440681462c45042674221f221"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-0-4.json",
+      "bytes": 62648,
+      "sha256": "55c76a10bd31c7818fad18ec816bf0f98439c2fece6b4cf0d42d1cd084e5db07"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-0-5.json",
+      "bytes": 62168,
+      "sha256": "b6a69c11e280c34eb707c8672ff565ffd9683fdbd5cac194a0c5415c76609fd2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-1-1.json",
+      "bytes": 63416,
+      "sha256": "28f7ec756503edd2d398e5072fb02ca790011e9b50b44157bac03464a2a75bdb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-1-2.json",
+      "bytes": 63416,
+      "sha256": "f461eaeb1292e29bd95d574a878738a806e20c61db1125f90ff8fb45be85e852"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-1-4.json",
+      "bytes": 62648,
+      "sha256": "5b7f07ada995292fcfc9d396ece8488a359d7a6235864d4e69bce6150901867d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-1-5.json",
+      "bytes": 62168,
+      "sha256": "23e34c775f295e8f3ad6f1a42a2b27603a6ff78cd7daa083108844ebd8750a2a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-5-1.json",
+      "bytes": 33480,
+      "sha256": "35bd989ddf19beb76f84985ffed5744cbdc5d17ad8a216ef652b2dd678cdc12c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-5-2.json",
+      "bytes": 33480,
+      "sha256": "7cba7b39134a7f3012ac68830d38fa47daf15f973ceb953c65ebe9034f0821e6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-5-4.json",
+      "bytes": 33096,
+      "sha256": "ceda1661d67a31410a4cd736305cf13275c8de46d72afc001f7822050665573b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-5-5-5.json",
+      "bytes": 32856,
+      "sha256": "8516ce34c5e260abb618cff704372c07dd13c5622cfdb2273ae689ee0e4551ba"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-0-1.json",
+      "bytes": 64268,
+      "sha256": "2cf919b628b3f488a7b8082a705aed22f9f7bffc447411a2ed302d008b9340f3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-0-2.json",
+      "bytes": 64268,
+      "sha256": "7d30a5ca3395ac0d4dfce08ded47aacafde8c71d36205b399cb517f148fdbc38"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-0-4.json",
+      "bytes": 63500,
+      "sha256": "cbc2502ba176a8bb352d863f8a492d4feb95b46eada0d910f070de522d74b1ca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-0-5.json",
+      "bytes": 62540,
+      "sha256": "e3187cc0e7bf9df8cec9ac50225584b53b84344e2f07ae0855cba2050175000f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-1-1.json",
+      "bytes": 64268,
+      "sha256": "66df65688121946bc911b5600003ed96cab4c97067cf6747db207cc15ffd6d5e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-1-2.json",
+      "bytes": 64268,
+      "sha256": "7b94f8253dd571f59a95337b7b18b43f644b2cbc15158b6c6c03af28b9d507ee"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-1-4.json",
+      "bytes": 63500,
+      "sha256": "e4bc5f086703945cd37329ca62b4e53b8f192e53162c604f71ae6c28fdf8ac2c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-1-5.json",
+      "bytes": 62540,
+      "sha256": "b4834337be1e847cf4653dc03b438db8d90d2940d06cc1356e01f15b6e47bfe8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-5-1.json",
+      "bytes": 33906,
+      "sha256": "28c4008cf2526664043fc699a7074ac854efee2fd6be61635ee13473fd0cc5af"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-5-2.json",
+      "bytes": 33906,
+      "sha256": "f7df03f855fb906ef0abe471f5ed254d71295c9a175add1cb8561750a8ab6869"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-5-4.json",
+      "bytes": 33522,
+      "sha256": "1751e7f626f00628614a330874eb582ea3ad315298d4cce623a8e5b428c03861"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-7-5-5.json",
+      "bytes": 33042,
+      "sha256": "e9c4128f182d6d6c510865bd725c50d9b8257dba39ddbcf476010356a5b07f55"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-0-1.json",
+      "bytes": 64268,
+      "sha256": "b5b12cae160a6463e0d5181443ded43f9fd288a0006ba06f3f5cbc29ff6270c2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-0-2.json",
+      "bytes": 64268,
+      "sha256": "6a1813595a20508ddcc14abe35b6d4cd65d9cf56b324ba9c3153458e5ecb329d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-0-4.json",
+      "bytes": 63500,
+      "sha256": "517ba4caeabc7bd16f363ba7b93f56c8679c306ed37ff5c95ff4deb1a7534c7e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-0-5.json",
+      "bytes": 62540,
+      "sha256": "ac8d22bbfb146c793560800d53b19381a43d913155f8d7d6715baaec149e921f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-1-1.json",
+      "bytes": 64268,
+      "sha256": "4fa779aa3269efeed18594c1dbcf1facdb0bce2ab6a699a5e85b823b6fdf7ae2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-1-2.json",
+      "bytes": 64268,
+      "sha256": "7eb73e23ce044e8159002d30edb3810092c069b5a646aee38089a2d116f66a9a"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-1-4.json",
+      "bytes": 63500,
+      "sha256": "e9f2793d44589be2e0c1733129119b3b07be1ed202ee05d863ea22cfcdf6e5c8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-1-5.json",
+      "bytes": 62540,
+      "sha256": "1e03036269244a84b3261d4df05adcdb08a67eff14b80c6b8e3d983cdaaf33b0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-5-1.json",
+      "bytes": 33906,
+      "sha256": "53317ff036f20bb6f7eb0838b8446b578630e02a47624497927768f07a1da1b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-5-2.json",
+      "bytes": 33906,
+      "sha256": "f2dde9abd7d394f3a01af2899811b42ce09d2d0ebfda56bd1cc12b3517687890"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-5-4.json",
+      "bytes": 33522,
+      "sha256": "3b318966ddeff749dcb388d2124f6c7266237b6626c80e831ef7223190d0b029"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final/4318-8-5-5.json",
+      "bytes": 33042,
+      "sha256": "e5d7144c57443f009ec1eb1c75088786466de66e5a9de2bbd9a7cfc6878b52c6"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-texture-load.txt",
+      "bytes": 887518,
+      "sha256": "0c5a883cdcc9aaef941e7fba4401e881dd491ea8e96fb4eca1ed4fafa375a378"
+    }
+  ],
+  "sources": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcExecution.cpp",
+      "bytes": 93546,
+      "sha256": "ee0de83b5969e0ec028ca718e9c751cf917a4945edb1f37429fb7fd80a0d1465"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcTextureInputs.cpp",
+      "bytes": 26811,
+      "sha256": "ceeb32fa621877aa8bb843352ce7bbfd49a713d1f3486cb10d4ac0ff642d63c4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcTextureInputs.h",
+      "bytes": 6440,
+      "sha256": "9a37b62fb807a0097cc8f417669d18ffad46b03a9760bc9ebf4fe2aac62b8682"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcGpuOperations.cpp",
+      "bytes": 110136,
+      "sha256": "51556415e9837200a57528ebd3afed13b2f0dbeb0716a6a728ae9c3ef893042e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/src/application/DxbcGpuOperations.h",
+      "bytes": 5450,
+      "sha256": "ec9d4eaf72f677b106ccd39d9f9bd94cc2d2acbd37a7a54685d6bd5880957303"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tests/DxbcTextureLoadTests.cpp",
+      "bytes": 47033,
+      "sha256": "9bf01ff4e75cf0f95f2298d9567cce8c9e9fa79525086b3c6015a84042e4efa3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_texture_precision.py",
+      "bytes": 8704,
+      "sha256": "a65ce13dae7d2a8d926e1c53c8387564a46a38a0d2fe580e7fa52192de6bc8cf"
+    }
+  ],
+  "regression": {
+    "suites": [
+      {
+        "suite": "dxbc-execution-trace-reader",
+        "passed": 64,
+        "elapsed_ms": 423,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-execution-trace-reader.txt",
+          "bytes": 4509,
+          "sha256": "c73d08919e719071264bb5e420952e877bd86b465272517eef965d2603ae903a"
+        }
+      },
+      {
+        "suite": "dxbc-execution-trace",
+        "passed": 21,
+        "elapsed_ms": 807,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-execution-trace.txt",
+          "bytes": 2781,
+          "sha256": "d28bed75a884f41edc8dbfab239089540e37cc22820278a9181f5dcfb7ed5ae0"
+        }
+      },
+      {
+        "suite": "dxbc-execution",
+        "passed": 1175,
+        "elapsed_ms": 104392,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-execution.txt",
+          "bytes": 688512,
+          "sha256": "ea1c7a7580330a3d34d7e946342f960a672893a2fa84df0e1d12ce3956003969"
+        }
+      },
+      {
+        "suite": "dxbc-pixel-sampling",
+        "passed": 186,
+        "elapsed_ms": 428595,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-pixel-sampling.txt",
+          "bytes": 82936,
+          "sha256": "d5ecc632a0e31621455c726e564e1ad216f8ec264dabf819ccb4d09e67800043"
+        }
+      },
+      {
+        "suite": "dxbc-sample-comparison",
+        "passed": 190,
+        "elapsed_ms": 124878,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-sample-comparison.txt",
+          "bytes": 77861,
+          "sha256": "19933f0546479b162b9b98b78724f146fbf4649ff9f50f64e50828b92cf991a4"
+        }
+      },
+      {
+        "suite": "dxbc-sample-grad",
+        "passed": 262,
+        "elapsed_ms": 87532,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-sample-grad.txt",
+          "bytes": 135975,
+          "sha256": "1ee6705727d4aa01bdf5930e002929624645fe8ffe7b317779c81a720b9494e9"
+        }
+      },
+      {
+        "suite": "dxbc-sample-level",
+        "passed": 156,
+        "elapsed_ms": 85723,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-sample-level.txt",
+          "bytes": 91793,
+          "sha256": "a39ee9385adac70e3653dc157daffda988811345cbab032b49507aa6279d4089"
+        }
+      },
+      {
+        "suite": "dxbc-texture-load",
+        "passed": 1625,
+        "elapsed_ms": 325207,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/dxbc-texture-load.txt",
+          "bytes": 887518,
+          "sha256": "0c5a883cdcc9aaef941e7fba4401e881dd491ea8e96fb4eca1ed4fafa375a378"
+        }
+      },
+      {
+        "suite": "native-compute-debug",
+        "passed": 65,
+        "elapsed_ms": 12167,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/native-compute-debug.txt",
+          "bytes": 4168,
+          "sha256": "de46053940c4b21e82442c8515583083af8c908e12d549ab04158de701d82795"
+        }
+      },
+      {
+        "suite": "native-pixel-debug",
+        "passed": 22,
+        "elapsed_ms": 20587,
+        "file": {
+          "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression-logs/native-pixel-debug.txt",
+          "bytes": 1523,
+          "sha256": "f52db75b767f859b09101667c1c28202d8e299da110370cd6447b17f9f840d43"
+        }
+      }
+    ],
+    "passed": 3766,
+    "elapsed_seconds": 1191.16,
+    "ctest": {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-regression.log",
+      "bytes": 1316,
+      "sha256": "089021055af6270066780ec57f57303aed3be757633020f3937ab2db5ff28d46"
+    },
+    "build": {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-final.log",
+      "bytes": 17103,
+      "sha256": "5e8da5c55c4adb93e1089c6d04c7c1543c93fb25ebc2393ab197bfc5e7ff09b0"
+    }
+  },
+  "binaries": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.exe",
+      "bytes": 5127680,
+      "sha256": "7c348488aea0eb430a2ebb50f9a1ce9c42ea6fa2261c49f27243bb5c965a1a9f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.Cli.exe",
+      "bytes": 6043648,
+      "sha256": "ff39f01bca8d1bc7fa260df39eb033d3527a495bec83f23bd6d98202ca37d44d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraGPA.Worker.exe",
+      "bytes": 6043648,
+      "sha256": "ff39f01bca8d1bc7fa260df39eb033d3527a495bec83f23bd6d98202ca37d44d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcTextureLoadTests.exe",
+      "bytes": 1663488,
+      "sha256": "d7d17a2ad3894b95a01adf541c8a1865639cdb52519ba1380507ec0e6ab2c01f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTests.exe",
+      "bytes": 629248,
+      "sha256": "75f5b21cbd689d0cda4788dd9802f17ec2c4a967de7c8914706ce78543b8c1eb"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 596480,
+      "sha256": "69e562f4207295d9f751516ddd951378490a8b2844904315f47f4f85f8b54a73"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleLevelTests.exe",
+      "bytes": 1673728,
+      "sha256": "8dafe4b1b8c5302ef15c92789a6dd5e0b7637a582546528de43ac965ec14a801"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleGradTests.exe",
+      "bytes": 1719808,
+      "sha256": "208a634f0f2cf29db0ce4ea0d0f455326f06686a557b25304259992f51407db9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcSampleComparisonTests.exe",
+      "bytes": 587264,
+      "sha256": "d7750de0bcaf38fe4d33a37d0cd797a76b86c45aaa9650f422b5b2ff53d01b1c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1871872,
+      "sha256": "bc47107e9741206c10c9c8867b1d7e77b330b16068789f1e2736b03feacef172"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraDxbcExecutionTraceReaderTests.exe",
+      "bytes": 869376,
+      "sha256": "8fb7b1c2889e35142c6d73c6c0eeade89b2f23822ac1be934fc34f3acbf676ca"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraNativePixelDebugTests.exe",
+      "bytes": 1977344,
+      "sha256": "c16046c4167d3d97b2b08c13d627db258aa6dd6ea35674c245e3c4c85cfcfa86"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/build/vs2022/Release/FloraNativeComputeDebugTests.exe",
+      "bytes": 2952192,
+      "sha256": "b93d1cb29a57daacec144539cc23874f5a5c225aaf03537ee818f157491c736b"
+    }
+  ],
+  "development_evidence": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-adapters-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-adapters.txt",
+      "bytes": 11277,
+      "sha256": "ca14c260343ec498ffaf050bedca1399ba25e0aa928266180d99c56302cc1904"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-adapter.log",
+      "bytes": 1543,
+      "sha256": "73886f4ef1687046023ab9922fd43d0c4b4059f1216594d478bc6d7042855044"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-diagnostic.log",
+      "bytes": 1000,
+      "sha256": "c7c569c22b00d367876f69d6a0d9c3cfc297d2e0010cc79d742df51c81218e6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-extended.log",
+      "bytes": 1543,
+      "sha256": "055cfa065067a37cb29fe68ee295f5340d2e380b95ad15dd0608b5945fc5c545"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-fixed.log",
+      "bytes": 1543,
+      "sha256": "9926fe06dbc8a314f2a9468d1877e102c9622b6ec0ced8427e7ea53d2bb89c42"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-initial.log",
+      "bytes": 2060,
+      "sha256": "5bdc0d945e3a0ab809d459ddfa94b4dc2a50e5a79a6481466266acf5d119ec16"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-owned-bytes.log",
+      "bytes": 1000,
+      "sha256": "c7c569c22b00d367876f69d6a0d9c3cfc297d2e0010cc79d742df51c81218e6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-build-ps-diagnostic.log",
+      "bytes": 1000,
+      "sha256": "c7c569c22b00d367876f69d6a0d9c3cfc297d2e0010cc79d742df51c81218e6d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-diagnostic-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-diagnostic.txt",
+      "bytes": 740,
+      "sha256": "17b42b8db1622f33aedf12aa19b8f5cf5e5886dd9bf71348a1b522909db43dbd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-extended-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-extended.txt",
+      "bytes": 855,
+      "sha256": "96328540a3c0bcfc0a4b77213f02dda7006ff9cc04f69ed57bd7805b54bfbfe0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-initial-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-initial.txt",
+      "bytes": 973,
+      "sha256": "8d60e915c01a553d758c9df5adf13e3a47760531e3a1d1af6b8ae5589682b2b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-owned-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-owned.txt",
+      "bytes": 28558,
+      "sha256": "02bcfac8021c32b7c8cee9bd4dc2f0ae8eaec68426d2ae0cb66b9843513fa2b8"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-ps-diagnostic-console.txt",
+      "bytes": 979,
+      "sha256": "ef01f3edf1ac85773a8a89b360105500f7ea591cfbf6b3267ebf7bea6936b6ee"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-ps-diagnostic.txt",
+      "bytes": 620,
+      "sha256": "8345fe52b563424046429cb2cb216bd780284373230538e83fb624abb9fbf051"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-validation.json",
+      "bytes": 51807,
+      "sha256": "5263f51db1217ea436757ebf3c450fbce66c11676639f642d53f1a0f41583eca"
+    }
+  ],
+  "validation": {
+    "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-precision-final-validation.json",
+    "bytes": 51293,
+    "sha256": "4a9ecf75e01bed64dd8e4702f58f059bed56f18459617fb6183780e625a85093"
+  },
+  "baseline_main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "parent_commit": "0edafaad2fc493af4cd23174d06a3245cdee04a3",
+  "scope_limits": [
+    "Minimum-precision MS loads and texture UAV operations remain unsupported",
+    "No original captured PS invocation qualification",
+    "Full debugger parity and standalone dependency removal remain open",
+    "Test elapsed times are not controlled performance acceptance"
+  ]
+}
